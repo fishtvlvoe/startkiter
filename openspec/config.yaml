@@ -1,48 +1,51 @@
 schema: spec-driven
 context: |
-  # 產品定位
-  StartKiter（對外課名可用「開站包」）是給台灣小白用 AI（Cursor）架起來的 take-home SaaS 教學模板。
-  學員帶走獨立 repo：繁中前台 + 後台、Google / LINE 登入、SHOPLINE 一次買斷（TWD）、電子發票接同一筆訂單。
-  程式可以一次齊、功能預設全關、課分四堂打開。不是賣課平台。不是 libon.me 的一部分。
+  # 產品定位（以 mvp-test-scope 為準）
+  StartKiter（對外課名可用「開站包」）是課 + 終身代碼包。MVP 用這包自己的站賣課；課程是模組，不是整站唯一長相。
+  結帳金額鎖 8800 TWD（不是區間）。主金流只接通 PAYUNi，一次買斷 TWD。付款後站內領 GitHub 組織私人倉庫只讀。
+  站內 agent 可接模型，v1 只掛兩支唯讀工具。付費學員在課程內加入 LINE 交流群；客服走 email。
+  不是 libon.me 的一部分。repo-foundation 的舊 v1 句子已廢，不要再當現行規則。
 
   # 獨立專案
   - 路徑：products/startkiter（自己的 git repo）
   - 零耦合 libon.me：不准借它的網域、帳號、課、代碼
   - 不准改來源專案：supastarter-nextjs-main、THE-TU-Project、8-外掛/line-hub
 
-  # 抽取來源（只讀）
-  - 殼：Development/supastarter-nextjs-main（Better Auth、apps/saas 前後台、i18n 只留 zh-TW）
-  - 台灣金流／發票／Simple-first：Development/THE-TU-Project/dev/thetu（WooMin 1.8.0）
+  # 抽取來源（只讀；本 change 不准抽應用程式碼，等下一張 extract change）
+  - 殼：Development/supastarter-nextjs-main（Better Auth、apps/saas 前後台、packages/ai、i18n 只留 zh-TW）
+  - 台灣金流／訂單：Development/THE-TU-Project/dev/thetu 的 PAYUNi／訂單抽象 → packages/payments
+  - 課程觀看與權限：Development/THE-TU-Project/dev/thetu 的觀看／權限畫面 → packages/course（只抽模組，不抽學院營運）
   - 不要抽 THE-TU-Project/code（1.0.0）與 realms-course-platform-v1.8.0
   - LINE 登入契約：8-外掛/line-hub 的網頁 OAuth 決策，PHP / LIFF / Bot 不搬
+  - GitHub kit 邀請是新做，用 GitHub API；不要拷 supastarter 的 GitHub OAuth 模組當履約
 
-  # Tech Stack（目標，foundation 階段還沒抽代碼）
+  # Tech Stack（目標，本 change 只落地規格，還沒抽代碼）
   - Next.js App Router + React + TypeScript
   - Better Auth（email/password + Google + LINE socialProviders.line）
   - Drizzle + PostgreSQL
-  - 主金流 SHOPLINE Payments（hosted checkout redirect）；PAYUNi 進階；Stripe 選配不上課
-  - 發票 @paid-tw/einvoice*（綠界 ECPay / ezPay），server-only
+  - 主金流 PAYUNi（一次買斷 TWD）；Shopline／Stripe 介面可留空位但不接線、不上課、不出現在結帳
+  - 發票不在 MVP；下一輪才接 @paid-tw/einvoice*
   - i18n 只留 zh-TW
   - 部署：常駐 Node（Zeabur 類）+ PostgreSQL + /data volume；預設不是 Vercel serverless
 
   # v1 硬邊界
-  - 一次買斷 TWD，不做月繳；SHOPLINE 不支援訂閱
+  - 商品常數：price_twd = 8800, currency = TWD, sku = startkiter-mvp
+  - 一次買斷 TWD，不做月繳、不做三階
   - 不做 Organization / Member / Invitation；帳單掛 user
-  - LINE 只做 Login Channel，不做 Messaging / LIFF / Bot
-  - 金鑰填後台、env fallback；沒設金流必須 fail-closed
-  - 發票預設關；一張訂單對一張發票；付款成功才開立
+  - LINE Login Channel 做登入；學員社群用課程內 LINE 邀請連結，不做 Messaging / LIFF / Bot，不能靜默入群
+  - 金鑰填後台、env fallback；沒設金流必須 fail-closed（POST /api/checkout → 503，不是 500）
+  - 發票不在 MVP
 
-  # 四堂課解鎖（Simple-first）
-  - 1 繁中前後台能開
-  - 2 Google 然後 LINE
-  - 3 SHOPLINE 測一筆付款
-  - 4 同一筆訂單開發票
+  # 已廢（repo-foundation，不是現行規則）
+  - 「不是賣課平台」已廢：官網即產品實例，自己賣課
+  - 「主金流 SHOPLINE」已廢：MVP 只接通 PAYUNi
+  - 「四堂課對 SHOPLINE」已廢：不走 SHOPLINE 測一筆付款解鎖
 
   # 程式碼規範
   - 程式碼英文、註解繁中
   - commit 用 conventional commits + 繁中描述
   - 禁止直接 push main；功能分支 feature/xxx
-  - 討論紀錄 SSOT：docs/discuss/
+  - 討論紀錄 SSOT：docs/discuss/；產品現行邊界以 mvp-test-scope 為準
 
   # 網域
   - 優先 startkiter.com，備案 startkiter.me
