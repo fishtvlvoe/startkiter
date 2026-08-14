@@ -1,0 +1,502 @@
+How to Build a SaaS in 2026 — Complete Guide
+Pricing
+FAQ
+Changelog
+Showcase
+Blog
+SaaS ideas
+Docs
+Get access
+How to Build a SaaS in 2026 — Complete Guide
+A comprehensive guide on how to build a SaaS application in 2026. Learn about the tech stack, features, architecture, and tools you need to launch a successful SaaS product.
+Start building with supastarter
+See the tech stack
+How to Build a SaaS Application in 2026
+Building a SaaS (Software as a Service) product is one of the most popular business models in tech. But where do you start? This guide walks you through everything you need — from choosing your tech stack to launching your product.
+Step 1: Validate Your Idea
+Before writing any code, validate that people will pay for your product:
+Talk to potential customers
+— find 10 people with the problem you're solving
+Research competitors
+— understand what exists and where the gaps are
+Build a landing page
+— test interest with a waitlist or pre-launch page
+Define your MVP
+— the smallest product that solves the core problem
+Step 2: Choose Your Tech Stack
+A modern SaaS tech stack in 2026 typically includes:
+Frontend/Fullstack Framework
+Next.js
+(React) — most popular, largest ecosystem
+Nuxt
+(Vue) — great DX, strong for internationalization
+Database
+PostgreSQL
+— the standard for SaaS (hosted on Supabase, Neon, or self-managed)
+ORM
+— Prisma (beginner-friendly) or Drizzle (performance-focused)
+Authentication
+better-auth
+— modern, open-source, supports 2FA, passkeys, and RBAC
+Payments
+Stripe
+— most flexible, best for larger businesses
+Lemon Squeezy
+— simplest, handles tax compliance as merchant of record
+Styling
+Tailwind CSS
+— utility-first CSS for rapid UI development
+shadcn/ui
+— accessible, composable component library
+Step 3: Build Core Features
+Every SaaS needs these foundational features:
+Authentication & User Management
+Sign up, sign in, password reset
+Social logins (Google, GitHub)
+Profile management
+Session handling
+Subscription Billing
+Pricing page with plan comparison
+Checkout flow
+Subscription management (upgrade, downgrade, cancel)
+Webhook handling for payment events
+Multi-Tenancy (for B2B)
+Organizations/workspaces
+Team member invitations
+Role-based permissions
+Scoped data access
+Admin Dashboard
+User management
+Subscription overview
+Analytics and metrics
+Step 4: Use a SaaS Boilerplate (Save 2-3 Months)
+Building all the features above from scratch takes
+2-3 months of full-time development
+. A SaaS boilerplate like
+supastarter
+gives you all of this out of the box:
+Authentication with 2FA, passkeys, and RBAC
+Payments with Stripe, Lemon Squeezy, or other providers
+Multi-tenancy with organizations and teams
+Email system with templates
+Admin dashboard
+Blog and documentation
+Landing page and marketing pages
+This lets you focus on building your unique product features from day one.
+Step 5: Launch and Iterate
+Pre-Launch Checklist
+Set up monitoring and error tracking
+Configure analytics
+Test payment flows end-to-end
+Set up transactional emails
+Prepare marketing content and SEO
+Launch Channels
+Product Hunt
+Hacker News
+Twitter/X
+Reddit (relevant subreddits)
+Indie Hackers
+Your email list
+Post-Launch
+Monitor error rates and performance
+Collect user feedback
+Iterate on your core value proposition
+Focus on retention before growth
+Frequently Asked Questions
+How long does it take to build a SaaS?
+With a boilerplate like supastarter, you can have a working MVP in
+days to weeks
+instead of months. The actual timeline depends on the complexity of your unique features.
+How much does it cost to build a SaaS?
+Development costs vary widely. Using a boilerplate ($200-400) plus hosting ($0-50/month with free tiers) means you can launch for under $500.
+Do I need to know how to code to build a SaaS?
+While no-code tools exist, building a production SaaS typically requires programming knowledge. However, AI coding agents (Cursor, Claude Code) make it much more accessible.
+What's the best tech stack for a SaaS in 2026?
+We recommend
+Next.js
+better-auth
+Stripe
+Prisma/Drizzle
+Tailwind CSS
+supastarter
+as a proven, modern stack. See our
+Best SaaS Stack
+article for a detailed breakdown.
+📚 Further reading
+How to Launch a SaaS in a Weekend
+SaaS Boilerplate vs Building from Scratch
+Best SaaS Boilerplates in 2026
+What is a SaaS Boilerplate?
+Next.js AI SaaS Template
+Next.js B2B SaaS Template
+Vibe Coding SaaS Template
+How-To Guides
+How to Launch a SaaS in a Weekend
+SaaS Boilerplate vs Building from Scratch — What's Better?
+The Best SaaS Boilerplate for 2026 — supastarter
+Explore more
+What is AGENTS.md? The Guide for SaaS Projects
+Best Next.js Boilerplates in 2026
+Best Nuxt Boilerplates in 2026
+View all boilerplates and stacks →
+Codebase
+Auth
+Payments
+Orgs
+i18n
+API
+AI workflows
+Marketing
+Style
+More
+Codebase
+An AI-ready codebase that scales
+Give Cursor, Claude Code, and other agents a Next.js, React, and TypeScript SaaS they can extend — skills, conventions, and real modules instead of an empty repo.
+Curated agent skills for SaaS workflows
+AGENTS.md and conventions included
+Structured monorepo agents can navigate
+End-to-end type safety
+Ready for Cursor, Claude Code, Codex, and more
+Learn more
+Next.js
+Next.js
+React
+TypeScript
+Claude Code
+Claude Code
+Cursor
+Codex
+Windsurf
+Windsurf
+GitHub Copilot
+GitHub Copilot
+supastarter
+skills
+Curated agent skills
+apps
+Applications in the monorepo
+marketing
+Landing, blog, changelog, legal
+saas
+Auth, billing, orgs, admin
+docs
+Customer documentation
+mail-preview
+Email previews in development
+packages
+Shared modules agents extend
+AI integration
+api
+Typed API
+auth
+Authentication
+database
+Schema and queries
+i18n
+Translations
+mail
+Transactional email
+payments
+Billing providers
+storage
+File uploads
+Shared components
+utils
+Helpers
+tooling
+Lint, Tailwind, TypeScript
+AGENTS.md
+Conventions for coding agents
+package.json
+pnpm-workspace.yaml
+turbo.json
+Auth
+Authentication that you can actually ship
+Don't let an agent invent your login system. Ship password, passkeys, magic links, OAuth, and 2FA on a proven flow you own.
+Own your user data
+Password, Passkeys & magic link
+2FA
+oAuth
+Forgot/reset password flow
+Roles & permissions
+Super Admin & impersonation
+Fully customizable flow
+Learn more
+better-auth
+Email
+Password
+Sign In
+Continue with GitHub
+Payments
+Charge your customers
+Billing is where generated code quietly breaks. Checkout, webhooks, and subscriptions are already wired — switch providers without rebuilding.
+Choose your payment provider
+Complete billing flow
+Subscription or one-time payment
+Usage-based billing
+Billing components
+Seat-based billing
+Learn more
+Lemonsqueezy
+Stripe
+Polar
+Polar
+Creem
+Dodo Payments
+Dodo Payments
+Choose your plan
+Solo
+$299
+once
+Select
+Popular
+Startup
+$799
+once
+Select
+Agency
+$1,499
+once
+Select
+Orgs
+Ready for organizations on day one
+Organizations, invites, and roles are already modeled so agents extend them instead of inventing a tenancy scheme.
+Create organizations & add members
+Seat-based billing
+Require / hide / disable organizations
+Member roles
+Easily removable
+Learn more
+Acme Inc
+Invite
+Team Members
+John Doe
+john@acme.com
+owner
+Jane Smith
+jane@acme.com
+admin
+Bob Wilson
+bob@acme.com
+member
+i18n
+Reach customers worldwide
+Agents can translate strings. They rarely leave you a real i18n architecture. Locales, a language switcher, and translatable mails are already in place.
+Reach more customers
+Ready-to-use translations
+Language switcher
+Translatable mail templates
+Learn more
+Welcome back!
+Your dashboard is ready
+Get Started
+API
+A backend your agents can extend
+A typed database and API is the contract agents should extend — not a new data layer every prompt.
+Type-safe data access
+Choose your database and ORM
+Typed API with permissions
+Easy migrations
+OpenAPI specs and UI
+Reusable client
+Learn more
+Prisma
+Drizzle
+Drizzle
+Hono
+Hono
+TanStack
+TanStack Query
+REST API
+OpenAPI
+Request
+GET
+Ready
+Response
+Awaiting response...
+Endpoint:
+GET /api/users/
+{id}
+AI workflows
+Ship AI features, not plumbing
+Add chatbots, agents, or structured generation on a foundation that's already wired — instead of inventing the plumbing each time.
+Build any AI workflow
+Chatbot example included
+Multiple AI adapters
+Ready to extend
+Learn more
+Marketing
+A site that converts on day one
+A landing page is cheap to generate. A conversion-ready marketing site that matches your app is the part agents keep reinventing.
+Landing page & hero
+Features & pricing sections
+Newsletter signup
+Responsive design
+Learn more
+Get started
+Learn more
+Style
+A UI that doesn't look like AI slop
+AI will invent a new design system every session. Start from a customizable UI so agents restyle your product instead of rewriting it.
+Modern, beautiful UI
+Fully customizable
+Dark mode
+Mobile-first
+shadcn/ui compatible
+Learn more
+Tailwind CSS
+Base UI
+Button
+Dark mode
+Every building block you need to
+ship a SaaS
+Mails
+Transactional emails
+Customizable mail templates
+Choose your mail provider
+Learn more
+Background tasks & cron jobs
+trigger.dev integration
+QStash for cron
+Type-safe job handlers
+Learn more
+SaaS Admin UI
+Superadmin role
+Manage organizations
+Manage users
+Learn more
+SaaS Blog
+Multi-language marketing blog
+MDX-based
+Support for CMS and external datasources
+Learn more
+SaaS Analytics
+Choose your favorite analytics provider
+Marketing & product analytics
+Privacy-friendly options
+Learn more
+File storage
+S3-compatible providers
+Presigned uploads
+Access stored files
+Learn more
+Notifications
+In-app notification center
+Notification preferences
+Email notifications
+SEO
+Meta tags & Open Graph
+Auto-generated sitemap
+Learn more
+Monitoring
+Sentry integration
+Performance insights
+Learn more
+E2E testing
+Playwright configured
+GitHub Actions ready
+Learn more
+Offline Development
+Docker Compose setup
+Local PostgreSQL database
+MinIO S3 storage
+Console output of mails
+Learn more
+SaaS Onboarding
+Multi-step flow
+Organization creation
+Profile picture upload
+Customizable steps
+Learn more
+SaaS Documentation
+Fumadocs-powered
+Full-text search
+AI-powered actions
+MDX & Markdown
+Learn more
+Contact form
+Ready-to-use form
+Integrate with your CRM / marketing tool
+Customizable fields
+SaaS Legal Pages
+Privacy policy
+Terms of service
+Multi-language support
+Deployment
+Deploy anywhere
+Vercel & serverless
+Docker support
+Environment guides
+Learn more
+Lee Robinson
+VP of Developer Experience @Vercel
+Supastarter was extremely easy to get set up and deployed. I had a working project in just a few minutes!
+Joel Hernandez
+Thank you Jonathan 🫡, @supastarter definitely saved us a couple of weeks of bootstrapping the new website!
+View project →
+Dan Mindru
+Shipixen
+Product Hunt
+Fantastic product packed with tons of features. Reading through the docs I can see the huge amount of work and love that was put into this. Not a common sight these days!
+James Q Quick
+The SaaS starter template for Next.js - So cool to learn about @supastarter from @jonathan_wilke on the most recent episode of @compressedfm
+Silvestro
+Affonso
+I'm very happy with this Next.js boilerplate! The codebase is well-structured and secure, making it a solid foundation for my app. Highly recommend it!
+View project →
+Janu Lingeswaran
+FeatherFlow
+We're a product development studio, and supastarter is the starting point for many of our SaaS projects. It saves us a ton of time so we can focus on what actually matters: building great products.
+View project →
+Jim Wrubel
+Founder of Spyglasses
+When we first set out to build Spyglasses we knew we needed an MVP before we even considered fundraising. That led us to researching starter kits. We looked at a dozen before settling on Supastarter. It had all the features we needed plus strong Cursor integration, which was critical to us.
+Thanks to Supastarter we saved 7+ months on our development estimates and even managed to pull some nice-to-haves into our initial launch.
+View project →
+Robin Faraj
+I am a super happy customer, 10/10 recommend
+View project →
+Oleksii Velykyi
+As someone experienced with backend development but with limited frontend experience, I knew from the beginning that I would need to use a starter kit. There were a few options, and I decided to go with supastarter. It turned out to be the right call. Supastarter + AI coding + some common sense and guidance -> the project was shipped much faster than I anticipated. I would definitely use it again and not build things like auth, org and user management, and many other things all SaaS businesses need from scratch. Highly recommended!
+View project →
+Rush Almosa
+The code is excellent and perfect for building complex apps, but what really sets supastarter apart is the support. Every time I needed help, I got a response incredibly fast. This kind of support makes all the difference when building serious projects.
+View project →
+Nikolas Burk
+Developer Relations at Prisma
+Kudos to @jonathan_wilke for building an awesome SaaS starter kit 🚀🚀🚀
+Hai Tran
+Supastarter is awesome! I can build my MVP with confidence and my team is happy with the development experience. Service support is excellent! This is the first time I've seen a PPP applied not from a course. Very helpful for indie hackers. Highly recommend!
+Edouard Lachot
+Just chose @supastarter as nextjs/supabase boilerplate for my next health/biohacking SaaS over other alternatives. Why ?
+- Extensive documentation, while keeping things simple and down to earth
+- Clean UI made directly with Radix
+- ORM (Prisma)
+Inkko
+Decided to go with @supastarter by @jonathan_wilke 🔥
+Creem
+@supastarter has established itself as one of the premier boilerplates for Indie Hackers and Micro-SaaS builders.
+Their reputation speaks for itself, and we couldn't be more thrilled about this collaboration! 🍦🫶
+Dima Rubanov
+Co-Founder Oscar & Branding5
+Product Hunt
+This is the ultimate Starter kit made by a real expert. It has everything you need to launch quick!
+Jacky Xbb
+Founder of facelessvideos.app
+I compared many SaaS boilerplates before choosing Supastarter, and it truly didn't disappoint. I launched two SaaS products quickly and smoothly, and I'm now recommending Supastarter to friends who want to start their own SaaS projects!
+View project →
+Sidi jeddou
+Rapidforms
+Product Hunt
+Wow this SaaS starter kit is really a game changer, and time saver, it helps building your next product SaaS much faster than before, we need more products like this, but this is the best one here 🔥 thanks for building supastarter 🙏
+Devluc
+HTMLrev
+Product Hunt
+Well made, beautiful design, many useful integrations. Saves hours of work and headaches. Totally recommended. Great work Jonathan. Supported.
+Yucheng L
+Product Hunt
+After comparing various starter template products, I can confidently say that Supastarter offers the best value (and arguably the best design!). It would be amazing to see more builders benefit from this product.
+Amando Abreu
+Founder & CTO
+Product Hunt
+This is a fantastic product built around the awesome supabase BaaS. I've spent quite some time playing around with it and it's 100% production ready – the i18n straight out of the box is

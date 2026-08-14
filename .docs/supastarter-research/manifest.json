@@ -1,0 +1,394 @@
+[
+  {
+    "url": "https://supastarter.dev/",
+    "slug": "home",
+    "status": 200,
+    "bytes": 715340,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/nextjs",
+    "slug": "nextjs",
+    "status": 200,
+    "bytes": 715744,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/nuxt",
+    "slug": "nuxt",
+    "status": 200,
+    "bytes": 707323,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/tanstack-start",
+    "slug": "tanstack-start",
+    "status": 200,
+    "bytes": 716523,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/faq",
+    "slug": "faq",
+    "status": 200,
+    "bytes": 135188,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/how-to-build-a-saas",
+    "slug": "how-to-build-a-saas",
+    "status": 200,
+    "bytes": 734977,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/saas-boilerplate",
+    "slug": "saas-boilerplate",
+    "status": 200,
+    "bytes": 986429,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/best-saas-boilerplate-2026",
+    "slug": "best-saas-boilerplate-2026",
+    "status": 200,
+    "bytes": 436241,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/best-nextjs-boilerplate-2026",
+    "slug": "best-nextjs-boilerplate-2026",
+    "status": 200,
+    "bytes": 426046,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/best-saas-ideas",
+    "slug": "best-saas-ideas",
+    "status": 200,
+    "bytes": 120687,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/saas-boilerplate-vs-building-from-scratch",
+    "slug": "saas-boilerplate-vs-building-from-scratch",
+    "status": 200,
+    "bytes": 428837,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/supastarter-vs-shipfast",
+    "slug": "supastarter-vs-shipfast",
+    "status": 200,
+    "bytes": 999501,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/supastarter-vs-makerkit",
+    "slug": "supastarter-vs-makerkit",
+    "status": 200,
+    "bytes": 734989,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/nextjs-ai-coding-agents-boilerplate",
+    "slug": "nextjs-ai-coding-agents-boilerplate",
+    "status": 200,
+    "bytes": 741220,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/agents-md-for-saas",
+    "slug": "agents-md-for-saas",
+    "status": 200,
+    "bytes": 412424,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/cursor-boilerplate",
+    "slug": "cursor-boilerplate",
+    "status": 200,
+    "bytes": 747595,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/claude-code-boilerplate",
+    "slug": "claude-code-boilerplate",
+    "status": 200,
+    "bytes": 754835,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/codex-boilerplate",
+    "slug": "codex-boilerplate",
+    "status": 200,
+    "bytes": 746872,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/github-copilot-boilerplate",
+    "slug": "github-copilot-boilerplate",
+    "status": 200,
+    "bytes": 759135,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/cline-boilerplate",
+    "slug": "cline-boilerplate",
+    "status": 200,
+    "bytes": 747030,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/google-antigravity-boilerplate",
+    "slug": "google-antigravity-boilerplate",
+    "status": 200,
+    "bytes": 747703,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/windsurf-boilerplate",
+    "slug": "windsurf-boilerplate",
+    "status": 200,
+    "bytes": 759702,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/kiro-boilerplate",
+    "slug": "kiro-boilerplate",
+    "status": 200,
+    "bytes": 749040,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/showcase",
+    "slug": "showcase",
+    "status": 200,
+    "bytes": 514651,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/tools",
+    "slug": "tools",
+    "status": 200,
+    "bytes": 283551,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/saas-idea-validator",
+    "slug": "saas-idea-validator",
+    "status": 200,
+    "bytes": 129442,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/saas-ideas",
+    "slug": "saas-ideas",
+    "status": 200,
+    "bytes": 147134,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/boilerplates-and-stacks",
+    "slug": "boilerplates-and-stacks",
+    "status": 200,
+    "bytes": 252696,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/dev-tips",
+    "slug": "dev-tips",
+    "status": 200,
+    "bytes": 601068,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/changelog",
+    "slug": "changelog",
+    "status": 200,
+    "bytes": 263214,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/blog",
+    "slug": "blog",
+    "status": 200,
+    "bytes": 1118910,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/legal/license",
+    "slug": "legal__license",
+    "status": 200,
+    "bytes": 85553,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/legal/terms-of-service",
+    "slug": "legal__terms-of-service",
+    "status": 200,
+    "bytes": 95752,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/legal/privacy-policy",
+    "slug": "legal__privacy-policy",
+    "status": 200,
+    "bytes": 128995,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/legal/acceptable-use",
+    "slug": "legal__acceptable-use",
+    "status": 200,
+    "bytes": 99717,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/legal/disclaimer",
+    "slug": "legal__disclaimer",
+    "status": 200,
+    "bytes": 94017,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/docs/nextjs.md",
+    "slug": "docs__nextjs.md",
+    "status": 200,
+    "bytes": 7974,
+    "content_type": "text/plain; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/docs/nextjs/setup.md",
+    "slug": "docs__nextjs__setup.md",
+    "status": 200,
+    "bytes": 8898,
+    "content_type": "text/plain; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/docs/nextjs/payments/overview.md",
+    "slug": "docs__nextjs__payments__overview.md",
+    "status": 200,
+    "bytes": 2414,
+    "content_type": "text/plain; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/docs/nextjs/authentication/overview.md",
+    "slug": "docs__nextjs__authentication__overview.md",
+    "status": 200,
+    "bytes": 2402,
+    "content_type": "text/plain; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/docs/nextjs/organizations/overview.md",
+    "slug": "docs__nextjs__organizations__overview.md",
+    "status": 200,
+    "bytes": 739,
+    "content_type": "text/plain; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/docs/nextjs/deployment/overview.md",
+    "slug": "docs__nextjs__deployment__overview.md",
+    "status": 200,
+    "bytes": 3683,
+    "content_type": "text/plain; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/docs/nextjs/internationalization",
+    "slug": "docs__nextjs__internationalization",
+    "status": 200,
+    "bytes": 352891,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/llms.txt",
+    "slug": "llms.txt",
+    "status": 200,
+    "bytes": 7452,
+    "content_type": "text/plain; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/showcase/affonso",
+    "slug": "showcase__affonso",
+    "status": 200,
+    "bytes": 136805,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/showcase/auftakt",
+    "slug": "showcase__auftakt",
+    "status": 200,
+    "bytes": 131893,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/showcase/autosetter",
+    "slug": "showcase__autosetter",
+    "status": 200,
+    "bytes": 132441,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/showcase/freel",
+    "slug": "showcase__freel",
+    "status": 200,
+    "bytes": 131751,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/showcase/ntree",
+    "slug": "showcase__ntree",
+    "status": 200,
+    "bytes": 136614,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/showcase/peekalink",
+    "slug": "showcase__peekalink",
+    "status": 200,
+    "bytes": 137162,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/showcase/postel",
+    "slug": "showcase__postel",
+    "status": 200,
+    "bytes": 136730,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/showcase/release-rocket",
+    "slug": "showcase__release-rocket",
+    "status": 200,
+    "bytes": 132778,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/showcase/screenshot-scout",
+    "slug": "showcase__screenshot-scout",
+    "status": 200,
+    "bytes": 137717,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/showcase/seowly",
+    "slug": "showcase__seowly",
+    "status": 200,
+    "bytes": 132101,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/showcase/team-skill-set",
+    "slug": "showcase__team-skill-set",
+    "status": 200,
+    "bytes": 132241,
+    "content_type": "text/html; charset=utf-8"
+  },
+  {
+    "url": "https://supastarter.dev/showcase/transgull",
+    "slug": "showcase__transgull",
+    "status": 200,
+    "bytes": 132123,
+    "content_type": "text/html; charset=utf-8"
+  }
+]

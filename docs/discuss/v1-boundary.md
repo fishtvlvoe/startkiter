@@ -1,6 +1,14 @@
-▋ v1 能力清單
+▋ 已被 mvp-test-scope 取代
 
-狀態：confirmed（2026-08-14）
+本篇是 repo-foundation 的舊 v1 邊界，不是現行規則。現行產品定義看 `openspec/changes/mvp-test-scope/`（課 + 終身代碼包、主金流 PAYUNi、結帳 8800、課程模組、站內領 GitHub、agent 兩支唯讀工具、課程內 LINE 交流群）。
+
+下列句子若還出現在本文，一律當過期：不是賣課平台、主金流 SHOPLINE、四堂課對 SHOPLINE、SHOPLINE 測一筆付款。
+
+---
+
+▋ v1 能力清單（過期稿，僅供對照）
+
+狀態：superseded by mvp-test-scope（原稿 confirmed 2026-08-14）
 
 成品目標是「程式一次齊、課分堂開」。本篇寫死抽什麼、不抽什麼、什麼必須新做。開始寫代碼時若要加東西，先改這篇，不要在施工時膨脹。
 

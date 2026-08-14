@@ -127,13 +127,17 @@ CREATE TABLE github_kit_grants (
   github_login text NOT NULL,
   repo_full_name text NOT NULL,
   permission text NOT NULL DEFAULT 'pull',
+  status text NOT NULL DEFAULT 'invited',
   invited_at timestamptz NOT NULL DEFAULT now(),
-  accepted_at timestamptz
+  accepted_at timestamptz,
+  revoked_at timestamptz
 );
 CREATE INDEX github_kit_grants_github_user_id_idx ON github_kit_grants (github_user_id);
 ```
 
-orders.amount_twd 必須為 8800。status 至少含 pending、paid、failed、refunded。
+orders.amount_twd 必須為 8800。orders.status 至少含 pending、paid、failed、refunded。
+
+github_kit_grants.status 至少含 invited、accepted、revoked。邀請已送未接受是 invited（accepted_at 為 null）；學員接受後是 accepted；退款撤銷後是 revoked。
 
 ## Implementation Contract
 
@@ -143,7 +147,8 @@ Interface / data shape:
 
 - 商品常數：price_twd = 8800, currency = TWD, sku = startkiter-mvp
 - 結帳（後續實作）：POST /api/checkout 未設定 PAYUNi 時 503 且不 500；webhook POST /api/payuni/notify 成功後訂單 status=paid
-- 領取（後續實作）：GET /api/github/claim 未登入 401；未付款 403；成功 200 並建立 github_kit_grants
+- 領取（後續實作）：POST /api/github/claim 執行邀請（未登入 401；未付款 403；成功 200 並建立 github_kit_grants）；GET /api/github/claim-status 只查狀態、無副作用
+- 退款（後續實作）：訂單 refunded 後 POST /api/github/claim 回 403；已接受的 collaborator 與尚未接受的 pending invite 都要主動撤銷
 - Agent 工具（後續實作）：get_my_orders、get_my_course_progress 只讀；寫入工具不存在
 - LINE 社群（後續實作）：GET /api/community/line-invite 已付款 200 回 inviteUrl；未登入 401；未付款 403
 - 客服（後續實作）：站上顯示客服信箱；GET /api/support/email 未設定 503；LINE 群不當客服通道
@@ -152,6 +157,7 @@ Failure modes:
 
 - 金流未設定：結帳 fail-closed，明確錯誤，不是空白 500
 - GitHub 邀請 API 失敗：頁面顯示可重試，不標記已領取
+- GitHub 撤銷 API 失敗：退款本身仍完成，失敗寫進待人工複核
 - Agent 未登入或查他人資料：拒絕工具呼叫
 
 Acceptance criteria:
@@ -159,7 +165,7 @@ Acceptance criteria:
 - `rg "8800|PAYUNi|終身" README.md AGENTS.md openspec/config.yaml` 命中
 - `rg "不是賣課平台|四堂課" README.md AGENTS.md openspec/config.yaml` 不再把這些當現行規則
 - `spectra validate mvp-test-scope` 通過
-- `openspec/changes/mvp-test-scope/specs/` 含六個 capability 目錄
+- `openspec/changes/mvp-test-scope/specs/` 含七個 capability 目錄
 
 Scope boundaries:
 

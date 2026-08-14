@@ -40,9 +40,9 @@ POST /api/payuni/notify SHALL verify the PAYUNi payload and mark at most one mat
 
 ### Requirement: Refund revokes kit eligibility
 
-A refunded MVP order SHALL revoke kit claim eligibility. Course access policy for refunds SHALL deny playback after refund.
+A refunded MVP order SHALL revoke kit claim eligibility. Course access policy for refunds SHALL deny playback after refund. If the learner already has a GitHub grant before the refund—whether accepted or still pending—that grant MUST also be actively revoked, not only blocked for future claims (see `github-kit-fulfillment` Requirement: Refund revokes existing collaborator access).
 
 #### Scenario: Refunded order cannot claim kit
 
 - **WHEN** the MVP order status is refunded
-- **THEN** GET /api/github/claim MUST return 403
+- **THEN** POST /api/github/claim MUST return 403

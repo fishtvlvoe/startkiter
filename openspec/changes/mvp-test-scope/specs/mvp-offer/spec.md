@@ -26,9 +26,9 @@ Payment of the MVP SKU SHALL grant course access and kit-claim eligibility toget
 ##### Example: PAYUNi 通知付款完成後同時開通兩項權益
 
 - PAYUNi webhook 通知 order_id=ord_8800_001（買家 alice@example.com）狀態變為已付款
-- 系統將該 user 的課程存取權設為開通，且允許其開啟 GET /api/github/claim 頁面
+- 系統將該 user 的課程存取權設為開通，且允許其開啟站內 GitHub claim 頁面（頁面用 POST /api/github/claim 執行邀請，用 GET /api/github/claim-status 查狀態）
 
 #### Scenario: Unpaid user is denied both
 
 - **WHEN** a signed-in user has no paid MVP order
-- **THEN** course playback MUST be denied and GET /api/github/claim MUST return 403
+- **THEN** course playback MUST be denied and POST /api/github/claim MUST return 403

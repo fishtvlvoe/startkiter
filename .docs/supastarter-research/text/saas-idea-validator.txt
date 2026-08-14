@@ -1,0 +1,90 @@
+SaaS idea validator | supastarter
+Pricing
+FAQ
+Changelog
+Showcase
+Blog
+SaaS ideas
+Docs
+Get access
+SaaS idea validator
+Evaluate your SaaS idea, identify the strongest target customers, sharpen your differentiation, and turn the result into a focused validation and build plan.
+A score with reasons
+See how the problem, audience, willingness to pay, differentiation, feasibility, and distribution each affect the result.
+A narrow first market
+Identify the customers most likely to feel the pain, pay for a solution, and be reachable through a practical channel.
+A plan to stand out
+Compare the idea with the status quo, find a focused wedge, and test it before committing to a large build.
+Describe the product, the problem it solves, and who would pay for it
+More context produces a more useful assessment.
+/3000
+Validate my SaaS idea
+This is a strategic heuristic, not proof of demand or live market research. Use the result to decide what to test with real customers.
+A high score is a direction, not a guarantee
+The validator applies proven SaaS principles and common failure patterns, but only customer behavior can prove demand. Use the interview prompts, success signals, and MVP scope in your result to gather that evidence before scaling the implementation.
+Real products shipped on this foundation
+From indie MVPs to agency client apps — proof you can go from idea to live product.
+Peekalink
+peekalink.io
+Affonso
+affonso.io
+Seowly
+seowly.com
+Built by our partner FeatherFlow
+Ntree
+ntr.ee
+Autosetter
+www.autosetter.ai
+TransGull
+transgull.com
+Freel
+freel.ca
+ReleaseRocket
+www.releaserocket.io
+Postel
+postel.app
+auftakt
+auftakt.app
+TeamSkillSet
+teamskillset.com
+Screenshot Scout
+screenshotscout.com
+Explore more customer products
+2026
+supastarter. All rights reserved.
+Featured on
+Startup Fame
+Blog
+Documentation
+llms.txt (for AI assistants)
+Demo
+supatools - Collection of tools for building your SaaS
+Best web development tools
+2026
+SaaS ideas generator
+SaaS idea validator
+Best SaaS ideas
+2026
+Dev Tips
+Boilerplates and Stacks
+FAQ
+Showcase
+Changelog
+Become an affiliate
+Privacy policy
+Terms of service
+Acceptable use
+Disclaimer
+License
+Next.js SaaS starter kit
+Nuxt SaaS starter kit
+TanStack Start SaaS starter kit
+Best SaaS boilerplate
+2026
+Best Next.js boilerplate
+2026
+supastarter vs ShipFast
+supastarter vs Makerkit
+How to build a SaaS
+Boilerplate vs building from scratch
+FAQ

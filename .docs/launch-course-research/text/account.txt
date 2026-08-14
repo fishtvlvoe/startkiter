@@ -1,0 +1,32 @@
+Get started
+
+完成付款後，依照以下步驟即可開始使用你的專屬課程平台。
+
+登出 fish
+下載專案
+
+取得完整的 Realms 平台原始碼，包含所有功能模組與繁體中文字幕教學影片。
+
+SOURCE CODE
+
+Realms Platform
+
+v1.8.0· Next.js + TypeScript
+
+部署教學
+
+觀看完整的部署教學影片，從環境設定到正式上線，一步步帶你完成。
+
+部署教學與圖文講義
+
+繁體中文字幕 · 40 min
+
+專屬群組
+
+加入 Realms 購買者專屬 Discord 社群，與其他創作者交流經驗、獲得技術支援。
+
+MEMBERS ONLY
+
+Discord 專屬群組
+
+Realms Exclusive

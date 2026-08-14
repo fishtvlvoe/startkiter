@@ -1,0 +1,57 @@
+---
+url: https://supastarter.dev/docs/nextjs/payments/overview.md
+content_type: text/plain; charset=utf-8
+bytes: 2414
+---
+
+supastarter includes a full-featured payments and subscription management system that works with multiple payment providers. It handles checkout flows, subscription management, plan upgrades and downgrades, webhook processing, and billing portal access — all through a unified, provider-agnostic API.
+
+## Setup payment provider
+
+supastarter supports five payment providers. Choose the one that best fits your business needs and target market:
+
+<Cards>
+  <Card title="Stripe" href="/docs/nextjs/payments/providers/stripe" />
+  <Card
+    title="Lemonsqueezy"
+    href="/docs/nextjs/payments/providers/lemonsqueezy"
+  />
+  <Card title="Creem" href="/docs/nextjs/payments/providers/creem" />
+  <Card title="Polar" href="/docs/nextjs/payments/providers/polar" />
+  <Card
+    title="Dodo Payments"
+    href="/docs/nextjs/payments/providers/dodopayments"
+  />
+</Cards>
+
+## Working with payments in your application
+
+<Cards>
+  <Card title="Manage plans and products" href="/docs/nextjs/payments/plans" />
+  <Card
+    title="Check for purchases or subscriptions"
+    href="/docs/nextjs/payments/check-purchases"
+  />
+  <Card
+    title="Usage-based billing"
+    href="/docs/nextjs/payments/usage-based-billing"
+  />
+</Cards>
+
+## Frequently asked questions
+
+### Which payment providers does supastarter support?
+
+supastarter supports **Stripe**, **Lemon Squeezy**, **Creem**, **Polar**, and **Dodo Payments**. Each provider is integrated through a unified API, so you can switch providers with minimal code changes.
+
+### How do I switch between payment providers?
+
+Switching payment providers involves changing the export in `/packages/payments/provider/index.ts` to point to your chosen provider, updating the environment variables with your provider's API keys, and configuring your product plans with the correct price IDs from your new provider.
+
+### Can I use one-time payments instead of subscriptions?
+
+Yes. supastarter's payment system supports both recurring subscriptions and one-time payments. You can configure your plans with a `one-time` type in addition to `monthly` and `yearly` subscription intervals.
+
+### How are webhooks handled?
+
+supastarter automatically handles webhooks from your payment provider to keep subscription status synchronized. It verifies webhook signatures for security, processes subscription lifecycle events (created, updated, canceled, expired), and updates your database accordingly.
