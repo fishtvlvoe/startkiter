@@ -1,0 +1,25 @@
+# Spectra application config
+# See: https://github.com/spectra-app/spectra
+
+locale: tw
+
+tdd: true
+audit: true
+parallel_tasks: true
+
+claude_slash_commands: true
+
+worktree: true
+
+claude_effort:
+  apply: xhigh
+  archive: low
+  ask: low
+  audit: xhigh
+  debug: xhigh
+  discuss: medium
+  ingest: xhigh
+  propose: xhigh
+
+tools:
+  - cursor

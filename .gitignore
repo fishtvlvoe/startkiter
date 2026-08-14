@@ -1,0 +1,42 @@
+# Spectra
+.spectra/
+openspec/.vector-search.db*
+
+# dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# next.js / build
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+
+# env / secrets
+.env
+.env.*
+!.env.example
+!.env.template
+*.pem
+
+# logs / os
+*.log
+.DS_Store
+
+# test / coverage
+coverage/
+test-results/
+
+# local data
+data/
+*.sqlite
+*.sqlite-journal
+
+# graphify
+graphify-out/
+
+# deploy leftovers
+.vercel
+.zeabur
