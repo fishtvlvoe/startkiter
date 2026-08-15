@@ -292,3 +292,45 @@ code:
 tests:
   - packages/auth/src/auth.test.ts
 -->
+
+---
+### Requirement: Operator navigation reaches settings
+When a signed-in operator views authenticated primary navigation, a link to /admin/settings MUST be visible. Learners MUST NOT see that link.
+
+#### Scenario: Operator nav includes settings
+- **WHEN** a signed-in operator views a page that renders SiteNav
+- **THEN** a link targeting /admin/settings MUST be present
+
+#### Scenario: Learner nav omits settings
+- **WHEN** a signed-in learner whose email is not ADMIN_EMAIL views SiteNav
+- **THEN** the document MUST NOT contain a hyperlink to /admin/settings
+
+<!-- @trace
+source: operator-payuni-settings
+updated: 2026-08-15
+code:
+  - apps/saas/app/admin/settings/payuni-settings-form.tsx
+  - apps/saas/app/api/checkout/route.ts
+  - apps/saas/lib/orders.ts
+  - apps/saas/lib/site-settings.ts
+  - apps/saas/lib/settings-crypto.ts
+  - apps/saas/app/components/site-nav.tsx
+  - apps/saas/app/api/admin/settings/payuni/route.ts
+  - apps/saas/app/admin/settings/page.tsx
+  - apps/saas/lib/payuni-settings-view.ts
+  - apps/saas/.env.example
+  - apps/saas/lib/operator.ts
+  - packages/database/prisma/migrations/20260815040000_add_site_setting/migration.sql
+  - packages/database/prisma/schema.prisma
+  - docs/deploy-and-public-url.md
+  - packages/payments/src/index.ts
+  - apps/saas/app/api/payuni/notify/route.ts
+  - apps/saas/lib/payuni-settings.ts
+tests:
+  - apps/saas/lib/operator.test.ts
+  - apps/saas/lib/orders-credentials.test.ts
+  - apps/saas/lib/payuni-settings-view.test.ts
+  - apps/saas/lib/payuni-settings.test.ts
+  - apps/saas/lib/site-settings.test.ts
+  - apps/saas/lib/settings-crypto.test.ts
+-->
