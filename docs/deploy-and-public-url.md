@@ -95,7 +95,7 @@ Coolify 仍是維運層選項（常駐 Node、固定 IP 利於 PAYUNi webhook）
 
 • 雲端 DB：Neon（Vercel Marketplace 資源名 `test-startkiter-db`）；`DATABASE_URL` 只在 Vercel env，不准進 git。Prisma migrate 已對 Neon 跑過。
 
-• Git 自動部署：暫未接通。Vercel 回「需先加 GitHub Login Connection」。目前用 `vercel deploy --prod`／本機 `git push test` 後手部屬。Dashboard 補 Login Connection 後再 `vercel git connect https://github.com/fishtvlvoe/test-startkiter.git`。
+• Git 自動部署：已接通。Vercel 帳號已連 GitHub（`fishtvlvoe`），專案已連 `fishtvlvoe/test-startkiter`。push `main` 應觸發部署。若 Dashboard 顯示失敗再改回 CLI `vercel deploy --prod`。
 
 • 自訂網域 `startkiter.aiver.me` 指到 Vercel：可本單後設，非阻塞。
 
