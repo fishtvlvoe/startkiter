@@ -345,3 +345,36 @@ tests:
   - packages/course/src/catalog.test.ts
   - packages/github-kit/src/config.test.ts
 -->
+
+---
+### Requirement: Site agent is discoverable in product navigation
+Signed-in learners SHALL be able to open the site agent from primary navigation without memorizing /agent. The agent page itself remains limited to the two read-only tools already specified.
+
+#### Scenario: Nav link opens agent
+- **WHEN** a signed-in learner uses primary navigation
+- **THEN** choosing the agent entry MUST open /agent
+
+<!-- @trace
+source: mvp-sell-flow-usable
+updated: 2026-08-15
+code:
+  - apps/saas/app/agent/agent-chat-client.tsx
+  - apps/saas/app/checkout/page.tsx
+  - apps/saas/app/page.tsx
+  - apps/saas/app/agent/page.tsx
+  - packages/i18n/src/index.ts
+  - apps/saas/app/course/page.tsx
+  - AGENTS.md
+  - apps/saas/app/course/kit-claim-panel.tsx
+  - apps/saas/app/checkout/checkout-button.tsx
+  - apps/saas/app/course/[lessonId]/page.tsx
+  - apps/saas/app/app/page.tsx
+  - apps/saas/app/globals.css
+  - apps/saas/app/signup/page.tsx
+  - apps/saas/app/components/site-nav.tsx
+  - apps/saas/app/layout.tsx
+  - apps/saas/app/login/page.tsx
+  - docs/deploy-and-public-url.md
+  - apps/saas/app/login/login-form.tsx
+  - apps/saas/app/course/line-community-panel.tsx
+-->

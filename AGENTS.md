@@ -67,7 +67,7 @@ Changes can be parked（暫存）— temporarily moved out of `openspec/changes/
 
 產品現行邊界以 `openspec/specs/` 為準（由已封存的 `mvp-test-scope` 灌入）。`extract-shell-auth`、`extract-payuni-checkout`、`extract-course-module`、`test-to-clean-package-promotion` 已封存。兩倉＋晉升規則見 `openspec/specs/test-clean-package-promotion/` 與 `docs/deploy-and-public-url.md`。
 
-MVP extract 佇列已清空：`extract-site-agent`、`extract-line-learner-community`、`extract-github-kit-fulfillment` 皆已封存。`bootstrap-test-startkiter` 已封存：TEST=`https://github.com/fishtvlvoe/test-startkiter`，站=`https://test-startkiter.vercel.app`（Neon；Git 自動部署已接通）。現行施工 mvp-sell-flow-usable。仍卡老闆：GITHUB_KIT_ORG／REPO／完整 PEM、LINE_COMMUNITY_INVITE_URL、Google／LINE OAuth callback。
+MVP extract 佇列已清空：`extract-site-agent`、`extract-line-learner-community`、`extract-github-kit-fulfillment` 皆已封存。`bootstrap-test-startkiter` 已封存：TEST=`https://github.com/fishtvlvoe/test-startkiter`，站=`https://test-startkiter.vercel.app`（Neon；Git 自動部署已接通）。mvp-sell-flow-usable 已封存。仍卡老闆：GITHUB_KIT_ORG／REPO／完整 PEM、LINE_COMMUNITY_INVITE_URL、Google／LINE OAuth callback。
 
 這是獨立 git repo。零耦合 libon.me。不要改抽取來源。站內 agent／LINE 社群／GitHub kit 履約已封存落地。本階段不以新 extract 白名單為準，而以 `openspec/specs/` 為現行真相。
 

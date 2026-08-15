@@ -11,4 +11,4 @@
 ## 3. Dogfood wiring and close-out
 
 - [x] 3.1 Production 灌 OPENAI_API_KEY（本機已有）；文件更新；push test 驗證部署。對應 Decision: Production 灌 OPENAI_API_KEY 讓 /agent 可回；缺 key 仍 503。驗證：有 session 打 /api/agent/chat 不再因缺 key 503。 [Tool: sonnet]
-- [ ] 3.2 Claude OK＋Codex 無 Critical 後 archive；AGENTS 標明仍卡 kit／LINE invite／社群 OAuth。驗證：CLI＋代理結論。 [Tool: sonnet]
+- [x] 3.2 Claude OK＋Codex 無 Critical 後 archive；AGENTS 標明仍卡 kit／LINE invite／社群 OAuth。驗證：CLI＋代理結論。 [Tool: sonnet]

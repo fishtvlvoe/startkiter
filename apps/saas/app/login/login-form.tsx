@@ -21,6 +21,7 @@ function safeNextPath(next: string | undefined) {
 		trimmed.startsWith("//") ||
 		trimmed.includes("\\") ||
 		trimmed.includes("://") ||
+		trimmed.includes("..") ||
 		/[\u0000-\u001f]/.test(trimmed)
 	) {
 		return "/course";
@@ -31,10 +32,21 @@ function safeNextPath(next: string | undefined) {
 		if (url.origin !== "https://startkiter.aiver.me") {
 			return "/course";
 		}
-		if (url.pathname.includes("\\") || url.username || url.password) {
+		if (
+			!url.pathname.startsWith("/") ||
+			url.pathname.startsWith("//") ||
+			url.pathname.includes("\\") ||
+			url.pathname.includes("..") ||
+			url.username ||
+			url.password
+		) {
 			return "/course";
 		}
-		return `${url.pathname}${url.search}${url.hash}` || "/course";
+		const destination = `${url.pathname}${url.search}${url.hash}` || "/course";
+		if (!destination.startsWith("/") || destination.startsWith("//")) {
+			return "/course";
+		}
+		return destination;
 	} catch {
 		return "/course";
 	}

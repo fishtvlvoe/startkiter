@@ -338,3 +338,36 @@ tests:
   - packages/payments/src/checkout.test.ts
   - packages/auth/src/auth.test.ts
 -->
+
+---
+### Requirement: Home page offers the MVP purchase path
+The home page SHALL offer a clear path to purchase the MVP SKU (NT$8800) and to enter the course after authentication. The primary call to action in the first viewport MUST lead toward purchase or account creation required for purchase.
+
+#### Scenario: Primary CTA leads to purchase path
+- **WHEN** a visitor opens the home page
+- **THEN** the primary CTA MUST navigate to checkout or signup that continues toward checkout
+
+<!-- @trace
+source: mvp-sell-flow-usable
+updated: 2026-08-15
+code:
+  - apps/saas/app/agent/agent-chat-client.tsx
+  - apps/saas/app/checkout/page.tsx
+  - apps/saas/app/page.tsx
+  - apps/saas/app/agent/page.tsx
+  - packages/i18n/src/index.ts
+  - apps/saas/app/course/page.tsx
+  - AGENTS.md
+  - apps/saas/app/course/kit-claim-panel.tsx
+  - apps/saas/app/checkout/checkout-button.tsx
+  - apps/saas/app/course/[lessonId]/page.tsx
+  - apps/saas/app/app/page.tsx
+  - apps/saas/app/globals.css
+  - apps/saas/app/signup/page.tsx
+  - apps/saas/app/components/site-nav.tsx
+  - apps/saas/app/layout.tsx
+  - apps/saas/app/login/page.tsx
+  - docs/deploy-and-public-url.md
+  - apps/saas/app/login/login-form.tsx
+  - apps/saas/app/course/line-community-panel.tsx
+-->
