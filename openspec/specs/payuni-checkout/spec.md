@@ -563,3 +563,36 @@ tests:
   - packages/payments/src/checkout.test.ts
   - packages/auth/src/auth.test.ts
 -->
+
+---
+### Requirement: Checkout callback URLs use the public HTTPS base
+PAYUNi ReturnURL and NotifyURL SHALL be built from BETTER_AUTH_URL when set, so TEST deployments on the custom domain receive browser return and server notify on the same public origin.
+
+#### Scenario: Base URL prefers BETTER_AUTH_URL
+- **WHEN** checkout creates a PAYUNi session and BETTER_AUTH_URL is https://startkiter.aiver.me
+- **THEN** ReturnURL and NotifyURL MUST start with https://startkiter.aiver.me/api/payuni/
+
+<!-- @trace
+source: mvp-dogfood-remaining
+updated: 2026-08-15
+code:
+  - apps/saas/app/globals.css
+  - apps/saas/app/course/kit-claim-panel.tsx
+  - packages/course/src/catalog.ts
+  - apps/saas/app/course/[lessonId]/page.tsx
+  - apps/saas/app/checkout/checkout-button.tsx
+  - apps/saas/.env.example
+  - apps/saas/lib/support-email.ts
+  - apps/saas/app/agent/agent-chat-client.tsx
+  - apps/saas/app/components/site-footer.tsx
+  - apps/saas/lib/public-base-url.ts
+  - docs/deploy-and-public-url.md
+  - apps/saas/app/layout.tsx
+  - vitest.config.ts
+  - apps/saas/app/course/demo-grant-button.tsx
+  - apps/saas/app/api/checkout/route.ts
+tests:
+  - apps/saas/lib/support-email.test.ts
+  - apps/saas/lib/public-base-url.test.ts
+  - packages/course/src/catalog.test.ts
+-->

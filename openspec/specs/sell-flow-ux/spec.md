@@ -139,3 +139,70 @@ code:
   - apps/saas/app/login/login-form.tsx
   - apps/saas/app/course/line-community-panel.tsx
 -->
+
+---
+### Requirement: Buyer-visible errors use plain Traditional Chinese
+Learner-facing UI for agent, checkout, demo grant, and kit panels SHALL map failures to plain Traditional Chinese. Raw provider codes such as provider_failed or HTTP status numbers MUST NOT be the primary user-visible message.
+
+#### Scenario: Agent failure without jargon
+- **WHEN** the site agent chat fails for a non-auth reason
+- **THEN** the UI MUST show a plain Traditional Chinese error and MUST NOT require the learner to understand provider_failed
+
+
+<!-- @trace
+source: mvp-dogfood-remaining
+updated: 2026-08-15
+code:
+  - apps/saas/app/globals.css
+  - apps/saas/app/course/kit-claim-panel.tsx
+  - packages/course/src/catalog.ts
+  - apps/saas/app/course/[lessonId]/page.tsx
+  - apps/saas/app/checkout/checkout-button.tsx
+  - apps/saas/.env.example
+  - apps/saas/lib/support-email.ts
+  - apps/saas/app/agent/agent-chat-client.tsx
+  - apps/saas/app/components/site-footer.tsx
+  - apps/saas/lib/public-base-url.ts
+  - docs/deploy-and-public-url.md
+  - apps/saas/app/layout.tsx
+  - vitest.config.ts
+  - apps/saas/app/course/demo-grant-button.tsx
+  - apps/saas/app/api/checkout/route.ts
+tests:
+  - apps/saas/lib/support-email.test.ts
+  - apps/saas/lib/public-base-url.test.ts
+  - packages/course/src/catalog.test.ts
+-->
+
+---
+### Requirement: Support email is visible when configured
+When SUPPORT_EMAIL or EMAIL_FROM is configured, sell-flow pages SHALL expose a mailto support contact in the footer or account surface.
+
+#### Scenario: Footer shows support mailto
+- **WHEN** SUPPORT_EMAIL is set and a visitor opens the home page
+- **THEN** a mailto link to that address MUST be visible
+
+<!-- @trace
+source: mvp-dogfood-remaining
+updated: 2026-08-15
+code:
+  - apps/saas/app/globals.css
+  - apps/saas/app/course/kit-claim-panel.tsx
+  - packages/course/src/catalog.ts
+  - apps/saas/app/course/[lessonId]/page.tsx
+  - apps/saas/app/checkout/checkout-button.tsx
+  - apps/saas/.env.example
+  - apps/saas/lib/support-email.ts
+  - apps/saas/app/agent/agent-chat-client.tsx
+  - apps/saas/app/components/site-footer.tsx
+  - apps/saas/lib/public-base-url.ts
+  - docs/deploy-and-public-url.md
+  - apps/saas/app/layout.tsx
+  - vitest.config.ts
+  - apps/saas/app/course/demo-grant-button.tsx
+  - apps/saas/app/api/checkout/route.ts
+tests:
+  - apps/saas/lib/support-email.test.ts
+  - apps/saas/lib/public-base-url.test.ts
+  - packages/course/src/catalog.test.ts
+-->
