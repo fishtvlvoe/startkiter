@@ -6,7 +6,7 @@ context: |
   站內 agent 可接模型，v1 只掛兩支唯讀工具。付費學員在課程內加入 LINE 交流群；客服走 email。
   不是 libon.me 的一部分。
   `mvp-test-scope`、`extract-shell-auth`、`extract-payuni-checkout`、`extract-course-module`、`test-to-clean-package-promotion` 皆已封存。
-  MVP extract 佇列已清空（site-agent／line／kit 皆封存）。`bootstrap-test-startkiter` 已封存。TEST HTTPS：https://test-startkiter.vercel.app（Neon via Vercel；Git auto-deploy 待 Login Connection）。kit 真測需 GITHUB_KIT_ORG／REPO／完整 PEM。
+  MVP extract 佇列已清空（site-agent／line／kit 皆封存）。`bootstrap-test-startkiter` 已封存。TEST HTTPS：https://test-startkiter.vercel.app（Neon via Vercel；Git auto-deploy 已接通）。kit 真測需 GITHUB_KIT_ORG／REPO／完整 PEM。
   兩倉＋晉升規則 SSOT：openspec/specs/test-clean-package-promotion/ 與 docs/deploy-and-public-url.md。
 
   # 獨立專案
