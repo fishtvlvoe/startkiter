@@ -34,7 +34,7 @@ export function mergePayuniSettings(
 		merchantId: patch.merchantId?.trim() || existing?.merchantId || "",
 		hashKey: patch.hashKey ? patch.hashKey : existing?.hashKey || "",
 		hashIV: patch.hashIV ? patch.hashIV : existing?.hashIV || "",
-		apiUrl: patch.apiUrl !== undefined ? patch.apiUrl.trim() : existing?.apiUrl || "",
+		apiUrl: patch.apiUrl?.trim() || existing?.apiUrl || "",
 	};
 }
 

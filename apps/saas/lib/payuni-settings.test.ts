@@ -18,6 +18,19 @@ describe("mergePayuniSettings", () => {
 		expect(merged.hashIV).toBe("1234567890123456");
 		expect(merged.apiUrl).toBe("https://old.example");
 	});
+
+	it("keeps previous apiUrl when the patch sends a blank url", () => {
+		const merged = mergePayuniSettings(
+			{
+				merchantId: "OLD",
+				hashKey: "12345678901234567890123456789012",
+				hashIV: "1234567890123456",
+				apiUrl: "https://old.example",
+			},
+			{ apiUrl: "   " },
+		);
+		expect(merged.apiUrl).toBe("https://old.example");
+	});
 });
 
 describe("validatePayuniPatch", () => {
