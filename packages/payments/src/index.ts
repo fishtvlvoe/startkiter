@@ -6,6 +6,7 @@ export { markOrderRefunded } from "./refund";
 export { createMemoryOrderStore } from "./memory-store";
 export type { OrderRecord, OrderStore, OrderStatus } from "./memory-store";
 export { resolvePayUniCredentials } from "./credentials";
+export type { PayUniEnv, PaymentSettingsReader, ResolvedPayUniCredentials } from "./credentials";
 export { createMvpCheckoutGateway } from "./factory";
 export { PayUniService } from "./provider/payuni/crypto";
 export { PayUniOneTimeGateway } from "./provider/payuni/gateway";

@@ -125,3 +125,13 @@ model GithubKitGrant {
   @@index([githubLogin])
   @@map("github_kit_grants")
 }
+
+model SiteSetting {
+  id         String   @id
+  ciphertext String   @db.Text
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  updatedBy  String?  @map("updated_by")
+
+  @@index([updatedAt], map: "site_setting_updated_at_idx")
+  @@map("site_setting")
+}

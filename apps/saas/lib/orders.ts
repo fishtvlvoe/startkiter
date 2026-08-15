@@ -6,16 +6,28 @@ import {
 	createMvpCheckoutGateway,
 	resolvePayUniCredentials,
 	type OrderRecord,
+	type PayUniEnv,
 } from "@startkiter/payments";
 
-function emptySettings() {
-	return null;
-}
+import { readPayuniSettingsPlain } from "./site-settings";
+import type { PayuniPlainSettings } from "./payuni-settings";
 
-export function loadPayUniCredentials() {
+export async function loadPayUniCredentials(opts?: {
+	readSettings?: () => Promise<PayuniPlainSettings | null>;
+	env?: PayUniEnv;
+}) {
+	const readSettings = opts?.readSettings ?? readPayuniSettingsPlain;
+	const env = opts?.env ?? process.env;
+	let settings: PayuniPlainSettings | null = null;
+	try {
+		settings = await readSettings();
+	} catch {
+		settings = null;
+	}
+
 	return resolvePayUniCredentials({
-		readSettings: emptySettings,
-		env: process.env,
+		readSettings: () => settings,
+		env,
 	});
 }
 
@@ -92,8 +104,8 @@ export async function markOrderRefundedInDb(orderNo: string) {
 	return result.count;
 }
 
-export function buildPayuniSession(order: OrderRecord, baseUrl: string, email?: string) {
-	const credentials = loadPayUniCredentials();
+export async function buildPayuniSession(order: OrderRecord, baseUrl: string, email?: string) {
+	const credentials = await loadPayUniCredentials();
 	if (!credentials) {
 		return null;
 	}

@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: "authentication_required" }, { status: 401 });
 	}
 
-	const credentials = loadPayUniCredentials();
+	const credentials = await loadPayUniCredentials();
 	if (!credentials) {
 		return NextResponse.json({ error: "payuni_not_configured" }, { status: 503 });
 	}
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
 	}
 
 	const order = await createPendingOrderForUser(session.user.id);
-	const payment = buildPayuniSession(order, baseUrl, session.user.email);
+	const payment = await buildPayuniSession(order, baseUrl, session.user.email);
 	if (!payment) {
 		return NextResponse.json({ error: "payuni_not_configured" }, { status: 503 });
 	}

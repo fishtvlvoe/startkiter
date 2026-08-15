@@ -109,6 +109,8 @@ Coolify 仍是維運層選項（常駐 Node、固定 IP 利於 PAYUNi webhook）
 
 • PAYUNi：sandbox 金鑰已在 Production；結帳 Return／Notify 強制走 `BETTER_AUTH_URL`。Vercel serverless webhook 可能不夠穩，正式金流測可另掛常駐 Node／VPS（Coolify）。
 
+• 營運者後台：`ADMIN_EMAIL` 對上登入 email 才看得到「設定」。`SETTINGS_ENCRYPTION_KEY` 用來加密站內 PAYUNi 金鑰；缺這個 key 時 PUT `/api/admin/settings/payuni` 會 503 fail-closed（不可寫明文），結帳仍可走 Production 的 `PAYUNI_*` env。換加密 key 等於舊密文作廢，要重填。換完加密 key 或新增 `site_setting` 後，記得對 Neon 跑 Prisma migrate。
+
 ▋ 跟現行 Spectra 的關係
 
 • 兩倉＋晉升規則已封存為規格：`openspec/specs/test-clean-package-promotion/`（archive `2026-08-15-test-to-clean-package-promotion`）。

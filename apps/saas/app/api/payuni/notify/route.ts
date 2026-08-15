@@ -7,7 +7,7 @@ import { NextResponse } from "next/server";
 import { findOrderByNo, loadPayUniCredentials, markOrderPaid } from "../../../../lib/orders";
 
 export async function POST(request: Request) {
-	const credentials = loadPayUniCredentials();
+	const credentials = await loadPayUniCredentials();
 	if (!credentials) {
 		return NextResponse.json({ error: "payuni_not_configured" }, { status: 503 });
 	}
