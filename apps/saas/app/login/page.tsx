@@ -5,7 +5,12 @@ import { auth } from "@startkiter/auth";
 import { SiteNav } from "../components/site-nav";
 import { LoginForm } from "./login-form";
 
-export default function LoginPage() {
+type PageProps = {
+	searchParams: Promise<{ next?: string }>;
+};
+
+export default async function LoginPage({ searchParams }: PageProps) {
+	const { next } = await searchParams;
 	return (
 		<main>
 			<SiteNav />
@@ -16,9 +21,11 @@ export default function LoginPage() {
 					googleEnabled={auth.enabledProviders.google}
 					lineEnabled={auth.enabledProviders.line}
 					mode="sign-in"
+					nextPath={next}
 				/>
 				<p className="muted">
-					還沒有帳號？ <Link href="/signup">註冊</Link>
+					還沒有帳號？{" "}
+					<Link href={next ? `/signup?next=${encodeURIComponent(next)}` : "/signup"}>註冊</Link>
 				</p>
 			</section>
 		</main>

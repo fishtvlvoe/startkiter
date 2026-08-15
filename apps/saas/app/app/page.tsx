@@ -20,7 +20,7 @@ export default async function AccountPage() {
 
 	return (
 		<main>
-			<SiteNav signedIn email={session.user.email} />
+			<SiteNav signedIn email={session.user.email} hasPurchase={entitled} />
 
 			<section className="panel stack">
 				<div>

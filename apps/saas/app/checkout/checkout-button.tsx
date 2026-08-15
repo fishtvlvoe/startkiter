@@ -3,6 +3,16 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+function checkoutErrorMessage(status: number, code?: string) {
+	if (status === 503 || code === "payuni_not_configured") {
+		return "金流尚未設定完成，暫時無法結帳。";
+	}
+	if (status === 401) {
+		return "請先登入再結帳。";
+	}
+	return "結帳失敗，請稍後再試。";
+}
+
 export function CheckoutButton() {
 	const router = useRouter();
 	const [error, setError] = useState<string | null>(null);
@@ -11,47 +21,52 @@ export function CheckoutButton() {
 	async function startCheckout() {
 		setLoading(true);
 		setError(null);
-		const response = await fetch("/api/checkout", {
-			method: "POST",
-			headers: { "content-type": "application/json" },
-			body: JSON.stringify({ sku: "startkiter-mvp" }),
-		});
+		try {
+			const response = await fetch("/api/checkout", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ sku: "startkiter-mvp" }),
+			});
 
-		if (response.status === 401) {
-			router.push("/login");
-			return;
-		}
+			if (response.status === 401) {
+				router.push("/login?next=/checkout");
+				return;
+			}
 
-		if (!response.ok) {
-			const payload = (await response.json().catch(() => ({}))) as { error?: string };
-			setError(payload.error || `結帳失敗（${response.status}）`);
-			setLoading(false);
-			return;
-		}
+			if (!response.ok) {
+				const payload = (await response.json().catch(() => ({}))) as { error?: string };
+				setError(checkoutErrorMessage(response.status, payload.error));
+				return;
+			}
 
-		const payload = (await response.json()) as {
-			payment: {
-				type: string;
-				formData: {
-					apiUrl: string;
-					MerID: string;
-					Version: string;
-					EncryptInfo: string;
-					HashInfo: string;
+			const payload = (await response.json()) as {
+				payment: {
+					type: string;
+					formData: {
+						apiUrl: string;
+						MerID: string;
+						Version: string;
+						EncryptInfo: string;
+						HashInfo: string;
+					};
 				};
 			};
-		};
 
-		sessionStorage.setItem("payuniCheckout", JSON.stringify(payload.payment));
-		router.push("/checkout/payuni");
+			sessionStorage.setItem("payuniCheckout", JSON.stringify(payload.payment));
+			router.push("/checkout/payuni");
+		} catch {
+			setError("網路異常，請稍後再試。");
+		} finally {
+			setLoading(false);
+		}
 	}
 
 	return (
 		<div className="actions">
-			<button className="button" type="button" disabled={loading} onClick={startCheckout}>
-				{loading ? "建立訂單中…" : "購買開站包 NT$8800"}
+			<button className="button" type="button" disabled={loading} onClick={() => void startCheckout()}>
+				{loading ? "建立訂單中…" : "購買開站包 NT$8,800"}
 			</button>
-			{error ? <p className="muted">{error}</p> : null}
+			{error ? <p className="error">{error}</p> : null}
 		</div>
 	);
 }
