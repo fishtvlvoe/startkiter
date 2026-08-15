@@ -55,15 +55,30 @@ export default async function LessonPage({ params }: PageProps) {
 	return (
 		<main>
 			<SiteNav signedIn email={session.user.email} hasPurchase={entitled} />
-			<section className="panel">
+			<section className="panel stack">
 				<p className="muted">
 					<Link href="/course">← 全部課程</Link>
 				</p>
 				<h1>{lesson.title}</h1>
 				<p className="muted">{lesson.description}</p>
-				<video className="lesson-player" controls playsInline preload="metadata" src={lesson.mediaUrl}>
-					你的瀏覽器不支援影片播放。
-				</video>
+				{lesson.isDemoFallback ? (
+					<p className="callout" style={{ margin: 0 }}>
+						目前播放的是暫時示範影片。站方接上 Bunny 課片後會自動換成正式內容。
+					</p>
+				) : null}
+				{lesson.mediaKind === "bunny_embed" ? (
+					<iframe
+						className="lesson-player"
+						src={lesson.mediaUrl}
+						title={lesson.title}
+						allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+						allowFullScreen
+					/>
+				) : (
+					<video className="lesson-player" controls playsInline preload="metadata" src={lesson.mediaUrl}>
+						你的瀏覽器不支援影片播放。
+					</video>
+				)}
 			</section>
 		</main>
 	);

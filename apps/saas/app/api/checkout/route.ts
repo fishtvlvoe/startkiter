@@ -52,8 +52,12 @@ export async function POST(request: Request) {
 		}
 	}
 
+	const baseUrl = process.env.BETTER_AUTH_URL?.trim();
+	if (!baseUrl) {
+		return NextResponse.json({ error: "public_base_url_required" }, { status: 503 });
+	}
+
 	const order = await createPendingOrderForUser(session.user.id);
-	const baseUrl = process.env.BETTER_AUTH_URL || new URL(request.url).origin;
 	const payment = buildPayuniSession(order, baseUrl, session.user.email);
 	if (!payment) {
 		return NextResponse.json({ error: "payuni_not_configured" }, { status: 503 });

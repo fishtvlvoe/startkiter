@@ -90,28 +90,32 @@ Coolify 仍是維運層選項（常駐 Node、固定 IP 利於 PAYUNi webhook）
 • Vercel 專案：`fishtvs-projects/test-startkiter`；`rootDirectory=apps/saas`；monorepo SSOT 見根目錄 `vercel.json`，saas 鏡像見 `apps/saas/vercel.json`
 
 • 測試站 HTTPS origin：`https://startkiter.aiver.me`（主；`BETTER_AUTH_URL` 已對這個）。備援：`https://test-startkiter.vercel.app`
-• DNS：`startkiter.aiver.me` CNAME → `cname.vercel-dns.com`（Cloudflare DNS only，已從 Tunnel 改過來）
-• 登入：先走 email／password；Google／LINE callback 暫未加，Production 先拿掉社群 key 免按鈕壞掉
-• 賣流 UX：`mvp-sell-flow-usable` 施工中（DESIGN token、導覽含助手、去工程文案）
-• 仍卡老闆：`GITHUB_KIT_ORG`／`GITHUB_KIT_REPO`／完整 PEM、`LINE_COMMUNITY_INVITE_URL`、社群 OAuth callback
 
-• OAuth callback 範例（之後填各 provider）：`https://test-startkiter.vercel.app/api/auth/callback/google`、`https://test-startkiter.vercel.app/api/auth/callback/line`、`https://test-startkiter.vercel.app/api/auth/callback/github`
+• DNS：`startkiter.aiver.me` CNAME → `cname.vercel-dns.com`（Cloudflare DNS only，已從 Tunnel 改過來）
+
+• 登入：email／password 可用。**本輪明確跳過**：Google／LINE Login callback（Production 先不放社群 key，免按鈕壞掉）
+
+• 課程媒體：Bunny library env（`BUNNY_LIBRARY_ID` 等）進 Production；課單元走 `iframe.mediadelivery.net/embed/...`；缺設定才回示範影片
+
+• 客服：頁尾讀 `SUPPORT_EMAIL`，空則 `EMAIL_FROM`
+
+• **仍卡老闆（跳過、不宣稱完成）**：`GITHUB_KIT_ORG`／`GITHUB_KIT_REPO`／完整 PEM（kit 真邀）、`LINE_COMMUNITY_INVITE_URL`（學員群邀請）、Google／LINE OAuth callback 設定
+
+• OAuth callback 範例（之後填各 provider）：`https://startkiter.aiver.me/api/auth/callback/google`、`https://startkiter.aiver.me/api/auth/callback/line`、`https://startkiter.aiver.me/api/auth/callback/github`
 
 • 雲端 DB：Neon（Vercel Marketplace 資源名 `test-startkiter-db`）；`DATABASE_URL` 只在 Vercel env，不准進 git。Prisma migrate 已對 Neon 跑過。
 
-• Git 自動部署：已接通。Vercel 帳號已連 GitHub（`fishtvlvoe`），專案已連 `fishtvlvoe/test-startkiter`。push `main` 應觸發部署。若 Dashboard 顯示失敗再改回 CLI `vercel deploy --prod`。
+• Git 自動部署：已接通。Vercel 帳號已連 GitHub（`fishtvlvoe`），專案已連 `fishtvlvoe/test-startkiter`。push `main` 應觸發部署。
 
-• 自訂網域 `startkiter.aiver.me` 指到 Vercel：可本單後設，非阻塞。
-
-• PAYUNi webhook：Vercel serverless 可能不夠穩；正式金流測可另掛常駐 Node／VPS（Coolify）。本輪 TEST 先驗 OAuth／UI／部署鏈。
+• PAYUNi：sandbox 金鑰已在 Production；結帳 Return／Notify 強制走 `BETTER_AUTH_URL`。Vercel serverless webhook 可能不夠穩，正式金流測可另掛常駐 Node／VPS（Coolify）。
 
 ▋ 跟現行 Spectra 的關係
 
 • 兩倉＋晉升規則已封存為規格：`openspec/specs/test-clean-package-promotion/`（archive `2026-08-15-test-to-clean-package-promotion`）。
 
-• 現行施工：`bootstrap-test-startkiter`（本節為落地紀錄）。
+• UI／賣流：`mvp-sell-flow-usable` 已封存；後續狗食剩餘見 `mvp-dogfood-remaining`（Bunny／錯誤文案／footer／checkout base）。
 
-• UI／UX 精修仍延後。kit 真邀仍缺 `GITHUB_KIT_ORG`／`GITHUB_KIT_REPO`／完整 PEM。
+• kit 真邀、LINE 群邀請、社群 Login callback：明確不做到老闆補齊密鑰與後台設定。
 
 ▋ 晉升 checklist（TEST → 正式乾淨安裝包）
 

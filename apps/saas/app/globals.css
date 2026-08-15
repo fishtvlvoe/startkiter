@@ -282,9 +282,18 @@ main.wide {
 	background: var(--color-primary-50);
 }
 
+.site-footer {
+	margin: var(--space-6) auto 0;
+	max-width: 720px;
+	padding: var(--space-4) 20px 40px;
+	border-top: 1px solid var(--border);
+	font-size: 0.875rem;
+}
+
 .lesson-player {
 	width: 100%;
 	margin-top: 20px;
+	border: 0;
 	border-radius: var(--radius-lg);
 	background: #000;
 	aspect-ratio: 16 / 9;

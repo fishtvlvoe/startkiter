@@ -26,8 +26,10 @@ export function AgentChatClient() {
 				setReply(null);
 				if (res.status === 503) {
 					setError("助手暫時無法使用（站方尚未設定模型金鑰）。");
+				} else if (res.status === 401) {
+					setError("請先登入再使用助手。");
 				} else {
-					setError(body.error ?? "送出失敗，請稍後再試。");
+					setError("助手暫時無法回答，請稍後再試。");
 				}
 				return;
 			}

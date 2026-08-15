@@ -23,18 +23,22 @@ export function KitClaimPanel() {
 	const [busy, setBusy] = useState(false);
 
 	async function refresh() {
-		const res = await fetch("/api/github/claim-status");
-		if (res.status === 503) {
-			setUnavailable(true);
-			setStatus(null);
-			return;
+		try {
+			const res = await fetch("/api/github/claim-status");
+			if (res.status === 503) {
+				setUnavailable(true);
+				setStatus(null);
+				return;
+			}
+			if (!res.ok) {
+				setMessage("暫時讀不到領取狀態，請稍後再試。");
+				return;
+			}
+			setUnavailable(false);
+			setStatus((await res.json()) as ClaimStatus);
+		} catch {
+			setMessage("網路異常，暫時讀不到領取狀態。");
 		}
-		if (!res.ok) {
-			setMessage("暫時讀不到領取狀態，請稍後再試。");
-			return;
-		}
-		setUnavailable(false);
-		setStatus((await res.json()) as ClaimStatus);
 	}
 
 	useEffect(() => {
@@ -53,12 +57,14 @@ export function KitClaimPanel() {
 					callbackURL: "/course",
 				}),
 			});
-			const data = (await response.json()) as { url?: string; error?: string };
+			const data = (await response.json()) as { url?: string };
 			if (!response.ok || !data.url) {
 				setMessage("現在無法綁定 GitHub，請確認已登入後再試。");
 				return;
 			}
 			window.location.href = data.url;
+		} catch {
+			setMessage("網路異常，請稍後再試。");
 		} finally {
 			setBusy(false);
 		}
@@ -69,16 +75,22 @@ export function KitClaimPanel() {
 		setMessage(null);
 		try {
 			const res = await fetch("/api/github/claim", { method: "POST" });
-			const body = (await res.json()) as { error?: string; message?: string };
 			if (res.status === 503) {
 				setUnavailable(true);
 				setMessage("代碼包領取尚未開放（站方還在設定 GitHub）。");
+			} else if (res.status === 401) {
+				setMessage("請先登入再領取。");
+			} else if (res.status === 403) {
+				setMessage("目前沒有領取資格，請先完成購買。");
 			} else if (!res.ok) {
-				setMessage(body.error ?? "領取失敗，請稍後再試。");
+				setMessage("領取失敗，請稍後再試。");
 			} else {
+				const body = (await res.json()) as { message?: string };
 				setMessage(body.message ?? "已送出邀請，請到 GitHub 通知接受。");
 			}
 			await refresh();
+		} catch {
+			setMessage("網路異常，請稍後再試。");
 		} finally {
 			setBusy(false);
 		}

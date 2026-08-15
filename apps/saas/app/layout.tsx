@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fira_Sans, Noto_Sans_TC } from "next/font/google";
 
+import { SiteFooter, resolveSupportEmail } from "./components/site-footer";
 import "./globals.css";
 
 const display = Fira_Sans({
@@ -23,9 +24,14 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+	const supportEmail = resolveSupportEmail();
+
 	return (
 		<html lang="zh-TW" className={`${display.variable} ${body.variable}`}>
-			<body style={{ fontFamily: "var(--font-body-loaded), var(--font-body)" }}>{children}</body>
+			<body style={{ fontFamily: "var(--font-body-loaded), var(--font-body)" }}>
+				{children}
+				<SiteFooter supportEmail={supportEmail} />
+			</body>
 		</html>
 	);
 }

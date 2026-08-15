@@ -14,13 +14,12 @@ export function DemoGrantButton() {
 		try {
 			const res = await fetch("/api/demo/grant-course", { method: "POST" });
 			if (!res.ok) {
-				const body = (await res.json().catch(() => ({}))) as { error?: string };
-				setError(body.error || `HTTP ${res.status}`);
+				setError(res.status === 403 ? "Demo 未開放。" : "暫時無法開通，請稍後再試。");
 				return;
 			}
 			router.refresh();
 		} catch {
-			setError("network_error");
+			setError("網路異常，請稍後再試。");
 		} finally {
 			setPending(false);
 		}
@@ -28,10 +27,10 @@ export function DemoGrantButton() {
 
 	return (
 		<div className="actions">
-			<button type="button" className="button" disabled={pending} onClick={onClick}>
+			<button type="button" className="button" disabled={pending} onClick={() => void onClick()}>
 				{pending ? "開通中…" : "Demo：一鍵開通課程權限"}
 			</button>
-			{error ? <p className="muted">失敗：{error}</p> : null}
+			{error ? <p className="error">{error}</p> : null}
 		</div>
 	);
 }

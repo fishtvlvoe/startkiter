@@ -4,6 +4,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 function checkoutErrorMessage(status: number, code?: string) {
+	if (code === "public_base_url_required") {
+		return "站台公開網址尚未設定，暫時無法結帳。";
+	}
 	if (status === 503 || code === "payuni_not_configured") {
 		return "金流尚未設定完成，暫時無法結帳。";
 	}
