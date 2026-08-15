@@ -1,0 +1,613 @@
+# test-startkiter-bootstrap Specification
+
+## Purpose
+
+TBD - created by archiving change 'bootstrap-test-startkiter'. Update Purpose after archive.
+
+## Requirements
+
+### Requirement: Private TEST repository exists
+The operator SHALL maintain a private GitHub repository named `test-startkiter` under the project owner account for dirty dogfood deploy. This repository MUST NOT be the learner kit repository and MUST NOT be the clean install-package repository.
+
+#### Scenario: TEST repo is private and named correctly
+- **WHEN** an operator inspects GitHub for the StartKiter test deploy surface
+- **THEN** a private repository named `test-startkiter` MUST exist
+
+
+<!-- @trace
+source: bootstrap-test-startkiter
+updated: 2026-08-15
+code:
+  - packages/i18n/src/index.ts
+  - packages/database/prisma/migrations/20260815010000_add_order/migration.sql
+  - packages/site-agent/src/index.ts
+  - packages/site-agent/tsconfig.json
+  - packages/database/src/index.ts
+  - docs/discuss/2026-08-14-alignment.md
+  - packages/course/src/index.ts
+  - packages/auth/src/auth.ts
+  - packages/payments/src/constants.ts
+  - packages/ui/tsconfig.json
+  - packages/database/tsconfig.json
+  - packages/payments/src/credentials.ts
+  - apps/saas/next.config.ts
+  - pnpm-workspace.yaml
+  - apps/saas/app/course/kit-claim-panel.tsx
+  - packages/database/prisma/migrations/migration_lock.toml
+  - apps/saas/lib/orders.ts
+  - packages/database/prisma/schema.prisma
+  - apps/saas/vercel.json
+  - apps/saas/app/api/payuni/return/route.ts
+  - packages/course/package.json
+  - packages/course/src/line-invite.ts
+  - apps/saas/app/api/demo/grant-course/route.ts
+  - apps/saas/.env.example
+  - apps/saas/app/api/orders/refund/route.ts
+  - apps/saas/app/api/payuni/notify/route.ts
+  - packages/github-kit/src/types.ts
+  - packages/github-kit/src/config.ts
+  - apps/saas/app/api/community/line-invite/route.ts
+  - packages/payments/src/order.ts
+  - tooling/typescript/base.json
+  - packages/auth/src/providers.ts
+  - packages/github-kit/package.json
+  - packages/database/prisma/migrations/20260815020000_add_github_kit_grants/migration.sql
+  - docs/discuss/architecture-draft.md
+  - vitest.config.ts
+  - apps/saas/app/checkout/checkout-button.tsx
+  - apps/saas/app/api/github/claim-status/route.ts
+  - apps/saas/app/not-found.tsx
+  - apps/saas/app/course/[lessonId]/page.tsx
+  - packages/course/src/catalog.ts
+  - packages/payments/src/provider/payuni/gateway.ts
+  - packages/auth/package.json
+  - turbo.json
+  - apps/saas/app/checkout/page.tsx
+  - apps/saas/app/course/demo-grant-button.tsx
+  - packages/github-kit/tsconfig.json
+  - apps/saas/app/api/auth/[...all]/route.ts
+  - packages/auth/src/test-auth.ts
+  - packages/site-agent/package.json
+  - apps/saas/app/page.tsx
+  - apps/saas/lib/course-access.ts
+  - packages/github-kit/src/index.ts
+  - packages/i18n/package.json
+  - packages/site-agent/src/types.ts
+  - apps/saas/app/api/course/lessons/route.ts
+  - packages/utils/package.json
+  - apps/saas/app/api/checkout/route.ts
+  - apps/saas/package.json
+  - vercel.json
+  - docs/autonomous-apply-loop.md
+  - tsconfig.json
+  - apps/saas/app/app/page.tsx
+  - apps/saas/app/checkout/payuni/page.tsx
+  - packages/ui/src/index.tsx
+  - apps/saas/app/course/page.tsx
+  - apps/saas/next-env.d.ts
+  - packages/site-agent/src/provider.ts
+  - packages/ui/package.json
+  - apps/saas/app/api/github/claim/route.ts
+  - packages/auth/tsconfig.json
+  - apps/saas/tsconfig.json
+  - apps/saas/app/layout.tsx
+  - apps/saas/app/agent/page.tsx
+  - package.json
+  - docs/deploy-and-public-url.md
+  - packages/auth/src/index.ts
+  - packages/course/src/access.ts
+  - packages/database/package.json
+  - docs/discuss/extract-map.md
+  - docs/discuss/2026-08-14-thetu-source.md
+  - packages/i18n/tsconfig.json
+  - packages/payments/package.json
+  - README.md
+  - packages/github-kit/src/github-app-client.ts
+  - apps/saas/app/api/agent/chat/route.ts
+  - apps/saas/app/signup/page.tsx
+  - packages/payments/src/checkout.ts
+  - packages/utils/src/index.ts
+  - docs/discuss/payment-and-deploy.md
+  - packages/payments/src/factory.ts
+  - packages/payments/src/provider/payuni/crypto.ts
+  - AGENTS.md
+  - apps/saas/app/login/page.tsx
+  - docs/discuss/v1-boundary.md
+  - docs/discuss/README.md
+  - packages/payments/src/notify.ts
+  - packages/course/src/playback.ts
+  - apps/saas/app/login/login-form.tsx
+  - packages/site-agent/src/tools.ts
+  - apps/saas/app/app/sign-out-button.tsx
+  - apps/saas/app/agent/agent-chat-client.tsx
+  - apps/saas/app/course/line-community-panel.tsx
+  - apps/saas/lib/demo-grant.ts
+  - packages/course/tsconfig.json
+  - packages/payments/src/memory-store.ts
+  - packages/payments/src/refund.ts
+  - packages/github-kit/src/revoke.ts
+  - apps/saas/app/checkout/result/page.tsx
+  - packages/github-kit/src/claim.ts
+  - apps/saas/app/globals.css
+  - apps/saas/lib/agent-data.ts
+  - packages/utils/tsconfig.json
+  - packages/site-agent/src/chat.ts
+  - packages/payments/src/index.ts
+  - packages/database/prisma/migrations/20260814160938_init/migration.sql
+  - tooling/typescript/package.json
+  - apps/saas/lib/github-kit.ts
+tests:
+  - packages/payments/src/notify.test.ts
+  - packages/payments/src/order.test.ts
+  - packages/payments/src/checkout.test.ts
+  - packages/payments/src/crypto.test.ts
+  - packages/course/src/playback.test.ts
+  - packages/payments/src/session-failclosed.test.ts
+  - packages/github-kit/src/claim.test.ts
+  - packages/payments/src/factory.test.ts
+  - packages/payments/src/refund.test.ts
+  - packages/course/src/catalog.test.ts
+  - packages/payments/src/credentials.test.ts
+  - packages/auth/src/auth.test.ts
+  - packages/course/src/line-invite.test.ts
+  - packages/github-kit/src/config.test.ts
+  - packages/site-agent/src/chat.test.ts
+  - packages/github-kit/src/revoke.test.ts
+  - packages/course/src/access.test.ts
+-->
+
+---
+### Requirement: Vercel deploys the TEST SaaS app
+The operator SHALL maintain a Vercel project that builds the SaaS app from the monorepo (`apps/saas`, typically via project `rootDirectory`). At least one successful production deployment MUST exist. If Vercel GitHub Login Connection is not yet available, documentation MUST record that push-triggered deploys are pending and that CLI/`vercel deploy` is the interim path; once Login Connection exists, the project MUST connect `test-startkiter` so default-branch pushes trigger deploys.
+
+#### Scenario: Vercel project builds saas and has a production deploy
+- **WHEN** an operator checks the StartKiter TEST Vercel project and recent production deployments
+- **THEN** the project MUST target the SaaS app build and MUST show at least one successful production deployment
+
+#### Scenario: Git auto-deploy pending is documented
+- **WHEN** GitHub Login Connection blocks `vercel git connect`
+- **THEN** `docs/deploy-and-public-url.md` MUST state the pending blocker and the interim CLI deploy path, and MUST NOT claim push auto-deploy is already live
+
+
+<!-- @trace
+source: bootstrap-test-startkiter
+updated: 2026-08-15
+code:
+  - packages/i18n/src/index.ts
+  - packages/database/prisma/migrations/20260815010000_add_order/migration.sql
+  - packages/site-agent/src/index.ts
+  - packages/site-agent/tsconfig.json
+  - packages/database/src/index.ts
+  - docs/discuss/2026-08-14-alignment.md
+  - packages/course/src/index.ts
+  - packages/auth/src/auth.ts
+  - packages/payments/src/constants.ts
+  - packages/ui/tsconfig.json
+  - packages/database/tsconfig.json
+  - packages/payments/src/credentials.ts
+  - apps/saas/next.config.ts
+  - pnpm-workspace.yaml
+  - apps/saas/app/course/kit-claim-panel.tsx
+  - packages/database/prisma/migrations/migration_lock.toml
+  - apps/saas/lib/orders.ts
+  - packages/database/prisma/schema.prisma
+  - apps/saas/vercel.json
+  - apps/saas/app/api/payuni/return/route.ts
+  - packages/course/package.json
+  - packages/course/src/line-invite.ts
+  - apps/saas/app/api/demo/grant-course/route.ts
+  - apps/saas/.env.example
+  - apps/saas/app/api/orders/refund/route.ts
+  - apps/saas/app/api/payuni/notify/route.ts
+  - packages/github-kit/src/types.ts
+  - packages/github-kit/src/config.ts
+  - apps/saas/app/api/community/line-invite/route.ts
+  - packages/payments/src/order.ts
+  - tooling/typescript/base.json
+  - packages/auth/src/providers.ts
+  - packages/github-kit/package.json
+  - packages/database/prisma/migrations/20260815020000_add_github_kit_grants/migration.sql
+  - docs/discuss/architecture-draft.md
+  - vitest.config.ts
+  - apps/saas/app/checkout/checkout-button.tsx
+  - apps/saas/app/api/github/claim-status/route.ts
+  - apps/saas/app/not-found.tsx
+  - apps/saas/app/course/[lessonId]/page.tsx
+  - packages/course/src/catalog.ts
+  - packages/payments/src/provider/payuni/gateway.ts
+  - packages/auth/package.json
+  - turbo.json
+  - apps/saas/app/checkout/page.tsx
+  - apps/saas/app/course/demo-grant-button.tsx
+  - packages/github-kit/tsconfig.json
+  - apps/saas/app/api/auth/[...all]/route.ts
+  - packages/auth/src/test-auth.ts
+  - packages/site-agent/package.json
+  - apps/saas/app/page.tsx
+  - apps/saas/lib/course-access.ts
+  - packages/github-kit/src/index.ts
+  - packages/i18n/package.json
+  - packages/site-agent/src/types.ts
+  - apps/saas/app/api/course/lessons/route.ts
+  - packages/utils/package.json
+  - apps/saas/app/api/checkout/route.ts
+  - apps/saas/package.json
+  - vercel.json
+  - docs/autonomous-apply-loop.md
+  - tsconfig.json
+  - apps/saas/app/app/page.tsx
+  - apps/saas/app/checkout/payuni/page.tsx
+  - packages/ui/src/index.tsx
+  - apps/saas/app/course/page.tsx
+  - apps/saas/next-env.d.ts
+  - packages/site-agent/src/provider.ts
+  - packages/ui/package.json
+  - apps/saas/app/api/github/claim/route.ts
+  - packages/auth/tsconfig.json
+  - apps/saas/tsconfig.json
+  - apps/saas/app/layout.tsx
+  - apps/saas/app/agent/page.tsx
+  - package.json
+  - docs/deploy-and-public-url.md
+  - packages/auth/src/index.ts
+  - packages/course/src/access.ts
+  - packages/database/package.json
+  - docs/discuss/extract-map.md
+  - docs/discuss/2026-08-14-thetu-source.md
+  - packages/i18n/tsconfig.json
+  - packages/payments/package.json
+  - README.md
+  - packages/github-kit/src/github-app-client.ts
+  - apps/saas/app/api/agent/chat/route.ts
+  - apps/saas/app/signup/page.tsx
+  - packages/payments/src/checkout.ts
+  - packages/utils/src/index.ts
+  - docs/discuss/payment-and-deploy.md
+  - packages/payments/src/factory.ts
+  - packages/payments/src/provider/payuni/crypto.ts
+  - AGENTS.md
+  - apps/saas/app/login/page.tsx
+  - docs/discuss/v1-boundary.md
+  - docs/discuss/README.md
+  - packages/payments/src/notify.ts
+  - packages/course/src/playback.ts
+  - apps/saas/app/login/login-form.tsx
+  - packages/site-agent/src/tools.ts
+  - apps/saas/app/app/sign-out-button.tsx
+  - apps/saas/app/agent/agent-chat-client.tsx
+  - apps/saas/app/course/line-community-panel.tsx
+  - apps/saas/lib/demo-grant.ts
+  - packages/course/tsconfig.json
+  - packages/payments/src/memory-store.ts
+  - packages/payments/src/refund.ts
+  - packages/github-kit/src/revoke.ts
+  - apps/saas/app/checkout/result/page.tsx
+  - packages/github-kit/src/claim.ts
+  - apps/saas/app/globals.css
+  - apps/saas/lib/agent-data.ts
+  - packages/utils/tsconfig.json
+  - packages/site-agent/src/chat.ts
+  - packages/payments/src/index.ts
+  - packages/database/prisma/migrations/20260814160938_init/migration.sql
+  - tooling/typescript/package.json
+  - apps/saas/lib/github-kit.ts
+tests:
+  - packages/payments/src/notify.test.ts
+  - packages/payments/src/order.test.ts
+  - packages/payments/src/checkout.test.ts
+  - packages/payments/src/crypto.test.ts
+  - packages/course/src/playback.test.ts
+  - packages/payments/src/session-failclosed.test.ts
+  - packages/github-kit/src/claim.test.ts
+  - packages/payments/src/factory.test.ts
+  - packages/payments/src/refund.test.ts
+  - packages/course/src/catalog.test.ts
+  - packages/payments/src/credentials.test.ts
+  - packages/auth/src/auth.test.ts
+  - packages/course/src/line-invite.test.ts
+  - packages/github-kit/src/config.test.ts
+  - packages/site-agent/src/chat.test.ts
+  - packages/github-kit/src/revoke.test.ts
+  - packages/course/src/access.test.ts
+-->
+
+---
+### Requirement: Cloud database for TEST
+The TEST deploy SHALL use a cloud Postgres connection string configured in Vercel environment variables (not localhost). Documentation MUST record which provider is used and that secrets MUST NOT be committed to git.
+
+#### Scenario: DATABASE_URL is cloud-hosted
+- **WHEN** the TEST deployment reads DATABASE_URL
+- **THEN** the value MUST point to a non-localhost Postgres host and MUST be stored in Vercel env (or equivalent secret store), not in tracked source files
+
+
+<!-- @trace
+source: bootstrap-test-startkiter
+updated: 2026-08-15
+code:
+  - packages/i18n/src/index.ts
+  - packages/database/prisma/migrations/20260815010000_add_order/migration.sql
+  - packages/site-agent/src/index.ts
+  - packages/site-agent/tsconfig.json
+  - packages/database/src/index.ts
+  - docs/discuss/2026-08-14-alignment.md
+  - packages/course/src/index.ts
+  - packages/auth/src/auth.ts
+  - packages/payments/src/constants.ts
+  - packages/ui/tsconfig.json
+  - packages/database/tsconfig.json
+  - packages/payments/src/credentials.ts
+  - apps/saas/next.config.ts
+  - pnpm-workspace.yaml
+  - apps/saas/app/course/kit-claim-panel.tsx
+  - packages/database/prisma/migrations/migration_lock.toml
+  - apps/saas/lib/orders.ts
+  - packages/database/prisma/schema.prisma
+  - apps/saas/vercel.json
+  - apps/saas/app/api/payuni/return/route.ts
+  - packages/course/package.json
+  - packages/course/src/line-invite.ts
+  - apps/saas/app/api/demo/grant-course/route.ts
+  - apps/saas/.env.example
+  - apps/saas/app/api/orders/refund/route.ts
+  - apps/saas/app/api/payuni/notify/route.ts
+  - packages/github-kit/src/types.ts
+  - packages/github-kit/src/config.ts
+  - apps/saas/app/api/community/line-invite/route.ts
+  - packages/payments/src/order.ts
+  - tooling/typescript/base.json
+  - packages/auth/src/providers.ts
+  - packages/github-kit/package.json
+  - packages/database/prisma/migrations/20260815020000_add_github_kit_grants/migration.sql
+  - docs/discuss/architecture-draft.md
+  - vitest.config.ts
+  - apps/saas/app/checkout/checkout-button.tsx
+  - apps/saas/app/api/github/claim-status/route.ts
+  - apps/saas/app/not-found.tsx
+  - apps/saas/app/course/[lessonId]/page.tsx
+  - packages/course/src/catalog.ts
+  - packages/payments/src/provider/payuni/gateway.ts
+  - packages/auth/package.json
+  - turbo.json
+  - apps/saas/app/checkout/page.tsx
+  - apps/saas/app/course/demo-grant-button.tsx
+  - packages/github-kit/tsconfig.json
+  - apps/saas/app/api/auth/[...all]/route.ts
+  - packages/auth/src/test-auth.ts
+  - packages/site-agent/package.json
+  - apps/saas/app/page.tsx
+  - apps/saas/lib/course-access.ts
+  - packages/github-kit/src/index.ts
+  - packages/i18n/package.json
+  - packages/site-agent/src/types.ts
+  - apps/saas/app/api/course/lessons/route.ts
+  - packages/utils/package.json
+  - apps/saas/app/api/checkout/route.ts
+  - apps/saas/package.json
+  - vercel.json
+  - docs/autonomous-apply-loop.md
+  - tsconfig.json
+  - apps/saas/app/app/page.tsx
+  - apps/saas/app/checkout/payuni/page.tsx
+  - packages/ui/src/index.tsx
+  - apps/saas/app/course/page.tsx
+  - apps/saas/next-env.d.ts
+  - packages/site-agent/src/provider.ts
+  - packages/ui/package.json
+  - apps/saas/app/api/github/claim/route.ts
+  - packages/auth/tsconfig.json
+  - apps/saas/tsconfig.json
+  - apps/saas/app/layout.tsx
+  - apps/saas/app/agent/page.tsx
+  - package.json
+  - docs/deploy-and-public-url.md
+  - packages/auth/src/index.ts
+  - packages/course/src/access.ts
+  - packages/database/package.json
+  - docs/discuss/extract-map.md
+  - docs/discuss/2026-08-14-thetu-source.md
+  - packages/i18n/tsconfig.json
+  - packages/payments/package.json
+  - README.md
+  - packages/github-kit/src/github-app-client.ts
+  - apps/saas/app/api/agent/chat/route.ts
+  - apps/saas/app/signup/page.tsx
+  - packages/payments/src/checkout.ts
+  - packages/utils/src/index.ts
+  - docs/discuss/payment-and-deploy.md
+  - packages/payments/src/factory.ts
+  - packages/payments/src/provider/payuni/crypto.ts
+  - AGENTS.md
+  - apps/saas/app/login/page.tsx
+  - docs/discuss/v1-boundary.md
+  - docs/discuss/README.md
+  - packages/payments/src/notify.ts
+  - packages/course/src/playback.ts
+  - apps/saas/app/login/login-form.tsx
+  - packages/site-agent/src/tools.ts
+  - apps/saas/app/app/sign-out-button.tsx
+  - apps/saas/app/agent/agent-chat-client.tsx
+  - apps/saas/app/course/line-community-panel.tsx
+  - apps/saas/lib/demo-grant.ts
+  - packages/course/tsconfig.json
+  - packages/payments/src/memory-store.ts
+  - packages/payments/src/refund.ts
+  - packages/github-kit/src/revoke.ts
+  - apps/saas/app/checkout/result/page.tsx
+  - packages/github-kit/src/claim.ts
+  - apps/saas/app/globals.css
+  - apps/saas/lib/agent-data.ts
+  - packages/utils/tsconfig.json
+  - packages/site-agent/src/chat.ts
+  - packages/payments/src/index.ts
+  - packages/database/prisma/migrations/20260814160938_init/migration.sql
+  - tooling/typescript/package.json
+  - apps/saas/lib/github-kit.ts
+tests:
+  - packages/payments/src/notify.test.ts
+  - packages/payments/src/order.test.ts
+  - packages/payments/src/checkout.test.ts
+  - packages/payments/src/crypto.test.ts
+  - packages/course/src/playback.test.ts
+  - packages/payments/src/session-failclosed.test.ts
+  - packages/github-kit/src/claim.test.ts
+  - packages/payments/src/factory.test.ts
+  - packages/payments/src/refund.test.ts
+  - packages/course/src/catalog.test.ts
+  - packages/payments/src/credentials.test.ts
+  - packages/auth/src/auth.test.ts
+  - packages/course/src/line-invite.test.ts
+  - packages/github-kit/src/config.test.ts
+  - packages/site-agent/src/chat.test.ts
+  - packages/github-kit/src/revoke.test.ts
+  - packages/course/src/access.test.ts
+-->
+
+---
+### Requirement: Public HTTPS base URL documented for OAuth
+Documentation SHALL record the TEST public HTTPS base URL used for `BETTER_AUTH_URL` and OAuth callback examples. Cloudflare Tunnel to localhost MUST NOT be documented as the primary TEST path.
+
+#### Scenario: Docs name the TEST HTTPS origin
+- **WHEN** an operator opens `docs/deploy-and-public-url.md` after this change
+- **THEN** the document MUST include the TEST HTTPS origin (or explicit pending placeholder) and MUST keep Tunnel marked as retired for primary OAuth testing
+
+<!-- @trace
+source: bootstrap-test-startkiter
+updated: 2026-08-15
+code:
+  - packages/i18n/src/index.ts
+  - packages/database/prisma/migrations/20260815010000_add_order/migration.sql
+  - packages/site-agent/src/index.ts
+  - packages/site-agent/tsconfig.json
+  - packages/database/src/index.ts
+  - docs/discuss/2026-08-14-alignment.md
+  - packages/course/src/index.ts
+  - packages/auth/src/auth.ts
+  - packages/payments/src/constants.ts
+  - packages/ui/tsconfig.json
+  - packages/database/tsconfig.json
+  - packages/payments/src/credentials.ts
+  - apps/saas/next.config.ts
+  - pnpm-workspace.yaml
+  - apps/saas/app/course/kit-claim-panel.tsx
+  - packages/database/prisma/migrations/migration_lock.toml
+  - apps/saas/lib/orders.ts
+  - packages/database/prisma/schema.prisma
+  - apps/saas/vercel.json
+  - apps/saas/app/api/payuni/return/route.ts
+  - packages/course/package.json
+  - packages/course/src/line-invite.ts
+  - apps/saas/app/api/demo/grant-course/route.ts
+  - apps/saas/.env.example
+  - apps/saas/app/api/orders/refund/route.ts
+  - apps/saas/app/api/payuni/notify/route.ts
+  - packages/github-kit/src/types.ts
+  - packages/github-kit/src/config.ts
+  - apps/saas/app/api/community/line-invite/route.ts
+  - packages/payments/src/order.ts
+  - tooling/typescript/base.json
+  - packages/auth/src/providers.ts
+  - packages/github-kit/package.json
+  - packages/database/prisma/migrations/20260815020000_add_github_kit_grants/migration.sql
+  - docs/discuss/architecture-draft.md
+  - vitest.config.ts
+  - apps/saas/app/checkout/checkout-button.tsx
+  - apps/saas/app/api/github/claim-status/route.ts
+  - apps/saas/app/not-found.tsx
+  - apps/saas/app/course/[lessonId]/page.tsx
+  - packages/course/src/catalog.ts
+  - packages/payments/src/provider/payuni/gateway.ts
+  - packages/auth/package.json
+  - turbo.json
+  - apps/saas/app/checkout/page.tsx
+  - apps/saas/app/course/demo-grant-button.tsx
+  - packages/github-kit/tsconfig.json
+  - apps/saas/app/api/auth/[...all]/route.ts
+  - packages/auth/src/test-auth.ts
+  - packages/site-agent/package.json
+  - apps/saas/app/page.tsx
+  - apps/saas/lib/course-access.ts
+  - packages/github-kit/src/index.ts
+  - packages/i18n/package.json
+  - packages/site-agent/src/types.ts
+  - apps/saas/app/api/course/lessons/route.ts
+  - packages/utils/package.json
+  - apps/saas/app/api/checkout/route.ts
+  - apps/saas/package.json
+  - vercel.json
+  - docs/autonomous-apply-loop.md
+  - tsconfig.json
+  - apps/saas/app/app/page.tsx
+  - apps/saas/app/checkout/payuni/page.tsx
+  - packages/ui/src/index.tsx
+  - apps/saas/app/course/page.tsx
+  - apps/saas/next-env.d.ts
+  - packages/site-agent/src/provider.ts
+  - packages/ui/package.json
+  - apps/saas/app/api/github/claim/route.ts
+  - packages/auth/tsconfig.json
+  - apps/saas/tsconfig.json
+  - apps/saas/app/layout.tsx
+  - apps/saas/app/agent/page.tsx
+  - package.json
+  - docs/deploy-and-public-url.md
+  - packages/auth/src/index.ts
+  - packages/course/src/access.ts
+  - packages/database/package.json
+  - docs/discuss/extract-map.md
+  - docs/discuss/2026-08-14-thetu-source.md
+  - packages/i18n/tsconfig.json
+  - packages/payments/package.json
+  - README.md
+  - packages/github-kit/src/github-app-client.ts
+  - apps/saas/app/api/agent/chat/route.ts
+  - apps/saas/app/signup/page.tsx
+  - packages/payments/src/checkout.ts
+  - packages/utils/src/index.ts
+  - docs/discuss/payment-and-deploy.md
+  - packages/payments/src/factory.ts
+  - packages/payments/src/provider/payuni/crypto.ts
+  - AGENTS.md
+  - apps/saas/app/login/page.tsx
+  - docs/discuss/v1-boundary.md
+  - docs/discuss/README.md
+  - packages/payments/src/notify.ts
+  - packages/course/src/playback.ts
+  - apps/saas/app/login/login-form.tsx
+  - packages/site-agent/src/tools.ts
+  - apps/saas/app/app/sign-out-button.tsx
+  - apps/saas/app/agent/agent-chat-client.tsx
+  - apps/saas/app/course/line-community-panel.tsx
+  - apps/saas/lib/demo-grant.ts
+  - packages/course/tsconfig.json
+  - packages/payments/src/memory-store.ts
+  - packages/payments/src/refund.ts
+  - packages/github-kit/src/revoke.ts
+  - apps/saas/app/checkout/result/page.tsx
+  - packages/github-kit/src/claim.ts
+  - apps/saas/app/globals.css
+  - apps/saas/lib/agent-data.ts
+  - packages/utils/tsconfig.json
+  - packages/site-agent/src/chat.ts
+  - packages/payments/src/index.ts
+  - packages/database/prisma/migrations/20260814160938_init/migration.sql
+  - tooling/typescript/package.json
+  - apps/saas/lib/github-kit.ts
+tests:
+  - packages/payments/src/notify.test.ts
+  - packages/payments/src/order.test.ts
+  - packages/payments/src/checkout.test.ts
+  - packages/payments/src/crypto.test.ts
+  - packages/course/src/playback.test.ts
+  - packages/payments/src/session-failclosed.test.ts
+  - packages/github-kit/src/claim.test.ts
+  - packages/payments/src/factory.test.ts
+  - packages/payments/src/refund.test.ts
+  - packages/course/src/catalog.test.ts
+  - packages/payments/src/credentials.test.ts
+  - packages/auth/src/auth.test.ts
+  - packages/course/src/line-invite.test.ts
+  - packages/github-kit/src/config.test.ts
+  - packages/site-agent/src/chat.test.ts
+  - packages/github-kit/src/revoke.test.ts
+  - packages/course/src/access.test.ts
+-->
