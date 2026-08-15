@@ -10,7 +10,7 @@
 
 • 本機開發目錄：`products/startkiter`（Spectra 施工、本機改碼；可同步進 TEST）
 
-• TEST 倉庫：`test-startkiter`（命名規則 `test-<專案名>`）。Private。專門邊裝邊測、托管部署（Vercel／可選 Cloudflare 或 VPS）+ 雲端 DB。會髒：測試帳號、測試圖、安裝雜物、**我們公司自己的 Landing／文章／營運內容**都可以待在這裡。用戶看不到這個倉庫。目前 Vercel 以 CLI 部署為準；Git push 自動部署待 Login Connection。
+• TEST 倉庫：`test-startkiter`（命名規則 `test-<專案名>`）。Private。專門邊裝邊測、托管部署（Vercel／可選 Cloudflare 或 VPS）+ 雲端 DB。會髒：測試帳號、測試圖、安裝雜物、**我們公司自己的 Landing／文章／營運內容**都可以待在這裡。用戶看不到這個倉庫。Git push `test` remote 的 `main` → Vercel 自動部署（已於 2026-08-15 接通 Login Connection；CLI `vercel deploy` 僅作備援）。
 
 • 正式倉庫（乾淨安裝包）：從 TEST 把**乾淨的東西拉出來**另成一個 Private（或之後給客戶的）倉庫。對標 `/Users/fishtv/Development/supastarter-nextjs-main` 那種乾淨度——單純安裝包：殼、前端頁面骨架、資料庫 schema／必要 seed。**不要**塞架站維運雜訊、**不要**塞我們公司資訊、**不要**塞 Landing 文章頁這類營運內容。這才是未來給客戶、並持續迭代更新的本體。
 

@@ -7,6 +7,7 @@ import {
 	createPendingOrderForUser,
 	loadPayUniCredentials,
 } from "../../../lib/orders";
+import { resolvePublicBaseUrl } from "../../../lib/public-base-url";
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
 		}
 	}
 
-	const baseUrl = process.env.BETTER_AUTH_URL?.trim();
+	const baseUrl = resolvePublicBaseUrl(process.env.BETTER_AUTH_URL);
 	if (!baseUrl) {
 		return NextResponse.json({ error: "public_base_url_required" }, { status: 503 });
 	}
