@@ -31,7 +31,7 @@ export default async function LessonPage({ params }: PageProps) {
 	if (decision.status === "forbidden") {
 		return (
 			<main>
-			<SiteNav signedIn email={session.user.email} hasPurchase={entitled} />
+				<SiteNav signedIn email={session.user.email} hasPurchase={entitled} />
 				<section className="panel">
 					<h1>這堂課還不能看</h1>
 					<p>需要先購買開站包。若已退款，課程也會重新鎖住。</p>
@@ -54,7 +54,7 @@ export default async function LessonPage({ params }: PageProps) {
 
 	return (
 		<main>
-			<SiteNav signedIn email={session.user.email} />
+			<SiteNav signedIn email={session.user.email} hasPurchase={entitled} />
 			<section className="panel">
 				<p className="muted">
 					<Link href="/course">← 全部課程</Link>
