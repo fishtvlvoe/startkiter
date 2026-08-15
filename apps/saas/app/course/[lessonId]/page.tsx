@@ -5,6 +5,7 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@startkiter/auth";
 import { decideLessonPlayback, getLesson } from "@startkiter/course";
 
+import { SiteNav } from "../../components/site-nav";
 import { userHasCourseAccess } from "../../../lib/course-access";
 
 type PageProps = {
@@ -30,15 +31,16 @@ export default async function LessonPage({ params }: PageProps) {
 	if (decision.status === "forbidden") {
 		return (
 			<main>
+				<SiteNav signedIn email={session.user.email} />
 				<section className="panel">
-					<h1>無法播放</h1>
-					<p>沒有課程權限（HTTP 403）。退款後也會走這條路。</p>
+					<h1>這堂課還不能看</h1>
+					<p>需要先購買開站包。若已退款，課程也會重新鎖住。</p>
 					<div className="actions">
-						<Link className="button secondary" href="/course">
-							回課程列表
-						</Link>
 						<Link className="button" href="/checkout">
 							去購買
+						</Link>
+						<Link className="button secondary" href="/course">
+							回課程列表
 						</Link>
 					</div>
 				</section>
@@ -52,21 +54,14 @@ export default async function LessonPage({ params }: PageProps) {
 
 	return (
 		<main>
-			<nav className="nav" aria-label="主要導覽">
-				<strong>
-					<Link href="/course">← 課程</Link>
-				</strong>
-			</nav>
+			<SiteNav signedIn email={session.user.email} />
 			<section className="panel">
+				<p className="muted">
+					<Link href="/course">← 全部課程</Link>
+				</p>
 				<h1>{lesson.title}</h1>
 				<p className="muted">{lesson.description}</p>
-				<video
-					className="lesson-player"
-					controls
-					playsInline
-					preload="metadata"
-					src={lesson.mediaUrl}
-				>
+				<video className="lesson-player" controls playsInline preload="metadata" src={lesson.mediaUrl}>
 					你的瀏覽器不支援影片播放。
 				</video>
 			</section>

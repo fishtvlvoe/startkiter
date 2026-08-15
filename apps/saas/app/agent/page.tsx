@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { auth } from "@startkiter/auth";
 
+import { SiteNav } from "../components/site-nav";
 import { AgentChatClient } from "./agent-chat-client";
 
 export default async function AgentPage() {
@@ -14,15 +14,7 @@ export default async function AgentPage() {
 
 	return (
 		<main>
-			<nav className="nav" aria-label="主要導覽">
-				<strong>
-					<Link href="/">開站包</Link>
-				</strong>
-				<div className="nav-links">
-					<Link href="/course">課程</Link>
-					<span className="muted">{session.user.email}</span>
-				</div>
-			</nav>
+			<SiteNav signedIn email={session.user.email} />
 			<AgentChatClient />
 		</main>
 	);

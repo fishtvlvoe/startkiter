@@ -92,6 +92,8 @@ Coolify 仍是維運層選項（常駐 Node、固定 IP 利於 PAYUNi webhook）
 • 測試站 HTTPS origin：`https://startkiter.aiver.me`（主；`BETTER_AUTH_URL` 已對這個）。備援：`https://test-startkiter.vercel.app`
 • DNS：`startkiter.aiver.me` CNAME → `cname.vercel-dns.com`（Cloudflare DNS only，已從 Tunnel 改過來）
 • 登入：先走 email／password；Google／LINE callback 暫未加，Production 先拿掉社群 key 免按鈕壞掉
+• 賣流 UX：`mvp-sell-flow-usable` 施工中（DESIGN token、導覽含助手、去工程文案）
+• 仍卡老闆：`GITHUB_KIT_ORG`／`GITHUB_KIT_REPO`／完整 PEM、`LINE_COMMUNITY_INVITE_URL`、社群 OAuth callback
 
 • OAuth callback 範例（之後填各 provider）：`https://test-startkiter.vercel.app/api/auth/callback/google`、`https://test-startkiter.vercel.app/api/auth/callback/line`、`https://test-startkiter.vercel.app/api/auth/callback/github`
 

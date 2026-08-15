@@ -1,9 +1,9 @@
 import { auth } from "@startkiter/auth";
-import { messages } from "@startkiter/i18n";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { SiteNav } from "../components/site-nav";
 import { CheckoutButton } from "./checkout-button";
 
 export default async function CheckoutPage() {
@@ -14,17 +14,19 @@ export default async function CheckoutPage() {
 
 	return (
 		<main>
-			<nav className="nav" aria-label="主要導覽">
-				<strong>{messages.brand}</strong>
-				<div className="nav-links">
-					<Link href="/app">帳號</Link>
+			<SiteNav signedIn email={session.user.email} />
+			<section className="panel stack">
+				<div>
+					<h1>購買開站包</h1>
+					<p>課 + 終身代碼包，一次買斷 NT$8,800。付款走 PAYUNi。</p>
 				</div>
-			</nav>
-			<section className="panel">
-				<p className="muted">單一 SKU · startkiter-mvp</p>
-				<h1>結帳</h1>
-				<p>課 + 終身代碼包，一次買斷 NT$8,800（TWD）。主金流 PAYUNi。</p>
+				<div className="callout">
+					<p style={{ margin: 0 }}>付完款即可看課。代碼包要再到課程頁綁定 GitHub 後領取。</p>
+				</div>
 				<CheckoutButton />
+				<p className="muted">
+					想先逛逛？ <Link href="/course">回課程</Link>
+				</p>
 			</section>
 		</main>
 	);

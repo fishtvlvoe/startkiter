@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 
 export function LineCommunityPanel() {
 	const [inviteUrl, setInviteUrl] = useState<string | null>(null);
-	const [error, setError] = useState<string | null>(null);
+	const [unavailable, setUnavailable] = useState(false);
+	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
 		void (async () => {
@@ -12,34 +13,36 @@ export function LineCommunityPanel() {
 				const res = await fetch("/api/community/line-invite", { cache: "no-store" });
 				const body = (await res.json()) as { inviteUrl?: string; error?: string };
 				if (!res.ok) {
-					setError(body.error ?? `無法取得邀請（${res.status}）`);
+					setUnavailable(true);
 					setInviteUrl(null);
 					return;
 				}
 				setInviteUrl(body.inviteUrl ?? null);
-				setError(null);
+				setUnavailable(false);
 			} catch {
-				setError("讀取邀請失敗");
+				setUnavailable(true);
 				setInviteUrl(null);
+			} finally {
+				setLoading(false);
 			}
 		})();
 	}, []);
 
 	return (
-		<section className="panel" style={{ marginTop: "1.5rem" }}>
+		<section className="panel">
 			<h2>學員 LINE 交流群</h2>
-			<p className="muted">
-				這是付費學員的同儕討論群，不是客服。客服請用 email。系統不會幫你靜默入群，要自己點連結加入。
-			</p>
-			{inviteUrl ? (
+			<p className="muted">付費學員的同儕討論，不是客服。客服請用 email。系統不會幫你自動入群。</p>
+			{loading ? <p className="muted">讀取邀請中…</p> : null}
+			{!loading && inviteUrl ? (
 				<div className="actions">
 					<a className="button" href={inviteUrl} target="_blank" rel="noreferrer">
 						加入學員 LINE 交流群
 					</a>
 				</div>
-			) : (
-				<p className="muted">{error ?? "讀取邀請中…"}</p>
-			)}
+			) : null}
+			{!loading && unavailable ? (
+				<p className="muted">交流群邀請尚未開放。站方補上邀請連結後，這裡會出現加入按鈕。</p>
+			) : null}
 		</section>
 	);
 }
