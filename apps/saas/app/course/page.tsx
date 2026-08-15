@@ -11,6 +11,8 @@ import { DemoGrantButton } from "./demo-grant-button";
 import { KitClaimPanel } from "./kit-claim-panel";
 import { LineCommunityPanel } from "./line-community-panel";
 
+export const dynamic = "force-dynamic";
+
 export default async function CourseIndexPage() {
 	const session = await auth.api.getSession({ headers: await headers() });
 	if (!session) {

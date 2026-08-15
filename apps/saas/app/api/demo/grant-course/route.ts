@@ -1,4 +1,5 @@
 import { auth } from "@startkiter/auth";
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 
 import { grantDemoCourseAccess } from "../../../../lib/demo-grant";
@@ -16,6 +17,10 @@ export async function POST(request: Request) {
 
 	try {
 		const order = await grantDemoCourseAccess(session.user.id);
+		revalidatePath("/course");
+		revalidatePath("/app");
+		revalidatePath("/agent");
+		revalidatePath("/checkout");
 		return NextResponse.json({
 			ok: true,
 			orderNo: order.orderNo,
