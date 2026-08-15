@@ -11,4 +11,4 @@
 ## 3. Docs and close-out
 
 - [x] 3.1 更新 docs/deploy-and-public-url.md：repo URL、Vercel、DB、HTTPS origin／pending、OAuth callback 範例；Tunnel 維持廢案。對應 Requirement: Public HTTPS base URL documented for OAuth。驗證：文件可回答四件事（repo、Vercel、DB、HTTPS／OAuth）。 [Tool: sonnet]
-- [ ] 3.2 更新 AGENTS.md／config 指針；Claude OK＋Codex 無 Critical 後 archive。驗證：CLI＋代理結論。 [Tool: sonnet]
+- [x] 3.2 更新 AGENTS.md／config 指針；Claude OK＋Codex 無 Critical 後 archive。驗證：CLI＋代理結論。 [Tool: sonnet]

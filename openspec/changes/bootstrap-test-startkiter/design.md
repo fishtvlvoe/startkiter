@@ -1,6 +1,6 @@
 ## Context
 
-兩倉模型已定稿。本機 `products/startkiter` 對應 GitHub `fishtvlvoe/startkiter`；TEST 面要另開 `test-startkiter` Private，push 觸發 Vercel，接雲端 DB。Tunnel 已廢。
+兩倉模型已定稿。本機 `products/startkiter` 對應 GitHub `fishtvlvoe/startkiter`；TEST 面另開 `test-startkiter` Private，接 Vercel＋雲端 DB。Git push 自動部署待 Vercel GitHub Login Connection；在那之前用 `vercel deploy --prod`。Tunnel 已廢。
 
 ## Goals / Non-Goals
 
