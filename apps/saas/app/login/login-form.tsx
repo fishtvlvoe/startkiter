@@ -9,7 +9,13 @@ function safeNextPath(next: string | undefined) {
 		return "/course";
 	}
 
-	const trimmed = next.trim();
+	let trimmed = next.trim();
+	try {
+		trimmed = decodeURIComponent(trimmed);
+	} catch {
+		return "/course";
+	}
+
 	if (
 		!trimmed.startsWith("/") ||
 		trimmed.startsWith("//") ||
@@ -23,6 +29,9 @@ function safeNextPath(next: string | undefined) {
 	try {
 		const url = new URL(trimmed, "https://startkiter.aiver.me");
 		if (url.origin !== "https://startkiter.aiver.me") {
+			return "/course";
+		}
+		if (url.pathname.includes("\\") || url.username || url.password) {
 			return "/course";
 		}
 		return `${url.pathname}${url.search}${url.hash}` || "/course";
