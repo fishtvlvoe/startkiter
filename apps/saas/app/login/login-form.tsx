@@ -5,10 +5,30 @@ import { useState } from "react";
 type AuthMode = "sign-in" | "sign-up";
 
 function safeNextPath(next: string | undefined) {
-	if (!next || !next.startsWith("/") || next.startsWith("//")) {
+	if (!next) {
 		return "/course";
 	}
-	return next;
+
+	const trimmed = next.trim();
+	if (
+		!trimmed.startsWith("/") ||
+		trimmed.startsWith("//") ||
+		trimmed.includes("\\") ||
+		trimmed.includes("://") ||
+		/[\u0000-\u001f]/.test(trimmed)
+	) {
+		return "/course";
+	}
+
+	try {
+		const url = new URL(trimmed, "https://startkiter.aiver.me");
+		if (url.origin !== "https://startkiter.aiver.me") {
+			return "/course";
+		}
+		return `${url.pathname}${url.search}${url.hash}` || "/course";
+	} catch {
+		return "/course";
+	}
 }
 
 export function LoginForm({
