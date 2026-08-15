@@ -89,7 +89,9 @@ Coolify 仍是維運層選項（常駐 Node、固定 IP 利於 PAYUNi webhook）
 
 • Vercel 專案：`fishtvs-projects/test-startkiter`；`rootDirectory=apps/saas`；monorepo SSOT 見根目錄 `vercel.json`，saas 鏡像見 `apps/saas/vercel.json`
 
-• 測試站 HTTPS origin：`https://test-startkiter.vercel.app`（`BETTER_AUTH_URL` 已對這個）
+• 測試站 HTTPS origin：`https://startkiter.aiver.me`（主；`BETTER_AUTH_URL` 已對這個）。備援：`https://test-startkiter.vercel.app`
+• DNS：`startkiter.aiver.me` CNAME → `cname.vercel-dns.com`（Cloudflare DNS only，已從 Tunnel 改過來）
+• 登入：先走 email／password；Google／LINE callback 暫未加，Production 先拿掉社群 key 免按鈕壞掉
 
 • OAuth callback 範例（之後填各 provider）：`https://test-startkiter.vercel.app/api/auth/callback/google`、`https://test-startkiter.vercel.app/api/auth/callback/line`、`https://test-startkiter.vercel.app/api/auth/callback/github`
 

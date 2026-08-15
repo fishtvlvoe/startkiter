@@ -76,7 +76,11 @@ export function createAuth(options: AuthFactoryOptions = {}): AuthInstance {
 
 	const auth = betterAuth({
 		baseURL,
-		trustedOrigins: [baseURL],
+		trustedOrigins: [
+			baseURL,
+			"https://startkiter.aiver.me",
+			"https://test-startkiter.vercel.app",
+		].filter((origin, index, all) => all.indexOf(origin) === index),
 		secret,
 		database,
 		advanced: {
@@ -92,7 +96,7 @@ export function createAuth(options: AuthFactoryOptions = {}): AuthInstance {
 		},
 		emailAndPassword: {
 			enabled: true,
-			autoSignIn: false,
+			autoSignIn: true,
 			minPasswordLength: 8,
 		},
 		socialProviders,
