@@ -1,6 +1,16 @@
 ▋ THE-TU 優化版看完之後
 
-狀態：confirmed（2026-08-14）
+狀態：partially superseded（2026-08-15）
+
+▋ 現行規則
+
+來源路徑觀察仍有效：抽 `THE-TU-Project/dev/thetu`，不抽 `code/` 與舊 `realms-course-platform-v1.8.0`。Simple-first、後台填金鑰、常駐 Node 仍有效。
+
+已廢：「教學主金流 SHOPLINE」「v1 一次買斷繼續 SHOPLINE」「發票進 v1 課綱」。現行 MVP 只通 PAYUNi，發票不在 MVP。見 `openspec/specs/`。
+
+---
+
+狀態（原稿）：confirmed（2026-08-14）
 
 老闆指的優化版是 `THE-TU-Project/dev/thetu`（對外叫 WooMin / Course Realms 1.8.0），不是根目錄的 `code/`（那份還停在 1.0.0）。更不是另一套 SaaS。它還是賣課系統。NextAuth。沒有 LINE Login。
 

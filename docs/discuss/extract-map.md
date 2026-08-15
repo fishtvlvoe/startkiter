@@ -1,6 +1,16 @@
 ▋ 抽取清單
 
-狀態：confirmed（2026-08-14）
+狀態：partially superseded（2026-08-15）
+
+▋ 現行規則（以 openspec/specs 為準）
+
+檔案路徑對照仍可當清單用。下列施工預設已廢：SHOPLINE 當 v1 主閘道、發票進 MVP、課綱「前後台 → Google → LINE → SHOPLINE → 發票」、建議順序「再搬 SHOPLINE」。
+
+現行 MVP：只接通 PAYUNi；Shopline／Stripe 可留空位但不接線不上課；發票不在 MVP；殼與登入已由 `extract-shell-auth` 落地。下一張 extract 白名單寫在新 change 的 proposal，不直接照抄本篇舊順序。
+
+---
+
+狀態（原稿）：confirmed（2026-08-14）— 金流預設與課綱順序已廢
 
 台灣金流／發票來源改為 `THE-TU-Project/dev/thetu`（WooMin 1.8.0 優化版）。不要抽 `THE-TU-Project/code`（1.0.0），也不要再抽舊副本 `realms-course-platform-v1.8.0`。supastarter 來源不變。目標 repo：`products/startkiter`。
 
@@ -316,15 +326,17 @@ Email 可能空（id_token 沒開 email）。要有後備，不要假設一定�
 
 漏 LINE = v1 沒做完。自己重寫 OAuth client = 做錯。
 
-【建議施工順序（仍不是寫碼日）】
+【建議施工順序】
 
-先複製精簡後的 apps/saas 殼 + Better Auth（Email + Google），zh-TW。
+殼 + Better Auth（Email／Google／LINE）已由 `extract-shell-auth` 完成。
 
-再搬 SHOPLINE 閘道 + Order 表 + notify/return。
+下一張（現行）：PAYUNi 閘道 + Order 表 + notify／return；結帳鎖 8800；沒金鑰 fail-closed。
 
-再搬 invoice 包，接到 PAID hook。
+其後：課程模組（認 paid）、GitHub kit 履約、LINE 學員邀請連結、site-agent 兩支唯讀工具。
 
-最後加 LINE。不要先做 LINE 再做金流，課的失敗點會疊在一起。
+發票包不進 MVP。Shopline／Stripe 不接線不上課。
+
+（原稿順序「再搬 SHOPLINE → invoice → 最後 LINE」已廢。）
 
 【對這份清單的挑戰】
 

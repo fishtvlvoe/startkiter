@@ -1,6 +1,16 @@
 ▋ 架構 draft：這包怎麼運作
 
-狀態：repo 已建（2026-08-14）。獨立 git 在 `products/startkiter`。討論稿副本在 `docs/discuss/`。施工單只准開在這個 repo 的 `openspec/changes/`，不准開在 Development 根目錄。
+狀態：partially superseded（2026-08-15）
+
+▋ 現行規則
+
+產品 SSOT：`openspec/specs/`。主金流 PAYUNi only；發票不在 MVP；Shopline 不上課。站殼與登入已落地。下文含 SHOPLINE／發票預設的圖與段落是早期草稿，僅供對照。
+
+仍有效：獨立 repo、施工單只開在本 repo `openspec/changes/`、不抽 Organization、LINE 只做 Login Channel、部署常駐 Node。
+
+---
+
+狀態（原稿）：repo 已建（2026-08-14）。獨立 git 在 `products/startkiter`。討論稿副本在 `docs/discuss/`。施工單只准開在這個 repo 的 `openspec/changes/`，不准開在 Development 根目錄。
 
 【要不要另找 agent 寫計畫】
 

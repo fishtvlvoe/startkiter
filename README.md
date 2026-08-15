@@ -1,6 +1,6 @@
 ▋ StartKiter
 
-給台灣已在用 AI 做服務的人：一堂課 + 終身代碼包。對外課名可用「開站包」。現行產品定義以 `mvp-test-scope` 為準。
+給台灣已在用 AI 做服務的人：一堂課 + 終身代碼包。對外課名可用「開站包」。現行產品定義以 `openspec/specs/` 為準。
 
 MVP 是用這包自己的站賣課。課程是課程模組，不是整站唯一長相。結帳鎖 NT$8800，主金流只接通 PAYUNi 一次買斷。付款後在站內領取代碼：GitHub 登入，系統邀請組織私人倉庫只讀。課程裡有 LINE 學員交流群加入連結（付費才看得到）。客服走 email，不進這個群。
 
@@ -8,7 +8,7 @@ MVP 是用這包自己的站賣課。課程是課程模組，不是整站唯一�
 
 【現在這 repo 有什麼】
 
-Git。Spectra（`openspec/`）。架構討論稿（`docs/discuss/`）。還沒抽 Next.js 應用程式碼。本 change 只落地規格，下一張 extract 才搬代碼。
+Git、Spectra（`openspec/`）、架構討論稿（`docs/discuss/`），以及已落地的站殼、登入、PAYUNi／Order、課程模組（`extract-shell-auth`、`extract-payuni-checkout`、`extract-course-module` 已封存）。兩倉／晉升規則已封存為 `test-clean-package-promotion`。現行施工 `extract-github-kit-fulfillment`（`packages/github-kit`＋claim API；站內領 GitHub 代碼包）。site-agent、LINE 學員社群仍是後續 change。
 
 【來源（只讀）】
 
@@ -42,7 +42,7 @@ LINE Login Channel 做登入。學員社群是邀請連結，不能靜默入群�
 
 【已廢（不是現行規則）】
 
-「不是賣課平台」「四堂課對 SHOPLINE」「主金流 SHOPLINE」已廢。細節看 `docs/discuss/v1-boundary.md` 開頭的取代聲明。
+「不是賣課平台」「四堂課對 SHOPLINE」「主金流 SHOPLINE」「發票在 MVP」已廢。細節看 `docs/discuss/README.md` 與各篇開頭的取代聲明。
 
 【網域】
 
@@ -50,4 +50,4 @@ LINE Login Channel 做登入。學員社群是邀請連結，不能靜默入群�
 
 【下一步】
 
-對「抽殼＋PAYUNi＋課程模組＋GitHub 履約」開 extract change，再開始搬代碼。不要在 Development 根目錄開施工單。不要改來源 repo。
+對齊文件後，施工 `extract-github-kit-fulfillment`（`/spectra-apply extract-github-kit-fulfillment`）。不要在 Development 根目錄開施工單。不要改來源 repo。產品衝突以 `openspec/specs/` 為準，不以 `docs/discuss/` 舊稿為準。

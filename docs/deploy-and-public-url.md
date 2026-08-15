@@ -1,0 +1,132 @@
+# StartKiter 部署與測試站結構（SSOT 備忘）
+
+這份只做紀錄，不當期功能單。結構對齊日：2026-08-15。
+
+▋ 一句話
+
+邊裝邊測用髒的測試站；測完再複製成乾淨正式站。OAuth／整合測走測試站公網 HTTPS，不走本機 Tunnel。
+
+▋ 三個倉庫／兩層站（不要混）
+
+• 本機開發目錄：`products/startkiter`（Spectra 施工、本機改碼；可同步進 TEST）
+
+• TEST 倉庫：`test-startkiter`（命名規則 `test-<專案名>`）。Private。專門邊裝邊測、自動部署（Vercel／可選 Cloudflare 或 VPS）+ 雲端 DB。會髒：測試帳號、測試圖、安裝雜物、**我們公司自己的 Landing／文章／營運內容**都可以待在這裡。用戶看不到這個倉庫。
+
+• 正式倉庫（乾淨安裝包）：從 TEST 把**乾淨的東西拉出來**另成一個 Private（或之後給客戶的）倉庫。對標 `/Users/fishtv/Development/supastarter-nextjs-main` 那種乾淨度——單純安裝包：殼、前端頁面骨架、資料庫 schema／必要 seed。**不要**塞架站維運雜訊、**不要**塞我們公司資訊、**不要**塞 Landing 文章頁這類營運內容。這才是未來給客戶、並持續迭代更新的本體。
+
+• 學員終身代碼包：付費後 GitHub App 邀的 kit repo。跟 TEST／正式安裝包都無關。
+
+一句話：TEST＝我們自己邊裝邊修的髒站；正式倉庫＝給客戶的乾淨安裝包（像當初買的 supastarter），不是把髒 repo 改名上線。
+
+▋ 為什麼要分開測／正式
+
+建置過程會堆測試帳號、測試圖、安裝工具、實驗程式。這些不該進正式倉庫與正式 DB。正式上線要像「剛裝好的乾淨殼」，不是開發垃圾場。
+
+▋ 流程（文字）
+
+1. 建 `test-startkiter` → 接 Vercel（與／或 Cloudflare／VPS）→ 接雲端 DB → 設 OAuth callback 到測試站網址。
+
+2. 在測試站把學生會踩的安裝／部署／登入／金流／領 kit 跑一遍，邊修邊推。
+
+3. 確認功能與課綱內容都穩 → 複製成正式 repo／正式網域／乾淨 DB。
+
+4. 本機 `localhost` 仍可開發；對外 OAuth、webhook、真機整合以測試站為準。
+
+▋ 圖解
+
+```text
+本機 products/startkiter
+        │
+        ▼
+ GitHub: test-startkiter（Private，用戶看不到）
+   髒：測帳號、測圖、公司 Landing／文章、安裝雜物
+        │  push → Vercel／可選 CF‧VPS + 雲端 DB
+        │
+        │  從裡面「只拉乾淨的」出來
+        ▼
+ GitHub: 正式倉庫＝乾淨安裝包（對標 supastarter）
+   有：殼、前端骨架、DB schema
+   無：架站雜訊、公司資訊、Landing 文章營運頁
+        │
+        └── 給客戶／持續迭代的本體
+
+旁支：學員 kit repo（付費履約）── 無關
+```
+
+```mermaid
+flowchart TD
+  local["本機 products/startkiter"]
+  testRepo["TEST: test-startkiter<br/>Private 髒站"]
+  cleanRepo["正式倉庫：乾淨安裝包<br/>對標 supastarter"]
+  kit["學員 kit repo"]
+
+  local --> testRepo
+  testRepo -->|"只拉乾淨程式／骨架／schema"| cleanRepo
+  local -.-> kit
+```
+
+▋ 已廢：Cloudflare Tunnel 當對外測入口
+
+以下為 2026-08-15 早先嘗試，**不再當 OAuth／整合測試主路徑**：
+
+• 曾設：`https://startkiter.aiver.me` → Tunnel → 本機 `127.0.0.1:3000`
+
+• Tunnel ID：`e3a0f3ba-e04d-4633-a52d-f103e8540804`（本機 `~/.cloudflared/startkiter.yml` 仍可能存在，可之後清）
+
+• 誤建過 `startkiter.aiver.me.buygo.me`（buygo zone）；Dashboard 看到可刪
+
+理由：邊裝邊部署需要真實托管環境（Vercel／VPS／CF）與雲端 DB，Tunnel 只是把本機捅出去，測不到學生會遇到的部署問題。
+
+▋ Coolify／VPS（之後）
+
+Coolify 仍是維運層選項（常駐 Node、固定 IP 利於 PAYUNi webhook），掛在「測試站或正式站的托管路徑」上，不是學員產品功能。不急開 change。
+
+▋ 跟現行 Spectra 的關係
+
+• 兩倉＋晉升規則已封存為規格：`openspec/specs/test-clean-package-promotion/`（archive `2026-08-15-test-to-clean-package-promotion`）。
+
+• 現行功能單：`extract-github-kit-fulfillment`（領代碼包；分析已 OK，可寫程式）。
+
+• 建 `test-startkiter`、接 Vercel／DB＝另排，不塞進 kit fulfillment。
+
+• UI／UX 精修仍延後。
+
+▋ 晉升 checklist（TEST → 正式乾淨安裝包）
+
+可晉升（通過才准拉）：
+
+• [ ] 殼／前端骨架（無公司 Landing 文章營運頁）
+
+• [ ] 資料庫 schema 與必要 seed（無測試帳號資料）
+
+• [ ] 通用安裝包行為（對標 supastarter 乾淨度）
+
+永不可晉升：
+
+• [ ] 公司 Landing／文章／營運文案
+
+• [ ] 測試帳號、測試圖、測試媒體
+
+• [ ] 僅工寮用的安裝雜物／實驗工具
+
+• [ ] 公司專用網域、金鑰範例、內網設定
+
+• [ ] 把髒 TEST 改名或直接當客戶安裝包上線
+
+• [ ] 以 Cloudflare Tunnel→localhost 當 OAuth／整合測主路徑
+
+假設「只在 TEST 的實驗 UI」→ 依上表 = **不可晉升**，直到顯式通過 checklist。
+
+▋ Hotfix 流向
+
+• 正式乾淨安裝包**已給客戶**：先修正式包，再回灌 TEST。
+
+• 正式包**尚未發佈給客戶**：可只修 TEST，之後再晉升。
+
+▋ 漂移（drift）與節奏
+
+TEST 營運中的內容與正式安裝包**本來就可以不一樣**，直到晉升。每張功能 SR archive 後，人工檢視是否有可晉升物（checklist）；**不做**自動 sync 工具（另開 SR 再說）。
+
+▋ 溝通約定（結構類）
+
+以後這類結構／部署／流程，對焦一律用文字＋圖解寫進 docs／回覆，確認後再動手，避免老闆重複講。

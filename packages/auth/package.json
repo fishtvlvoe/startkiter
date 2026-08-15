@@ -1,0 +1,21 @@
+{
+	"name": "@startkiter/auth",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"test": "vitest run src",
+		"type-check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@better-auth/memory-adapter": "1.6.25",
+		"@startkiter/database": "workspace:*",
+		"better-auth": "1.6.25"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.0",
+		"vitest": "^4.1.10"
+	}
+}

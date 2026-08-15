@@ -1,0 +1,14 @@
+{
+	"name": "@startkiter/i18n",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"dependencies": {
+		"next-intl": "4.13.4"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.0"
+	}
+}

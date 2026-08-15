@@ -1,8 +1,20 @@
 ▋ 主金流與部署
 
-狀態：confirmed（2026-08-14）
+狀態：partially superseded（2026-08-15）
 
-【主金流：SHOPLINE】
+▋ 現行規則（以 openspec/specs 為準）
+
+MVP 主金流只接通 PAYUNi，一次買斷 TWD，結帳鎖 8800。Shopline／Stripe 不接線、不上課、不出現在結帳。發票不在 MVP。
+
+部署仍有效：常駐 Node（Zeabur 類）+ PostgreSQL + `/data` volume；預設不是 Vercel serverless。金鑰填後台、env fallback；沒設金流 fail-closed（503）。
+
+下文自「主金流：SHOPLINE」起是 2026-08-14 歷史決定，僅供對照，不是施工單。
+
+---
+
+狀態（原稿）：confirmed（2026-08-14）— 金流預設已廢
+
+【主金流：SHOPLINE】（已廢）
 
 課上一定會串的那一家是 SHOPLINE Payments。第二家 PAYUNi 留在模板裡，當進階。Stripe 可編譯進去，不當台灣小白第一條路。
 

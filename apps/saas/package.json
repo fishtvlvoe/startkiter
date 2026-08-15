@@ -1,0 +1,30 @@
+{
+	"name": "@startkiter/saas",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "next build",
+		"dev": "next dev",
+		"start": "next start",
+		"type-check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@startkiter/auth": "workspace:*",
+		"@startkiter/course": "workspace:*",
+		"@startkiter/database": "workspace:*",
+		"@startkiter/github-kit": "workspace:*",
+		"@startkiter/i18n": "workspace:*",
+		"@startkiter/payments": "workspace:*",
+		"@startkiter/site-agent": "workspace:*",
+		"@startkiter/ui": "workspace:*",
+		"next": "16.2.12",
+		"react": "19.2.8",
+		"react-dom": "19.2.8"
+	},
+	"devDependencies": {
+		"@types/node": "^22.0.0",
+		"@types/react": "^19.0.0",
+		"@types/react-dom": "^19.0.0",
+		"typescript": "^5.9.0"
+	}
+}

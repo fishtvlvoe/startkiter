@@ -1,0 +1,7 @@
+{
+	"extends": "../../tooling/typescript/base.json",
+	"compilerOptions": {
+		"plugins": [{ "name": "next" }]
+	},
+	"include": ["next-env.d.ts", ".next/types/**/*.ts", "app/**/*.ts", "app/**/*.tsx"]
+}

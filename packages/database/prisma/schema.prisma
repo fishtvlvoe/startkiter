@@ -1,0 +1,127 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  orders        Order[]
+  githubKitGrants GithubKitGrant[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  userId    String
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?   @db.Text
+  refreshToken          String?   @db.Text
+  idToken               String?   @db.Text
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?   @db.Text
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id @default(cuid())
+  identifier String
+  value      String    @db.Text
+  expiresAt  DateTime
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+enum OrderStatus {
+  pending
+  paid
+  refunded
+}
+
+model Order {
+  id               String      @id @default(cuid())
+  orderNo          String      @unique
+  userId           String
+  sku              String
+  amount           Int
+  currency         String      @default("TWD")
+  status           OrderStatus @default(pending)
+  paymentGateway   String      @default("payuni")
+  gatewayTradeNo   String?     @unique
+  courseAccess     Boolean     @default(false)
+  kitClaimEligible Boolean     @default(false)
+  paidAt           DateTime?
+  refundedAt       DateTime?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("order")
+}
+
+enum GithubKitGrantStatus {
+  invited
+  accepted
+  revoked
+  failed
+}
+
+model GithubKitGrant {
+  id           String               @id @default(cuid())
+  userId       String
+  githubUserId String
+  githubLogin  String
+  org          String
+  repo         String
+  permission   String               @default("pull")
+  status       GithubKitGrantStatus
+  orderNo      String?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, org, repo])
+  @@index([userId])
+  @@index([githubLogin])
+  @@map("github_kit_grants")
+}

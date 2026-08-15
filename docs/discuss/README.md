@@ -1,23 +1,37 @@
 ▋ 台灣 SaaS 教學 starter 討論紀錄
 
-一句話結論：開全新教學 repo，從 supastarter 抽繁中前後台殼，從 THE-TU `dev/thetu` 抽台灣金流、電子發票與 Simple-first 啟用方式，LINE 登入新做；原專案不動，代碼可一次齊、預設全關、課分堂打開。
+產品現行邊界 SSOT：`openspec/specs/`（由已封存 `mvp-test-scope` 灌入）。本資料夾是架構討論歷史；與 specs 衝突時以 specs 為準。
 
-資料夾工作名稱：`products/startkiter`。獨立新專案，不掛 libon.me（那是客戶平台）。網域盯 `startkiter.com`／`startkiter.me`。
+一句話結論（現行）：StartKiter 是獨立教學產品——課 + 終身代碼包；站殼與登入已落地；MVP 主金流只通 PAYUNi、結帳 8800 TWD；發票不在 MVP；Shopline／Stripe 不接線不上課。
 
-• [architecture-draft.md](./architecture-draft.md) 整包怎麼運作、要不要另派 agent、資料夾命名
+資料夾工作名稱：`products/startkiter`。獨立新專案，不掛 libon.me。網域盯 `startkiter.com`／`startkiter.me`。
 
-本資料夾是架構討論紀錄。產品規格以這個 repo 的 `openspec/` 為準。舊檔 `docs/teaching-starter-教學專用版-SOP.md` 的 v1（不要登入、不要後台、不要金流）已被這次需求推翻，不要沿用。
+【怎麼讀這些檔】
 
-• [2026-08-14-alignment.md](./2026-08-14-alignment.md) 今日對焦圖與決定
+• 要施工規則 → 先看 `openspec/specs/` 與 `AGENTS.md`
 
-• [2026-08-14-thetu-source.md](./2026-08-14-thetu-source.md) THE-TU 優化版看完後：改抽來源、Simple-first、SHOPLINE 不做訂閱
+• 要檔案路徑清單 → `extract-map.md`（路徑仍可用；金流預設與課綱順序以本頁「已廢」為準）
 
-• [line-login-from-line-hub.md](./line-login-from-line-hub.md) WordPress LINE 登入能接什麼：協定可以，PHP 與 LIFF 不能搬
+• 要看當年怎麼吵到 SHOPLINE → 下列標「歷史／已廢」的檔，開頭有取代聲明
 
-• [v1-boundary.md](./v1-boundary.md) v1 能力清單：抽什麼、不抽什麼、什麼是新做
+【現行仍有效】
 
-• [payment-and-deploy.md](./payment-and-deploy.md) 主金流 SHOPLINE、部署 Zeabur 類常駐 Node
+• [organizations.md](./organizations.md) v1 不抽 Organization 多租戶（仍有效）
 
-• [organizations.md](./organizations.md) v1 不抽 supastarter 組織多租戶
+• [line-login-from-line-hub.md](./line-login-from-line-hub.md) LINE Login 契約：協定可以，PHP／LIFF 不搬（仍有效；登入已在 extract-shell-auth 落地）
 
-• [extract-map.md](./extract-map.md) 對到檔案的抽取清單
+• [deploy-and-public-url.md](../deploy-and-public-url.md) 對外網址 `startkiter.aiver.me`、Tunnel、Coolify 部署方向備忘（功能尚未開工）
+
+【歷史／已廢（保留對照，勿當施工單）】
+
+• [2026-08-14-alignment.md](./2026-08-14-alignment.md) 當日對焦；主金流 SHOPLINE、發票進 v1、四堂課路徑已廢
+
+• [extract-map.md](./extract-map.md) 檔案路徑清單仍可參考；SHOPLINE 主推／發票 v1／舊施工順序已廢
+
+• [v1-boundary.md](./v1-boundary.md) repo-foundation 舊邊界；已被 mvp-test-scope 取代
+
+• [architecture-draft.md](./architecture-draft.md) 早期架構草稿；SHOPLINE／發票預設段落已廢
+
+• [2026-08-14-thetu-source.md](./2026-08-14-thetu-source.md) thetu 來源觀察仍有用；「教學主金流 SHOPLINE」結論已廢
+
+舊檔 `docs/teaching-starter-教學專用版-SOP.md` 的 v1（不要登入、不要後台、不要金流）亦已廢，不要沿用。

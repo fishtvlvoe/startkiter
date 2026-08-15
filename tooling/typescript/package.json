@@ -1,0 +1,8 @@
+{
+	"name": "@startkiter/tsconfig",
+	"private": true,
+	"files": ["base.json"],
+	"exports": {
+		"./base.json": "./base.json"
+	}
+}

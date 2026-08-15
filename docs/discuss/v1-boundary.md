@@ -1,8 +1,10 @@
 ▋ 已被 mvp-test-scope 取代
 
-本篇是 repo-foundation 的舊 v1 邊界，不是現行規則。現行產品定義看 `openspec/changes/mvp-test-scope/`（課 + 終身代碼包、主金流 PAYUNi、結帳 8800、課程模組、站內領 GitHub、agent 兩支唯讀工具、課程內 LINE 交流群）。
+本篇是 repo-foundation 的舊 v1 邊界，不是現行規則。現行產品定義看 `openspec/specs/`（封存來源：`openspec/changes/archive/2026-08-14-mvp-test-scope/`）。
 
-下列句子若還出現在本文，一律當過期：不是賣課平台、主金流 SHOPLINE、四堂課對 SHOPLINE、SHOPLINE 測一筆付款。
+課 + 終身代碼包、主金流 PAYUNi、結帳 8800、課程模組、站內領 GitHub、agent 兩支唯讀工具、課程內 LINE 交流群、發票不在 MVP。
+
+下列句子若還出現在本文，一律當過期：不是賣課平台、主金流 SHOPLINE、四堂課對 SHOPLINE、SHOPLINE 測一筆付款、發票在 MVP。
 
 ---
 

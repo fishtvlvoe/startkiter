@@ -21,6 +21,40 @@ discuss? → propose → apply ⇄ ingest → archive
 - `discuss` is optional — skip if requirements are clear
 - Requirements change mid-work? `ingest` → resume `apply`
 
+## Apply gate（StartKiter 強制）
+
+每張 change 落地順序固定，不准跳步：
+
+1. Artifact 寫完（proposal／design／specs／tasks）→ 派 **Claude Code** 做一致性分析（`spectra analyze` + `validate`＋語意對照）。有阻塞問題先改 artifact，等 Claude 明確 OK。
+2. 通過後才由本 session／Cursor **寫程式**（`spectra-apply`）。
+3. 程式寫完 → 派 **Codex** 做 Code Review（不是 Codeless）；Critical 修完再收尾／archive。
+4. Critical 修完 → **再派／再收** Codex（或至少重跑 test＋對照 Critical 清單），確認無新 Critical 才 archive。
+5. archive 後自動進入下一張待施工 change（或 propose 下一張），直到佇列清空或卡在老闆才能解的密鑰／決策。
+
+### 外出／自治合約（主控必須做得到）
+
+老闆外出或說「一鼓作氣做完」時，主控 **SHALL** 自己跑滿閉環，不准等下一句話才繼續：
+
+1. `orca terminal send` 派 Claude／Codex 後，立刻進入監工：`orca terminal wait --for tui-idle` → `orca terminal read` 收全文結論。
+2. 有 Critical → 本 session 修 → test／type-check → 必要時再派 CR；不准只回報「還在跑」就結束 turn。
+3. 對話進行中仍並行監工；抽樣一眼就停 = 流程違規 = 不配當主控。
+4. 卡關條件只有：缺老闆才能給的密鑰／ORG／REPO／產品決策、或來源 repo 禁改衝突。卡關要寫進 handoff，其餘自己往下做。
+
+一致性分析調度規則：
+
+- 直接對 **main 工作樹上既有的 Claude Code 視窗**下指令（例如 `orca terminal send` 到該 terminal）。
+- **不准**為一致性分析另開 git worktree／子視窗再等它跑回來。Worktree 隔離只留給真的要平行改應用程式碼、怕弄髒 main 的場景。
+- 若 main 上 Claude 還沒起來，在同一 main 路徑啟動 Claude 後下指令即可，仍不要開 analyze 專用 worktree。
+
+結構／部署類對焦：一律先文字＋圖解（見 `docs/deploy-and-public-url.md`），確認後再動手；測試站 repo 命名 `test-<專案名>`，與正式乾淨安裝包、學員 kit 分開。晉升規則見同一文件。外出自治閉環見 `docs/autonomous-apply-loop.md`。
+
+派 Claude／Codex 做一致性分析或 Code Review 後：
+
+- **回覆老闆或接下一動之前，必須先 `orca terminal read`（必要時先 `wait`）把結果收齊。**
+- **不准等老闆提醒「跑完了你怎麼不看」。** 忘了收結果＝流程違規。
+- **老闆在跟本 session 講話、交代新事情時，仍要並行盯其它代理的進度**；對話進行中 ≠ 暫停監工，不准因此漏收 Claude／Codex 結果。
+- **不准只抽樣看一眼就結束 turn**：必須 `wait` 到代理 idle、讀完結論；有 Critical 就接著修。不准把「等老闆下一句」當唯一觸發器。
+
 ## Parked Changes
 
 Changes can be parked（暫存）— temporarily moved out of `openspec/changes/`. Parked changes won't appear in `spectra list` but can be found with `spectra list --parked`. To restore: `spectra unpark <name>`. The `$spectra-apply` and `$spectra-ingest` skills handle parked changes automatically.
@@ -29,21 +63,25 @@ Changes can be parked（暫存）— temporarily moved out of `openspec/changes/
 
 # StartKiter
 
-課 + 終身代碼包。對外課名可用「開站包」。現行邊界以 `mvp-test-scope` 為準。
+課 + 終身代碼包。對外課名可用「開站包」。
 
-這是獨立 git repo。零耦合 libon.me。不要改抽取來源。本張 apply 只落地規格；不准抽應用程式碼直到下一張 extract change。
+產品現行邊界以 `openspec/specs/` 為準（由已封存的 `mvp-test-scope` 灌入）。`extract-shell-auth`、`extract-payuni-checkout`、`extract-course-module`、`test-to-clean-package-promotion` 已封存。兩倉＋晉升規則見 `openspec/specs/test-clean-package-promotion/` 與 `docs/deploy-and-public-url.md`。
+
+MVP extract 佇列已清空：`extract-site-agent`、`extract-line-learner-community`、`extract-github-kit-fulfillment` 皆已封存。下一優先：建 `test-startkiter`／接 Vercel（見 docs/deploy-and-public-url.md），需老闆給 GITHUB_KIT_ORG／REPO 才真測 kit。
+
+這是獨立 git repo。零耦合 libon.me。不要改抽取來源。站內 agent／LINE 社群／GitHub kit 履約已封存落地。本階段不以新 extract 白名單為準，而以 `openspec/specs/` 為現行真相。
 
 【Allowed extract sources（只讀，禁止修改來源）】
 
-殼：`/Users/fishtv/Development/supastarter-nextjs-main` → 後續 `apps/saas`、`packages/auth`、`packages/ai`
+殼：`/Users/fishtv/Development/supastarter-nextjs-main` → 已抽 `apps/saas`、`packages/auth`；後續可再抽 `packages/ai`
 
-台灣金流／訂單：`/Users/fishtv/Development/THE-TU-Project/dev/thetu` 的 PAYUNi／訂單抽象 → `packages/payments`
+台灣金流／訂單：`/Users/fishtv/Development/THE-TU-Project/dev/thetu` 的 PAYUNi／訂單抽象 → `packages/payments`（含 Order 模型欄位契約）
 
-課程 UI 當模組留下：從舊售出包（thetu）抽觀看與權限畫面 → `packages/course`。不抽整套學院營運。
+課程 UI 當模組留下：從舊售出包（thetu）抽觀看與權限畫面 → `packages/course`。不抽整套學院營運。已封存。
 
 LINE 登入契約：`/Users/fishtv/Development/8-外掛/line-hub`（網頁 OAuth 決策；PHP／LIFF／Bot 不搬）
 
-GitHub kit 邀請是新做（GitHub API + 站內 OAuth），不要拷 supastarter 的 GitHub OAuth 模組當履約。
+GitHub kit 邀請已封存（GitHub App + 站內 OAuth）。本刀不做 kit 履約。
 
 【Forbidden extract targets】
 
@@ -55,7 +93,7 @@ THE-TU 只抽觀看／金流。不准抽電子報、優惠券、作業、NextAut
 
 不准抽 supastarter 的 marketing／docs、Lemon／Polar／Dodo／Creem、Passkey／2FA、Organization 多租戶。
 
-不准抽應用程式碼直到下一張 extract change。本 repo 現在不該出現 `apps/` 與 `package.json`。
+不准抽 Shopline／Stripe 可收款路徑、不准抽發票。站內 agent 只掛唯讀兩工具（已落地）。
 
 【v1 硬規則】
 
@@ -75,6 +113,12 @@ LINE Login Channel 做登入。學員社群用課程內 LINE 邀請連結，不�
 
 【文件】
 
-決策 SSOT：`docs/discuss/`（舊 v1-boundary 已被 mvp-test-scope 取代）
+產品規格 SSOT：`openspec/specs/`
 
-產品規格：`openspec/`（以 `openspec/changes/mvp-test-scope/` 為準，直到 archive）
+已封存 change：`openspec/changes/archive/2026-08-14-mvp-test-scope/`、`openspec/changes/archive/2026-08-15-extract-shell-auth/`、`openspec/changes/archive/2026-08-15-extract-payuni-checkout/`
+
+討論紀錄：`docs/discuss/`（歷史稿；與 specs 衝突時以 specs 為準）
+
+【已廢（不是現行規則）】
+
+「不是賣課平台」「主金流 SHOPLINE」「四堂課對 SHOPLINE」「發票在 MVP」「目前施工 extract-shell-auth」「現行待施工 extract-payuni-checkout」

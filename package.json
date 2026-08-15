@@ -1,0 +1,18 @@
+{
+	"name": "startkiter",
+	"private": true,
+	"packageManager": "pnpm@11.20.0",
+	"scripts": {
+		"build": "pnpm --filter @startkiter/saas build",
+		"dev": "pnpm --filter @startkiter/saas dev",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"type-check": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@types/node": "^22.0.0",
+		"turbo": "^2.10.7",
+		"typescript": "^5.9.0",
+		"vitest": "^4.1.10"
+	}
+}
