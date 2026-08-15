@@ -7,12 +7,16 @@ The operator SHALL maintain a private GitHub repository named `test-startkiter` 
 - **WHEN** an operator inspects GitHub for the StartKiter test deploy surface
 - **THEN** a private repository named `test-startkiter` MUST exist
 
-### Requirement: Vercel deploys from TEST repository
-The TEST repository SHALL be connected to a Vercel project that builds the SaaS app from the monorepo (`apps/saas`). Successful git push to the default branch MUST trigger a deployment attempt.
+### Requirement: Vercel deploys the TEST SaaS app
+The operator SHALL maintain a Vercel project that builds the SaaS app from the monorepo (`apps/saas`, typically via project `rootDirectory`). At least one successful production deployment MUST exist. If Vercel GitHub Login Connection is not yet available, documentation MUST record that push-triggered deploys are pending and that CLI/`vercel deploy` is the interim path; once Login Connection exists, the project MUST connect `test-startkiter` so default-branch pushes trigger deploys.
 
-#### Scenario: Vercel project is linked
-- **WHEN** an operator checks Vercel project settings for StartKiter TEST
-- **THEN** the project MUST list `test-startkiter` as its git repository and MUST target the SaaS app build
+#### Scenario: Vercel project builds saas and has a production deploy
+- **WHEN** an operator checks the StartKiter TEST Vercel project and recent production deployments
+- **THEN** the project MUST target the SaaS app build and MUST show at least one successful production deployment
+
+#### Scenario: Git auto-deploy pending is documented
+- **WHEN** GitHub Login Connection blocks `vercel git connect`
+- **THEN** `docs/deploy-and-public-url.md` MUST state the pending blocker and the interim CLI deploy path, and MUST NOT claim push auto-deploy is already live
 
 ### Requirement: Cloud database for TEST
 The TEST deploy SHALL use a cloud Postgres connection string configured in Vercel environment variables (not localhost). Documentation MUST record which provider is used and that secrets MUST NOT be committed to git.

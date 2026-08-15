@@ -21,9 +21,9 @@
 
 Alternatives: 同 repo preview branch → 否決（與兩倉定稿衝突）。
 
-### Decision: 首發托管用 Vercel＋Vercel Postgres 或 Neon（誰先開通用誰）
+### Decision: 首發托管用 Vercel＋Neon；Git 自動部署可暫以 CLI 頂，Login Connection 補完再接
 
-Alternatives: 只 Coolify → 否決（老闆本輪要 Vercel 測）。之後可加 CF／VPS。
+Alternatives: 卡死等 Login Connection 才算完成 → 否決（部署鏈與 HTTPS／DB 可先驗）；只 Coolify → 否決（老闆本輪要 Vercel 測）。
 
 ### Decision: 本機 startkiter 繼續 Spectra 施工；以 remote `test` 或手動 push 同步到 test-startkiter
 

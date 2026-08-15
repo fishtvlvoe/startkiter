@@ -42,7 +42,8 @@ context: |
   - 「四堂課對 SHOPLINE」已廢：不走 SHOPLINE 測一筆付款解鎖
   - 「發票在 MVP」已廢
   - 「目前施工 extract-shell-auth」已廢：該 change 已封存
-  - 「下一張施工 change 尚未開」已廢：現行待施工為 extract-github-kit-fulfillment
+  - 「下一張施工 change 尚未開」已廢：已進入 bootstrap／extract 階段
+  - 「現行待施工為 extract-github-kit-fulfillment」已廢：該 change 已封存
   - 「現行待施工 extract-payuni-checkout」已廢：該 change 已封存
   - 「現行待施工 extract-course-module」已廢：該 change 已封存
 
