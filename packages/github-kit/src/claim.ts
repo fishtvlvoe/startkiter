@@ -92,19 +92,18 @@ export type ClaimStatusResult = {
 export async function getClaimStatus(args: {
 	userId: string | null | undefined;
 	config: GithubKitConfig | null;
+	oauthConfigured?: boolean;
 	grants: GithubKitGrantStore;
 }): Promise<
 	| { ok: true; body: ClaimStatusResult }
 	| { ok: false; httpStatus: 401; error: "authentication_required" }
+	| { ok: false; httpStatus: 503; error: "github_kit_misconfigured" }
 > {
 	if (!args.userId) {
 		return { ok: false, httpStatus: 401, error: "authentication_required" };
 	}
-	if (!args.config) {
-		return {
-			ok: true,
-			body: { status: "not_claimed", githubLogin: null, repo: null },
-		};
+	if (!args.config || args.oauthConfigured === false) {
+		return { ok: false, httpStatus: 503, error: "github_kit_misconfigured" };
 	}
 	const grant = await args.grants.findByUserRepo({
 		userId: args.userId,

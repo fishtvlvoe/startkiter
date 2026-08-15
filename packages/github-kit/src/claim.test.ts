@@ -239,6 +239,33 @@ describe("claimGithubKit", () => {
 });
 
 describe("getClaimStatus", () => {
+	it("returns 503 when kit config missing so UI can hide claim buttons", async () => {
+		const result = await getClaimStatus({
+			userId: "u1",
+			config: null,
+			grants: createMemoryGrants(),
+		});
+		expect(result).toEqual({
+			ok: false,
+			httpStatus: 503,
+			error: "github_kit_misconfigured",
+		});
+	});
+
+	it("returns 503 when GitHub OAuth is not configured", async () => {
+		const result = await getClaimStatus({
+			userId: "u1",
+			config,
+			oauthConfigured: false,
+			grants: createMemoryGrants(),
+		});
+		expect(result).toEqual({
+			ok: false,
+			httpStatus: 503,
+			error: "github_kit_misconfigured",
+		});
+	});
+
 	it("never calls collaborator APIs", async () => {
 		const collaborators: GithubCollaboratorClient = {
 			invitePullCollaborator: vi.fn(),

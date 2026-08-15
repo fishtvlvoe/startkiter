@@ -9,10 +9,11 @@ import {
 
 export async function GET(request: Request) {
 	const session = await auth.api.getSession({ headers: request.headers });
-	const { config } = loadGithubKitRuntime();
+	const { config, oauthConfigured } = loadGithubKitRuntime();
 	const result = await getClaimStatus({
 		userId: session?.user.id,
 		config,
+		oauthConfigured,
 		grants: createPrismaGrantStore(),
 	});
 
