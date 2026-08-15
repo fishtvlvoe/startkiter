@@ -81,15 +81,33 @@ flowchart TD
 
 Coolify 仍是維運層選項（常駐 Node、固定 IP 利於 PAYUNi webhook），掛在「測試站或正式站的托管路徑」上，不是學員產品功能。不急開 change。
 
+▋ TEST 站現況（2026-08-15 bootstrap）
+
+• GitHub TEST repo（Private）：`https://github.com/fishtvlvoe/test-startkiter`
+
+• 本機 remote 名：`test`（`origin` 仍指 `fishtvlvoe/startkiter`，Spectra 施工別改掉）
+
+• Vercel 專案：`fishtvs-projects/test-startkiter`；`rootDirectory=apps/saas`；monorepo SSOT 見根目錄 `vercel.json`，saas 鏡像見 `apps/saas/vercel.json`
+
+• 測試站 HTTPS origin：`https://test-startkiter.vercel.app`（`BETTER_AUTH_URL` 已對這個）
+
+• OAuth callback 範例（之後填各 provider）：`https://test-startkiter.vercel.app/api/auth/callback/google`、`https://test-startkiter.vercel.app/api/auth/callback/line`、`https://test-startkiter.vercel.app/api/auth/callback/github`
+
+• 雲端 DB：Neon（Vercel Marketplace 資源名 `test-startkiter-db`）；`DATABASE_URL` 只在 Vercel env，不准進 git。Prisma migrate 已對 Neon 跑過。
+
+• Git 自動部署：暫未接通。Vercel 回「需先加 GitHub Login Connection」。目前用 `vercel deploy --prod`／本機 `git push test` 後手部屬。Dashboard 補 Login Connection 後再 `vercel git connect https://github.com/fishtvlvoe/test-startkiter.git`。
+
+• 自訂網域 `startkiter.aiver.me` 指到 Vercel：可本單後設，非阻塞。
+
+• PAYUNi webhook：Vercel serverless 可能不夠穩；正式金流測可另掛常駐 Node／VPS（Coolify）。本輪 TEST 先驗 OAuth／UI／部署鏈。
+
 ▋ 跟現行 Spectra 的關係
 
 • 兩倉＋晉升規則已封存為規格：`openspec/specs/test-clean-package-promotion/`（archive `2026-08-15-test-to-clean-package-promotion`）。
 
-• 現行功能單：`extract-github-kit-fulfillment`（領代碼包；分析已 OK，可寫程式）。
+• 現行施工：`bootstrap-test-startkiter`（本節為落地紀錄）。
 
-• 建 `test-startkiter`、接 Vercel／DB＝另排，不塞進 kit fulfillment。
-
-• UI／UX 精修仍延後。
+• UI／UX 精修仍延後。kit 真邀仍缺 `GITHUB_KIT_ORG`／`GITHUB_KIT_REPO`／完整 PEM。
 
 ▋ 晉升 checklist（TEST → 正式乾淨安裝包）
 

@@ -40,3 +40,4 @@ graphify-out/
 # deploy leftovers
 .vercel
 .zeabur
+.env*.local
