@@ -5,6 +5,13 @@ import { Button, Form, Input } from "@startkiter/ui";
 
 type AuthMode = "sign-in" | "sign-up";
 
+type SocialProviderId = "google" | "line";
+
+export const AUTH_SOCIAL_PROVIDERS: { id: SocialProviderId; label: string }[] = [
+	{ id: "google", label: "使用 Google 登入" },
+	{ id: "line", label: "使用 LINE 登入" },
+];
+
 function safeNextPath(next: string | undefined) {
 	if (!next) {
 		return "/course";
@@ -67,6 +74,11 @@ export function LoginForm({
 	const [error, setError] = useState<string | null>(null);
 	const isSignUp = mode === "sign-up";
 	const destination = safeNextPath(nextPath);
+	const enabledSocialProviders: Record<SocialProviderId, boolean> = {
+		google: googleEnabled,
+		line: lineEnabled,
+	};
+	const visibleSocialProviders = AUTH_SOCIAL_PROVIDERS.filter((provider) => enabledSocialProviders[provider.id]);
 
 	async function submit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -145,18 +157,19 @@ export function LoginForm({
 					{error}
 				</p>
 			) : null}
-			{!isSignUp && (googleEnabled || lineEnabled) ? (
+			{!isSignUp && visibleSocialProviders.length > 0 ? (
 				<div className="provider-actions" aria-label="社群登入">
-					{googleEnabled ? (
-						<Button className="button secondary" type="button" variant="outline" onClick={() => socialSignIn("google")}>
-							使用 Google 登入
+					{visibleSocialProviders.map((provider) => (
+						<Button
+							key={provider.id}
+							className="button secondary"
+							type="button"
+							variant="outline"
+							onClick={() => socialSignIn(provider.id)}
+						>
+							{provider.label}
 						</Button>
-					) : null}
-					{lineEnabled ? (
-						<Button className="button secondary" type="button" variant="outline" onClick={() => socialSignIn("line")}>
-							使用 LINE 登入
-						</Button>
-					) : null}
+					))}
 				</div>
 			) : null}
 		</>
