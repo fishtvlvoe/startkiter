@@ -83,8 +83,20 @@ Admin 或 owner 可以把任何現有的組織成員（原本是 `user` 角色�
 
 本 change 不涉及部署或資料庫變更（純規格文件），無需 Migration Plan。
 
-## Open Questions
+## Open Questions（已裁決，記錄於此）
 
-- StartKiter 自己的網站要不要真的開放建立多個 Organization，還是永遠只用一個官方組織？
-- 買家付費權益（courseAccess／kitClaimEligible）掛在 Organization 層級（整組織買一次全員可用）還是 Member 層級（每人各自付費）？
-- Invitation 通知機制要不要沿用 supastarter 現有的 email 機制，還是配合 StartKiter 既有的 LINE／email 客服模式重新設計？
+### StartKiter 自己的網站真的使用多組織（已裁決：是）
+
+老闆裁決：StartKiter 自己的網站要真的支援多個 Organization——不同的產品線/app 可以各自有各自的管理員，不是只做半套給買家看的空殼功能。
+
+### 買家付費權益採雙模式並存（已裁決：兩種都要）
+
+老闆裁決：不是「組織層級」或「個人層級」二選一，是兩種客群並存：
+- **B2B 客戶**：一個 Organization 付一次錢，該組織底下所有 Member 都能看課，entitlement 掛在 Organization 上
+- **B2C 客戶**：個人自己付錢才能看課，entitlement 掛在該 User（或該 Member，若該 User 屬於某組織）上，這是現行 `mvp-offer` spec 的既有模式
+
+這代表 courseAccess／kitClaimEligible 這類權益欄位，後續實作 change 需要能同時檢查「User 自己是否有權益」與「User 所屬 Organization 是否有權益」兩條路徑，兩者皆可授予存取。本 change 不決定資料庫欄位的實際掛法（留給後續後端 change），但正式記錄這個雙模式決策，後續 change 不得只做單一模式。
+
+### Invitation 通知機制（已裁決：Email）
+
+老闆裁決：沿用 supastarter 既有的 Email 邀請機制，不改用 LINE。

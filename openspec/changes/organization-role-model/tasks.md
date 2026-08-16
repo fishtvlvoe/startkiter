@@ -1,19 +1,19 @@
 ## 1. 角色矩陣確認（Decision: 角色矩陣：合併 supastarter 的三層跟 realms 的講師語彙，不是照搬任一邊）
 
-- [ ] 1.1 把 design.md 的權限矩陣表（owner/admin/instructor/user 六項動作）交給老闆逐格確認，驗證方式：老闆針對表格內每一列明確回覆「對」或提出修正，回覆記錄在對話紀錄或本檔案補充區塊
-- [ ] 1.2 驗證 Requirement「Organization membership roles are a fixed four-value set」與「Every organization has exactly one owner」的敘述跟老闆原本描述（組織/管理員/講師/買家用戶）一致，驗證方式：逐條唸出 spec 的 Requirement 文字給老闆確認用詞對應正確
-- [ ] 1.3 驗證 Requirement「Every member can view their own purchased courses regardless of role」符合老闆對「買家/用戶不管是哪個角色都能看自己買的課」的預期，驗證方式：老闆明確回覆確認
+- [x] 1.1 把 design.md 的權限矩陣表（owner/admin/instructor/user 六項動作）交給老闆逐格確認，驗證方式：老闆明確回覆「對」
+- [x] 1.2 驗證 Requirement「Organization membership roles are a fixed four-value set」與「Every organization has exactly one owner」的敘述跟老闆原本描述一致，驗證方式：老闆確認 owner 恰好一個、admin/instructor 無上限，跟現有 spec 一致
+- [x] 1.3 驗證 Requirement「Every member can view their own purchased courses regardless of role」符合老闆預期，驗證方式：老闆明確回覆確認
 
 ## 2. Instructor 指派規則確認（Decision: instructor 指派規則）
 
-- [ ] 2.1 驗證 Requirement「Only owner or admin can assign or revoke the instructor role」的三個 Scenario（admin 指派／instructor 不能自己或別人升級／user 不能自我升級）跟老闆的描述一致，驗證方式：老闆明確回覆這三個情境符合預期
-- [ ] 2.2 驗證 Requirement「Instructor role grants course content permissions but not billing visibility」是否符合老闆對「講師」職責範圍的預期（只管內容不管金流/買家名單），驗證方式：老闆明確回覆確認或提出修正
+- [x] 2.1 驗證 Requirement「Only owner or admin can assign or revoke the instructor role」的三個 Scenario 跟老闆的描述一致，驗證方式：老闆明確回覆確認
+- [x] 2.2 驗證 Requirement「Instructor role grants course content permissions but not billing visibility」符合老闆對「講師」職責範圍的預期，驗證方式：老闆明確回覆確認
 
 ## 3. Open Questions 裁決（Decision: 角色矩陣：合併 supastarter 的三層跟 realms 的講師語彙，不是照搬任一邊）
 
-- [ ] 3.1 請老闆裁決「StartKiter 自己的網站要不要真的開放建立多個 Organization，還是永遠只用一個官方組織」，驗證方式：取得老闆明確回覆，記錄於本 change 的補充區塊或後續 change 的 proposal
-- [ ] 3.2 請老闆裁決「買家付費權益（courseAccess／kitClaimEligible）掛在 Organization 層級還是 Member 層級」，驗證方式：取得老闆明確回覆
-- [ ] 3.3 請老闆裁決「Invitation 通知機制沿用 supastarter 現有 email 機制，或改用 StartKiter 既有 LINE／email 客服模式」，驗證方式：取得老闆明確回覆
+- [x] 3.1 請老闆裁決「StartKiter 自己的網站真的使用多組織」，驗證方式：取得老闆明確回覆，已裁決：是，記錄於 design.md「StartKiter 自己的網站真的使用多組織（已裁決：是）」
+- [x] 3.2 請老闆裁決「買家付費權益採雙模式並存」，驗證方式：取得老闆明確回覆，已裁決：B2B 掛組織、B2C 掛個人，兩種並存，記錄於 design.md「買家付費權益採雙模式並存（已裁決：兩種都要）」
+- [x] 3.3 請老闆裁決「Invitation 通知機制（已裁決：Email）」，驗證方式：取得老闆明確回覆，已裁決：沿用 supastarter 既有 Email 機制，記錄於 design.md 對應段落
 
 ## 4. v1-scope-boundary 規則正式生效（Requirement: Forbidden extract targets）
 
