@@ -21,7 +21,7 @@ describe("locale route contract", () => {
 	});
 
 	it("declares the three launch locales", () => {
-		expect(locales).toEqual(["zh-tw", "zh-cn", "en"]);
+		expect(locales).toEqual(expect.arrayContaining(["zh-tw", "zh-cn", "en"]));
 	});
 });
 

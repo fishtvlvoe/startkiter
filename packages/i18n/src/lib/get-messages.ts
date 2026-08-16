@@ -21,7 +21,9 @@ function mergeMessages(base: MessageCatalog, override: MessageCatalog): MessageC
 function isMissingCatalogError(error: unknown): boolean {
 	return (
 		error instanceof Error &&
-		/(cannot find module|failed to load|does not exist|enoent)/i.test(error.message)
+		/(cannot find module|failed to load|does not exist|enoent|unknown variable dynamic import)/i.test(
+			error.message,
+		)
 	);
 }
 
@@ -43,7 +45,9 @@ async function importLocaleMessages(
 }
 
 function resolveLocale(locale: string): Locale {
-	return isLocale(locale) ? locale : config.defaultLocale;
+	const normalizedLocale = locale.toLowerCase();
+
+	return isLocale(normalizedLocale) ? normalizedLocale : config.defaultLocale;
 }
 
 export async function getMessagesForLocale<T = MessageCatalog>(
