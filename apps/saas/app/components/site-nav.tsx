@@ -1,16 +1,42 @@
 import Link from "next/link";
 
-import { messages } from "@startkiter/i18n";
+import { getMessagesForLocale } from "@startkiter/i18n";
+import type { Locale } from "@startkiter/i18n";
+import { ColorModeToggle } from "@startkiter/ui";
 
+import { getRequestLocale } from "../../lib/request-locale";
 import { shouldShowOperatorSettingsLink } from "../../lib/operator";
+import { LocaleSwitcher } from "./locale-switcher";
 
 type SiteNavProps = {
 	signedIn?: boolean;
 	email?: string | null;
 	hasPurchase?: boolean;
+	locale?: Locale;
 };
 
-export function SiteNav({ signedIn = false, email, hasPurchase = false }: SiteNavProps) {
+type NavMessages = {
+	brand: string;
+	navigation: {
+		login: string;
+		signup: string;
+		course: string;
+		purchase: string;
+		purchaseStatus: string;
+		assistant: string;
+		account: string;
+		settings: string;
+	};
+};
+
+export async function SiteNav({
+	signedIn = false,
+	email,
+	hasPurchase = false,
+	locale,
+}: SiteNavProps) {
+	const resolvedLocale = locale ?? (await getRequestLocale());
+	const messages = await getMessagesForLocale<NavMessages>(resolvedLocale, "saas");
 	const showSettings = shouldShowOperatorSettingsLink(
 		signedIn,
 		email,
@@ -25,19 +51,23 @@ export function SiteNav({ signedIn = false, email, hasPurchase = false }: SiteNa
 			<div className="nav-links">
 				{signedIn ? (
 					<>
-						<Link href="/course">課程</Link>
-						<Link href="/checkout">{hasPurchase ? "購買狀態" : "購買"}</Link>
-						<Link href="/agent">助手</Link>
-						<Link href="/app">帳號</Link>
-						{showSettings ? <Link href="/admin/settings">設定</Link> : null}
+						<Link href="/course">{messages.navigation.course}</Link>
+						<Link href="/checkout">
+							{hasPurchase ? messages.navigation.purchaseStatus : messages.navigation.purchase}
+						</Link>
+						<Link href="/agent">{messages.navigation.assistant}</Link>
+						<Link href="/app">{messages.navigation.account}</Link>
+						{showSettings ? <Link href="/admin/settings">{messages.navigation.settings}</Link> : null}
 						{email ? <span className="nav-email">{email}</span> : null}
 					</>
 				) : (
 					<>
-						<Link href="/login">{messages.login}</Link>
-						<Link href="/signup">{messages.signup}</Link>
+						<Link href="/login">{messages.navigation.login}</Link>
+						<Link href="/signup">{messages.navigation.signup}</Link>
 					</>
 				)}
+				<LocaleSwitcher current={resolvedLocale} />
+				<ColorModeToggle />
 			</div>
 		</nav>
 	);

@@ -217,6 +217,32 @@ main.wide {
 	white-space: nowrap;
 }
 
+.locale-switcher {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	padding: 2px;
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	background: var(--surface);
+}
+
+.locale-switcher button {
+	border: 0;
+	background: transparent;
+	color: var(--on-surface-muted);
+	font: inherit;
+	font-size: 0.75rem;
+	padding: 4px 8px;
+	border-radius: 999px;
+	cursor: pointer;
+}
+
+.locale-switcher button[aria-pressed="true"] {
+	background: var(--on-background);
+	color: var(--surface);
+}
+
 .hero {
 	padding: var(--space-6) 0 var(--space-5);
 	min-height: min(70vh, 640px);

@@ -24,6 +24,7 @@ StartKiter 現行 `packages/ui/src/index.tsx` 僅有一個 stub 元件 `Panel`�
 - 不修改 supastarter-nextjs-main 或 THE-TU-Project 來源 repo 本身，僅單向抽取/參考
 - 不變更現行 PAYUNi 結帳邏輯、Order 資料模型、GitHub kit 認領流程的業務邏輯（只調整這些頁面的視覺呈現，不動後端邏輯）
 - 不重做 course、checkout、admin/settings、agent 頁面的視覺（cross-impact 預檢發現這些頁面共用 globals.css 現有的 `.hero`／`.button`／`.panel`／`.actions`／`.muted` class，超出本次 demo-first 確認過的首頁/登入/後台首頁三頁範圍）——這些 class 本次保留不動，這些頁面排入後續 change 才套用新設計系統
+- 本輪語言切換用 cookie `NEXT_LOCALE` + 用戶端切換器 + `router.refresh()`，不實作 `/zh-tw`／`/zh-cn`／`/en` URL 前綴與 middleware；完整路由級 i18n 留給後續 change
 
 ## Decisions
 
