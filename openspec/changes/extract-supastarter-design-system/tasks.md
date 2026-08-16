@@ -40,7 +40,7 @@
 
 ## 6. 前後台版面骨架
 
-- [ ] 6.1 撰寫測試：驗證 Requirement「Shell pages use the shared design system」——斷言 GET / 的 DOM 不包含僅靠 `.hero`／`.button` 這類頁面自製 class 提供樣式的元素，驗證方式：新增 DOM class 檢查測試，目前為紅燈
+- [x] 6.1 撰寫測試：驗證 Requirement「Shell pages use the shared design system」——斷言 GET / 的 DOM 不包含僅靠 `.hero`／`.button` 這類頁面自製 class 提供樣式的元素，驗證方式：新增 DOM class 檢查測試，目前為紅燈
 - [ ] 6.2 依 1.1 確認過的首頁 demo，重寫 apps/saas/app/page.tsx，比照 supastarter.dev 版面語言（置中 Hero、徽章、打勾清單、雙 CTA、社會認同、功能深潛區塊），滿足 Requirement「Shell pages use the shared design system」，驗證方式：6.1 測試轉綠燈，且立即用 ego-browser 截圖真實頁面與 1.1 demo 並排比對，逐項記錄有無落差（不等到第 10 節才比對）；若有落差立即修正，不得留到後續才處理
 - [ ] 6.3 依 1.3 確認過的後台 demo，重寫 apps/saas/app/app/page.tsx，比照 demo.supastarter.dev 版面語言，驗證方式：`pnpm --filter @startkiter/saas test` 新增後台首頁渲染測試通過，且立即用 ego-browser 截圖真實頁面與 1.3 demo 並排比對，逐項記錄有無落差；若有落差立即修正
 - [ ] 6.5 依 1.5 確認過的課程觀看頁 demo，重寫 apps/saas/app/course/page.tsx 與 course/[lessonId]/page.tsx，比照 1.5 demo 的版面語言，驗證方式：新增課程頁渲染測試通過，且立即用 ego-browser 截圖真實頁面與 1.5 demo 並排比對，逐項記錄有無落差；若有落差立即修正。本 task 與 tasks 2.7「本次不修改 course 頁面」的排除範圍不衝突——2.7 排除的是「不主動重做」，本 task 是因為 1.5 demo 已經走過老闆確認流程，才把課程頁納入本次真代碼範圍
