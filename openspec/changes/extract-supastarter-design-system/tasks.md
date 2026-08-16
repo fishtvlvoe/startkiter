@@ -13,7 +13,7 @@
 - [x] 2.2 撰寫測試：驗證 Requirement「UI components come from the shared design system」——對 packages/ui 匯出的 Button、Card、Badge、Input、Form、ColorModeToggle 元件各寫一個渲染測試，斷言元件輸出的 DOM 帶有 `data-slot` 屬性，驗證方式：`pnpm --filter @startkiter/ui test` 目前為紅燈（元件尚未存在）
 - [x] 2.3 將 supastarter-nextjs-main/packages/ui/components 底下的 Button、Card、Badge、Input、Form 元件原始檔複製進 packages/ui/src/components/，滿足 Requirement「UI components come from the shared design system」，驗證方式：`pnpm --filter @startkiter/ui test` 轉綠燈
 - [x] 2.4 將 supastarter-nextjs-main/apps/saas/modules/shared/components/ColorModeToggle.tsx 複製進 packages/ui/src/components/color-mode-toggle.tsx 並調整 import 路徑，滿足 Requirement「Dark and light mode share the same component system」，驗證方式：元件測試綠燈且 `pnpm --filter @startkiter/ui type-check` 通過
-- [ ] 2.5 撰寫測試並實作 Requirement「Design tokens are ported, not approximated」——將 supastarter-nextjs-main/apps/saas/app/globals.css 的 CSS 自訂屬性 token 段落（含 `@variant dark` 宣告）複製進 apps/saas/app/globals.css，驗證方式：讀取兩份檔案的 `--radius`（或對應改名後 token）自訂屬性字串值，兩者逐字相同
+- [x] 2.5 撰寫測試並實作 Requirement「Design tokens are ported, not approximated」——將 supastarter-nextjs-main/apps/saas/app/globals.css 的 CSS 自訂屬性 token 段落（含 `@variant dark` 宣告）複製進 apps/saas/app/globals.css，驗證方式：讀取兩份檔案的 `--radius`（或對應改名後 token）自訂屬性字串值，兩者逐字相同
 - [ ] 2.6 更新 packages/ui/src/index.tsx 匯出新元件，移除 stub Panel 元件，驗證方式：`grep -rn "Panel" packages/ui/src apps/saas/app` 確認 apps/saas 內無任何頁面仍 import Panel
 - [ ] 2.7 cross-impact 補強：保留 apps/saas/app/globals.css 現有的 `.hero`／`.button`／`.panel`／`.actions`／`.muted` class 不刪除、不改名（course、checkout、admin/settings、agent 等頁面仍在使用），且不在本 change 修改 apps/saas/app/course/、checkout/、admin/settings/、agent/ 底下任何頁面，驗證方式：`git diff --stat` 確認這些路徑下的檔案本次改動中皆為 0 異動，且用 ego-browser 開啟本機 /course、/checkout、/admin/settings、/agent 四個頁面，確認畫面樣式與改版前一致（未出現無樣式的裸版面）
 
@@ -27,8 +27,8 @@
 
 - [ ] 4.1 撰寫測試：驗證 Requirement「At least three locales are supported at launch」——對 GET /zh-tw、GET /zh-cn、GET /en 三個路由各斷言回應 200，驗證方式：`pnpm --filter @startkiter/saas test` 新增 locale 路由測試，目前為紅燈
 - [ ] 4.2 撰寫測試：驗證 Requirement「Missing translation keys fall back to zh-TW」——對一個刻意在 en catalog 缺漏但 zh-TW catalog 存在的 key，斷言渲染結果為 zh-TW 文字而非原始 key 字串，驗證方式：新增 fallback 測試，目前為紅燈
-- [ ] 4.3 將 supastarter-nextjs-main/packages/i18n 的 next-intl 架構移植進 StartKiter packages/i18n，取代現有自製 messages 物件，滿足 Requirement「At least three locales are supported at launch」與「Missing translation keys fall back to zh-TW」，驗證方式：4.1、4.2 測試轉綠燈
-- [ ] 4.4 建立 zh-TW、zh-CN、en 三份訊息目錄檔案，內容為現有 StartKiter 首頁/登入/後台文案的對應翻譯，滿足 Requirement「Locale is zh-TW only」（現行為多語系起跳，zh-TW 維持 fallback 語系），驗證方式：`pnpm --filter @startkiter/i18n type-check` 通過且三語系路由皆可渲染對應語言文字
+- [x] 4.3 將 supastarter-nextjs-main/packages/i18n 的 next-intl 架構移植進 StartKiter packages/i18n，取代現有自製 messages 物件，滿足 Requirement「At least three locales are supported at launch」與「Missing translation keys fall back to zh-TW」，驗證方式：4.1、4.2 測試轉綠燈
+- [x] 4.4 建立 zh-TW、zh-CN、en 三份訊息目錄檔案，內容為現有 StartKiter 首頁/登入/後台文案的對應翻譯，滿足 Requirement「Locale is zh-TW only」（現行為多語系起跳，zh-TW 維持 fallback 語系），驗證方式：`pnpm --filter @startkiter/i18n type-check` 通過且三語系路由皆可渲染對應語言文字
 - [ ] 4.5 驗證 Requirement「Locale list is extensible without component changes」——新增一份第四語系（例如 ja）作為擴充性驗證，只新增訊息檔與語言清單項目，不改任何元件檔案，驗證方式：`git diff --stat` 顯示變更僅涉及 i18n 訊息檔與語言清單常數，未觸及 apps/saas/app 或 packages/ui 下任何檔案，驗證完後移除這份測試用語系檔案
 - [ ] 4.6 cross-impact 補強：撰寫測試涵蓋 apps/saas/app/components/site-nav.tsx（被 page.tsx／course/page.tsx／course/[lessonId]/page.tsx／signup/page.tsx／app/page.tsx／agent/page.tsx／admin/settings/page.tsx／checkout/page.tsx／login/page.tsx 共 9 個頁面共用）在三語系下正確渲染，並同步改寫 site-nav.tsx 與 apps/saas/app/app/page.tsx 對 packages/i18n 的呼叫方式，配合 4.3 的新 next-intl 介面，驗證方式：新增 SiteNav 渲染測試（斷言三語系下皆能正確渲染、無執行期錯誤）並轉綠燈，且 `pnpm --filter @startkiter/saas type-check` 通過
 
