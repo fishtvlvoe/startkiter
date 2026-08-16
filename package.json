@@ -5,11 +5,13 @@
 	"scripts": {
 		"build": "pnpm --filter @startkiter/saas build",
 		"dev": "pnpm --filter @startkiter/saas dev",
+		"e2e": "playwright test",
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"type-check": "tsc --noEmit"
 	},
 	"devDependencies": {
+		"@playwright/test": "1.58.0",
 		"@types/node": "^22.0.0",
 		"turbo": "^2.10.7",
 		"typescript": "^5.9.0",

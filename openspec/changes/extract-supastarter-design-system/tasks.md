@@ -64,3 +64,11 @@
 - [ ] 10.1 對第 2-6 節的程式碼變更跑一輪 correctness／security／performance 三角度 code review，驗證方式：Review 報告列出的 Critical 發現數為零，或所有 Critical 發現皆已修正
 - [ ] 10.2 執行 `pnpm build` 與 `pnpm test` 全專案跑一次，驗證方式：兩個指令皆以 exit code 0 結束
 - [ ] 10.3 用 ego-browser 對本機 apps/saas 首頁、登入頁、後台首頁三頁分別截圖，逐頁比對是否與 1.1-1.3 確認過的 demo 視覺一致，驗證方式：三張截圖存檔並附上與 demo 的比對結論
+
+## 11. E2E 測試
+
+- [ ] 11.1 撰寫測試：驗證從首頁→登入頁→後台首頁→課程頁的導覽流程可以正常走完，驗證方式：Playwright（或專案既有 E2E 慣例，若無則新建最小可跑設定）E2E 測試涵蓋這條導覽路徑（需要測試帳密，今晚環境無法驗證）
+- [x] 11.2 撰寫測試：驗證三語系切換（zh-TW/zh-CN/en）在首頁能正確切換，各語系斷言至少一句關鍵文字（如首頁 hero 標題）渲染正確，驗證方式：Playwright 使用穩定的 locale 控制項與 hero 標題選擇器
+- [x] 11.3 撰寫測試：驗證深色/淺色模式切換能正確套用（斷言 html/body 的 class 或 data-attribute 隨切換改變），驗證方式：Playwright 讀取切換前後 html/body 的 class 或 data-attribute
+- [ ] 11.4 撰寫測試：驗證後台側邊欄收合/展開功能可操作（斷言收合後導覽項目隱藏、展開後恢復），驗證方式：Playwright 使用預期的 sidebar toggle、sidebar container 與導覽項目選擇器（需要測試帳密，今晚環境無法驗證）
+- [ ] 11.5 執行全部 E2E 測試並確認轉綠燈，驗證方式：`pnpm e2e`（或專案既有 E2E 指令）exit code 0，且 11.1-11.4 全部通過（需要測試帳密，今晚環境無法驗證）
