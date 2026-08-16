@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { cn } from "../lib";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./tooltip";
 
-const DEFAULT_THEME = "system";
+const DEFAULT_THEME = "light";
 
 const COLOR_MODE_LABELS = {
 	system: "系統",
