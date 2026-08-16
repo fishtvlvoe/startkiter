@@ -41,3 +41,6 @@ graphify-out/
 .vercel
 .zeabur
 .env*.local
+
+# 唯讀參考原始碼（supastarter-nextjs-main、realms-course-platform 等），不進版控
+code/
