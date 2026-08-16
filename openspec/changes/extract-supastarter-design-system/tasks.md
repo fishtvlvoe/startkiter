@@ -45,8 +45,8 @@
 
 ## 7. 買家擴充機制：輕量慣例文件，不採用 runtime plugin 框架（如 cordis）
 
-- [ ] 7.1 撰寫 docs/buyer-extension-convention.md，滿足 Requirement「A written module convention document exists」——以 packages/course（或另一個現有真實模組）的實際資料夾結構與 index 檔內容當範例，列出新模組的資料夾/進入點/env 宣告規則，驗證方式：文件內容包含至少一個真實 packages/ 路徑與該路徑實際檔案內容摘錄
-- [ ] 7.2 驗證 Requirement「Convention is written for an AI coding tool audience, not a human tutorial」——依文件內容手動走一次「新增一個假模組」流程，驗證方式：照文件步驟建立一個 packages/demo-module 測試模組，確認能成功產生符合慣例的資料夾結構後刪除該測試模組
+- [x] 7.1 撰寫 docs/buyer-extension-convention.md，滿足 Requirement「A written module convention document exists」——以 packages/course（或另一個現有真實模組）的實際資料夾結構與 index 檔內容當範例，列出新模組的資料夾/進入點/env 宣告規則，驗證方式：文件內容包含至少一個真實 packages/ 路徑與該路徑實際檔案內容摘錄
+- [x] 7.2 驗證 Requirement「Convention is written for an AI coding tool audience, not a human tutorial」——依文件內容手動走一次「新增一個假模組」流程，驗證方式：照文件步驟建立一個 packages/demo-module 測試模組，確認能成功產生符合慣例的資料夾結構後刪除該測試模組
 
 ## 8. 一鍵部署設定
 
