@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>登入學員入口｜StartKiter 方向 A</title>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    (() => {
+      try {
+        if (localStorage.getItem("startkiter-theme") === "dark") {
+          document.documentElement.classList.add("dark");
+        }
+      } catch (error) {}
+    })();
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand-mark" href="index.html">STARTKITER <span>學員入口</span></a>
+      <nav class="nav-links" aria-label="頁面導覽">
+        <a href="index.html">回到介紹</a>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">
+          <span class="theme-icon" aria-hidden="true">☾</span>
+          <span class="theme-label">深色</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="login-shell">
+    <section class="login-story">
+      <div class="eyebrow">MEMBER ACCESS / 01</div>
+      <h1>從這裡，接回你的工作台。</h1>
+      <p>課程、進度、代碼包與學員社群，都放在同一個安靜的入口裡。你不必再找一封很久以前的信。</p>
+      <div class="login-stamp">已購買？直接登入，不用重新付款。</div>
+    </section>
+
+    <section class="login-card-wrap">
+      <div class="login-card">
+        <div class="eyebrow">STARTKITER / SIGN IN</div>
+        <h2>登入學員入口</h2>
+        <p>第一次來？付款後會在這裡建立你的學員工作台。</p>
+
+        <div class="auth-options">
+          <button class="auth-option" type="button">GitHub 登入</button>
+          <button class="auth-option" type="button">LINE 登入</button>
+        </div>
+
+        <div class="divider">或使用 Email</div>
+
+        <form action="dashboard.html" method="get">
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" placeholder="you@example.com">
+          </div>
+          <div class="field">
+            <label for="password">密碼</label>
+            <input id="password" name="password" type="password" placeholder="輸入密碼">
+          </div>
+          <button class="button login-submit" type="submit">登入工作台 →</button>
+        </form>
+        <p class="form-note">展示用 mockup｜尚未連接真實登入</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="theme.js"></script>
+</body>
+</html>

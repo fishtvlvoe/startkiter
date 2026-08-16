@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>學員工作台｜StartKiter 方向 A</title>
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    (() => {
+      try {
+        if (localStorage.getItem("startkiter-theme") === "dark") {
+          document.documentElement.classList.add("dark");
+        }
+      } catch (error) {}
+    })();
+  </script>
+</head>
+<body>
+  <header class="app-header">
+    <a class="brand-mark" href="index.html">STARTKITER <span>學員工作台</span></a>
+    <div class="app-header-actions">
+      <a class="back-link" href="index.html">回到產品介紹 ↗</a>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false">
+        <span class="theme-icon" aria-hidden="true">☾</span>
+        <span class="theme-label">深色</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <aside class="app-sidebar">
+      <div class="profile-block">
+        <div class="avatar">F</div>
+        <strong>Fish 的學員</strong>
+        <span>會員狀態：有效</span>
+      </div>
+      <nav class="side-nav" aria-label="工作台導覽">
+        <a class="active" href="dashboard.html">總覽</a>
+        <a href="#course-progress">我的課程</a>
+        <a href="#agent">AI 客服 Agent</a>
+        <a href="#deliveries">我的交付</a>
+      </nav>
+    </aside>
+
+    <main class="dashboard-main">
+      <div class="dashboard-heading">
+        <div>
+          <div class="eyebrow">MEMBER / OVERVIEW</div>
+          <h1>歡迎回來，開始下一段。</h1>
+        </div>
+        <p>最後登入：今天 09:42</p>
+      </div>
+
+      <div class="dashboard-grid">
+        <section class="dashboard-card progress-card" id="course-progress">
+          <div class="eyebrow">COURSE PROGRESS</div>
+          <h2>AI 開站包實戰課</h2>
+          <p>沿著目前的節奏走，不用一次把整套課看完。</p>
+          <div class="progress-big"><strong>43%</strong><span>6 / 14 個單元</span></div>
+          <div class="progress-track" aria-label="課程進度 43%"><span></span></div>
+          <div class="lesson-list">
+            <div class="lesson-row"><span class="lesson-index">01</span><span>把服務說成一句話</span><span class="lesson-state">完成</span></div>
+            <div class="lesson-row"><span class="lesson-index">02</span><span>跟 AI 一起拆首頁</span><span class="lesson-state">完成</span></div>
+            <div class="lesson-row"><span class="lesson-index">03</span><span>建立你的第一條交付路徑</span><span class="lesson-state">進行中</span></div>
+            <div class="lesson-row"><span class="lesson-index">04</span><span>付款、登入與學員權限</span><span class="lesson-state">未開始</span></div>
+          </div>
+          <a class="button" href="#course-progress" style="margin-top: 26px;">繼續觀看 →</a>
+        </section>
+
+        <section class="dashboard-card order-card">
+          <div class="eyebrow">ORDER / RECEIPT 001</div>
+          <h2>開站包一次買斷</h2>
+          <p>課程與 GitHub 代碼包同一份交付。</p>
+          <div class="order-meta">
+            <div><strong>NT$8,800</strong><span class="status">付款完成</span></div>
+            <span class="stamp-kicker">2026.08.17</span>
+          </div>
+        </section>
+
+        <section class="dashboard-card agent-card" id="agent">
+          <div>
+            <div class="eyebrow">PRIVATE AGENT</div>
+            <h2>問問你的站內 AI 客服</h2>
+            <p>只讀取你的訂單與課程進度，不替你亂改資料。</p>
+          </div>
+          <a class="button" href="#agent">開啟 Agent</a>
+        </section>
+
+        <div class="delivery-grid" id="deliveries">
+          <section class="dashboard-card delivery-card" id="github">
+            <div class="delivery-head">
+              <div><div class="eyebrow">GITHUB KIT</div><h2>私人代碼包</h2></div>
+              <div class="delivery-icon">⌘</div>
+            </div>
+            <p><span class="status">已接受邀請</span><br>startkiter / private-kit<br>權限：只讀</p>
+            <a class="button button-quiet" href="#github">查看領取狀態 ↗</a>
+          </section>
+          <section class="dashboard-card delivery-card" id="line">
+            <div class="delivery-head">
+              <div><div class="eyebrow">LEARNER COMMUNITY</div><h2>LINE 學員社群</h2></div>
+              <div class="delivery-icon">↗</div>
+            </div>
+            <p>已付款學員專屬邀請連結。客服問題請寄 Email。</p>
+            <a class="button button-quiet" href="#line">開啟 LINE 邀請</a>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="theme.js"></script>
+</body>
+</html>
