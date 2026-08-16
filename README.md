@@ -52,7 +52,7 @@ LINE Login Channel 做登入。學員社群是邀請連結，不能靜默入群�
 
 [![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/new?template=https%3A%2F%2Fgithub.com%2Ffishtvlvoe%2Fstartkiter)
 
-點擊上方按鈕即可在 Zeabur 一鍵建立 StartKiter 全端服務與 PostgreSQL 資料庫。部署設定檔位於 [`deploy/zeabur.yaml`](file:///Users/fishtv/orca/workspaces/startkiter/deploy-agy/deploy/zeabur.yaml)，會自動建立 PostgreSQL 相依與 `DATABASE_URL`、`BETTER_AUTH_URL`、`BETTER_AUTH_SECRET` 等環境變數配置。
+點擊上方按鈕即可在 Zeabur 一鍵建立 StartKiter 全端服務與 PostgreSQL 資料庫。部署設定檔位於 [`deploy/zeabur.yaml`](./deploy/zeabur.yaml)，會自動建立 PostgreSQL 相依與 `DATABASE_URL`、`BETTER_AUTH_URL`、`BETTER_AUTH_SECRET` 等環境變數配置。
 
 【下一步】
 
