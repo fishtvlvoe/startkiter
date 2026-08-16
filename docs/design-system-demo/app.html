@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-Hant">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>開站包 — 後台首頁 demo</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" href="tokens.css" />
+		<link rel="stylesheet" href="components.css" />
+		<script>
+			(function () {
+				var mode =
+					new URLSearchParams(location.search).get("mode") ||
+					localStorage.getItem("startkiter-demo-color-mode") ||
+					"light";
+				document.documentElement.classList.toggle("dark", mode === "dark");
+			})();
+		</script>
+	</head>
+	<body>
+		<div class="app-shell">
+			<aside class="app-sidebar" data-slot="sidebar">
+				<a class="brand" href="home.html">
+					<span class="brand-mark">開</span>
+					開站包
+				</a>
+				<nav class="app-nav" aria-label="後台選單">
+					<a href="app.html" aria-current="page">開始</a>
+					<a href="app.html">課程</a>
+					<a href="app.html">站內客服</a>
+					<a href="app.html">帳號設定</a>
+				</nav>
+				<div class="app-user">
+					<span class="app-avatar">F</span>
+					<div>
+						<div style="font-size: 0.875rem; font-weight: 600">Fish</div>
+						<div class="ds-muted" style="font-size: 0.75rem">fish@startkiter.dev</div>
+					</div>
+				</div>
+			</aside>
+
+			<main class="app-main">
+				<div class="page-header">
+					<div>
+						<p class="ds-muted" style="margin: 0; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase">
+							帳號
+						</p>
+						<h1 style="margin: 0.2rem 0 0; font-size: 1.5rem; font-weight: 600">開始</h1>
+						<p class="ds-muted" style="margin: 0.25rem 0 0">課程已開通。課與終身代碼包同一筆訂單。</p>
+					</div>
+					<div class="color-mode-toggle" data-test="color-mode-toggle" role="group" aria-label="顏色模式">
+						<button
+							type="button"
+							data-test="color-mode-toggle-item-light"
+							aria-label="淺色"
+							aria-pressed="true"
+							onclick="setDemoColorMode('light')"
+						>
+							☀
+						</button>
+						<button
+							type="button"
+							data-test="color-mode-toggle-item-dark"
+							aria-label="深色"
+							aria-pressed="false"
+							onclick="setDemoColorMode('dark')"
+						>
+							☾
+						</button>
+					</div>
+				</div>
+
+				<section class="stats-grid">
+					<article class="ds-card stat-card" data-slot="card">
+						<p class="ds-muted" style="margin: 0; font-size: 0.8rem">課程</p>
+						<p style="margin: 0.35rem 0 0; font-size: 1.75rem; font-weight: 600">已開通</p>
+						<p class="ds-muted" style="margin: 0.35rem 0 0; font-size: 0.8rem">一次買斷，觀看權限有效</p>
+					</article>
+					<article class="ds-card stat-card" data-slot="card">
+						<p class="ds-muted" style="margin: 0; font-size: 0.8rem">訂單</p>
+						<p style="margin: 0.35rem 0 0; font-size: 1.75rem; font-weight: 600">NT$8,800</p>
+						<p class="ds-muted" style="margin: 0.35rem 0 0; font-size: 0.8rem">PAYUNi · 買斷</p>
+					</article>
+					<article class="ds-card stat-card" data-slot="card">
+						<p class="ds-muted" style="margin: 0; font-size: 0.8rem">GitHub kit</p>
+						<p style="margin: 0.35rem 0 0; font-size: 1.75rem; font-weight: 600">可領取</p>
+						<p class="ds-muted" style="margin: 0.35rem 0 0; font-size: 0.8rem">退款後資格取消</p>
+					</article>
+				</section>
+
+				<section class="ds-card" data-slot="card" style="margin-top: 1rem; padding: 1.25rem 1.5rem">
+					<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem">
+						<div>
+							<h2 style="margin: 0; font-size: 1.05rem; font-weight: 600">繼續上課</h2>
+							<p class="ds-muted" style="margin: 0.3rem 0 0; font-size: 0.9rem">
+								從課程目錄接著看。這頁只先確認後台骨架，課程播放畫面不在這次改。
+							</p>
+						</div>
+						<a class="ds-btn" data-slot="button" data-variant="primary" data-size="md" href="home.html">
+							進入課程
+						</a>
+					</div>
+				</section>
+			</main>
+		</div>
+		<script src="demo.js"></script>
+	</body>
+</html>

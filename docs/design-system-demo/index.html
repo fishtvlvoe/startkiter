@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="zh-Hant">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>開站包 — 設計系統 demo 目錄</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" href="tokens.css" />
+		<link rel="stylesheet" href="components.css" />
+		<script>
+			(function () {
+				var mode =
+					new URLSearchParams(location.search).get("mode") ||
+					localStorage.getItem("startkiter-demo-color-mode") ||
+					"light";
+				document.documentElement.classList.toggle("dark", mode === "dark");
+			})();
+		</script>
+	</head>
+	<body>
+		<main class="ds-container" style="padding: 3rem 0 4rem">
+			<p class="ds-muted" style="margin: 0; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; color: var(--primary)">
+				Demo-first
+			</p>
+			<h1 style="margin: 0.4rem 0 0; font-size: 2rem; font-weight: 600; letter-spacing: -0.04em">
+				開站包設計系統 demo
+			</h1>
+			<p class="ds-muted" style="max-width: 40rem; margin: 0.75rem 0 0">
+				顏色來自 supastarter 的真實 token，不是手估。每頁右上角可切淺色／深色。看完三頁後回「可以」，才會動真代碼。
+			</p>
+
+			<section class="hub-grid" style="margin-top: 2rem">
+				<article class="ds-card hub-card" data-slot="card">
+					<h2 style="margin: 0; font-size: 1.1rem">首頁</h2>
+					<p class="ds-muted" style="margin: 0.4rem 0 1rem; font-size: 0.9rem">置中 Hero、徽章、打勾清單、雙 CTA、社會認同、功能深潛。</p>
+					<div style="display: flex; gap: 0.5rem">
+						<a class="ds-btn" data-slot="button" data-variant="primary" data-size="md" href="home.html?mode=light">淺色</a>
+						<a class="ds-btn" data-slot="button" data-variant="secondary" data-size="md" href="home.html?mode=dark">深色</a>
+					</div>
+				</article>
+				<article class="ds-card hub-card" data-slot="card">
+					<h2 style="margin: 0; font-size: 1.1rem">登入／註冊</h2>
+					<p class="ds-muted" style="margin: 0.4rem 0 1rem; font-size: 0.9rem">置中表單、Google／LINE、登入與建立帳號切換。</p>
+					<div style="display: flex; gap: 0.5rem">
+						<a class="ds-btn" data-slot="button" data-variant="primary" data-size="md" href="login.html?mode=light">淺色</a>
+						<a class="ds-btn" data-slot="button" data-variant="secondary" data-size="md" href="login.html?mode=dark">深色</a>
+					</div>
+				</article>
+				<article class="ds-card hub-card" data-slot="card">
+					<h2 style="margin: 0; font-size: 1.1rem">後台首頁</h2>
+					<p class="ds-muted" style="margin: 0.4rem 0 1rem; font-size: 0.9rem">左側 280px 選單 + 右側內容格，比照 demo.supastarter.dev 密度。</p>
+					<div style="display: flex; gap: 0.5rem">
+						<a class="ds-btn" data-slot="button" data-variant="primary" data-size="md" href="app.html?mode=light">淺色</a>
+						<a class="ds-btn" data-slot="button" data-variant="secondary" data-size="md" href="app.html?mode=dark">深色</a>
+					</div>
+				</article>
+			</section>
+		</main>
+		<script src="demo.js"></script>
+	</body>
+</html>

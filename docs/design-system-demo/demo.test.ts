@@ -1,0 +1,90 @@
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+import { describe, expect, it } from "vitest";
+
+const demoDir = dirname(fileURLToPath(import.meta.url));
+
+const sourceThemePath =
+	"/Users/fishtv/Development/supastarter-nextjs-main/tooling/tailwind/theme.css";
+
+function readDemo(name: string) {
+	return readFileSync(resolve(demoDir, name), "utf8");
+}
+
+function extractCustomProperty(css: string, name: string) {
+	const match = css.match(new RegExp(`${name}:\\s*([^;]+);`));
+	return match?.[1].trim();
+}
+
+function countAttr(html: string, selectorAttr: string, value: string) {
+	const pattern = new RegExp(`${selectorAttr}="${value}"`, "g");
+	return html.match(pattern)?.length ?? 0;
+}
+
+describe("design-system HTML demos", () => {
+	it("ports --radius from the supastarter theme instead of approximating it", () => {
+		const sourceTheme = readFileSync(sourceThemePath, "utf8");
+		const tokens = readDemo("tokens.css");
+
+		expect(extractCustomProperty(tokens, "--radius")).toBe(
+			extractCustomProperty(sourceTheme, "--radius"),
+		);
+		expect(extractCustomProperty(tokens, "--radius")).toBe("0.75rem");
+	});
+
+	it("declares light tokens on :root and dark tokens on .dark", () => {
+		const tokens = readDemo("tokens.css");
+
+		expect(tokens).toMatch(/:root\s*\{[\s\S]*--background:/);
+		expect(tokens).toMatch(/\.dark\s*\{[\s\S]*--background:/);
+		expect(extractCustomProperty(tokens, "--accent")).toBe("var(--color-zinc-100)");
+	});
+
+	it("uses DM Sans with Noto Sans TC as the immediate CJK fallback", () => {
+		const tokens = readDemo("tokens.css");
+
+		expect(tokens).toMatch(/font-family:\s*"DM Sans",\s*"Noto Sans TC",\s*sans-serif;/);
+	});
+
+	it("home demo has dual color modes, design-system buttons, and spec CTA copy", () => {
+		const html = readDemo("home.html");
+
+		expect(html).toContain('data-test="color-mode-toggle"');
+		expect(html).toContain("classList");
+		expect(html).toContain("dark");
+		expect(html).toContain("取得開站包");
+		expect(html).toContain("看示範");
+		expect(html).toContain("NT$8,800");
+		expect(countAttr(html, "data-slot", "button")).toBeGreaterThanOrEqual(2);
+		expect(html).not.toMatch(/class="hero"/);
+		expect(html).not.toMatch(/class="button"/);
+	});
+
+	it("login demo exposes email and password inputs plus a submit button with data-slot", () => {
+		const html = readDemo("login.html");
+
+		expect(html).toContain('data-test="color-mode-toggle"');
+		expect(countAttr(html, "data-slot", "input")).toBeGreaterThanOrEqual(2);
+		expect(html).toMatch(/type="email"[\s\S]*data-slot="input"|data-slot="input"[\s\S]*type="email"/);
+		expect(html).toMatch(
+			/type="password"[\s\S]*data-slot="input"|data-slot="input"[\s\S]*type="password"/,
+		);
+		expect(countAttr(html, "data-slot", "button")).toBeGreaterThanOrEqual(1);
+		expect(html).toContain("使用 Google 登入");
+		expect(html).toContain("使用 LINE 登入");
+		expect(html).toContain("建立帳號");
+	});
+
+	it("app demo uses a sidebar-plus-content layout with the same shared tokens", () => {
+		const html = readDemo("app.html");
+
+		expect(html).toContain('data-test="color-mode-toggle"');
+		expect(html).toContain('data-slot="sidebar"');
+		expect(html).toContain("進入課程");
+		expect(html).toContain('href="tokens.css"');
+		expect(html).not.toMatch(/class="hero"/);
+		expect(html).not.toMatch(/class="button"/);
+	});
+});
