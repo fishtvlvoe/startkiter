@@ -24,20 +24,56 @@
 	</head>
 	<body>
 		<div class="app-shell">
-			<aside class="app-sidebar" data-slot="sidebar">
-				<a class="brand" href="home.html">
-					<span class="brand-mark">開</span>
-					開站包
-				</a>
+			<aside class="app-sidebar" data-slot="sidebar" id="app-sidebar">
+				<div class="sidebar-head">
+					<a class="brand" href="home.html">
+						<span class="brand-mark">開</span>
+						<span class="brand-label">開站包</span>
+					</a>
+					<button
+						type="button"
+						class="sidebar-collapse-toggle"
+						data-test="sidebar-collapse-toggle"
+						aria-expanded="true"
+						aria-controls="app-sidebar"
+						onclick="toggleDemoSidebar()"
+					>
+						‹
+					</button>
+				</div>
 				<nav class="app-nav" aria-label="後台選單">
-					<a href="app.html">開始</a>
-					<a href="course.html" aria-current="page">課程</a>
-					<a href="app.html">站內客服</a>
-					<a href="app.html">帳號設定</a>
+					<a href="app.html" aria-label="開始">
+						<span class="nav-icon" aria-hidden="true">⌂</span>
+						<span class="nav-label">開始</span>
+					</a>
+					<a href="course.html" aria-current="page" aria-label="課程">
+						<span class="nav-icon" aria-hidden="true">▷</span>
+						<span class="nav-label">課程</span>
+					</a>
+					<a href="app.html" aria-label="站內客服">
+						<span class="nav-icon" aria-hidden="true">◇</span>
+						<span class="nav-label">站內客服</span>
+					</a>
+					<a href="app.html" aria-label="帳號設定">
+						<span class="nav-icon" aria-hidden="true">⚙</span>
+						<span class="nav-label">帳號設定</span>
+					</a>
+					<span
+						class="nav-placeholder"
+						data-slot="course-admin"
+						title="課程內容管理・下一輪 change 接上"
+						aria-disabled="true"
+					>
+						<span class="nav-icon" aria-hidden="true">▦</span>
+						<span class="nav-label">
+							課程內容管理
+							<small>下一輪 change 接上</small>
+						</span>
+					</span>
 				</nav>
 				<div class="app-user">
 					<span class="app-avatar">F</span>
-					<div>
+					<div class="app-user-meta">
 						<div style="font-size: 0.875rem; font-weight: 600">Fish</div>
 						<div class="ds-muted" style="font-size: 0.75rem">fish@startkiter.dev</div>
 					</div>
@@ -122,6 +158,10 @@
 								<a class="ds-btn" data-slot="button" data-variant="secondary" data-size="md" href="#lesson-01">上一單元</a>
 								<a class="ds-btn" data-slot="button" data-variant="primary" data-size="md" href="#lesson-03">下一單元</a>
 							</div>
+						</div>
+
+						<div class="comments-placeholder" data-slot="comments">
+							<p>留言區佔位 · 下一輪 change 接上真實討論功能</p>
 						</div>
 					</section>
 				</div>

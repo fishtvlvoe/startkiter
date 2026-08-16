@@ -88,6 +88,15 @@ describe("design-system HTML demos", () => {
 		expect(html).not.toMatch(/class="button"/);
 	});
 
+	it("shared demo script collapses the app sidebar from one toggle", () => {
+		const script = readDemo("demo.js");
+
+		expect(script).toContain("setDemoSidebarCollapsed");
+		expect(script).toContain("is-sidebar-collapsed");
+		expect(readDemo("app.html")).toContain('data-test="sidebar-collapse-toggle"');
+		expect(readDemo("course.html")).toContain('data-test="sidebar-collapse-toggle"');
+	});
+
 	it("course demo has a lesson rail, player placeholder, progress, and catalog titles", () => {
 		const html = readDemo("course.html");
 
@@ -104,4 +113,25 @@ describe("design-system HTML demos", () => {
 		expect(html).not.toMatch(/class="button"/);
 		expect(html).not.toMatch(/class="lesson-list"/);
 	});
+
+	it("course demo shows an honest comments placeholder without fake discussion UI", () => {
+		const html = readDemo("course.html");
+
+		expect(html).toContain('data-slot="comments"');
+		expect(html).toContain("留言區佔位");
+		expect(html).toContain("下一輪 change 接上真實討論功能");
+		expect(html).not.toMatch(/<textarea\b/i);
+		expect(html).not.toMatch(/假留言|匿名學員|讚$|回覆這則/);
+	});
+
+	it("course demo marks a course-admin entry without shipping an editor", () => {
+		const html = readDemo("course.html");
+
+		expect(html).toContain('data-slot="course-admin"');
+		expect(html).toContain("課程內容管理");
+		expect(html).toContain("下一輪 change 接上");
+		expect(html).not.toMatch(/單元標題|儲存課程|新增單元/);
+		expect(html).not.toMatch(/<form\b[^>]*(course|lesson|admin)/i);
+	});
 });
+

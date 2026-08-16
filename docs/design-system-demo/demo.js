@@ -33,6 +33,42 @@
 
 	applyMode(readMode());
 
+	var SIDEBAR_KEY = "startkiter-demo-sidebar-collapsed";
+
+	function readSidebarCollapsed() {
+		return localStorage.getItem(SIDEBAR_KEY) === "true";
+	}
+
+	function applySidebarCollapsed(collapsed) {
+		document.querySelectorAll(".app-shell").forEach(function (shell) {
+			shell.classList.toggle("is-sidebar-collapsed", collapsed);
+		});
+
+		document.querySelectorAll("[data-slot='sidebar']").forEach(function (sidebar) {
+			sidebar.setAttribute("data-collapsed", collapsed ? "true" : "false");
+		});
+
+		document.querySelectorAll("[data-test='sidebar-collapse-toggle']").forEach(function (button) {
+			button.setAttribute("aria-expanded", String(!collapsed));
+			button.setAttribute("aria-label", collapsed ? "展開側欄" : "收合側欄");
+			button.textContent = collapsed ? "›" : "‹";
+		});
+
+		localStorage.setItem(SIDEBAR_KEY, String(collapsed));
+	}
+
+	window.setDemoSidebarCollapsed = function setDemoSidebarCollapsed(collapsed) {
+		applySidebarCollapsed(Boolean(collapsed));
+	};
+
+	window.toggleDemoSidebar = function toggleDemoSidebar() {
+		applySidebarCollapsed(!document.querySelector(".app-shell")?.classList.contains("is-sidebar-collapsed"));
+	};
+
+	if (document.querySelector(".app-shell")) {
+		applySidebarCollapsed(readSidebarCollapsed());
+	}
+
 	document.querySelectorAll("[data-auth-tab]").forEach(function (button) {
 		button.addEventListener("click", function () {
 			var tab = button.getAttribute("data-auth-tab");
