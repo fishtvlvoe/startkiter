@@ -11,8 +11,8 @@
 
 - [x] 2.1 [P] 比對 supastarter-nextjs-main 與 StartKiter 兩邊 package.json 的 Next.js／React／Tailwind／Radix UI 版本號，列出版本落差清單，驗證方式：產出一份版本比對表，每個套件標示「相同/StartKiter 較舊/StartKiter 較新」
 - [x] 2.2 撰寫測試：驗證 Requirement「UI components come from the shared design system」——對 packages/ui 匯出的 Button、Card、Badge、Input、Form、ColorModeToggle 元件各寫一個渲染測試，斷言元件輸出的 DOM 帶有 `data-slot` 屬性，驗證方式：`pnpm --filter @startkiter/ui test` 目前為紅燈（元件尚未存在）
-- [ ] 2.3 將 supastarter-nextjs-main/packages/ui/components 底下的 Button、Card、Badge、Input、Form 元件原始檔複製進 packages/ui/src/components/，滿足 Requirement「UI components come from the shared design system」，驗證方式：`pnpm --filter @startkiter/ui test` 轉綠燈
-- [ ] 2.4 將 supastarter-nextjs-main/apps/saas/modules/shared/components/ColorModeToggle.tsx 複製進 packages/ui/src/components/color-mode-toggle.tsx 並調整 import 路徑，滿足 Requirement「Dark and light mode share the same component system」，驗證方式：元件測試綠燈且 `pnpm --filter @startkiter/ui type-check` 通過
+- [x] 2.3 將 supastarter-nextjs-main/packages/ui/components 底下的 Button、Card、Badge、Input、Form 元件原始檔複製進 packages/ui/src/components/，滿足 Requirement「UI components come from the shared design system」，驗證方式：`pnpm --filter @startkiter/ui test` 轉綠燈
+- [x] 2.4 將 supastarter-nextjs-main/apps/saas/modules/shared/components/ColorModeToggle.tsx 複製進 packages/ui/src/components/color-mode-toggle.tsx 並調整 import 路徑，滿足 Requirement「Dark and light mode share the same component system」，驗證方式：元件測試綠燈且 `pnpm --filter @startkiter/ui type-check` 通過
 - [ ] 2.5 撰寫測試並實作 Requirement「Design tokens are ported, not approximated」——將 supastarter-nextjs-main/apps/saas/app/globals.css 的 CSS 自訂屬性 token 段落（含 `@variant dark` 宣告）複製進 apps/saas/app/globals.css，驗證方式：讀取兩份檔案的 `--radius`（或對應改名後 token）自訂屬性字串值，兩者逐字相同
 - [ ] 2.6 更新 packages/ui/src/index.tsx 匯出新元件，移除 stub Panel 元件，驗證方式：`grep -rn "Panel" packages/ui/src apps/saas/app` 確認 apps/saas 內無任何頁面仍 import Panel
 - [ ] 2.7 cross-impact 補強：保留 apps/saas/app/globals.css 現有的 `.hero`／`.button`／`.panel`／`.actions`／`.muted` class 不刪除、不改名（course、checkout、admin/settings、agent 等頁面仍在使用），且不在本 change 修改 apps/saas/app/course/、checkout/、admin/settings/、agent/ 底下任何頁面，驗證方式：`git diff --stat` 確認這些路徑下的檔案本次改動中皆為 0 異動，且用 ego-browser 開啟本機 /course、/checkout、/admin/settings、/agent 四個頁面，確認畫面樣式與改版前一致（未出現無樣式的裸版面）
@@ -44,12 +44,12 @@
 - [ ] 6.2 依 1.1 確認過的首頁 demo，重寫 apps/saas/app/page.tsx，比照 supastarter.dev 版面語言（置中 Hero、徽章、打勾清單、雙 CTA、社會認同、功能深潛區塊），滿足 Requirement「Shell pages use the shared design system」，驗證方式：6.1 測試轉綠燈，且立即用 ego-browser 截圖真實頁面與 1.1 demo 並排比對，逐項記錄有無落差（不等到第 10 節才比對）；若有落差立即修正，不得留到後續才處理
 - [ ] 6.3 依 1.3 確認過的後台 demo，重寫 apps/saas/app/app/page.tsx，比照 demo.supastarter.dev 版面語言，驗證方式：`pnpm --filter @startkiter/saas test` 新增後台首頁渲染測試通過，且立即用 ego-browser 截圖真實頁面與 1.3 demo 並排比對，逐項記錄有無落差；若有落差立即修正
 - [ ] 6.5 依 1.5 確認過的課程觀看頁 demo，重寫 apps/saas/app/course/page.tsx 與 course/[lessonId]/page.tsx，比照 1.5 demo 的版面語言，驗證方式：新增課程頁渲染測試通過，且立即用 ego-browser 截圖真實頁面與 1.5 demo 並排比對，逐項記錄有無落差；若有落差立即修正。本 task 與 tasks 2.7「本次不修改 course 頁面」的排除範圍不衝突——2.7 排除的是「不主動重做」，本 task 是因為 1.5 demo 已經走過老闆確認流程，才把課程頁納入本次真代碼範圍
-- [ ] 6.4 撰寫測試：驗證 Requirement「Marketing surface and app surface are not required to share identical layout」——比對 GET / 與 GET /app 兩者的色彩 CSS 自訂屬性計算值，斷言逐一相同，驗證方式：新增 token 一致性測試，確認前後台共用同一份設計 token
+- [x] 6.4 撰寫測試：驗證 Requirement「Marketing surface and app surface are not required to share identical layout」——比對 GET / 與 GET /app 兩者的色彩 CSS 自訂屬性計算值，斷言逐一相同，驗證方式：新增 token 一致性測試，確認前後台共用同一份設計 token
 
 ## 7. 買家擴充機制：輕量慣例文件，不採用 runtime plugin 框架（如 cordis）
 
-- [ ] 7.1 撰寫 docs/buyer-extension-convention.md，滿足 Requirement「A written module convention document exists」——以 packages/course（或另一個現有真實模組）的實際資料夾結構與 index 檔內容當範例，列出新模組的資料夾/進入點/env 宣告規則，驗證方式：文件內容包含至少一個真實 packages/ 路徑與該路徑實際檔案內容摘錄
-- [ ] 7.2 驗證 Requirement「Convention is written for an AI coding tool audience, not a human tutorial」——依文件內容手動走一次「新增一個假模組」流程，驗證方式：照文件步驟建立一個 packages/demo-module 測試模組，確認能成功產生符合慣例的資料夾結構後刪除該測試模組
+- [x] 7.1 撰寫 docs/buyer-extension-convention.md，滿足 Requirement「A written module convention document exists」——以 packages/course（或另一個現有真實模組）的實際資料夾結構與 index 檔內容當範例，列出新模組的資料夾/進入點/env 宣告規則，驗證方式：文件內容包含至少一個真實 packages/ 路徑與該路徑實際檔案內容摘錄
+- [x] 7.2 驗證 Requirement「Convention is written for an AI coding tool audience, not a human tutorial」——依文件內容手動走一次「新增一個假模組」流程，驗證方式：照文件步驟建立一個 packages/demo-module 測試模組，確認能成功產生符合慣例的資料夾結構後刪除該測試模組
 
 ## 8. 一鍵部署設定
 
