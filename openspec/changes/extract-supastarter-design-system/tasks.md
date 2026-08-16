@@ -23,11 +23,11 @@
 
 ## 4. 多語系架構：沿用 supastarter 的 next-intl，不用其他 i18n 套件
 
-- [ ] 4.1 撰寫測試：驗證 Requirement「At least three locales are supported at launch」——對 GET /zh-tw、GET /zh-cn、GET /en 三個路由各斷言回應 200，驗證方式：`pnpm --filter @startkiter/saas test` 新增 locale 路由測試，目前為紅燈
-- [ ] 4.2 撰寫測試：驗證 Requirement「Missing translation keys fall back to zh-TW」——對一個刻意在 en catalog 缺漏但 zh-TW catalog 存在的 key，斷言渲染結果為 zh-TW 文字而非原始 key 字串，驗證方式：新增 fallback 測試，目前為紅燈
-- [ ] 4.3 將 supastarter-nextjs-main/packages/i18n 的 next-intl 架構移植進 StartKiter packages/i18n，取代現有自製 messages 物件，滿足 Requirement「At least three locales are supported at launch」與「Missing translation keys fall back to zh-TW」，驗證方式：4.1、4.2 測試轉綠燈
-- [ ] 4.4 建立 zh-TW、zh-CN、en 三份訊息目錄檔案，內容為現有 StartKiter 首頁/登入/後台文案的對應翻譯，滿足 Requirement「Locale is zh-TW only」（現行為多語系起跳，zh-TW 維持 fallback 語系），驗證方式：`pnpm --filter @startkiter/i18n type-check` 通過且三語系路由皆可渲染對應語言文字
-- [ ] 4.5 驗證 Requirement「Locale list is extensible without component changes」——新增一份第四語系（例如 ja）作為擴充性驗證，只新增訊息檔與語言清單項目，不改任何元件檔案，驗證方式：`git diff --stat` 顯示變更僅涉及 i18n 訊息檔與語言清單常數，未觸及 apps/saas/app 或 packages/ui 下任何檔案，驗證完後移除這份測試用語系檔案
+- [x] 4.1 撰寫測試：驗證 Requirement「At least three locales are supported at launch」——對 GET /zh-tw、GET /zh-cn、GET /en 三個路由各斷言回應 200，驗證方式：`pnpm --filter @startkiter/saas test` 新增 locale 路由測試，目前為紅燈
+- [x] 4.2 撰寫測試：驗證 Requirement「Missing translation keys fall back to zh-TW」——對一個刻意在 en catalog 缺漏但 zh-TW catalog 存在的 key，斷言渲染結果為 zh-TW 文字而非原始 key 字串，驗證方式：新增 fallback 測試，目前為紅燈
+- [x] 4.3 將 supastarter-nextjs-main/packages/i18n 的 next-intl 架構移植進 StartKiter packages/i18n，取代現有自製 messages 物件，滿足 Requirement「At least three locales are supported at launch」與「Missing translation keys fall back to zh-TW」，驗證方式：4.1、4.2 測試轉綠燈
+- [x] 4.4 建立 zh-TW、zh-CN、en 三份訊息目錄檔案，內容為現有 StartKiter 首頁/登入/後台文案的對應翻譯，滿足 Requirement「Locale is zh-TW only」（現行為多語系起跳，zh-TW 維持 fallback 語系），驗證方式：`pnpm --filter @startkiter/i18n type-check` 通過且三語系路由皆可渲染對應語言文字
+- [x] 4.5 驗證 Requirement「Locale list is extensible without component changes」——新增一份第四語系（例如 ja）作為擴充性驗證，只新增訊息檔與語言清單項目，不改任何元件檔案，驗證方式：`git diff --stat` 顯示變更僅涉及 i18n 訊息檔與語言清單常數，未觸及 apps/saas/app 或 packages/ui 下任何檔案，驗證完後移除這份測試用語系檔案
 - [ ] 4.6 cross-impact 補強：撰寫測試涵蓋 apps/saas/app/components/site-nav.tsx（被 page.tsx／course/page.tsx／course/[lessonId]/page.tsx／signup/page.tsx／app/page.tsx／agent/page.tsx／admin/settings/page.tsx／checkout/page.tsx／login/page.tsx 共 9 個頁面共用）在三語系下正確渲染，並同步改寫 site-nav.tsx 與 apps/saas/app/app/page.tsx 對 packages/i18n 的呼叫方式，配合 4.3 的新 next-intl 介面，驗證方式：新增 SiteNav 渲染測試（斷言三語系下皆能正確渲染、無執行期錯誤）並轉綠燈，且 `pnpm --filter @startkiter/saas type-check` 通過
 
 ## 5. 登入/註冊 UI 重做
