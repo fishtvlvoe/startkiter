@@ -14,7 +14,7 @@
 - [x] 2.3 將 supastarter-nextjs-main/packages/ui/components 底下的 Button、Card、Badge、Input、Form 元件原始檔複製進 packages/ui/src/components/，滿足 Requirement「UI components come from the shared design system」，驗證方式：`pnpm --filter @startkiter/ui test` 轉綠燈
 - [x] 2.4 將 supastarter-nextjs-main/apps/saas/modules/shared/components/ColorModeToggle.tsx 複製進 packages/ui/src/components/color-mode-toggle.tsx 並調整 import 路徑，滿足 Requirement「Dark and light mode share the same component system」，驗證方式：元件測試綠燈且 `pnpm --filter @startkiter/ui type-check` 通過
 - [x] 2.5 撰寫測試並實作 Requirement「Design tokens are ported, not approximated」——將 supastarter-nextjs-main/apps/saas/app/globals.css 的 CSS 自訂屬性 token 段落（含 `@variant dark` 宣告）複製進 apps/saas/app/globals.css，驗證方式：讀取兩份檔案的 `--radius`（或對應改名後 token）自訂屬性字串值，兩者逐字相同
-- [ ] 2.6 更新 packages/ui/src/index.tsx 匯出新元件，移除 stub Panel 元件，驗證方式：`grep -rn "Panel" packages/ui/src apps/saas/app` 確認 apps/saas 內無任何頁面仍 import Panel
+- [x] 2.6 更新 packages/ui/src/index.tsx 匯出新元件，移除 stub Panel 元件，驗證方式：`grep -rn "Panel" packages/ui/src apps/saas/app` 確認 apps/saas 內無任何頁面仍 import Panel
 - [ ] 2.7 cross-impact 補強：保留 apps/saas/app/globals.css 現有的 `.hero`／`.button`／`.panel`／`.actions`／`.muted` class 不刪除、不改名（course、checkout、admin/settings、agent 等頁面仍在使用），且不在本 change 修改 apps/saas/app/course/、checkout/、admin/settings/、agent/ 底下任何頁面，驗證方式：`git diff --stat` 確認這些路徑下的檔案本次改動中皆為 0 異動，且用 ego-browser 開啟本機 /course、/checkout、/admin/settings、/agent 四個頁面，確認畫面樣式與改版前一致（未出現無樣式的裸版面）
 
 ## 3. 字體策略：DM Sans 接中文字體 fallback
