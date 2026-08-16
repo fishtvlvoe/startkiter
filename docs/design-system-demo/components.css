@@ -659,6 +659,146 @@
 	padding: 1.25rem;
 }
 
+.course-workspace {
+	display: grid;
+
+	grid-template-columns: 18rem minmax(0, 1fr);
+
+	gap: 1rem;
+
+	min-height: calc(100vh - 8rem);
+
+	align-items: start;
+}
+
+.lesson-rail {
+	padding: 0.75rem;
+}
+
+.lesson-rail h2 {
+	margin: 0 0.5rem 0.75rem;
+
+	font-size: 0.75rem;
+
+	font-weight: 600;
+
+	letter-spacing: 0.08em;
+
+	text-transform: uppercase;
+
+	color: var(--muted-foreground);
+}
+
+.lesson-item {
+	display: flex;
+
+	align-items: flex-start;
+
+	gap: 0.65rem;
+
+	padding: 0.7rem 0.75rem;
+
+	border-radius: 0.5rem;
+
+	color: var(--muted-foreground);
+
+	font-size: 0.875rem;
+}
+
+.lesson-item[aria-current="true"] {
+	background: var(--muted);
+
+	color: var(--foreground);
+
+	font-weight: 600;
+}
+
+.lesson-order {
+	display: grid;
+
+	place-items: center;
+
+	width: 1.5rem;
+
+	height: 1.5rem;
+
+	flex-shrink: 0;
+
+	border-radius: 9999px;
+
+	background: var(--secondary);
+
+	color: var(--secondary-foreground);
+
+	font-size: 0.7rem;
+
+	font-weight: 700;
+}
+
+.lesson-item[data-state="done"] .lesson-order {
+	background: var(--success);
+
+	color: var(--success-foreground);
+}
+
+.player-stage {
+	position: relative;
+
+	display: grid;
+
+	place-items: center;
+
+	aspect-ratio: 16 / 9;
+
+	border-radius: var(--radius);
+
+	background: var(--foreground);
+
+	color: var(--background);
+
+	overflow: hidden;
+}
+
+.dark .player-stage {
+	background: color-mix(in srgb, var(--card) 70%, black);
+}
+
+.player-play {
+	display: grid;
+
+	place-items: center;
+
+	width: 4rem;
+
+	height: 4rem;
+
+	border-radius: 9999px;
+
+	background: color-mix(in srgb, var(--background) 18%, transparent);
+
+	font-size: 1.5rem;
+}
+
+.progress-track {
+	height: 0.4rem;
+
+	border-radius: 9999px;
+
+	background: var(--muted);
+
+	overflow: hidden;
+}
+
+.progress-track > span {
+	display: block;
+
+	height: 100%;
+
+	width: 33.333%;
+
+	background: var(--primary);
+}
+
 @media (max-width: 900px) {
 	.feature-grid,
 	.highlight-grid,
@@ -667,7 +807,8 @@
 	.hero-screen-grid,
 	.hub-grid,
 	.app-shell,
-	.provider-grid {
+	.provider-grid,
+	.course-workspace {
 		grid-template-columns: 1fr;
 	}
 

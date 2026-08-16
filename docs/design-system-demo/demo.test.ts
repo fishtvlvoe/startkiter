@@ -87,4 +87,21 @@ describe("design-system HTML demos", () => {
 		expect(html).not.toMatch(/class="hero"/);
 		expect(html).not.toMatch(/class="button"/);
 	});
+
+	it("course demo has a lesson rail, player placeholder, progress, and catalog titles", () => {
+		const html = readDemo("course.html");
+
+		expect(html).toContain('data-test="color-mode-toggle"');
+		expect(html).toContain('href="tokens.css"');
+		expect(html).toContain('data-slot="sidebar"');
+		expect(html).toContain('data-slot="lesson-list"');
+		expect(html).toContain('data-slot="player"');
+		expect(html).toContain("開站包是什麼、為什麼要買斷");
+		expect(html).toContain("站殼、登入與結帳路徑");
+		expect(html).toContain("課程模組與權限閘門");
+		expect(html).toMatch(/1\s*\/\s*3/);
+		expect(html).not.toMatch(/class="hero"/);
+		expect(html).not.toMatch(/class="button"/);
+		expect(html).not.toMatch(/class="lesson-list"/);
+	});
 });

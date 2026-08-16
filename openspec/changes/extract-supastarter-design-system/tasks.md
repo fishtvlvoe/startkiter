@@ -1,9 +1,11 @@
 ## 1. Demo-first 驗證流程：先出 HTML demo 確認，再動真代碼
 
-- [ ] 1.1 用移植後的真實設計 token（見第 2 節）產出首頁靜態 HTML demo（淺色/深色雙模式），驗證方式：老闆在瀏覽器打開檔案人工確認，回覆「可以」才算完成
-- [ ] 1.2 產出登入/註冊頁靜態 HTML demo（淺色/深色雙模式），驗證方式：老闆人工確認回覆「可以」
-- [ ] 1.3 產出後台首頁（/app）靜態 HTML demo（淺色/深色雙模式），驗證方式：老闆人工確認回覆「可以」
-- [ ] 1.4 關卡：三頁 demo 全部確認通過後才能進入第 3 節（真代碼實作），驗證方式：確認 1.1-1.3 三個 checkbox 皆已勾選，且對話紀錄中老闆對三頁分別表示過同意
+- [x] 1.1 用移植後的真實設計 token（見第 2 節）產出首頁靜態 HTML demo（淺色/深色雙模式），驗證方式：老闆在瀏覽器打開檔案人工確認，回覆「可以」才算完成
+- [x] 1.2 產出登入/註冊頁靜態 HTML demo（淺色/深色雙模式），驗證方式：老闆人工確認回覆「可以」
+- [x] 1.3 產出後台首頁（/app）靜態 HTML demo（淺色/深色雙模式），驗證方式：老闆人工確認回覆「可以」
+- [x] 1.3b 老闆已對首頁／登入頁／後台首頁三頁 demo 明確回覆「可以」，驗證方式：對話紀錄留存確認
+- [ ] 1.5 產出後台課程觀看頁靜態 HTML demo（課程單元列表側欄＋播放區塊＋進度，淺色/深色雙模式），視覺與元件比照 1.3 後台首頁的設計語言，內容參考現有 apps/saas/app/course 頁面既有的課程單元/進度資訊結構，不照抄 THE-TU-Project 原本的視覺樣式，驗證方式：老闆在瀏覽器打開檔案人工確認，回覆「可以」才算完成。本 task 僅產出靜態 demo，不修改 apps/saas/app/course 底下的真實頁面（真實頁面改版留待後續 change，見 design.md Non-Goals）
+- [ ] 1.6 關卡：四頁 demo（首頁／登入頁／後台首頁／課程觀看頁）全部確認通過後才能進入第 2 節（元件庫移植與真代碼實作），驗證方式：確認 1.1-1.3、1.5 四個 demo checkbox 皆已勾選，且對話紀錄中老闆對四頁分別表示過同意
 
 ## 2. 元件庫移植方式：整包搬遷不是重新手刻
 
@@ -39,8 +41,9 @@
 ## 6. 前後台版面骨架
 
 - [ ] 6.1 撰寫測試：驗證 Requirement「Shell pages use the shared design system」——斷言 GET / 的 DOM 不包含僅靠 `.hero`／`.button` 這類頁面自製 class 提供樣式的元素，驗證方式：新增 DOM class 檢查測試，目前為紅燈
-- [ ] 6.2 依 1.1 確認過的首頁 demo，重寫 apps/saas/app/page.tsx，比照 supastarter.dev 版面語言（置中 Hero、徽章、打勾清單、雙 CTA、社會認同、功能深潛區塊），滿足 Requirement「Shell pages use the shared design system」，驗證方式：6.1 測試轉綠燈
-- [ ] 6.3 依 1.3 確認過的後台 demo，重寫 apps/saas/app/app/page.tsx，比照 demo.supastarter.dev 版面語言，驗證方式：`pnpm --filter @startkiter/saas test` 新增後台首頁渲染測試通過
+- [ ] 6.2 依 1.1 確認過的首頁 demo，重寫 apps/saas/app/page.tsx，比照 supastarter.dev 版面語言（置中 Hero、徽章、打勾清單、雙 CTA、社會認同、功能深潛區塊），滿足 Requirement「Shell pages use the shared design system」，驗證方式：6.1 測試轉綠燈，且立即用 ego-browser 截圖真實頁面與 1.1 demo 並排比對，逐項記錄有無落差（不等到第 10 節才比對）；若有落差立即修正，不得留到後續才處理
+- [ ] 6.3 依 1.3 確認過的後台 demo，重寫 apps/saas/app/app/page.tsx，比照 demo.supastarter.dev 版面語言，驗證方式：`pnpm --filter @startkiter/saas test` 新增後台首頁渲染測試通過，且立即用 ego-browser 截圖真實頁面與 1.3 demo 並排比對，逐項記錄有無落差；若有落差立即修正
+- [ ] 6.5 依 1.5 確認過的課程觀看頁 demo，重寫 apps/saas/app/course/page.tsx 與 course/[lessonId]/page.tsx，比照 1.5 demo 的版面語言，驗證方式：新增課程頁渲染測試通過，且立即用 ego-browser 截圖真實頁面與 1.5 demo 並排比對，逐項記錄有無落差；若有落差立即修正。本 task 與 tasks 2.7「本次不修改 course 頁面」的排除範圍不衝突——2.7 排除的是「不主動重做」，本 task 是因為 1.5 demo 已經走過老闆確認流程，才把課程頁納入本次真代碼範圍
 - [ ] 6.4 撰寫測試：驗證 Requirement「Marketing surface and app surface are not required to share identical layout」——比對 GET / 與 GET /app 兩者的色彩 CSS 自訂屬性計算值，斷言逐一相同，驗證方式：新增 token 一致性測試，確認前後台共用同一份設計 token
 
 ## 7. 買家擴充機制：輕量慣例文件，不採用 runtime plugin 框架（如 cordis）
