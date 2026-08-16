@@ -61,6 +61,6 @@
 
 ## 10. Review
 
-- [ ] 10.1 對第 2-6 節的程式碼變更跑一輪 correctness／security／performance 三角度 code review，驗證方式：Review 報告列出的 Critical 發現數為零，或所有 Critical 發現皆已修正
+- [ ] 10.1 對第 2-6 節的程式碼變更跑一輪 correctness／security／performance 三角度 code review，由 agy 在自己的 worktree 獨立審查（不是 Cursor 自審自己的 diff，避免球員兼裁判），審查對象為合併後 Cursor 分支的完整 diff（`git diff --stat feature/extract-supastarter-design-system...HEAD`），須等分支合併、Cursor 完成 6.2/6.3/6.5、Codex 完成 i18n 補完後才進行，CR 報告存成 `docs/cr-report-extract-supastarter-design-system.md` 並 commit，驗證方式：Review 報告列出的 Critical 發現數為零，或所有 Critical 發現皆已修正（若時間內修不完，明確列進最終報告不可含糊帶過）
 - [ ] 10.2 執行 `pnpm build` 與 `pnpm test` 全專案跑一次，驗證方式：兩個指令皆以 exit code 0 結束
 - [ ] 10.3 用 ego-browser 對本機 apps/saas 首頁、登入頁、後台首頁三頁分別截圖，逐頁比對是否與 1.1-1.3 確認過的 demo 視覺一致，驗證方式：三張截圖存檔並附上與 demo 的比對結論
