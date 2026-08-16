@@ -4,12 +4,12 @@
 - [x] 1.2 產出登入/註冊頁靜態 HTML demo（淺色/深色雙模式），驗證方式：老闆人工確認回覆「可以」
 - [x] 1.3 產出後台首頁（/app）靜態 HTML demo（淺色/深色雙模式），驗證方式：老闆人工確認回覆「可以」
 - [x] 1.3b 老闆已對首頁／登入頁／後台首頁三頁 demo 明確回覆「可以」，驗證方式：對話紀錄留存確認
-- [ ] 1.5 產出後台課程觀看頁靜態 HTML demo（課程單元列表側欄＋播放區塊＋進度，淺色/深色雙模式），視覺與元件比照 1.3 後台首頁的設計語言，內容參考現有 apps/saas/app/course 頁面既有的課程單元/進度資訊結構，不照抄 THE-TU-Project 原本的視覺樣式，驗證方式：老闆在瀏覽器打開檔案人工確認，回覆「可以」才算完成。本 task 僅產出靜態 demo，不修改 apps/saas/app/course 底下的真實頁面（真實頁面改版留待後續 change，見 design.md Non-Goals）
-- [ ] 1.6 關卡：四頁 demo（首頁／登入頁／後台首頁／課程觀看頁）全部確認通過後才能進入第 2 節（元件庫移植與真代碼實作），驗證方式：確認 1.1-1.3、1.5 四個 demo checkbox 皆已勾選，且對話紀錄中老闆對四頁分別表示過同意
+- [x] 1.5 產出後台課程觀看頁靜態 HTML demo（課程單元列表側欄＋播放區塊＋進度，淺色/深色雙模式），視覺與元件比照 1.3 後台首頁的設計語言，內容參考現有 apps/saas/app/course 頁面既有的課程單元/進度資訊結構，不照抄 THE-TU-Project 原本的視覺樣式，驗證方式：老闆在瀏覽器打開檔案人工確認，回覆「可以」才算完成。本 task 僅產出靜態 demo，不修改 apps/saas/app/course 底下的真實頁面（真實頁面改版留待後續 change，見 design.md Non-Goals）
+- [x] 1.6 關卡：四頁 demo（首頁／登入頁／後台首頁／課程觀看頁）全部確認通過後才能進入第 2 節（元件庫移植與真代碼實作），驗證方式：確認 1.1-1.3、1.5 四個 demo checkbox 皆已勾選，且對話紀錄中老闆對四頁分別表示過同意
 
 ## 2. 元件庫移植方式：整包搬遷不是重新手刻
 
-- [ ] 2.1 [P] 比對 supastarter-nextjs-main 與 StartKiter 兩邊 package.json 的 Next.js／React／Tailwind／Radix UI 版本號，列出版本落差清單，驗證方式：產出一份版本比對表，每個套件標示「相同/StartKiter 較舊/StartKiter 較新」
+- [x] 2.1 [P] 比對 supastarter-nextjs-main 與 StartKiter 兩邊 package.json 的 Next.js／React／Tailwind／Radix UI 版本號，列出版本落差清單，驗證方式：產出一份版本比對表，每個套件標示「相同/StartKiter 較舊/StartKiter 較新」
 - [ ] 2.2 撰寫測試：驗證 Requirement「UI components come from the shared design system」——對 packages/ui 匯出的 Button、Card、Badge、Input、Form、ColorModeToggle 元件各寫一個渲染測試，斷言元件輸出的 DOM 帶有 `data-slot` 屬性，驗證方式：`pnpm --filter @startkiter/ui test` 目前為紅燈（元件尚未存在）
 - [ ] 2.3 將 supastarter-nextjs-main/packages/ui/components 底下的 Button、Card、Badge、Input、Form 元件原始檔複製進 packages/ui/src/components/，滿足 Requirement「UI components come from the shared design system」，驗證方式：`pnpm --filter @startkiter/ui test` 轉綠燈
 - [ ] 2.4 將 supastarter-nextjs-main/apps/saas/modules/shared/components/ColorModeToggle.tsx 複製進 packages/ui/src/components/color-mode-toggle.tsx 並調整 import 路徑，滿足 Requirement「Dark and light mode share the same component system」，驗證方式：元件測試綠燈且 `pnpm --filter @startkiter/ui type-check` 通過
