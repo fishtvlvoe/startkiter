@@ -10,7 +10,7 @@
 ## 2. 元件庫移植方式：整包搬遷不是重新手刻
 
 - [x] 2.1 [P] 比對 supastarter-nextjs-main 與 StartKiter 兩邊 package.json 的 Next.js／React／Tailwind／Radix UI 版本號，列出版本落差清單，驗證方式：產出一份版本比對表，每個套件標示「相同/StartKiter 較舊/StartKiter 較新」
-- [ ] 2.2 撰寫測試：驗證 Requirement「UI components come from the shared design system」——對 packages/ui 匯出的 Button、Card、Badge、Input、Form、ColorModeToggle 元件各寫一個渲染測試，斷言元件輸出的 DOM 帶有 `data-slot` 屬性，驗證方式：`pnpm --filter @startkiter/ui test` 目前為紅燈（元件尚未存在）
+- [x] 2.2 撰寫測試：驗證 Requirement「UI components come from the shared design system」——對 packages/ui 匯出的 Button、Card、Badge、Input、Form、ColorModeToggle 元件各寫一個渲染測試，斷言元件輸出的 DOM 帶有 `data-slot` 屬性，驗證方式：`pnpm --filter @startkiter/ui test` 目前為紅燈（元件尚未存在）
 - [ ] 2.3 將 supastarter-nextjs-main/packages/ui/components 底下的 Button、Card、Badge、Input、Form 元件原始檔複製進 packages/ui/src/components/，滿足 Requirement「UI components come from the shared design system」，驗證方式：`pnpm --filter @startkiter/ui test` 轉綠燈
 - [ ] 2.4 將 supastarter-nextjs-main/apps/saas/modules/shared/components/ColorModeToggle.tsx 複製進 packages/ui/src/components/color-mode-toggle.tsx 並調整 import 路徑，滿足 Requirement「Dark and light mode share the same component system」，驗證方式：元件測試綠燈且 `pnpm --filter @startkiter/ui type-check` 通過
 - [ ] 2.5 撰寫測試並實作 Requirement「Design tokens are ported, not approximated」——將 supastarter-nextjs-main/apps/saas/app/globals.css 的 CSS 自訂屬性 token 段落（含 `@variant dark` 宣告）複製進 apps/saas/app/globals.css，驗證方式：讀取兩份檔案的 `--radius`（或對應改名後 token）自訂屬性字串值，兩者逐字相同
