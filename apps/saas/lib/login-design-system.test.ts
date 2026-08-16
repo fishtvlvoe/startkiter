@@ -8,10 +8,10 @@ describe("login uses the shared design system", () => {
 		const html = await response.text();
 
 		expect(response.status).toBe(200);
-		expect(html).toMatch(/type="email"[\s\S]{0,200}data-slot="input"|data-slot="input"[\s\S]{0,200}type="email"/);
+		expect(html).toMatch(/<input[^>]*type="email"[^>]*data-slot="input"|<input[^>]*data-slot="input"[^>]*type="email"/);
 		expect(html).toMatch(
-			/type="password"[\s\S]{0,200}data-slot="input"|data-slot="input"[\s\S]{0,200}type="password"/,
+			/<input[^>]*type="password"[^>]*data-slot="input"|<input[^>]*data-slot="input"[^>]*type="password"/,
 		);
-		expect(html).toMatch(/type="submit"[\s\S]{0,200}data-slot="button"|data-slot="button"[\s\S]{0,200}type="submit"/);
+		expect(html).toMatch(/<button[^>]*data-slot="button"[^>]*type="submit"/);
 	});
 });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Button, Form, Input } from "@startkiter/ui";
 
 type AuthMode = "sign-in" | "sign-up";
 
@@ -112,31 +113,33 @@ export function LoginForm({
 
 	return (
 		<>
-			<form className="form" onSubmit={submit}>
-				{isSignUp ? (
+			<Form>
+				<form className="form" onSubmit={submit}>
+					{isSignUp ? (
+						<label>
+							名稱
+							<Input name="name" autoComplete="name" required />
+						</label>
+					) : null}
 					<label>
-						名稱
-						<input name="name" autoComplete="name" required />
+						Email
+						<Input name="email" type="email" autoComplete="email" required />
 					</label>
-				) : null}
-				<label>
-					Email
-					<input name="email" type="email" autoComplete="email" required />
-				</label>
-				<label>
-					密碼
-					<input
-						name="password"
-						type="password"
-						minLength={8}
-						autoComplete={isSignUp ? "new-password" : "current-password"}
-						required
-					/>
-				</label>
-				<button className="button" type="submit">
-					{isSignUp ? "建立帳號" : "登入"}
-				</button>
-			</form>
+					<label>
+						密碼
+						<Input
+							name="password"
+							type="password"
+							minLength={8}
+							autoComplete={isSignUp ? "new-password" : "current-password"}
+							required
+						/>
+					</label>
+					<Button type="submit" variant="primary">
+						{isSignUp ? "建立帳號" : "登入"}
+					</Button>
+				</form>
+			</Form>
 			{error ? (
 				<p className="error" role="alert">
 					{error}
@@ -145,14 +148,14 @@ export function LoginForm({
 			{!isSignUp && (googleEnabled || lineEnabled) ? (
 				<div className="provider-actions" aria-label="社群登入">
 					{googleEnabled ? (
-						<button className="button secondary" type="button" onClick={() => socialSignIn("google")}>
+						<Button className="button secondary" type="button" variant="outline" onClick={() => socialSignIn("google")}>
 							使用 Google 登入
-						</button>
+						</Button>
 					) : null}
 					{lineEnabled ? (
-						<button className="button secondary" type="button" onClick={() => socialSignIn("line")}>
+						<Button className="button secondary" type="button" variant="outline" onClick={() => socialSignIn("line")}>
 							使用 LINE 登入
-						</button>
+						</Button>
 					) : null}
 				</div>
 			) : null}
