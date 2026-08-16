@@ -216,6 +216,10 @@
 	cursor: pointer;
 }
 
+.color-mode-toggle > [aria-hidden="true"] {
+	display: none;
+}
+
 .color-mode-toggle button[aria-pressed="true"] {
 	color: var(--foreground);
 
@@ -249,6 +253,10 @@
 	font-weight: 700;
 
 	letter-spacing: -0.03em;
+
+	color: var(--foreground);
+
+	text-decoration: none;
 }
 
 .brand-mark {
@@ -631,6 +639,8 @@
 	color: var(--muted-foreground);
 
 	font-size: 0.875rem;
+
+	text-decoration: none;
 }
 
 .app-nav a[aria-current="page"] {
@@ -823,6 +833,8 @@
 	color: var(--muted-foreground);
 
 	font-size: 0.875rem;
+
+	text-decoration: none;
 }
 
 .lesson-item[aria-current="true"] {

@@ -56,7 +56,10 @@ export function ColorModeToggle() {
 	return (
 		<TooltipProvider delayDuration={0}>
 			<div
-				className="gap-0 p-0.5 relative inline-flex items-center rounded-full bg-muted"
+				className={cn(
+					"color-mode-toggle",
+					"gap-0 p-0.5 relative inline-flex items-center rounded-full bg-muted",
+				)}
 				data-slot="color-mode-toggle"
 				data-test="color-mode-toggle"
 			>

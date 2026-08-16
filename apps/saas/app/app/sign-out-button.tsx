@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@startkiter/ui";
+
 export function SignOutButton() {
 	async function onClick() {
 		await fetch("/api/auth/sign-out", { method: "POST" });
@@ -7,8 +9,8 @@ export function SignOutButton() {
 	}
 
 	return (
-		<button type="button" className="button secondary" onClick={onClick} style={{ padding: "6px 12px" }}>
+		<Button type="button" variant="outline" className="ds-btn" data-variant="outline" data-size="md" onClick={onClick}>
 			登出
-		</button>
+		</Button>
 	);
 }
