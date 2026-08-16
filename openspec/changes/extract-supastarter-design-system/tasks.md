@@ -34,7 +34,7 @@
 
 ## 5. 登入/註冊 UI 重做
 
-- [ ] 5.1 撰寫測試：驗證 Requirement「Login and signup forms use the shared design system」——斷言 GET /login 渲染出的 email input、password input、submit button 帶有 design-system 元件的 `data-slot` 屬性，驗證方式：新增元件屬性測試，目前為紅燈
+- [x] 5.1 撰寫測試：驗證 Requirement「Login and signup forms use the shared design system」——斷言 GET /login 渲染出的 email input、password input、submit button 帶有 design-system 元件的 `data-slot` 屬性，驗證方式：新增元件屬性測試，目前為紅燈
 - [ ] 5.2 用第 2 節移植好的 Input／Button／Form 元件重寫 apps/saas/app/login/login-form.tsx 與 signup/page.tsx，滿足 Requirement「Login and signup forms use the shared design system」，驗證方式：5.1 測試轉綠燈
 - [ ] 5.3 驗證 Requirement「Auth provider list is structurally extensible」——把 Google、LINE 登入按鈕改為從一份 provider 清單陣列渲染，而非各自寫死的 JSX 區塊，驗證方式：新增一個測試 provider 項目到清單陣列，斷言登入頁渲染出對應按鈕且未修改頁面版面程式碼其他部分
 
