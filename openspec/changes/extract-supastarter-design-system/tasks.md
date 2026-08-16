@@ -50,8 +50,8 @@
 
 ## 8. 一鍵部署設定
 
-- [ ] 8.1 建立 Zeabur 部署設定檔（deploy/zeabur.yaml 或等價 manifest），滿足 Requirement「Repository provides a one-click deploy path」——宣告 PostgreSQL 相依與 BETTER_AUTH_URL、DATABASE_URL 必要環境變數，驗證方式：設定檔內容經 YAML/JSON 格式驗證且包含上述宣告
-- [ ] 8.2 在 README.md 加入一鍵部署按鈕與說明，滿足 Requirement「Repository provides a one-click deploy path」，驗證方式：README 內含指向部署設定的連結或按鈕圖片
+- [x] 8.1 建立 Zeabur 部署設定檔（deploy/zeabur.yaml 或等價 manifest），滿足 Requirement「Repository provides a one-click deploy path」——宣告 PostgreSQL 相依與 BETTER_AUTH_URL、DATABASE_URL 必要環境變數，驗證方式：設定檔內容經 YAML/JSON 格式驗證且包含上述宣告
+- [x] 8.2 在 README.md 加入一鍵部署按鈕與說明，滿足 Requirement「Repository provides a one-click deploy path」，驗證方式：README 內含指向部署設定的連結或按鈕圖片
 - [ ] 8.3 驗證 Requirement「One-click deploy succeeds without payment or OAuth keys configured」——用該部署設定在 Zeabur 建立一次全新測試部署，只設定 DATABASE_URL 與 BETTER_AUTH_SECRET，驗證方式：對部署後的網址發送 GET / 請求，回應 200 且不是 500，完成驗證後可視情況保留或關閉該測試部署
 
 ## 9. v1-scope-boundary 文件更新
