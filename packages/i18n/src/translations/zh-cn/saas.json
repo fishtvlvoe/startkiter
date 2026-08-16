@@ -1,0 +1,10 @@
+{
+	"account": {
+		"title": "账号",
+		"courseActive": "课程：已开通",
+		"courseInactive": "课程：尚未购买",
+		"enterCourse": "进入课程",
+		"buyCourse": "购买开站包 NT$8,800",
+		"signOut": "退出登录"
+	}
+}

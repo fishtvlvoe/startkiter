@@ -1,0 +1,10 @@
+{
+	"account": {
+		"title": "Account",
+		"courseActive": "Course: active",
+		"courseInactive": "Course: not purchased",
+		"enterCourse": "Open course",
+		"buyCourse": "Buy the StartKiter package NT$8,800",
+		"signOut": "Log out"
+	}
+}

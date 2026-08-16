@@ -1,0 +1,29 @@
+{
+	"brand": "开站包",
+	"navigation": {
+		"login": "登录",
+		"signup": "注册",
+		"course": "课程",
+		"purchase": "购买",
+		"purchaseStatus": "购买状态",
+		"assistant": "助手",
+		"account": "账号",
+		"settings": "设置"
+	},
+	"auth": {
+		"name": "名称",
+		"email": "Email",
+		"password": "密码",
+		"createAccount": "创建账号",
+		"signIn": "登录",
+		"google": "使用 Google 登录",
+		"line": "使用 LINE 登录",
+		"socialLogin": "社交登录",
+		"noAccount": "还没有账号？",
+		"hasAccount": "已经有账号？",
+		"signInError": "Email 或密码不正确。",
+		"signUpError": "无法创建账号，请检查资料后再试。",
+		"socialError": "这个登录方式目前无法使用。",
+		"networkError": "网络异常，请稍后再试。"
+	}
+}

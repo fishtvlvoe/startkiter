@@ -35,3 +35,17 @@ describe("locale fallback", () => {
 		expect(messages.home.hero.title).not.toBe("home.hero.title");
 	});
 });
+
+describe("launch message catalogs", () => {
+	it.each([
+		["zh-tw", "一次買斷，帶走課與終身代碼包"],
+		["zh-cn", "一次买断，带走课程与终身代码包"],
+		["en", "Buy once. Take the course and lifetime code package with you."],
+	] as const)("loads the %s homepage catalog", async (locale, expectedTitle) => {
+		const messages = await getMessagesForLocale<{
+			home: { title: string };
+		}>(locale, "marketing");
+
+		expect(messages.home.title).toBe(expectedTitle);
+	});
+});

@@ -1,0 +1,14 @@
+{
+	"home": {
+		"title": "Buy once. Take the course and lifetime code package with you.",
+		"description": "Learn to turn an AI service into your own site. Pay once: NT$8,800 for the course and GitHub code package.",
+		"buyCta": "Buy the StartKiter package NT$8,800",
+		"loginCta": "Already have an account? Log in"
+	},
+	"auth": {
+		"loginTitle": "Log in",
+		"loginDescription": "Use your email and password to enter StartKiter.",
+		"signupTitle": "Create an account",
+		"signupDescription": "Create an account to buy the StartKiter package and get the course with lifetime code access."
+	}
+}
