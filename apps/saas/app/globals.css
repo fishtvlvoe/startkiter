@@ -132,8 +132,8 @@
 	--radius-md: 8px;
 	--radius-lg: 12px;
 	--radius-xl: 16px;
-	--font-display: var(--font-display-loaded), "Fira Sans", "Noto Sans TC", system-ui, sans-serif;
-	--font-body: var(--font-body-loaded), "Noto Sans TC", system-ui, -apple-system, sans-serif;
+	--font-display: var(--font-display-loaded), "DM Sans", "Noto Sans TC", system-ui, sans-serif;
+	--font-body: var(--font-display-loaded), var(--font-body-loaded), "DM Sans", "Noto Sans TC", sans-serif;
 	--ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -153,7 +153,7 @@ body {
 		radial-gradient(900px 500px at 90% 0%, rgb(16 185 129 / 10%), transparent 50%),
 		var(--background);
 	color: var(--on-background);
-	font-family: var(--font-body);
+	font-family: "DM Sans", "Noto Sans TC", sans-serif;
 	line-height: 1.5;
 }
 

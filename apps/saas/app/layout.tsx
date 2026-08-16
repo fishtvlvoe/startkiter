@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Fira_Sans, Noto_Sans_TC } from "next/font/google";
+import { DM_Sans, Noto_Sans_TC } from "next/font/google";
 
 import { SiteFooter, resolveSupportEmail } from "./components/site-footer";
 import "./globals.css";
 
-const display = Fira_Sans({
+const display = DM_Sans({
 	subsets: ["latin"],
-	weight: ["600", "700"],
+	weight: ["400", "500", "600", "700"],
 	variable: "--font-display-loaded",
 	display: "swap",
 });
@@ -28,7 +28,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 
 	return (
 		<html lang="zh-TW" className={`${display.variable} ${body.variable}`}>
-			<body style={{ fontFamily: "var(--font-body-loaded), var(--font-body)" }}>
+			<body style={{ fontFamily: 'var(--font-display-loaded), var(--font-body-loaded), "DM Sans", "Noto Sans TC", sans-serif' }}>
 				{children}
 				<SiteFooter supportEmail={supportEmail} />
 			</body>
