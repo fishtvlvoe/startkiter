@@ -18,5 +18,8 @@ describe("app home uses the shared app shell", () => {
 		expect(shellSrc).toContain("data-test=\"sidebar-collapse-toggle\"");
 		expect(shellSrc).toContain("ColorModeToggle");
 		expect(shellSrc).toContain("LocaleSwitcher");
+		expect(src).toContain("shouldShowOperatorSettingsLink");
+		expect(shellSrc).toContain("showOperatorSettings");
+		expect(shellSrc).toMatch(/showOperatorSettings\s*\?/);
 	});
 });

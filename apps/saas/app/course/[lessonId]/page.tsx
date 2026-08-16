@@ -8,6 +8,7 @@ import { getMessagesForLocale } from "@startkiter/i18n";
 import { Button } from "@startkiter/ui";
 
 import { userHasCourseAccess } from "../../../lib/course-access";
+import { shouldShowOperatorSettingsLink } from "../../../lib/operator";
 import { getRequestLocale } from "../../../lib/request-locale";
 import { AppShell } from "../../components/app-shell";
 import { CourseWorkspace } from "../course-workspace";
@@ -38,6 +39,11 @@ export default async function LessonPage({ params }: PageProps) {
 	const locale = await getRequestLocale();
 	const messages = await getMessagesForLocale<NavMessages>(locale, "saas");
 	const lessons = listLessons();
+	const showOperatorSettings = shouldShowOperatorSettingsLink(
+		true,
+		session.user.email,
+		process.env.ADMIN_EMAIL,
+	);
 
 	if (decision.status === "forbidden") {
 		return (
@@ -48,6 +54,7 @@ export default async function LessonPage({ params }: PageProps) {
 					name={session.user.name}
 					locale={locale}
 					current="course"
+					showOperatorSettings={showOperatorSettings}
 					heading={
 						<>
 							<p className="ds-muted" style={{ margin: 0, fontSize: "0.75rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>
@@ -83,6 +90,7 @@ export default async function LessonPage({ params }: PageProps) {
 				name={session.user.name}
 				locale={locale}
 				current="course"
+				showOperatorSettings={showOperatorSettings}
 				heading={
 					<>
 						<p className="ds-muted" style={{ margin: 0, fontSize: "0.75rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>

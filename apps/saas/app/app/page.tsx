@@ -7,6 +7,7 @@ import { getMessagesForLocale } from "@startkiter/i18n";
 import { Button, Card } from "@startkiter/ui";
 
 import { userHasCourseAccess } from "../../lib/course-access";
+import { shouldShowOperatorSettingsLink } from "../../lib/operator";
 import { getRequestLocale } from "../../lib/request-locale";
 import { AppShell } from "../components/app-shell";
 import { SignOutButton } from "./sign-out-button";
@@ -32,6 +33,11 @@ export default async function AccountPage() {
 	const entitled = await userHasCourseAccess(session.user.id);
 	const locale = await getRequestLocale();
 	const messages = await getMessagesForLocale<AccountMessages>(locale, "saas");
+	const showOperatorSettings = shouldShowOperatorSettingsLink(
+		true,
+		session.user.email,
+		process.env.ADMIN_EMAIL,
+	);
 
 	return (
 		<main className="app-main-root">
@@ -41,6 +47,7 @@ export default async function AccountPage() {
 				name={session.user.name}
 				locale={locale}
 				current="app"
+				showOperatorSettings={showOperatorSettings}
 				heading={
 					<>
 						<p className="ds-muted" style={{ margin: 0, fontSize: "0.75rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>

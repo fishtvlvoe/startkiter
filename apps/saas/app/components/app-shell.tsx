@@ -18,6 +18,7 @@ export function AppShell({
 	name,
 	locale,
 	current,
+	showOperatorSettings = false,
 	heading,
 	children,
 }: {
@@ -26,6 +27,7 @@ export function AppShell({
 	name?: string | null;
 	locale: Locale;
 	current: AppShellCurrent;
+	showOperatorSettings?: boolean;
 	heading: React.ReactNode;
 	children: React.ReactNode;
 }) {
@@ -82,12 +84,14 @@ export function AppShell({
 						</span>
 						<span className="nav-label">站內客服</span>
 					</Link>
-					<Link href="/admin/settings" aria-current={current === "settings" ? "page" : undefined} aria-label="帳號設定">
-						<span className="nav-icon" aria-hidden="true">
-							⚙
-						</span>
-						<span className="nav-label">帳號設定</span>
-					</Link>
+					{showOperatorSettings ? (
+						<Link href="/admin/settings" aria-current={current === "settings" ? "page" : undefined} aria-label="帳號設定">
+							<span className="nav-icon" aria-hidden="true">
+								⚙
+							</span>
+							<span className="nav-label">帳號設定</span>
+						</Link>
+					) : null}
 					<span className="nav-placeholder" data-slot="course-admin" title="課程內容管理・下一輪 change 接上" aria-disabled="true">
 						<span className="nav-icon" aria-hidden="true">
 							▦
