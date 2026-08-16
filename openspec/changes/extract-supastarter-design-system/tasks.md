@@ -21,7 +21,7 @@
 
 - [x] 3.1 撰寫測試：驗證 Requirement「Chinese text renders with a CJK font fallback」——斷言 apps/saas/app/globals.css 內每個包含 DM Sans 的 `font-family` 宣告，緊接在 DM Sans 後面的下一個字體名稱為 Noto Sans TC，驗證方式：新增一支 CSS 解析測試，目前為紅燈
 - [x] 3.2 在 globals.css 的 font-family 宣告加入 Noto Sans TC fallback 並設定字體來源（Google Fonts 或自架），滿足 Requirement「Chinese text renders with a CJK font fallback」，驗證方式：3.1 測試轉綠燈
-- [ ] 3.3 用 ego-browser 開啟本機 apps/saas 首頁，截圖比對「取得開站包 NT$8,800」這類中英混排文字，人工確認字重/基線一致，驗證方式：截圖存檔並附上人工確認結論
+- [x] 3.3 用 ego-browser 開啟本機 apps/saas 首頁，截圖比對「取得開站包 NT$8,800」這類中英混排文字，人工確認字重/基線一致，驗證方式：截圖存檔並附上人工確認結論
 
 ## 4. 多語系架構：沿用 supastarter 的 next-intl，不用其他 i18n 套件
 
