@@ -59,7 +59,7 @@
 
 ## 9. v1-scope-boundary 文件更新
 
-- [ ] 9.1 更新 openspec/config.yaml 的 context 段落，滿足 Requirement「v1 take-home capabilities」——移除「i18n 只留 zh-TW」的舊規則描述，改為反映多語系起跳的現行狀態，驗證方式：`spectra validate extract-supastarter-design-system` 通過且無 Critical 發現
+- [x] 9.1 更新 openspec/config.yaml 的 context 段落，滿足 Requirement「v1 take-home capabilities」——移除「i18n 只留 zh-TW」的舊規則描述，改為反映多語系起跳的現行狀態，驗證方式：`spectra validate extract-supastarter-design-system` 通過且無 Critical 發現
 - [ ] 9.2 驗證 Requirement「Feature scope expansion beyond this change requires an explicit decision record」——在 proposal 或既有溝通紀錄中，明確請老闆對 Open Questions（Organization 多租戶、電子發票範圍、已封存 changes 與本次方向的關係）逐項給裁決，驗證方式：三項 Open Questions 都取得老闆明確回覆，並記錄於後續 change 或本 change 的補充註記中
 
 ## 10. Review
