@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 const demoDir = dirname(fileURLToPath(import.meta.url));
 
 const sourceThemePath =
-	"/Users/fishtv/Development/supastarter-nextjs-main/tooling/tailwind/theme.css";
+	"/Users/fishtv/Development/products/startkiter/code/supastarter-nextjs-main/tooling/tailwind/theme.css";
 
 function readDemo(name: string) {
 	return readFileSync(resolve(demoDir, name), "utf8");
