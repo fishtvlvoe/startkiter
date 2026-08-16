@@ -48,6 +48,12 @@ LINE Login Channel 做登入。學員社群是邀請連結，不能靜默入群�
 
 盯 `startkiter.com`，備案 `startkiter.me`。下單前再查 whois。沒買到先用 Zeabur 子網域，不准借 libon.me。
 
+【一鍵部署】
+
+[![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/new?template=https%3A%2F%2Fgithub.com%2Ffishtvlvoe%2Fstartkiter)
+
+點擊上方按鈕即可在 Zeabur 一鍵建立 StartKiter 全端服務與 PostgreSQL 資料庫。部署設定檔位於 [`deploy/zeabur.yaml`](./deploy/zeabur.yaml)，會自動建立 PostgreSQL 相依與 `DATABASE_URL`、`BETTER_AUTH_URL`、`BETTER_AUTH_SECRET` 等環境變數配置。
+
 【下一步】
 
 對齊文件後，施工 `extract-github-kit-fulfillment`（`/spectra-apply extract-github-kit-fulfillment`）。不要在 Development 根目錄開施工單。不要改來源 repo。產品衝突以 `openspec/specs/` 為準，不以 `docs/discuss/` 舊稿為準。

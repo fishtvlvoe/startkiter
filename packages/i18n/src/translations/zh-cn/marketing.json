@@ -1,0 +1,17 @@
+{
+	"home": {
+		"hero": {
+			"title": "已经在用 AI 做事的人，需要的是一套 SaaS 开站包"
+		},
+		"title": "一次买断，带走课程与终身代码包",
+		"description": "教你把 AI 服务做成自己的站。付一次 NT$8,800，课程与 GitHub 代码包一起到手。",
+		"buyCta": "购买开站包 NT$8,800",
+		"loginCta": "已有账号，登录"
+	},
+	"auth": {
+		"loginTitle": "登录",
+		"loginDescription": "使用 email 和密码进入开站包。",
+		"signupTitle": "创建账号",
+		"signupDescription": "注册后即可购买开站包，一次带走课程与终身代码包。"
+	}
+}

@@ -1,0 +1,29 @@
+{
+	"brand": "StartKiter",
+	"navigation": {
+		"login": "Log in",
+		"signup": "Sign up",
+		"course": "Course",
+		"purchase": "Purchase",
+		"purchaseStatus": "Purchase status",
+		"assistant": "Assistant",
+		"account": "Account",
+		"settings": "Settings"
+	},
+	"auth": {
+		"name": "Name",
+		"email": "Email",
+		"password": "Password",
+		"createAccount": "Create account",
+		"signIn": "Log in",
+		"google": "Continue with Google",
+		"line": "Continue with LINE",
+		"socialLogin": "Social login",
+		"noAccount": "Don't have an account?",
+		"hasAccount": "Already have an account?",
+		"signInError": "Email or password is incorrect.",
+		"signUpError": "We could not create your account. Check your details and try again.",
+		"socialError": "This sign-in method is not available right now.",
+		"networkError": "A network error occurred. Please try again later."
+	}
+}
