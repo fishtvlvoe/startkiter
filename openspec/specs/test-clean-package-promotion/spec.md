@@ -2,7 +2,7 @@
 
 ## Purpose
 
-TBD - created by archiving change 'test-to-clean-package-promotion'. Update Purpose after archive.
+Define the three-repository boundary that keeps StartKiter's dogfood development environment from leaking into what customers receive: a private TEST repository for dirty deploy testing, a separate clean install-package repository shipped to customers (comparable in cleanliness to the purchased supastarter starter kit), and the unrelated learner lifetime kit fulfillment line. Material MUST move from TEST into the clean install-package repository only through an explicit promotion checklist — renaming or repointing the dirty TEST repository to serve customers directly is forbidden. This capability is the SSOT for what belongs in each repository and how hotfixes flow between them.
 
 ## Requirements
 
