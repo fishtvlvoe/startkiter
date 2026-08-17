@@ -31,6 +31,7 @@ import { usePermissions } from "@shared/components/PermixProvider";
 import { UserMenu } from "@shared/components/UserMenu";
 import {
 	BotMessageSquareIcon,
+	BookOpenIcon,
 	ChevronLeftIcon,
 	ChevronRightIcon,
 	HomeIcon,
@@ -386,6 +387,12 @@ export function NavBar() {
 				href: startHref,
 				icon: HomeIcon,
 				isActive: pathname === "/" || pathname === basePath,
+			},
+			{
+				label: "課程",
+				href: "/course",
+				icon: BookOpenIcon,
+				isActive: pathname.startsWith("/course"),
 			},
 			{
 				label: t("app.menu.aiChatbot"),

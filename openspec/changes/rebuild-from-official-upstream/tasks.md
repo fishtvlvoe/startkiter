@@ -25,8 +25,8 @@
 
 ## 6. 業務邏輯遷移：course
 
-- [ ] 6.1 從 `legacy/packages/course` 複製到新建的 `packages/course`，在新底座重新接線課程相關頁面與 route，驗證方式：`legacy/packages/course/src/*.test.ts`（access/catalog/playback/line-invite）對應測試在新底座執行全部通過
-- [ ] 6.2 對照 `openspec/specs/course-module/spec.md`、`course-media-playback/spec.md` 逐一驗證每個 Scenario，驗證方式：產出驗證記錄，全部標記通過
+- [x] 6.1 從 `legacy/packages/course` 複製到新建的 `packages/course`，在新底座重新接線課程相關頁面與 route，驗證方式：`legacy/packages/course/src/*.test.ts`（access/catalog/playback/line-invite）對應測試在新底座執行全部通過
+- [x] 6.2 對照 `openspec/specs/course-module/spec.md`、`course-media-playback/spec.md` 逐一驗證每個 Scenario，驗證方式：產出驗證記錄，全部標記通過
 
 ## 7. 業務邏輯遷移：github-kit
 
