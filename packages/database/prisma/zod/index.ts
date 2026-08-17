@@ -82,6 +82,24 @@ export const UserNotificationPreferenceScalarFieldEnumSchema = z.enum(['id', 'us
 
 export type UserNotificationPreferenceScalarFieldEnum = z.infer<typeof UserNotificationPreferenceScalarFieldEnumSchema>;
 
+// File: OrderScalarFieldEnum.schema.ts
+
+export const OrderScalarFieldEnumSchema = z.enum(['id', 'orderNo', 'userId', 'sku', 'amount', 'currency', 'status', 'paymentGateway', 'gatewayTradeNo', 'courseAccess', 'kitClaimEligible', 'paidAt', 'refundedAt', 'createdAt', 'updatedAt'])
+
+export type OrderScalarFieldEnum = z.infer<typeof OrderScalarFieldEnumSchema>;
+
+// File: GithubKitGrantScalarFieldEnum.schema.ts
+
+export const GithubKitGrantScalarFieldEnumSchema = z.enum(['id', 'userId', 'githubUserId', 'githubLogin', 'org', 'repo', 'permission', 'status', 'orderNo', 'createdAt', 'updatedAt'])
+
+export type GithubKitGrantScalarFieldEnum = z.infer<typeof GithubKitGrantScalarFieldEnumSchema>;
+
+// File: SiteSettingScalarFieldEnum.schema.ts
+
+export const SiteSettingScalarFieldEnumSchema = z.enum(['id', 'ciphertext', 'updatedAt', 'updatedBy'])
+
+export type SiteSettingScalarFieldEnum = z.infer<typeof SiteSettingScalarFieldEnumSchema>;
+
 // File: SortOrder.schema.ts
 
 export const SortOrderSchema = z.enum(['asc', 'desc'])
@@ -129,6 +147,18 @@ export type NotificationType = z.infer<typeof NotificationTypeSchema>;
 export const NotificationTargetSchema = z.enum(['IN_APP', 'EMAIL'])
 
 export type NotificationTarget = z.infer<typeof NotificationTargetSchema>;
+
+// File: OrderStatus.schema.ts
+
+export const OrderStatusSchema = z.enum(['pending', 'paid', 'refunded'])
+
+export type OrderStatus = z.infer<typeof OrderStatusSchema>;
+
+// File: GithubKitGrantStatus.schema.ts
+
+export const GithubKitGrantStatusSchema = z.enum(['invited', 'accepted', 'revoked', 'failed'])
+
+export type GithubKitGrantStatus = z.infer<typeof GithubKitGrantStatusSchema>;
 
 // File: User.schema.ts
 
@@ -329,4 +359,58 @@ export const UserNotificationPreferenceSchema = z.object({
 });
 
 export type UserNotificationPreferenceType = z.infer<typeof UserNotificationPreferenceSchema>;
+
+
+// File: Order.schema.ts
+
+export const OrderSchema = z.object({
+  id: z.string(),
+  orderNo: z.string(),
+  userId: z.string(),
+  sku: z.string(),
+  amount: z.number().int(),
+  currency: z.string().default("TWD"),
+  status: OrderStatusSchema.default("pending"),
+  paymentGateway: z.string().default("payuni"),
+  gatewayTradeNo: z.string().nullish(),
+  courseAccess: z.boolean(),
+  kitClaimEligible: z.boolean(),
+  paidAt: z.date().nullish(),
+  refundedAt: z.date().nullish(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type OrderType = z.infer<typeof OrderSchema>;
+
+
+// File: GithubKitGrant.schema.ts
+
+export const GithubKitGrantSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  githubUserId: z.string(),
+  githubLogin: z.string(),
+  org: z.string(),
+  repo: z.string(),
+  permission: z.string().default("pull"),
+  status: GithubKitGrantStatusSchema,
+  orderNo: z.string().nullish(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type GithubKitGrantType = z.infer<typeof GithubKitGrantSchema>;
+
+
+// File: SiteSetting.schema.ts
+
+export const SiteSettingSchema = z.object({
+  id: z.string(),
+  ciphertext: z.string(),
+  updatedAt: z.date(),
+  updatedBy: z.string().nullish(),
+});
+
+export type SiteSettingType = z.infer<typeof SiteSettingSchema>;
 

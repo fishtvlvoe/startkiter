@@ -40,6 +40,8 @@ model User {
   twofactors               TwoFactor[]
   notifications            Notification[]
   notificationPreferences  UserNotificationPreference[]
+  orders                   Order[]
+  githubKitGrants          GithubKitGrant[]
 
   @@unique([email])
   @@map("user")
@@ -243,4 +245,69 @@ model UserNotificationPreference {
 
   @@unique([userId, type, target])
   @@map("user_notification_preference")
+}
+
+enum OrderStatus {
+  pending
+  paid
+  refunded
+}
+
+model Order {
+  id               String      @id @default(cuid())
+  orderNo          String      @unique
+  userId           String
+  sku              String
+  amount           Int
+  currency         String      @default("TWD")
+  status           OrderStatus @default(pending)
+  paymentGateway   String      @default("payuni")
+  gatewayTradeNo   String?     @unique
+  courseAccess     Boolean     @default(false)
+  kitClaimEligible Boolean     @default(false)
+  paidAt           DateTime?
+  refundedAt       DateTime?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("order")
+}
+
+enum GithubKitGrantStatus {
+  invited
+  accepted
+  revoked
+  failed
+}
+
+model GithubKitGrant {
+  id           String               @id @default(cuid())
+  userId       String
+  githubUserId String
+  githubLogin  String
+  org          String
+  repo         String
+  permission   String               @default("pull")
+  status       GithubKitGrantStatus
+  orderNo      String?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, org, repo])
+  @@index([userId])
+  @@index([githubLogin])
+  @@map("github_kit_grants")
+}
+
+model SiteSetting {
+  id         String   @id
+  ciphertext String   @db.Text
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  updatedBy  String?  @map("updated_by")
+
+  @@index([updatedAt], map: "site_setting_updated_at_idx")
+  @@map("site_setting")
 }

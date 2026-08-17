@@ -35,7 +35,7 @@
 
 ## 8. 業務邏輯遷移：database
 
-- [ ] 8.1 把 `legacy/packages/database/prisma/schema.prisma` 的 Order、Course 相關 model 併入新底座 schema（官方 User/Session/Account/Verification 等標準 model 為底，欄位命名衝突時保留 StartKiter 既有命名），滿足 Decision「資料庫 schema：合併官方預設 model 與 StartKiter 既有 model」，驗證方式：`pnpm --filter database generate` 成功執行，`pnpm --filter @startkiter/saas type-check` 通過
+- [x] 8.1 把 `legacy/packages/database/prisma/schema.prisma` 的 Order、Course 相關 model 併入新底座 schema（官方 User/Session/Account/Verification 等標準 model 為底，欄位命名衝突時保留 StartKiter 既有命名），滿足 Decision「資料庫 schema：合併官方預設 model 與 StartKiter 既有 model」，驗證方式：`pnpm --filter database generate` 成功執行，`pnpm --filter @startkiter/saas type-check` 通過
 - [ ] 8.2 在新底座重新產生 migration history，驗證方式：`pnpm --filter database push` 成功套用到測試資料庫，不報 schema 衝突錯誤
 
 ## 9. 中文語系
