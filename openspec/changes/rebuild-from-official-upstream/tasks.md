@@ -5,7 +5,7 @@
 
 ## 2. 官方底座安裝：apps/marketing
 
-- [ ] 2.1 依 `docs/reference/supastarter-nextjs-docs/setup.mdx` 在正式路徑 `apps/marketing` 建立官方首頁（Hero/Features/Pricing/FAQ/Testimonials/CTA/Newsletter 全部區塊，含 `HeroWireframe` 瀏覽器窗格展示元件），滿足 Requirement「Monorepo shell boots locally」的 apps/marketing 服務公開頁面場景，驗證方式：`pnpm dev` 啟動後 GET / 回應 200，用 ego-browser 對首頁與 `demo.supastarter.dev` 首頁並排截圖，確認 Logo icon、瀏覽器窗格內容、CTA 按鈕樣式等版面骨架一致（非僅色票/字體比對）
+- [x] 2.1 依 `docs/reference/supastarter-nextjs-docs/setup.mdx` 在正式路徑 `apps/marketing` 建立官方首頁（Hero/Features/Pricing/FAQ/Testimonials/CTA/Newsletter 全部區塊，含 `HeroWireframe` 瀏覽器窗格展示元件），滿足 Requirement「Monorepo shell boots locally」的 apps/marketing 服務公開頁面場景，驗證方式：`pnpm dev` 啟動後 GET / 回應 200，用 ego-browser 對首頁與 `demo.supastarter.dev` 首頁並排截圖，確認 Logo icon、瀏覽器窗格內容、CTA 按鈕樣式等版面骨架一致（非僅色票/字體比對）
 - [ ] 2.2 在 `apps/marketing` 建立 Blog、Changelog、Contact、Legal 頁面，驗證方式：GET /blog、/changelog、/contact、/legal 皆回應 200，畫面版面與官方對應頁面一致
 
 ## 3. 官方底座安裝：apps/saas 殼
