@@ -17,8 +17,8 @@
 
 ## 4. v1-scope-boundary 規則正式生效（Requirement: Forbidden extract targets）
 
-- [ ] 4.1 確認 Requirement「Forbidden extract targets」的 delta（移除 Organization/Member/Invitation 禁止項，改為要求支援）內容跟 design.md 的角色矩陣一致，驗證方式：`spectra validate organization-role-model` 通過且無 Critical/Warning
+- [x] 4.1 確認 Requirement「Forbidden extract targets」的 delta（移除 Organization/Member/Invitation 禁止項，改為要求支援）內容跟 design.md 的角色矩陣一致，驗證方式：`spectra validate organization-role-model` 通過且無 Critical/Warning
 
 ## 5. Review
 
-- [ ] 5.1 對 proposal.md、design.md、specs/organization-tenancy/spec.md、specs/v1-scope-boundary/spec.md 四份文件做一次內部一致性複查（角色命名、權限矩陣、Open Questions 三份文件互相對得上），驗證方式：`spectra analyze organization-role-model` 的 Coverage/Consistency/Ambiguity/Gaps 四個維度皆為 Clean 或僅剩 Suggestion 等級
+- [x] 5.1 對 proposal.md、design.md、specs/organization-tenancy/spec.md、specs/v1-scope-boundary/spec.md 四份文件做一次內部一致性複查（角色命名、權限矩陣、Open Questions 三份文件互相對得上），驗證方式：`spectra analyze organization-role-model` 的 Coverage/Consistency/Ambiguity/Gaps 四個維度皆為 Clean 或僅剩 Suggestion 等級
