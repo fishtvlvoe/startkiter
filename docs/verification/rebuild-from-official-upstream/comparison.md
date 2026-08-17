@@ -2,7 +2,7 @@
 
 > 驗證限制（先讀）：官方 `app-demo.supastarter.dev` 的 protected routes 沒有本次可用的合法 demo session；後台首頁、課程、checkout 的右側截圖因此是官方登入殼，不是登入後頁面。這三頁以本機已登入實景、共用官方 `AppWrapper`／`AuthWrapper`／`Card` 元件與官方公開 auth 骨架作降級佐證，正式上線前仍應用官方測試帳號補做一次。
 
-驗證日期：2026-08-18（Asia/Taipei）  
+驗證日期：2026-08-18（Asia/Taipei）
 瀏覽器 viewport：1920 × 988；原始截圖為 ego-browser `captureScreenshot()` 產生，並排圖縮放為 1280 × 658／每側。
 
 ## 路由與結果

@@ -1,7 +1,7 @@
 # rebuild-from-official-upstream Code Review
 
-日期：2026-08-18  
-範圍：第 1–9 節落地內容，含本輪為修復 review 發現新增的 checkout route 與 course API body guard。  
+日期：2026-08-18
+範圍：第 1–9 節落地內容，含本輪為修復 review 發現新增的 checkout route 與 course API body guard。
 比較基準：`f6ea77b5^..f43163a`（截至 review 前的程式碼）；review 修復另見 `72d63f7c`、`d85ae608`。
 
 ## 結論
@@ -61,5 +61,5 @@
 
 ## Review status
 
-**Code review final gate：PASS（Critical 0）。**  
+**Code review final gate：PASS（Critical 0）。**
 仍需後續處理：正式環境 PAYUNi sandbox／production 憑證與 endpoint gate、官方 demo protected session 取得後補做 backend／course／checkout 登入後並排比對；本 change 是否能在產品驗收層標記完整，取決於是否接受上述官方 demo session 限制。
