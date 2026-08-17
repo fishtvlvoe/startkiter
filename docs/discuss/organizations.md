@@ -1,6 +1,8 @@
 ▋ 組織多租戶：v1 不抽
 
-狀態：confirmed（2026-08-14）
+狀態：**已取代（2026-08-17）**——見 `openspec/changes/organization-role-model/`。Fish 重新裁決：StartKiter 自己的網站跟賣給買家的代碼包是同一套模組（dogfooding），要真的支援多租戶，owner／admin／instructor／user 四層角色，B2B 掛組織、B2C 掛個人雙模式並存。以下內容保留當歷史對照，不要當施工單。
+
+狀態（舊）：confirmed（2026-08-14）
 
 v1 不從 supastarter 抽 Organization / Member / Invitation。一個老闆、一個後台、帳單掛在 user 上。
 

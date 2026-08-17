@@ -16,13 +16,15 @@
 
 【現行仍有效】
 
-• [organizations.md](./organizations.md) v1 不抽 Organization 多租戶（仍有效）
+• [2026-08-17-handoff-to-startkiter-session.md](./2026-08-17-handoff-to-startkiter-session.md) 從 Development 大方向對話交接回本專案的摘要，含目前兩個進行中 change 的狀態
 
 • [line-login-from-line-hub.md](./line-login-from-line-hub.md) LINE Login 契約：協定可以，PHP／LIFF 不搬（仍有效；登入已在 extract-shell-auth 落地）
 
 • [deploy-and-public-url.md](../deploy-and-public-url.md) 對外網址 `startkiter.aiver.me`、Tunnel、Coolify 部署方向備忘（功能尚未開工）
 
 【歷史／已廢（保留對照，勿當施工單）】
+
+• [organizations.md](./organizations.md) v1 不抽 Organization 多租戶——**已被 `openspec/changes/organization-role-model/` 取代（2026-08-17）**，現行決策是要做多租戶
 
 • [2026-08-14-alignment.md](./2026-08-14-alignment.md) 當日對焦；主金流 SHOPLINE、發票進 v1、四堂課路徑已廢
 
