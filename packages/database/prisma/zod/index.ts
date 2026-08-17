@@ -90,7 +90,7 @@ export type OrderScalarFieldEnum = z.infer<typeof OrderScalarFieldEnumSchema>;
 
 // File: GithubKitGrantScalarFieldEnum.schema.ts
 
-export const GithubKitGrantScalarFieldEnumSchema = z.enum(['id', 'userId', 'githubUserId', 'githubLogin', 'org', 'repo', 'permission', 'status', 'orderNo', 'createdAt', 'updatedAt'])
+export const GithubKitGrantScalarFieldEnumSchema = z.enum(['id', 'userId', 'githubUserId', 'githubLogin', 'org', 'repo', 'permission', 'status', 'orderNo', 'acceptedAt', 'revokedAt', 'createdAt', 'updatedAt'])
 
 export type GithubKitGrantScalarFieldEnum = z.infer<typeof GithubKitGrantScalarFieldEnumSchema>;
 
@@ -396,6 +396,8 @@ export const GithubKitGrantSchema = z.object({
   permission: z.string().default("pull"),
   status: GithubKitGrantStatusSchema,
   orderNo: z.string().nullish(),
+  acceptedAt: z.date().nullish(),
+  revokedAt: z.date().nullish(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });

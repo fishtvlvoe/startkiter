@@ -30,8 +30,8 @@
 
 ## 7. 業務邏輯遷移：github-kit
 
-- [ ] 7.1 從 `legacy/packages/github-kit` 複製到新建的 `packages/github-kit`，在新底座重新接線 claim/revoke route，驗證方式：`legacy/packages/github-kit/src/*.test.ts`（claim/revoke/config）對應測試在新底座執行全部通過
-- [ ] 7.2 對照 `openspec/specs/github-kit-fulfillment/spec.md` 逐一驗證每個 Scenario，驗證方式：產出驗證記錄，全部標記通過
+- [x] 7.1 從 `legacy/packages/github-kit` 複製到新建的 `packages/github-kit`，在新底座重新接線 claim/revoke route，驗證方式：`legacy/packages/github-kit/src/*.test.ts`（claim/revoke/config）對應測試在新底座執行全部通過
+- [x] 7.2 對照 `openspec/specs/github-kit-fulfillment/spec.md` 逐一驗證每個 Scenario，驗證方式：產出驗證記錄，全部標記通過
 
 ## 8. 業務邏輯遷移：database
 

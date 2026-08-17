@@ -25,6 +25,7 @@
 		"@startkiter/auth": "workspace:*",
 		"@startkiter/course": "workspace:*",
 		"@startkiter/database": "workspace:*",
+		"@startkiter/github-kit": "workspace:*",
 		"@startkiter/i18n": "workspace:*",
 		"@startkiter/notifications": "workspace:*",
 		"@startkiter/payments": "workspace:*",
