@@ -45,6 +45,6 @@
 
 ## 10. Review 與最終驗收
 
-- [ ] 10.1 對第 1-9 節的變更跑一輪 correctness／security／performance 三角度 code review，涵蓋 schema 合併是否有欄位型別衝突、route 接線是否有遺漏、業務邏輯搬遷過程是否引入行為變更，驗證方式：Review 報告列出的 Critical 發現數為零，報告存成 `docs/cr-report-rebuild-from-official-upstream.md` 並 commit
+- [x] 10.1 對第 1-9 節的變更跑一輪 correctness／security／performance 三角度 code review，涵蓋 schema 合併是否有欄位型別衝突、route 接線是否有遺漏、業務邏輯搬遷過程是否引入行為變更，驗證方式：Review 報告列出的 Critical 發現數為零，報告存成 `docs/cr-report-rebuild-from-official-upstream.md` 並 commit
 - [x] 10.2 執行 `pnpm build` 與 `pnpm test` 全專案，驗證方式：兩個指令皆以 exit code 0 結束
 - [ ] 10.3 用 ego-browser 對首頁、登入頁、後台首頁、課程頁、checkout 頁分別與 `demo.supastarter.dev` 對應頁面並排截圖，確認版面骨架（Logo icon、瀏覽器窗格內容、卡片邊框樣式）與官方一致，驗證方式：截圖存於 `docs/verification/rebuild-from-official-upstream/` 並附比對結論
