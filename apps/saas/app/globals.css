@@ -1,3 +1,4 @@
+@import "tailwindcss";
 @import "../../../packages/tooling/tailwind/theme.css";
 @import "./design-system.css";
 
