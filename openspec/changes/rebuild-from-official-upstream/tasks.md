@@ -11,7 +11,7 @@
 ## 3. 官方底座安裝：apps/saas 殼
 
 - [x] 3.1 依開發文件在正式路徑 `apps/saas` 建立官方 login/signup 頁面（無邊框飄浮登入卡片，非白卡片+邊框陰影），滿足 Requirement「Monorepo shell boots locally」的 apps/saas 服務驗證流程場景，驗證方式：GET /login、/signup 回應 200，用 ego-browser 與 `demo.supastarter.dev` 對應頁面並排截圖確認卡片樣式一致
-- [ ] 3.2 建立官方後台殼（`apps/saas/app` 下的側欄導覽、`packages/ui`、`packages/tooling` Tailwind 主題），驗證方式：`pnpm build` exit code 0，`pnpm --filter @startkiter/ui test` 全數通過
+- [x] 3.2 建立官方後台殼（`apps/saas/app` 下的側欄導覽、`packages/ui`、`packages/tooling` Tailwind 主題），驗證方式：`pnpm build` exit code 0，`pnpm --filter @startkiter/ui test` 全數通過
 
 ## 4. 業務邏輯遷移：auth
 
