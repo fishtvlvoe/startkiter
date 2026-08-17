@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="zh-Hant">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>開站包 — 後台課程觀看 demo</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" href="tokens.css" />
+		<link rel="stylesheet" href="components.css" />
+		<script>
+			(function () {
+				var mode =
+					new URLSearchParams(location.search).get("mode") ||
+					localStorage.getItem("startkiter-demo-color-mode") ||
+					"light";
+				document.documentElement.classList.toggle("dark", mode === "dark");
+			})();
+		</script>
+	</head>
+	<body>
+		<div class="app-shell">
+			<aside class="app-sidebar" data-slot="sidebar" id="app-sidebar">
+				<div class="sidebar-head">
+					<a class="brand" href="home.html">
+						<span class="brand-mark">開</span>
+						<span class="brand-label">開站包</span>
+					</a>
+					<button
+						type="button"
+						class="sidebar-collapse-toggle"
+						data-test="sidebar-collapse-toggle"
+						aria-expanded="true"
+						aria-controls="app-sidebar"
+						onclick="toggleDemoSidebar()"
+					>
+						‹
+					</button>
+				</div>
+				<nav class="app-nav" aria-label="後台選單">
+					<a href="app.html" aria-label="開始">
+						<span class="nav-icon" aria-hidden="true">⌂</span>
+						<span class="nav-label">開始</span>
+					</a>
+					<a href="course.html" aria-current="page" aria-label="課程">
+						<span class="nav-icon" aria-hidden="true">▷</span>
+						<span class="nav-label">課程</span>
+					</a>
+					<a href="app.html" aria-label="站內客服">
+						<span class="nav-icon" aria-hidden="true">◇</span>
+						<span class="nav-label">站內客服</span>
+					</a>
+					<a href="app.html" aria-label="帳號設定">
+						<span class="nav-icon" aria-hidden="true">⚙</span>
+						<span class="nav-label">帳號設定</span>
+					</a>
+					<span
+						class="nav-placeholder"
+						data-slot="course-admin"
+						title="課程內容管理・下一輪 change 接上"
+						aria-disabled="true"
+					>
+						<span class="nav-icon" aria-hidden="true">▦</span>
+						<span class="nav-label">
+							課程內容管理
+							<small>下一輪 change 接上</small>
+						</span>
+					</span>
+				</nav>
+				<div class="app-user">
+					<span class="app-avatar">F</span>
+					<div class="app-user-meta">
+						<div style="font-size: 0.875rem; font-weight: 600">Fish</div>
+						<div class="ds-muted" style="font-size: 0.75rem">fish@startkiter.dev</div>
+					</div>
+				</div>
+			</aside>
+
+			<main class="app-main">
+				<div class="page-header">
+					<div>
+						<p class="ds-muted" style="margin: 0; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase">
+							課程
+						</p>
+						<h1 style="margin: 0.2rem 0 0; font-size: 1.5rem; font-weight: 600">觀看開站包</h1>
+						<p class="ds-muted" style="margin: 0.25rem 0 0">買斷後可看全部單元。進度 1 / 3。</p>
+					</div>
+					<div class="color-mode-toggle" data-test="color-mode-toggle" role="group" aria-label="顏色模式">
+						<button
+							type="button"
+							data-test="color-mode-toggle-item-light"
+							aria-label="淺色"
+							aria-pressed="true"
+							onclick="setDemoColorMode('light')"
+						>
+							☀
+						</button>
+						<button
+							type="button"
+							data-test="color-mode-toggle-item-dark"
+							aria-label="深色"
+							aria-pressed="false"
+							onclick="setDemoColorMode('dark')"
+						>
+							☾
+						</button>
+					</div>
+				</div>
+
+				<div class="course-workspace">
+					<aside class="ds-card lesson-rail" data-slot="lesson-list" aria-label="課程單元">
+						<h2>單元列表</h2>
+						<a class="lesson-item" data-state="done" href="#lesson-01">
+							<span class="lesson-order">1</span>
+							<span>開站包是什麼、為什麼要買斷</span>
+						</a>
+						<a class="lesson-item" data-state="current" aria-current="true" href="#lesson-02">
+							<span class="lesson-order">2</span>
+							<span>站殼、登入與結帳路徑</span>
+						</a>
+						<a class="lesson-item" data-state="upcoming" href="#lesson-03">
+							<span class="lesson-order">3</span>
+							<span>課程模組與權限閘門</span>
+						</a>
+						<div style="margin: 0.75rem 0.5rem 0.25rem">
+							<p class="ds-muted" style="margin: 0 0 0.4rem; font-size: 0.75rem">觀看進度</p>
+							<div class="progress-track" aria-label="已看完 1 / 3">
+								<span></span>
+							</div>
+							<p class="ds-muted" style="margin: 0.4rem 0 0; font-size: 0.75rem">1 / 3 已看完</p>
+						</div>
+					</aside>
+
+					<section>
+						<div class="player-stage" data-slot="player" id="lesson-02" aria-label="播放區塊佔位">
+							<div style="text-align: center">
+								<div class="player-play" aria-hidden="true">▶</div>
+								<p style="margin: 0.85rem 0 0; font-size: 0.875rem; opacity: 0.8">
+									播放區塊佔位 · 正式環境接 Bunny
+								</p>
+							</div>
+						</div>
+
+						<div class="ds-card" data-slot="card" style="margin-top: 1rem; padding: 1.25rem 1.5rem">
+							<p class="ds-muted" style="margin: 0; font-size: 0.75rem">單元 2 / 3</p>
+							<h2 style="margin: 0.35rem 0 0; font-size: 1.15rem; font-weight: 600">站殼、登入與結帳路徑</h2>
+							<p class="ds-muted" style="margin: 0.45rem 0 0; font-size: 0.9rem">
+								Better Auth、PAYUNi、Order 權限怎麼串起來。
+							</p>
+							<p class="ds-muted" style="margin: 0.75rem 0 0; font-size: 0.8125rem">
+								目前播放的是暫時示範畫面。站方接上 Bunny 課片後會自動換成正式內容。退款後此頁會重新鎖住。
+							</p>
+							<div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem">
+								<a class="ds-btn" data-slot="button" data-variant="secondary" data-size="md" href="#lesson-01">上一單元</a>
+								<a class="ds-btn" data-slot="button" data-variant="primary" data-size="md" href="#lesson-03">下一單元</a>
+							</div>
+						</div>
+
+						<div class="comments-placeholder" data-slot="comments">
+							<p>留言區佔位 · 下一輪 change 接上真實討論功能</p>
+						</div>
+					</section>
+				</div>
+			</main>
+		</div>
+		<script src="demo.js"></script>
+	</body>
+</html>

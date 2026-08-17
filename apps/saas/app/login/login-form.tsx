@@ -1,8 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { Button, Form, Input } from "@startkiter/ui";
 
 type AuthMode = "sign-in" | "sign-up";
+
+type SocialProviderId = "google" | "line";
+
+export const AUTH_SOCIAL_PROVIDERS: { id: SocialProviderId; label: string }[] = [
+	{ id: "google", label: "使用 Google 登入" },
+	{ id: "line", label: "使用 LINE 登入" },
+];
 
 function safeNextPath(next: string | undefined) {
 	if (!next) {
@@ -66,6 +74,11 @@ export function LoginForm({
 	const [error, setError] = useState<string | null>(null);
 	const isSignUp = mode === "sign-up";
 	const destination = safeNextPath(nextPath);
+	const enabledSocialProviders: Record<SocialProviderId, boolean> = {
+		google: googleEnabled,
+		line: lineEnabled,
+	};
+	const visibleSocialProviders = AUTH_SOCIAL_PROVIDERS.filter((provider) => enabledSocialProviders[provider.id]);
 
 	async function submit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -112,48 +125,51 @@ export function LoginForm({
 
 	return (
 		<>
-			<form className="form" onSubmit={submit}>
-				{isSignUp ? (
+			<Form>
+				<form className="form" onSubmit={submit}>
+					{isSignUp ? (
+						<label>
+							名稱
+							<Input name="name" autoComplete="name" required />
+						</label>
+					) : null}
 					<label>
-						名稱
-						<input name="name" autoComplete="name" required />
+						Email
+						<Input name="email" type="email" autoComplete="email" required />
 					</label>
-				) : null}
-				<label>
-					Email
-					<input name="email" type="email" autoComplete="email" required />
-				</label>
-				<label>
-					密碼
-					<input
-						name="password"
-						type="password"
-						minLength={8}
-						autoComplete={isSignUp ? "new-password" : "current-password"}
-						required
-					/>
-				</label>
-				<button className="button" type="submit">
-					{isSignUp ? "建立帳號" : "登入"}
-				</button>
-			</form>
+					<label>
+						密碼
+						<Input
+							name="password"
+							type="password"
+							minLength={8}
+							autoComplete={isSignUp ? "new-password" : "current-password"}
+							required
+						/>
+					</label>
+					<Button type="submit" variant="primary">
+						{isSignUp ? "建立帳號" : "登入"}
+					</Button>
+				</form>
+			</Form>
 			{error ? (
 				<p className="error" role="alert">
 					{error}
 				</p>
 			) : null}
-			{!isSignUp && (googleEnabled || lineEnabled) ? (
+			{!isSignUp && visibleSocialProviders.length > 0 ? (
 				<div className="provider-actions" aria-label="社群登入">
-					{googleEnabled ? (
-						<button className="button secondary" type="button" onClick={() => socialSignIn("google")}>
-							使用 Google 登入
-						</button>
-					) : null}
-					{lineEnabled ? (
-						<button className="button secondary" type="button" onClick={() => socialSignIn("line")}>
-							使用 LINE 登入
-						</button>
-					) : null}
+					{visibleSocialProviders.map((provider) => (
+						<Button
+							key={provider.id}
+							className="button secondary"
+							type="button"
+							variant="outline"
+							onClick={() => socialSignIn(provider.id)}
+						>
+							{provider.label}
+						</Button>
+					))}
 				</div>
 			) : null}
 		</>

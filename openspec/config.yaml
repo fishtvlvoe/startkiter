@@ -25,7 +25,7 @@ context: |
   - Prisma + PostgreSQL
   - 主金流 PAYUNi（一次買斷 TWD）；Shopline／Stripe 介面可留空位但不接線、不上課、不出現在結帳
   - 發票不在 MVP；下一輪才接 @paid-tw/einvoice*
-  - i18n 只留 zh-TW
+  - i18n 起跳 zh-tw／zh-cn／en；cookie NEXT_LOCALE 切換，缺 key fallback zh-tw。本輪不做 /zh-tw URL 前綴與 middleware
   - 部署：常駐 Node（Zeabur 類）+ PostgreSQL + /data volume；預設不是 Vercel serverless
 
   # v1 硬邊界
@@ -46,6 +46,7 @@ context: |
   - 「現行待施工為 extract-github-kit-fulfillment」已廢：該 change 已封存
   - 「現行待施工 extract-payuni-checkout」已廢：該 change 已封存
   - 「現行待施工 extract-course-module」已廢：該 change 已封存
+  - 「i18n 只留 zh-TW」已廢：多語系已起跳，zh-tw 是 fallback 不是唯一語言
 
   # 程式碼規範
   - 程式碼英文、註解繁中

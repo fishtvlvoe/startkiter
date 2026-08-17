@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="zh-Hant">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>開站包 — 首頁 demo</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" href="tokens.css" />
+		<link rel="stylesheet" href="components.css" />
+		<script>
+			(function () {
+				var mode =
+					new URLSearchParams(location.search).get("mode") ||
+					localStorage.getItem("startkiter-demo-color-mode") ||
+					"light";
+				document.documentElement.classList.toggle("dark", mode === "dark");
+			})();
+		</script>
+	</head>
+	<body>
+		<header class="ds-container site-header">
+			<a class="brand" href="home.html">
+				<span class="brand-mark">開</span>
+				開站包
+			</a>
+			<nav class="nav-links">
+				<a href="home.html">首頁</a>
+				<a href="login.html">登入</a>
+				<a href="app.html">後台</a>
+				<a href="course.html">課程</a>
+				<div class="color-mode-toggle" data-test="color-mode-toggle" role="group" aria-label="顏色模式">
+					<button
+						type="button"
+						data-test="color-mode-toggle-item-light"
+						aria-label="淺色"
+						aria-pressed="true"
+						onclick="setDemoColorMode('light')"
+					>
+						☀
+					</button>
+					<button
+						type="button"
+						data-test="color-mode-toggle-item-dark"
+						aria-label="深色"
+						aria-pressed="false"
+						onclick="setDemoColorMode('dark')"
+					>
+						☾
+					</button>
+				</div>
+			</nav>
+		</header>
+
+		<main>
+			<section class="ds-container" style="padding: 4rem 0 2rem; text-align: center">
+				<div class="ds-badge" data-slot="badge">一次買斷 · 課與終身代碼包</div>
+				<h1
+					style="
+						max-width: 18ch;
+						margin: 1rem auto 0;
+						font-size: clamp(2.4rem, 6vw, 4.4rem);
+						font-weight: 500;
+						letter-spacing: -0.05em;
+						line-height: 1.1;
+					"
+				>
+					一次買斷，帶走課與終身代碼包
+				</h1>
+				<p class="ds-muted" style="max-width: 36rem; margin: 0.85rem auto 0; font-size: 1.125rem">
+					教你把 AI 服務做成自己的站。付一次 NT$8,800，課程與 GitHub 代碼包一起到手。
+				</p>
+				<ul class="check-list">
+					<li>
+						<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+							<circle cx="8" cy="8" r="8" fill="currentColor" opacity="0.15" />
+							<path d="M4.5 8.2 6.7 10.4 11.5 5.6" stroke="currentColor" stroke-width="1.6" />
+						</svg>
+						課程觀看權限一次開通
+					</li>
+					<li>
+						<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+							<circle cx="8" cy="8" r="8" fill="currentColor" opacity="0.15" />
+							<path d="M4.5 8.2 6.7 10.4 11.5 5.6" stroke="currentColor" stroke-width="1.6" />
+						</svg>
+						終身 GitHub 代碼包
+					</li>
+					<li>
+						<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+							<circle cx="8" cy="8" r="8" fill="currentColor" opacity="0.15" />
+							<path d="M4.5 8.2 6.7 10.4 11.5 5.6" stroke="currentColor" stroke-width="1.6" />
+						</svg>
+						PAYUNi 結帳，台幣買斷
+					</li>
+					<li>
+						<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+							<circle cx="8" cy="8" r="8" fill="currentColor" opacity="0.15" />
+							<path d="M4.5 8.2 6.7 10.4 11.5 5.6" stroke="currentColor" stroke-width="1.6" />
+						</svg>
+						LINE 學員社群用邀請連結，不靜默入群
+					</li>
+				</ul>
+				<div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 1.5rem">
+					<a class="ds-btn" data-slot="button" data-variant="primary" data-size="lg" href="login.html">
+						取得開站包
+					</a>
+					<a class="ds-btn" data-slot="button" data-variant="ghost" data-size="lg" href="app.html">
+						看示範
+					</a>
+				</div>
+				<div class="hero-frame" aria-hidden="true">
+					<div class="hero-screen">
+						<div class="hero-screen-bar">
+							<span></span>
+							<span></span>
+							<span></span>
+						</div>
+						<div class="hero-screen-grid">
+							<div class="hero-screen-side"></div>
+							<div class="hero-screen-main">
+								<div class="stat-bar" style="height: 4.5rem; margin: 0.5rem"></div>
+								<div class="stat-bar" style="height: 8rem; margin: 0.5rem"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="ds-container" style="padding: 3rem 0">
+				<p class="ds-muted" style="text-align: center; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; color: var(--primary)">
+					社會認同
+				</p>
+				<div class="proof-grid" style="margin-top: 1rem">
+					<article class="ds-card proof-card" data-slot="card">
+						<p style="margin: 0; font-weight: 600">一次買斷 NT$8,800</p>
+						<p class="ds-muted" style="margin: 0.4rem 0 0; font-size: 0.9rem">
+							沒有月費。課與終身代碼包同一 SKU。
+						</p>
+					</article>
+					<article class="ds-card proof-card" data-slot="card">
+						<p style="margin: 0; font-weight: 600">帳單掛在使用者</p>
+						<p class="ds-muted" style="margin: 0.4rem 0 0; font-size: 0.9rem">
+							不做 Organization 多租戶。金流走 PAYUNi。
+						</p>
+					</article>
+					<article class="ds-card proof-card" data-slot="card">
+						<p style="margin: 0; font-weight: 600">退款即取消領取</p>
+						<p class="ds-muted" style="margin: 0.4rem 0 0; font-size: 0.9rem">
+							退款後課程與 GitHub kit 資格一併取消。
+						</p>
+					</article>
+				</div>
+			</section>
+
+			<section id="features" class="ds-container" style="padding: 1rem 0 4rem">
+				<div style="max-width: 40rem; margin: 0 auto 2rem; text-align: center">
+					<p class="ds-muted" style="font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; color: var(--primary)">
+						功能深潛
+					</p>
+					<h2 style="margin: 0.4rem 0 0; font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 500; letter-spacing: -0.04em">
+						站、課、代碼包，同一套系統
+					</h2>
+					<p class="ds-muted" style="margin: 0.6rem 0 0">
+						前台賣、後台學、kit 履約。這三頁 demo 只先確認視覺骨架，課程與結帳頁下一步才套。
+					</p>
+				</div>
+
+				<article class="ds-card feature-block" data-slot="card">
+					<div class="feature-grid">
+						<div class="hero-screen" style="min-height: 12rem"></div>
+						<div>
+							<h3 style="margin: 0; font-size: 1.4rem; font-weight: 500">課程觀看。</h3>
+							<p class="ds-muted" style="margin: 0.75rem 0 0">
+								買完直接進課。權限跟訂單綁在一起，不是另外一套學院後台。
+							</p>
+						</div>
+					</div>
+					<div class="highlight-grid">
+						<div class="highlight-card">
+							<strong>進度跟自己走</strong>
+							<p class="ds-muted" style="margin: 0.35rem 0 0; font-size: 0.9rem">站內 agent 只能查自己的課程進度。</p>
+						</div>
+						<div class="highlight-card">
+							<strong>中英混排</strong>
+							<p class="ds-muted" style="margin: 0.35rem 0 0; font-size: 0.9rem">DM Sans 接 Noto Sans TC，避免「取得開站包 NT$8,800」字重跑掉。</p>
+						</div>
+						<div class="highlight-card">
+							<strong>同一套元件</strong>
+							<p class="ds-muted" style="margin: 0.35rem 0 0; font-size: 0.9rem">按鈕、卡片、徽章都走移植後的 design token，不是手估色號。</p>
+						</div>
+					</div>
+				</article>
+
+				<article class="ds-card feature-block" data-slot="card">
+					<div class="feature-grid">
+						<div class="hero-screen" style="min-height: 12rem"></div>
+						<div>
+							<h3 style="margin: 0; font-size: 1.4rem; font-weight: 500">GitHub kit。</h3>
+							<p class="ds-muted" style="margin: 0.75rem 0 0">
+								課與終身代碼包同一筆訂單。退款後領取資格取消。
+							</p>
+						</div>
+					</div>
+				</article>
+			</section>
+		</main>
+		<script src="demo.js"></script>
+	</body>
+</html>

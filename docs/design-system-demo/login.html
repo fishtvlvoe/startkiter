@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-Hant">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>開站包 — 登入／註冊 demo</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" href="tokens.css" />
+		<link rel="stylesheet" href="components.css" />
+		<script>
+			(function () {
+				var mode =
+					new URLSearchParams(location.search).get("mode") ||
+					localStorage.getItem("startkiter-demo-color-mode") ||
+					"light";
+				document.documentElement.classList.toggle("dark", mode === "dark");
+			})();
+		</script>
+	</head>
+	<body>
+		<div class="auth-shell">
+			<header class="ds-container auth-header">
+				<a class="brand" href="home.html">
+					<span class="brand-mark">開</span>
+					開站包
+				</a>
+				<div class="nav-links">
+					<span class="ds-muted" style="font-size: 0.8125rem">zh-TW</span>
+					<div class="color-mode-toggle" data-test="color-mode-toggle" role="group" aria-label="顏色模式">
+						<button
+							type="button"
+							data-test="color-mode-toggle-item-light"
+							aria-label="淺色"
+							aria-pressed="true"
+							onclick="setDemoColorMode('light')"
+						>
+							☀
+						</button>
+						<button
+							type="button"
+							data-test="color-mode-toggle-item-dark"
+							aria-label="深色"
+							aria-pressed="false"
+							onclick="setDemoColorMode('dark')"
+						>
+							☾
+						</button>
+					</div>
+				</div>
+			</header>
+
+			<main class="auth-main">
+				<div class="auth-panel">
+					<h1 style="margin: 0; text-align: center; font-size: 1.5rem; font-weight: 700">登入開站包</h1>
+					<p class="ds-muted" style="margin: 0.35rem 0 0; text-align: center">用 email 與密碼進入開站包。</p>
+
+					<div class="auth-tabs" role="tablist" aria-label="登入或註冊">
+						<button type="button" role="tab" data-auth-tab="signin" aria-selected="true">登入</button>
+						<button type="button" role="tab" data-auth-tab="signup" aria-selected="false">建立帳號</button>
+					</div>
+
+					<section data-auth-panel="signin">
+						<form onsubmit="event.preventDefault()">
+							<label class="field">
+								<span class="ds-label">Email</span>
+								<input class="ds-input" data-slot="input" type="email" name="email" autocomplete="email" placeholder="you@example.com" />
+							</label>
+							<label class="field">
+								<span class="ds-label">密碼</span>
+								<input class="ds-input" data-slot="input" type="password" name="password" autocomplete="current-password" placeholder="至少 8 碼" />
+							</label>
+							<button class="ds-btn" data-slot="button" data-variant="primary" data-size="lg" type="submit" style="width: 100%">
+								登入
+							</button>
+						</form>
+
+						<div class="divider"><span>或使用</span></div>
+
+						<div class="provider-grid">
+							<button class="ds-btn" data-slot="button" data-variant="secondary" data-size="md" type="button">
+								使用 Google 登入
+							</button>
+							<button class="ds-btn" data-slot="button" data-variant="secondary" data-size="md" type="button">
+								使用 LINE 登入
+							</button>
+						</div>
+					</section>
+
+					<section data-auth-panel="signup" hidden>
+						<form onsubmit="event.preventDefault()">
+							<label class="field">
+								<span class="ds-label">名稱</span>
+								<input class="ds-input" data-slot="input" type="text" name="name" autocomplete="name" />
+							</label>
+							<label class="field">
+								<span class="ds-label">Email</span>
+								<input class="ds-input" data-slot="input" type="email" name="email" autocomplete="email" />
+							</label>
+							<label class="field">
+								<span class="ds-label">密碼</span>
+								<input class="ds-input" data-slot="input" type="password" name="password" autocomplete="new-password" />
+							</label>
+							<button class="ds-btn" data-slot="button" data-variant="primary" data-size="lg" type="submit" style="width: 100%">
+								建立帳號
+							</button>
+						</form>
+						<p class="ds-muted" style="margin: 1rem 0 0; text-align: center; font-size: 0.875rem">
+							註冊後可購買開站包，一次帶走課程與終身代碼包。
+						</p>
+					</section>
+				</div>
+			</main>
+		</div>
+		<script src="demo.js"></script>
+	</body>
+</html>

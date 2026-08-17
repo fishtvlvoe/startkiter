@@ -3,13 +3,22 @@ import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@startkiter/auth";
-import { decideLessonPlayback, getLesson } from "@startkiter/course";
+import { decideLessonPlayback, getLesson, listLessons } from "@startkiter/course";
+import { getMessagesForLocale } from "@startkiter/i18n";
+import { Button } from "@startkiter/ui";
 
-import { SiteNav } from "../../components/site-nav";
 import { userHasCourseAccess } from "../../../lib/course-access";
+import { shouldShowOperatorSettingsLink } from "../../../lib/operator";
+import { getRequestLocale } from "../../../lib/request-locale";
+import { AppShell } from "../../components/app-shell";
+import { CourseWorkspace } from "../course-workspace";
 
 type PageProps = {
 	params: Promise<{ lessonId: string }>;
+};
+
+type NavMessages = {
+	brand: string;
 };
 
 export default async function LessonPage({ params }: PageProps) {
@@ -27,23 +36,44 @@ export default async function LessonPage({ params }: PageProps) {
 		lessonExists: Boolean(lesson),
 		lessonId,
 	});
+	const locale = await getRequestLocale();
+	const messages = await getMessagesForLocale<NavMessages>(locale, "saas");
+	const lessons = listLessons();
+	const showOperatorSettings = shouldShowOperatorSettingsLink(
+		true,
+		session.user.email,
+		process.env.ADMIN_EMAIL,
+	);
 
 	if (decision.status === "forbidden") {
 		return (
-			<main>
-				<SiteNav signedIn email={session.user.email} hasPurchase={entitled} />
-				<section className="panel">
-					<h1>這堂課還不能看</h1>
+			<main className="app-main-root">
+				<AppShell
+					brand={messages.brand}
+					email={session.user.email}
+					name={session.user.name}
+					locale={locale}
+					current="course"
+					showOperatorSettings={showOperatorSettings}
+					heading={
+						<>
+							<p className="ds-muted" style={{ margin: 0, fontSize: "0.75rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+								課程
+							</p>
+							<h1 style={{ margin: "0.2rem 0 0", fontSize: "1.5rem", fontWeight: 600 }}>這堂課還不能看</h1>
+						</>
+					}
+				>
 					<p>需要先購買開站包。若已退款，課程也會重新鎖住。</p>
-					<div className="actions">
-						<Link className="button" href="/checkout">
-							去購買
-						</Link>
-						<Link className="button secondary" href="/course">
-							回課程列表
-						</Link>
+					<div style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
+						<Button asChild variant="primary" className="ds-btn" data-variant="primary" data-size="md">
+							<Link href="/checkout">去購買</Link>
+						</Button>
+						<Button asChild variant="secondary" className="ds-btn" data-variant="secondary" data-size="md">
+							<Link href="/course">回課程列表</Link>
+						</Button>
 					</div>
-				</section>
+				</AppShell>
 			</main>
 		);
 	}
@@ -53,33 +83,48 @@ export default async function LessonPage({ params }: PageProps) {
 	}
 
 	return (
-		<main>
-			<SiteNav signedIn email={session.user.email} hasPurchase={entitled} />
-			<section className="panel stack">
-				<p className="muted">
-					<Link href="/course">← 全部課程</Link>
-				</p>
-				<h1>{lesson.title}</h1>
-				<p className="muted">{lesson.description}</p>
-				{lesson.isDemoFallback ? (
-					<p className="callout" style={{ margin: 0 }}>
-						目前播放的是暫時示範影片。站方接上 Bunny 課片後會自動換成正式內容。
-					</p>
-				) : null}
-				{lesson.mediaKind === "bunny_embed" ? (
-					<iframe
-						className="lesson-player"
-						src={lesson.mediaUrl}
-						title={lesson.title}
-						allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
-						allowFullScreen
-					/>
-				) : (
-					<video className="lesson-player" controls playsInline preload="metadata" src={lesson.mediaUrl}>
-						你的瀏覽器不支援影片播放。
-					</video>
-				)}
-			</section>
+		<main className="app-main-root">
+			<AppShell
+				brand={messages.brand}
+				email={session.user.email}
+				name={session.user.name}
+				locale={locale}
+				current="course"
+				showOperatorSettings={showOperatorSettings}
+				heading={
+					<>
+						<p className="ds-muted" style={{ margin: 0, fontSize: "0.75rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+							課程
+						</p>
+						<h1 style={{ margin: "0.2rem 0 0", fontSize: "1.5rem", fontWeight: 600 }}>觀看開站包</h1>
+						<p className="ds-muted" style={{ margin: "0.25rem 0 0" }}>
+							買斷後可看全部單元。進度 1 / 3。
+						</p>
+					</>
+				}
+			>
+				<CourseWorkspace
+					lessons={lessons}
+					current={lesson}
+					entitled={entitled}
+					player={
+						lesson.mediaKind === "bunny_embed" ? (
+							<iframe
+								className="lesson-player"
+								data-slot="player"
+								src={lesson.mediaUrl}
+								title={lesson.title}
+								allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+								allowFullScreen
+							/>
+						) : (
+							<video className="lesson-player" data-slot="player" controls playsInline preload="metadata" src={lesson.mediaUrl}>
+								你的瀏覽器不支援影片播放。
+							</video>
+						)
+					}
+				/>
+			</AppShell>
 		</main>
 	);
 }

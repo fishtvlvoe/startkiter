@@ -1,0 +1,29 @@
+{
+	"brand": "開站包",
+	"navigation": {
+		"login": "登入",
+		"signup": "註冊",
+		"course": "課程",
+		"purchase": "購買",
+		"purchaseStatus": "購買狀態",
+		"assistant": "助手",
+		"account": "帳號",
+		"settings": "設定"
+	},
+	"auth": {
+		"name": "名稱",
+		"email": "Email",
+		"password": "密碼",
+		"createAccount": "建立帳號",
+		"signIn": "登入",
+		"google": "使用 Google 登入",
+		"line": "使用 LINE 登入",
+		"socialLogin": "社群登入",
+		"noAccount": "還沒有帳號？",
+		"hasAccount": "已經有帳號？",
+		"signInError": "Email 或密碼不正確。",
+		"signUpError": "無法建立帳號，請檢查資料後再試。",
+		"socialError": "這個登入方式目前無法使用。",
+		"networkError": "網路異常，請稍後再試。"
+	}
+}

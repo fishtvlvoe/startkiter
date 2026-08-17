@@ -1,3 +1,127 @@
+@import "./design-system.css";
+
+:root {
+	--color-zinc-50: #fafafa;
+	--color-zinc-100: #f4f4f5;
+	--color-zinc-200: #e4e4e7;
+	--color-zinc-400: #a1a1aa;
+	--color-zinc-500: #71717a;
+	--color-zinc-800: #27272a;
+	--color-zinc-900: #18181b;
+	--color-zinc-950: #09090b;
+	--color-slate-400: #94a3b8;
+	--color-slate-500: #64748b;
+	--color-white: #ffffff;
+	--color-red-600: #dc2626;
+	--color-red-700: #b91c1c;
+	--color-emerald-600: #059669;
+	--color-emerald-700: #047857;
+}
+
+@layer base {
+	:root {
+		--border: var(--color-zinc-200);
+		--input: var(--color-zinc-200);
+		--ring: var(--color-zinc-400);
+		--background: var(--color-zinc-50);
+		--foreground: var(--color-zinc-950);
+		--primary: var(--color-slate-500);
+		--primary-foreground: var(--color-white);
+		--secondary: var(--color-zinc-200);
+		--secondary-foreground: var(--color-zinc-900);
+		--destructive: var(--color-red-700);
+		--destructive-foreground: var(--color-white);
+		--success: var(--color-emerald-700);
+		--success-foreground: var(--color-white);
+		--muted: var(--color-zinc-100);
+		--muted-foreground: var(--color-zinc-500);
+		--accent: var(--color-zinc-100);
+		--accent-foreground: var(--color-zinc-900);
+		--popover: var(--color-white);
+		--popover-foreground: var(--color-zinc-950);
+		--card: var(--color-white);
+		--card-foreground: var(--color-zinc-950);
+		--radius: 0.75rem;
+	}
+
+	.dark {
+		--border: var(--color-zinc-800);
+		--input: var(--color-zinc-800);
+		--ring: var(--color-zinc-500);
+		--background: var(--color-zinc-950);
+		--foreground: var(--color-white);
+		--primary: var(--color-slate-400);
+		--primary-foreground: var(--color-zinc-950);
+		--secondary: var(--color-zinc-800);
+		--secondary-foreground: var(--color-white);
+		--destructive: var(--color-red-600);
+		--destructive-foreground: var(--color-white);
+		--success: var(--color-emerald-600);
+		--success-foreground: var(--color-white);
+		--muted: var(--color-zinc-800);
+		--muted-foreground: var(--color-zinc-400);
+		--accent: var(--color-zinc-800);
+		--accent-foreground: var(--color-white);
+		--popover: var(--color-zinc-900);
+		--popover-foreground: var(--color-white);
+		--card: var(--color-zinc-900);
+		--card-foreground: var(--color-white);
+	}
+}
+
+@theme {
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-success: var(--success);
+	--color-success-foreground: var(--success-foreground);
+	--color-destructive: var(--destructive);
+	--color-destructive-foreground: var(--destructive-foreground);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+	--radius-sm: calc(var(--radius) * 0.6);
+	--radius-md: calc(var(--radius) * 0.8);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) * 1.4);
+	--radius-2xl: calc(var(--radius) * 1.8);
+	--radius-3xl: calc(var(--radius) * 2.2);
+	--radius-4xl: calc(var(--radius) * 2.6);
+	--animate-accordion-down: accordion-down 0.2s ease-out;
+	--animate-accordion-up: accordion-up 0.2s ease-out;
+
+	@keyframes accordion-down {
+		from {
+			height: 0;
+		}
+		to {
+			height: var(--radix-accordion-content-height);
+		}
+	}
+
+	@keyframes accordion-up {
+		from {
+			height: var(--radix-accordion-content-height);
+		}
+		to {
+			height: 0;
+		}
+	}
+}
+
+@variant dark (&:where(.dark, .dark *));
+
 :root {
 	color-scheme: light;
 	--color-primary: #3b82f6;
@@ -10,12 +134,6 @@
 	--color-slate-200: #e2e8f0;
 	--color-slate-300: #cbd5e1;
 	--color-slate-500: #64748b;
-	--color-slate-600: #475569;
-	--color-slate-700: #334155;
-	--color-slate-900: #0f172a;
-	--background: #f8fafc;
-	--surface: #ffffff;
-	--border: #e2e8f0;
 	--on-background: #0f172a;
 	--on-surface: #334155;
 	--on-surface-muted: #64748b;
@@ -28,9 +146,10 @@
 	--radius-md: 8px;
 	--radius-lg: 12px;
 	--radius-xl: 16px;
-	--font-display: var(--font-display-loaded), "Fira Sans", "Noto Sans TC", system-ui, sans-serif;
-	--font-body: var(--font-body-loaded), "Noto Sans TC", system-ui, -apple-system, sans-serif;
+	--font-display: var(--font-display-loaded), "DM Sans", "Noto Sans TC", system-ui, sans-serif;
+	--font-body: var(--font-display-loaded), var(--font-body-loaded), "DM Sans", "Noto Sans TC", sans-serif;
 	--ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+	--surface: var(--card);
 }
 
 * {
@@ -44,12 +163,9 @@ body {
 }
 
 body {
-	background:
-		radial-gradient(1200px 600px at 10% -10%, rgb(59 130 246 / 14%), transparent 55%),
-		radial-gradient(900px 500px at 90% 0%, rgb(16 185 129 / 10%), transparent 50%),
-		var(--background);
-	color: var(--on-background);
-	font-family: var(--font-body);
+	background: var(--background);
+	color: var(--foreground);
+	font-family: "DM Sans", "Noto Sans TC", sans-serif;
 	line-height: 1.5;
 }
 
@@ -63,6 +179,14 @@ main {
 	width: min(720px, calc(100% - 32px));
 	margin: 0 auto;
 	padding: var(--space-5) 0 var(--space-6);
+}
+
+main.home-main,
+main.app-main-root {
+	width: 100%;
+	max-width: none;
+	margin: 0;
+	padding: 0;
 }
 
 main.wide {
@@ -111,6 +235,32 @@ main.wide {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+.locale-switcher {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	padding: 2px;
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	background: var(--surface);
+}
+
+.locale-switcher button {
+	border: 0;
+	background: transparent;
+	color: var(--on-surface-muted);
+	font: inherit;
+	font-size: 0.75rem;
+	padding: 4px 8px;
+	border-radius: 999px;
+	cursor: pointer;
+}
+
+.locale-switcher button[aria-pressed="true"] {
+	background: var(--on-background);
+	color: var(--surface);
 }
 
 .hero {

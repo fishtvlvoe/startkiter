@@ -33,7 +33,7 @@ export function DemoGrantButton() {
 
 	return (
 		<div className="actions">
-			<button type="button" className="button" disabled={pending} onClick={() => void onClick()}>
+			<button type="button" className="ds-btn" data-variant="primary" data-size="md" disabled={pending} onClick={() => void onClick()}>
 				{pending ? "開通中…" : "Demo：一鍵開通課程權限"}
 			</button>
 			{error ? <p className="error">{error}</p> : null}

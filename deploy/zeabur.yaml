@@ -1,0 +1,84 @@
+# yaml-language-server: $schema=https://schema.zeabur.app/template.json
+apiVersion: zeabur.com/v1
+kind: Template
+metadata:
+  name: StartKiter
+spec:
+  description: |
+    StartKiter - 給台灣 AI 創業者的開站包與課程系統。包含 Next.js 全端應用與 PostgreSQL 資料庫。
+  icon: https://raw.githubusercontent.com/zeabur/service-icons/main/marketplace/nextjs.svg
+  tags:
+    - Next.js
+    - Full Stack
+    - Database
+  variables:
+    - key: BETTER_AUTH_SECRET
+      type: PASSWORD
+      name: Better Auth Secret
+      description: 認證金鑰，用於加密 Session Token
+    - key: APP_DOMAIN
+      type: DOMAIN
+      name: 應用網域
+      description: StartKiter 網站對外網址
+  services:
+    - name: postgresql
+      icon: https://raw.githubusercontent.com/zeabur/service-icons/main/marketplace/postgresql.svg
+      template: PREBUILT_V2
+      spec:
+        source:
+          image: postgres:16-alpine
+        ports:
+          - id: database
+            port: 5432
+            type: TCP
+        volumes:
+          - id: data
+            dir: /var/lib/postgresql/data
+        env:
+          POSTGRES_USER:
+            default: postgres
+            expose: true
+          POSTGRES_PASSWORD:
+            default: ${PASSWORD}
+            expose: true
+          POSTGRES_DB:
+            default: startkiter
+            expose: true
+          POSTGRES_HOST:
+            default: ${CONTAINER_HOSTNAME}
+            expose: true
+          POSTGRES_PORT:
+            default: ${DATABASE_PORT}
+            expose: true
+        instructions:
+          - title: Connection String
+            content: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+    - name: startkiter-web
+      icon: https://raw.githubusercontent.com/zeabur/service-icons/main/marketplace/nextjs.svg
+      template: GIT
+      dependencies:
+        - postgresql
+      domainKey: APP_DOMAIN
+      spec:
+        source:
+          source: ARBITRARY_GIT
+          gitURL: https://github.com/fishtvlvoe/startkiter
+          branch: main
+          rootDirectory: apps/saas
+        ports:
+          - id: web
+            port: 3000
+            type: HTTP
+        env:
+          DATABASE_URL:
+            default: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+            expose: false
+          BETTER_AUTH_URL:
+            default: https://${APP_DOMAIN}
+            expose: false
+          BETTER_AUTH_SECRET:
+            default: ${BETTER_AUTH_SECRET}
+            expose: false
+          NODE_ENV:
+            default: production
+            expose: false
