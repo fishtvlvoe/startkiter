@@ -21,7 +21,7 @@
 ## 5. 業務邏輯遷移：payments
 
 - [x] 5.1 從 `legacy/packages/payments` 複製到新建的 `packages/payments`，在新底座 `apps/saas/app/api/checkout/route.ts` 等 route 重新接線 PAYUNi provider，驗證方式：`legacy/packages/payments/src/*.test.ts`（checkout/refund/order/credentials/crypto/factory/notify/session-failclosed）對應測試在新底座執行全部通過
-- [ ] 5.2 對照 `openspec/specs/payuni-checkout/spec.md` 逐一驗證每個 Scenario 在新底座上成立，驗證方式：產出驗證記錄（每個 Scenario 對應的測試結果或手動驗證結論），全部標記通過
+- [x] 5.2 對照 `openspec/specs/payuni-checkout/spec.md` 逐一驗證每個 Scenario 在新底座上成立，驗證方式：產出驗證記錄（每個 Scenario 對應的測試結果或手動驗證結論），全部標記通過
 
 ## 6. 業務邏輯遷移：course
 
