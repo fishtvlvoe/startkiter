@@ -1,15 +1,15 @@
 ## 1. Token/CSS 架構重整
 
-- [ ] 1.1 撰寫測試驗證 Decision「CSS/token 架構：token 抽成獨立共用包，globals.css 只留 base 樣式」——斷言 `packages/tooling/tailwind/theme.css` 檔案存在且定義 `--background`、`--primary`、`--border` 等核心 CSS 自訂屬性，驗證方式：新增測試，目前為紅燈（檔案不存在）
-- [ ] 1.2 建立 `packages/tooling/tailwind/theme.css`，依 Decision「配色：完整採用官方 olive 色階，不做客製化偏移」把 `vendor/supastarter-nextjs/packages/tooling/tailwind/theme.css` 的 olive 色階 CSS 自訂屬性完整複製進來（不做客製化偏移），滿足 Requirement「Design tokens are ported, not approximated」，驗證方式：1.1 測試轉綠燈
-- [ ] 1.3 撰寫測試驗證 `apps/saas/app/globals.css` 透過 `@import` 引入新建的 `packages/tooling/tailwind/theme.css`，且檔案總行數精簡到 100 行以內（比照官方 41 行的精簡程度），驗證方式：新增測試斷言 import 語句存在且行數門檻，目前為紅燈
-- [ ] 1.4 移除 `apps/saas/app/globals.css`／`apps/saas/app/design-system.css` 內嵌的 zinc/slate 色階與重複 token 定義，改為 `@import "../../../packages/tooling/tailwind/theme.css"`，驗證方式：1.3 測試轉綠燈，且 `grep -rn "color-zinc\|color-slate" apps/saas/app/globals.css apps/saas/app/design-system.css` 確認無殘留
+- [x] 1.1 撰寫測試驗證 Decision「CSS/token 架構：token 抽成獨立共用包，globals.css 只留 base 樣式」——斷言 `packages/tooling/tailwind/theme.css` 檔案存在且定義 `--background`、`--primary`、`--border` 等核心 CSS 自訂屬性，驗證方式：新增測試，目前為紅燈（檔案不存在）
+- [x] 1.2 建立 `packages/tooling/tailwind/theme.css`，依 Decision「配色：完整採用官方 olive 色階，不做客製化偏移」把 `vendor/supastarter-nextjs/packages/tooling/theme.css` 的 olive 色階 CSS 自訂屬性完整複製進來（不做客製化偏移），滿足 Requirement「Design tokens are ported, not approximated」，驗證方式：1.1 測試轉綠燈
+- [x] 1.3 撰寫測試驗證 `apps/saas/app/globals.css` 透過 `@import` 引入新建的 `packages/tooling/tailwind/theme.css`，且檔案總行數精簡到 100 行以內（比照官方 41 行的精簡程度），驗證方式：新增測試斷言 import 語句存在且行數門檻，目前為紅燈
+- [x] 1.4 移除 `apps/saas/app/globals.css`／`apps/saas/app/design-system.css` 內嵌的 zinc/slate 色階與重複 token 定義，改為 `@import "../../../packages/tooling/tailwind/theme.css"`，驗證方式：1.3 測試轉綠燈，且 `grep -rn "color-zinc\|color-slate" apps/saas/app/globals.css apps/saas/app/design-system.css` 確認無殘留
 
 ## 2. 字體策略調整
 
-- [ ] 2.1 撰寫測試驗證 Decision「字體：SaaS 後台純 Inter，拿掉 DM Sans + Noto Sans TC fallback」——斷言 `apps/saas` 底下所有 CSS／layout 檔案不再宣告 DM Sans 或 Noto Sans TC 字體，驗證方式：新增測試取代原本斷言 CJK fallback 的 `apps/saas/lib/font-fallback.test.ts`，目前為紅燈
-- [ ] 2.2 移除 DM Sans 與 Noto Sans TC 字體宣告，`apps/saas` 全站改用 Inter（含 `apps/saas/app/layout.tsx` 的 `next/font/google` 設定），滿足移除後的 Requirement「Chinese text renders with a CJK font fallback」（已由本 change 的 spec delta REMOVED），驗證方式：2.1 測試轉綠燈
-- [ ] 2.3 用 ego-browser 對首頁「取得開站包 NT$8,800」這類中英混排文字截圖，確認 Inter 系統字體 fallback 鏈渲染出可讀的中文字（非空白或缺字方塊），驗證方式：截圖存檔並附人工確認結論
+- [x] 2.1 撰寫測試驗證 Decision「字體：SaaS 後台純 Inter，拿掉 DM Sans + Noto Sans TC fallback」——斷言 `apps/saas` 底下所有 CSS／layout 檔案不再宣告 DM Sans 或 Noto Sans TC 字體，驗證方式：新增測試取代原本斷言 CJK fallback 的 `apps/saas/lib/font-fallback.test.ts`，目前為紅燈
+- [x] 2.2 移除 DM Sans 與 Noto Sans TC 字體宣告，`apps/saas` 全站改用 Inter（含 `apps/saas/app/layout.tsx` 的 `next/font/google` 設定），滿足移除後的 Requirement「Chinese text renders with a CJK font fallback」（已由本 change 的 spec delta REMOVED），驗證方式：2.1 測試轉綠燈
+- [x] 2.3 用 ego-browser 對首頁「取得開站包 NT$8,800」這類中英混排文字截圖，確認 Inter 系統字體 fallback 鏈渲染出可讀的中文字（非空白或缺字方塊），驗證方式：截圖存檔並附人工確認結論
 
 ## 3. 元件庫替換：基礎顯示元件（Button／Card／Badge）
 

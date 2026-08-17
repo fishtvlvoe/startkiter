@@ -172,7 +172,7 @@ export default async function HomePage() {
 						<div className="highlight-card">
 							<strong>中英混排</strong>
 							<p className="ds-muted" style={{ margin: "0.35rem 0 0", fontSize: "0.9rem" }}>
-								DM Sans 接 Noto Sans TC，避免「取得開站包 NT$8,800」字重跑掉。
+								Inter 接系統 fallback，中文與「取得開站包 NT$8,800」保持可讀。
 							</p>
 						</div>
 						<div className="highlight-card">
