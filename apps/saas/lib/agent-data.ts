@@ -1,7 +1,7 @@
 import { createDatabase } from "@startkiter/database";
 import { listLessons } from "@startkiter/course";
 import { MVP_SKU } from "@startkiter/payments";
-import type { AgentDataAccess } from "@startkiter/site-agent";
+import type { AgentDataAccess, AgentOrder } from "@startkiter/site-agent";
 
 import { userHasCourseAccess } from "./course-access";
 
@@ -13,7 +13,7 @@ export function createPrismaAgentDataAccess(): AgentDataAccess {
 				where: { userId, sku: MVP_SKU },
 				orderBy: { createdAt: "desc" },
 			});
-			return rows.map((row) => ({
+			return rows.map((row: AgentOrder) => ({
 				orderNo: row.orderNo,
 				sku: row.sku,
 				status: row.status,

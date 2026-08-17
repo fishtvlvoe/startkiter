@@ -15,7 +15,7 @@
 
 - [x] 3.1 撰寫測試驗證 Decision「元件庫遷移：逐元件源碼比對搬遷，不是重新設計」的 Button／Card／Badge 部分——延續既有 `data-slot` 屬性斷言（`packages/ui/src/components.test.tsx`），額外斷言元件原始碼 import 自 `@base-ui/react` 而非 `radix-ui`，驗證方式：新增 import 來源檢查測試，目前為紅燈
 - [x] 3.2 執行 `pnpm --filter=ui shadcn add --base base button card badge`，用 Base UI 版本元件取代 `packages/ui/src/components/button.tsx`、`card.tsx`、`badge.tsx` 現有 Radix UI 實作，滿足 Requirement「UI components come from the shared design system」，驗證方式：3.1 測試轉綠燈
-- [ ] 3.3 更新 `apps/saas/app/page.tsx`、`apps/saas/app/app/page.tsx` 等呼叫這三個元件的頁面，適配 Base UI 版本的 props 介面差異，驗證方式：既有 `apps/saas/lib/home-shell.test.ts`、`apps/saas/lib/app-home.test.ts` 保持綠燈且 `pnpm --filter @startkiter/saas type-check` 通過
+- [x] 3.3 更新 `apps/saas/app/page.tsx`、`apps/saas/app/app/page.tsx` 等呼叫這三個元件的頁面，適配 Base UI 版本的 props 介面差異，驗證方式：既有 `apps/saas/lib/home-shell.test.ts`、`apps/saas/lib/app-home.test.ts` 保持綠燈且 `pnpm --filter @startkiter/saas type-check` 通過
 
 ## 4. 元件庫替換：表單元件（Input／Form／Label）
 
@@ -27,7 +27,7 @@
 
 - [x] 5.1 撰寫測試驗證 Tooltip／Spinner／ColorModeToggle 元件 import 自 `@base-ui/react`，且 Decision「Dark and light mode share the same component system」描述的 `.dark` class 切換行為維持不變，驗證方式：新增測試，目前為紅燈
 - [x] 5.2 執行 `pnpm --filter=ui shadcn add --base base tooltip spinner`，取代 `packages/ui/src/components/tooltip.tsx`、`spinner.tsx` 現有實作；`color-mode-toggle.tsx` 改用 Base UI 的狀態管理原語重寫深色模式切換邏輯，驗證方式：5.1 測試轉綠燈
-- [ ] 5.3 用 ego-browser 對首頁與後台首頁分別測試深色/淺色模式切換，確認切換後 `document.documentElement.classList.contains('dark')` 正確變化且視覺無跳動或殘留樣式，驗證方式：Requirement「Dark and light mode share the same component system」的既有測試場景保持綠燈，並截圖存檔佐證
+- [x] 5.3 用 ego-browser 對首頁與後台首頁分別測試深色/淺色模式切換，確認切換後 `document.documentElement.classList.contains('dark')` 正確變化且視覺無跳動或殘留樣式，驗證方式：Requirement「Dark and light mode share the same component system」的既有測試場景保持綠燈，並截圖存檔佐證
 
 ## 6. 移除 Radix UI 依賴
 
