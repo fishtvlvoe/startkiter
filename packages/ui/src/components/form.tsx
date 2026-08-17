@@ -1,7 +1,5 @@
 "use client";
 
-import type { Label as LabelPrimitive } from "radix-ui";
-import { Slot as SlotPrimitive } from "radix-ui";
 import * as React from "react";
 import type { ControllerProps, FieldPath, FieldValues } from "react-hook-form";
 import { Controller, FormProvider, useFormContext } from "react-hook-form";
@@ -9,24 +7,13 @@ import { Controller, FormProvider, useFormContext } from "react-hook-form";
 import { cn } from "../lib";
 import { Label } from "./label";
 
-function Form({
-	children,
-	...props
-}: React.PropsWithChildren<Partial<React.ComponentProps<typeof FormProvider>>>) {
-	const isProvider = "control" in props && Boolean(props.control);
+type FormProps = React.PropsWithChildren<Partial<React.ComponentProps<typeof FormProvider>>>;
 
-	return (
-		<div data-slot="form">
-			{isProvider ? (
-				<FormProvider {...(props as React.ComponentProps<typeof FormProvider>)}>
-					{children}
-				</FormProvider>
-			) : (
-				children
-			)}
-		</div>
-	);
-}
+const Form = ({ children, ...props }: FormProps) => (
+	<FormProvider {...(props as React.ComponentProps<typeof FormProvider>)}>
+		<div data-slot="form">{children}</div>
+	</FormProvider>
+);
 
 type FormFieldContextValue<
 	TFieldValues extends FieldValues = FieldValues,
@@ -89,7 +76,7 @@ const FormItem = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>)
 	);
 };
 
-const FormLabel = ({ className, ...props }: React.ComponentProps<typeof LabelPrimitive.Root>) => {
+const FormLabel = ({ className, ...props }: React.ComponentProps<typeof Label>) => {
 	const { error, formItemId } = useFormField();
 
 	return (
@@ -101,17 +88,14 @@ const FormLabel = ({ className, ...props }: React.ComponentProps<typeof LabelPri
 	);
 };
 
-const FormControl = ({ ...props }: React.ComponentProps<typeof SlotPrimitive.Slot>) => {
+const FormControl = ({ children }: { children: React.ReactElement }) => {
 	const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
 
-	return (
-		<SlotPrimitive.Slot
-			id={formItemId}
-			aria-describedby={error ? `${formDescriptionId} ${formMessageId}` : `${formDescriptionId}`}
-			aria-invalid={!!error}
-			{...props}
-		/>
-	);
+	return React.cloneElement(children, {
+		id: formItemId,
+		"aria-describedby": error ? `${formDescriptionId} ${formMessageId}` : formDescriptionId,
+		"aria-invalid": Boolean(error),
+	} as React.HTMLAttributes<HTMLElement>);
 };
 
 const FormDescription = ({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) => {

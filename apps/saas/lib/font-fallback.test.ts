@@ -1,24 +1,34 @@
-import { readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { readdirSync, readFileSync } from "node:fs";
+import { basename, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { describe, expect, it } from "vitest";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
+const saasRoot = resolve(repoRoot, "apps/saas");
 
-describe("Chinese text renders with a CJK font fallback", () => {
-	it("puts Noto Sans TC immediately after DM Sans in every font-family declaration", () => {
-		const css = readFileSync(resolve(repoRoot, "apps/saas/app/globals.css"), "utf8");
-		const declarations = [...css.matchAll(/font-family:\s*([^;]+);/g)].map((match) => match[1]);
-		const withDmSans = declarations.filter((value) => value.includes("DM Sans"));
+function findCssAndLayoutFiles(directory: string): string[] {
+	return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+		const path = resolve(directory, entry.name);
 
-		expect(withDmSans.length).toBeGreaterThan(0);
+		if (entry.isDirectory() && entry.name !== "node_modules" && entry.name !== ".next") {
+			return findCssAndLayoutFiles(path);
+		}
 
-		for (const value of withDmSans) {
-			const fonts = value.split(",").map((part) => part.trim().replace(/^["']|["']$/g, ""));
-			const dmIndex = fonts.findIndex((name) => name === "DM Sans");
+		return entry.isFile() && (entry.name.endsWith(".css") || basename(entry.name) === "layout.tsx") ? [path] : [];
+	});
+}
 
-			expect(fonts[dmIndex + 1]).toBe("Noto Sans TC");
+describe("SaaS uses the Inter font strategy", () => {
+	it("does not declare DM Sans or Noto Sans TC in CSS or layout files", () => {
+		const fontFiles = findCssAndLayoutFiles(saasRoot);
+
+		expect(fontFiles.length).toBeGreaterThan(0);
+
+		for (const file of fontFiles) {
+			const source = readFileSync(file, "utf8");
+
+			expect(source, file).not.toMatch(/DM Sans|Noto Sans TC/);
 		}
 	});
 });

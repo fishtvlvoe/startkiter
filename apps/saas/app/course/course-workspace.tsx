@@ -74,14 +74,22 @@ export function CourseWorkspace({
 						) : null}
 						<div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginTop: "1rem" }}>
 							{previous ? (
-								<Button asChild variant="secondary" className="ds-btn" data-variant="secondary" data-size="md">
-									<Link href={`/course/${previous.id}`}>上一單元</Link>
-								</Button>
+								<Button
+									variant="secondary"
+									className="ds-btn"
+									data-variant="secondary"
+									data-size="md"
+									render={(props) => <Link {...props} href={`/course/${previous.id}`}>上一單元</Link>}
+								/>
 							) : null}
 							{next ? (
-								<Button asChild variant="primary" className="ds-btn" data-variant="primary" data-size="md">
-									<Link href={`/course/${next.id}`}>下一單元</Link>
-								</Button>
+								<Button
+									variant="primary"
+									className="ds-btn"
+									data-variant="primary"
+									data-size="md"
+									render={(props) => <Link {...props} href={`/course/${next.id}`}>下一單元</Link>}
+								/>
 							) : null}
 						</div>
 					</Card>

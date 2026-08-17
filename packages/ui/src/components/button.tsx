@@ -1,6 +1,5 @@
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
-import { Slot as SlotPrimitive } from "radix-ui";
 import * as React from "react";
 
 import { cn } from "../lib";
@@ -12,7 +11,7 @@ const buttonVariants = cva(
 		variants: {
 			variant: {
 				primary:
-					"bg-primary text-primary-foreground hover:bg-[color-mix(in_srgb,var(--primary)90%,white)]",
+					"bg-primary text-primary-foreground hover:bg-[color-mix(in_srgb,var(--primary)82%,var(--background))]",
 				secondary:
 					"bg-secondary text-secondary-foreground hover:bg-[color-mix(in_srgb,var(--secondary)90%,black)]",
 				outline:
@@ -36,34 +35,55 @@ const buttonVariants = cva(
 	},
 );
 
-export type ButtonProps = {
-	asChild?: boolean;
-	loading?: boolean;
-} & React.ButtonHTMLAttributes<HTMLButtonElement> &
-	VariantProps<typeof buttonVariants>;
-
-const Button = ({
-	className,
-	children,
-	variant,
-	size,
-	asChild = false,
-	loading,
-	disabled,
-	...props
-}: ButtonProps) => {
-	const Comp = asChild ? SlotPrimitive.Slot : "button";
-	return (
-		<Comp
-			data-slot="button"
-			className={cn(buttonVariants({ variant, size, className }))}
-			disabled={disabled || loading}
-			{...props}
-		>
-			{loading && <Spinner className="mr-1.5 size-4 text-inherit" />}
-			<SlotPrimitive.Slottable>{children}</SlotPrimitive.Slottable>
-		</Comp>
-	);
+export type ButtonRenderProps = React.HTMLAttributes<HTMLElement> & {
+	disabled?: boolean;
+	type?: React.ButtonHTMLAttributes<HTMLButtonElement>["type"];
+	"data-slot"?: string;
 };
+
+export type ButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "children"> &
+	VariantProps<typeof buttonVariants> & {
+		loading?: boolean;
+		children?: React.ReactNode;
+		/**
+		 * Compose styles and behavior onto a custom element (e.g. `<a>` or `next/link`).
+		 * Spread the received props onto the root element.
+		 */
+		render?: (props: ButtonRenderProps) => React.ReactElement<{ ref?: React.Ref<unknown> }>;
+	};
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+	{ className, children, variant, size, loading, disabled, render, ...props },
+	ref,
+) {
+	const mergedClassName = cn(buttonVariants({ variant, size, className }));
+	const isDisabled = Boolean(disabled || loading);
+
+	if (render) {
+		const element = render({
+			...props,
+			"data-slot": "button",
+			className: mergedClassName,
+			disabled: isDisabled,
+			children: (
+				<>
+					{loading && <Spinner className="mr-1.5 size-4 text-inherit" />}
+					{children}
+				</>
+			),
+		});
+
+		return ref ? React.cloneElement(element, { ref }) : element;
+	}
+
+	return (
+		<button ref={ref} data-slot="button" className={mergedClassName} disabled={isDisabled} {...props}>
+			{loading && <Spinner className="mr-1.5 size-4 text-inherit" />}
+			{children}
+		</button>
+	);
+});
+
+Button.displayName = "Button";
 
 export { Button, buttonVariants };

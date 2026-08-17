@@ -4,12 +4,15 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import type { AppShellCurrent } from "./app-shell";
+import type { OrganizationRole } from "../../lib/organization";
+import { createPermissionRules } from "../../lib/permissions";
 
 const MOBILE_MEDIA_QUERY = "(max-width: 767px)";
 
 type MobileTabbarProps = {
 	current: AppShellCurrent;
 	showOperatorSettings?: boolean;
+	organizationRole?: OrganizationRole | null;
 };
 
 type OverflowItem =
@@ -168,7 +171,7 @@ const responsiveStyles = `
 }
 `;
 
-export function MobileTabbar({ current, showOperatorSettings = false }: MobileTabbarProps) {
+export function MobileTabbar({ current, showOperatorSettings = false, organizationRole }: MobileTabbarProps) {
 	const [isNarrow, setIsNarrow] = useState(false);
 	const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -192,10 +195,13 @@ export function MobileTabbar({ current, showOperatorSettings = false }: MobileTa
 	}, []);
 
 	const overflowItems: OverflowItem[] = [];
-	if (showOperatorSettings) {
+	const permissions = createPermissionRules(organizationRole);
+	if (showOperatorSettings && permissions.manageMembers) {
 		overflowItems.push({ kind: "link", href: "/admin/settings", label: "帳號設定", icon: "⚙", current: "settings" });
 	}
-	overflowItems.push({ kind: "placeholder", label: "課程內容管理", icon: "▦" });
+	if (permissions.manageCourseContent) {
+		overflowItems.push({ kind: "placeholder", label: "課程內容管理", icon: "▦" });
+	}
 
 	if (!isNarrow) {
 		return <style data-slot="mobile-tabbar-styles">{responsiveStyles}</style>;

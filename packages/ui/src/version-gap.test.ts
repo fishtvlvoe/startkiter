@@ -10,7 +10,7 @@ const SOURCE_ROOT = resolve(repoRoot, "vendor/supastarter-nextjs");
 
 const TABLE_PATH = resolve(
 	repoRoot,
-	"openspec/changes/extract-supastarter-design-system/version-gap.md",
+	"openspec/changes/archive/2026-08-17-extract-supastarter-design-system/version-gap.md",
 );
 
 const PACKAGES = ["next", "react", "tailwindcss", "radix-ui"] as const;

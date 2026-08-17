@@ -66,12 +66,20 @@ export default async function LessonPage({ params }: PageProps) {
 				>
 					<p>需要先購買開站包。若已退款，課程也會重新鎖住。</p>
 					<div style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
-						<Button asChild variant="primary" className="ds-btn" data-variant="primary" data-size="md">
-							<Link href="/checkout">去購買</Link>
-						</Button>
-						<Button asChild variant="secondary" className="ds-btn" data-variant="secondary" data-size="md">
-							<Link href="/course">回課程列表</Link>
-						</Button>
+						<Button
+							variant="primary"
+							className="ds-btn"
+							data-variant="primary"
+							data-size="md"
+							render={(props) => <Link {...props} href="/checkout">去購買</Link>}
+						/>
+						<Button
+							variant="secondary"
+							className="ds-btn"
+							data-variant="secondary"
+							data-size="md"
+							render={(props) => <Link {...props} href="/course">回課程列表</Link>}
+						/>
 					</div>
 				</AppShell>
 			</main>

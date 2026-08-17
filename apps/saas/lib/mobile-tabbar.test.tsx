@@ -78,6 +78,7 @@ function renderAt(width: number, element: ReactNode) {
 const mobileProps = {
 	current: "app" as const,
 	showOperatorSettings: true,
+	organizationRole: "owner" as const,
 };
 
 describe("MobileTabbar viewport behavior", () => {
@@ -130,7 +131,8 @@ describe("MobileTabbar viewport behavior", () => {
 					name: "Operator",
 					locale: "zh-tw",
 					current: "app",
-					showOperatorSettings: true,
+						showOperatorSettings: true,
+						organizationRole: "owner",
 					heading: createElement("h1", null, "開始"),
 					children: createElement("p", null, "內容"),
 				},

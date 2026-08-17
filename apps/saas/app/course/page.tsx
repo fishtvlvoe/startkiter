@@ -70,9 +70,13 @@ export default async function CourseIndexPage() {
 								<DemoGrantButton />
 							</div>
 						) : (
-							<Button asChild variant="primary" className="ds-btn" data-variant="primary" data-size="md">
-								<Link href="/checkout">去購買 NT$8,800</Link>
-							</Button>
+							<Button
+								variant="primary"
+								className="ds-btn"
+								data-variant="primary"
+								data-size="md"
+								render={(props) => <Link {...props} href="/checkout">去購買 NT$8,800</Link>}
+							/>
 						)}
 					</div>
 				) : null}

@@ -2,7 +2,6 @@
 
 import type { VariantProps } from "class-variance-authority";
 import { cva } from "class-variance-authority";
-import { Label as LabelPrimitive } from "radix-ui";
 import * as React from "react";
 
 import { cn } from "../lib";
@@ -14,8 +13,10 @@ const labelVariants = cva(
 const Label = ({
 	className,
 	...props
-}: React.ComponentProps<typeof LabelPrimitive.Root> & VariantProps<typeof labelVariants>) => (
-	<LabelPrimitive.Root className={cn(labelVariants(), className)} {...props} />
+}: React.LabelHTMLAttributes<HTMLLabelElement> & VariantProps<typeof labelVariants>) => (
+	// Design-system primitive: `htmlFor` is supplied by callers (e.g. FormLabel).
+	// oxlint-disable-next-line jsx-a11y/label-has-associated-control -- primitive label
+	<label className={cn(labelVariants(), className)} {...props} />
 );
 
 export { Label };

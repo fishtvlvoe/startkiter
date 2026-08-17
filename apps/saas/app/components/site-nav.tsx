@@ -67,7 +67,10 @@ export async function SiteNav({
 					</>
 				)}
 				<LocaleSwitcher current={resolvedLocale} />
-				<ColorModeToggle />
+				<ColorModeToggle
+					modes={["system", "light", "dark"]}
+					labels={{ system: "系統", light: "淺色", dark: "深色" }}
+				/>
 			</div>
 		</nav>
 	);
