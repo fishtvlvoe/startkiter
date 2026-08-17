@@ -1073,3 +1073,426 @@ tests:
   - docs/design-system-demo/demo.test.ts
   - packages/ui/src/components.test.tsx
 -->
+
+---
+### Requirement: Operator role determines visible permission-gated navigation
+
+The AppShell SHALL determine which navigation items and page-level actions are visible using a typed permission check (`usePermissions`) against the four-value role set defined in the `organization-tenancy` capability (owner/admin/instructor/user), rather than the single boolean `requiresOperator` check used previously. A user whose role lacks a given permission MUST NOT see the navigation item or action gated by that permission.
+
+#### Scenario: Instructor sees content management but not billing navigation
+
+- **WHEN** a signed-in user with the `instructor` role views the AppShell sidebar
+- **THEN** the sidebar MUST show course content management navigation and MUST NOT show organization billing or member management navigation
+
+#### Scenario: Owner sees all permission-gated navigation
+
+- **WHEN** a signed-in user with the `owner` role views the AppShell sidebar
+- **THEN** the sidebar MUST show organization billing, member management, and course content management navigation
+
+#### Scenario: Permission check fails closed when role is unknown
+
+- **WHEN** `usePermissions` cannot resolve a role for the current session
+- **THEN** the AppShell MUST treat the user as having no permissions and MUST NOT show any permission-gated navigation item, and MUST NOT throw an unhandled exception
+
+
+<!-- @trace
+source: rebuild-design-system-from-source
+updated: 2026-08-18
+code:
+  - docs/discuss/2026-08-17-hyperagent-reference.md
+  - docs/reference/supastarter-nextjs-docs/database/update-schema.mdx
+  - docs/reference/supastarter-nextjs-docs/payments/paywall.mdx
+  - docs/verification/rebuild-design-system-from-source/9.3-agent.png
+  - apps/saas/app/components/organization-select.tsx
+  - docs/reference/supastarter-nextjs-docs/mailing/nodemailer.mdx
+  - packages/tooling/tailwind/theme.css
+  - docs/reference/supastarter-nextjs-docs/database/providers/planetscale.mdx
+  - docs/verification/rebuild-design-system-from-source/9.3-home.png
+  - docs/reference/supastarter-nextjs-docs/organizations/configure.mdx
+  - docs/reference/supastarter-nextjs-docs/codebase/vscode.mdx
+  - packages/ui/src/components/dropdown-menu.tsx
+  - docs/verification/rebuild-design-system-from-source/9.3-login.png
+  - docs/reference/supastarter-nextjs-docs/ai/prompts.mdx
+  - docs/reference/supastarter-nextjs-docs/e2e.mdx
+  - packages/ui/src/components/color-mode-toggle.tsx
+  - docs/reference/supastarter-nextjs-docs/storage/access-files.mdx
+  - docs/reference/supastarter-nextjs-docs/analytics/umami.mdx
+  - docs/reference/supastarter-nextjs-docs/codebase/dependencies.mdx
+  - docs/reference/supastarter-nextjs-docs/mailing/console.mdx
+  - docs/reference/supastarter-nextjs-docs/payments/meta.json
+  - docs/reference/supastarter-nextjs-docs/monitoring/meta.json
+  - docs/reference/supastarter-nextjs-docs/analytics/meta.json
+  - packages/ui/src/components/label.tsx
+  - docs/reference/supastarter-nextjs-docs/mailing/resend.mdx
+  - docs/reference/2026-08-17-supastarter-docs-analysis.md
+  - packages/ui/src/index.tsx
+  - apps/saas/app/components/site-nav.tsx
+  - docs/reference/supastarter-nextjs-docs/payments/providers/lemonsqueezy.mdx
+  - packages/ui/src/components/tooltip.tsx
+  - docs/reference/supastarter-nextjs-docs/storage/overview.mdx
+  - docs/reference/supastarter-nextjs-docs/api/define-endpoint.mdx
+  - docs/verification/rebuild-design-system-from-source/9.3-admin-settings.png
+  - docs/reference/supastarter-nextjs-docs/api/use-locale.mdx
+  - docs/reference/supastarter-nextjs-docs/organizations/store-data-for-organizations.mdx
+  - docs/reference/supastarter-nextjs-docs/troubleshooting.mdx
+  - docs/reference/supastarter-nextjs-docs/storage/upload-files.mdx
+  - docs/reference/supastarter-nextjs-docs/deployment/flydotio.mdx
+  - apps/saas/app/components/mobile-tabbar.tsx
+  - docs/discuss/2026-08-17-supastarter-gap-risk-report.md
+  - apps/saas/app/course/[lessonId]/page.tsx
+  - apps/saas/app/design-system.css
+  - docs/reference/supastarter-nextjs-docs/analytics/vemetric.mdx
+  - docs/reference/supastarter-nextjs-docs/seo/sitemap.mdx
+  - docs/reference/supastarter-nextjs-docs/database/overview.mdx
+  - apps/saas/lib/organization.ts
+  - docs/reference/supastarter-nextjs-docs/documentation.mdx
+  - docs/reference/supastarter-nextjs-docs/authentication/permissions.mdx
+  - docs/reference/supastarter-nextjs-docs/payments/plans.mdx
+  - packages/ui/src/components/badge.tsx
+  - docs/discuss/2026-08-17-supastarter-source-correction.md
+  - docs/reference/supastarter-nextjs-docs/database/schema.mdx
+  - docs/reference/supastarter-nextjs-docs/deployment/overview.mdx
+  - docs/reference/supastarter-nextjs-docs/payments/providers/meta.json
+  - docs/reference/supastarter-nextjs-docs/payments/providers/polar.mdx
+  - docs/reference/supastarter-nextjs-docs/payments/usage-based-billing.mdx
+  - docs/reference/supastarter-nextjs-docs/customization/onboarding.mdx
+  - apps/saas/app/page.tsx
+  - docs/reference/supastarter-nextjs-docs/organizations/use-organizations.mdx
+  - docs/reference/supastarter-nextjs-docs/tasks/trigger-dev.mdx
+  - docs/reference/supastarter-nextjs-docs/database/studio.mdx
+  - docs/reference/supastarter-nextjs-docs/ai/meta.json
+  - docs/reference/supastarter-nextjs-docs/storage/uploadthing.mdx
+  - docs/reference/supastarter-nextjs-docs/tasks/meta.json
+  - docs/reference/supastarter-nextjs-docs/recipes/build-a-feedback-widget.mdx
+  - AGENTS.md
+  - docs/reference/supastarter-nextjs-docs/configuration.mdx
+  - apps/saas/app/login/login-form.tsx
+  - apps/saas/lib/agent-data.ts
+  - docs/reference/supastarter-nextjs-docs/tech-stack.mdx
+  - docs/verification/rebuild-design-system-from-source/2.3-home-inter-fallback.png
+  - packages/ui/src/components/form.tsx
+  - docs/reference/supastarter-nextjs-docs/database/providers/railway.mdx
+  - docs/reference/supastarter-nextjs-docs/analytics/posthog.mdx
+  - docs/reference/supastarter-nextjs-docs/analytics/pirsch.mdx
+  - docs/reference/supastarter-nextjs-docs/api/meta.json
+  - docs/reference/supastarter-nextjs-docs/codebase/meta.json
+  - docs/reference/supastarter-nextjs-docs/payments/check-purchases.mdx
+  - docs/reference/supastarter-nextjs-docs/organizations/meta.json
+  - docs/reference/supastarter-nextjs-docs/database/meta.json
+  - docs/reference/supastarter-nextjs-docs/setup.mdx
+  - docs/reference/supastarter-nextjs-docs/tasks/overview.mdx
+  - packages/ui/src/components/button.tsx
+  - docs/reference/supastarter-nextjs-docs/authentication/oauth.mdx
+  - docs/reference/supastarter-nextjs-docs/api/overview.mdx
+  - docs/verification/rebuild-design-system-from-source/9.3-app.png
+  - docs/reference/supastarter-nextjs-docs/customization/styling.mdx
+  - docs/reference/supastarter-nextjs-docs/internationalization.mdx
+  - apps/saas/app/app/page.tsx
+  - docs/reference/supastarter-nextjs-docs/database/providers/meta.json
+  - docs/reference/supastarter-nextjs-docs/payments/providers/dodopayments.mdx
+  - docs/reference/supastarter-nextjs-docs/storage/aws-s3.mdx
+  - docs/reference/supastarter-nextjs-docs/deployment/meta.json
+  - docs/reference/supastarter-nextjs-docs/monitoring/overview.mdx
+  - docs/reference/supastarter-nextjs-docs/authentication/user-and-session.mdx
+  - docs/reference/supastarter-nextjs-docs/database/providers/turso.mdx
+  - docs/reference/supastarter-nextjs-docs/ai/overview.mdx
+  - docs/reference/supastarter-nextjs-docs/meta.json
+  - docs/reference/supastarter-nextjs-docs/mailing/postmark.mdx
+  - docs/reference/supastarter-nextjs-docs/skills.mdx
+  - apps/saas/package.json
+  - docs/reference/supastarter-nextjs-docs/monitoring/sentry.mdx
+  - docs/reference/supastarter-nextjs-docs/analytics/plausible.mdx
+  - apps/saas/app/course/course-workspace.tsx
+  - docs/reference/supastarter-nextjs-docs/deployment/railway.mdx
+  - docs/reference/supastarter-nextjs-docs/launch.mdx
+  - docs/reference/supastarter-nextjs-docs/ai/chatbot.mdx
+  - docs/reference/supastarter-nextjs-docs/customization/overview.mdx
+  - packages/ui/src/components/logo.tsx
+  - docs/reference/supastarter-nextjs-docs/analytics/custom.mdx
+  - docs/reference/supastarter-nextjs-docs/deployment/render.mdx
+  - docs/cr-report-rebuild-design-system-from-source.md
+  - docs/reference/supastarter-nextjs-docs/deployment/docker.mdx
+  - docs/reference/supastarter-nextjs-docs/tasks/queuebase.mdx
+  - docs/reference/supastarter-nextjs-docs/recipes/supabase-setup.mdx
+  - docs/reference/supastarter-nextjs-docs/database/client.mdx
+  - docs/reference/supastarter-nextjs-docs/deployment/coolify.mdx
+  - docs/reference/supastarter-nextjs-docs/payments/providers/stripe.mdx
+  - docs/reference/supastarter-nextjs-docs/index.mdx
+  - docs/reference/supastarter-nextjs-docs/payments/providers/creem.mdx
+  - docs/reference/supastarter-nextjs-docs/recipes/meta.json
+  - docs/reference/supastarter-nextjs-docs/authentication/overview.mdx
+  - apps/saas/app/components/app-shell.tsx
+  - docs/reference/supastarter-nextjs-docs/codebase/structure.mdx
+  - apps/saas/app/globals.css
+  - docs/verification/rebuild-design-system-from-source/5.3-app-dark.png
+  - docs/reference/supastarter-nextjs-docs/customization/dashboard.mdx
+  - apps/saas/app/course/page.tsx
+  - docs/reference/supastarter-nextjs-docs/codebase/update.mdx
+  - docs/reference/supastarter-nextjs-docs/mailing/custom.mdx
+  - docs/reference/supastarter-nextjs-docs/database/providers/supabase.mdx
+  - docs/reference/supastarter-nextjs-docs/mailing/meta.json
+  - docs/reference/supastarter-nextjs-docs/api/protect-endpoints.mdx
+  - docs/reference/supastarter-nextjs-docs/analytics/overview.mdx
+  - docs/discuss/2026-08-17-landing-signup-visual-feedback.md
+  - docs/reference/supastarter-nextjs-docs/authentication/superadmin.mdx
+  - docs/为什么叫QQ – 你的AI编程总是翻车？因为你少做了一步：设计隔离  拆解 Grill-me，Superpowers，Openspec 的第一步.md
+  - docs/verification/rebuild-design-system-from-source/5.3-app-light.png
+  - docs/reference/supastarter-nextjs-docs/authentication/meta.json
+  - docs/reference/supastarter-nextjs-docs/codebase/formatting-and-linting.mdx
+  - docs/reference/supastarter-nextjs-docs/mailing/overview.mdx
+  - docs/reference/supastarter-nextjs-docs/organizations/overview.mdx
+  - docs/reference/supastarter-nextjs-docs/seo/meta-tags.mdx
+  - docs/reference/supastarter-nextjs-docs/analytics/google.mdx
+  - docs/reference/supastarter-nextjs-docs/seo/meta.json
+  - docs/reference/supastarter-nextjs-docs/deployment/vercel.mdx
+  - docs/reference/supastarter-nextjs-docs/api/usage-in-frontend.mdx
+  - docs/reference/supastarter-nextjs-docs/api/streaming.mdx
+  - docs/reference/supastarter-nextjs-docs/storage/meta.json
+  - docs/discuss/2026-08-17-wp-frontend-mount-research.md
+  - docs/verification/rebuild-design-system-from-source/9.3-course.png
+  - docs/reference/supastarter-nextjs-docs/customization/meta.json
+  - docs/reference/supastarter-nextjs-docs/tasks/qstash.mdx
+  - docs/reference/supastarter-nextjs-docs/blog.mdx
+  - packages/ui/package.json
+  - apps/saas/lib/permissions.tsx
+  - docs/reference/supastarter-nextjs-docs/database/providers/neon.mdx
+  - docs/reference/supastarter-nextjs-docs/deployment/standalone-api.mdx
+  - docs/verification/rebuild-design-system-from-source/5.3-home-light.png
+  - docs/reference/supastarter-nextjs-docs/analytics/mixpanel.mdx
+  - docs/reference/supastarter-nextjs-docs/storage/cloudflare-r2.mdx
+  - docs/reference/supastarter-nextjs-docs/codebase/local-development.mdx
+  - docs/reference/supastarter-nextjs-docs/storage/digitalocean-spaces.mdx
+  - docs/reference/supastarter-nextjs-docs/payments/overview.mdx
+  - docs/reference/supastarter-nextjs-docs/storage/setup.mdx
+  - apps/saas/postcss.config.cjs
+  - packages/ui/src/components/input.tsx
+  - docs/reference/supastarter-nextjs-docs/deployment/netlify.mdx
+  - docs/reference/supastarter-nextjs-docs/api/openapi.mdx
+  - apps/saas/app/layout.tsx
+  - docs/verification/rebuild-design-system-from-source/5.3-home-dark.png
+  - docs/reference/supastarter-nextjs-docs/analytics/vercel.mdx
+tests:
+  - packages/ui/src/components-source.test.ts
+  - apps/saas/lib/organization-switcher.test.tsx
+  - apps/saas/lib/mobile-tabbar.test.tsx
+  - packages/ui/src/form-components-source.test.ts
+  - apps/saas/lib/permissions.test.tsx
+  - apps/saas/lib/design-tokens.test.ts
+  - packages/ui/src/version-gap.test.ts
+  - apps/saas/lib/css-architecture.test.ts
+  - apps/saas/lib/platform-shell.test.tsx
+  - apps/saas/lib/font-fallback.test.ts
+  - packages/ui/src/interactive-components-source.test.tsx
+  - packages/ui/src/components.test.tsx
+-->
+
+---
+### Requirement: Multi-organization users can switch active organization from the shell
+
+When a signed-in user belongs to more than one organization, the AppShell SHALL render an organization switcher control in the sidebar user area that lists the user's organizations and allows switching the active organization context.
+
+#### Scenario: User with multiple organizations sees the switcher
+
+- **WHEN** a signed-in user who is a member of two or more organizations views the AppShell sidebar
+- **THEN** the sidebar user area MUST contain an organization switcher control listing all organizations the user belongs to
+
+#### Scenario: User with exactly one organization does not see the switcher
+
+- **WHEN** a signed-in user who belongs to exactly one organization views the AppShell sidebar
+- **THEN** the sidebar user area MUST NOT render an organization switcher control
+
+#### Scenario: Switching organization updates the active context
+
+- **WHEN** a user with multiple organizations selects a different organization in the switcher
+- **THEN** subsequent navigation and data queries MUST scope to the newly selected organization, and the previously active organization's data MUST NOT remain visible
+
+<!-- @trace
+source: rebuild-design-system-from-source
+updated: 2026-08-18
+code:
+  - docs/discuss/2026-08-17-hyperagent-reference.md
+  - docs/reference/supastarter-nextjs-docs/database/update-schema.mdx
+  - docs/reference/supastarter-nextjs-docs/payments/paywall.mdx
+  - docs/verification/rebuild-design-system-from-source/9.3-agent.png
+  - apps/saas/app/components/organization-select.tsx
+  - docs/reference/supastarter-nextjs-docs/mailing/nodemailer.mdx
+  - packages/tooling/tailwind/theme.css
+  - docs/reference/supastarter-nextjs-docs/database/providers/planetscale.mdx
+  - docs/verification/rebuild-design-system-from-source/9.3-home.png
+  - docs/reference/supastarter-nextjs-docs/organizations/configure.mdx
+  - docs/reference/supastarter-nextjs-docs/codebase/vscode.mdx
+  - packages/ui/src/components/dropdown-menu.tsx
+  - docs/verification/rebuild-design-system-from-source/9.3-login.png
+  - docs/reference/supastarter-nextjs-docs/ai/prompts.mdx
+  - docs/reference/supastarter-nextjs-docs/e2e.mdx
+  - packages/ui/src/components/color-mode-toggle.tsx
+  - docs/reference/supastarter-nextjs-docs/storage/access-files.mdx
+  - docs/reference/supastarter-nextjs-docs/analytics/umami.mdx
+  - docs/reference/supastarter-nextjs-docs/codebase/dependencies.mdx
+  - docs/reference/supastarter-nextjs-docs/mailing/console.mdx
+  - docs/reference/supastarter-nextjs-docs/payments/meta.json
+  - docs/reference/supastarter-nextjs-docs/monitoring/meta.json
+  - docs/reference/supastarter-nextjs-docs/analytics/meta.json
+  - packages/ui/src/components/label.tsx
+  - docs/reference/supastarter-nextjs-docs/mailing/resend.mdx
+  - docs/reference/2026-08-17-supastarter-docs-analysis.md
+  - packages/ui/src/index.tsx
+  - apps/saas/app/components/site-nav.tsx
+  - docs/reference/supastarter-nextjs-docs/payments/providers/lemonsqueezy.mdx
+  - packages/ui/src/components/tooltip.tsx
+  - docs/reference/supastarter-nextjs-docs/storage/overview.mdx
+  - docs/reference/supastarter-nextjs-docs/api/define-endpoint.mdx
+  - docs/verification/rebuild-design-system-from-source/9.3-admin-settings.png
+  - docs/reference/supastarter-nextjs-docs/api/use-locale.mdx
+  - docs/reference/supastarter-nextjs-docs/organizations/store-data-for-organizations.mdx
+  - docs/reference/supastarter-nextjs-docs/troubleshooting.mdx
+  - docs/reference/supastarter-nextjs-docs/storage/upload-files.mdx
+  - docs/reference/supastarter-nextjs-docs/deployment/flydotio.mdx
+  - apps/saas/app/components/mobile-tabbar.tsx
+  - docs/discuss/2026-08-17-supastarter-gap-risk-report.md
+  - apps/saas/app/course/[lessonId]/page.tsx
+  - apps/saas/app/design-system.css
+  - docs/reference/supastarter-nextjs-docs/analytics/vemetric.mdx
+  - docs/reference/supastarter-nextjs-docs/seo/sitemap.mdx
+  - docs/reference/supastarter-nextjs-docs/database/overview.mdx
+  - apps/saas/lib/organization.ts
+  - docs/reference/supastarter-nextjs-docs/documentation.mdx
+  - docs/reference/supastarter-nextjs-docs/authentication/permissions.mdx
+  - docs/reference/supastarter-nextjs-docs/payments/plans.mdx
+  - packages/ui/src/components/badge.tsx
+  - docs/discuss/2026-08-17-supastarter-source-correction.md
+  - docs/reference/supastarter-nextjs-docs/database/schema.mdx
+  - docs/reference/supastarter-nextjs-docs/deployment/overview.mdx
+  - docs/reference/supastarter-nextjs-docs/payments/providers/meta.json
+  - docs/reference/supastarter-nextjs-docs/payments/providers/polar.mdx
+  - docs/reference/supastarter-nextjs-docs/payments/usage-based-billing.mdx
+  - docs/reference/supastarter-nextjs-docs/customization/onboarding.mdx
+  - apps/saas/app/page.tsx
+  - docs/reference/supastarter-nextjs-docs/organizations/use-organizations.mdx
+  - docs/reference/supastarter-nextjs-docs/tasks/trigger-dev.mdx
+  - docs/reference/supastarter-nextjs-docs/database/studio.mdx
+  - docs/reference/supastarter-nextjs-docs/ai/meta.json
+  - docs/reference/supastarter-nextjs-docs/storage/uploadthing.mdx
+  - docs/reference/supastarter-nextjs-docs/tasks/meta.json
+  - docs/reference/supastarter-nextjs-docs/recipes/build-a-feedback-widget.mdx
+  - AGENTS.md
+  - docs/reference/supastarter-nextjs-docs/configuration.mdx
+  - apps/saas/app/login/login-form.tsx
+  - apps/saas/lib/agent-data.ts
+  - docs/reference/supastarter-nextjs-docs/tech-stack.mdx
+  - docs/verification/rebuild-design-system-from-source/2.3-home-inter-fallback.png
+  - packages/ui/src/components/form.tsx
+  - docs/reference/supastarter-nextjs-docs/database/providers/railway.mdx
+  - docs/reference/supastarter-nextjs-docs/analytics/posthog.mdx
+  - docs/reference/supastarter-nextjs-docs/analytics/pirsch.mdx
+  - docs/reference/supastarter-nextjs-docs/api/meta.json
+  - docs/reference/supastarter-nextjs-docs/codebase/meta.json
+  - docs/reference/supastarter-nextjs-docs/payments/check-purchases.mdx
+  - docs/reference/supastarter-nextjs-docs/organizations/meta.json
+  - docs/reference/supastarter-nextjs-docs/database/meta.json
+  - docs/reference/supastarter-nextjs-docs/setup.mdx
+  - docs/reference/supastarter-nextjs-docs/tasks/overview.mdx
+  - packages/ui/src/components/button.tsx
+  - docs/reference/supastarter-nextjs-docs/authentication/oauth.mdx
+  - docs/reference/supastarter-nextjs-docs/api/overview.mdx
+  - docs/verification/rebuild-design-system-from-source/9.3-app.png
+  - docs/reference/supastarter-nextjs-docs/customization/styling.mdx
+  - docs/reference/supastarter-nextjs-docs/internationalization.mdx
+  - apps/saas/app/app/page.tsx
+  - docs/reference/supastarter-nextjs-docs/database/providers/meta.json
+  - docs/reference/supastarter-nextjs-docs/payments/providers/dodopayments.mdx
+  - docs/reference/supastarter-nextjs-docs/storage/aws-s3.mdx
+  - docs/reference/supastarter-nextjs-docs/deployment/meta.json
+  - docs/reference/supastarter-nextjs-docs/monitoring/overview.mdx
+  - docs/reference/supastarter-nextjs-docs/authentication/user-and-session.mdx
+  - docs/reference/supastarter-nextjs-docs/database/providers/turso.mdx
+  - docs/reference/supastarter-nextjs-docs/ai/overview.mdx
+  - docs/reference/supastarter-nextjs-docs/meta.json
+  - docs/reference/supastarter-nextjs-docs/mailing/postmark.mdx
+  - docs/reference/supastarter-nextjs-docs/skills.mdx
+  - apps/saas/package.json
+  - docs/reference/supastarter-nextjs-docs/monitoring/sentry.mdx
+  - docs/reference/supastarter-nextjs-docs/analytics/plausible.mdx
+  - apps/saas/app/course/course-workspace.tsx
+  - docs/reference/supastarter-nextjs-docs/deployment/railway.mdx
+  - docs/reference/supastarter-nextjs-docs/launch.mdx
+  - docs/reference/supastarter-nextjs-docs/ai/chatbot.mdx
+  - docs/reference/supastarter-nextjs-docs/customization/overview.mdx
+  - packages/ui/src/components/logo.tsx
+  - docs/reference/supastarter-nextjs-docs/analytics/custom.mdx
+  - docs/reference/supastarter-nextjs-docs/deployment/render.mdx
+  - docs/cr-report-rebuild-design-system-from-source.md
+  - docs/reference/supastarter-nextjs-docs/deployment/docker.mdx
+  - docs/reference/supastarter-nextjs-docs/tasks/queuebase.mdx
+  - docs/reference/supastarter-nextjs-docs/recipes/supabase-setup.mdx
+  - docs/reference/supastarter-nextjs-docs/database/client.mdx
+  - docs/reference/supastarter-nextjs-docs/deployment/coolify.mdx
+  - docs/reference/supastarter-nextjs-docs/payments/providers/stripe.mdx
+  - docs/reference/supastarter-nextjs-docs/index.mdx
+  - docs/reference/supastarter-nextjs-docs/payments/providers/creem.mdx
+  - docs/reference/supastarter-nextjs-docs/recipes/meta.json
+  - docs/reference/supastarter-nextjs-docs/authentication/overview.mdx
+  - apps/saas/app/components/app-shell.tsx
+  - docs/reference/supastarter-nextjs-docs/codebase/structure.mdx
+  - apps/saas/app/globals.css
+  - docs/verification/rebuild-design-system-from-source/5.3-app-dark.png
+  - docs/reference/supastarter-nextjs-docs/customization/dashboard.mdx
+  - apps/saas/app/course/page.tsx
+  - docs/reference/supastarter-nextjs-docs/codebase/update.mdx
+  - docs/reference/supastarter-nextjs-docs/mailing/custom.mdx
+  - docs/reference/supastarter-nextjs-docs/database/providers/supabase.mdx
+  - docs/reference/supastarter-nextjs-docs/mailing/meta.json
+  - docs/reference/supastarter-nextjs-docs/api/protect-endpoints.mdx
+  - docs/reference/supastarter-nextjs-docs/analytics/overview.mdx
+  - docs/discuss/2026-08-17-landing-signup-visual-feedback.md
+  - docs/reference/supastarter-nextjs-docs/authentication/superadmin.mdx
+  - docs/为什么叫QQ – 你的AI编程总是翻车？因为你少做了一步：设计隔离  拆解 Grill-me，Superpowers，Openspec 的第一步.md
+  - docs/verification/rebuild-design-system-from-source/5.3-app-light.png
+  - docs/reference/supastarter-nextjs-docs/authentication/meta.json
+  - docs/reference/supastarter-nextjs-docs/codebase/formatting-and-linting.mdx
+  - docs/reference/supastarter-nextjs-docs/mailing/overview.mdx
+  - docs/reference/supastarter-nextjs-docs/organizations/overview.mdx
+  - docs/reference/supastarter-nextjs-docs/seo/meta-tags.mdx
+  - docs/reference/supastarter-nextjs-docs/analytics/google.mdx
+  - docs/reference/supastarter-nextjs-docs/seo/meta.json
+  - docs/reference/supastarter-nextjs-docs/deployment/vercel.mdx
+  - docs/reference/supastarter-nextjs-docs/api/usage-in-frontend.mdx
+  - docs/reference/supastarter-nextjs-docs/api/streaming.mdx
+  - docs/reference/supastarter-nextjs-docs/storage/meta.json
+  - docs/discuss/2026-08-17-wp-frontend-mount-research.md
+  - docs/verification/rebuild-design-system-from-source/9.3-course.png
+  - docs/reference/supastarter-nextjs-docs/customization/meta.json
+  - docs/reference/supastarter-nextjs-docs/tasks/qstash.mdx
+  - docs/reference/supastarter-nextjs-docs/blog.mdx
+  - packages/ui/package.json
+  - apps/saas/lib/permissions.tsx
+  - docs/reference/supastarter-nextjs-docs/database/providers/neon.mdx
+  - docs/reference/supastarter-nextjs-docs/deployment/standalone-api.mdx
+  - docs/verification/rebuild-design-system-from-source/5.3-home-light.png
+  - docs/reference/supastarter-nextjs-docs/analytics/mixpanel.mdx
+  - docs/reference/supastarter-nextjs-docs/storage/cloudflare-r2.mdx
+  - docs/reference/supastarter-nextjs-docs/codebase/local-development.mdx
+  - docs/reference/supastarter-nextjs-docs/storage/digitalocean-spaces.mdx
+  - docs/reference/supastarter-nextjs-docs/payments/overview.mdx
+  - docs/reference/supastarter-nextjs-docs/storage/setup.mdx
+  - apps/saas/postcss.config.cjs
+  - packages/ui/src/components/input.tsx
+  - docs/reference/supastarter-nextjs-docs/deployment/netlify.mdx
+  - docs/reference/supastarter-nextjs-docs/api/openapi.mdx
+  - apps/saas/app/layout.tsx
+  - docs/verification/rebuild-design-system-from-source/5.3-home-dark.png
+  - docs/reference/supastarter-nextjs-docs/analytics/vercel.mdx
+tests:
+  - packages/ui/src/components-source.test.ts
+  - apps/saas/lib/organization-switcher.test.tsx
+  - apps/saas/lib/mobile-tabbar.test.tsx
+  - packages/ui/src/form-components-source.test.ts
+  - apps/saas/lib/permissions.test.tsx
+  - apps/saas/lib/design-tokens.test.ts
+  - packages/ui/src/version-gap.test.ts
+  - apps/saas/lib/css-architecture.test.ts
+  - apps/saas/lib/platform-shell.test.tsx
+  - apps/saas/lib/font-fallback.test.ts
+  - packages/ui/src/interactive-components-source.test.tsx
+  - packages/ui/src/components.test.tsx
+-->
