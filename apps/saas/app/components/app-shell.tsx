@@ -6,20 +6,50 @@ import { useEffect, useState } from "react";
 import type { Locale } from "@startkiter/i18n";
 import { ColorModeToggle } from "@startkiter/ui";
 
+import type { OrganizationRecord, OrganizationRole } from "../../lib/organization";
+import { PermixProvider, usePermissions } from "../../lib/permissions";
 import { LocaleSwitcher } from "./locale-switcher";
 import { MobileTabbar } from "./mobile-tabbar";
+import { OrganizationSelect } from "./organization-select";
 
 const STORAGE_KEY = "startkiter-demo-sidebar-collapsed";
 
 export type AppShellCurrent = "app" | "course" | "agent" | "settings";
 
 export function AppShell({
+	...props
+}: {
+	brand: string;
+	email?: string | null;
+	name?: string | null;
+	locale: Locale;
+	current: AppShellCurrent;
+	showOperatorSettings?: boolean;
+	organizationRole?: OrganizationRole | null;
+	organizations?: readonly OrganizationRecord[];
+	activeOrganizationId?: string | null;
+	onOrganizationChange?: (organization: OrganizationRecord) => void;
+	heading: React.ReactNode;
+	children: React.ReactNode;
+}) {
+	return (
+		<PermixProvider role={props.organizationRole}>
+			<AppShellContent {...props} />
+		</PermixProvider>
+	);
+}
+
+function AppShellContent({
 	brand,
 	email,
 	name,
 	locale,
 	current,
 	showOperatorSettings = false,
+	organizationRole,
+	organizations = [],
+	activeOrganizationId,
+	onOrganizationChange,
 	heading,
 	children,
 }: {
@@ -29,9 +59,14 @@ export function AppShell({
 	locale: Locale;
 	current: AppShellCurrent;
 	showOperatorSettings?: boolean;
+	organizationRole?: OrganizationRole | null;
+	organizations?: readonly OrganizationRecord[];
+	activeOrganizationId?: string | null;
+	onOrganizationChange?: (organization: OrganizationRecord) => void;
 	heading: React.ReactNode;
 	children: React.ReactNode;
 }) {
+	const { manageMembers, manageCourseContent } = usePermissions();
 	const [collapsed, setCollapsed] = useState(false);
 
 	useEffect(() => {
@@ -86,7 +121,7 @@ export function AppShell({
 							</span>
 							<span className="nav-label">站內客服</span>
 						</Link>
-						{showOperatorSettings ? (
+						{showOperatorSettings && manageMembers ? (
 							<Link href="/admin/settings" aria-current={current === "settings" ? "page" : undefined} aria-label="帳號設定">
 								<span className="nav-icon" aria-hidden="true">
 									⚙
@@ -94,25 +129,34 @@ export function AppShell({
 								<span className="nav-label">帳號設定</span>
 							</Link>
 						) : null}
-						<span className="nav-placeholder" data-slot="course-admin" title="課程內容管理・下一輪 change 接上" aria-disabled="true">
-							<span className="nav-icon" aria-hidden="true">
-								▦
+						{manageCourseContent ? (
+							<span className="nav-placeholder" data-slot="course-admin" title="課程內容管理・下一輪 change 接上" aria-disabled="true">
+								<span className="nav-icon" aria-hidden="true">
+									▦
+								</span>
+								<span className="nav-label">
+									課程內容管理
+									<small>下一輪 change 接上</small>
+								</span>
 							</span>
-							<span className="nav-label">
-								課程內容管理
-								<small>下一輪 change 接上</small>
-							</span>
-						</span>
+						) : null}
 					</nav>
-					<div className="app-user" data-slot="sidebar-user">
-						<span className="app-avatar">{initial}</span>
-						<div className="app-user-meta">
-							<div style={{ fontSize: "0.875rem", fontWeight: 600 }}>{name || "學員"}</div>
-							<div className="ds-muted" style={{ fontSize: "0.75rem" }}>
-								{email}
+					<div className="sidebar-user-area">
+						<OrganizationSelect
+							organizations={organizations}
+							activeOrganizationId={activeOrganizationId}
+							onOrganizationChange={onOrganizationChange}
+						/>
+						<div className="app-user" data-slot="sidebar-user">
+							<span className="app-avatar">{initial}</span>
+							<div className="app-user-meta">
+								<div style={{ fontSize: "0.875rem", fontWeight: 600 }}>{name || "學員"}</div>
+								<div className="ds-muted" style={{ fontSize: "0.75rem" }}>
+									{email}
+								</div>
 							</div>
+							<LocaleSwitcher current={locale} />
 						</div>
-						<LocaleSwitcher current={locale} />
 					</div>
 				</aside>
 				<div className="app-main">
@@ -128,7 +172,7 @@ export function AppShell({
 					{children}
 				</div>
 			</div>
-			<MobileTabbar current={current} showOperatorSettings={showOperatorSettings} />
-		</>
+			<MobileTabbar current={current} showOperatorSettings={showOperatorSettings} organizationRole={organizationRole} />
+			</>
 	);
 }

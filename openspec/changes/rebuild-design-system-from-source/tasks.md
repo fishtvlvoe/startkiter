@@ -36,14 +36,14 @@
 
 ## 7. 型別化權限
 
-- [ ] 7.1 撰寫測試驗證 Requirement「Operator role determines visible permission-gated navigation」的三個 Scenario——分別斷言 instructor 角色只看到課程內容管理導覽、owner 角色看到全部權限導覽、角色無法解析時側欄不顯示任何權限限定導覽項且不拋出例外，驗證方式：新增 `apps/saas/lib/permissions.test.tsx`，目前為紅燈
-- [ ] 7.2 依 Decision「型別化權限與多租戶切換器：對接 organization-role-model 既有角色矩陣」實作 `usePermissions` hook 與 `PermixProvider`，讀取 `organization-tenancy` capability 定義的 owner/admin/instructor/user 權限矩陣進行型別化權限判斷，取代 `apps/saas/lib/operator.ts` 現有的布林 `requiresOperator` 判斷，驗證方式：7.1 測試轉綠燈
-- [ ] 7.3 更新 `apps/saas/app/components/app-shell.tsx` 的側欄導覽渲染邏輯改用 `usePermissions` 判斷各導覽項目可見性，驗證方式：既有 `apps/saas/lib/platform-shell.test.tsx` 保持綠燈且新增的權限測試涵蓋 AppShell 渲染結果
+- [x] 7.1 撰寫測試驗證 Requirement「Operator role determines visible permission-gated navigation」的三個 Scenario——分別斷言 instructor 角色只看到課程內容管理導覽、owner 角色看到全部權限導覽、角色無法解析時側欄不顯示任何權限限定導覽項且不拋出例外，驗證方式：新增 `apps/saas/lib/permissions.test.tsx`，目前為紅燈
+- [x] 7.2 依 Decision「型別化權限與多租戶切換器：對接 organization-role-model 既有角色矩陣」實作 `usePermissions` hook 與 `PermixProvider`，讀取 `organization-tenancy` capability 定義的 owner/admin/instructor/user 權限矩陣進行型別化權限判斷，取代 `apps/saas/lib/operator.ts` 現有的布林 `requiresOperator` 判斷，驗證方式：7.1 測試轉綠燈
+- [x] 7.3 更新 `apps/saas/app/components/app-shell.tsx` 的側欄導覽渲染邏輯改用 `usePermissions` 判斷各導覽項目可見性，驗證方式：既有 `apps/saas/lib/platform-shell.test.tsx` 保持綠燈且新增的權限測試涵蓋 AppShell 渲染結果
 
 ## 8. 多租戶切換器
 
-- [ ] 8.1 撰寫測試驗證 Requirement「Multi-organization users can switch active organization from the shell」的三個 Scenario——多組織使用者看到切換器、單組織使用者不看到切換器、切換組織後資料範圍更新，驗證方式：新增 `apps/saas/lib/organization-switcher.test.tsx`，目前為紅燈
-- [ ] 8.2 實作 `OrganizationSelect` 元件加入 AppShell 側欄使用者區塊，串接 `organization-role-model` 已封存 change 定義的 Organization/Member 資料模型讀取使用者所屬組織清單，驗證方式：8.1 測試轉綠燈
+- [x] 8.1 撰寫測試驗證 Requirement「Multi-organization users can switch active organization from the shell」的三個 Scenario——多組織使用者看到切換器、單組織使用者不看到切換器、切換組織後資料範圍更新，驗證方式：新增 `apps/saas/lib/organization-switcher.test.tsx`，目前為紅燈
+- [x] 8.2 實作 `OrganizationSelect` 元件加入 AppShell 側欄使用者區塊，串接 `organization-role-model` 已封存 change 定義的 Organization/Member 資料模型讀取使用者所屬組織清單，驗證方式：8.1 測試轉綠燈
 
 ## 9. Review 與驗收
 
