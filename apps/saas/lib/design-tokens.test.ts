@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 
-const SOURCE_ROOT = "/Users/fishtv/Development/products/startkiter/code/supastarter-nextjs-main";
+const SOURCE_ROOT = resolve(repoRoot, "vendor/supastarter-nextjs");
 
 function extractCustomProperty(css: string, name: string) {
 	const match = css.match(new RegExp(`${name}:\\s*([^;]+);`));
@@ -22,7 +22,7 @@ describe("design tokens are ported, not approximated", () => {
 		expect(extractCustomProperty(localGlobals, "--radius")).toBe(
 			extractCustomProperty(sourceTheme, "--radius"),
 		);
-		expect(extractCustomProperty(localGlobals, "--radius")).toBe("0.75rem");
+		expect(extractCustomProperty(localGlobals, "--radius")).toBe("0.625rem");
 		expect(sourceGlobals).toContain("@variant dark (&:where(.dark, .dark *));");
 		expect(localGlobals).toContain("@variant dark (&:where(.dark, .dark *));");
 	});

@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 
-const SOURCE_ROOT = "/Users/fishtv/Development/products/startkiter/code/supastarter-nextjs-main";
+const SOURCE_ROOT = resolve(repoRoot, "vendor/supastarter-nextjs");
 
 const TABLE_PATH = resolve(
 	repoRoot,

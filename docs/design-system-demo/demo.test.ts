@@ -6,8 +6,7 @@ import { describe, expect, it } from "vitest";
 
 const demoDir = dirname(fileURLToPath(import.meta.url));
 
-const sourceThemePath =
-	"/Users/fishtv/Development/products/startkiter/code/supastarter-nextjs-main/tooling/tailwind/theme.css";
+const sourceThemePath = resolve(demoDir, "../../vendor/supastarter-nextjs/tooling/tailwind/theme.css");
 
 function readDemo(name: string) {
 	return readFileSync(resolve(demoDir, name), "utf8");
@@ -31,7 +30,7 @@ describe("design-system HTML demos", () => {
 		expect(extractCustomProperty(tokens, "--radius")).toBe(
 			extractCustomProperty(sourceTheme, "--radius"),
 		);
-		expect(extractCustomProperty(tokens, "--radius")).toBe("0.75rem");
+		expect(extractCustomProperty(tokens, "--radius")).toBe("0.625rem");
 	});
 
 	it("declares light tokens on :root and dark tokens on .dark", () => {

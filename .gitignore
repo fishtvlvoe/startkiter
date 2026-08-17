@@ -44,3 +44,6 @@ graphify-out/
 
 # 唯讀參考原始碼（supastarter-nextjs-main、realms-course-platform 等），不進版控
 code/
+
+# 官方 supastarter-nextjs 私有倉庫唯讀 clone（gh 認證 pull），不進版控
+vendor/
