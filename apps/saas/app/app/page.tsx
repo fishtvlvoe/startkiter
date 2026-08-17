@@ -103,13 +103,21 @@ export default async function AccountPage() {
 							</p>
 						</div>
 						<div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-							<Button asChild variant="primary" className="ds-btn" data-variant="primary" data-size="md">
-								<Link href="/course">{messages.account.enterCourse}</Link>
-							</Button>
+							<Button
+								variant="primary"
+								className="ds-btn"
+								data-variant="primary"
+								data-size="md"
+								render={(props) => <Link {...props} href="/course">{messages.account.enterCourse}</Link>}
+							/>
 							{!entitled ? (
-								<Button asChild variant="outline" className="ds-btn" data-variant="outline" data-size="md">
-									<Link href="/checkout">{messages.account.buyCourse}</Link>
-								</Button>
+								<Button
+									variant="outline"
+									className="ds-btn"
+									data-variant="outline"
+									data-size="md"
+									render={(props) => <Link {...props} href="/checkout">{messages.account.buyCourse}</Link>}
+								/>
 							) : null}
 							<SignOutButton />
 						</div>

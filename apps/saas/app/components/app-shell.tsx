@@ -119,7 +119,10 @@ export function AppShell({
 					<div className="page-header" data-slot="page-header">
 						<div>{heading}</div>
 						<div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-							<ColorModeToggle />
+							<ColorModeToggle
+								modes={["system", "light", "dark"]}
+								labels={{ system: "系統", light: "淺色", dark: "深色" }}
+							/>
 						</div>
 					</div>
 					{children}

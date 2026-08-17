@@ -70,12 +70,22 @@ export default async function HomePage() {
 					</li>
 				</ul>
 				<div style={{ display: "flex", justifyContent: "center", gap: "0.5rem", marginTop: "1.5rem" }}>
-					<Button asChild variant="primary" size="lg" className="ds-btn" data-variant="primary" data-size="lg">
-						<Link href="/checkout">{messages.home.buyCta}</Link>
-					</Button>
-					<Button asChild variant="ghost" size="lg" className="ds-btn" data-variant="ghost" data-size="lg">
-						<Link href="/login">{messages.home.loginCta}</Link>
-					</Button>
+					<Button
+						variant="primary"
+						size="lg"
+						className="ds-btn"
+						data-variant="primary"
+						data-size="lg"
+						render={(props) => <Link {...props} href="/checkout">{messages.home.buyCta}</Link>}
+					/>
+					<Button
+						variant="ghost"
+						size="lg"
+						className="ds-btn"
+						data-variant="ghost"
+						data-size="lg"
+						render={(props) => <Link {...props} href="/login">{messages.home.loginCta}</Link>}
+					/>
 				</div>
 				<div className="hero-frame" aria-hidden="true">
 					<div className="hero-screen">

@@ -35,7 +35,11 @@ describe("shared design-system markers", () => {
 	});
 
 	it("ColorModeToggle renders a data-slot attribute", () => {
-		const { container } = render(<ColorModeToggle />);
+		const { container } = render(
+			<ColorModeToggle
+				labels={{ system: "系統", light: "淺色", dark: "深色" }}
+			/>,
+		);
 
 		expect(container.querySelector("[data-slot]")).not.toBeNull();
 	});

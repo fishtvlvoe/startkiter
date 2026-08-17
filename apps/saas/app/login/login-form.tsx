@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Form, Input } from "@startkiter/ui";
+import { Button, Form, Input, Label } from "@startkiter/ui";
 
 type AuthMode = "sign-in" | "sign-up";
 
@@ -128,16 +128,16 @@ export function LoginForm({
 			<Form>
 				<form className="form" onSubmit={submit}>
 					{isSignUp ? (
-						<label>
+						<Label>
 							名稱
 							<Input name="name" autoComplete="name" required />
-						</label>
+						</Label>
 					) : null}
-					<label>
+					<Label>
 						Email
 						<Input name="email" type="email" autoComplete="email" required />
-					</label>
-					<label>
+					</Label>
+					<Label>
 						密碼
 						<Input
 							name="password"
@@ -146,7 +146,7 @@ export function LoginForm({
 							autoComplete={isSignUp ? "new-password" : "current-password"}
 							required
 						/>
-					</label>
+					</Label>
 					<Button type="submit" variant="primary">
 						{isSignUp ? "建立帳號" : "登入"}
 					</Button>
