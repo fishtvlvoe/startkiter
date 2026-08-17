@@ -22,6 +22,7 @@ import { parseCookie as parseCookies } from "cookie";
 import { config } from "./config";
 import { updateSeatsInOrganizationSubscription } from "./lib/organization";
 import { invitationOnlyPlugin } from "./plugins/invitation-only";
+import { getSocialProviders } from "./providers";
 
 const getLocaleFromRequest = (request?: Request) => {
 	const cookies = parseCookies(request?.headers.get("cookie") ?? "");
@@ -29,6 +30,7 @@ const getLocaleFromRequest = (request?: Request) => {
 };
 
 const appUrl = getBaseUrl(process.env.NEXT_PUBLIC_SAAS_URL, 3000);
+const socialProviders = getSocialProviders(process.env);
 
 export const auth = betterAuth({
 	baseURL: appUrl,
@@ -80,7 +82,8 @@ export const auth = betterAuth({
 	account: {
 		accountLinking: {
 			enabled: true,
-			trustedProviders: ["google", "github"],
+			trustedProviders: ["google", "line", "github"],
+			allowDifferentEmails: true,
 		},
 	},
 	hooks: {
@@ -205,18 +208,7 @@ export const auth = betterAuth({
 			});
 		},
 	},
-	socialProviders: {
-		google: {
-			clientId: process.env.GOOGLE_CLIENT_ID as string,
-			clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-			scope: ["email", "profile"],
-		},
-		github: {
-			clientId: process.env.GITHUB_CLIENT_ID as string,
-			clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
-			scope: ["user:email"],
-		},
-	},
+	socialProviders,
 	plugins: [
 		admin(),
 		passkey(),
