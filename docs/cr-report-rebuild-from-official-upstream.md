@@ -57,7 +57,7 @@
 - `pnpm build`：exit code 0；Turbo 2.10.10，marketing／saas build successful；route list 包含 `/checkout`、`/checkout/payuni`、`/course`、`/api/checkout`、`/api/course/lessons`、`/api/payuni/notify`。
 - `pnpm test`：exit code 0；Turbo 10 successful／10 total。主要輸出：saas 24 tests、marketing 32、api 31、ui 115、permissions 6；其餘 package test tasks 也全數成功。只有 Vitest native config 與 Turbo output-file warnings。
 - HTTP smoke：已登入 ego-browser 對本機 `/`、`/course`、`/checkout` 取得 200；未登入 course body edge cases 回 400／401；marketing `/zh-tw` 取得 200。
-- 視覺驗證：完整矩陣與截圖在 `docs/verification/rebuild-from-official-upstream/comparison.md`。首頁與登入頁官方骨架 PASS；官方 app protected backend／course／checkout 因沒有合法 demo session 均 redirect `/login`，三頁只能保留「本機可用 + 官方 redirect」的限制紀錄，不能宣稱三頁登入後骨架已完成對比。
+- 視覺驗證：完整矩陣與截圖在 `docs/verification/rebuild-from-official-upstream/comparison.md`。首頁、登入、註冊公開殼官方骨架 PASS；官方 app protected backend／course／checkout 因沒有合法 demo session 均 redirect `/login`，三頁以本機已登入實景、共用官方 `AppWrapper`／`AuthWrapper`／`Card` 元件與官方 redirect 做降級驗證，不能宣稱三頁登入後骨架已完成實際並排對比。
 
 ## Review status
 
