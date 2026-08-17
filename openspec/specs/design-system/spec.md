@@ -1,173 +1,36 @@
-# saas-shell Specification
+# design-system Specification
 
 ## Purpose
 
-Define the StartKiter zh-TW pnpm shell, authenticated `/app` area, and the absence of organization tenancy and payment routes in the shell extract.
+TBD - created by archiving change 'extract-supastarter-design-system'. Update Purpose after archive.
 
 ## Requirements
 
-### Requirement: Monorepo shell boots locally
+### Requirement: UI components come from the shared design system
 
-The StartKiter workspace SHALL provide a pnpm monorepo with apps/saas that serves Traditional Chinese public pages without requiring PAYUNi keys. Source repositories MUST NOT be modified by this change.
+The apps/saas application SHALL render pages using components imported from packages/ui that are ported from supastarter-nextjs-main's shadcn/ui-based component library. Pages MUST NOT define bespoke visual components with hand-written CSS classes for controls that have an equivalent design-system component (buttons, cards, badges, form inputs).
 
-#### Scenario: Public home responds without payment keys
+#### Scenario: Homepage buttons use the shared Button component
 
-- **WHEN** an operator starts apps/saas with DATABASE_URL and BETTER_AUTH_SECRET set and without PAYUNi keys
-- **THEN** GET / MUST return HTTP 200 and MUST NOT return HTTP 500
+- **WHEN** a browser renders GET /
+- **THEN** the primary and secondary call-to-action controls MUST be DOM elements carrying the design-system component marker attribute `data-slot="button"`
 
-##### Example: 無金流金鑰仍能開首頁
+##### Example: Detecting the marker attribute
 
-- 環境變數含 DATABASE_URL 與 BETTER_AUTH_SECRET，缺少任何 PAYUNi 相關鍵
-- 開發伺服器啟動後對 GET / 回應 200，body 為繁中公開頁
+- **GIVEN** the rendered homepage DOM
+- **WHEN** `document.querySelectorAll('[data-slot="button"]')` is evaluated
+- **THEN** the result MUST contain at least the "取得開站包" and "看示範" controls
 
-#### Scenario: Workspace root has the shell packages
+#### Scenario: Login form uses shared form components
 
-- **WHEN** the extract-shell-auth change is applied
-- **THEN** package.json, pnpm-workspace.yaml, apps/saas, packages/auth, and packages/database MUST exist at the workspace root
+- **WHEN** a browser renders GET /login
+- **THEN** the email and password fields MUST be design-system Input components and the submit control MUST be a design-system Button component
 
-##### Example: Required workspace entries
+##### Example: Detecting Input and Button markers on the login form
 
-- `test -f package.json`, `test -f pnpm-workspace.yaml`, `test -d apps/saas`, `test -d packages/auth`, and `test -d packages/database` all return success
-
-
-<!-- @trace
-source: extract-shell-auth
-updated: 2026-08-15
-code:
-  - packages/utils/src/index.ts
-  - AGENTS.md
-  - packages/utils/tsconfig.json
-  - apps/saas/app/globals.css
-  - apps/saas/app/login/login-form.tsx
-  - apps/saas/app/not-found.tsx
-  - apps/saas/package.json
-  - packages/i18n/src/index.ts
-  - apps/saas/app/app/page.tsx
-  - packages/auth/package.json
-  - apps/saas/app/login/page.tsx
-  - package.json
-  - packages/auth/src/index.ts
-  - apps/saas/app/signup/page.tsx
-  - packages/auth/tsconfig.json
-  - tsconfig.json
-  - packages/database/package.json
-  - packages/auth/src/auth.ts
-  - apps/saas/app/page.tsx
-  - apps/saas/.env.example
-  - packages/ui/package.json
-  - packages/database/prisma/migrations/migration_lock.toml
-  - README.md
-  - vitest.config.ts
-  - packages/database/tsconfig.json
-  - packages/utils/package.json
-  - packages/ui/tsconfig.json
-  - tooling/typescript/base.json
-  - turbo.json
-  - tooling/typescript/package.json
-  - packages/auth/src/providers.ts
-  - apps/saas/tsconfig.json
-  - apps/saas/app/layout.tsx
-  - packages/ui/src/index.tsx
-  - pnpm-workspace.yaml
-  - packages/auth/src/test-auth.ts
-  - packages/database/prisma/schema.prisma
-  - apps/saas/next-env.d.ts
-  - apps/saas/next.config.ts
-  - packages/database/prisma/migrations/20260814160938_init/migration.sql
-  - packages/database/src/index.ts
-  - packages/i18n/package.json
-  - apps/saas/app/api/auth/[...all]/route.ts
-  - packages/i18n/tsconfig.json
-tests:
-  - packages/auth/src/auth.test.ts
--->
-
----
-### Requirement: Authenticated area requires a session
-
-Unauthenticated users MUST NOT view the authenticated account area. Authenticated users SHALL reach a Traditional Chinese account area after sign-in.
-
-#### Scenario: Anonymous user is redirected from the account area
-
-- **WHEN** a browser without a session requests GET /app
-- **THEN** the response MUST redirect to the login page and MUST NOT render account settings content
-
-##### Example: No session cookie
-
-- `GET /app` without a `better-auth.session_token` cookie returns HTTP 307 with `Location: /login`
-
-#### Scenario: Signed-in user reaches the account area
-
-- **WHEN** a user with a valid session requests GET /app
-- **THEN** the response MUST be HTTP 200 and MUST render Traditional Chinese account UI
-
-
-<!-- @trace
-source: extract-shell-auth
-updated: 2026-08-15
-code:
-  - packages/utils/src/index.ts
-  - AGENTS.md
-  - packages/utils/tsconfig.json
-  - apps/saas/app/globals.css
-  - apps/saas/app/login/login-form.tsx
-  - apps/saas/app/not-found.tsx
-  - apps/saas/package.json
-  - packages/i18n/src/index.ts
-  - apps/saas/app/app/page.tsx
-  - packages/auth/package.json
-  - apps/saas/app/login/page.tsx
-  - package.json
-  - packages/auth/src/index.ts
-  - apps/saas/app/signup/page.tsx
-  - packages/auth/tsconfig.json
-  - tsconfig.json
-  - packages/database/package.json
-  - packages/auth/src/auth.ts
-  - apps/saas/app/page.tsx
-  - apps/saas/.env.example
-  - packages/ui/package.json
-  - packages/database/prisma/migrations/migration_lock.toml
-  - README.md
-  - vitest.config.ts
-  - packages/database/tsconfig.json
-  - packages/utils/package.json
-  - packages/ui/tsconfig.json
-  - tooling/typescript/base.json
-  - turbo.json
-  - tooling/typescript/package.json
-  - packages/auth/src/providers.ts
-  - apps/saas/tsconfig.json
-  - apps/saas/app/layout.tsx
-  - packages/ui/src/index.tsx
-  - pnpm-workspace.yaml
-  - packages/auth/src/test-auth.ts
-  - packages/database/prisma/schema.prisma
-  - apps/saas/next-env.d.ts
-  - apps/saas/next.config.ts
-  - packages/database/prisma/migrations/20260814160938_init/migration.sql
-  - packages/database/src/index.ts
-  - packages/i18n/package.json
-  - apps/saas/app/api/auth/[...all]/route.ts
-  - packages/i18n/tsconfig.json
-tests:
-  - packages/auth/src/auth.test.ts
--->
-
----
-### Requirement: Locale is zh-TW only
-
-The saas shell SHALL ship zh-TW, zh-CN, and en as the supported product locales at launch, with an architecture that allows additional locales to be added without component changes. zh-TW MUST remain the fallback locale for missing translation keys in any other locale.
-
-#### Scenario: Boot does not depend on unconfigured locales
-
-- **WHEN** apps/saas starts
-- **THEN** missing message catalogs for locales other than zh-TW, zh-CN, and en MUST NOT cause HTTP 500 on GET /
-
-#### Scenario: All three launch locales serve the public homepage
-
-- **WHEN** a client requests GET /zh-tw, GET /zh-cn, and GET /en
-- **THEN** each request MUST return HTTP 200 with page text rendered in the corresponding locale
+- **GIVEN** the rendered login page DOM
+- **WHEN** `document.querySelectorAll('input[data-slot="input"]')` and `document.querySelectorAll('button[data-slot="button"]')` are evaluated
+- **THEN** the input query MUST return exactly two elements (email, password) and the button query MUST include the submit control
 
 
 <!-- @trace
@@ -424,132 +287,20 @@ tests:
 -->
 
 ---
-### Requirement: Organization tenancy is absent
+### Requirement: Design tokens are ported, not approximated
 
-The shell MUST NOT expose organization create, invitation, or org-scoped product routes. Billing and identity MUST attach to user.
+The theme color, radius, spacing, and typography tokens in apps/saas/app/globals.css SHALL be copied from supastarter-nextjs-main's theme.css CSS custom properties rather than hand-authored approximate values.
 
-#### Scenario: Organization routes are not product features
+#### Scenario: Token values match the source
 
-- **WHEN** a client requests GET /new-organization or GET /organization-invitation
-- **THEN** the app MUST NOT expose those paths as working product features
+- **WHEN** the computed CSS custom property `--radius` (or the token's renamed equivalent) is read from the document root
+- **THEN** its value MUST equal the value defined in supastarter-nextjs-main's theme.css, not an independently chosen value
 
-##### Example: 組織路由不存在或明確不可用
+##### Example: Border radius token traced to source
 
-- 未登入或已登入使用者請求 GET /new-organization
-- 系統回傳 404，或不存在可建立組織的成功流程
-
-#### Scenario: Database has no organization tables
-
-- **WHEN** the Prisma schema for this change is inspected
-- **THEN** it MUST NOT define organization, member, or invitation models
-
-##### Example: Auth-only Prisma models
-
-- The schema models are `User`, `Session`, `Account`, and `Verification`; no model or table named `organization`, `member`, or `invitation` exists
-
-<!-- @trace
-source: extract-shell-auth
-updated: 2026-08-15
-code:
-  - packages/utils/src/index.ts
-  - AGENTS.md
-  - packages/utils/tsconfig.json
-  - apps/saas/app/globals.css
-  - apps/saas/app/login/login-form.tsx
-  - apps/saas/app/not-found.tsx
-  - apps/saas/package.json
-  - packages/i18n/src/index.ts
-  - apps/saas/app/app/page.tsx
-  - packages/auth/package.json
-  - apps/saas/app/login/page.tsx
-  - package.json
-  - packages/auth/src/index.ts
-  - apps/saas/app/signup/page.tsx
-  - packages/auth/tsconfig.json
-  - tsconfig.json
-  - packages/database/package.json
-  - packages/auth/src/auth.ts
-  - apps/saas/app/page.tsx
-  - apps/saas/.env.example
-  - packages/ui/package.json
-  - packages/database/prisma/migrations/migration_lock.toml
-  - README.md
-  - vitest.config.ts
-  - packages/database/tsconfig.json
-  - packages/utils/package.json
-  - packages/ui/tsconfig.json
-  - tooling/typescript/base.json
-  - turbo.json
-  - tooling/typescript/package.json
-  - packages/auth/src/providers.ts
-  - apps/saas/tsconfig.json
-  - apps/saas/app/layout.tsx
-  - packages/ui/src/index.tsx
-  - pnpm-workspace.yaml
-  - packages/auth/src/test-auth.ts
-  - packages/database/prisma/schema.prisma
-  - apps/saas/next-env.d.ts
-  - apps/saas/next.config.ts
-  - packages/database/prisma/migrations/20260814160938_init/migration.sql
-  - packages/database/src/index.ts
-  - packages/i18n/package.json
-  - apps/saas/app/api/auth/[...all]/route.ts
-  - packages/i18n/tsconfig.json
-tests:
-  - packages/auth/src/auth.test.ts
--->
-
----
-### Requirement: Operator navigation reaches settings
-When a signed-in operator views authenticated primary navigation, a link to /admin/settings MUST be visible. Learners MUST NOT see that link.
-
-#### Scenario: Operator nav includes settings
-- **WHEN** a signed-in operator views a page that renders SiteNav
-- **THEN** a link targeting /admin/settings MUST be present
-
-#### Scenario: Learner nav omits settings
-- **WHEN** a signed-in learner whose email is not ADMIN_EMAIL views SiteNav
-- **THEN** the document MUST NOT contain a hyperlink to /admin/settings
-
-<!-- @trace
-source: operator-payuni-settings
-updated: 2026-08-15
-code:
-  - apps/saas/app/admin/settings/payuni-settings-form.tsx
-  - apps/saas/app/api/checkout/route.ts
-  - apps/saas/lib/orders.ts
-  - apps/saas/lib/site-settings.ts
-  - apps/saas/lib/settings-crypto.ts
-  - apps/saas/app/components/site-nav.tsx
-  - apps/saas/app/api/admin/settings/payuni/route.ts
-  - apps/saas/app/admin/settings/page.tsx
-  - apps/saas/lib/payuni-settings-view.ts
-  - apps/saas/.env.example
-  - apps/saas/lib/operator.ts
-  - packages/database/prisma/migrations/20260815040000_add_site_setting/migration.sql
-  - packages/database/prisma/schema.prisma
-  - docs/deploy-and-public-url.md
-  - packages/payments/src/index.ts
-  - apps/saas/app/api/payuni/notify/route.ts
-  - apps/saas/lib/payuni-settings.ts
-tests:
-  - apps/saas/lib/operator.test.ts
-  - apps/saas/lib/orders-credentials.test.ts
-  - apps/saas/lib/payuni-settings-view.test.ts
-  - apps/saas/lib/payuni-settings.test.ts
-  - apps/saas/lib/site-settings.test.ts
-  - apps/saas/lib/settings-crypto.test.ts
--->
-
----
-### Requirement: Shell pages use the shared design system
-
-apps/saas pages SHALL be composed from packages/ui design-system components (see the design-system capability) rather than page-local hand-written CSS classes for buttons, cards, badges, and form controls.
-
-#### Scenario: Public homepage does not use bespoke button classes
-
-- **WHEN** GET / is rendered
-- **THEN** the DOM MUST NOT contain elements whose only styling comes from a page-local class named "button" or "hero" and MUST instead contain design-system component marker attributes
+- **GIVEN** supastarter-nextjs-main/apps/saas/app/globals.css defines a `--radius` custom property
+- **WHEN** the same custom property is read from StartKiter's rendered globals.css
+- **THEN** the two values MUST be identical strings
 
 
 <!-- @trace
@@ -806,20 +557,290 @@ tests:
 -->
 
 ---
-### Requirement: Marketing surface and app surface are not required to share identical layout
+### Requirement: Chinese text renders with a CJK font fallback
 
-The public marketing pages (equivalent to supastarter.dev's presentation) and the authenticated app pages (equivalent to demo.supastarter.dev's presentation) SHALL NOT be required to use identical layout density or visual emphasis. Both SHALL draw their colors, typography, and components from the same shared design-system tokens defined in the design-system capability.
+Every font-family declaration that includes DM Sans (or any other Latin-only display font inherited from the ported design system) MUST include a CJK-capable fallback font immediately after it in the font stack.
 
-#### Scenario: Marketing and app pages share design tokens despite different layouts
+#### Scenario: Mixed Chinese and English text renders consistently
 
-- **WHEN** the computed CSS custom properties for color tokens are compared between GET / (marketing) and GET /app (authenticated app area)
-- **THEN** the token values MUST be identical even if the two pages arrange components differently
+- **WHEN** a heading contains both Chinese characters and Latin digits (for example "取得開站包 NT$8,800")
+- **THEN** the computed font-family for the Chinese characters MUST resolve to the declared CJK fallback and MUST NOT fall back to the browser's unstyled default serif or sans-serif font
 
-##### Example: Same accent token, different layout density
+##### Example: Font stack includes CJK fallback
 
-- **GIVEN** GET / renders a centered single-column hero with generous vertical spacing, and GET /app renders a dense sidebar-plus-content-grid layout
-- **WHEN** the `--accent` (or equivalently named accent color) CSS custom property is read from both pages' document roots
-- **THEN** both pages MUST report the same hex value for `--accent`, even though the two pages' component arrangement differs
+- **GIVEN** a CSS rule `font-family: "DM Sans", "Noto Sans TC", sans-serif;`
+- **WHEN** a browser without DM Sans glyph coverage for CJK characters renders "開站包"
+- **THEN** it MUST render using Noto Sans TC, not the system default serif font
+
+
+<!-- @trace
+source: extract-supastarter-design-system
+updated: 2026-08-17
+code:
+  - packages/ui/src/components/input.tsx
+  - docs/reference/supastarter-nextjs-docs/tasks/meta.json
+  - packages/ui/src/components/tooltip.tsx
+  - docs/design-system-demo/screenshots/course-light.png
+  - packages/ui/src/components/badge.tsx
+  - docs/reference/supastarter-nextjs-docs/storage/upload-files.mdx
+  - docs/reference/supastarter-nextjs-docs/mailing/console.mdx
+  - docs/reference/supastarter-nextjs-docs/customization/dashboard.mdx
+  - docs/reference/supastarter-nextjs-docs/tasks/queuebase.mdx
+  - apps/saas/app/course/course-workspace.tsx
+  - docs/design-system-demo/demo.js
+  - docs/reference/supastarter-nextjs-docs/authentication/meta.json
+  - docs/reference/supastarter-nextjs-docs/organizations/configure.mdx
+  - docs/reference/supastarter-nextjs-docs/analytics/posthog.mdx
+  - docs/reference/supastarter-nextjs-docs/api/meta.json
+  - docs/reference/supastarter-nextjs-docs/index.mdx
+  - docs/reference/supastarter-nextjs-docs/monitoring/meta.json
+  - docs/design-system-demo/screenshots/app-collapsed.png
+  - docs/reference/supastarter-nextjs-docs/authentication/oauth.mdx
+  - docs/reference/supastarter-nextjs-docs/tasks/qstash.mdx
+  - packages/i18n/src/translations/en/marketing.json
+  - docs/reference/supastarter-nextjs-docs/internationalization.mdx
+  - docs/reference/supastarter-nextjs-docs/api/openapi.mdx
+  - packages/i18n/src/index.ts
+  - docs/reference/supastarter-nextjs-docs/api/define-endpoint.mdx
+  - docs/reference/supastarter-nextjs-docs/authentication/user-and-session.mdx
+  - docs/reference/supastarter-nextjs-docs/database/providers/supabase.mdx
+  - docs/design-system-demo/screenshots/app-dark.png
+  - docs/reference/supastarter-nextjs-docs/skills.mdx
+  - packages/i18n/src/translations/zh-tw/marketing.json
+  - docs/为什么叫QQ – 你的AI编程总是翻车？因为你少做了一步：设计隔离  拆解 Grill-me，Superpowers，Openspec 的第一步.md
+  - docs/reference/supastarter-nextjs-docs/deployment/docker.mdx
+  - package.json
+  - docs/reference/supastarter-nextjs-docs/database/schema.mdx
+  - apps/saas/lib/request-locale.ts
+  - docs/design-system-demo/screenshots/10.3/real-home.png
+  - docs/reference/supastarter-nextjs-docs/deployment/vercel.mdx
+  - docs/reference/supastarter-nextjs-docs/payments/paywall.mdx
+  - docs/reference/supastarter-nextjs-docs/analytics/umami.mdx
+  - docs/reference/supastarter-nextjs-docs/api/overview.mdx
+  - apps/saas/package.json
+  - docs/reference/supastarter-nextjs-docs/deployment/railway.mdx
+  - docs/reference/supastarter-nextjs-docs/database/providers/turso.mdx
+  - packages/ui/src/components/button.tsx
+  - docs/reference/supastarter-nextjs-docs/database/update-schema.mdx
+  - packages/i18n/src/types.ts
+  - docs/design-system-demo/screenshots/6.3/real-app-dark.png
+  - docs/design-system-demo/screenshots/login-light.png
+  - docs/design-system-demo/tokens.css
+  - docs/reference/supastarter-nextjs-docs/mailing/custom.mdx
+  - docs/reference/supastarter-nextjs-docs/monitoring/overview.mdx
+  - packages/ui/src/components/spinner.tsx
+  - docs/design-system-demo/screenshots/6.5/real-course-lesson-02.png
+  - docs/reference/supastarter-nextjs-docs/storage/aws-s3.mdx
+  - docs/reference/supastarter-nextjs-docs/api/protect-endpoints.mdx
+  - packages/ui/tsconfig.json
+  - docs/reference/supastarter-nextjs-docs/deployment/coolify.mdx
+  - apps/saas/app/design-system.css
+  - packages/i18n/src/translations/en/saas.json
+  - apps/saas/next-env.d.ts
+  - docs/design-system-demo/screenshots/home-dark.png
+  - AGENTS.md
+  - docs/reference/supastarter-nextjs-docs/analytics/plausible.mdx
+  - docs/reference/supastarter-nextjs-docs/analytics/pirsch.mdx
+  - docs/discuss/2026-08-17-supastarter-gap-risk-report.md
+  - docs/design-system-demo/screenshots/2.7/checkout.png
+  - docs/reference/supastarter-nextjs-docs/codebase/meta.json
+  - docs/discuss/README.md
+  - docs/reference/supastarter-nextjs-docs/payments/check-purchases.mdx
+  - docs/design-system-demo/screenshots/course-comments.png
+  - docs/design-system-demo/screenshots/login-dark.png
+  - packages/ui/src/components/card.tsx
+  - vitest.config.ts
+  - docs/discuss/2026-08-17-landing-signup-visual-feedback.md
+  - docs/reference/supastarter-nextjs-docs/analytics/google.mdx
+  - docs/reference/supastarter-nextjs-docs/seo/meta-tags.mdx
+  - docs/reference/supastarter-nextjs-docs/storage/overview.mdx
+  - docs/reference/supastarter-nextjs-docs/authentication/permissions.mdx
+  - docs/design-system-demo/screenshots/home-light.png
+  - docs/reference/supastarter-nextjs-docs/organizations/overview.mdx
+  - packages/i18n/src/translations/zh-cn/shared.json
+  - apps/saas/app/app/sign-out-button.tsx
+  - docs/discuss/2026-08-17-hyperagent-reference.md
+  - docs/buyer-extension-convention.md
+  - docs/cr-report-extract-supastarter-design-system.md
+  - docs/design-system-demo/screenshots/6.3/real-app-collapsed.png
+  - docs/reference/supastarter-nextjs-docs/database/client.mdx
+  - docs/reference/supastarter-nextjs-docs/api/use-locale.mdx
+  - apps/saas/app/components/site-nav.tsx
+  - docs/reference/supastarter-nextjs-docs/seo/sitemap.mdx
+  - docs/reference/supastarter-nextjs-docs/deployment/standalone-api.mdx
+  - docs/reference/supastarter-nextjs-docs/codebase/dependencies.mdx
+  - apps/saas/app/app/page.tsx
+  - apps/saas/app/login/login-form.tsx
+  - docs/design-system-demo/screenshots/6.5/real-course.png
+  - docs/reference/supastarter-nextjs-docs/e2e.mdx
+  - docs/reference/supastarter-nextjs-docs/ai/chatbot.mdx
+  - docs/reference/supastarter-nextjs-docs/tech-stack.mdx
+  - docs/reference/supastarter-nextjs-docs/monitoring/sentry.mdx
+  - docs/reference/supastarter-nextjs-docs/storage/cloudflare-r2.mdx
+  - docs/design-system-demo/screenshots/course-dark.png
+  - docs/reference/supastarter-nextjs-docs/blog.mdx
+  - docs/reference/supastarter-nextjs-docs/storage/access-files.mdx
+  - docs/reference/supastarter-nextjs-docs/customization/onboarding.mdx
+  - packages/ui/vitest.config.ts
+  - packages/ui/src/components/label.tsx
+  - docs/reference/supastarter-nextjs-docs/analytics/overview.mdx
+  - docs/reference/supastarter-nextjs-docs/deployment/flydotio.mdx
+  - docs/reference/supastarter-nextjs-docs/payments/providers/polar.mdx
+  - docs/design-system-demo/screenshots/10.3/comparison.txt
+  - docs/reference/supastarter-nextjs-docs/payments/usage-based-billing.mdx
+  - docs/reference/supastarter-nextjs-docs/setup.mdx
+  - docs/design-system-demo/screenshots/10.3/real-login.png
+  - docs/reference/supastarter-nextjs-docs/analytics/meta.json
+  - docs/reference/supastarter-nextjs-docs/database/providers/railway.mdx
+  - docs/design-system-demo/login.html
+  - packages/i18n/src/translations/zh-tw/saas.json
+  - docs/design-system-demo/screenshots/10.3/real-app.png
+  - docs/design-system-demo/screenshots/6.3/demo-app.png
+  - docs/discuss/2026-08-17-handoff-to-startkiter-session.md
+  - packages/i18n/package.json
+  - docs/reference/2026-08-17-supastarter-docs-analysis.md
+  - docs/reference/supastarter-nextjs-docs/codebase/update.mdx
+  - docs/design-system-demo/screenshots/app-light.png
+  - docs/reference/supastarter-nextjs-docs/payments/providers/meta.json
+  - docs/reference/supastarter-nextjs-docs/recipes/meta.json
+  - docs/reference/supastarter-nextjs-docs/storage/setup.mdx
+  - packages/ui/src/components/form.tsx
+  - docs/reference/supastarter-nextjs-docs/tasks/trigger-dev.mdx
+  - docs/reference/supastarter-nextjs-docs/database/studio.mdx
+  - docs/design-system-demo/course.html
+  - packages/ui/src/components/color-mode-toggle.tsx
+  - packages/i18n/src/translations/zh-cn/marketing.json
+  - docs/reference/supastarter-nextjs-docs/analytics/vercel.mdx
+  - apps/saas/app/components/locale-switcher.tsx
+  - docs/design-system-demo/screenshots/2.7/admin_settings.png
+  - docs/discuss/2026-08-17-wp-frontend-mount-research.md
+  - docs/reference/supastarter-nextjs-docs/analytics/custom.mdx
+  - docs/design-system-demo/app.html
+  - docs/reference/supastarter-nextjs-docs/storage/uploadthing.mdx
+  - docs/reference/supastarter-nextjs-docs/mailing/meta.json
+  - docs/reference/supastarter-nextjs-docs/payments/providers/stripe.mdx
+  - apps/saas/app/components/app-shell.tsx
+  - docs/reference/supastarter-nextjs-docs/mailing/postmark.mdx
+  - docs/reference/supastarter-nextjs-docs/organizations/store-data-for-organizations.mdx
+  - docs/reference/supastarter-nextjs-docs/codebase/local-development.mdx
+  - docs/discuss/organizations.md
+  - apps/saas/app/course/[lessonId]/page.tsx
+  - packages/ui/package.json
+  - docs/reference/supastarter-nextjs-docs/mailing/overview.mdx
+  - playwright.config.ts
+  - docs/reference/supastarter-nextjs-docs/troubleshooting.mdx
+  - docs/reference/supastarter-nextjs-docs/storage/meta.json
+  - docs/reference/supastarter-nextjs-docs/database/providers/planetscale.mdx
+  - docs/reference/supastarter-nextjs-docs/payments/overview.mdx
+  - docs/design-system-demo/screenshots/6.2/real-home.png
+  - packages/i18n/src/translations/en/shared.json
+  - docs/design-system-demo/screenshots/2.7/course.png
+  - docs/reference/supastarter-nextjs-docs/payments/providers/creem.mdx
+  - docs/reference/supastarter-nextjs-docs/api/streaming.mdx
+  - apps/saas/app/agent/page.tsx
+  - apps/saas/app/course/page.tsx
+  - packages/ui/src/index.tsx
+  - docs/reference/supastarter-nextjs-docs/mailing/resend.mdx
+  - docs/design-system-demo/screenshots/2.7/agent.png
+  - docs/reference/supastarter-nextjs-docs/database/providers/meta.json
+  - packages/i18n/src/config.ts
+  - apps/saas/app/components/mobile-tabbar.tsx
+  - docs/reference/supastarter-nextjs-docs/ai/meta.json
+  - docs/reference/supastarter-nextjs-docs/meta.json
+  - docs/reference/supastarter-nextjs-docs/analytics/vemetric.mdx
+  - docs/reference/supastarter-nextjs-docs/payments/plans.mdx
+  - docs/reference/supastarter-nextjs-docs/customization/styling.mdx
+  - docs/reference/supastarter-nextjs-docs/recipes/build-a-feedback-widget.mdx
+  - docs/design-system-demo/screenshots/10.3/demo-login.png
+  - docs/design-system-demo/home.html
+  - docs/reference/supastarter-nextjs-docs/mailing/nodemailer.mdx
+  - docs/reference/supastarter-nextjs-docs/tasks/overview.mdx
+  - docs/reference/supastarter-nextjs-docs/documentation.mdx
+  - docs/reference/supastarter-nextjs-docs/customization/meta.json
+  - apps/saas/app/components/theme-provider.tsx
+  - docs/reference/supastarter-nextjs-docs/deployment/render.mdx
+  - apps/saas/app/layout.tsx
+  - docs/design-system-demo/components.css
+  - docs/design-system-demo/screenshots/10.3/demo-home.png
+  - docs/design-system-demo/screenshots/6.3/real-app.png
+  - apps/saas/app/admin/settings/page.tsx
+  - docs/reference/supastarter-nextjs-docs/authentication/superadmin.mdx
+  - deploy/zeabur.yaml
+  - docs/discuss/2026-08-17-supastarter-source-correction.md
+  - docs/reference/supastarter-nextjs-docs/codebase/structure.mdx
+  - apps/saas/app/course/demo-grant-button.tsx
+  - packages/ui/src/lib/index.ts
+  - docs/design-system-demo/screenshots/course-collapsed.png
+  - docs/reference/supastarter-nextjs-docs/recipes/supabase-setup.mdx
+  - docs/reference/supastarter-nextjs-docs/storage/digitalocean-spaces.mdx
+  - docs/design-system-demo/screenshots/6.5/demo-course.png
+  - docs/reference/supastarter-nextjs-docs/seo/meta.json
+  - docs/reference/supastarter-nextjs-docs/deployment/meta.json
+  - docs/design-system-demo/screenshots/3.3/home.png
+  - docs/reference/supastarter-nextjs-docs/payments/providers/lemonsqueezy.mdx
+  - docs/reference/supastarter-nextjs-docs/codebase/formatting-and-linting.mdx
+  - docs/design-system-demo/screenshots/6.2/demo-home.png
+  - docs/reference/supastarter-nextjs-docs/customization/overview.mdx
+  - apps/saas/app/page.tsx
+  - docs/reference/supastarter-nextjs-docs/organizations/meta.json
+  - docs/reference/supastarter-nextjs-docs/database/overview.mdx
+  - docs/reference/supastarter-nextjs-docs/configuration.mdx
+  - docs/reference/supastarter-nextjs-docs/api/usage-in-frontend.mdx
+  - docs/reference/supastarter-nextjs-docs/database/providers/neon.mdx
+  - docs/design-system-demo/index.html
+  - docs/reference/supastarter-nextjs-docs/deployment/netlify.mdx
+  - packages/i18n/src/translations/zh-cn/saas.json
+  - docs/reference/supastarter-nextjs-docs/organizations/use-organizations.mdx
+  - docs/reference/supastarter-nextjs-docs/payments/meta.json
+  - apps/saas/app/signup/page.tsx
+  - docs/design-system-demo/screenshots/10.3/demo-app.png
+  - packages/i18n/vitest.config.ts
+  - docs/reference/supastarter-nextjs-docs/database/meta.json
+  - docs/reference/supastarter-nextjs-docs/deployment/overview.mdx
+  - docs/reference/supastarter-nextjs-docs/payments/providers/dodopayments.mdx
+  - docs/reference/supastarter-nextjs-docs/ai/overview.mdx
+  - packages/i18n/src/lib/get-messages.ts
+  - packages/i18n/src/translations/zh-tw/shared.json
+  - docs/reference/supastarter-nextjs-docs/analytics/mixpanel.mdx
+  - docs/reference/supastarter-nextjs-docs/authentication/overview.mdx
+  - README.md
+  - docs/reference/supastarter-nextjs-docs/ai/prompts.mdx
+  - apps/saas/app/globals.css
+  - docs/reference/supastarter-nextjs-docs/launch.mdx
+  - docs/reference/supastarter-nextjs-docs/codebase/vscode.mdx
+tests:
+  - apps/saas/lib/site-nav.test.tsx
+  - packages/i18n/src/i18n.test.ts
+  - apps/saas/lib/platform-shell.test.tsx
+  - apps/saas/lib/course-shell.test.ts
+  - apps/saas/lib/font-fallback.test.ts
+  - e2e/startkiter.spec.ts
+  - apps/saas/lib/home-shell.test.ts
+  - apps/saas/lib/auth-providers.test.ts
+  - apps/saas/lib/design-tokens.test.ts
+  - apps/saas/lib/app-home.test.ts
+  - packages/ui/src/version-gap.test.ts
+  - apps/saas/lib/login-design-system.test.ts
+  - apps/saas/lib/mobile-tabbar.test.tsx
+  - docs/design-system-demo/demo.test.ts
+  - packages/ui/src/components.test.tsx
+-->
+
+---
+### Requirement: Dark and light mode share the same component system
+
+The color mode toggle SHALL switch a `dark` class on the document root element, and every ported component MUST read its colors from CSS custom properties that change value under the `.dark` selector, matching supastarter-nextjs-main's `@variant dark` mechanism.
+
+#### Scenario: Toggling dark mode changes token values without changing markup
+
+- **WHEN** a user activates the color mode toggle control
+- **THEN** `document.documentElement.classList.contains('dark')` MUST become true and the background color custom property MUST change value, while the DOM structure of the page MUST NOT change
+
+##### Example: Toggle click flips the class
+
+- **GIVEN** the document root has no `dark` class
+- **WHEN** the color mode toggle button is clicked
+- **THEN** the document root gains the `dark` class and the computed `background-color` of `<body>` changes to the dark-mode token value
 
 <!-- @trace
 source: extract-supastarter-design-system
