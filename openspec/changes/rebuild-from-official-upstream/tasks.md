@@ -40,8 +40,8 @@
 
 ## 9. 中文語系
 
-- [ ] 9.1 依 Decision「i18n：換成官方 next-intl，只多一個 zh-tw locale」，把 `packages/i18n` 換成 next-intl 架構，把既有 zh-tw/zh-cn/en 三語系訊息內容原樣搬遷，滿足 `i18n-multilingual` capability「At least three locales are supported at launch」要求的 next-intl 架構，驗證方式：GET /zh-tw、/zh-cn、/en 皆回應 200 且頁面文字為對應語言
-- [ ] 9.2 驗證缺 key 時 fallback 到 zh-tw 的行為，滿足 Requirement「Missing translation keys fall back to zh-TW」，驗證方式：對一個刻意在 en catalog 缺漏但 zh-TW catalog 存在的 key，斷言渲染結果為 zh-TW 文字而非原始 key 字串
+- [x] 9.1 依 Decision「i18n：換成官方 next-intl，只多一個 zh-tw locale」，把 `packages/i18n` 換成 next-intl 架構，把既有 zh-tw/zh-cn/en 三語系訊息內容原樣搬遷，滿足 `i18n-multilingual` capability「At least three locales are supported at launch」要求的 next-intl 架構，驗證方式：GET /zh-tw、/zh-cn、/en 皆回應 200 且頁面文字為對應語言
+- [x] 9.2 驗證缺 key 時 fallback 到 zh-tw 的行為，滿足 Requirement「Missing translation keys fall back to zh-TW」，驗證方式：對一個刻意在 en catalog 缺漏但 zh-TW catalog 存在的 key，斷言渲染結果為 zh-TW 文字而非原始 key 字串
 
 ## 10. Review 與最終驗收
 

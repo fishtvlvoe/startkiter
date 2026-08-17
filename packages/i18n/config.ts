@@ -1,27 +1,27 @@
 import type { I18nConfig } from "./types";
 
+export const locales = ["zh-tw", "zh-cn", "en"] as const;
+
+export type Locale = (typeof locales)[number];
+
+const localeMetadata: Record<Locale, { label: string; currency: string }> = {
+	"zh-tw": { label: "繁體中文", currency: "TWD" },
+	"zh-cn": { label: "简体中文", currency: "TWD" },
+	en: { label: "English", currency: "TWD" },
+};
+
 export const config = {
-	locales: {
-		en: {
-			label: "English",
-			currency: "USD",
-		},
-		de: {
-			label: "Deutsch",
-			currency: "USD",
-		},
-		es: {
-			label: "Español",
-			currency: "USD",
-		},
-		fr: {
-			label: "Français",
-			currency: "USD",
-		},
-	},
-	defaultLocale: "en",
-	defaultCurrency: "USD",
+	locales: localeMetadata,
+	defaultLocale: "zh-tw",
+	defaultCurrency: "TWD",
 	localeCookieName: "NEXT_LOCALE",
 } as const satisfies I18nConfig;
 
-export type Locale = keyof typeof config.locales;
+export function isLocale(value: string): value is Locale {
+	return (locales as readonly string[]).includes(value);
+}
+
+export function getLocaleFromPathname(pathname: string): Locale | null {
+	const segment = pathname.split("/").find(Boolean)?.toLowerCase();
+	return segment && isLocale(segment) ? segment : null;
+}

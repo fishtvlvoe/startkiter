@@ -1,38 +1,49 @@
-import { toMerged } from "es-toolkit";
-
-import { config, type Locale } from "../config";
+import { config, isLocale, type Locale } from "../config";
 
 export type TranslationScope = "marketing" | "saas" | "mail";
+type MessageCatalog = Record<string, unknown>;
 
-async function importLocaleMessages<T>(
-	locale: Locale,
-	scope: TranslationScope | "shared",
-): Promise<T> {
-	return (await import(`../translations/${locale}/${scope}.json`)).default as T;
+function isRecord(value: unknown): value is MessageCatalog {
+	return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-export async function getMessagesForLocale<T = Record<string, unknown>>(
-	locale: Locale,
+function mergeMessages(base: MessageCatalog, override: MessageCatalog): MessageCatalog {
+	const merged = { ...base };
+	for (const [key, value] of Object.entries(override)) {
+		const current = merged[key];
+		merged[key] = isRecord(current) && isRecord(value) ? mergeMessages(current, value) : value;
+	}
+	return merged;
+}
+
+function isMissingCatalogError(error: unknown): boolean {
+	return error instanceof Error && /(cannot find module|failed to load|does not exist|enoent|unknown variable dynamic import)/i.test(error.message);
+}
+
+async function importLocaleMessages(locale: string, scope: TranslationScope | "shared"): Promise<MessageCatalog> {
+	try {
+		return (await import(`../translations/${locale}/${scope}.json`)).default as MessageCatalog;
+	} catch (error) {
+		if (isMissingCatalogError(error)) return {};
+		throw error;
+	}
+}
+
+function resolveLocale(locale: string): Locale {
+	const normalizedLocale = locale.toLowerCase();
+	return isLocale(normalizedLocale) ? normalizedLocale : config.defaultLocale;
+}
+
+export async function getMessagesForLocale<T = MessageCatalog>(
+	locale: string,
 	scope: TranslationScope,
 ): Promise<T> {
-	const localeMessages = await importLocaleMessages<T>(locale, scope);
-
-	const sharedMessages = await importLocaleMessages<Record<string, unknown>>(locale, "shared");
-
-	let messages = toMerged(localeMessages as Record<string, unknown>, sharedMessages) as T;
-
-	if (locale !== config.defaultLocale) {
-		const defaultLocaleMessages = await importLocaleMessages<T>(config.defaultLocale, scope);
-		const defaultSharedMessages = await importLocaleMessages<Record<string, unknown>>(
-			config.defaultLocale,
-			"shared",
-		);
-		const defaultMessages = toMerged(
-			defaultLocaleMessages as Record<string, unknown>,
-			defaultSharedMessages,
-		);
-		messages = toMerged(defaultMessages, messages as Record<string, unknown>) as T;
-	}
-
-	return messages;
+	const resolvedLocale = resolveLocale(locale);
+	const defaultScope = await importLocaleMessages(config.defaultLocale, scope);
+	const defaultShared = await importLocaleMessages(config.defaultLocale, "shared");
+	const defaultMessages = mergeMessages(defaultScope, defaultShared);
+	if (resolvedLocale === config.defaultLocale) return defaultMessages as T;
+	const localeScope = await importLocaleMessages(resolvedLocale, scope);
+	const localeShared = await importLocaleMessages(resolvedLocale, "shared");
+	return mergeMessages(defaultMessages, mergeMessages(localeScope, localeShared)) as T;
 }

@@ -688,11 +688,11 @@
     "loading": "Confirming your purchase, please wait..."
   },
   "account": {
-    "title": "Account",
-    "courseActive": "Course: active",
-    "courseInactive": "Course: not purchased",
-    "enterCourse": "Open course",
-    "buyCourse": "Buy the StartKiter package NT$8,800",
-    "signOut": "Log out"
+    "title": "帳號",
+    "courseActive": "課程：已開通",
+    "courseInactive": "課程：尚未購買",
+    "enterCourse": "進入課程",
+    "buyCourse": "購買開站包 NT$8,800",
+    "signOut": "登出"
   }
 }

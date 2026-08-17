@@ -183,10 +183,11 @@
     }
   },
   "home": {
+    "legacyFallback": "這個字串只存在繁體中文目錄，用來驗證缺 key fallback。",
     "hero": {
       "new": "New",
       "featureBadge": "Multi-tenant auth, billing, and orgs — ready to ship",
-      "title": "Build your SaaS without rebuilding the foundations",
+      "title": "已經在用 AI 做事的人，需要的是一套 SaaS 開站包",
       "subtitle": "A production-minded Next.js starter with authentication, organizations, billing, and the UI patterns you need to launch faster.",
       "getStarted": "Start building",
       "documentation": "Read the docs",
@@ -274,10 +275,10 @@
       "primary": "Create your account",
       "secondary": "Talk to us"
     },
-    "title": "Buy once. Take the course and lifetime code package with you.",
-    "description": "Learn to turn an AI service into your own site. Pay once: NT$8,800 for the course and GitHub code package.",
-    "buyCta": "Buy the StartKiter package NT$8,800",
-    "loginCta": "Already have an account? Log in"
+    "title": "一次買斷，帶走課與終身代碼包",
+    "description": "教你把 AI 服務做成自己的站。付一次 NT$8,800，課程與 GitHub 代碼包一起到手。",
+    "buyCta": "購買開站包 NT$8,800",
+    "loginCta": "已有帳號，登入"
   },
   "newsletter": {
     "email": "Email",
@@ -333,9 +334,9 @@
     }
   },
   "auth": {
-    "loginTitle": "Log in",
-    "loginDescription": "Use your email and password to enter StartKiter.",
-    "signupTitle": "Create an account",
-    "signupDescription": "Create an account to buy the StartKiter package and get the course with lifetime code access."
+    "loginTitle": "登入",
+    "loginDescription": "用 email 與密碼進入開站包。",
+    "signupTitle": "建立帳號",
+    "signupDescription": "註冊後可購買開站包，一次帶走課程與終身代碼包。"
   }
 }
