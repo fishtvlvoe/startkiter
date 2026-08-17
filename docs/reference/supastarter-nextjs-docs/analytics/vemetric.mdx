@@ -1,0 +1,30 @@
+---
+title: Vemetric
+description: Learn how to use Vemetric Analytics with supastarter.
+---
+
+To use Vemetric with supastarter, you need to have your application deployed on [Vemetric](https://vemetric.com).
+
+To activate the Vemetric Analytics feature, we need to install the package first:
+
+```bash copy
+pnpm add --filter web @vemetric/react
+```
+
+Then we need to activate Vemetric as the analytics provider in your supastarter app. To do this, open `apps/web/modules/analytics/index.tsx` and change the content to:
+
+```typescript copy
+export * from "./provider/vemetric";
+```
+
+Lastly, get the public token from the Vemetric settings page and add it to your environment variables.
+
+```bash
+NEXT_PUBLIC_VEMETRIC_TOKEN=your-public-token
+```
+
+To customize the Vemetric configuration, edit the `apps/web/modules/analytics/provider/vemetric/index.tsx`.
+
+Learn more about analytics with Vemetric in the [official documentation](https://vemetric.com/docs/product-analytics/getting-started).
+
+For further instructions, follow the [general analytics instructions](/docs/nextjs/analytics/overview).

@@ -1,0 +1,5 @@
+{
+  "title": "Mailing",
+  "defaultOpen": false,
+  "pages": ["overview", "resend", "postmark", "nodemailer", "custom"]
+}

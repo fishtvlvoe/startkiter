@@ -1,0 +1,50 @@
+---
+title: Use API in application
+description: Learn how to fetch data from your API in your supastarter application.
+---
+
+To call your endpoints from the frontend, you can use Tanstack Query and the `orpc` client, which will give you a type-safe way to call your endpoints.
+
+## Use API in a client component
+
+```tsx copy
+import { orpc } from "@shared/lib/orpc-query-utils";
+
+const { data, isLoading } = useQuery(
+  orpc.posts.list.queryOptions({
+    input: {
+      limit: 10,
+      offset: 0,
+    },
+  }),
+);
+```
+
+If you have a mutation instead of a query, you can use `useMutation` from Tanstack Query to call your endpoints.
+
+```tsx copy
+const { mutateAsync, isLoading } = useMutation(
+  orpc.posts.create.mutationOptions(),
+);
+
+const post = await mutateAsync({
+  input: {
+    title: "My first post",
+    content: "This is my first post",
+  },
+});
+```
+
+## Use API in a server component
+
+To fetch data from the API in a server component, you can use the `orpcClient`:
+
+```tsx copy
+import { orpcClient } from "@shared/lib/orpc-client";
+
+function ServerComponent() {
+  const purchases = await orpcClient.payments.listPurchases({
+    organizationId,
+  });
+}
+```

@@ -1,0 +1,92 @@
+---
+title: Blog
+description: Learn how to use the blog feature in supastarter.
+---
+
+For the blog feature supastarter integrates [content-collections](https://content-collections.dev/), a markdown based CMS. You can also use a custom datasource for your blog posts by following [the steps below](#use-cms-or-external-datasource-for-blog-posts).
+
+<Callout title="Why content-collections">
+  It is a great alternative to headless CMS like Contentful or Prismic based on
+  MDX (a more powerful version of markdown). It is free, open source and the
+  content is located right in your repository.
+</Callout>
+
+## Create a new blog post
+
+To create a new blog post, create a new `.mdx` file in the marketing content directory, for example in `/apps/marketing/content/posts`. The file name will be the url slug of the post. For example, if you want the url to be https://your-app.com/blog/my-first-post, then the file name should be `my-first-post.mdx`.
+
+The file will start with a frontmatter block, which is a yaml-like block that contains metadata about the post. The frontmatter block should be surrounded by three dashes (---).
+
+```mdx copy
+---
+title: My awesome blog post
+date: 2023-02-28
+image: /images/blog/cover.png
+authorName: Elon Musk
+authorImage: /images/blog/elon-musk.jpg
+excerpt: In this post I'm going to tell you about my awesome blog.
+tags: [awesome, post]
+published: true
+---
+```
+
+The frontmatter block contains the following fields:
+
+- **title**: The title of the blog post
+- **date**: The date of the blog post
+- **image**: The cover image of the blog post
+- **authorName**: The name of the author of the blog post
+- **authorImage**: The url of the image of the author of the blog post
+- **excerpt**: A short description of the blog post that will be shown in the blog overview
+- **tags**: A list of tags
+- **published**: Whether the blog post should be publically listed or not (boolean)
+
+After the frontmatter block, you can write the content of the blog post in MDX:
+
+```mdx copy
+# My awesome blog post
+
+In this post I'm going to tell you about my awesome blog.
+```
+
+## Use CMS or external datasource for blog posts
+
+You can use the CMS or an external datasource to create your blog posts if you don't want to use MDX to manage your posts.
+
+To do this, all you need to do is to add the data fetching logic that gets the posts from your CMS or datasource in the marketing app blog utilities, for example in `apps/marketing/modules/blog/utils/lib/posts.ts`.
+Make sure to map the data to the `Post` type.
+
+```typescript
+import type { Post } from "@marketing/blog/types";
+
+export async function getAllPosts(): Promise<Post[]> {
+  const posts = await fetch("https://your-cms-or-datasource/posts").then(
+    (res) => res.json(),
+  );
+
+  return posts.map((post) => ({
+    title: post.title,
+    date: post.date,
+    authorName: post.author_name,
+    tags: post.tags,
+    published: post.published,
+    locale: "en", // if you don't have a locale, just use your default locale here
+    path: post.slug,
+    content: post.content, // this is the raw content of the post
+    body: post.body, // this is the body of the post which will be rendered in the blog post
+    authorImage: post.author_image,
+    authorLink: post.author_link,
+    excerpt: post.excerpt,
+    image: post.image,
+  }));
+}
+
+export async function getPostBySlug(
+  slug: string,
+  options?: {
+    locale?: string;
+  },
+): Promise<Post | null> {
+  // the same as getAllPosts but for a single post
+}
+```

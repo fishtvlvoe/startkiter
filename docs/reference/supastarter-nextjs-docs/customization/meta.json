@@ -1,0 +1,5 @@
+{
+  "title": "Customization",
+  "defaultOpen": false,
+  "pages": ["overview", "styling", "dashboard", "..."]
+}

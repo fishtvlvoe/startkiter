@@ -1,0 +1,5 @@
+{
+  "title": "AI",
+  "defaultOpen": false,
+  "pages": ["overview", "chatbot", "prompts", "streaming", "..."]
+}

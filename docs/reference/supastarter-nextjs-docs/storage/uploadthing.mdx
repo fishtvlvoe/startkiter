@@ -1,0 +1,124 @@
+---
+title: Uploadthing
+description: Learn how to use Uploadthing as an alternative file upload solution with supastarter.
+---
+
+Uploadthing is a file upload service purpose-built for TypeScript applications. Unlike the S3-based storage that supastarter uses by default, Uploadthing provides a higher-level API with built-in file validation, type-safe routes, and a simple developer experience. It can be a good alternative if you want a managed upload solution without configuring S3 buckets and credentials.
+
+<Callout>
+  Uploadthing is an alternative to supastarter's built-in S3-based storage
+  system. Using Uploadthing requires replacing the default storage
+  implementation rather than just configuring environment variables.
+</Callout>
+
+## When to use Uploadthing vs S3
+
+| Feature              | S3 (default)                    | Uploadthing                |
+| -------------------- | ------------------------------- | -------------------------- |
+| Setup complexity     | Configure bucket + credentials  | API key only               |
+| Provider flexibility | Any S3-compatible provider      | Uploadthing only           |
+| File validation      | Manual                          | Built-in, type-safe        |
+| Pricing model        | Pay for storage + transfer      | Free tier + usage-based    |
+| Self-hosting         | Possible (MinIO)                | No                         |
+| Max file size        | Provider-dependent (up to 5 GB) | 512 MB (free), 4 GB (paid) |
+
+Use S3 if you want provider flexibility, self-hosting options, or already have AWS/Cloudflare infrastructure. Use Uploadthing if you want the simplest possible setup with built-in file validation.
+
+## 1. Create an Uploadthing account
+
+Sign up at [uploadthing.com](https://uploadthing.com) and create a new app. Copy your **API Key** and **Secret** from the dashboard.
+
+## 2. Install Uploadthing
+
+Install the Uploadthing packages in your project:
+
+```bash copy
+pnpm --filter web add uploadthing @uploadthing/react
+```
+
+## 3. Configure environment variables
+
+Add the following to your `.env.local` file:
+
+```bash copy title=".env.local"
+UPLOADTHING_TOKEN="your-uploadthing-token"
+```
+
+## 4. Create a file router
+
+Create a file router that defines what types of files can be uploaded and any middleware (authentication, authorization):
+
+```ts copy title="apps/web/app/api/uploadthing/core.ts"
+import { createUploadthing, type FileRouter } from "uploadthing/next";
+
+const f = createUploadthing();
+
+export const uploadRouter = {
+  avatar: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
+    .middleware(async ({ req }) => {
+      // Add your auth check here
+      return {};
+    })
+    .onUploadComplete(async ({ file }) => {
+      console.log("Upload complete:", file.url);
+    }),
+} satisfies FileRouter;
+
+export type UploadRouter = typeof uploadRouter;
+```
+
+## 5. Create the API route
+
+```ts copy title="apps/web/app/api/uploadthing/route.ts"
+import { createRouteHandler } from "uploadthing/next";
+import { uploadRouter } from "./core";
+
+export const { GET, POST } = createRouteHandler({
+  router: uploadRouter,
+});
+```
+
+## 6. Use in your components
+
+```tsx copy title="Example component"
+import { UploadButton } from "@uploadthing/react";
+import type { UploadRouter } from "@/app/api/uploadthing/core";
+
+export function AvatarUpload() {
+  return (
+    <UploadButton<UploadRouter, "avatar">
+      endpoint="avatar"
+      onClientUploadComplete={(res) => {
+        console.log("Files: ", res);
+      }}
+      onUploadError={(error: Error) => {
+        console.error("Error: ", error.message);
+      }}
+    />
+  );
+}
+```
+
+<Callout>
+  Using Uploadthing replaces supastarter's built-in presigned URL upload flow.
+  You will need to update the avatar and logo upload components to use
+  Uploadthing's components instead.
+</Callout>
+
+## Frequently asked questions
+
+### Can I use Uploadthing alongside the default S3 storage?
+
+Yes, you can use both. For example, you might use Uploadthing for user-facing uploads (avatars, documents) and S3 for server-side file operations. However, this adds complexity and two separate storage systems to manage.
+
+### How much does Uploadthing cost?
+
+Uploadthing's free tier includes 2 GB of storage and 2 GB of transfer. The Pro plan starts at $10/month with 100 GB of storage. See [uploadthing.com/pricing](https://uploadthing.com/pricing) for current pricing.
+
+### Is Uploadthing self-hostable?
+
+No. Uploadthing is a managed service. If you need self-hosted storage, use the default S3-based storage with MinIO or another S3-compatible provider.
+
+### Does Uploadthing work with Nuxt or SvelteKit?
+
+Uploadthing has official adapters for Next.js, Nuxt, SvelteKit, and other frameworks. The setup is similar across frameworks.

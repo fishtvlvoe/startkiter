@@ -1,0 +1,34 @@
+---
+title: Fly.io
+description: Learn how to deploy your supastarter application to Fly.io.
+---
+
+This guide will show you how to deploy your supastarter SaaS to fly.io in minutes. And the best part? You can actually start for free thanks to the generous free tier of fly.io.
+
+## Why host your SaaS on fly.io?
+
+Self-hosting your SaaS app as a docker image allows you to have complete control over your server environment. It ensures better privacy, contributes to cost savings if managed correctly, and offers you the flexibility to customize your server setup to suit your specific needs. It can also give your application a performance boost compared to hosting on a serverless platform like Vercel, since it removes cold starts.
+
+## Get your supastarter app ready for Docker deployment
+
+To get your supastarter app ready for Docker deployment, follow the steps in our [Docker deployment guide](/docs/nextjs/deployment/docker).
+
+## Deploying your application to Fly.io
+
+Make sure you have an account on Fly.io before continuing. You can sign up for free at [fly.io](http://fly.io).
+
+To deploy your application with Docker to [fly.io](http://fly.io) simply install the [Fly CLI](https://fly.io/docs/hands-on/install-flyctl/) and run the launch command for the app you are deploying.
+
+For example, if you are deploying the SaaS app:
+
+```bash
+fly launch --dockerfile apps/saas/Dockerfile
+```
+
+Follow the steps in the CLI and configure the used port to `3000` in the deployment configuration and you should have a running instance of your app within a few minutes on fly.io.
+
+![Fly.io deployment overview](/images/blog/flydotio-deployment-overview.png)
+
+## Troubleshooting
+
+If you are getting a SSL error like `ERR_SSL_PACKET_LENGTH_TOO_LONG` or `ERR_SSL_WRONG_VERSION_NUMBER`, see our [troubleshooting guide](/docs/nextjs/troubleshooting#im-getting-a-ssl-routines) for a quick fix.

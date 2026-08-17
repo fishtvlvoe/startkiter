@@ -1,0 +1,222 @@
+---
+title: Manage plans and products
+description: Learn how to manage plans and products in your application.
+---
+
+![Pricing table](/images/documentation/nextjs/pricing.png)
+
+## Define plans and products
+
+You can manage the plans and products in the configuration file at `packages/payments/config.ts`.
+
+The config has the following top-level properties:
+
+- `billingAttachedTo`: determines whether subscriptions are owned by individual `"user"`s or by `"organization"`s
+- `requireActiveSubscription`: if `true`, forces users to hold an active subscription before accessing paid areas (acts as a paywall). When `false`, a free plan is implicitly available
+- `plans`: the catalog of plans exposed to checkout, pricing pages, and billing logic
+
+```ts title="packages/payments/config.ts"
+import type { PaymentsConfig } from "./types";
+
+export const config: PaymentsConfig = {
+  billingAttachedTo: "user",
+  requireActiveSubscription: false,
+  plans: {
+    // ...
+  },
+};
+```
+
+There are different types of plans you can define:
+
+### Free plan
+
+When `requireActiveSubscription` is set to `false`, a free plan is implicitly available for users who have not purchased any plans. You don't need to define it in the `plans` object — it is automatically added by the pricing table.
+
+If you set `requireActiveSubscription` to `true`, the free plan is removed and users must purchase a plan to access paid areas.
+
+### Enterprise plan
+
+The enterprise plan is not a real plan, but will show up in the pricing table with a link to a contact form, so customers can contact you to get access to your product.
+
+As this is no paid plan, you don't need to define any prices or attach a provider price id to it.
+
+```ts title="packages/payments/config.ts"
+import type { PaymentsConfig } from "./types";
+
+export const config: PaymentsConfig = {
+  billingAttachedTo: "user",
+  requireActiveSubscription: false,
+  plans: {
+    enterprise: {
+      isEnterprise: true,
+    },
+  },
+};
+```
+
+### Subscription plans and one-time purchase plans
+
+A plan represents a product or service of your application and each is a column in your pricing table.
+It has the following properties:
+
+- `recommended`: if this plan should be highlighted as recommended
+- `hidden`: hide the plan from the pricing table, can be used if you want to grandfather old plans or prepare for a new plan
+- `prices`: define the prices for this plan
+
+One plan can have multiple prices, for example a monthly and yearly price or/and for each currency you support.
+
+A price has the following properties:
+
+- `type`: the type of the price, can be `"subscription"` or `"one-time"`
+- `priceId`: the id of the price from the payment provider (use environment variables to keep this secret)
+- `interval`: the billing interval for subscriptions, can be `"month"` or `"year"`
+- `amount`: the amount of the price
+- `currency`: the currency of the price, for example `"USD"`
+- `trialPeriodDays`: the number of days of the trial period, leave out if you don't want to offer a trial period
+- `seatBased`: if price is per seat (this will only work for organizations and will multiply the price by the number of members), defaults to `false`
+
+_You can publish your site with a placeholder `priceId`, if you need a landing page with pricing table to verify your store in Stripe or Lemonsqueezy. Just note that this will not work in production._
+
+```ts title="packages/payments/config.ts"
+import type { PaymentsConfig } from "./types";
+
+export const config: PaymentsConfig = {
+  billingAttachedTo: "user",
+  requireActiveSubscription: false,
+  plans: {
+    pro: {
+      recommended: true,
+      prices: [
+        {
+          type: "subscription",
+          priceId: process.env.PRICE_ID_PRO_MONTHLY as string,
+          interval: "month",
+          amount: 29,
+          currency: "USD",
+          trialPeriodDays: 7,
+          seatBased: true,
+        },
+        {
+          type: "subscription",
+          priceId: process.env.PRICE_ID_PRO_YEARLY as string,
+          interval: "year",
+          amount: 290,
+          currency: "USD",
+          trialPeriodDays: 7,
+          seatBased: true,
+        },
+      ],
+    },
+    lifetime: {
+      prices: [
+        {
+          type: "one-time",
+          priceId: process.env.PRICE_ID_LIFETIME as string,
+          amount: 799,
+          currency: "USD",
+        },
+      ],
+    },
+    enterprise: {
+      isEnterprise: true,
+    },
+  },
+};
+```
+
+## Support multiple currencies
+
+To support multiple currencies, make sure to define the different currencies for each locale in `packages/i18n/config.ts`:
+
+```ts title="packages/i18n/config.ts"
+export const config = {
+  locales: {
+    en: {
+      label: "English",
+      currency: "USD",
+    },
+    de: {
+      label: "Deutsch",
+      currency: "EUR",
+    },
+  },
+  defaultLocale: "en",
+  defaultCurrency: "USD",
+} as const satisfies I18nConfig;
+```
+
+Then define the prices for each currency in the `packages/payments/config.ts`:
+
+```ts title="packages/payments/config.ts"
+import type { PaymentsConfig } from "./types";
+
+export const config: PaymentsConfig = {
+  billingAttachedTo: "user",
+  requireActiveSubscription: false,
+  plans: {
+    pro: {
+      prices: [
+        {
+          type: "subscription",
+          priceId: process.env.PRICE_ID_PRO_MONTHLY_USD as string,
+          interval: "month",
+          amount: 29,
+          currency: "USD",
+        },
+        {
+          type: "subscription",
+          priceId: process.env.PRICE_ID_PRO_MONTHLY_EUR as string,
+          interval: "month",
+          amount: 29,
+          currency: "EUR",
+        },
+      ],
+    },
+  },
+};
+```
+
+## Plan information for pricing table
+
+You can define the information for the pricing table for each plan in the `usePlanData` hook in `/apps/saas/modules/payments/hooks/plan-data.tsx`.
+
+The hook dynamically iterates over the plans defined in your payments config and looks up translations for each plan. If `requireActiveSubscription` is `false`, it also adds a free plan entry.
+
+We recommend you to use the `t()` function to get the translations for the plan information and then define the translations in the scoped i18n messages for the SaaS app.
+
+```tsx title="/apps/saas/modules/payments/hooks/plan-data.tsx"
+export function usePlanData() {
+  const t = useTranslations();
+
+  const planData: Record<string, PlanDataEntry> = {};
+
+  for (const planId of Object.keys(config.plans)) {
+    planData[planId] = {
+      title: t(`pricing.products.${planId}.title`),
+      description: t(`pricing.products.${planId}.description`),
+      features: Object.values(
+        (t.raw(`pricing.products.${planId}.features`) as Record<
+          string,
+          string
+        >) ?? {},
+      ),
+    };
+  }
+
+  if (!config.requireActiveSubscription) {
+    planData.free = {
+      title: t("pricing.products.free.title"),
+      description: t("pricing.products.free.description"),
+      features: Object.values(
+        (t.raw("pricing.products.free.features") as Record<string, string>) ??
+          {},
+      ),
+    };
+  }
+
+  return { planData };
+}
+```
+
+_Note: When you add or remove plans, the hook will automatically pick up the changes from the config. Make sure to add the corresponding translation keys for each plan's title, description, and features._

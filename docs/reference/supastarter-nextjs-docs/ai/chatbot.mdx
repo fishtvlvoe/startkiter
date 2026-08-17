@@ -1,0 +1,24 @@
+---
+title: Using the AI chatbot
+description: Learn how to use and extend the integrated AI chatbot in your supastarter app.
+---
+
+supastarter includes a fully working AI chatbot with a chat history and a context window.
+It is using the Vercel AI SDK to connect to ChatGPT.
+
+To learn more about the AI chatbot, you can read the [Vercel AI SDK documentation](https://sdk.vercel.ai/docs/introduction).
+
+![AI chatbot](/images/documentation/nextjs/ai/chatbot.png)
+
+It includes the following features:
+
+- Multiple chat sessions
+- Chat history
+- Context window
+- Streaming responses
+
+As all parts of supastarter, the chatbot is fully customizable and can be extended/adjusted to fit your needs.
+
+You can find the code for the AI chatbot in the SaaS app, for example in `apps/saas/modules/ai/components/AiChat.tsx`.
+
+The API logic is located in the `packages/api/modules/ai` folder.

@@ -1,0 +1,190 @@
+---
+title: Standalone API
+description: Learn how to deploy your supastarter API separately from the frontend as a dedicated service.
+---
+
+This guide will show you how to deploy your supastarter API as a dedicated service.
+This can be useful if you want to run your API and frontend on different platforms or if you want your API to be a "long-running" service instead of a serverless deployment.
+You probably want to use this if you have tasks in your backend that have a long execution duration (that would exceed the timeout limit of a serverless deployment for example).
+
+We have a fully working example of this setup in the [supastarter-repository on the `api-deployment` branch](https://github.com/supastarter/supastarter-nextjs/tree/feat/api-deployment).
+You can either checkout this branch directly or follow the steps below to set it up yourself.
+
+## Create a dedicated app for your API
+
+First you want to create a dedciated app inside your monorepo. This will be the app that will run the API as a node.js server.
+
+Create the following files inside your monorepo:
+
+```json title="apps/api/package.json"
+{
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "@repo/api": "workspace:*",
+    "@repo/logs": "workspace:*"
+  },
+  "devDependencies": {
+    "@repo/tsconfig": "workspace:*",
+    "@types/node": "22.10.3",
+    "@types/react": "19.0.2",
+    "@types/react-dom": "19.0.2",
+    "esbuild": "^0.24.2",
+    "tsx": "^4.19.2",
+    "typescript": "5.7.2"
+  },
+  "name": "@repo/api-app",
+  "private": true,
+  "scripts": {
+    "build": "esbuild ./src/index.ts --bundle --platform=node --outfile=dist/index.js",
+    "dev": "tsx --env-file=../../.env.local src/index.ts --watch",
+    "start": "node dist/index.js",
+    "type-check": "tsc --noEmit"
+  },
+  "version": "0.0.0"
+}
+```
+
+```json title="apps/api/tsconfig.json"
+{
+  "extends": "@repo/tsconfig/react-library.json",
+  "include": ["src/*.ts"],
+  "exclude": ["node_modules"]
+}
+```
+
+```ts title="apps/api/src/index.ts"
+import { serve } from "@hono/node-server";
+import { app } from "@repo/api";
+import { logger } from "@repo/logs";
+
+const port = Number.parseInt(process.env.PORT || "3001");
+
+serve(
+  {
+    fetch: app.fetch,
+    port,
+  },
+  () => {
+    logger.info(`Server is running on port ${port}`);
+  },
+);
+```
+
+## Add rewrite rule to the app that proxies the API
+
+The API will be running on a different URL than the app. To not have to handle cross-origin requests, we are going to proxy the API requests through the app that serves your frontend.
+To do this, add a rewrite rule to the Next.js app that should proxy the requests:
+
+```ts title="apps/saas/next.config.ts"
+const nextConfig: NextConfig = {
+  // ...
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path((?!docs-search$).*)",
+        destination: `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001"}/api/:path*`,
+      },
+    ];
+  },
+};
+```
+
+**Note:** We are redirecting all requests to the `/api` path to the API service, except for the `/api/docs-search` path. This is because the docs search is a serverless function inside the docs app and we don't want to proxy it through the API service.
+
+Now you should be able to run the API service locally, by running the known `pnpm dev` command inside your monorepo. It will start both apps in development mode.
+
+Keep the proxy route in the app that owns it, for example in the SaaS app if your product UI is proxying the API.
+
+## Deploy API service
+
+How to deploy the API service depends on where you want to run it. You can either use a platform like [Render](https://render.com/) which allows to deploy a Node.js server, or you wrap the API service in a docker container and deploy it on a platform like [Fly.io](https://fly.io/).
+
+### Deploy as Node.js server
+
+To run the API service as a Node.js server, all you need to do is to connect your repository, build the API service and start the server.
+
+Depending on the platform the commands for this will be different. For example, if you want to deploy on Render, you can use the following commands:
+
+```bash
+# Build the API service
+corepack enable; pnpm install --frozen-lockfile; pnpm --filter @repo/api-app build
+
+# Start the API service
+pnpm --filter @repo/api-app start
+```
+
+### Deploy as Docker container
+
+To run the API service as a Docker container, you need to create a Dockerfile and build the container.
+
+Add the following Dockerfile to your `apps/api` folder:
+
+```dockerfile title="apps/api/Dockerfile"
+FROM node:22-alpine AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
+FROM base AS builder
+RUN apk add --no-cache libc6-compat
+RUN apk update
+WORKDIR /app
+RUN pnpm add -g turbo
+COPY . .
+RUN turbo prune @repo/api-app --docker
+
+FROM base AS installer
+RUN apk add --no-cache libc6-compat
+RUN apk update
+WORKDIR /app
+
+COPY .gitignore .gitignore
+COPY --from=builder /app/out/json/ .
+COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+
+RUN pnpm install
+
+COPY --from=builder /app/out/full/ .
+COPY turbo.json turbo.json
+
+RUN pnpm turbo run build --filter=@repo/api-app...
+
+FROM base AS runner
+WORKDIR /app
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 api
+USER api
+
+COPY --from=installer /app/apps/api/dist/index.js .
+
+USER api
+
+EXPOSE 3001
+
+ENV PORT=3001
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "/app/index.js"]
+```
+
+To make Prisma work in the Docker container, you need to set the engine type to `binary` in the `schema.prisma` file:
+
+```prisma title="schema.prisma"
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "binary" // [!code ++]
+}
+```
+
+Now you deploy the API service to your platform of choice.
+
+## Set the API url in the web app
+
+Finally, you need to provide the API url to the web app.
+You can do so by defining the `NEXT_PUBLIC_API_URL` environment variable in the deployment environment of the web app.
+
+Dending on your platform, you might have different deployments for different branches.
+A common use case is to have a `production` deployment for the `main` branch and a `staging` deployment for the `staging` or `dev` branch.
+
+In this case you can define different environment variables for each deployment, to work with the correct API for each environment.

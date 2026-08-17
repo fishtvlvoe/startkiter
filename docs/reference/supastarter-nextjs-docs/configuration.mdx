@@ -1,0 +1,160 @@
+---
+title: Configuration
+description: Learn how to configure your supastarter application.
+icon: Settings
+---
+
+supastarter is a highly flexible and customizable starter kit and allows you to configure the project to your needs. Configuration is scoped to the app or package that owns the behavior.
+
+This section will cover all configuration options and when to use them.
+
+## Config files
+
+Each app and package has its own configuration file.
+
+### Marketing app configuration
+
+The marketing app configuration lives in `apps/marketing/config.ts`. It contains settings for public-site behavior such as links, themes, analytics wiring, and marketing-specific options.
+
+```ts file="apps/marketing/config.ts"
+export const config = {
+  // the name of the app
+  appName: "supastarter for Next.js Demo",
+
+  // the link to the documentation app (if not defined, the documentation link will not be shown in the app)
+  docsLink: process.env.NEXT_PUBLIC_DOCS_URL as string | undefined,
+
+  // the themes that should be available in the app
+  enabledThemes: ["light", "dark"],
+  // the default theme
+  defaultTheme: "light",
+} as const;
+```
+
+### SaaS app configuration
+
+The SaaS app configuration lives in `apps/saas/config.ts`. It contains settings for product-app behavior such as redirects, navigation, layouts, and other protected-app concerns.
+
+```ts file="apps/saas/config.ts"
+export const config = {
+  // the name of the app
+  appName: "supastarter for Next.js Demo",
+
+  // the public base URL of the SaaS app
+  saasUrl: process.env.NEXT_PUBLIC_SAAS_URL as string,
+
+  // the redirect path after sign in
+  redirectAfterSignIn: "/app",
+
+  // the redirect path after logout
+  redirectAfterLogout: "/login",
+} as const;
+```
+
+Within each app, import the app config through the local `@config` alias.
+
+### Internationalization
+
+Internationalization is scoped by surface. Messages are split into `marketing`, `saas`, `mail`, and `shared`.
+
+Supported locales are:
+
+- `en`
+- `de`
+- `es`
+- `fr`
+
+Use `getMessagesForLocale(locale, scope)` to load the messages for the current surface. Shared messages are merged in automatically and missing messages fall back to the default locale.
+
+### Auth
+
+Auth flows are served by the SaaS app and use routes like `/login`, `/signup`, `/forgot-password`, `/reset-password`, and `/verify`.
+
+The public auth redirects use `NEXT_PUBLIC_SAAS_URL`, so make sure it points to your deployed SaaS app.
+
+The minimum password length is `8`.
+
+If you configure reserved organization slugs, include all system routes used by the app, including `chatbot`.
+
+### Mail
+
+Mail configuration lives in the mail package. Mail helpers live under `packages/mail/lib`, and mail translations use the scoped i18n setup.
+
+Newsletter signup template support is not part of the mail package.
+
+### Payments
+
+```ts file="packages/payments/config.ts"
+export const config = {
+  billingAttachedTo: "user" as "user" | "organization",
+  requireActiveSubscription: false,
+  plans: {
+    free: {
+      isFree: true,
+    },
+    pro: {
+      recommended: true,
+      prices: [
+        {
+          type: "recurring",
+          priceId: process.env.PRICE_ID_PRO_MONTHLY as string,
+          interval: "month",
+          amount: 29,
+          currency: "USD",
+          seatBased: true,
+          trialPeriodDays: 7,
+        },
+        {
+          type: "recurring",
+          priceId: process.env.PRICE_ID_PRO_YEARLY as string,
+          interval: "year",
+          amount: 290,
+          currency: "USD",
+          seatBased: true,
+          trialPeriodDays: 7,
+        },
+      ],
+    },
+    lifetime: {
+      prices: [
+        {
+          type: "one-time",
+          priceId: process.env.PRICE_ID_LIFETIME as string,
+          amount: 799,
+          currency: "USD",
+        },
+      ],
+    },
+    enterprise: {
+      isEnterprise: true,
+    },
+  },
+} as const;
+```
+
+Billing is plan-driven. Checkout creation works with `planId`, `type`, and optional `interval`, and the provider price is resolved server-side.
+
+Purchase records use `priceId`.
+
+### Storage
+
+```ts file="packages/storage/config.ts"
+export const config = {
+  // the bucket names to use for the storage provider
+  bucketNames: {
+    avatars: process.env.NEXT_PUBLIC_AVATARS_BUCKET_NAME ?? "avatars",
+  },
+} as const;
+```
+
+## Use cases
+
+The configuration options enable you to set up lots of different use cases. Here are some examples:
+
+### Marketing site
+
+The public site is implemented in `apps/marketing`. This app owns its own routes, layout, configuration, and content collections.
+
+### SaaS application
+
+The protected product app is implemented in `apps/saas`. This app owns auth, onboarding, organizations, settings, billing, admin pages, and API routes.

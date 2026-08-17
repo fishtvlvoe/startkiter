@@ -1,0 +1,101 @@
+---
+title: Protect API endpoints
+description: Learn how to protect your API endpoints in your supastarter application.
+---
+
+To protect your API endpoints, there are multiple ways to do it. Essentially what you want to do is to check if the user is authenticated and if they have the necessary permissions to access the endpoint.
+
+Out of the box, supastarter provides a few predefined procedures:
+
+- `publicProcedure` -> Public endpoint, no authentication required
+- `protectedProcedure` -> Protected endpoint, authentication required
+- `adminProcedure` -> Admin endpoint, authentication and `admin.access` permission required
+
+You can find the definition of these procedures in the `/packages/api/orpc/procedures.ts` file. Feel free to add more custom procedures for common use cases in your application. See [custom procedures](#custom-procedures) for more information.
+
+Let's cover the different ways to protect your API endpoints.
+
+### Public endpoints
+
+Public endpoints are endpoints that are available to everyone, without any authentication required.
+
+```tsx copy
+import { publicProcedure } from "../orpc/procedures";
+
+export const sayHello = publicProcedure.handler(async ({ input }) => {
+  return {
+    message: "Hello, world!",
+  };
+});
+```
+
+## Authenticated endpoints
+
+To protect your API endpoints for unauthenticated users, you can use the `protectedProcedure`. It will check for a valid session and throw a 401 error if the user is not authenticated.
+
+Using the `protectedProcedure` will also pass the `session` and `user` information to the context.
+
+```tsx copy
+import { protectedProcedure } from "../orpc/procedures";
+
+export const sayHelloToAuthenticatedUser = protectedProcedure.handler(
+  async ({ input, context: { user, session } }) => {
+    return {
+      message: `Hello, ${user.name}!`,
+    };
+  },
+);
+```
+
+## Admin-only endpoints
+
+For endpoints that are only available to admin users, you can use the `adminProcedure`. It additionally checks the `admin.access` permission via Permix (`@repo/permissions`).
+
+```ts copy
+import { adminProcedure } from "../orpc/procedures";
+
+export const sayHelloToAdmin = adminProcedure.handler(
+  async ({ input, context: { user, session } }) => {
+    return {
+      message: `Hello, Admin!`,
+    };
+  },
+);
+```
+
+Organization and payment procedures resolve membership for the target organization and use `checkPermission` for keys like `organization.manage` or `organization.accessBillingPortal`. See [Permissions and access control](/docs/nextjs/authentication/permissions) for the full matrix.
+
+## Custom procedures
+
+You can also create your own procedures for common use cases in your application. Let's for example create a procedure that passes the `user` and `session` information to the context without throwing an error if the user is not authenticated:
+
+```ts copy filename="packages/api/orpc/procedures.ts"
+export const publicProcedureWithSession = publicProcedure.use(
+  async ({ context, next }) => {
+    const session = await auth.api.getSession({
+      headers: context.headers,
+    });
+
+    return await next({
+      context: {
+        session: session?.session || null,
+        user: session?.user || null,
+      },
+    });
+  },
+);
+```
+
+This way you can have endpoints that can access the `session` but also be publicly accessible.
+
+```ts copy
+import { publicProcedureWithSession } from "../orpc/procedures";
+
+export const sayHelloToUser = publicProcedureWithSession.handler(
+  async ({ input, context: { user } }) => {
+    return {
+      message: `Hello, ${user?.name || "Guest"}!`,
+    };
+  },
+);
+```

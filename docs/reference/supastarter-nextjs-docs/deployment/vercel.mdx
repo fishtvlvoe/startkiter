@@ -1,0 +1,38 @@
+---
+title: Vercel
+seoTitle: Deploy to Vercel
+description: Learn how to deploy your supastarter application to Vercel.
+---
+
+This guide will show you how to deploy your supastarter application to [Vercel](https://vercel.com).
+
+Read further deployment guides on our blog:
+
+## Deploying to Vercel
+
+Vercel is the easiest way to deploy Next.js apps. It's the company behind Next.js and has first-class support for Next.js.
+
+### Setup vercel account
+
+To host your project on Vercel you first have to [create an account](https://vercel.com/signup).
+
+### Connect your git repository
+
+After signing up you will be promted to import a git repository. Select the git provider of your project and connect your git account with Vercel.
+
+![Vercel welcome screen](/images/documentation/vercel-welcome.png)
+
+Now you will see a list of all your projects. Select the project you want to deploy and click on the **Import** button.
+
+In the **Configure Project** view expand the **Enviornment Variables** section and add the following variables one by one (you can copy them from the .env file in your projects root too):
+
+```bash copy
+NEXT_PUBLIC_SITE_URL=<YOUR_SITE_URL>
+DATABASE_URL=<YOUR_DATABASE_URL>
+```
+
+The **NEXT_PUBLIC_SITE_URL** is the main url of your site, e.g. `https://your-app.com`.
+
+![Vercel project configuration](/images/documentation/vercel-configure-project.png)
+
+Then click the **Deploy** button and your project will be deployed.

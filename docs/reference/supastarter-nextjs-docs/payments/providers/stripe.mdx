@@ -1,0 +1,120 @@
+---
+title: Stripe
+description: Learn how to set up Stripe with supastarter.
+---
+
+## Get the api key
+
+After you have created your account for [Stripe](https://stripe.com/), you will need to get the API key. You can do this by going to the [API page](https://dashboard.stripe.com/apikeys) in the dashboard. Here you will find the _Secret key_ and the _Publishable key_. You will need the _Secret key_ for the integration to work.
+
+## Add environment variables
+
+To use the Stripe integration, you need to define the following environment variables to your `.env.local` as well as your production environment:
+
+```bash title=".env.local" copy
+STRIPE_SECRET_KEY="" # Your Stripe secret key
+STRIPE_WEBHOOK_SECRET="" # The secret key of the webhook you created (see below)
+```
+
+## Create products
+
+For your users to choose from the available subscription plans, you need to create those _Products_ first on the [Products page](https://dashboard.stripe.com/products). You can create as many products as you want, but you will need to create at least one product for the integration to work.
+
+Create one product per plan you want to offer. You can add multiple prices within this product to offer multiple currencies or different billing intervals.
+
+![Stripe products](/images/documentation/stripe-product-prices.png)
+
+## Create a webhook
+
+To sync the current subscription status and other information to your database, you need to set up a webhook.
+
+The webhook code comes ready to use with supastarter, you just have to create the webhook in the Stripe dashboard and insert the URL for your project.
+
+To configure a new webhook, go to the [Webhooks page](https://dashboard.stripe.com/webhooks) in the Stripe settings and click the _Add endpoint_ button.
+
+![Create Stripe webhook](/images/documentation/stripe-create-webhook.png)
+
+Select the following events:
+
+- `checkout.session.completed`
+- `customer.subscription.created`
+- `customer.subscription.updated`
+- `customer.subscription.deleted`
+
+To get the URL for the webhook, you can either use a local development URL or the URL of your deployed app:
+
+### Local development
+
+If you want to test the webhook locally, you can use [ngrok](https://ngrok.com/) to create a tunnel to your local machine. Ngrok will then give you a URL that you can use to test the webhook locally.
+
+To do so, install ngrok and run it with the following command (while your supastarter development server is running):
+
+```bash
+ngrok http 3000
+```
+
+![ngrok](/images/documentation/ngrok.png)
+
+This will give you a URL (see the _Forwarding_ output) that you can use to create a webhook in Stripe. Just use that url and add `/api/webhooks/payments` to it.
+
+### Production / preview deployment
+
+When you have already deployed a version of your project, you can use the actual URL to create the webhook with. This will be necessary for a production version your app later anyway.
+
+**Make sure you have a deployed version that has the `STRIPE_WEBHOOK_SECRET` environment variable set.**
+
+Then you can use the URL of your deployed app and add `/api/webhooks/payments` to it.
+
+Example URL: `https://your-app.com/api/webhooks/payments`
+
+## Set up products in app
+
+The created products have to be defined in the `packages/payments/config.ts` file:
+
+```js title="packages/payments/config.ts"
+export const config = {
+	plans: {
+		plans: {
+		pro: {
+			recommended: true,
+			prices: [
+				{
+					type: "subscription",
+					priceId: process.env.PRICE_ID_PRO_MONTHLY as string,
+					interval: "month",
+					amount: 29,
+					currency: "USD",
+					seatBased: true,
+					trialPeriodDays: 7,
+				},
+				{
+					type: "subscription",
+					priceId: process.env.PRICE_ID_PRO_YEARLY as string,
+					interval: "year",
+					amount: 290,
+					currency: "USD",
+					seatBased: true,
+					trialPeriodDays: 7,
+				},
+			],
+		},
+	},
+};
+```
+
+We are using envs for the product ids, so you can define different product ids for each environment, as you probably want to use the test mode for development.
+
+Define the product ids in your `.env.local` and in the environment variables of your production environment:
+
+```bash title=".env.local" copy
+PRICE_ID_PRO_MONTHLY=""
+PRICE_ID_PRO_YEARLY=""
+```
+
+Learn more about the payment plans configuration in [_Manage plans and products_ documentation](/docs/nextjs/payments/plans).
+
+## Set currency for locales in your app
+
+Lastly you need to configure the currency that should be used for each locale in your app.
+
+Set the `currency` value in the i18n configuration for the locales you support so the marketing and SaaS apps can resolve the correct price display for each locale.

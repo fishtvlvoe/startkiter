@@ -1,0 +1,65 @@
+---
+title: Railway Postgres
+description: Learn how to use Railway Postgres as your database provider with supastarter.
+---
+
+Railway offers managed PostgreSQL databases with a simple setup process. It is a good option for developers who want a straightforward database provider without the complexity of connection pooling configuration.
+
+## 1. Create a Railway account and project
+
+Go to [railway.app](https://railway.app) and create an account. Create a new project from the Railway dashboard.
+
+## 2. Add a PostgreSQL database
+
+In your Railway project, click **New** and select **Database**, then choose **PostgreSQL**. Railway will provision a new PostgreSQL instance for your project.
+
+## 3. Get your connection string
+
+Click on the PostgreSQL service in your project, then navigate to the **Variables** tab. Copy the `DATABASE_URL` variable. Railway provides connection strings in several formats - the `DATABASE_URL` variable contains the full connection string you need.
+
+## 4. Configure environment variables
+
+Add the connection string to your `.env.local` file:
+
+```bash copy title=".env.local"
+DATABASE_URL="postgresql://postgres:password@region.railway.app:port/railway"
+```
+
+## 5. Configure your ORM
+
+No special Prisma or Drizzle configuration is needed. The standard PostgreSQL setup works out of the box with Railway. Both ORMs will use the `DATABASE_URL` environment variable automatically.
+
+## 6. Run migrations
+
+Push your database schema to Railway:
+
+```bash copy
+pnpm --filter database push
+```
+
+## 7. Start the development server
+
+Start your development server to verify everything is working:
+
+```bash copy
+pnpm dev
+```
+
+<Callout>
+  Railway's PostgreSQL databases include automatic backups, point-in-time
+  recovery, and usage-based pricing starting at $5/month.
+</Callout>
+
+## Frequently asked questions
+
+### Does Railway include connection pooling?
+
+Railway's Postgres does not include built-in connection pooling. For production workloads with many concurrent connections, consider adding PgBouncer or using Railway's TCP proxy.
+
+### How much does Railway Postgres cost?
+
+Railway uses usage-based pricing. The Hobby plan starts at $5/month with included resources. Database storage and compute are billed based on actual usage.
+
+### Can I use Railway for both database and deployment?
+
+Yes, Railway can host both your database and your application. See the [Railway deployment guide](/docs/nextjs/deployment/railway) for deploying your supastarter app to Railway.

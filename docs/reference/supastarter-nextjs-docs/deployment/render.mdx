@@ -1,0 +1,39 @@
+---
+title: Render
+description: Learn how to deploy your supastarter application to Render.
+---
+
+This guide will show you how to deploy your supastarter SaaS to [render.com](https://render.com) in minutes. And the best part? You can actually start for free thanks to the generous free tier of render.com.
+
+## Why deploy your SaaS on render.com?
+
+Deploying your SaaS as a node application on Render allows you to have complete control over your server environment. It ensures better privacy, contributes to cost savings if managed correctly, and offers you the flexibility to customize your server setup to suit your specific needs. It can also give your application a performance boost compared to hosting on a serverless platform like Vercel, since it removes cold starts.
+
+## Deploying your application to render.com
+
+Make sure you have an account on Render before continuing. You can sign up for free at [render.com](http://render.com).
+
+To deploy your application on Render click the `New` button on the dashboard and select `Web Service`.
+
+![Render new web service](/images/blog/render-dashboard.png)
+
+Then select `Build and deploy from a Git repository` and connect your repository:
+
+![Render connect repository](/images/blog/render-connect-repository.png)
+
+In the next step, enter a name for your project and set the following configuration:
+
+- Build Command: `corepack enable && pnpm install --frozen-lockfile && pnpm --filter saas build`
+- Start Command: `cd apps/saas && pnpm start`
+
+![Render deployment configuration](/images/blog/render-deployment-configuration.png)
+
+Now define the environment variables for your application. You can copy them from your `.env.local` file:
+
+![Render environment variables](/images/blog/render-envs.png)
+
+Lastly, select a plan for your service. For testing purposes or even MVPs, you can start with the free tier. For production, we recommend upgrading to a paid plan, which offers more resources, better performance and won't sleep after periods of inactivity.
+
+![Render service plan](/images/blog/render-plan.png)
+
+Then click `Create Web Service` and Render will start building and deploying your application. Once the deployment is complete, you can access your application via the provided URL.

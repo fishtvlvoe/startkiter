@@ -1,0 +1,101 @@
+---
+title: Cloudflare R2
+description: Learn how to use Cloudflare R2 as your storage provider with supastarter.
+---
+
+Cloudflare R2 is an S3-compatible object storage service with zero egress fees. Unlike AWS S3, R2 does not charge for data transfer out, making it a cost-effective choice for applications that serve many files to users. Since R2 is fully S3-compatible, it works seamlessly with supastarter's built-in storage system.
+
+## 1. Create an R2 bucket
+
+Log in to the [Cloudflare dashboard](https://dash.cloudflare.com) and navigate to **R2 Object Storage** in the sidebar. Click **Create bucket**.
+
+Choose a bucket name (e.g., `avatars` to match supastarter's default bucket name) and select a location hint closest to your deployment region.
+
+<Callout>
+  The bucket name in R2 should match the bucket name configured in
+  `packages/storage/config.ts`. The default is `avatars`.
+</Callout>
+
+## 2. Generate API credentials
+
+In the R2 section of the Cloudflare dashboard, click **Manage R2 API Tokens** (or navigate to **R2 Overview** → **Manage API tokens**).
+
+Click **Create API token** and configure:
+
+- **Permissions**: Object Read & Write
+- **Specify bucket(s)**: Select your bucket, or apply to all buckets
+- **TTL**: Set an appropriate expiration or leave as indefinite for production
+
+After creating the token, copy the **Access Key ID** and **Secret Access Key**. These are only shown once.
+
+## 3. Get your R2 endpoint
+
+Your R2 S3-compatible endpoint follows this format:
+
+```
+https://<ACCOUNT_ID>.r2.cloudflarestorage.com
+```
+
+You can find your Account ID in the Cloudflare dashboard URL or in the R2 overview page.
+
+## 4. Configure environment variables
+
+Add the following to your `.env.local` file:
+
+```bash copy title=".env.local"
+S3_ACCESS_KEY_ID="your-r2-access-key-id"
+S3_SECRET_ACCESS_KEY="your-r2-secret-access-key"
+S3_ENDPOINT="https://your-account-id.r2.cloudflarestorage.com"
+S3_REGION="auto"
+```
+
+The region should be set to `auto` for R2, as Cloudflare handles data placement automatically.
+
+## 5. Configure CORS (if needed)
+
+If you encounter CORS errors during file uploads, configure CORS rules for your R2 bucket. In the Cloudflare dashboard, navigate to your bucket → **Settings** → **CORS Policy** and add:
+
+```json copy
+[
+  {
+    "AllowedOrigins": ["https://your-domain.com"],
+    "AllowedMethods": ["GET", "PUT", "POST", "DELETE", "HEAD"],
+    "AllowedHeaders": ["*"],
+    "MaxAgeSeconds": 3600
+  }
+]
+```
+
+Replace `https://your-domain.com` with your actual application domain. For development, you can temporarily add `http://localhost:3000`.
+
+## 6. Test the upload
+
+Start your development server and test a file upload (e.g., uploading a user avatar):
+
+```bash copy
+pnpm dev
+```
+
+Navigate to your account settings and try uploading a profile picture to verify the R2 connection.
+
+## Using a custom domain (optional)
+
+R2 supports custom domains for serving files. In the Cloudflare dashboard, go to your bucket → **Settings** → **Custom Domains** and add your domain. This allows you to serve files from a URL like `https://files.your-domain.com` instead of the R2 endpoint.
+
+## Frequently asked questions
+
+### Why choose R2 over AWS S3?
+
+The primary advantage of R2 is **zero egress fees**. AWS S3 charges for data transfer out, which can become significant for applications that serve many files. R2 is also simpler to set up if you already use Cloudflare for DNS or CDN.
+
+### Is R2 fully S3-compatible?
+
+R2 implements the most commonly used S3 APIs, including presigned URLs which supastarter uses for file uploads. Some advanced S3 features like object lock or S3 Select are not available.
+
+### How much does R2 cost?
+
+R2 includes 10 GB of free storage and 10 million read requests per month. Beyond the free tier, storage is $0.015/GB per month and Class A operations (writes) are $4.50 per million requests. There are no egress fees.
+
+### Can I use R2 with a CDN?
+
+Yes. When you add a custom domain to your R2 bucket through Cloudflare, it automatically uses Cloudflare's CDN to cache and serve your files globally.

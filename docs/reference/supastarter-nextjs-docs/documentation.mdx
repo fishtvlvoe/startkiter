@@ -1,0 +1,81 @@
+---
+title: Documentation
+description: Learn how to use the documentation feature in supastarter.
+---
+
+Documentation in supastarter is handled by a dedicated standalone application using [fumadocs](https://fumadocs.vercel.app/), a powerful documentation framework built on Next.js.
+
+## Documentation app
+
+The documentation lives in a separate Next.js application at `apps/docs`. This provides better separation of concerns and an improved documentation experience with fumadocs-ui.
+
+### Starting the docs server
+
+To start the documentation development server:
+
+```bash copy
+pnpm --filter @repo/docs dev
+```
+
+This will start the docs server on port 3001 by default.
+
+## Create a documentation page
+
+To create a new documentation page, create a new `.mdx` file in the `apps/docs/content/docs/` directory.
+
+```mdx
+---
+title: Documentation
+description: Learn how to use our software
+---
+
+Your content here
+```
+
+The frontmatter properties `title` and `description` can be defined for each documentation page.
+
+## Folder structure
+
+The folder structure of the documentation is determined by the directory structure of the `apps/docs/content/docs/` directory:
+
+```
+apps/docs/content/docs
+├── getting-started
+│   └── index.mdx
+├── installation
+│   ├── index.mdx
+│   └── linux.mdx
+├── usage
+│   └── index.mdx
+└── index.mdx
+```
+
+The index file of each directory will be used as the main page of the documentation section. The title of the directory will be used as the title of the documentation section.
+
+If you want to customize the title or the order of directories / pages you can define a `meta.json` file in each directory:
+
+```json
+{
+  "pages": ["getting-started", "usage", "installation"]
+}
+```
+
+The `pages` array defines the order of the pages. If a page is not defined in the `meta.json` file, the order will be determined by the file system.
+
+## Features
+
+The fumadocs-based documentation app includes:
+
+- **AI-powered page actions**: Interactive AI components for enhanced documentation experience
+- **Full-text search**: Built-in search functionality
+- **Syntax highlighting**: Code blocks with syntax highlighting
+- **MDX support**: Full MDX support with custom components
+- **Dark mode**: Built-in dark mode support
+
+## Deployment
+
+The docs app can be deployed separately from the marketing site and the SaaS app. When deploying:
+
+1. Build the docs app: `pnpm --filter @repo/docs build`
+2. Deploy to your hosting provider
+3. Point documentation links to your docs deployment URL

@@ -1,0 +1,5 @@
+{
+  "title": "Monitoring",
+  "defaultOpen": false,
+  "pages": ["overview", "sentry", "..."]
+}

@@ -1,7 +1,7 @@
 ## 1. 舊內容封存與 upstream 追蹤
 
-- [ ] 1.1 執行 `git mv apps legacy/apps && git mv packages legacy/packages` 並 commit，滿足 Decision「官方底座建立方式：舊內容搬進 legacy/，新底座直接佔用正式路徑」，驗證方式：`ls apps packages` 回報空或不存在，`diff -rq legacy/apps <搬移前備份>` 與 `diff -rq legacy/packages <搬移前備份>` 皆無差異
-- [ ] 1.2 執行 `git remote add upstream https://github.com/supastarter/supastarter-nextjs.git` 並 `git fetch upstream`，滿足 Decision「建立官方 upstream 追蹤：git remote，不用 submodule」，驗證方式：`git remote -v` 顯示 upstream 指向該網址，`git log upstream/main -1` 正常顯示官方最新 commit 訊息
+- [x] 1.1 執行 `git mv apps legacy/apps && git mv packages legacy/packages` 並 commit，滿足 Decision「官方底座建立方式：舊內容搬進 legacy/，新底座直接佔用正式路徑」，驗證方式：`ls apps packages` 回報空或不存在，`diff -rq legacy/apps <搬移前備份>` 與 `diff -rq legacy/packages <搬移前備份>` 皆無差異
+- [x] 1.2 執行 `git remote add upstream https://github.com/supastarter/supastarter-nextjs.git` 並 `git fetch upstream`，滿足 Decision「建立官方 upstream 追蹤：git remote，不用 submodule」，驗證方式：`git remote -v` 顯示 upstream 指向該網址，`git log upstream/main -1` 正常顯示官方最新 commit 訊息
 
 ## 2. 官方底座安裝：apps/marketing
 

@@ -1,0 +1,12 @@
+{
+  "title": "Payments",
+  "defaultOpen": false,
+  "pages": [
+    "overview",
+    "providers",
+    "plans",
+    "check-purchases",
+    "paywall",
+    "..."
+  ]
+}

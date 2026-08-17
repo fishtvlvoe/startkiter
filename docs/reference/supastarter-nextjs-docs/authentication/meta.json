@@ -1,0 +1,12 @@
+{
+  "title": "Authentication",
+  "defaultOpen": false,
+  "pages": [
+    "overview",
+    "user-and-session",
+    "permissions",
+    "oauth",
+    "superadmin",
+    "..."
+  ]
+}

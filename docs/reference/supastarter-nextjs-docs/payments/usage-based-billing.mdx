@@ -1,0 +1,318 @@
+---
+title: Usage-based billing
+description: Learn how to implement usage-based billing with supastarter.
+---
+
+Usage-based billing lets you charge customers for what they actually consume, such as API calls, AI tokens, storage, generated images, or processed data.
+
+supastarter handles checkout, subscriptions, webhook synchronization, plan configuration, and access checks through the payments module. The usage events themselves are provider-specific: after a customer has an active subscription, your application reports billable usage to the payment provider from server-side code.
+
+## Supported providers
+
+supastarter supports Stripe, Lemon Squeezy, Creem, Polar, and Dodo Payments. The providers that also support metered or usage-based billing are:
+
+| Provider      | Usage-based billing model                                | What you report from your app                          |
+| ------------- | -------------------------------------------------------- | ------------------------------------------------------ |
+| Stripe        | Billing meters with metered recurring prices             | Meter events for a Stripe customer                     |
+| Lemon Squeezy | Metered subscription products or variants                | Usage records for a subscription item                  |
+| Polar         | Meters, metered subscription prices, and event ingestion | Usage events for a Polar customer or external customer |
+| Dodo Payments | Usage-based products with meters and event ingestion     | Usage events for a Dodo Payments customer              |
+
+Creem supports seat-based/unit quantity billing in supastarter, but it does not currently expose the same metered usage event model as the providers above.
+
+## How it fits into supastarter
+
+Use the normal supastarter payment flow to create the subscription:
+
+1. Configure the provider in `packages/payments/provider/index.ts`.
+2. Create the usage-based product or price in your payment provider dashboard.
+3. Add the provider price ID to `packages/payments/config.ts` like any other recurring price.
+4. Let users subscribe through the existing checkout flow.
+5. Use the synced subscription record to find the provider customer ID when you need to report usage.
+6. Report usage from a trusted server-side API route, oRPC procedure, background job, or queue worker.
+
+The `packages/payments/config.ts` entry is still the source for what appears in the pricing table and checkout. Meters, aggregation rules, event names, subscription item IDs, and usage metadata are provider-specific details that you store or reference in your own usage reporting code.
+
+```ts title="packages/payments/config.ts"
+export const config = {
+  plans: {
+    usage: {
+      recommended: true,
+      prices: [
+        {
+          type: "recurring",
+          priceId: process.env.PRICE_ID_USAGE_MONTHLY as string,
+          interval: "month",
+          amount: 0,
+          currency: "USD",
+        },
+      ],
+    },
+  },
+};
+```
+
+If your plan has a fixed base fee plus usage overages, set `amount` to the base fee shown in your pricing UI. If the provider charges only in arrears for usage, set `amount` to `0` and explain the usage price in your plan data.
+
+## Store the identifiers you need
+
+The default subscription synchronization stores the provider subscription ID, provider customer ID, plan ID, variant ID, status, and next payment date. Usage reporting usually needs one of these identifiers:
+
+- **Stripe**: `customer_id` from the synced subscription record.
+- **Lemon Squeezy**: the subscription item ID for the metered variant.
+- **Polar**: the Polar customer ID, or an `external_customer_id` that maps to your user or organization.
+- **Dodo Payments**: `customer_id` from the synced subscription record.
+
+For providers that require an identifier not stored by default, extend your database schema and webhook handling to persist it when the subscription is created or updated. Lemon Squeezy usage records are the common case because the usage API records usage against a subscription item.
+
+## Report usage from the server
+
+Never report usage directly from the browser. Usage events affect invoices, so the call should happen in trusted server-side code after you have verified:
+
+- The user or organization has an active subscription.
+- The action is billable.
+- The usage quantity is calculated by your backend.
+- The event has a deterministic idempotency key when the provider supports one.
+
+For example, an AI feature might report usage after a successful completion:
+
+```ts title="packages/api/modules/ai/lib/report-usage.ts"
+interface ReportUsageParams {
+  customerId: string;
+  requestId: string;
+  totalTokens: number;
+}
+
+export async function reportUsage({
+  customerId,
+  requestId,
+  totalTokens,
+}: ReportUsageParams) {
+  // Call the provider-specific implementation here.
+}
+```
+
+Then call this helper from the API procedure or background job that performed the billable work.
+
+## Stripe
+
+Stripe usage-based billing uses billing meters and metered recurring prices.
+
+1. In Stripe, create a billing meter for the usage you want to track, such as `ai_tokens` or `api_requests`.
+2. Create a recurring price with **Usage-based** pricing and attach the meter.
+3. Put the metered Stripe price ID in `packages/payments/config.ts`.
+4. After checkout, report meter events with the Stripe customer ID stored on the subscription.
+
+```ts title="packages/api/modules/billing/lib/report-stripe-usage.ts"
+interface ReportStripeUsageParams {
+  customerId: string;
+  eventName: string;
+  value: number;
+}
+
+export async function reportStripeUsage({
+  customerId,
+  eventName,
+  value,
+}: ReportStripeUsageParams) {
+  const body = new URLSearchParams();
+  body.append("event_name", eventName);
+  body.append("payload[stripe_customer_id]", customerId);
+  body.append("payload[value]", String(value));
+
+  const response = await fetch(
+    "https://api.stripe.com/v1/billing/meter_events",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body,
+    },
+  );
+
+  if (!response.ok) throw new Error("Failed to report Stripe usage");
+}
+```
+
+Use the same `eventName` that you configured on the Stripe meter. Stripe aggregates the reported values and invoices the customer at the end of the billing period.
+
+## Lemon Squeezy
+
+Lemon Squeezy usage-based billing is enabled on subscription products or variants with the **Usage is metered?** option.
+
+1. Create a subscription product or variant in Lemon Squeezy.
+2. Enable **Usage is metered?** and choose the aggregation mode:
+   - **Sum of usage during period** for incremental events.
+   - **Most recent usage** or **Most recent usage during a period** for absolute totals.
+   - **Maximum usage during period** for peak usage.
+3. Put the variant ID in `packages/payments/config.ts`.
+4. Store the subscription item ID from Lemon Squeezy when the webhook syncs the subscription.
+5. Report usage records for that subscription item.
+
+```ts title="packages/api/modules/billing/lib/report-lemonsqueezy-usage.ts"
+interface ReportLemonSqueezyUsageParams {
+  subscriptionItemId: string;
+  quantity: number;
+  action?: "increment" | "set";
+}
+
+export async function reportLemonSqueezyUsage({
+  subscriptionItemId,
+  quantity,
+  action = "increment",
+}: ReportLemonSqueezyUsageParams) {
+  const response = await fetch(
+    "https://api.lemonsqueezy.com/v1/usage-records",
+    {
+      method: "POST",
+      headers: {
+        Accept: "application/vnd.api+json",
+        Authorization: `Bearer ${process.env.LEMONSQUEEZY_API_KEY}`,
+        "Content-Type": "application/vnd.api+json",
+      },
+      body: JSON.stringify({
+        data: {
+          type: "usage-records",
+          attributes: {
+            quantity,
+            action,
+          },
+          relationships: {
+            "subscription-item": {
+              data: {
+                type: "subscription-items",
+                id: subscriptionItemId,
+              },
+            },
+          },
+        },
+      }),
+    },
+  );
+
+  if (!response.ok) throw new Error("Failed to report Lemon Squeezy usage");
+}
+```
+
+Use `increment` with the **Sum of usage during period** aggregation. Use `set` when your aggregation mode expects the latest total.
+
+## Polar
+
+Polar usage-based billing uses events, meters, and metered prices on subscription products.
+
+1. Create a meter in Polar. Configure the event name, filters, aggregation function, and display unit.
+2. Add a metered price to a subscription product and select that meter.
+3. Put the Polar price or product reference used by checkout in `packages/payments/config.ts`.
+4. Ingest events from your server using the Polar SDK or Events Ingestion API.
+
+```ts title="packages/api/modules/billing/lib/report-polar-usage.ts"
+import { Polar } from "@polar-sh/sdk";
+
+const polar = new Polar({
+  accessToken: process.env.POLAR_ACCESS_TOKEN ?? "",
+});
+
+interface ReportPolarUsageParams {
+  externalCustomerId: string;
+  eventName: string;
+  requestId: string;
+  totalTokens: number;
+}
+
+export async function reportPolarUsage({
+  externalCustomerId,
+  eventName,
+  requestId,
+  totalTokens,
+}: ReportPolarUsageParams) {
+  await polar.events.ingest({
+    events: [
+      {
+        name: eventName,
+        externalCustomerId,
+        externalId: requestId,
+        metadata: {
+          total_tokens: totalTokens,
+        },
+      },
+    ],
+  });
+}
+```
+
+You can use `customerId` instead of `externalCustomerId` if you store Polar customer IDs. Use `externalId` to deduplicate retries.
+
+## Dodo Payments
+
+Dodo Payments usage-based billing uses meters connected to usage-based products.
+
+1. Create a meter in Dodo Payments and choose the event name, aggregation type, measurement unit, and optional filters.
+2. Create or edit a usage-based product and attach the meter.
+3. Configure the price per unit and optional free threshold.
+4. Put the Dodo Payments product or price ID in `packages/payments/config.ts`.
+5. Send usage events to Dodo Payments from your server.
+
+```ts title="packages/api/modules/billing/lib/report-dodo-usage.ts"
+interface ReportDodoUsageParams {
+  customerId: string;
+  eventId: string;
+  eventName: string;
+  metadata?: Record<string, string | number | boolean>;
+}
+
+export async function reportDodoUsage({
+  customerId,
+  eventId,
+  eventName,
+  metadata,
+}: ReportDodoUsageParams) {
+  const baseUrl =
+    process.env.NODE_ENV === "production"
+      ? "https://live.dodopayments.com"
+      : "https://test.dodopayments.com";
+
+  const response = await fetch(`${baseUrl}/events/ingest`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env.DODO_PAYMENTS_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      events: [
+        {
+          customer_id: customerId,
+          event_id: eventId,
+          event_name: eventName,
+          metadata,
+        },
+      ],
+    }),
+  });
+
+  if (!response.ok) throw new Error("Failed to report Dodo Payments usage");
+}
+```
+
+Use a stable `event_id` for each billable action so retries do not create duplicate usage. Dodo Payments requires event timestamps to be recent, so batch reporting should run shortly after the usage occurs.
+
+## Testing usage-based billing
+
+Before going live:
+
+1. Use the provider's test mode or sandbox.
+2. Subscribe to the usage-based plan through the supastarter checkout flow.
+3. Trigger a billable action in your app.
+4. Confirm that the provider dashboard shows the usage event or usage record.
+5. Preview the upcoming invoice to confirm the usage quantity and amount.
+6. Test retries to make sure your idempotency keys prevent duplicate billing.
+
+## Best practices
+
+- Keep usage reporting in server-side code only.
+- Use a queue or background job for high-volume events.
+- Store enough local usage data to debug invoices and answer customer questions.
+- Use deterministic idempotency keys, such as a request ID or job ID.
+- Decide whether you need real-time enforcement, prepaid credits, or soft limits before relying on provider-side invoice totals.
+- Show the customer their current usage in your app if usage charges can vary significantly.

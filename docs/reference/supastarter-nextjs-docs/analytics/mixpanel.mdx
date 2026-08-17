@@ -1,0 +1,31 @@
+---
+title: Mixpanel
+description: Learn how to use Mixpanel with supastarter.
+---
+
+To use Mixpanel with supastarter, first [create a Mixpanel account](https://mixpanel.com) and get your app token.
+
+Then, add the app token to your `.env.local` file and your deployment environment:
+
+```bash copy
+NEXT_PUBLIC_MIXPANEL_TOKEN=your_token_here
+```
+
+Next, we need to install the Mixpanel packages:
+
+```bash copy
+pnpm add --filter web mixpanel-browser
+pnpm add --filter web -D @types/mixpanel-node
+```
+
+Finally, we need activate Mixpanel as the analytics provider. To do this, open `apps/web/modules/analytics/index.tsx` and change the content to:
+
+```typescript copy
+export * from "./provider/mixpanel";
+```
+
+To customize the Mixpanel configuration, edit the `apps/web/modules/analytics/provider/mixpanel/index.tsx`.
+
+Learn more about analytics with Mixpanel in the [official documentation](https://docs.mixpanel.com/).
+
+For further instructions, follow the [general analytics instructions](/docs/nextjs/analytics/overview).

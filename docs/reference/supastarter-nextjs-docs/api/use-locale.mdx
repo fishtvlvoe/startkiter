@@ -1,0 +1,18 @@
+---
+title: Use locale in API endpoints
+description: Learn how to use the users locale in your supastarter API endpoints.
+---
+
+Sometimes you need to use the users locale in your API endpoints. For example, you might want to fetch data from a database that is localized or if you want to send an email in the users locale.
+
+The locale of the user (or if no locale is set, the default locale of the application) is available in the context of your endpoint handler.
+
+```tsx copy
+export const sayHello = protectedProcedure.handler(
+  async ({ input, context: { locale } }) => {
+    return {
+      message: `Hello, in ${locale}!`,
+    };
+  },
+);
+```

@@ -1,0 +1,13 @@
+{
+  "title": "API",
+  "defaultOpen": false,
+  "pages": [
+    "overview",
+    "define-endpoint",
+    "protect-endpoints",
+    "usage-in-frontend",
+    "use-locale",
+    "streaming",
+    "..."
+  ]
+}

@@ -1,0 +1,77 @@
+---
+title: Overview
+description: Learn how to deploy your supastarter application.
+---
+
+supastarter can be deployed to any hosting provider that supports Node.js. Whether you prefer serverless platforms like Vercel and Netlify, container-based solutions with Docker, or self-hosted setups on a VPS, supastarter has you covered. Since Next.js is built by Vercel, deploying to Vercel provides the best out-of-the-box developer experience.
+
+Learn more about the deployment in these different guides:
+
+<Cards>
+  <Card
+    title="Vercel"
+    description="Learn how to deploy your supastarter application to Vercel."
+    href="/docs/nextjs/deployment/vercel"
+  />
+  <Card
+    title="Render"
+    description="Learn how to deploy your supastarter application to Render."
+    href="/docs/nextjs/deployment/render"
+  />
+  <Card
+    title="Fly.io"
+    description="Learn how to deploy your supastarter application to Fly.io."
+    href="/docs/nextjs/deployment/flydotio"
+  />
+  <Card
+    title="Netlify"
+    description="Learn how to deploy your supastarter application to Netlify."
+    href="/docs/nextjs/deployment/netlify"
+  />
+  <Card
+    title="Docker"
+    description="Learn how to deploy your supastarter application with Docker."
+    href="/docs/nextjs/deployment/docker"
+  />
+  <Card
+    title="Coolify"
+    description="Learn how to deploy your supastarter application with Coolify."
+    href="/docs/nextjs/deployment/coolify"
+  />
+  <Card
+    title="Railway"
+    description="Learn how to deploy your supastarter application to Railway."
+    href="/docs/nextjs/deployment/railway"
+  />
+</Cards>
+
+## Deploy API as a service
+
+As supastarter has a dedicated API layer, it also allows you to deploy your API as a dedicated service.
+This can be useful if you want to run your API and frontend on different platforms or if you want your API to be a "long-running" service instead of a serverless deployment.
+
+<Cards>
+  <Card
+    title="Standalone API"
+    description="Learn how to deploy your supastarter API as a dedicated service."
+    href="/docs/nextjs/deployment/standalone-api"
+  />
+</Cards>
+
+## Frequently asked questions
+
+### What is the best platform to deploy supastarter?
+
+**Vercel** offers the best developer experience for Next.js applications and is the recommended deployment target. It provides automatic scaling, edge functions, and zero-config deployments. However, if you need more control over your infrastructure or want to reduce costs at scale, Docker-based deployments on platforms like **Railway**, **Fly.io**, or a self-hosted VPS are excellent alternatives.
+
+### Can I self-host supastarter?
+
+Yes. supastarter includes a Docker configuration that allows you to self-host the application on any server. You can deploy to a VPS provider like Hetzner, DigitalOcean, or any Linux server using Docker Compose with an Nginx reverse proxy and Let's Encrypt SSL certificates. See the [Docker deployment guide](/docs/nextjs/deployment/docker) for details.
+
+### How much does it cost to deploy supastarter?
+
+Deployment costs vary by platform. **Vercel** has a generous free tier suitable for getting started. **Railway** starts at $5/month. **Fly.io** offers a free tier with pay-as-you-go pricing. Self-hosting on **Hetzner** starts at about $4/month for a VPS. The main cost factors are compute, database, and storage — which depend on your traffic and usage.
+
+### Can I deploy the API separately from the frontend?
+
+Yes. supastarter has a dedicated API layer that can be deployed as a standalone service. This is useful if you want to run your API as a long-running service rather than serverless functions, or if you want to deploy frontend and API on different platforms. See the [standalone API guide](/docs/nextjs/deployment/standalone-api) for details.

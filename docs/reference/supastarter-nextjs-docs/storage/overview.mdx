@@ -1,0 +1,70 @@
+---
+title: Overview
+description: Learn how to use storage in supastarter to store files in the cloud.
+---
+
+supastarter includes a built-in file storage system that makes it easy to upload and store files like images, documents, and other assets in the cloud. It supports all S3-compatible storage providers including AWS S3, Cloudflare R2, DigitalOcean Spaces, MinIO, and Supabase Storage — giving you flexibility to choose the provider that best fits your needs and budget.
+supastarter out-of-the-box uses the storage functionality to enable the upload of user avatars and organiaztion logos, but you can use it for any other kind of files as well.
+
+We currently support all S3 compatible storage providers like AWS S3, DigitalOcean Spaces, MinIO, etc. and Supabase Storage.
+
+## Uploading files in a serverless architecture
+
+supastarter uses Next.js route handlers for providing the API, which have some limitations when being deployed on serverless platforms like Vercel or Netlify.
+For example there is a maximum execution time and a maximum payload size.
+These limitations are not a problem for most use cases, but if you need to upload very large files or need to process the files in a way that takes a long time, you might need to use a different approach.
+
+That's why supastarter utilizes the presigned URLs feature provided by S3 compatible storage providers.
+That means instead of sending the files to the serverless function, the client requests a presigned URL from the serverless function and then uploads the file directly to the storage provider.
+This way you can make sure to not expose any credentials, handle authentication and authorization and also don't need to worry about the limitations of the serverless platforms.
+
+<Cards>
+  <Card title="Connect to S3 storage" href="/docs/nextjs/storage/setup" />
+  <Card title="Upload files" href="/docs/nextjs/storage/upload-files" />
+  <Card title="Access stored files" href="/docs/nextjs/storage/access-files" />
+</Cards>
+
+## Storage provider guides
+
+Follow a provider-specific guide for detailed setup instructions:
+
+<Cards>
+  <Card
+    title="Cloudflare R2"
+    description="Zero egress fees, S3-compatible storage."
+    href="/docs/nextjs/storage/cloudflare-r2"
+  />
+  <Card
+    title="AWS S3"
+    description="The most widely used object storage service."
+    href="/docs/nextjs/storage/aws-s3"
+  />
+  <Card
+    title="DigitalOcean Spaces"
+    description="Simple, predictable pricing with built-in CDN."
+    href="/docs/nextjs/storage/digitalocean-spaces"
+  />
+  <Card
+    title="Uploadthing"
+    description="Purpose-built file uploads for TypeScript apps."
+    href="/docs/nextjs/storage/uploadthing"
+  />
+</Cards>
+
+## Frequently asked questions
+
+### Which storage providers work with supastarter?
+
+supastarter supports all S3-compatible storage providers out of the box. This includes **AWS S3**, **Cloudflare R2** (with zero egress fees), **DigitalOcean Spaces**, **MinIO** (self-hosted), and **Supabase Storage**. Any provider that implements the S3 API is compatible.
+
+### What is the maximum file upload size?
+
+The maximum file upload size depends on your deployment platform and storage provider. Since supastarter uses presigned URLs for uploads, the files are sent directly to the storage provider — bypassing serverless function limits. Most S3-compatible providers support files up to 5GB with multipart uploads.
+
+### How do file uploads work in supastarter?
+
+supastarter uses presigned URLs to handle file uploads securely. Instead of sending files through your server, the client requests a presigned URL from your API, then uploads the file directly to the storage provider. This approach avoids serverless platform limitations, keeps credentials secure, and handles authentication and authorization at the API level.
+
+### Do I need to configure CORS for file uploads?
+
+Yes, most storage providers require CORS configuration to allow direct uploads from the browser. You need to add your application's domain to the allowed origins in your storage provider's CORS settings. Some providers like DigitalOcean Spaces require this explicitly, while others may have more permissive defaults.

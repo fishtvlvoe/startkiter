@@ -1,0 +1,234 @@
+---
+title: Permissions and access control
+description: Learn how to use Permix-based permissions and access control in your supastarter frontend application.
+---
+
+We have already guided you through the process of [how to protect API endpoints](/docs/nextjs/api/protect-endpoints) in your application.
+In this guide we will show you how you can protect pages and display UI based on typed permissions.
+
+supastarter uses [Permix](https://permix.letstri.dev) with a shared `@repo/permissions` matrix. Prefer permission checks over raw role string comparisons.
+
+Built-in permission keys:
+
+- `admin.access` — global platform admin (`user.role === "admin"`)
+- `organization.read` — any organization member
+- `organization.manage` — organization owner/admin, or global admin
+- `organization.delete` — organization owner only
+- `organization.manageBilling` — organization owner/admin
+- `organization.accessBillingPortal` — organization owner only
+
+`isOrganizationAdmin` / `isOrganizationOwner` from `@repo/auth/lib/helper` remain as thin wrappers for backwards compatibility. Prefer `checkPermission` / `usePermissions().check` in new code.
+
+Better Auth `organization.*` client endpoints keep Better Auth's own access control and are not covered by Permix.
+
+## Protect a route (server side)
+
+### For authenticated users
+
+To protect a route to be only accessible for authenticated users, you can simply get the session in the RSC component and check if the user is authenticated.
+
+_Note: When you are inside the authenticated SaaS app, you often don't need to check if the user is authenticated on each page, because the session is already verified by the app-level auth flow._
+
+```tsx copy
+import { getSession } from "@auth/lib/server";
+export async function MyProtectedPage() {
+  const session = await getSession();
+
+  if (!session) {
+    return redirect("/login");
+  }
+
+  return <div>My protected page</div>;
+}
+```
+
+### For platform admins
+
+Use `checkPermission` with `admin.access`. This is the recommended pattern for nested layouts that may render before the authenticated layout finishes Permix `setup()`.
+
+```tsx copy
+import { getSession } from "@auth/lib/server";
+import { checkPermission } from "@repo/permissions";
+import { redirect } from "next/navigation";
+
+export async function MyAdminPage() {
+  const session = await getSession();
+
+  if (!session) {
+    redirect("/login");
+  }
+
+  if (!checkPermission({ user: session.user }, "admin.access")) {
+    redirect("/app");
+  }
+
+  return <div>This page is only accessible for admins</div>;
+}
+```
+
+Inside routes that run after `setupPermissions` in the authenticated layout, you can also use `permix.check("admin.access")`.
+
+### For active or specific subscription
+
+Or if you want to check for an active subscription, you can do the following:
+
+```tsx copy
+export async function MyPremiumPage() {
+  const purchases = await getPurchases();
+
+  const { activePlan, hasSubscription } = createPurchasesHelper(purchases);
+
+  if (!activePlan) {
+    return redirect("/app");
+    // or show a message to the user that they need to subscribe to the premium plan
+  }
+
+  // or check for a specific subscription - you don't need to check for the active plan if you use this
+  if (!hasSubscription("pro")) {
+    return (
+      <div>This page is only accessible for users with a pro subscription</div>
+    );
+  }
+
+  return (
+    <div>
+      This page is only accessible for users with an active subscription
+    </div>
+  );
+}
+```
+
+### For organization permissions
+
+Call `setupPermissions` with the membership for the target organization, then use `permix.check`. For a one-off check without setup, use `checkPermission` with that membership role.
+
+```tsx copy
+import { getActiveOrganization, getSession } from "@auth/lib/server";
+import { setupPermissions, permix } from "@shared/lib/permix";
+
+export async function MyOrganizationPage({
+  params,
+}: PropsWithChildren<{
+  params: Promise<{ organizationSlug: string }>;
+}>) {
+  const session = await getSession();
+  const { organizationSlug } = await params;
+  const organization = await getActiveOrganization(organizationSlug);
+
+  if (!organization || !session) {
+    redirect("/app");
+  }
+
+  const membershipRole =
+    organization.members.find((member) => member.userId === session.user.id)
+      ?.role ?? null;
+
+  setupPermissions({
+    user: session.user,
+    membershipRole,
+  });
+
+  if (!permix.check("organization.manage")) {
+    return <div>This page is only accessible for organization admins</div>;
+  }
+
+  return <div>This page is only accessible for organization admins</div>;
+}
+```
+
+## Display UI based on permissions (client side)
+
+On the client, use `usePermissions` for active-organization checks. The authenticated layout dehydrates Permix state into `PermixProvider`, and `useSetupClientPermissions` keeps the client rules in sync.
+
+**Note: You always want to check the permission on the server side first to avoid any security issues.**
+
+### For authenticated users
+
+```tsx copy
+import { useSession } from "@auth/hooks/use-session";
+
+export function MyComponent() {
+  const { user } = useSession();
+
+  if (!user) {
+    return <div>You need to be logged in to access this page</div>;
+  }
+
+  return <div>You are logged in</div>;
+}
+```
+
+### For platform admins
+
+```tsx copy
+import { usePermissions } from "@shared/components/PermixProvider";
+
+export function MyComponent() {
+  const { check } = usePermissions();
+
+  if (!check("admin.access")) {
+    return <div>This page is only accessible for admins</div>;
+  }
+
+  return <div>This page is only accessible for admins</div>;
+}
+```
+
+### For active or specific subscription
+
+```tsx copy
+export function MyComponent() {
+  const { activePlan, hasSubscription } = usePurchases(); // or usePurchases(organizationId) if you have enabled billing for organizations
+
+  if (!activePlan) {
+    return <div>You don't have an active subscription</div>;
+  }
+
+  if (!hasSubscription("pro")) {
+    return <div>You need to subscribe to the pro plan to access this page</div>;
+  }
+
+  return <div>You have an active subscription</div>;
+}
+```
+
+### For organization permissions
+
+```tsx copy
+import { usePermissions } from "@shared/components/PermixProvider";
+
+export function MyComponent() {
+  const { check } = usePermissions();
+
+  // Active-organization checks via the hydrated Permix client
+  if (!check("organization.manage")) {
+    return <div>This page is only accessible for organization admins</div>;
+  }
+
+  if (!check("organization.delete")) {
+    return <div>Only organization owners can delete the organization</div>;
+  }
+
+  return <div>You can manage this organization</div>;
+}
+```
+
+When a component is keyed by a specific `organizationId` (not necessarily the active org), resolve that org's membership and use `checkPermission` instead of `usePermissions().check`:
+
+```tsx copy
+import { checkPermission } from "@repo/permissions";
+import { useSession } from "@auth/hooks/use-session";
+
+const { user } = useSession();
+const membershipRole = organization?.members.find(
+  (member) => member.userId === user?.id,
+)?.role;
+
+const canManageOrganization = checkPermission(
+  {
+    user,
+    membershipRole,
+  },
+  "organization.manage",
+);
+```

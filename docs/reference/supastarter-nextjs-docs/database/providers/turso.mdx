@@ -1,0 +1,106 @@
+---
+title: Turso (libSQL)
+description: Learn how to use Turso libSQL as your database provider with supastarter.
+---
+
+Turso is an edge-hosted SQLite-compatible database built on libSQL. It is ideal for edge deployments and applications that benefit from embedded replicas with ultra-low latency reads.
+
+<Callout>
+  Turso currently works best with Drizzle ORM. Prisma's libSQL support is still
+  evolving.
+</Callout>
+
+## 1. Create a Turso account and database
+
+Install the Turso CLI and create a new database:
+
+```bash copy
+turso db create my-saas-db
+```
+
+Get the database URL and create an auth token:
+
+```bash copy
+turso db show my-saas-db --url
+turso db tokens create my-saas-db
+```
+
+## 2. Configure environment variables
+
+Add the database URL and auth token to your `.env.local` file:
+
+```bash copy title=".env.local"
+DATABASE_URL="libsql://your-db-name-your-org.turso.io"
+DATABASE_AUTH_TOKEN="your-auth-token"
+```
+
+## 3. Switch to Drizzle and configure for libSQL
+
+First, update the database package export to use Drizzle:
+
+```ts copy title="packages/database/index.ts"
+export * from "./drizzle";
+```
+
+Update the schema export to use the SQLite schema:
+
+```ts copy title="packages/database/drizzle/schema/index.ts"
+export * from "./sqlite";
+```
+
+Update the Drizzle client to use the `@libsql/client` driver:
+
+```ts copy title="packages/database/drizzle/client.ts"
+import { drizzle } from "drizzle-orm/libsql";
+import { createClient } from "@libsql/client";
+import * as schema from "./schema";
+
+const client = createClient({
+  url: process.env.DATABASE_URL!,
+  authToken: process.env.DATABASE_AUTH_TOKEN,
+});
+
+export const db = drizzle(client, { schema });
+```
+
+## 4. Update the auth adapter
+
+Update the auth adapter to use the SQLite provider:
+
+```ts copy title="packages/auth/auth.ts"
+export const auth = betterAuth({
+  database: drizzleAdapter(db, {
+    provider: "sqlite",
+  }),
+});
+```
+
+## 5. Run migrations
+
+Push your database schema to Turso:
+
+```bash copy
+pnpm --filter database push
+```
+
+## 6. Start the development server
+
+Start your development server to verify everything is working:
+
+```bash copy
+pnpm dev
+```
+
+## Frequently asked questions
+
+### When should I use Turso over PostgreSQL?
+
+Turso is ideal for edge deployments where low-latency reads are critical. For most SaaS applications, PostgreSQL is the safer default choice due to its broader ecosystem and tooling support.
+
+### Does Turso support embedded replicas?
+
+Yes, Turso can create local SQLite replicas that sync with the remote database, providing sub-millisecond read latency. This is one of Turso's standout features for edge deployments.
+
+### Can I use Turso with Prisma?
+
+Prisma's libSQL adapter is available but not as mature as Drizzle's. We recommend using Drizzle with Turso for the best experience.

@@ -1,0 +1,25 @@
+---
+title: Vercel
+seoTitle: Vercel Analytics
+description: Learn how to use Vercel Analytics with supastarter.
+---
+
+To use Vercel with supastarter, you need to have your application deployed on [Vercel](https://vercel.com).
+
+To activate the Vercel Analytics feature, we need to install the package first:
+
+```bash copy
+pnpm add --filter web @vercel/analytics
+```
+
+Then we need to activate Vercel as the analytics provider in your supastarter app. To do this, open `apps/web/modules/analytics/index.tsx` and change the content to:
+
+```typescript copy
+export * from "./provider/vercel";
+```
+
+To customize the Vercel configuration, edit the `apps/web/modules/analytics/provider/vercel/index.tsx`.
+
+Learn more about analytics with Vercel in the [official documentation](https://vercel.com/docs/analytics/quickstart).
+
+For further instructions, follow the [general analytics instructions](/docs/nextjs/analytics/overview).

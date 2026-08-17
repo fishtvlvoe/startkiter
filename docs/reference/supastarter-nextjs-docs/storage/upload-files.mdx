@@ -1,0 +1,227 @@
+---
+title: Uploading files
+description: Learn how to upload files in your supastarter application.
+---
+
+Before you start uploading files, make sure to [setup your storage](/docs/nextjs/storage/setup).
+
+You also want to make sure that you have the bucket created that you want to upload files to.
+For this example we are going to upload a PDF file to a bucket called `documents`, that we assume you have already created in your storage provider.
+
+**Make sure to disable public access to all your buckets as we will care about access control in the API layer of the application.**
+
+## Add the bucket name to the config
+
+For easy reusability, we recommend adding the bucket name to the config that owns the upload flow.
+
+This also allows you to use a dynamic value by using an environment variable instead of a static value.
+
+```ts title="packages/storage/config.ts"
+import type { StorageConfig } from "./types";
+
+export const config = {
+  bucketNames: {
+    avatars: process.env.NEXT_PUBLIC_AVATARS_BUCKET_NAME ?? "avatars",
+    documents: process.env.NEXT_PUBLIC_DOCUMENTS_BUCKET_NAME ?? "documents",
+  },
+} as const satisfies StorageConfig;
+```
+
+## Prepare upload endpoint
+
+As explained on the [overview page](/docs/nextjs/storage/overview), supastarter uses presigned URLs to upload files to your storage provider.
+The API is built with [oRPC](/docs/nextjs/api/overview), so we create a new procedure that returns a signed upload URL for the `documents` bucket.
+
+supastarter already ships with the `createAvatarUploadUrl` procedure in `packages/api/modules/users/procedures/create-avatar-upload-url.ts`, which you can use as a reference. Let's create a new procedure for the `documents` bucket:
+
+```ts title="packages/api/modules/uploads/procedures/create-document-upload-url.ts"
+import { getSignedUploadUrl } from "@repo/storage";
+import { config } from "@repo/storage/config";
+import { z } from "zod";
+
+// the protectedProcedure makes sure the user is authenticated
+import { protectedProcedure } from "../../../orpc/procedures";
+
+export const createDocumentUploadUrl = protectedProcedure
+  .route({
+    method: "POST",
+    path: "/uploads/document-upload-url",
+    tags: ["Uploads"],
+    summary: "Create document upload URL",
+    description:
+      "Create a signed upload URL to upload a document to the storage bucket",
+  })
+  .input(
+    z.object({
+      path: z.string().min(1),
+    }),
+  )
+  .handler(async ({ input: { path } }) => {
+    const signedUploadUrl = await getSignedUploadUrl(path, {
+      bucket: config.bucketNames.documents,
+    });
+
+    return { signedUploadUrl };
+  });
+```
+
+Then register the procedure in a router and mount it in the main API router (see the [define an endpoint guide](/docs/nextjs/api/define-endpoint) for more details):
+
+```ts title="packages/api/modules/uploads/router.ts"
+import { createDocumentUploadUrl } from "./procedures/create-document-upload-url";
+
+export const uploadsRouter = {
+  documentUploadUrl: createDocumentUploadUrl,
+};
+```
+
+```ts title="packages/api/orpc/router.ts"
+// ...
+import { uploadsRouter } from "../modules/uploads/router";
+
+export const router = publicProcedure.router({
+  // ...
+  uploads: uploadsRouter,
+});
+```
+
+This procedure will now allow authenticated users to get a signed upload URL for the `documents` bucket. Be careful though, as this will allow anyone to write _any path_ to the `documents` bucket.
+
+If you want to only allow uploading to specific paths or check for specific file types, you can add a check for the path or file type:
+
+```ts title="packages/api/modules/uploads/procedures/create-document-upload-url.ts"
+import { ORPCError } from "@orpc/server";
+
+// ...
+.handler(async ({ input: { path }, context: { user } }) => {
+	// only allow pdf files
+	if (!path.endsWith(".pdf")) {
+		throw new ORPCError("BAD_REQUEST");
+	}
+
+	// only allow paths that include the user id
+	if (!path.startsWith(`${user.id}/`)) {
+		throw new ORPCError("FORBIDDEN");
+	}
+
+	const signedUploadUrl = await getSignedUploadUrl(path, {
+		bucket: config.bucketNames.documents,
+	});
+
+	return { signedUploadUrl };
+});
+```
+
+## Allow public uploads
+
+In general, we don't recommend allowing public uploads as this can lead to security issues or spam to your storage provider.
+
+However, if you want to allow public uploads, you can create a procedure that uses the `publicProcedure` instead of the `protectedProcedure`, so it doesn't require authentication.
+
+```ts title="packages/api/modules/uploads/procedures/create-public-upload-url.ts"
+import { getSignedUploadUrl } from "@repo/storage";
+import { config } from "@repo/storage/config";
+import { z } from "zod";
+
+import { publicProcedure } from "../../../orpc/procedures";
+
+export const createPublicUploadUrl = publicProcedure
+  .route({
+    method: "POST",
+    path: "/uploads/public-upload-url",
+    tags: ["Uploads"],
+    summary: "Create public upload URL",
+    description: "Create a signed upload URL for a public bucket",
+  })
+  .input(
+    z.object({
+      path: z.string().min(1),
+    }),
+  )
+  .handler(async ({ input: { path } }) => {
+    const signedUploadUrl = await getSignedUploadUrl(path, {
+      bucket: config.bucketNames.publicFiles,
+    });
+
+    return { signedUploadUrl };
+  });
+```
+
+## Upload files from the UI
+
+In order to upload files from the UI, use your preferred method to select a file (like a file input or a dropzone component).
+Then you need to execute the following steps:
+
+1. Get a signed upload URL for the file you want to upload.
+2. Upload the file to the signed URL.
+3. Store the file url to your database to be able to use the file later
+
+Here is an example of how you can upload a file from the UI:
+
+```tsx
+import { useSession } from "@auth/hooks/use-session";
+import { orpc } from "@shared/lib/orpc-query-utils";
+import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
+import { useDropzone } from "react-dropzone";
+import { v4 as uuid } from "uuid";
+
+export function DocumentUpload() {
+  const [uploading, setUploading] = useState(false);
+  const { user } = useSession();
+  const getSignedUploadUrlMutation = useMutation(
+    orpc.uploads.documentUploadUrl.mutationOptions(),
+  );
+
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop: async (acceptedFiles) => {
+      if (!user || !acceptedFiles.length) return;
+
+      setUploading(true);
+
+      try {
+        // we recommend to use a unique name for the uploaded file here and store the file name in the database to avoid conflicts
+        // we are also prefixing the file path with the user id to enable easier filtering of files later
+        const path = `${user.id}/${uuid()}.pdf`;
+        const { signedUploadUrl } =
+          await getSignedUploadUrlMutation.mutateAsync({
+            path,
+          });
+
+        const response = await fetch(signedUploadUrl, {
+          method: "PUT",
+          body: acceptedFiles[0],
+          headers: {
+            "Content-Type": acceptedFiles[0].type,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to upload document");
+        }
+
+        // TODO: store the file path to the database
+      } catch (e) {
+        // TODO: handle error
+      } finally {
+        setUploading(false);
+      }
+    },
+    accept: {
+      "application/pdf": [".pdf"],
+    },
+    multiple: false,
+  });
+
+  return (
+    <div {...getRootProps()}>
+      <input {...getInputProps()} />
+
+      {uploading ? <Spinner /> : <Button>Upload document</Button>}
+    </div>
+  );
+}
+```
+
+Now your users can use the upload component to upload files to the `documents` bucket.
+In the next step you can learn how to access the uploaded files.

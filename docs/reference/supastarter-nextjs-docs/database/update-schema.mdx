@@ -1,0 +1,69 @@
+---
+title: Update schema & migrate changes
+description: Learn how to update your database schema and migrate changes with Prisma in supastarter.
+---
+
+## Prisma
+
+To update your database schema, you can simply edit the `schema.prisma` file in the `/packages/database` library. You can find more information about the Prisma schema file [here](https://www.prisma.io/docs/concepts/components/prisma-schema).
+
+To add an entity for "posts" for example, you can add the following to your schema:
+
+```prisma copy
+model Post {
+  id        String      @id @default(cuid())
+  title     String
+  content   String
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+```
+
+### Migrate changes (optional)
+
+If you want to to keep a migration history of your database changes, you can run the following command to create a new migration:
+
+```bash copy
+pnpm --filter database migrate
+```
+
+### Push your changes to the database
+
+To push your changes to the database, you can run the following command:
+
+```bash copy
+pnpm --filter database push
+```
+
+### Generate prisma client
+
+After you have pushed your schema changes, you need to re-generate the prisma client. You can do this by running the following command:
+
+_This command will automatically be run when you start the development server._
+
+```bash copy
+pnpm --filter database generate
+```
+
+## Drizzle
+
+To update your database schema, you can simply edit the `packages/database/drizzle/schema/[postgres|mysql|sqlite].ts` file.
+You can find more information about the Drizzle schema file [in the official documentation](https://orm.drizzle.team/docs/sql-schema-declaration).
+
+### Migrate changes (optional)
+
+To migrate your changes, you can run the following command:
+
+```bash copy
+pnpm --filter database migrate
+```
+
+### Push your changes to the database
+
+To push your changes to the database, you can run the following command:
+
+```bash copy
+pnpm --filter database push
+```

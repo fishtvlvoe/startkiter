@@ -1,0 +1,26 @@
+---
+title: Set up a paywall
+description: Learn how to set up a paywall for your supastarter application.
+---
+
+![Paywall](/images/documentation/nextjs/paywall.png)
+
+Per default, supastarter has includes a free plan which means that users can access your application after signing up without any payment.
+
+If your SaaS should not be accessible for free or only with a trial of a paid plan, you can set up a paywall.
+
+All you need to do is to remove the plan with `isFree: true` from the configuration file.
+
+```ts title="packages/payments/config.ts"
+export const config = {
+  plans: {
+    free: {
+      // [!code --]
+      isFree: false, // [!code --]
+    }, // [!code --]
+    // ...
+  },
+};
+```
+
+This will remove the free plan and redirect the users to the `/app/choose-plan` page after the signup (and the onboarding flow).

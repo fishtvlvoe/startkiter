@@ -1,0 +1,55 @@
+---
+title: Overview
+description: Learn how to integrate AI features into your supastarter app.
+---
+
+supastarter is the perfect starting point for building your AI-powered SaaS.
+It integrates the [Vercel AI SDK](https://sdk.vercel.ai/docs/introduction), which allows you to easily connect to all major AI providers like LangChain, OpenAI, Hugging Face and more.
+
+It also includes a fully working AI chatbot example with a chat history and a context window.
+
+To change the used AI models, simply change the values in the the `/packages/ai/index.ts`:
+
+```typescript
+import { openai } from "@ai-sdk/openai";
+
+export const textModel = openai("gpt-4o-mini");
+export const imageModel = openai("dall-e-3");
+export const audioModel = openai("whisper-1");
+```
+
+For example, if you want to use Anthropic instead of OpenAI, you can change the `textModel` variable to:
+
+```typescript
+import { anthropic } from "@ai-sdk/anthropic";
+
+export const textModel = anthropic("claude-3-5-sonnet-20240620");
+```
+
+Then when using any of the AI SDK functions, you can pass the model to it:
+
+```typescript
+import { streamText, textModel } from "@repo/ai";
+
+const response = streamText({
+  model: textModel,
+  messages: [{ role: "user", content: "What is the capital of France?" }],
+});
+```
+
+Here are a few guides on how to work with the AI features in your supastarter app:
+
+<Cards>
+  <Card title="How to use the AI chatbot" href="/docs/nextjs/ai/chatbot">
+    Learn how to use the AI chatbot in your supastarter app.
+  </Card>
+  <Card title="Using prompts" href="/docs/nextjs/ai/prompts">
+    Learn how to use prompts to interact with the AI.
+  </Card>
+  <Card
+    title="Streaming responses from the API"
+    href="/docs/nextjs/api/streaming"
+  >
+    Learn how to stream responses from the API.
+  </Card>
+</Cards>

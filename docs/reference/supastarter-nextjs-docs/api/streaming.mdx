@@ -1,0 +1,32 @@
+---
+title: Streaming responses
+description: Learn how to stream responses from your API.
+---
+
+With streaming responses being very common in times of AI, this guide will cover how to stream responses from your API.
+
+```typescript
+export const streamChatResponse = publicProcedure
+  .input(
+    z.object({
+      message: z.string(),
+    }),
+  )
+  .handler(async ({ input }) => {
+    const { message } = input;
+
+    const response = streamText({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "user",
+          content: message,
+        },
+      ],
+    });
+
+    return streamToEventIterator(response.toUIMessageStream());
+  });
+```
+
+To learn more about streaming with oRPC, you can read the [oRPC documentation](https://orpc.unnoq.com/docs/integrations/ai-sdk#server).

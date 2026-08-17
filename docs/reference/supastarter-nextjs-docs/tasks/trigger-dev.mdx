@@ -1,0 +1,199 @@
+---
+title: trigger.dev
+description: Learn how to set up background jobs, cron jobs and queues with trigger.dev in your supastarter application.
+---
+
+Before we get started, make sure to create a new [trigger.dev](https://trigger.dev) account and project.
+
+## 🪄 LLM prompt
+
+<div className="llm-prompt-card rounded-lg bg-fd-card p-5 not-prose">
+
+<p className="text-foreground/80 text-sm mb-3">
+  You can use the following prompt with your coding agent (e.g. Claude Code,
+  Cursor, Copilot) to automatically set up trigger.dev in your supastarter
+  project:
+</p>
+
+```
+Set up trigger.dev v4 in this supastarter monorepo. Here are the steps:
+
+1. Create a new `packages/tasks` directory with the following files:
+
+- `packages/tasks/package.json` with dependencies on `@repo/database` (workspace:*), `@trigger.dev/sdk` (latest), and devDependencies on `@trigger.dev/build` (latest), `@repo/tsconfig` (workspace:*), and `@biomejs/biome` (latest). Add scripts: `"type-check": "tsc --noEmit"`, `"dev": "pnpm dlx trigger.dev@latest dev --env-file ../../.env.local"`, `"deploy": "pnpm dlx trigger.dev@latest deploy"`. Set the package name to `@repo/tasks`.
+
+- `packages/tasks/tsconfig.json` extending `@repo/tsconfig/base.json`, including `**/*.ts`, excluding `dist`, `build`, `node_modules`.
+
+- `packages/tasks/trigger.config.ts` with the following config:
+  - Import `defineConfig` from `@trigger.dev/sdk` (NOT from `@trigger.dev/sdk/v3`)
+  - Import `additionalPackages` from `@trigger.dev/build/extensions/core`
+  - Import `prismaExtension` from `@trigger.dev/build/extensions/prisma`
+  - Use `prismaExtension` with `mode: "legacy"`, `schema: "../database/prisma/schema.prisma"`, `typedSql: true`, `directUrlEnvVarName: "DATABASE_URL_UNPOOLED"`
+  - Add `@react-email/render`, `@react-email/components`, `react-dom`, `react` to `build.external`
+  - Set `dirs: ["./trigger"]`, `runtime: "node"`, `maxDuration: 300`
+  - Replace `your_project_id` with the actual project ID from the trigger.dev dashboard
+
+2. Create an example task at `packages/tasks/trigger/test-task.ts`:
+   - Import `task` from `@trigger.dev/sdk` (NOT from `@trigger.dev/sdk/v3`)
+   - Export a `testTask` using `task({ id: "test-task", run: async () => { console.log("test task"); } })`
+
+3. Run `pnpm install` from the root to install the new dependencies.
+
+4. To trigger a task from the API, add `@repo/tasks` as a dependency in the `api` package and import the task directly, e.g. `import { testTask } from "@repo/tasks/trigger/test-task"`, then call `await testTask.trigger()`.
+```
+
+</div>
+
+## 1. Create a new package in your repository
+
+Create a new folder `tasks` in the `/packages` directory and add the following files:
+
+```json title="packages/tasks/package.json"
+{
+  "dependencies": {
+    "@repo/database": "workspace:*",
+    "@trigger.dev/sdk": "^4.3.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.1.0",
+    "@trigger.dev/build": "^4.3.0",
+    "@repo/tsconfig": "workspace:*"
+  },
+  "main": "./index.ts",
+  "name": "@repo/tasks",
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "dev": "pnpm dlx trigger.dev@latest dev --env-file ../../.env.local",
+    "deploy": "pnpm dlx trigger.dev@latest deploy"
+  },
+  "version": "0.0.0"
+}
+```
+
+```json title="packages/tasks/tsconfig.json"
+{
+  "extends": "@repo/tsconfig/base.json",
+  "include": ["**/*.ts"],
+  "exclude": ["dist", "build", "node_modules"]
+}
+```
+
+```ts title="packages/tasks/trigger.config.ts"
+import { additionalPackages } from "@trigger.dev/build/extensions/core";
+import { prismaExtension } from "@trigger.dev/build/extensions/prisma";
+import { defineConfig } from "@trigger.dev/sdk";
+
+export default defineConfig({
+  project: "your_project_id",
+  runtime: "node",
+  tsconfig: "./tsconfig.json",
+  logLevel: "log",
+  maxDuration: 300,
+  dirs: ["./trigger"],
+  build: {
+    extensions: [
+      additionalPackages({ packages: ["zod-prisma-types"] }),
+      prismaExtension({
+        mode: "legacy",
+        schema: "../database/prisma/schema.prisma",
+        typedSql: true,
+        directUrlEnvVarName: "DATABASE_URL_UNPOOLED",
+      }),
+    ],
+    external: [
+      "@react-email/render",
+      "@react-email/components",
+      "react-dom",
+      "react",
+    ],
+  },
+});
+```
+
+## 2. Create your first task
+
+Now to create your first task, create a new file `test-task.ts` in the `packages/tasks/trigger` directory and add the following code:
+
+```ts title="packages/tasks/trigger/test-task.ts"
+import { task } from "@trigger.dev/sdk";
+
+export const testTask = task({
+  id: "test-task",
+  run: async () => {
+    console.log("test task");
+  },
+});
+```
+
+Read the [trigger.dev documentation](https://trigger.dev/docs/tasks/overview) for more information on how to create tasks or cron jobs.
+
+## 3. Test your task
+
+You can easily test your task locally by running `pnpm --filter tasks dev` from the root of your repository.
+
+This will deploy your task to trigger.dev in the development environment, so you can trigger it from there. When you run the task in the development environment, it will be executed on your local machine.
+
+## 4. Deploy your task
+
+To deploy your task to trigger.dev, run `pnpm --filter tasks deploy` from the root of your repository.
+
+You can also add this command as an automated deployment step in your CI/CD pipeline, by creating a new github action.
+
+You need to add the `TRIGGER_ACCESS_TOKEN` secret to your repositories secrets, which you can create in the [trigger.dev dashboard](https://cloud.trigger.dev/account/tokens).
+
+```yml title=".github/workflows/trigger-deploy.yml"
+name: Deploy to trigger.dev (prod)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - uses: pnpm/action-setup@v4
+      - name: Install dependencies
+        run: pnpm install
+      - name: Deploy trigger tasks
+        env:
+          TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
+        run: |
+          pnpm --filter tasks deploy
+```
+
+## 5. Programmatically trigger a task
+
+If you want to trigger one of your tasks from your application, for example as an action from an API call, you can import the task to your API resolver and trigger it.
+
+Make sure to add the `@repo/tasks` package to your `api` package as a dependency.
+
+```ts title="api/actions/test-task.ts"
+import { testTask } from "@repo/tasks/trigger/test-task";
+
+import { logger } from "@repo/logs";
+import { sendEmail } from "@repo/mail";
+import { Hono } from "hono";
+import { describeRoute } from "hono-openapi";
+import { resolver, validator } from "hono-openapi/zod";
+import { z } from "zod";
+import { localeMiddleware } from "../middleware/locale";
+
+export const newsletterRouter = new Hono().basePath("/newsletter").post(
+  "/signup",
+  // ...
+  async (c) => {
+    // ...
+
+    await testTask.trigger();
+
+    // ...
+  },
+);
+```

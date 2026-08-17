@@ -1,0 +1,122 @@
+---
+title: PlanetScale
+description: Learn how to use PlanetScale MySQL as your database provider with supastarter.
+---
+
+PlanetScale is a MySQL-compatible serverless database platform that offers database branching, non-blocking schema changes, and horizontal scaling. Using PlanetScale requires switching supastarter from the default PostgreSQL to MySQL.
+
+## 1. Create a PlanetScale account and database
+
+Go to [planetscale.com](https://planetscale.com) and create an account. Create a new database and choose the region closest to your deployment target.
+
+## 2. Get your connection string
+
+In the PlanetScale dashboard, navigate to your database and click **Connect**. Select the **Prisma** or **General** connection string format depending on your ORM. Copy the connection string.
+
+## 3. Configure environment variables
+
+Add the connection string to your `.env.local` file:
+
+```bash copy title=".env.local"
+DATABASE_URL="mysql://user:password@aws.connect.psdb.cloud/your-database?sslaccept=strict"
+```
+
+## 4. Configure your ORM for MySQL
+
+Since PlanetScale uses MySQL, you need to update your ORM configuration.
+
+### Prisma
+
+Update the `provider` in your Prisma schema to `"mysql"`:
+
+```ts copy title="packages/database/prisma/schema.prisma"
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+```
+
+Then update the auth adapter provider to `"mysql"` in your auth configuration:
+
+```ts copy title="packages/auth/auth.ts"
+export const auth = betterAuth({
+  database: prismaAdapter(db, {
+    provider: "mysql",
+  }),
+});
+```
+
+### Drizzle
+
+If you are using Drizzle, update the schema export to use the MySQL schema:
+
+```ts copy title="packages/database/drizzle/schema/index.ts"
+export * from "./mysql";
+```
+
+Update the Drizzle client to use the MySQL driver:
+
+```ts copy title="packages/database/drizzle/client.ts"
+import { drizzle } from "drizzle-orm/mysql2";
+import mysql from "mysql2/promise";
+import * as schema from "./schema";
+
+const databaseUrl = process.env.DATABASE_URL as string;
+
+if (!databaseUrl) {
+  throw new Error("DATABASE_URL is not set");
+}
+
+const connection = await mysql.createConnection(databaseUrl);
+
+export const db = drizzle(connection, { schema, mode: "default" });
+```
+
+Then update the auth adapter provider:
+
+```ts copy title="packages/auth/auth.ts"
+export const auth = betterAuth({
+  database: drizzleAdapter(db, {
+    provider: "mysql",
+  }),
+});
+```
+
+## 5. Remove `mode: "insensitive"` occurrences
+
+Search your codebase for all occurrences of `mode: "insensitive"` and remove them. This is a Prisma feature that is not supported with MySQL databases.
+
+<Callout>
+  Switching to MySQL requires removing all `mode: "insensitive"` occurrences
+  from the project. This Prisma feature is not supported with MySQL databases.
+</Callout>
+
+## 6. Run migrations
+
+Push your database schema to PlanetScale:
+
+```bash copy
+pnpm --filter database push
+```
+
+## 7. Start the development server
+
+Start your development server to verify everything is working:
+
+```bash copy
+pnpm dev
+```
+
+## Frequently asked questions
+
+### Should I use PlanetScale or PostgreSQL?
+
+PostgreSQL is the default and recommended choice for supastarter. PlanetScale is a good option if your team prefers MySQL or you need PlanetScale's branching workflow for managing schema changes.
+
+### Can I use PlanetScale with Drizzle?
+
+Yes, use the Drizzle MySQL adapter and export the MySQL schema from your schema directory. See the Drizzle configuration section above for details.
+
+### Does PlanetScale support foreign keys?
+
+PlanetScale now supports foreign key constraints. Make sure to enable them in your PlanetScale database settings.

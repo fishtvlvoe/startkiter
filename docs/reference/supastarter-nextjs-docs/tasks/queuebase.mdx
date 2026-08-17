@@ -1,0 +1,320 @@
+---
+title: Queuebase
+description: Learn how to set up background jobs, cron jobs and queues with Queuebase in your supastarter application.
+---
+
+Before you get started, make sure you have a [Queuebase account](https://queuebase.com). You can start with the free tier (10,000 job runs/month) — no credit card required.
+
+## How Queuebase works
+
+Queuebase uses a callback model: your app defines job handlers at a webhook endpoint, and Queuebase calls back to your app to execute them. Your job code lives in your app — no separate worker process or infrastructure to manage. Queuebase handles storage, scheduling, and retries.
+
+In supastarter, the callback is wired through your **Hono** API app (the same place as the [payments webhook](/docs/nextjs/payments/overview)), not a separate Next.js route file.
+
+## 🪄 LLM prompt
+
+<div className="llm-prompt-card rounded-lg bg-fd-card p-5 not-prose">
+
+<p className="text-foreground/80 mb-3 text-sm">
+  You can use the following prompt with your coding agent (e.g. Claude Code,
+  Cursor, Copilot) to automatically set up Queuebase in your supastarter
+  project:
+</p>
+
+```
+Set up Queuebase in this supastarter monorepo. Here are the steps:
+
+1. Create a new `packages/jobs` directory with:
+
+- `packages/jobs/package.json`: name `@repo/jobs`, `private: true`, `version` `0.0.0`. Dependencies: `@queuebase/nextjs` (^2.1.0), `zod` (^3.22.2), `@repo/utils` (workspace:*). devDependencies: `@queuebase/cli` (^2.1.0), `@repo/tsconfig` (workspace:*), `@biomejs/biome` (match other packages). Set `main` to `./src/index.ts`, add `exports` for `"."` → `./src/index.ts`, `"./client"` → `./src/client.ts`, and `"./handler"` → `./src/handler.ts`. Scripts: `"type-check": "tsc --noEmit"`.
+
+- `packages/jobs/tsconfig.json` extending `@repo/tsconfig/base.json`, including `**/*.ts`, excluding `dist`, `build`, `node_modules`.
+
+- `packages/jobs/src/index.ts`: export `jobs` from `createJobRouter` with at least one example job (`sendWelcomeEmail`) using `job()` from `@queuebase/nextjs`, Zod `input`, and a `handler`. Export `type JobRouter = typeof jobs`.
+
+- `packages/jobs/src/client.ts`: `createClient` with `callbackUrl` set to `` `${getBaseUrl()}/api/webhooks/queuebase` `` (import `getBaseUrl` from `@repo/utils`) so it matches `.basePath("/api").post("/webhooks/queuebase", ...)` in Hono.
+
+- `packages/jobs/src/handler.ts`: export `queuebaseWebhookHandler` as `createHandler(jobs)` from `@queuebase/nextjs/handler`.
+
+2. If the repo lists workspace packages explicitly, add `packages/jobs` to `pnpm-workspace.yaml`.
+
+3. Add `@repo/jobs` as a dependency (`workspace:*`) to `packages/api/package.json` (Hono webhook) and `apps/saas/package.json` (enqueue from the app), or whichever packages import `@repo/jobs` in your layout.
+
+4. In the Hono API entry, use `.basePath("/api")`, import `queuebaseWebhookHandler` from `@repo/jobs/handler`, and register `.post("/webhooks/queuebase", (c) => queuebaseWebhookHandler(c.req.raw))` — same pattern as the payments webhook. Place this route before any catch-all `*` middleware that forwards to oRPC.
+
+5. Add Queuebase env vars to `.env` / `.env.local` (see the docs): `QUEUEBASE_API_URL` and `QUEUEBASE_API_KEY` for production. Do not set a separate callback URL env — it is `` `${getBaseUrl()}/api/webhooks/queuebase` `` in the client.
+
+6. Run `pnpm install` from the repository root.
+
+7. Document that local development requires two terminals: `npx queuebase dev` in one, and `pnpm dev` (or the project dev command) in the other; production deploy uses `npx queuebase sync` after setting env vars on the host.
+```
+
+</div>
+
+## 1. Create a new package in your repository
+
+Create a new folder `jobs` in the `/packages` directory and add the following files.
+
+Register the package in your workspace: if your monorepo lists packages explicitly (as in supastarter’s `pnpm-workspace.yaml`), add `packages/jobs` to that list.
+
+```json title="packages/jobs/package.json"
+{
+  "dependencies": {
+    "@queuebase/nextjs": "^2.1.0",
+    "@repo/utils": "workspace:*",
+    "zod": "^3.22.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.1.0",
+    "@queuebase/cli": "^2.1.0",
+    "@repo/tsconfig": "workspace:*"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts",
+    "./handler": "./src/handler.ts"
+  },
+  "main": "./src/index.ts",
+  "name": "@repo/jobs",
+  "private": true,
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "version": "0.0.0"
+}
+```
+
+```json title="packages/jobs/tsconfig.json"
+{
+  "extends": "@repo/tsconfig/base.json",
+  "include": ["**/*.ts"],
+  "exclude": ["dist", "build", "node_modules"]
+}
+```
+
+Then install dependencies from the repository root:
+
+```bash copy
+pnpm install
+```
+
+Add the jobs package anywhere you import it: the **API package** that mounts Hono needs `@repo/jobs/handler`; the **SaaS app** needs `@repo/jobs/client` for server actions and API code.
+
+```json title="packages/api/package.json (snippet)"
+{
+  "dependencies": {
+    "@repo/jobs": "workspace:*"
+  }
+}
+```
+
+```json title="apps/saas/package.json (snippet)"
+{
+  "dependencies": {
+    "@repo/jobs": "workspace:*"
+  }
+}
+```
+
+Run `pnpm install` again after adding the dependencies.
+
+## 2. Define your jobs
+
+Create a job router with validated inputs. Each job gets a schema for type-safe input validation and a handler that runs when the job executes:
+
+```ts title="packages/jobs/src/index.ts"
+import { createJobRouter, job } from "@queuebase/nextjs";
+import { z } from "zod";
+
+export const jobs = createJobRouter({
+  sendWelcomeEmail: job({
+    input: z.object({
+      to: z.string().email(),
+      name: z.string(),
+    }),
+    handler: async ({ input, jobId, attempt }) => {
+      // your email sending logic here
+      console.info(`[job ${jobId}] Sending welcome email to ${input.to}`);
+      return { sent: true };
+    },
+    defaults: {
+      retries: 3,
+      backoff: "exponential",
+    },
+  }),
+
+  processSubscription: job({
+    input: z.object({
+      userId: z.string(),
+      plan: z.enum(["free", "pro", "enterprise"]),
+    }),
+    handler: async ({ input, jobId }) => {
+      // subscription processing logic
+      console.info(
+        `[job ${jobId}] Processing ${input.plan} subscription for ${input.userId}`,
+      );
+      return { processed: true };
+    },
+  }),
+});
+
+export type JobRouter = typeof jobs;
+```
+
+The handler receives a context object with:
+
+- `input` — the validated payload (typed from your schema)
+- `jobId` — unique identifier for this job execution
+- `attempt` / `maxAttempts` — retry tracking
+- `fail(reason)` — explicitly mark the job as failed
+
+Zod is used in this guide, but Queuebase supports any [Standard Schema](https://github.com/standard-schema/standard-schema)-compatible validation library (Valibot, ArkType, etc.).
+
+## 3. Create a client
+
+The client gives you a type-safe way to enqueue jobs from anywhere in your app. Set `callbackUrl` to the same URL your Hono app exposes: `` `${getBaseUrl()}/api/webhooks/queuebase` `` (`.basePath("/api")` plus `.post("/webhooks/queuebase", ...)`).
+
+```ts title="packages/jobs/src/client.ts"
+import { createClient } from "@queuebase/nextjs";
+import { getBaseUrl } from "@repo/utils";
+import { jobs } from "./index";
+
+export const jobClient = createClient(jobs, {
+  apiUrl: process.env.QUEUEBASE_API_URL ?? "http://localhost:3847",
+  apiKey: process.env.QUEUEBASE_API_KEY,
+  callbackUrl: `${getBaseUrl()}/api/webhooks/queuebase`,
+});
+```
+
+- `apiUrl` — the Queuebase API. The CLI dev server runs on `http://localhost:3847`. In production, this is your hosted Queuebase API URL.
+- `apiKey` — authenticates with the production API. Not needed during local development.
+- `callbackUrl` — built from `getBaseUrl()`; if you change the Hono path, update this template literal to match.
+
+## 4. Register the webhook in your Hono API
+
+[`createHandler`](https://www.npmjs.com/package/@queuebase/nextjs) returns a **Web** handler `(request: Request) => Promise<Response>`, which matches what Hono passes through `c.req.raw`.
+
+Export it from your jobs package:
+
+```ts title="packages/jobs/src/handler.ts"
+import { createHandler } from "@queuebase/nextjs/handler";
+import { jobs } from "./index";
+
+export const queuebaseWebhookHandler = createHandler(jobs);
+```
+
+Then mount it next to your other webhooks (same pattern as the payments webhook):
+
+```ts title="packages/api/hono.ts (example)"
+import { queuebaseWebhookHandler } from "@repo/jobs/handler";
+export const app = new Hono()
+  // ...
+  // Queuebase webhook handler (job execution callbacks)
+  .post("/webhooks/queuebase", (c) => queuebaseWebhookHandler(c.req.raw));
+// ...
+```
+
+Register the Queuebase route **before** the catch-all `*` handler that forwards to oRPC, so job callbacks are not swallowed by the RPC/OpenAPI layer.
+
+If your Hono app lives under a different file path, keep the same `.post("/webhooks/queuebase", ...)` path as in the client’s `callbackUrl` template literal.
+
+## 5. Enqueue jobs
+
+Call `.enqueue()` from server actions, API routes, or anywhere server-side:
+
+```ts
+"use server";
+
+import { jobClient } from "@repo/jobs/client";
+
+export async function sendWelcomeEmail(to: string, name: string) {
+  const { jobId } = await jobClient.sendWelcomeEmail.enqueue({
+    to,
+    name,
+  });
+
+  return jobId;
+}
+```
+
+The SDK validates the input against your schema at compile time and runtime, sends the job to the Queuebase API, and returns a `jobId` you can use to track status.
+
+## 6. Add scheduled jobs
+
+Scheduled jobs are defined inline using the `schedule` property. Scheduled jobs must have an empty input schema (`z.object({})`), since the scheduler has no payload to pass:
+
+```ts
+import { createJobRouter, job } from "@queuebase/nextjs";
+import { z } from "zod";
+
+export const jobs = createJobRouter({
+  // ... your other jobs
+
+  dailyCleanup: job({
+    input: z.object({}),
+    schedule: "every day at 2am",
+    handler: async ({ jobId }) => {
+      // cleanup expired sessions, old data, etc.
+      console.info(`[job ${jobId}] Running daily cleanup`);
+      return { cleaned: true };
+    },
+  }),
+});
+```
+
+The `schedule` property accepts plain English (`"every 5 minutes"`, `"every weekday at 9am"`) or raw cron expressions (`"0 2 * * *"`). You can also pass a config object for more control:
+
+```ts
+schedule: {
+  cron: "every day at 2am",
+  timezone: "America/New_York",
+  overlap: "skip",
+}
+```
+
+Schedules sync automatically when you run `npx queuebase dev` locally or `npx queuebase sync` for production.
+
+## Environment variables
+
+Add these to your `.env` file. The callback URL is **not** configured here — it is `` `${getBaseUrl()}/api/webhooks/queuebase` `` in the client (see above).
+
+```bash
+# Development (defaults work out of the box)
+QUEUEBASE_API_URL=http://localhost:3847
+
+# Production
+QUEUEBASE_API_URL=https://api.queuebase.com
+QUEUEBASE_API_KEY=your_api_key
+```
+
+Ensure `NEXT_PUBLIC_SITE_URL` / `VERCEL_URL` / `PORT` are set correctly for your environment so `getBaseUrl()` resolves to the same origin Queuebase will call in production.
+
+## Run locally
+
+In one terminal, start the Queuebase dev server:
+
+```bash copy
+npx queuebase dev
+```
+
+In another terminal, start your app:
+
+```bash copy
+pnpm dev
+```
+
+The dev server stores jobs in a local SQLite database and polls for pending jobs to execute. Trigger an enqueue from your app and you should see the job being received and executed in the CLI output.
+
+## Deploy to production
+
+1. Create a project at [queuebase.com](https://queuebase.com)
+2. Set the environment variables (`QUEUEBASE_API_URL`, `QUEUEBASE_API_KEY`, plus your usual app URL vars for `getBaseUrl()`) in your hosting provider
+3. Run `npx queuebase sync` to sync your job types and schedules to production
+4. Deploy your app — Queuebase will start calling back to your webhook endpoint
+
+## Next steps
+
+- [Defining Jobs](https://docs.queuebase.com/guides/defining-jobs/) — defaults, config, and advanced handler patterns
+- [Enqueueing Jobs](https://docs.queuebase.com/guides/enqueueing-jobs/) — options, delays, and checking job status
+- [Scheduled Jobs](https://docs.queuebase.com/guides/scheduled-jobs/) — cron schedules and automatic execution
+- [Configuration](https://docs.queuebase.com/guides/configuration/) — environment variables and webhook security

@@ -1,0 +1,322 @@
+---
+title: Define an API endpoint
+description: Learn how to define an API endpoint in your supastarter application.
+---
+
+To define a new API endpoint you can either create a new router or add a new endpoint to an existing router.
+
+This guide assumes you have already created a model in your database schema for the feature you want to create an API endpoint for.
+To learn how to create a model in your schema and update your database, please refer to the [database documentation](/docs/nextjs/database/overview).
+
+### Create a new router
+
+A router is basically a sub-path of your API. It is used to group related endpoints together.
+
+For this example we will create a new router for the `posts` feature, which will contain the common CRUD endpoints for the `posts` resource.
+
+We recommend to create a new router file in a sub-folder for the feature (or module as we call it).
+For example `/packages/api/modules/posts/router.ts`.
+
+We are going to go with the first option and create a new router file in a sub-folder for the feature.
+
+```ts copy title="packages/api/modules/posts/router.ts"
+export const postsRouter = {
+  // your new endpoint will go here
+};
+```
+
+Now we can add a new endpoint to the router.
+
+We recommend creating a new file for each endpoint to keep the code organized. Also you can easily import the endpoint as a callable function in a RSC.
+
+```ts copy title="packages/api/modules/posts/procedures/list-posts.ts"
+import { z } from "zod";
+import { publicProcedure } from "../../../orpc/procedures";
+import { getPosts, PostSchema } from "@repo/database";
+
+export const listPosts = publicProcedure
+  .route({
+    method: "GET",
+    path: "/posts",
+    tags: ["Posts"],
+    summary: "Get posts",
+    description: "Get all posts",
+  })
+  .input(
+    z.object({
+      limit: z.number().optional(),
+      offset: z.number().optional(),
+    }),
+  )
+  .output(
+    z.object({
+      posts: z.array(PostSchema),
+    }),
+  )
+  .handler(async ({ input }) => {
+    const posts = await getPosts({
+      limit: input.limit,
+      offset: input.offset,
+    });
+
+    return { posts };
+  });
+```
+
+In this case we are using the `publicProcedure`, which means the endpoint is public and doesn't require authentication. Read more about the different types of procedures in the ["protect endpoints" guide](/docs/nextjs/api/protect-endpoints).
+
+We have also defined the necessary properties to generate the OpenAPI specification for this endpoint.
+The `.output()` property is optional, but will generate an OpenAPI specification for the endpoint.
+
+If you don't plan on using the OpenAPI specification, you can also omit the `.route()` and `.output()` properties.
+
+### Add endpoint to feature router
+
+Now we need to add the new endpoint to the feature router.
+
+```ts copy title="packages/api/modules/posts/router.ts"
+import { listPosts } from "./procedures/list-posts";
+
+export const postsRouter = {
+  list: listPosts,
+};
+```
+
+### Mount new router in the API
+
+To make the new router available in the API, we need to add it to the main router in the `/packages/api/orpc/router.ts` file.
+
+```ts copy title="packages/api/api.ts"
+// ...
+import { postsRouter } from "../modules/posts/router";
+
+export const router = publicProcedure
+  // Prefix for openapi
+  .prefix("/api")
+  .router({
+    // ...
+    posts: postsRouter,
+  });
+```
+
+Now you can use the endpoint in your application. It is available at `/api/posts`.
+
+### CRUD endpoints
+
+Now let's cover the typical CRUD endpoints for the `posts` resource.
+
+A few naming conventions we personally use:
+
+- `list` -> `listPosts`
+- `create` -> `createPost`
+- `read` -> `findPost`
+- `update` -> `updatePost`
+- `delete` -> `deletePost`
+
+#### Create a post
+
+To create a new post, we will use a `protectedProcedure` to ensure the user is authenticated and also to get the current user to assign it as the author of the post:
+
+We are wrapping the database operation in a try/catch block to handle any errors and return a 500 error to the client without passing any sensitive information to the client.
+
+```typescript copy title="packages/api/modules/posts/procedures/create-post.ts"
+import { z } from "zod";
+import { PostSchema, protectedProcedure } from "../../../orpc/procedures";
+
+export const createPost = protectedProcedure
+  .route({
+    method: "POST",
+    path: "/posts",
+    tags: ["Posts"],
+    summary: "Create post",
+    description: "Create a new post",
+  })
+  .input(
+    z.object({
+      title: z.string(),
+      content: z.string(),
+    }),
+  )
+  .output(
+    z.object({
+      post: PostSchema,
+    }),
+  )
+  .handler(async ({ input, context: { user } }) => {
+    try {
+      const post = await createPost({
+        title: input.title,
+        content: input.content,
+        authorId: user.id,
+      });
+
+      return { post };
+    } catch (error) {
+      logger.error(error);
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to create post",
+      });
+    }
+  });
+```
+
+### Find a post by id
+
+Usually you want to find entities by ID or a different unique identifier.
+
+In this case we will use the `findPost` procedure to find a post by its ID.
+
+Notice how we are using the `{id}` parameter in the path for the OpenAPI route to follow the OpenAPI best practices, so you can query it like `/api/posts/123`.
+
+```typescript copy title="packages/api/modules/posts/procedures/find-post.ts"
+import { z } from "zod";
+import { PostSchema, publicProcedure } from "../../../orpc/procedures";
+
+export const findPost = publicProcedure
+  .route({
+    method: "GET",
+    path: "/posts/{id}",
+    tags: ["Posts"],
+    summary: "Find post",
+    description: "Find a post by id",
+  })
+  .input(
+    z.object({
+      id: z.string(),
+    }),
+  )
+  .output(
+    z.object({
+      post: PostSchema,
+    }),
+  )
+  .handler(async ({ input }) => {
+    const post = await findPost({
+      id: input.id,
+    });
+
+    if (!post) {
+      throw new ORPCError("NOT_FOUND", {
+        message: "Post not found",
+      });
+    }
+
+    return { post };
+  });
+```
+
+#### Update a post
+
+To update a post, we will again use a `protectedProcedure` to ensure the user is authenticated and to verify the user is the author of the post.
+In case this endpoint is called without a session, the `protectedProcedure` will return a 401 error.
+
+```typescript copy title="packages/api/modules/posts/procedures/update-post.ts"
+import { z } from "zod";
+import { PostSchema, protectedProcedure } from "../../../orpc/procedures";
+
+export const updatePost = protectedProcedure
+  .route({
+    method: "PUT",
+    path: "/posts/{id}",
+    tags: ["Posts"],
+    summary: "Update post",
+    description: "Update a post",
+  })
+  .input(
+    z.object({
+      id: z.string(),
+      title: z.string().optional(),
+      content: z.string().optional(),
+    }),
+  )
+  .output(
+    z.object({
+      post: PostSchema,
+    }),
+  )
+  .handler(async ({ input }) => {
+    const post = await findPost({
+      id: input.id,
+    });
+
+    if (!post) {
+      throw new ORPCError("NOT_FOUND", {
+        message: "Post not found",
+      });
+    }
+
+    if (post.authorId !== user.id) {
+      throw new ORPCError("FORBIDDEN", {
+        message: "You are not the author of this post",
+      });
+    }
+
+    const updatedPost = await updatePost({
+      id: input.id,
+      title: input.title,
+      content: input.content,
+    });
+
+    return { post: updatedPost };
+  });
+```
+
+#### Delete a post
+
+For deleting a post, we will use a `protectedProcedure` to ensure the user is authenticated and verify the user is the author of the post.
+
+In case of success, we do not return any data, but in case of an error, we throw a 500 error, log the error and return a message to the client.
+
+```typescript copy title="packages/api/modules/posts/procedures/delete-post.ts"
+import { ORPCError } from "@orpc/server";
+import { logger } from "@repo/logs";
+import { z } from "zod";
+import { PostSchema, protectedProcedure } from "../../../orpc/procedures";
+
+export const deletePost = protectedProcedure
+  .route({
+    method: "DELETE",
+    path: "/posts/{id}",
+    tags: ["Posts"],
+    summary: "Delete post",
+    description: "Delete a post",
+  })
+  .input(
+    z.object({
+      id: z.string(),
+    }),
+  )
+  .output(
+    z.object({
+      post: PostSchema,
+    }),
+  )
+  .handler(async ({ input, context: { user } }) => {
+    try {
+      const post = await findPost({
+        id: input.id,
+      });
+
+      if (!post) {
+        throw new ORPCError("NOT_FOUND", {
+          message: "Post not found",
+        });
+      }
+
+      if (post.authorId !== user.id) {
+        throw new ORPCError("FORBIDDEN", {
+          message: "You are not the author of this post",
+        });
+      }
+
+      await deletePost({
+        id: input.id,
+      });
+    } catch (error) {
+      logger.error(error);
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Failed to delete post",
+      });
+    }
+  });
+```

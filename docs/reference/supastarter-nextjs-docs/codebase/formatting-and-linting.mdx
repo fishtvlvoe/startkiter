@@ -1,0 +1,41 @@
+---
+title: Formatting and linting
+description: Learn how to format and lint your supastarter codebase.
+---
+
+supastarter uses [Oxlint](https://oxc.rs/docs/guide/usage/linter) for linting and [Oxfmt](https://oxc.rs/docs/guide/usage/formatter) for formatting, as part of the [Oxc](https://oxc.rs/) toolchain. Together they deliver very fast linting and formatting, with features such as automatic Tailwind CSS class sorting built into Oxfmt.
+
+## Auto-format and fix code on save
+
+By default, the [Oxc VS Code extension](https://marketplace.visualstudio.com/items?itemName=oxc.oxc-vscode) is set up to format and lint the codebase while you are developing.
+
+If you want to disable this behavior, open the `.vscode/settings.json` file and set the following options:
+
+```json
+{
+  "editor.formatOnSave": false,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.oxc": "never"
+  }
+}
+```
+
+## Manual formatting and linting
+
+To manually format your codebase run:
+
+```bash copy
+pnpm format
+```
+
+To manually lint your codebase run:
+
+```bash copy
+pnpm lint
+```
+
+To fix all the linting errors in your codebase run:
+
+```bash copy
+pnpm lint --fix
+```

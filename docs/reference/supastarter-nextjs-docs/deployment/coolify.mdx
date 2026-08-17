@@ -1,0 +1,100 @@
+---
+title: Coolify
+description: Learn how to deploy your supastarter application with Coolify.
+---
+
+This guide will show you how to deploy your supastarter application with [Coolify](https://coolify.io) to your own server.
+
+Coolify builds your app into a Docker container (usually with [Nixpacks](https://coolify.io/docs/applications/builds/nixpacks/deploy)) and proxies traffic with automatic HTTPS. For a Next.js monorepo like supastarter, you mainly need to point Coolify at the SaaS app and expose port `3000`.
+
+### Setup Coolify
+
+Before you can deploy your supastarter application with Coolify, you need a server with Coolify installed (or a [Coolify Cloud](https://coolify.io) account) and a Git repository with your project.
+
+Follow the [Coolify installation guide](https://coolify.io/docs/get-started/installation) to get started.
+
+<Callout>
+  Next.js production builds are memory-heavy. Use at least **4 GB RAM** on the
+  server that runs the build (or configure a dedicated Coolify build server). If
+  builds fail with heap out of memory errors, set
+  `NODE_OPTIONS=--max-old-space-size=4096` as a build environment variable.
+</Callout>
+
+### Deploy your supastarter application
+
+#### Create a new project
+
+First create a new project in Coolify.
+
+![Coolify new project](/images/documentation/nextjs/deployment/coolify/new-project.png)
+
+#### Add a new resource
+
+Select the `Production` environment and click `Add a new resource`.
+
+Choose `Private Repository (with Github App)`:
+
+![Coolify new resource](/images/documentation/nextjs/deployment/coolify/add-resource.png)
+
+You can also use `Public Repository` or `Private Repository (with Deploy Key)` if that fits your setup better. See the [Coolify GitHub integration docs](https://coolify.io/docs/knowledge-base/git/github/integration) for details.
+
+#### Connect your Github repository (with Github App)
+
+If you haven't already created a Github App that connects your Coolify instance to your Github repository, you will be asked to create one.
+
+![Coolify create github app](/images/documentation/nextjs/deployment/coolify/create-github-app.png)
+
+Follow the instructions to create a Github App and connect it to your Coolify instance.
+
+#### Create a new application
+
+After you have connected your Github repository, you can create a new application by selecting the Github App connection you just created and then selecting the repository you want to deploy:
+
+![Coolify create application](/images/documentation/nextjs/deployment/coolify/create-application.png)
+
+Make sure to select the branch you want to deploy, like `main`.
+
+#### Configure the application
+
+You will be redirected to the application configuration page. Here you need to configure the build settings for your application.
+
+![Coolify application configuration](/images/documentation/nextjs/deployment/coolify/application-configuration.png)
+
+Set the following values on the **General** tab:
+
+- **Build Pack**: `Nixpacks`
+- **Base Directory**: `/` (repository root of the monorepo)
+- **Ports Exposes**: `3000`
+- **Install Command**: `pnpm install` (or leave empty so Nixpacks detects it from the lockfile)
+- **Build Command**: `corepack enable && pnpm install --frozen-lockfile && pnpm --filter saas build`
+- **Start Command**: `cd apps/saas && pnpm start`
+
+Start the app from `apps/saas` instead of `pnpm --filter saas start`. Coolify's Turborepo examples recommend changing into the app directory for the start command, because Turbo pipelines often do not define a `start` task.
+
+If you prefer a smaller production image with full control over the build, switch **Build Pack** to `Dockerfile` and follow the [Docker deployment guide](/docs/nextjs/deployment/docker).
+
+#### Add environment variables
+
+Before we deploy the application, add the environment variables in the `Environment Variables` tab.
+
+Add all the envs from the `.env.local` file in your project root and make sure to use production values here.
+
+![Coolify add environment variables](/images/documentation/nextjs/deployment/coolify/add-envs.png)
+
+Mark variables that Next.js needs during `next build` (especially `NEXT_PUBLIC_*` values) as **build variables** in Coolify. Keep secrets such as `DATABASE_URL` and API keys as runtime-only when possible.
+
+#### Deploy the application
+
+Now you can click the `Deploy` button to deploy your application. This will start the build process and deploy your application to your server.
+
+![Coolify deploy application](/images/documentation/nextjs/deployment/coolify/deploy-application.png)
+
+After the build process is finished, your application will be deployed to your server.
+
+You probably want to assign a custom domain to your application. You can do this by setting it in the `Domain` field on the configuration page.
+
+![Coolify application domain](/images/documentation/nextjs/deployment/coolify/domain-configuration.png)
+
+Lastly, set the defined domain as the `NEXT_PUBLIC_SITE_URL` environment variable in the `Environment Variables` tab (as a build and runtime variable) and redeploy the application by clicking the `Redeploy` button in the top right corner.
+
+Now you have a fully working supastarter application deployed to your own server.

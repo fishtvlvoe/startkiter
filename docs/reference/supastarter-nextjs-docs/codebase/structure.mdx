@@ -1,0 +1,91 @@
+---
+title: Project structure
+description: Learn how the supastarter codebase is structured.
+---
+
+supastarter uses a monorepo structure, which allows you to easily extend your project (for example with a mobile app) and share code and configs between applications.
+
+## Basic repository structure
+
+By default the monorepo contains the following apps and packages:
+
+<Files>
+  <Folder name="apps – Applications in the monorepo" defaultOpen>
+    <Folder name="marketing – Public marketing site, blog, changelog, legal pages, and sitemap" />
+    <Folder name="saas – Protected product app, auth, onboarding, billing, organizations, admin, and API routes" />
+    <Folder name="docs – Documentation application (using fumadocs)" />
+    <Folder name="mail-preview – Email preview application for development" />
+  </Folder>
+  <Folder name="packages" defaultOpen>
+    <Folder name="ai - AI integration" />
+    <Folder name="api – API server (including shared feature logic)" />
+    <Folder name="auth – Authentication setup" />
+    <Folder name="database – Database setup" />
+    <Folder name="i18n – Translations and localization setup" />
+    <Folder name="logs – Logging setup" />
+    <Folder name="mail – Mail templates and provider" />
+    <Folder name="payments – Payment providers and subscription logic" />
+    <Folder name="storage – Storage providers and upload logic" />
+    <Folder name="ui – Shared UI components (Button, Card, Dialog, etc.)" />
+    <Folder name="utils – Shared utilities and helpers" />
+  </Folder>
+  <Folder name="tooling – Configuration for the monorepo" defaultOpen>
+    <Folder name="scripts – CLI scripts for common tasks" />
+    <Folder name="tailwind – Tailwind config" />
+    <Folder name="typescript – TypeScript config" />
+  </Folder>
+</Files>
+
+## Next.js app boundaries
+
+The marketing site and the product app are separate Next.js apps. Each app has its own:
+
+- `package.json`
+- `next.config.ts`
+- `tsconfig.json`
+- layouts
+- global styles
+- Playwright config
+
+This keeps public-site concerns and protected product concerns clearly separated.
+
+## Configuration
+
+Configuration is scoped to the app or package that owns the behavior:
+
+- `apps/marketing/config.ts` – marketing app configuration
+- `apps/saas/config.ts` – SaaS app configuration
+- package-local config files in shared packages
+
+Within each app, import app config through the local `@config` alias.
+
+## Path aliases
+
+The alias setup is app-specific as well.
+
+### `apps/saas`
+
+- `@config`
+- `@auth/*`
+- `@organizations/*`
+- `@settings/*`
+- `@payments/*`
+- `@admin/*`
+- `@ai/*`
+- `@onboarding/*`
+- `@shared/*`
+- `@i18n/*`
+
+### `apps/marketing`
+
+- `@config`
+- `@analytics`
+- `@home/*`
+- `@blog/*`
+- `@changelog/*`
+- `@legal/*`
+- `@shared/*`
+- `@i18n/*`
+- `content-collections`
+
+Learn more about configuration in the [configuration documentation](/docs/nextjs/configuration).

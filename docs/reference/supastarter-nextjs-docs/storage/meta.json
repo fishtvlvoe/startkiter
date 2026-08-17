@@ -1,0 +1,14 @@
+{
+  "title": "Storage",
+  "pages": [
+    "overview",
+    "setup",
+    "upload-files",
+    "access-files",
+    "cloudflare-r2",
+    "aws-s3",
+    "digitalocean-spaces",
+    "uploadthing",
+    "..."
+  ]
+}

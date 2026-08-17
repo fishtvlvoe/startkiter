@@ -1,0 +1,36 @@
+---
+title: Create a dashboard page
+description: Learn how to create a dashboard page in supastarter.
+---
+
+## 1. Create a new page
+
+For this example we are going to create the _AI Demo_ page in the dashboard.
+We start by creating the new page in the SaaS app inside `/apps/saas/app/app`. To do so, we need to create a subfolder with the name of the page (in this case `ai-demo`) and in there a `page.tsx` file.
+
+```tsx title="apps/saas/app/app/ai-demo/page.tsx"
+export default function AiDemoPage() {
+  return (
+    <div>
+      <h1>AI Demo</h1>
+    </div>
+  );
+}
+```
+
+## 2. Add menu item for the new page
+
+In the NavBar component we need to add a new menu item for the new page:
+
+```tsx title="apps/saas/modules/shared/components/NavBar.tsx" {3-7}
+const menuItems = [
+  // ...
+  {
+    title: "AI Demo",
+    href: "/app/ai-demo",
+    icon: WandIcon,
+  },
+];
+```
+
+Now we can navigate to the new page by clicking on the menu item.

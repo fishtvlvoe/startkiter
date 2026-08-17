@@ -1,0 +1,144 @@
+---
+title: Styling the application
+description: Learn how to style your supastarter application.
+---
+
+To build the user interface supastarter comes with [Tailwind CSS](https://tailwindcss.com) and [Base UI](https://base-ui.com) pre-installed.
+
+<Callout title="Why Tailwind CSS and Base UI">
+  The combination of Tailwind CSS and Base UI allows gives ready-to-use, complex
+  UI components that can be fully customized to match your brands design.
+</Callout>
+
+## Theme configuration
+
+In the `packages/tooling/tailwind/theme.css` file you can configure the Tailwind CSS theme. Next to the default Tailwind CSS
+theme configuration you will also find two color variable objects in the file for light and dark mode. These color variables
+will be passed into the Tailwind CSS theme configuration and are used across the UI of the application.
+
+The default palette sits on Tailwind’s olive scale—warm olive-50 paper, olive-tinted borders, and olive-950 actions—plus a chromatic `--touch` accent for highlights.
+
+```css copy
+@layer base {
+  :root {
+    --border: var(--color-olive-200);
+    --input: var(--color-olive-200);
+    --ring: var(--color-olive-400);
+    --background: var(--color-olive-50);
+    --foreground: var(--color-olive-950);
+    --primary: var(--color-olive-950);
+    --primary-foreground: var(--color-olive-50);
+    --secondary: var(--color-olive-100);
+    --secondary-foreground: var(--color-olive-900);
+    --destructive: var(--color-red-700);
+    --destructive-foreground: var(--color-white);
+    --success: var(--color-green-800);
+    --success-foreground: var(--color-white);
+    --warning: var(--color-yellow-700);
+    --warning-foreground: var(--color-white);
+    --muted: var(--color-olive-100);
+    --muted-foreground: var(--color-olive-600);
+    --accent: var(--color-olive-100);
+    --accent-foreground: var(--color-olive-900);
+    --touch: oklch(0.51 0.12 128);
+    --touch-foreground: oklch(0.99 0.01 128);
+    --popover: var(--color-white);
+    --popover-foreground: var(--color-olive-950);
+    --card: var(--color-white);
+    --card-foreground: var(--color-olive-950);
+    --radius: 0.625rem;
+  }
+
+  .dark {
+    --border: var(--color-olive-800);
+    --input: var(--color-olive-800);
+    --ring: var(--color-olive-500);
+    --background: var(--color-olive-950);
+    --foreground: var(--color-olive-50);
+    --primary: var(--color-olive-50);
+    --primary-foreground: var(--color-olive-950);
+    /* ... */
+  }
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-touch: var(--touch);
+  --color-touch-foreground: var(--touch-foreground);
+  /* ... */
+}
+```
+
+## Change fonts
+
+Marketing uses Inter for body copy and DM Sans for headings. The SaaS app uses Inter throughout. Configure the fonts in the app layout that owns the surface you are styling, for example in `apps/marketing/app/[locale]/layout.tsx` for the public site or `apps/saas/app/layout.tsx` for the product app.
+
+```tsx
+import { DM_Sans, Inter } from "next/font/google";
+
+const sansFont = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
+const headingFont = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-dm-sans",
+});
+```
+
+The font is initialized here and then we pass the variable classes to the `html` element:
+
+```tsx
+<html
+  lang={locale}
+  suppressHydrationWarning
+  className={cn(sansFont.variable, headingFont.variable)}
+>
+```
+
+Wire the CSS variables in the app’s `globals.css` so Tailwind can use them:
+
+```css
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+}
+```
+
+Read more about how to use next/font [in the offical Next.js documentation](https://nextjs.org/docs/app/getting-started/fonts).
+
+## shadcn/ui
+
+supastarter is also fully compatible with [shadcn/ui](https://ui.shadcn.com/), which is an amazing tool to quickly build your own component library with Base UI and Tailwind CSS.
+
+All UI components are located in the `packages/ui` package and can be imported from `@repo/ui/components/[component-name]`.
+
+To use the shadcn/ui CLI in your supastarter project, run the following command from your project's root:
+
+```bash copy
+pnpm --filter=ui shadcn [command]
+```
+
+Since supastarter uses Base UI, make sure the components are added from the Base UI registry with the `--base base` flag (shadcn/ui also offers `radix` and `aria` registries).
+
+For example to add the skeleton component you would run:
+
+```bash copy
+pnpm --filter=ui shadcn add --base base skeleton
+```
+
+### Using UI components
+
+After adding components, you can import them from `@repo/ui`:
+
+```tsx copy
+import { Button } from "@repo/ui/components/button";
+import { Card } from "@repo/ui/components/card";
+import { cn } from "@repo/ui";
+```
+
+The `cn` utility function for merging Tailwind classes is also available from `@repo/ui`.

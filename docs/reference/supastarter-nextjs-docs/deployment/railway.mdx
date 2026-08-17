@@ -1,0 +1,102 @@
+---
+title: Railway
+description: Learn how to deploy your supastarter application to Railway.
+---
+
+Railway is a modern cloud platform that makes it easy to deploy web applications with automatic builds from Git, built-in databases, and simple environment variable management. It supports Docker and Nixpacks for zero-config deployments and is a good option for deploying supastarter alongside a Railway-hosted PostgreSQL database.
+
+## Prerequisites
+
+- A [Railway account](https://railway.app)
+- Your supastarter project in a Git repository (GitHub, GitLab, or Bitbucket)
+- A PostgreSQL database (Railway can provision one, or use an external provider)
+
+## 1. Create a Railway project
+
+Log in to the Railway dashboard and click **New Project**. Choose **Deploy from GitHub repo** and select your supastarter repository.
+
+If this is your first time, Railway will ask you to connect your GitHub account.
+
+## 2. Add a PostgreSQL database (optional)
+
+If you do not have a database yet, click **New** → **Database** → **Add PostgreSQL** within your project. Railway provisions the database and automatically injects the `DATABASE_URL` variable into services in the same project.
+
+If you are using an external database provider (Neon, Supabase, etc.), skip this step and set the `DATABASE_URL` manually in step 4.
+
+## 3. Configure the build
+
+Railway uses Nixpacks to detect your project type and build it automatically. For supastarter's monorepo, you may need to configure the build:
+
+1. Click on your service in the Railway project
+2. Go to **Settings** → **Build**
+3. Set the **Root Directory** to `/` (or the directory containing your monorepo root)
+4. Set the **Build Command**:
+
+```bash copy
+pnpm --filter database generate && pnpm --filter saas build
+```
+
+5. Set the **Start Command**:
+
+```bash copy
+cd apps/saas && pnpm start
+```
+
+Alternatively, you can deploy using Docker. Point Railway at `apps/saas/Dockerfile` (or copy it to the repository root). See the [Docker deployment guide](/docs/nextjs/deployment/docker) for the Dockerfile configuration.
+
+## 4. Configure environment variables
+
+In your Railway service, go to **Variables** and add all required environment variables:
+
+```bash copy
+NEXT_PUBLIC_SITE_URL=https://your-domain.com
+DATABASE_URL=<your-database-url>
+```
+
+If your PostgreSQL database is in the same Railway project, reference it using Railway's variable references:
+
+```bash
+DATABASE_URL=${{Postgres.DATABASE_URL}}
+```
+
+Add all other environment variables from your `.env.local` file (payment provider keys, mail provider keys, storage credentials, etc.).
+
+## 5. Configure custom domain
+
+In your service settings, go to **Settings** → **Networking** → **Custom Domain**. Add your domain and configure the DNS records as shown by Railway (typically a CNAME record).
+
+Railway also provides a free `*.up.railway.app` subdomain for testing.
+
+## 6. Deploy
+
+Railway deploys automatically when you push to your connected Git branch. You can also trigger a manual deploy from the dashboard.
+
+Monitor the build logs in the **Deployments** tab to verify the build completes successfully.
+
+## Using Railway's private networking
+
+If your database and application are in the same Railway project, use the private networking URL for database connections. This provides lower latency and zero egress costs:
+
+```bash
+DATABASE_URL=postgresql://postgres:password@postgres.railway.internal:5432/railway
+```
+
+Set this as your `DATABASE_URL` in the service variables.
+
+## Frequently asked questions
+
+### How much does Railway deployment cost?
+
+Railway's Pro plan starts at $5/month, which includes a $5 credit. Compute is billed at $0.000231/vCPU/minute and memory at $0.000231/GB/minute. A small Next.js application typically costs $5-15/month.
+
+### Does Railway support preview deployments?
+
+Yes. Railway can create ephemeral environments for pull requests, similar to Vercel's preview deployments. Enable this in your project settings under **Environments**.
+
+### Can I deploy multiple services?
+
+Yes. Railway projects can contain multiple services. You can deploy the marketing site, SaaS app, and API as separate services within the same project, each with their own environment variables and domains.
+
+### How do I view application logs?
+
+Click on your service and navigate to the **Logs** tab. Railway provides real-time log streaming and log persistence for debugging.

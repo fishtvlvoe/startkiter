@@ -1,0 +1,141 @@
+---
+title: Dodo Payments
+description: Learn how to set up Dodo Payments with supastarter.
+---
+
+## Get the API key
+
+After you have created your account for [Dodo Payments](https://dodopayments.com/), you will need to get the API key. You can do this by going to the [API keys page](https://app.dodopayments.com/developer/api-keys) in the dashboard.
+
+## Add environment variables
+
+To use the Dodo Payments integration, you need to define the following environment variables to your `.env.local` as well as your production environment:
+
+```bash title=".env.local" copy
+DODO_PAYMENTS_API_KEY="" # Your Dodo Payments API key
+DODO_PAYMENTS_WEBHOOK_SECRET="" # The secret key of the webhook you created (see below)
+```
+
+## Create products
+
+For your users to choose from the available subscription plans, you need to create those _Products_ first on the [Products page](https://app.dodopayments.com/products). You can create as many products as you want, but you will need to create at least one product for the integration to work.
+
+Create one product per plan you want to offer. You can add multiple prices within this product to offer multiple currencies or different billing intervals.
+
+## Create a webhook
+
+To sync the current subscription status and other information to your database, you need to set up a webhook.
+
+The webhook code comes ready to use with supastarter, you just have to create the webhook in the Dodo Payments dashboard and insert the URL for your project.
+
+To configure a new webhook, go to the [Webhooks page](https://app.dodopayments.com/developer/webhooks) in the Dodo Payments settings and click the _Add endpoint_ button.
+
+Select the following events:
+
+- `checkout.session.completed`
+- `subscription.created`
+- `subscription.updated`
+- `subscription.cancelled`
+
+To get the URL for the webhook, you can either use a local development URL or the URL of your deployed app:
+
+### Local development
+
+If you want to test the webhook locally, you can use [ngrok](https://ngrok.com/) to create a tunnel to your local machine. Ngrok will then give you a URL that you can use to test the webhook locally.
+
+To do so, install ngrok and run it with the following command (while your supastarter development server is running):
+
+```bash
+ngrok http 3000
+```
+
+This will give you a URL (see the _Forwarding_ output) that you can use to create a webhook in Dodo Payments. Just use that url and add `/api/webhooks/payments` to it.
+
+### Production / preview deployment
+
+When you have already deployed a version of your project, you can use the actual URL to create the webhook with. This will be necessary for a production version your app later anyway.
+
+**Make sure you have a deployed version that has the `DODO_PAYMENTS_WEBHOOK_SECRET` environment variable set.**
+
+Then you can use the URL of your deployed app and add `/api/webhooks/payments` to it.
+
+Example URL: `https://your-app.com/api/webhooks/payments`
+
+## Set up products in app
+
+The created products have to be defined in the `packages/payments/config.ts` file:
+
+```js title="packages/payments/config.ts"
+export const config = {
+	plans: {
+		plans: {
+		pro: {
+			recommended: true,
+			prices: [
+				{
+					type: "subscription",
+					priceId: process.env.PRICE_ID_PRO_MONTHLY as string,
+					interval: "month",
+					amount: 29,
+					currency: "USD",
+					seatBased: true,
+					trialPeriodDays: 7,
+				},
+				{
+					type: "subscription",
+					priceId: process.env.PRICE_ID_PRO_YEARLY as string,
+					interval: "year",
+					amount: 290,
+					currency: "USD",
+					seatBased: true,
+					trialPeriodDays: 7,
+				},
+			],
+		},
+	},
+};
+```
+
+We are using envs for the product ids, so you can define different product ids for each environment, as you probably want to use the test mode for development.
+
+Define the product ids in your `.env.local` and in the environment variables of your production environment:
+
+```bash title=".env.local" copy
+NEXT_PUBLIC_PRODUCT_ID_PRO_MONTHLY=""
+NEXT_PUBLIC_PRODUCT_ID_PRO_YEARLY=""
+```
+
+Learn more about the payment plans configuration in [_Manage plans and products_ documentation](/docs/nextjs/payments/plans).
+
+## Set currency for locales in your app
+
+Lastly you need to configure the currency that should be used for each locale in your app.
+
+You can this by setting the `currency` property for each locale in the config file.
+
+```js title="packages/payments/config.ts"
+export const config = {
+  locales: {
+    en: {
+      currency: "USD",
+      language: "en",
+    },
+    de: {
+      currency: "EUR",
+      language: "de",
+    },
+  },
+  // ...
+};
+```
+
+## Test Mode vs Live Mode
+
+Dodo Payments provides two environments for testing and production:
+
+- **Test Mode**: Use `https://test.dodopayments.com` for development and testing
+- **Live Mode**: Use `https://live.dodopayments.com` for production
+
+Make sure to use the appropriate environment URLs and API keys for each stage of your development process.
+
+Per default, supastarter uses **Live mode** when the NODE_ENV is set to `production`. You can change this behavior in the `packages/payments/providers/dodopayments/index.ts` file.

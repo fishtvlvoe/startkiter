@@ -1,0 +1,24 @@
+---
+title: Plausible
+description: Learn how to use Plausible Analytics with supastarter.
+---
+
+To use Mixpanel with supastarter, first [create a Plausible account](https://plausible.io/) and get plausible app url.
+
+Then, add the app code to your `.env.local` file and your deployment environment:
+
+```bash copy
+NEXT_PUBLIC_PLAUSIBLE_URL=your_url_here
+```
+
+Next, we need to activate Plausible as the analytics provider. To do this, open `apps/web/modules/analytics/index.tsx` and change the content to:
+
+```typescript copy
+export * from "./provider/plausible";
+```
+
+To customize the Plausible configuration, edit the `apps/web/modules/analytics/provider/plausible/index.tsx`.
+
+Learn more about analytics with Plausible in the [official documentation](https://plausible.io/docs).
+
+For further instructions, follow the [general analytics instructions](/docs/nextjs/analytics/overview).

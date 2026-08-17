@@ -1,0 +1,55 @@
+---
+title: Overview
+description: Learn how to use the API layer of your supastarter application.
+---
+
+supastarter is designed to be a scalable and production-ready fullstack starter kit. One of the core features is a dedicated and extendable API layer.
+To enable this in a type-safe manner, we chose [Hono](https://hono.dev/) as the server framework, in combination with [oRPC](https://orpc.unnoq.com/) to call the API from the frontend and [Tanstack Query](https://tanstack.com/query) to query the API.
+
+<Callout title="Why Hono">
+  Hono is a modern and minimalistic web framework for TypeScript and JavaScript.
+  It is designed to be simple, fast and easy to use. It is also designed to be
+  very flexible and easy to extend. You can deploy it almost anywhere and use it
+  in a type-safe manner with the Hono RPC client. It is also capable of
+  generating an OpenAPI documenation automatically for you API.
+</Callout>
+
+<Callout title="Why oRPC">
+  oRPC is a library that helps you to call backend functions from the frontend
+  in a type-safe way. It's similar to tRPC, but is based on the OpenAPI standard
+  and gives you a few more advanced capabilities.
+</Callout>
+
+<Callout title="Why combine Hono and oRPC">
+  Hono is a great server framework, but it's RPC client is not as powerful and
+  doesn't offer the same developer experience as oRPC. Combining the two gives
+  you a very powerful and flexible API layer with a great developer experience
+  for both RPC and OpenAPI.
+</Callout>
+
+All API logic is defined in the `/packages/api/` package.
+
+Learn more about the API in these different guides:
+
+<Cards>
+  <Card
+    title="Define an API endpoint"
+    href="/docs/nextjs/api/define-endpoint"
+    target="_self"
+  />
+  <Card
+    title="Protect API endpoints"
+    href="/docs/nextjs/api/protect-endpoints"
+    target="_self"
+  />
+  <Card
+    title="Use API in frontend"
+    href="/docs/nextjs/api/usage-in-frontend"
+    target="_self"
+  />
+  <Card
+    title="Use locale in API endpoints"
+    href="/docs/nextjs/api/use-locale"
+    target="_self"
+  />
+</Cards>

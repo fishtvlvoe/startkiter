@@ -1,0 +1,47 @@
+---
+title: Meta tags
+description: Learn how to set meta tags for pages in your supastarter app.
+---
+
+Meta tags are used to describe the content of a page.
+It's important to set these tags for each page, as it helps search engines understand what the page is about and can improve the SEO of your app.
+
+Per default, your application has set a base title for each page, which is defined in the root layout of the app that owns the route. For public pages this is typically in `/apps/marketing/app/layout.tsx`.
+
+```ts title="apps/marketing/app/layout.tsx"
+export const metadata: Metadata = {
+  title: {
+    default: config.appName,
+    template: `%s – ${config.appName}`,
+  },
+};
+```
+
+This setup will result in the title from `config.appName` (for example `supastarter for Next.js Demo`) for the home page and each page that has no title set.
+
+If a title is set for a page, the `template` will be applied to the title, so if your page title is `Changelog`, the title will be `Changelog – supastarter for Next.js Demo`.
+
+To set meta tags for a specific page, use the `generateMetadata` function in that page:
+
+```ts title="apps/marketing/app/[locale]/changelog/page.tsx"
+export const generateMetadata = () => {
+  return {
+    title: "Changelog",
+    description: "The description of the changelog page",
+  };
+};
+```
+
+To have an internationalized title, you can also use translations in the `generateMetadata` function:
+
+```ts title="apps/marketing/app/[locale]/changelog/page.tsx"
+export async function generateMetadata() {
+  const t = await getTranslations();
+  return {
+    title: t("changelog.title"),
+    description: t("changelog.description"),
+  };
+}
+```
+
+Learn more about how to set meta tags in the [offical Next.js documentation](https://nextjs.org/docs/app/api-reference/functions/generate-metadata).

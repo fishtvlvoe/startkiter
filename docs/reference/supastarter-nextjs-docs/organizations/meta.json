@@ -1,0 +1,11 @@
+{
+  "title": "Organizations",
+  "defaultOpen": false,
+  "pages": [
+    "overview",
+    "configure",
+    "use-organizations",
+    "store-data-for-organizations",
+    "..."
+  ]
+}

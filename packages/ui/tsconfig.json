@@ -1,0 +1,10 @@
+{
+	"extends": "@startkiter/tsconfig/react-library.json",
+	"include": ["**/*.ts", "**/*.tsx"],
+	"exclude": ["dist", "build", "node_modules"],
+	"compilerOptions": {
+		"paths": {
+			"@/*": ["./*"]
+		}
+	}
+}

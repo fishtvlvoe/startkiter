@@ -1,0 +1,94 @@
+---
+title: Supabase Postgres
+description: Learn how to use Supabase as your database provider with supastarter.
+---
+
+Supabase provides a managed PostgreSQL database with built-in connection pooling via Supavisor, along with additional features like storage, real-time subscriptions, and edge functions.
+
+Note that supastarter uses **better-auth** for authentication, not Supabase Auth. Supabase is used purely as a database provider in this setup.
+
+## 1. Create a Supabase account and project
+
+Go to [supabase.com](https://supabase.com) and create an account. Create a new project and choose a strong database password. Save this password as you will need it for your connection strings.
+
+## 2. Get your connection strings
+
+In the Supabase dashboard, click the **Connect** button at the top of your project, then select the **ORM** tab. You will find two connection strings:
+
+- **Pooler (Transaction mode)**: Used by your application at runtime for efficient connection management.
+- **Direct connection**: Used for database migrations.
+
+The pooler connection string uses port `6543`:
+
+```bash copy title="Pooler connection string (Transaction mode)"
+postgres://postgres.[project]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres?pgbouncer=true
+```
+
+The direct connection string uses port `5432`:
+
+```bash copy title="Direct connection string"
+postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres
+```
+
+## 3. Configure environment variables
+
+Add both connection strings to your `.env.local` file:
+
+```bash copy title=".env.local"
+DATABASE_URL="postgres://postgres.[project]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres"
+```
+
+## 4. Configure Prisma for migrations
+
+If you are using Prisma, configure it to use the direct connection string for migrations. Create or update the `prisma.config.ts` file:
+
+```ts copy title="packages/database/prisma.config.ts"
+import "dotenv/config";
+import { defineConfig, env } from "prisma/config";
+
+export default defineConfig({
+  schema: "./prisma/schema.prisma",
+  datasource: {
+    url: env("DIRECT_URL"),
+  },
+});
+```
+
+At runtime, Prisma Client automatically uses the `DATABASE_URL` environment variable (the pooler connection string) for all queries.
+
+If you are using Drizzle, no special configuration is needed. The standard PostgreSQL setup works with the pooled `DATABASE_URL`.
+
+## 5. Run migrations
+
+Push your database schema to Supabase:
+
+```bash copy
+pnpm --filter database push
+```
+
+## 6. Enable Row Level Security
+
+After running migrations, enable Row Level Security (RLS) for all created tables in the Supabase dashboard. Navigate to the **Table Editor**, select each table, and enable RLS from the table settings.
+
+<Callout>
+  After running migrations, make sure to enable Row Level Security (RLS) for all
+  created tables in the Supabase dashboard. This is a security best practice
+  when using Supabase.
+</Callout>
+
+If you also want to use Supabase for file storage, see the [complete Supabase setup recipe](/docs/nextjs/recipes/supabase-setup) which covers both database and storage configuration.
+
+## Frequently asked questions
+
+### Does supastarter use Supabase Auth?
+
+No, supastarter uses better-auth for authentication, which stores user data directly in your Supabase Postgres database. Supabase is used only as a database (and optionally storage) provider.
+
+### Do I need to enable RLS?
+
+Yes, enabling RLS is recommended for security. supastarter accesses the database through the server-side connection, not the Supabase client SDK, but RLS adds an additional layer of protection at the database level.
+
+### Can I use Supabase's real-time features?
+
+The database connection works for real-time subscriptions if you add the Supabase client SDK to your project, but this is not included by default in supastarter.

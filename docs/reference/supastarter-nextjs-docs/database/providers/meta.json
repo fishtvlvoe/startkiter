@@ -1,0 +1,5 @@
+{
+  "title": "Database providers",
+  "defaultOpen": false,
+  "pages": ["neon", "supabase", "planetscale", "turso", "railway"]
+}

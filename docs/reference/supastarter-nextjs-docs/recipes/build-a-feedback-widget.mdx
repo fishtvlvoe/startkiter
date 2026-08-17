@@ -1,0 +1,637 @@
+---
+title: "Build a feature – a complete guide from database to UI"
+seoTitle: "Feedback Widget: Database to UI"
+description: "Learn how to build a complete feature (with the example of a feedback widget) in supastarter."
+---
+
+In this guide, we'll take you through the process of implementing a feature in supastarter from start to finish.
+This will a lot of the things from the previous guides and documentation, but we'll be doing it in a more complete way and with a more concrete example of creating a feedback widget for your app.
+
+## Overview
+
+The feedback widget consists of:
+
+1. **Database Schema**: Prisma model to store feedback data
+2. **Database Queries**: Dedicated query functions for feedback operations
+3. **API Endpoint**: oRPC procedure to handle feedback submissions with session integration
+4. **Frontend Component**: React component with form and UI
+5. **Translations**: Internationalization support for the widget
+
+## Step 1: Database Schema
+
+First, we added a `Feedback` model to the Prisma schema:
+
+```prisma
+// packages/database/prisma/schema.prisma
+
+model Feedback {
+    id        String   @id @default(cuid())
+    userId    String?
+    user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+    email     String?
+    name      String?
+    message   String
+    type      String
+    ipAddress String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@map("feedback")
+}
+```
+
+We also added the relation to the User model:
+
+```prisma
+model User {
+    // ... existing fields ...
+    feedbacks          Feedback[]
+}
+```
+
+## Step 2: Database Queries
+
+Created dedicated query functions for feedback operations:
+
+```typescript
+// packages/database/prisma/queries/feedback.ts
+import { db } from "../client";
+
+export async function createFeedback({
+  message,
+  type,
+  email,
+  name,
+  ipAddress,
+  userId,
+}: {
+  message: string;
+  type: string;
+  email?: string;
+  name?: string;
+  ipAddress?: string;
+  userId?: string;
+}) {
+  return await db.feedback.create({
+    data: {
+      message,
+      type,
+      email,
+      name,
+      ipAddress,
+      userId,
+    },
+  });
+}
+```
+
+Updated the queries index to export the feedback functions:
+
+```typescript
+// packages/database/prisma/queries/index.ts
+export * from "./ai-chats";
+export * from "./feedback";
+export * from "./organizations";
+export * from "./purchases";
+export * from "./users";
+```
+
+## Step 3: API Endpoint
+
+Created the feedback oRPC procedure with validation and session integration:
+
+First, we'll create the feedback schema:
+
+```typescript
+// packages/api/modules/feedback/types.ts
+import { z } from "zod";
+
+export const feedbackSchema = z.object({
+  message: z.string().min(10).max(1000),
+  type: z.enum(["bug", "feature", "general"]).default("general"),
+  email: z.string().email().optional(),
+  name: z.string().min(2).max(100).optional(),
+});
+
+export type FeedbackFormValues = z.infer<typeof feedbackSchema>;
+```
+
+Now, we'll create the feedback procedure. Since feedback can be submitted by both authenticated and unauthenticated users, we'll use `publicProcedure` and manually get the session if available. Alternatively, you could create a `publicProcedureWithSession` custom procedure following the pattern shown in the [protect endpoints guide](/docs/nextjs/api/protect-endpoints#custom-procedures) to simplify this.
+
+```typescript
+// packages/api/modules/feedback/procedures/create.ts
+import { ORPCError } from "@orpc/server";
+import { auth } from "@repo/auth";
+import { createFeedback } from "@repo/database";
+import { logger } from "@repo/logs";
+import { z } from "zod";
+import { publicProcedure } from "../../../orpc/procedures";
+import { feedbackSchema } from "../types";
+
+export const createFeedbackProcedure = publicProcedure
+  .route({
+    method: "POST",
+    path: "/feedback",
+    tags: ["Feedback"],
+    summary: "Submit user feedback",
+    description: "Submit feedback with optional contact information",
+  })
+  .input(feedbackSchema)
+  .output(
+    z.object({
+      id: z.string(),
+      message: z.string(),
+    }),
+  )
+  .handler(async ({ input, context }) => {
+    try {
+      // Get session if available (for authenticated users)
+      const session = await auth.api.getSession({
+        headers: context.headers,
+      });
+
+      // Get IP address from headers if available
+      const ipAddress =
+        context.headers.get("x-forwarded-for") ||
+        context.headers.get("x-real-ip") ||
+        undefined;
+
+      // Store feedback in database using the query function
+      const feedback = await createFeedback({
+        message: input.message,
+        type: input.type,
+        email: input.email,
+        name: input.name,
+        ipAddress,
+        userId: session?.user.id,
+      });
+
+      return {
+        id: feedback.id,
+        message: "Feedback submitted successfully",
+      };
+    } catch (error) {
+      logger.error("Failed to submit feedback:", error);
+      throw new ORPCError("INTERNAL_SERVER_ERROR", {
+        message: "Could not submit feedback",
+      });
+    }
+  });
+```
+
+Create the feedback router:
+
+```typescript
+// packages/api/modules/feedback/router.ts
+import { createFeedbackProcedure } from "./procedures/create";
+
+export const feedbackRouter = {
+  create: createFeedbackProcedure,
+};
+```
+
+Mount the router in the main API router:
+
+```typescript
+// packages/api/orpc/router.ts
+// ...
+import { feedbackRouter } from "../modules/feedback/router";
+
+export const router = publicProcedure
+  // Prefix for openapi
+  .prefix("/api")
+  .router({
+    // ... other routers
+    feedback: feedbackRouter,
+  });
+```
+
+## Step 4: Frontend Component
+
+Created a React component with form validation, session integration, and internationalization:
+
+```typescript
+// apps/web/modules/shared/components/FeedbackWidget.tsx
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useSession } from "@saas/auth/hooks/use-session";
+import { Button } from "@ui/components/button";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@ui/components/dialog";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@ui/components/form";
+import { Input } from "@ui/components/input";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@ui/components/select";
+import { Textarea } from "@ui/components/textarea";
+import { cn } from "@ui/lib";
+import { MessageSquare } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useMutation } from "@tanstack/react-query";
+import { z } from "zod";
+import { orpc } from "@shared/lib/orpc-query-utils";
+import { toast } from "sonner";
+
+const feedbackSchema = z.object({
+    message: z.string().min(10).max(1000),
+    type: z.enum(["bug", "feature", "general"]).default("general"),
+    email: z.string().email().optional(),
+    name: z.string().min(2).max(100).optional(),
+});
+
+type FeedbackFormValues = z.infer<typeof feedbackSchema>;
+
+export function FeedbackWidget({ className }: { className?: string }) {
+    const t = useTranslations();
+    const { user } = useSession();
+    const [isOpen, setIsOpen] = useState(false);
+
+    const createFeedbackMutation = useMutation(
+        orpc.feedback.create.mutationOptions(),
+    );
+
+    const form = useForm<FeedbackFormValues>({
+        resolver: zodResolver(feedbackSchema),
+        defaultValues: {
+            message: "",
+            type: "general",
+            email: "",
+            name: "",
+        },
+    });
+
+    const onSubmit = async (data: FeedbackFormValues) => {
+        try {
+            await createFeedbackMutation.mutateAsync({
+                input: data,
+            });
+
+            setIsOpen(false);
+            form.reset();
+            toast.success(t("feedback.success.message"));
+        } catch (error) {
+            console.error("Error submitting feedback:", error);
+            toast.error(t("feedback.error.message"));
+        }
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger
+                render={
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className={cn(
+                            "fixed bottom-4 right-4 z-50 shadow-lg",
+                            className,
+                        )}
+                    >
+                        <MessageSquare className="h-4 w-4 mr-2" />
+                        {t("feedback.button")}
+                    </Button>
+                }
+            />
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                    <DialogTitle>{t("feedback.title")}</DialogTitle>
+                </DialogHeader>
+
+                    <Form {...form}>
+                        <form
+                            onSubmit={form.handleSubmit(onSubmit)}
+                            className="space-y-4"
+                        >
+                            <FormField
+                                control={form.control}
+                                name="type"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            {t("feedback.form.type.label")}
+                                        </FormLabel>
+                                        <Select
+                                            onValueChange={field.onChange}
+                                            defaultValue={field.value}
+                                        >
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue
+                                                        placeholder={t(
+                                                            "feedback.form.type.placeholder",
+                                                        )}
+                                                    />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="general">
+                                                    {t(
+                                                        "feedback.form.type.options.general",
+                                                    )}
+                                                </SelectItem>
+                                                <SelectItem value="bug">
+                                                    {t("feedback.form.type.options.bug")}
+                                                </SelectItem>
+                                                <SelectItem value="feature">
+                                                    {t(
+                                                        "feedback.form.type.options.feature",
+                                                    )}
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            {!user && (
+                                <>
+                                    <FormField
+                                        control={form.control}
+                                        name="name"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    {t("feedback.form.name.label")}
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder={t(
+                                                            "feedback.form.name.placeholder",
+                                                        )}
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+
+                                    <FormField
+                                        control={form.control}
+                                        name="email"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    {t("feedback.form.email.label")}
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder={t(
+                                                            "feedback.form.email.placeholder",
+                                                        )}
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </>
+                            )}
+
+                            <FormField
+                                control={form.control}
+                                name="message"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            {t("feedback.form.message.label")}
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Textarea
+                                                placeholder={t(
+                                                    "feedback.form.message.placeholder",
+                                                )}
+                                                className="min-h-[100px]"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <Button
+                                type="submit"
+                                className="w-full"
+                                loading={createFeedbackMutation.isPending}
+                            >
+                                {t("feedback.form.submit")}
+                            </Button>
+                        </form>
+                    </Form>
+            </DialogContent>
+        </Dialog>
+    );
+}
+```
+
+## Step 5: Translations
+
+Added translation keys for the feedback widget:
+
+```json
+// packages/i18n/translations/en.json
+{
+  "feedback": {
+    "button": "Feedback",
+    "title": "Send Feedback",
+    "success": {
+      "title": "Thank you!",
+      "message": "Your feedback has been submitted successfully."
+    },
+    "error": {
+      "title": "Error",
+      "message": "Failed to submit feedback"
+    },
+    "form": {
+      "type": {
+        "label": "Feedback Type",
+        "placeholder": "Select feedback type",
+        "options": {
+          "general": "General",
+          "bug": "Bug Report",
+          "feature": "Feature Request"
+        }
+      },
+      "name": {
+        "label": "Name",
+        "placeholder": "Your name"
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "your.email@example.com"
+      },
+      "message": {
+        "label": "Message",
+        "placeholder": "Tell us what you think..."
+      },
+      "submit": "Send Feedback"
+    }
+  }
+}
+```
+
+```json
+// packages/i18n/translations/de.json
+{
+  "feedback": {
+    "button": "Feedback",
+    "title": "Feedback senden",
+    "success": {
+      "title": "Vielen Dank!",
+      "message": "Ihr Feedback wurde erfolgreich übermittelt."
+    },
+    "error": {
+      "title": "Fehler",
+      "message": "Feedback konnte nicht gesendet werden"
+    },
+    "form": {
+      "type": {
+        "label": "Feedback-Typ",
+        "placeholder": "Feedback-Typ auswählen",
+        "options": {
+          "general": "Allgemein",
+          "bug": "Fehlermeldung",
+          "feature": "Feature-Anfrage"
+        }
+      },
+      "name": {
+        "label": "Name",
+        "placeholder": "Ihr Name"
+      },
+      "email": {
+        "label": "E-Mail",
+        "placeholder": "ihre.email@beispiel.com"
+      },
+      "message": {
+        "label": "Nachricht",
+        "placeholder": "Sagen Sie uns, was Sie denken..."
+      },
+      "submit": "Feedback senden"
+    }
+  }
+}
+```
+
+## Step 6: Integration
+
+Add the feedback widget to your layout or pages:
+
+```typescript
+// apps/web/app/(marketing)/layout.tsx
+import { FeedbackWidget } from "@modules/shared/components/FeedbackWidget";
+
+export default function MarketingLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
+    return (
+        <>
+            {children}
+            <FeedbackWidget />
+        </>
+    );
+}
+```
+
+## Step 7: Evaluation
+
+The next logical step would be to add some way to evaluate the feedback. You could either send it an admin email or build a small page in the admin dashboard to view the feedback.
+
+We'll cover this in a future guide.
+
+## Features
+
+The feedback widget includes the following features:
+
+1. **Session Integration**: Automatically associates feedback with logged-in users
+2. **Conditional Fields**: Name and email fields are hidden for logged-in users
+3. **Internationalization**: Full i18n support with English and German translations
+4. **Form Validation**: Client-side validation with Zod schema
+5. **Responsive Design**: Mobile-friendly UI with Tailwind CSS
+6. **Database Storage**: Persistent storage with Prisma ORM
+7. **API Integration**: Type-safe oRPC endpoints with proper error handling
+8. **Type Safety**: Full TypeScript support throughout the stack
+
+## Usage
+
+The feedback widget will appear as a floating button in the bottom-right corner of the page. Users can:
+
+- Click the feedback button to open the dialog
+- Select a feedback type (General, Bug Report, or Feature Request)
+- Enter their name and email (only for non-logged-in users)
+- Write their feedback message
+- Submit the feedback
+
+The widget automatically handles:
+
+- Form validation
+- Loading states
+- Success messages
+- Error handling
+- Session management
+- Database storage
+
+## Further Considerations
+
+Here are some additional features you might want to consider adding to your feedback widget:
+
+- **Analytics and Insights**: Track feedback patterns and user behavior
+- **Email Notifications**: Send admin notifications for new feedback submissions
+- **Rate Limiting**: Prevent spam by limiting submissions per IP address
+- **Feedback Management Dashboard**: Create an admin interface to view and manage feedback
+- **Sentiment Analysis**: Integrate AI services to analyze feedback sentiment
+- **Export and Reporting**: Add CSV export functionality for feedback data
+- **Accessibility Improvements**: Enhance screen reader support and keyboard navigation
+- **Customization Options**: Allow configuration of widget position, theme, and visibility
+- **Multi-language Support**: Add more translation languages beyond English and German
+- **Feedback Categories**: Add more specific feedback types or custom categories
+- **File Attachments**: Allow users to attach screenshots or files with their feedback
+- **Follow-up Communication**: Enable two-way communication with feedback submitters
+
+## Conclusion
+
+This guide demonstrates how to build a complete feedback widget in supastarter, covering all aspects from database design to user interface. The implementation follows supastarter's best practices:
+
+- **Type Safety**: Full TypeScript integration throughout the stack
+- **Database Design**: Proper Prisma schema with relationships
+- **API Design**: Type-safe oRPC procedures with validation and error handling
+- **UI/UX**: Modern, accessible components with Shadcn UI
+- **Internationalization**: Multi-language support
+- **Session Integration**: Seamless user experience for logged-in users
+- **Error Handling**: Comprehensive error management and user feedback
+
+The feedback widget serves as an excellent example of how to implement features in supastarter, showcasing the framework's capabilities for building production-ready applications. The modular approach allows for easy extension and customization based on your specific needs.
+
+Key takeaways:
+
+- Start with database schema and work your way up to the UI
+- Use TypeScript for type safety across the entire stack
+- Implement proper validation and error handling
+- Consider user experience and accessibility
+- Plan for scalability and maintenance
+- Follow the established patterns in your codebase
+
+This pattern can be applied to build other features like contact forms, support tickets, or any user input system. The feedback widget demonstrates the power and flexibility of the supastarter framework for building real-world applications.

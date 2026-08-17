@@ -1,0 +1,16 @@
+{
+  "title": "Analytics",
+  "defaultOpen": false,
+  "pages": [
+    "overview",
+    "google",
+    "mixpanel",
+    "pirsch",
+    "plausible",
+    "umami",
+    "vercel",
+    "posthog",
+    "vemetric",
+    "custom"
+  ]
+}

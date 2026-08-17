@@ -1,0 +1,90 @@
+---
+title: DigitalOcean Spaces
+description: Learn how to use DigitalOcean Spaces as your storage provider with supastarter.
+---
+
+DigitalOcean Spaces is an S3-compatible object storage service with a built-in CDN. It offers simple, predictable pricing and works seamlessly with supastarter's storage system since it implements the S3 API.
+
+## 1. Create a Space
+
+Log in to the [DigitalOcean Control Panel](https://cloud.digitalocean.com) and navigate to **Spaces Object Storage**. Click **Create a Spaces Bucket**.
+
+- **Choose a datacenter region**: Select the region closest to your deployment
+- **CDN**: Enable if you want to serve files via DigitalOcean's CDN
+- **Restrict File Listing**: Keep enabled for security
+- **Choose a name**: Enter a unique name (e.g., `your-app-avatars`)
+
+## 2. Generate Spaces access keys
+
+Navigate to **API** in the left sidebar, then scroll to the **Spaces Keys** section. Click **Generate New Key**.
+
+Give your key a name and copy the **Access Key** and **Secret Key**. The secret key is only shown once.
+
+## 3. Configure environment variables
+
+Add the following to your `.env.local` file:
+
+```bash copy title=".env.local"
+S3_ACCESS_KEY_ID="your-spaces-access-key"
+S3_SECRET_ACCESS_KEY="your-spaces-secret-key"
+S3_ENDPOINT="https://nyc3.digitaloceanspaces.com"
+S3_REGION="nyc3"
+```
+
+Replace the region with your Space's region. Common regions include `nyc3`, `sfo3`, `ams3`, `sgp1`, and `fra1`.
+
+The endpoint follows the pattern `https://<region>.digitaloceanspaces.com`.
+
+## 4. Configure CORS
+
+DigitalOcean Spaces requires explicit CORS configuration for browser-based uploads. In the DigitalOcean Control Panel, navigate to your Space → **Settings** → **CORS Configurations**.
+
+Click **Add** and configure:
+
+- **Origin**: `https://your-domain.com` (add `http://localhost:3000` for development)
+- **Allowed Methods**: GET, PUT, POST, DELETE, HEAD
+- **Allowed Headers**: `*`
+- **Max Age**: `3600`
+
+<Callout>
+  CORS configuration is required for DigitalOcean Spaces. Without it, presigned
+  URL uploads from the browser will fail with CORS errors.
+</Callout>
+
+## 5. Test the upload
+
+Start your development server and test a file upload:
+
+```bash copy
+pnpm dev
+```
+
+Navigate to your account settings and try uploading a profile picture to verify the connection.
+
+## Using the built-in CDN
+
+If you enabled the CDN when creating your Space, files can be served from a CDN URL like:
+
+```
+https://your-app-avatars.nyc3.cdn.digitaloceanspaces.com/path/to/file.jpg
+```
+
+You can also configure a custom subdomain for the CDN in the Space settings.
+
+## Frequently asked questions
+
+### How much does DigitalOcean Spaces cost?
+
+Spaces starts at $5/month, which includes 250 GB of storage and 1 TB of outbound transfer. Additional storage is $0.02/GB per month and additional transfer is $0.01/GB.
+
+### Is the CDN included?
+
+Yes, Spaces includes a free CDN that you can enable when creating the Space. The CDN caches your files at edge locations globally for faster delivery.
+
+### Do I need to set up CORS?
+
+Yes. Unlike some other S3-compatible providers, DigitalOcean Spaces does not have permissive default CORS settings. You must explicitly configure CORS to allow browser-based uploads via presigned URLs.
+
+### Can I use Spaces with a custom domain?
+
+Yes. You can configure a custom subdomain (e.g., `files.your-domain.com`) in the Space settings by adding a CNAME DNS record pointing to the Spaces CDN endpoint.

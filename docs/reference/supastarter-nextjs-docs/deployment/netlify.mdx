@@ -1,0 +1,44 @@
+---
+title: Netlify
+description: Learn how to deploy your supastarter application to Netlify.
+---
+
+In this guide we will show you how to easily deploy your supastarter SaaS with Netlify.
+
+Before we start, make sure you have a Netlify account. If you don't have one yet, you can create one for free at [netlify.com](https://netlify.com).
+
+## 1. Create a new project
+
+After creating an account, you should see a prompt on the dashboard to create a new site from a Git repository. Click on the _Import from Git_ button.
+
+![Create a new project](/images/blog/netlify-start-project.png)
+
+## 2.Select your repository
+
+If not already done, you will be asked to connect your Git provider account. After that, you can select the repository you want to deploy.
+
+![Select a repository](/images/blog/netlify-connect-git.png)
+
+## 3. Configure the build
+
+After selecting the repository, you will be promted to configure the build settings. Usually Netlify will detect the correct settings automatically. If not, you can configure them manually like in the screenshot below:
+
+![Configure the deployment](/images/blog/netlify-configure-project.png)
+
+![Build configuration](/images/blog/netlify-deployment-configuration.png)
+
+Make sure to copy and paste all the envs from your local `.env.local` file to the Netlify build settings in the `Environment Variables` section.
+
+## 5. Deploy the site
+
+Now click on the _Deploy site_ button and wait for the deployment to finish. After that, you should be able to visit your freshly deployed SaaS.
+
+---
+
+### 💡 Tip: Select function region for better performance
+
+After your site has been deployed, go to `Site configuration` -> `Build & deploy` -> `Functions region` and select the region closest region to where your database is hosted. This will reduce the loading time of your api functions and improve the overall performance of your SaaS.
+
+Make sure to redeploy your site after changing the region by clicking the _Trigger deploy_ button on the `Deploys` page of your project.
+
+![Select functions region](/images/blog/netlify-functions-region.png)

@@ -1,0 +1,40 @@
+{
+	"name": "@startkiter/api",
+	"version": "0.0.0",
+	"main": "./index.ts",
+	"scripts": {
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:coverage": "vitest run --coverage",
+		"type-check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@orpc/client": "catalog:",
+		"@orpc/json-schema": "catalog:",
+		"@orpc/openapi": "catalog:",
+		"@orpc/server": "catalog:",
+		"@orpc/zod": "catalog:",
+		"@startkiter/ai": "workspace:*",
+		"@startkiter/auth": "workspace:*",
+		"@startkiter/database": "workspace:*",
+		"@startkiter/i18n": "workspace:*",
+		"@startkiter/logs": "workspace:*",
+		"@startkiter/notifications": "workspace:*",
+		"@startkiter/payments": "workspace:*",
+		"@startkiter/permissions": "workspace:*",
+		"@startkiter/storage": "workspace:*",
+		"@startkiter/utils": "workspace:*",
+		"@sindresorhus/slugify": "catalog:",
+		"hono": "catalog:",
+		"nanoid": "catalog:",
+		"permix": "catalog:",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@startkiter/tsconfig": "workspace:*",
+		"@vitest/coverage-v8": "catalog:",
+		"typescript": "catalog:",
+		"vitest": "catalog:"
+	}
+}

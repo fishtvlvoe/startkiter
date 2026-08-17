@@ -1,0 +1,155 @@
+---
+title: Lemonsqueezy
+description: Learn how to set up Lemonsqueezy with supastarter.
+---
+
+## Create an api key
+
+After you have created your account and a store for [Lemonsqueezy](https://lemonsqueezy.com/), you will need to create a new API key. You can do this by going to the [API page](https://app.lemonsqueezy.com/settings/api) in the settings and clicking on the plus button. You will need to give your API key a name and then click on the "Create" button. Once you have created your API key, you will need to copy the API key to use it in the setup of the integration when running the CLI.
+
+## Add environment variables
+
+To use the Lemonsqueezy integration, you need to define the following environment variables to your `.env.local` as well as your production environment:
+
+```bash title=".env.local" copy
+LEMONSQUEEZY_API_KEY="" # Your Lemonsqueezy API key
+LEMONSQUEEZY_SIGNING_SECRET="" # Your Lemonsqueezy webhook signing secret
+LEMONSQUEEZY_STORE_ID="" # Your Lemonsqueezy store ID (can be found under Settings > Stores next to your store url, e.g #12345)
+```
+
+## Create products
+
+For your users to choose from the available subscription plans, you need to create those _Products_ first on the [Products page](https://app.lemonsqueezy.com/products). You can create as many products as you want, but you will need to create at least one product for the integration to work.
+
+Create as many plans as you like. Each plan has to be created as a _Subscription_ and you can choose the interval of the subscription.
+
+![Create a product](/images/documentation/lemonsqueezy-new-product.png)
+
+![Subscription interval](/images/documentation/lemonsqueezy-subscription-interval.png)
+
+To offer multiple intervals for each plan, you can use the _Variant_ feature of Lemonsqueezy. Just create one variant for each interval you want to offer. supastarter will automatically output the variants for you then in the UI.
+
+To offer a free trial, you can set the _Trial period_ to the number of days you want to offer the trial for.
+
+![Trial period](/images/documentation/lemonsqueezy-trial.png)
+
+## Set up products in app
+
+The created products have to be defined in the `packages/payments/config.ts` file:
+
+```js title="packages/payments/config.ts"
+export const config = {
+	plans: {
+		plans: {
+		pro: {
+			recommended: true,
+			prices: [
+				{
+					type: "subscription",
+					priceId: process.env.PRICE_ID_PRO_MONTHLY as string,
+					interval: "month",
+					amount: 29,
+					currency: "USD",
+					seatBased: true,
+					trialPeriodDays: 7,
+				},
+				{
+					type: "subscription",
+					priceId: process.env.PRICE_ID_PRO_YEARLY as string,
+					interval: "year",
+					amount: 290,
+					currency: "USD",
+					seatBased: true,
+					trialPeriodDays: 7,
+				},
+			],
+		},
+	},
+};
+```
+
+We are using envs for the product ids, so you can define different product ids for each environment, as you probably want to use the test mode for development.
+
+Define the product ids in your `.env.local` and in the environment variables of your production environment:
+
+```bash title=".env.local" copy
+PRICE_ID_PRO_MONTHLY=""
+PRICE_ID_PRO_YEARLY=""
+```
+
+Learn more about the payment plans configuration in [_Manage plans and products_ documentation](/docs/nextjs/payments/plans).
+
+## Create webhook
+
+To sync the current subscription status and other information to your database, you need to set up a webhook.
+
+The webhook code comes ready to use with supastarter, you just have to create the webhook in Lemonsqueezy and insert the URL for your project.
+
+To configure a new webhook, go to the [Webhooks page](https://app.lemonsqueezy.com/settings/webhooks) in the lemonsqueezy settings and click the _Plus_ button.
+
+You will have to enter a _Signing secret_ which you can get by running the following command in your terminal:
+
+```bash
+openssl rand -base64 32
+```
+
+Copy the generated string and paste it into the _Signing secret_ field.
+
+**You also need to add this secret to your environment variables**:
+
+```bash title=".env.local"
+LEMONSQUEEZY_WEBHOOK_SECRET=your-signing-secret
+```
+
+Then select all events and click on the _Save webhook_ button.
+
+![Create a webhook](/images/documentation/lemonsqueezy-webhook.png)
+
+To get the URL for the webhook, read the next section.
+
+### Local development
+
+If you want to test the webhook locally, you can use [ngrok](https://ngrok.com/) to create a tunnel to your local machine. Ngrok will then give you a URL that you can use to test the webhook locally.
+
+To do so, install ngrok and run it with the following command (while your supastarter development server is running):
+
+```bash
+ngrok http 3000
+```
+
+![ngrok](/images/documentation/ngrok.png)
+
+This will give you a URL (see the _Forwarding_ output) that you can use to create a webhook in Lemonsqueezy. Just use that url and add `/api/webhooks/payments` to it.
+
+### Production / preview deployment
+
+When you have already deployed a version of your project, you can use the actual URL to create the webhook with. This will be necessary for a production version your app later anyway.
+
+**Make sure you have a deployed version that has the `LEMONSQUEEZY_WEBHOOK_SECRET` environment variable set.**
+
+Then you can use the URL of your deployed app and add `/api/webhooks/payments` to it.
+
+Example URL: `https://your-app.com/api/webhooks/payments`
+
+## Set currency in your app
+
+Lastly you need to configure the currency that you want to use for your products. Since Lemonsqueezy only supports one currency per shop, this will be the same for all languages in your app.
+
+You can do this by setting the `currency` property for each locale in the config file.
+
+```js title="packages/payments/config.ts"
+export const config = {
+  // ...
+  locales: {
+    en: {
+      currency: "USD",
+      language: "en",
+    },
+    de: {
+      currency: "EUR",
+      language: "de",
+    },
+  },
+  // ...
+};
+```

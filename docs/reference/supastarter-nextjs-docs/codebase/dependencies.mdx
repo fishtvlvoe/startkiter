@@ -1,0 +1,197 @@
+---
+title: Manage dependencies
+description: Learn how to manage dependencies in supastarter.
+---
+
+As the package manager we chose [pnpm](https://pnpm.io/).
+
+<Callout title="Why pnpm">
+  It is a fast, disk space efficient package manager that uses hard links and
+  symlinks to save one version of a module only ever once on a disk. It also has
+  a great [monorepo support](https://pnpm.io/workspaces).
+</Callout>
+
+## Install a package
+
+To install a package to the supastarter monorepo you need to decide whether you want to install it to the root of the monorepo or to a specific workspace. Installing it to the root makes it available to all packages, while installing it to a specific workspace makes it available only to that workspace.
+
+To install a package globally, run:
+
+```bash
+pnpm add -w <package-name>
+```
+
+To install a package to a specific workspace, run:
+
+```bash
+pnpm add --filter <workspace-name> <package-name>
+```
+
+Here is a list of the workspaces of supastarter:
+
+- web
+- api
+- auth
+- database
+- mail
+- eslint-config-custom
+- tsconfig
+- tailwind
+- utils
+
+## Remove a package
+
+Removing a package is the same as installing but with the `remove` command.
+
+To remove a package globally, run:
+
+```bash
+pnpm remove -w <package-name>
+```
+
+To remove a package to a specific workspace, run:
+
+```bash
+pnpm remove --filter <workspace-name> <package-name>
+```
+
+## Update a package
+
+Updating is a bit easier since there is a nice way to update a package in all workspaces at once:
+
+```bash
+pnpm update -r <package-name>
+```
+
+## Supply-chain safeguard
+
+supastarter no longer ships Dependabot. Dependency updates are manual — use commands like `pnpm update -r <package-name>` or `pnpm outdated -r` to check for available updates.
+
+The workspace still enforces a built-in supply-chain safeguard in `pnpm-workspace.yaml`:
+
+```yaml
+minimumReleaseAge: 1440
+```
+
+This setting blocks installing package versions published less than 24 hours ago, including transitive dependencies. Any automation you set up must respect this — freshly published versions will fail `pnpm install` until they are at least one day old.
+
+## Automate updates with AI agents (recommended)
+
+We recommend scheduling a daily AI agent automation as a modern replacement for Dependabot. The agent checks for safe updates, validates the codebase, and opens a draft pull request for you to review.
+
+### Cursor Automations
+
+Create an automation at [cursor.com/automations](https://cursor.com/automations) with:
+
+- **Trigger**: Scheduled (e.g. daily at 9:00 AM)
+- **Repository**: your starter repo
+- **Tools**: enable Pull request creation (draft PRs)
+
+See the [Cursor Automations docs](https://cursor.com/docs/cloud-agent/automations) for details.
+
+### Claude Code Routines
+
+Create a routine at [claude.ai/code/routines](https://claude.ai/code/routines) or via the `/schedule daily dependency updates at 9am` command in Claude Code. Attach your GitHub repository and use a **Schedule** trigger.
+
+See the [Claude Code Routines docs](https://code.claude.com/docs/en/routines) for details.
+
+### Traditional alternatives
+
+If you prefer rule-based bots, you can also configure [Renovate](https://docs.renovatebot.com/) or [GitHub Dependabot](https://docs.github.com/en/code-security/dependabot) yourself.
+
+### Best practices
+
+1. **Start narrow** — auto-apply patch and minor updates only; skip major version bumps and report them for manual review
+2. **Open draft PRs only** — never merge to `main` automatically; require human review
+3. **Validate before opening a PR** — run lint, type-check, and tests; stop without a PR if validation fails
+4. **Respect `minimumReleaseAge`** — if `pnpm install` fails because a version is too new, skip it and note it in the PR body or run report
+5. **Always commit the lockfile** — include `pnpm-lock.yaml` changes in the PR; no lockfile update means no dependency change
+6. **Keep scope bounded** — one PR per run; avoid broad upgrade churn
+7. **Use explicit guardrails in the prompt** — tell the agent what to do when tests fail, when no updates exist, or when a change is risky
+8. **Build trust gradually** — review the first several runs manually before relying on the automation
+9. **Store the prompt in your repo** (optional) — e.g. `.cursor/automations/dependency-updates.md` for auditability and version control
+
+<Callout title="Framework-specific exclusions">
+  Major `cropperjs` upgrades are intentionally deferred in the starter pending
+  migration work. Skip or report them for manual review.
+</Callout>
+
+### Example automation prompt
+
+Copy this prompt into your Cursor Automation or Claude Code Routine. Adjust validation commands if your repo uses different scripts.
+
+```
+You are a daily dependency update automation for this supastarter monorepo.
+
+## Goal
+
+Check for safe dependency updates, apply them, validate the codebase, and open a single draft pull request. Prefer doing nothing over opening a risky PR.
+
+## Step 1 — Discover updates
+
+1. Fetch latest from the default branch and create a new branch named `chore/deps-YYYY-MM-DD`.
+2. Run `pnpm outdated -r` to list available updates across all workspaces.
+3. Categorize each update:
+   - PATCH or MINOR within the current major → eligible for auto-update
+   - MAJOR version bump → skip; list in the report for manual review
+   - Intentionally pinned (exact version, no ^/~) → skip
+   - cropperjs major upgrades → skip; deferred pending migration work
+
+## Step 2 — Apply safe updates
+
+1. Apply eligible patch and minor updates with `pnpm update -r <package>` (or workspace-scoped commands as needed).
+2. Respect `minimumReleaseAge: 1440` in `pnpm-workspace.yaml`. If `pnpm install` fails because a version was published less than 24 hours ago, revert that specific update and note it as skipped.
+3. Do not add new dependencies. Do not change application code unless a type error requires a trivial fix to make the update compile.
+4. Commit lockfile changes with message: `chore(deps): update patch and minor dependencies`.
+
+## Step 3 — Validate
+
+Run these commands in order. Stop without opening a PR if any step fails:
+
+1. `pnpm install --frozen-lockfile`
+2. `pnpm lint`
+3. `pnpm type-check`
+4. `pnpm test` (or the repo's standard test command)
+
+If validation fails, revert your dependency changes and produce a report-only summary explaining what failed.
+
+## Step 4 — Open a draft PR
+
+If updates were applied and validation passed:
+
+1. Push the branch.
+2. Open a draft pull request against the default branch.
+3. Use title: `chore(deps): daily dependency updates`
+4. Include this PR body structure:
+
+   ## Summary
+   List packages updated with old → new versions.
+
+   ## Skipped (major versions)
+   List major bumps deferred for manual review.
+
+   ## Skipped (minimum release age)
+   List packages blocked by pnpm minimumReleaseAge.
+
+   ## Validation
+   Commands run and their results.
+
+   ## Residual risk
+   Note any areas that may need manual testing (auth, payments, etc.).
+
+If no eligible updates exist, stop without opening a PR and report "No safe updates available."
+
+## Guardrails
+
+Never:
+- Merge PRs or enable auto-merge
+- Force major version upgrades (`pnpm update --latest` on majors)
+- Edit CI workflows, auth config, or deployment scripts
+- Open more than one PR per run
+- Proceed if lockfile and manifest are out of sync
+
+Always:
+- Include `pnpm-lock.yaml` in the commit
+- Keep changes limited to dependency and lockfile files
+- Prefer the smallest safe version bump that resolves the update
+```

@@ -1,0 +1,72 @@
+---
+title: Internationalization
+description: Learn how to use internationalization in supastarter.
+---
+
+For internationaliztion supastarter integrates [next-intl](https://next-intl-docs.vercel.app/).
+
+<Callout emoji="💡">
+  **Why next-intl:** <br />
+  next-intl is a lightweight internationalization library for Next.js and comes
+  with support for both server and client components in the app router. It also
+  supports automatic language detection and url based language routing.
+</Callout>
+
+## Usage
+
+### Server components
+
+In server components you can use the `getTranslations` method:
+
+```tsx copy
+import { getTranslations } from "next-intl/server";
+
+export default async function MyServerComponent() {
+  const t = await getTranslations();
+
+  return <div>{t("hello")}</div>;
+}
+```
+
+### Client components
+
+In client components you can use the `useTranslations` hook like so:
+
+```tsx copy
+"use client";
+import { useTranslations } from "next-intl";
+
+export default function MyClientComponent() {
+  const t = useTranslations();
+
+  return <div>{t("hello")}</div>;
+}
+```
+
+## Translations
+
+Translations are scoped by surface. supastarter splits messages into:
+
+- `marketing`
+- `saas`
+- `mail`
+- `shared`
+
+The supported locales are:
+
+- `en`
+- `de`
+- `es`
+- `fr`
+
+Use `getMessagesForLocale(locale, scope)` to load the messages for the active surface. Shared messages are merged in, and missing translations fall back to the default locale.
+
+### Add a new locale
+
+To add a new locale, add the locale to your i18n config and provide message files for the scopes you use in your app.
+
+For example, if you add French, make sure the `marketing`, `saas`, `mail`, and `shared` message scopes all contain a `fr` variant when needed.
+
+## Notes
+
+The marketing app owns locale-aware public routes, while the SaaS app owns locale-aware product routes. Both use the same scoped i18n system.

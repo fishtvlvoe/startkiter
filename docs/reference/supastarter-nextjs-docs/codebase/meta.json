@@ -1,0 +1,12 @@
+{
+  "title": "Working with the codebase",
+  "defaultOpen": false,
+  "pages": [
+    "structure",
+    "vscode",
+    "update",
+    "dependencies",
+    "formatting-and-linting",
+    "..."
+  ]
+}

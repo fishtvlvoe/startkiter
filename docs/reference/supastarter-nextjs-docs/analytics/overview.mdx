@@ -1,0 +1,77 @@
+---
+title: Overview
+description: Learn how to use analytics in supastarter.
+---
+
+supastarter comes with a generic analytics module that enables you to integrate analytics providers and track custom events.
+
+## Setup analytics
+
+In the `apps/web/modules/analytics/index.ts` file, export the provider file of the provider you want to use:
+
+```ts
+export * from "./provider/google";
+// or export * from './provider/mixpanel';
+// or export * from './provider/pirsch';
+// or export * from './provider/plausible';
+// or export * from './provider/umami';
+// or export * from './provider/vercel';
+// or export * from './provider/posthog';
+// or export * from './provider/custom';
+```
+
+To learn how to set up your analytics provider, check out the respective documentation:
+
+<Cards>
+  <Card title="Google Analytics" href="/docs/nextjs/analytics/google" />
+  <Card title="Mixpanel" href="/docs/nextjs/analytics/mixpanel" />
+  <Card title="Pirsch" href="/docs/nextjs/analytics/pirsch" />
+  <Card title="Plausible" href="/docs/nextjs/analytics/plausible" />
+  <Card title="Umami" href="/docs/nextjs/analytics/umami" />
+  <Card title="Vercel" href="/docs/nextjs/analytics/vercel" />
+  <Card title="Vemetric" href="/docs/nextjs/analytics/vemetric" />
+  <Card title="PostHog" href="/docs/nextjs/analytics/posthog" />
+  <Card title="Custom" href="/docs/nextjs/analytics/custom" />
+</Cards>
+
+## Analytics script component
+
+The analytics script component that is part of the provider file you exported in the first step is automatically included in the application:
+
+```tsx title="apps/web/modules/shared/components/Document.tsx"
+export function Document({ children }: PropsWithChildren) {
+  return (
+    <html>
+      <body>
+        {children}
+        <AnalyticsScript />
+      </body>
+    </html>
+  );
+}
+```
+
+Now your app will include the analytics script and track page views.
+
+## Track custom events
+
+To track custom events, import the `useAnalytics` hook and use the `trackEvent` function:
+
+```tsx {1,4,6}
+import { useAnalytics } from "@analytics";
+
+export function YourComponent() {
+  const { trackEvent } = useAnalytics();
+
+  return (
+    <button onClick={() => trackEvent("button-clicked", { value: "asdf" })}>
+      Click me
+    </button>
+  );
+}
+```
+
+The `trackEvent` function takes two arguments:
+
+- `event`: The name of the event
+- `data`: An object containing additional data about the event

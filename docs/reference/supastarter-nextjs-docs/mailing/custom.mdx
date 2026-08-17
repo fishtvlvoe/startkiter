@@ -1,0 +1,38 @@
+---
+title: Custom provider
+description: Learn how to create a custom provider for sending emails.
+---
+
+You can create your own mail provider by creating a new file in the `packages/mail/provider` folder and implementing the
+`SendEmailHandler` interface:
+
+```ts copy title="packages/mail/provider/my-provider.ts"
+import { config } from "../config";
+import type { SendEmailHandler } from "../types";
+
+const { from } = config;
+
+export const send: SendEmailHandler = async ({ to, subject, text, html }) => {
+  // handle your custom email sending logic here
+  // Example implementation:
+  // await myEmailService.send({
+  //   from,
+  //   to,
+  //   subject,
+  //   text,
+  //   html,
+  // });
+};
+```
+
+Then, make sure to export your custom provider in the `/packages/mail/provider/index.ts`:
+
+```typescript copy title="packages/mail/provider/index.ts"
+export * from "./my-provider";
+```
+
+<Callout title="Supported providers">
+  supastarter comes with several built-in providers: Resend, Nodemailer,
+  Postmark, and Console (for development). Consider using one of these providers
+  before creating a custom one.
+</Callout>

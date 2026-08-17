@@ -3,18 +3,22 @@
 	"private": true,
 	"packageManager": "pnpm@11.20.0",
 	"scripts": {
-		"build": "pnpm --filter @startkiter/saas build",
-		"dev": "pnpm --filter @startkiter/saas dev",
+		"build": "dotenv -c -- turbo build",
+		"dev": "dotenv -c -- turbo dev --concurrency 15",
 		"e2e": "playwright test",
-		"test": "vitest run",
+		"test": "dotenv -c -- turbo test",
 		"test:watch": "vitest",
-		"type-check": "tsc --noEmit"
+		"type-check": "dotenv -c -- turbo type-check"
 	},
 	"devDependencies": {
-		"@playwright/test": "1.58.0",
-		"@types/node": "^22.0.0",
-		"turbo": "^2.10.7",
-		"typescript": "^5.9.0",
-		"vitest": "^4.1.10"
+		"@playwright/test": "catalog:",
+		"@types/node": "catalog:",
+		"dotenv-cli": "catalog:",
+		"turbo": "^2.10.10",
+		"typescript": "catalog:",
+		"vitest": "catalog:"
+	},
+	"engines": {
+		"node": ">=22"
 	}
 }

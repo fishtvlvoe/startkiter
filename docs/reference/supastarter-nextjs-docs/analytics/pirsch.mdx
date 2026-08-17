@@ -1,0 +1,24 @@
+---
+title: Pirsch
+description: Learn how to use Pirsch Analytics with supastarter.
+---
+
+To use Mixpanel with supastarter, first [create a Pirsch account](https://pirsch.io/) and get your app code.
+
+Then, add the app code to your `.env.local` file and your deployment environment:
+
+```bash copy
+NEXT_PUBLIC_PIRSCH_CODE=your_code_here
+```
+
+Next, we need to activate Pirsch as the analytics provider. To do this, open `apps/web/modules/analytics/index.tsx` and change the content to:
+
+```typescript copy
+export * from "./provider/pirsch";
+```
+
+To customize the Pirsch configuration, edit the `apps/web/modules/analytics/provider/pirsch/index.tsx`.
+
+Learn more about analytics with Pirsch in the [official documentation](https://docs.pirsch.io/).
+
+For further instructions, follow the [general analytics instructions](/docs/nextjs/analytics/overview).

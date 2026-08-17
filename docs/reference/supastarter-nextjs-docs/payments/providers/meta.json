@@ -1,0 +1,5 @@
+{
+  "title": "Payment providers",
+  "defaultOpen": false,
+  "pages": ["stripe", "lemonsqueezy", "creem", "polar", "dodopayments"]
+}

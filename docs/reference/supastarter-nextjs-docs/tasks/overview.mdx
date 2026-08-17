@@ -1,0 +1,23 @@
+---
+title: Overview
+description: Learn how to create background tasks & cron jobs in your supastarter application.
+---
+
+With every larger application, you'll get to a point where you need to run tasks in the background or want to queue up or schedule tasks to be executed.
+This could be sending emails, processing images, or any other task that doesn't need to be done immediately, take too long for an API call, or need to be run at a specific time.
+
+There are multiple approaches to implement tasks in your supastarter application.
+
+## Serverless environments
+
+If you deploy your application in a serverless environment, you want to use a third-party service to schedule and trigger your tasks like [trigger.dev](https://trigger.dev) or [upstash](https://upstash.com/docs/cron):
+
+<Cards>
+  <Card title="trigger.dev" href="/docs/nextjs/tasks/trigger-dev" />
+  <Card title="Upstash QStash" href="/docs/nextjs/tasks/qstash" />
+  <Card title="Queuebase" href="/docs/nextjs/tasks/queuebase" />
+</Cards>
+
+## Self-hosted environments
+
+If you have your backend deployed on a long-running server like described in our [standalone API documentation](/docs/nextjs/deployment/standalone-api), you can also use libraries like [bullmq](https://docs.bullmq.io/) to create and schedule background tasks.

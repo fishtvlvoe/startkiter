@@ -1,0 +1,22 @@
+---
+title: Postmark
+description: Learn how to use Postmark for sending emails.
+---
+
+To use postmark with supastarter, first [create a postmark account](https://postmark.com/) and grab your `server token`.
+
+Add the following environment variables to your `.env.local` file and your deployment environment:
+
+```bash title=".env.local" copy
+POSTMARK_SERVER_TOKEN="your-server-token"
+```
+
+Then, make sure to activate Postmark in the `/packages/mail/provider/index.ts`:
+
+```typescript copy
+export * from "./postmark";
+```
+
+To customize the provider, edit the `packages/mail/provider/postmark/index.ts`.
+
+For further instructions, follow the [general mail instructions](/docs/nextjs/mailing/overview).

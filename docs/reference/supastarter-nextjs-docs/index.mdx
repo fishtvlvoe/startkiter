@@ -1,0 +1,187 @@
+---
+title: Introduction
+icon: Home
+description: Welcome to the supastarter for Next.js documentation. This is the place to get started with the starter kit, learn about the structure, its features and how to use it.
+---
+
+## What is supastarter?
+
+supastarter is a fullstack starter kit that helps you build production-ready and scalable web applications faster. It comes with the most common features you need to build a SaaS and embodies best practices and a solid foundation for large applications.
+
+The Next.js codebase is organized as dedicated applications for each surface:
+
+- `apps/marketing` for the public marketing site
+- `apps/saas` for the actual SaaS application
+- `apps/docs` for the documentation site
+- `apps/mail-preview` for email previews during development
+
+<Callout title="Download documentation as .md files">
+  As this is a common request, the latest version of the documentation is at any
+  time available for download as .md files.
+  <a
+    href="https://supastarter.dev/nextjs-docs.zip"
+    target="_blank"
+    rel="noreferrer"
+  >
+    Download Next.js documentation
+  </a>
+</Callout>
+
+### Popular guides
+
+<Cards>
+  <Card
+    title="Setup"
+    description="Get your supastarter application up and running."
+    href="/docs/nextjs/setup"
+  />
+  <Card
+    title="Local development"
+    description="Set up your local environment for offline development."
+    href="/docs/nextjs/codebase/local-development"
+  />
+  <Card
+    title="Supabase setup"
+    description="Set up your app with Supabase as database and storage."
+    href="/docs/nextjs/recipes/supabase-setup"
+  />
+  <Card
+    title="Configuration"
+    description="Learn how to configure your supastarter application."
+    href="/docs/nextjs/configuration"
+  />
+  <Card
+    title="Build a feedback widget"
+    description="Complete guide from database to UI."
+    href="/docs/nextjs/recipes/build-a-feedback-widget"
+  />
+  <Card
+    title="Super Admin & Admin UI"
+    description="Admin role and UI for managing users and organizations."
+    href="/docs/nextjs/authentication/superadmin"
+  />
+</Cards>
+
+## App architecture
+
+The public site and the product app are separate Next.js applications. Each app has its own `package.json`, `next.config.ts`, `tsconfig.json`, layouts, global styles, and Playwright config.
+
+Use `apps/marketing` for homepage, blog, changelog, legal pages, contact pages, sitemap generation, and locale-aware public routes.
+
+Use `apps/saas` for authentication, onboarding, organizations, billing, admin, protected product routes, and API routes.
+
+## Features
+
+supastarter comes packed with everything you need to build a production-ready SaaS. To try it out, check out the [live demo](https://demo.supastarter.dev).
+
+#### Marketing site
+
+- Responsive [landing page](https://demo.supastarter.dev) with hero, features, FAQ, and newsletter signup sections
+- [Pricing page](https://demo.supastarter.dev/pricing) with plan comparison
+- [Blog](https://demo.supastarter.dev/blog) with MDX-based content and i18n support
+- [Changelog page](https://demo.supastarter.dev/changelog)
+- [Contact page](https://demo.supastarter.dev/contact)
+- Legal pages ([Terms of service](https://demo.supastarter.dev/legal/terms), [Privacy policy](https://demo.supastarter.dev/legal/privacy-policy))
+- [Documentation site](https://demo.supastarter.dev/docs) with automatic table of contents
+- SEO optimization with meta tags and sitemap generation
+
+#### Authentication
+
+- Powered by [better-auth](/docs/nextjs/authentication) with email/password, magic link, and OAuth social login (Google, GitHub, Apple, and more)
+- Login, signup, password reset, and email verification flows
+- User session management
+- Role-based permissions and access control
+- [Super admin panel](/docs/nextjs/authentication/superadmin) for managing users and organizations
+
+#### Organizations & multi-tenancy
+
+- [Multi-tenancy with organizations](/docs/nextjs/organizations) — users can create and manage teams
+- Invite members with role-based permissions (owner, member)
+- Organization-specific settings, avatars, and data isolation
+
+#### Payments & billing
+
+- [5 payment providers](/docs/nextjs/payments): Stripe, Lemon Squeezy, Creem, Polar, and Dodo Payments
+- Subscription management with monthly, yearly, and one-time plans
+- Plan upgrades, downgrades, and cancellations
+- Webhook processing and billing portal
+- [Paywall components](/docs/nextjs/payments/paywall) for gating features
+
+#### Database & ORM
+
+- [Prisma or Drizzle ORM](/docs/nextjs/database) support
+- PostgreSQL (default), MySQL, and SQLite compatibility
+- [Provider guides](/docs/nextjs/database/providers) for Neon, Supabase, PlanetScale, Turso, and Railway
+
+#### API layer
+
+- [Hono server framework](/docs/nextjs/api) with oRPC for type-safe frontend-backend communication
+- TanStack Query integration for data fetching
+- OpenAPI documentation generation
+- Protected endpoints with locale support
+
+#### File storage
+
+- [S3-compatible storage](/docs/nextjs/storage) with support for AWS S3, Cloudflare R2, DigitalOcean Spaces, MinIO, and Supabase Storage
+- Presigned URLs for secure file uploads
+- User avatar and organization logo uploads
+
+#### Email & mailing
+
+- [React Email](/docs/nextjs/mailing) integration with Tailwind CSS styling
+- Multiple providers: Resend, Postmark, Nodemailer
+- Email templates with full i18n support
+- Mail preview app for development
+
+#### AI features
+
+- [Vercel AI SDK integration](/docs/nextjs/ai) with support for OpenAI, Anthropic, and more
+- AI chatbot with chat history
+- Text, image, and audio model support
+
+#### Background tasks
+
+- [Serverless and self-hosted options](/docs/nextjs/tasks): trigger.dev, Upstash QStash, and BullMQ
+- Scheduled tasks, email processing, and more
+
+#### Internationalization (i18n)
+
+- Multi-language support across the entire app
+- Language switcher and automatic browser language detection
+- Locale-based currency support (Stripe)
+- Included translations for English and German
+
+#### Analytics & monitoring
+
+- [Analytics providers](/docs/nextjs/analytics): Google Analytics, Mixpanel, Pirsch, Plausible, Umami, PostHog, Vercel, and Vemetric
+- Custom event and page view tracking
+- [Sentry integration](/docs/nextjs/monitoring) for error tracking and performance monitoring
+
+#### Developer experience
+
+- Monorepo architecture with [Turborepo](/docs/nextjs/codebase)
+- Formatting, linting, and VSCode configuration out of the box
+- [Deployment guides](/docs/nextjs/deployment) for Vercel, Render, Fly.io, Netlify, Docker, Coolify, and Railway
+- [AI agent automation for dependency updates](/docs/nextjs/codebase/dependencies#automate-updates-with-ai-agents-recommended)
+
+## Frequently asked questions
+
+### What is supastarter?
+
+supastarter is a production-ready, fullstack SaaS starter kit that helps you build scalable web applications faster. It includes authentication, payments, multi-tenancy, email, storage, analytics, monitoring, AI features, and more — all pre-configured and ready for production.
+
+### Which frameworks does supastarter support?
+
+supastarter supports three major frameworks: **Next.js**, **Nuxt**, and **SvelteKit**. Each framework has its own codebase with the same feature set, so you can choose the one that best fits your team and project.
+
+### Is supastarter open source?
+
+supastarter is a premium starter kit available under a commercial license. You get full access to the source code after purchase, and you can use it for unlimited projects. It is not open source in the traditional sense, but you own the code and can modify it freely.
+
+### How is supastarter different from other SaaS boilerplates?
+
+supastarter stands out through its comprehensive feature set, multi-framework support, monorepo architecture with Turborepo, and production-ready configuration. It includes features like multi-tenancy with organizations, internationalization (i18n), built-in admin panel, and support for 5+ payment providers — all in a well-structured, maintainable codebase.
+
+### Can I use supastarter for multiple projects?
+
+Yes. The license allows you to use supastarter for unlimited projects. Once purchased, you can create as many applications as you want using the starter kit.

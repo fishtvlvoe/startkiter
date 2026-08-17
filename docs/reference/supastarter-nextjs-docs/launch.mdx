@@ -1,0 +1,193 @@
+---
+title: Going to production
+description: Learn how to make your app ready for production and launch it.
+---
+
+This section gives you a checklist of things you need to do before launching your apps and includes common pitfalls to avoid.
+
+We will not cover the deployment process here in detail, please refer to the [deployment](/docs/nextjs/deployment/overview) section for more information.
+
+## App architecture
+
+supastarter ships the public site and the product app as separate Next.js applications:
+
+- `apps/marketing`
+- `apps/saas`
+
+Make sure you review both apps before launch. Marketing owns public pages, blog, changelog, legal pages, and sitemap generation. SaaS owns auth, protected product routes, onboarding, organizations, billing, admin, and API routes.
+
+## Mails
+
+### Mail templates
+
+supastarter includes a hand full of mail templates for things like magic links, email verification, password reset, etc.
+
+![Mail template](/images/documentation/mail-template.png)
+
+You can find them in the `/packages/mail/emails` directory. Each mail template is a React component that you can customize to your needs.
+
+You definitely want to change the logo inside the mail template `Wrapper.tsx` to your own logo. The colors will be automatically adjusted to your brand colors from the tailwind config.
+
+Check the [mailing](/docs/nextjs/mailing/overview) section for more information on how to customize the mail templates.
+
+Preview all mail templates by running `pnpm --filter mail-preview dev` and opening `http://localhost:3003` in your browser.
+
+If you added a new language to your supastarter application, also make sure that all [mail templates are translated](/docs/nextjs/mailing/overview#translations) to the new language, as otherwise the mails might not be displayed correctly.
+
+_Things to check:_
+
+<Checklist>
+  <ChecklistItem>All templates are working</ChecklistItem>
+  <ChecklistItem>Design is consistent with your brand</ChecklistItem>
+  <ChecklistItem>All templates are translated</ChecklistItem>
+  <ChecklistItem>Logo is changed to your own logo</ChecklistItem>
+</Checklist>
+
+### Mail provider and domain
+
+Make sure you have set up your mail provider and domain correctly, so that the mails are sent out correctly and not marked as spam.
+
+Also make sure that you have set up the `from` property in the `packages/mail/config.ts` file to your own email address.
+
+_Things to check:_
+
+<Checklist>
+  <ChecklistItem>Mail provider is set up correctly</ChecklistItem>
+  <ChecklistItem>
+    Domain for sending mails is verified in mail provider
+  </ChecklistItem>
+  <ChecklistItem>
+    `from` config is set to an email address of your domain
+  </ChecklistItem>
+</Checklist>
+
+## Internationalization
+
+supastarter supports multiple languages and allows to switch between them with a language switcher. The available locales are `en`, `de`, `es`, and `fr`, and messages are organized by the `marketing`, `saas`, `mail`, and `shared` scopes.
+
+_Things to check:_
+
+<Checklist>
+  <ChecklistItem>
+    Only the languages you want to support are enabled
+  </ChecklistItem>
+  <ChecklistItem>
+    All keys for the enabled languages are translated
+  </ChecklistItem>
+</Checklist>
+
+## Payments
+
+### Products and subscriptions
+
+Make sure the products or subscriptions you want to offer are set up correctly in the payment provider. Also make sure to use the `production` mode of your payment provider as Stripe and Lemonsqueezy both offer test modes, that you should not use in production.
+
+That means all the prices are set correctly (monthly, yearly, etc.) and if you want to offer your productions in different currencies, make sure to [set up the currencies correctly](/docs/nextjs/payments/plans#support-multiple-currencies).
+
+Plan configuration uses provider `priceId` values, and purchase records use `priceId` as well.
+
+_Things to check:_
+
+<Checklist>
+  <ChecklistItem>
+    All products and subscriptions are set up correctly in `production` mode
+  </ChecklistItem>
+  <ChecklistItem>
+    All prices are set correctly (monthly, yearly, etc.)
+  </ChecklistItem>
+  <ChecklistItem>
+    All currencies supported currencies are defined and configured for each
+    language
+  </ChecklistItem>
+</Checklist>
+
+### Webhoooks
+
+If you have set up billing for your app, you need to [set up webhooks for the payment provider](/docs/nextjs/payments/overview) to sync the purchases to your database.
+
+If you have done this already, make sure you are using the `production` keys and environment variables. Also make sure that the webhook is pointing to your production url.
+
+_Things to check:_
+
+<Checklist>
+  <ChecklistItem>
+    You are using the `production` keys and environment variables from your
+    payment provider
+  </ChecklistItem>
+  <ChecklistItem>Webhook is pointing to your production url</ChecklistItem>
+</Checklist>
+
+## SEO
+
+Especially for the marketing pages you want to make sure that the SEO is set up correctly, so that the pages can be found and indexed by the search engines.
+
+Read the guides on [meta tags](/docs/nextjs/seo/meta-tags) and [sitemap](/docs/nextjs/seo/sitemap) to learn more.
+
+_Things to check:_
+
+<Checklist>
+  <ChecklistItem>All pages have a meta title and description</ChecklistItem>
+  <ChecklistItem>
+    All pages that should be indexed are added to the sitemap
+  </ChecklistItem>
+</Checklist>
+
+## Legal pages
+
+supastarter includes placeholder legal pages like [privacy policy](https://demo.supastarter.dev/legal/privacy-policy). These pages live in the marketing app content under `apps/marketing/content/legal`.
+
+Common legal pages are:
+
+- Privacy policy
+- Terms of service
+- Cookie policy
+- Imprint
+
+Create the legal pages that make sense for your kind of application.
+
+The legal pages are added to the sitemap automatically, so you don't need to worry about that.
+
+_Things to check:_
+
+<Checklist>
+  <ChecklistItem>Define all necessary legal pages</ChecklistItem>
+</Checklist>
+
+## Deployment
+
+### Environment variables
+
+Make sure that all the environment variables that are required for your app to work are set in your deployment environment.
+
+`NEXT_PUBLIC_SAAS_URL` should point to your deployed SaaS app, since auth redirects and public auth links use the SaaS base URL.
+
+_Things to check:_
+
+<Checklist>
+  <ChecklistItem>All environment variables are set correctly</ChecklistItem>
+  <ChecklistItem>
+    Make sure you are using production values for the environment variables
+  </ChecklistItem>
+</Checklist>
+
+### Region
+
+When your have deployed your app to a cloud provider that runs your app (or at least the serverless functions) in a specific region (like Vercel does), you need to make sure that you have selected a region that is:
+
+1. Close to your database location
+2. Close to your target audience
+
+This is important as the latency between the user, the server and the database can have a big impact on the performance of your app.
+
+When you target a global audience, prioritize the first point or choose a platform that has multiple regions. If you deploy to multiple regions, you want to have a globally distributed database too, as otherwise the latency can be too high from some regions.
+
+_Things to check:_
+
+<Checklist>
+  <ChecklistItem>
+    App is deployed to a region close to your database location
+  </ChecklistItem>
+  <ChecklistItem>
+    App is deployed to a region close to your target audience
+  </ChecklistItem>
+</Checklist>

@@ -1,0 +1,22 @@
+{
+	"name": "@startkiter/scripts",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"create:user": "dotenv -c -e ../../.env -- tsx ./src/create-user.ts",
+		"type-check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@startkiter/auth": "workspace:*",
+		"@startkiter/database": "workspace:*",
+		"@startkiter/logs": "workspace:*"
+	},
+	"devDependencies": {
+		"@startkiter/tsconfig": "workspace:*",
+		"@types/node": "catalog:",
+		"nanoid": "catalog:",
+		"tsx": "catalog:",
+		"typescript": "catalog:"
+	}
+}
