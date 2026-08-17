@@ -22,7 +22,10 @@ export async function POST(request: Request) {
 	const session = await auth.api.getSession({ headers: request.headers });
 	let body: { lessonId?: unknown } = {};
 	try {
-		body = (await request.json()) as { lessonId?: unknown };
+		const parsed = await request.json();
+		if (parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)) {
+			body = parsed as { lessonId?: unknown };
+		}
 	} catch {
 		return NextResponse.json({ error: "invalid_body" }, { status: 400 });
 	}
