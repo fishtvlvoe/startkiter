@@ -30,5 +30,6 @@ export {
 } from "./components/form";
 export { Input } from "./components/input";
 export { Label } from "./components/label";
+export { Logo } from "./components/logo";
 export { Spinner } from "./components/spinner";
 export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./components/tooltip";

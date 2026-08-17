@@ -122,3 +122,16 @@ LINE Login Channel 做登入。學員社群用課程內 LINE 邀請連結，不�
 【已廢（不是現行規則）】
 
 「不是賣課平台」「主金流 SHOPLINE」「四堂課對 SHOPLINE」「發票在 MVP」「目前施工 extract-shell-auth」「現行待施工 extract-payuni-checkout」
+
+<!-- graphify:auto:start -->
+## graphify
+
+This project keeps a local knowledge graph in `graphify-out/`.
+
+Rules:
+- For broad codebase questions, read `graphify-out/GRAPH_REPORT.md` before opening source files.
+- For relationship questions, prefer `graphify query`, `graphify path`, or `graphify explain` against this project's local `graphify-out/graph.json`.
+- Do not inspect unrelated sibling projects unless the user explicitly asks for cross-project context.
+- The workspace-level project index is `/Users/fishtv/Development/graphify-projects.json`.
+- Maintained by `/Users/fishtv/Development/batch-graphify.sh` for `products/startkiter`.
+<!-- graphify:auto:end -->

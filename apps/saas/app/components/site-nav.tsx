@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { getMessagesForLocale } from "@startkiter/i18n";
 import type { Locale } from "@startkiter/i18n";
-import { ColorModeToggle } from "@startkiter/ui";
+import { ColorModeToggle, Logo } from "@startkiter/ui";
 
 import { getRequestLocale } from "../../lib/request-locale";
 import { shouldShowOperatorSettingsLink } from "../../lib/operator";
@@ -46,7 +46,7 @@ export async function SiteNav({
 	return (
 		<nav className="nav" aria-label="主要導覽">
 			<Link className="nav-brand" href="/">
-				{messages.brand}
+				<Logo />
 			</Link>
 			<div className="nav-links">
 				{signedIn ? (
