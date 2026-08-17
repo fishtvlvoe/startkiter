@@ -2,36 +2,36 @@
 
 ### 1. 紅燈測試：AppShell 涵蓋所有已登入路由
 
-- [ ] 1.1 [P] 撰寫測試驗證 Requirement「AppShell covers all four authenticated routes」的 Agent route uses AppShell scenario——斷言 GET /agent 回應含 AppShell 側欄結構、不含 SiteNav 結構,驗證方式：新增測試,目前為紅燈
-- [ ] 1.2 [P] 撰寫測試驗證同一 Requirement 的 Settings route uses AppShell scenario——斷言 GET /admin/settings 同上,驗證方式：新增測試,目前為紅燈
-- [ ] 1.3 撰寫測試驗證 Requirement「Operator navigation reaches settings」——斷言 operator 檢視 AppShell 時側欄含 /admin/settings 連結、learner 檢視時不含,驗證方式：新增測試,目前為紅燈
+- [x] 1.1 [P] 撰寫測試驗證 Requirement「AppShell covers all four authenticated routes」的 Agent route uses AppShell scenario——斷言 GET /agent 回應含 AppShell 側欄結構、不含 SiteNav 結構,驗證方式：新增測試,目前為紅燈
+- [x] 1.2 [P] 撰寫測試驗證同一 Requirement 的 Settings route uses AppShell scenario——斷言 GET /admin/settings 同上,驗證方式：新增測試,目前為紅燈
+- [x] 1.3 撰寫測試驗證 Requirement「Operator navigation reaches settings」——斷言 operator 檢視 AppShell 時側欄含 /admin/settings 連結、learner 檢視時不含,驗證方式：新增測試,目前為紅燈
 
 ### 2. 實作：AppShell 涵蓋所有已登入路由
 
-- [ ] 2.1 修改 apps/saas/app/agent/page.tsx 改用 AppShell 元件取代 SiteNav,依循 design.md 決策「統一 Shell 採擴充既有 AppShell 元件,不重寫 SiteNav 或新建第三套」,滿足 Requirement「AppShell covers all four authenticated routes」的 Agent route scenario,驗證方式：1.1 轉綠燈
-- [ ] 2.2 修改 apps/saas/app/admin/settings/page.tsx 改用 AppShell 元件取代 SiteNav,同樣依循「統一 Shell 採擴充既有 AppShell 元件」決策,滿足「AppShell covers all four authenticated routes」的 Settings route scenario 與「Operator navigation reaches settings」,驗證方式：1.2、1.3 轉綠燈
+- [x] 2.1 修改 apps/saas/app/agent/page.tsx 改用 AppShell 元件取代 SiteNav,依循 design.md 決策「統一 Shell 採擴充既有 AppShell 元件,不重寫 SiteNav 或新建第三套」,滿足 Requirement「AppShell covers all four authenticated routes」的 Agent route scenario,驗證方式：1.1 轉綠燈
+- [x] 2.2 修改 apps/saas/app/admin/settings/page.tsx 改用 AppShell 元件取代 SiteNav,同樣依循「統一 Shell 採擴充既有 AppShell 元件」決策,滿足「AppShell covers all four authenticated routes」的 Settings route scenario 與「Operator navigation reaches settings」,驗證方式：1.2、1.3 轉綠燈
 
 ### 3. 紅燈測試：語系與深色模式配置
 
-- [ ] 3.1 撰寫測試驗證 Requirement「Locale switcher lives in the sidebar user area, color mode toggle stays in the top bar」兩個 scenario——斷言側欄使用者區塊 DOM 含語系切換元素、頂欄 DOM 含深色模式元素但不含語系切換,驗證方式：新增測試,目前為紅燈
+- [x] 3.1 撰寫測試驗證 Requirement「Locale switcher lives in the sidebar user area, color mode toggle stays in the top bar」兩個 scenario——斷言側欄使用者區塊 DOM 含語系切換元素、頂欄 DOM 含深色模式元素但不含語系切換,驗證方式：新增測試,目前為紅燈
 
 ### 4. 實作：語系與深色模式配置
 
-- [ ] 4.1 將 apps/saas/app/components/locale-switcher.tsx 從 AppShell 頂欄移入側欄使用者區塊,移除頂欄對語系切換的渲染,滿足 Requirement「Locale switcher lives in the sidebar user area, color mode toggle stays in the top bar」,驗證方式：3.1 轉綠燈
+- [x] 4.1 將 apps/saas/app/components/locale-switcher.tsx 從 AppShell 頂欄移入側欄使用者區塊,移除頂欄對語系切換的渲染,滿足 Requirement「Locale switcher lives in the sidebar user area, color mode toggle stays in the top bar」,驗證方式：3.1 轉綠燈
 
 ### 5. 紅燈測試：窄螢幕 tab bar
 
-- [ ] 5.1 [P] 撰寫測試驗證 Requirement「Narrow viewport renders a bottom tab bar with an overflow drawer」的 Narrow viewport shows the 4-slot tab bar scenario——375px viewport 斷言 tab bar 恰好 4 個項目,驗證方式：新增測試,目前為紅燈
-- [ ] 5.2 [P] 撰寫測試驗證同一 Requirement 的 More drawer lists overflow items scenario——operator 在 375px viewport 點「更多」,斷言抽屜列表含帳號設定,驗證方式：新增測試,目前為紅燈
-- [ ] 5.3 [P] 撰寫測試驗證同一 Requirement 的 Wide viewport shows the sidebar, not the tab bar scenario——1280px viewport 斷言渲染側欄、不渲染底部 tab bar,驗證方式：新增測試,目前為紅燈
+- [x] 5.1 [P] 撰寫測試驗證 Requirement「Narrow viewport renders a bottom tab bar with an overflow drawer」的 Narrow viewport shows the 4-slot tab bar scenario——375px viewport 斷言 tab bar 恰好 4 個項目,驗證方式：新增測試,目前為紅燈
+- [x] 5.2 [P] 撰寫測試驗證同一 Requirement 的 More drawer lists overflow items scenario——operator 在 375px viewport 點「更多」,斷言抽屜列表含帳號設定,驗證方式：新增測試,目前為紅燈
+- [x] 5.3 [P] 撰寫測試驗證同一 Requirement 的 Wide viewport shows the sidebar, not the tab bar scenario——1280px viewport 斷言渲染側欄、不渲染底部 tab bar,驗證方式：新增測試,目前為紅燈
 
 ### 6. 實作：窄螢幕 tab bar
 
-- [ ] 6.1 新增 apps/saas/app/components/mobile-tabbar.tsx,螢幕寬度小於 768px 時渲染 3 個固定項目加「更多」抽屜,取代側欄,滿足 Requirement「Narrow viewport renders a bottom tab bar with an overflow drawer」,驗證方式：5.1、5.2、5.3 轉綠燈
+- [x] 6.1 新增 apps/saas/app/components/mobile-tabbar.tsx,螢幕寬度小於 768px 時渲染 3 個固定項目加「更多」抽屜,取代側欄,滿足 Requirement「Narrow viewport renders a bottom tab bar with an overflow drawer」,驗證方式：5.1、5.2、5.3 轉綠燈
 
 ### 7. Phase 1 Review 與驗收
 
-- [ ] 7.1 對 Phase 1 變更(apps/saas/app/components/app-shell.tsx、apps/saas/app/agent/page.tsx、apps/saas/app/admin/settings/page.tsx、apps/saas/app/components/locale-switcher.tsx、apps/saas/app/components/mobile-tabbar.tsx)跑一輪 correctness／security／performance code review,驗證方式：Review 報告列出的 Critical 發現數為零
+- [x] 7.1 對 Phase 1 變更(apps/saas/app/components/app-shell.tsx、apps/saas/app/agent/page.tsx、apps/saas/app/admin/settings/page.tsx、apps/saas/app/components/locale-switcher.tsx、apps/saas/app/components/mobile-tabbar.tsx)跑一輪 correctness／security／performance code review,驗證方式：Review 報告列出的 Critical 發現數為零
 - [ ] 7.2 用 ego-browser 對 /agent、/admin/settings 截圖比對 /app 的頂欄/側欄結構一致性,並以 375px 與 1280px 兩種 viewport 各截一次確認 tab bar／側欄切換正確,驗證方式：截圖存檔並附比對結論
 - [ ] 7.3 執行 pnpm build 與 pnpm test 全專案,驗證方式：兩指令皆以 exit code 0 結束
 
