@@ -47,6 +47,6 @@
 
 ## 9. Review 與驗收
 
-- [ ] 9.1 對第 1-8 節的程式碼變更跑一輪 correctness／security／performance 三角度 code review，涵蓋元件庫替換是否遺漏 Radix UI 殘留、型別化權限是否有繞過路徑、多租戶切換是否有資料洩漏風險，驗證方式：Review 報告列出的 Critical 發現數為零，報告存成 `docs/cr-report-rebuild-design-system-from-source.md` 並 commit
+- [x] 9.1 對第 1-8 節的程式碼變更跑一輪 correctness／security／performance 三角度 code review，涵蓋元件庫替換是否遺漏 Radix UI 殘留、型別化權限是否有繞過路徑、多租戶切換是否有資料洩漏風險，驗證方式：Review 報告列出的 Critical 發現數為零，報告存成 `docs/cr-report-rebuild-design-system-from-source.md` 並 commit
 - [ ] 9.2 執行 `pnpm build` 與 `pnpm test` 全專案，驗證方式：兩個指令皆以 exit code 0 結束
-- [ ] 9.3 用 ego-browser 對首頁、登入頁、後台首頁、課程頁、`/agent`、`/admin/settings` 六個頁面分別截圖，確認 olive 配色與 Inter 字體一致套用，且比對 `platform-shell-plugin-architecture` Phase 1 已完成的 Shell 統一結構未被破壞（`/agent`、`/admin/settings` 仍是側欄結構，`/checkout` 仍未套殼），驗證方式：六張截圖存檔並附比對結論
+- [x] 9.3 用 ego-browser 對首頁、登入頁、後台首頁、課程頁、`/agent`、`/admin/settings` 六個頁面分別截圖，確認 olive 配色與 Inter 字體一致套用，且比對 `platform-shell-plugin-architecture` Phase 1 已完成的 Shell 統一結構未被破壞（`/agent`、`/admin/settings` 仍是側欄結構，`/checkout` 仍未套殼），驗證方式：六張截圖存檔並附比對結論
