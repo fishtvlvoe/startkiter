@@ -16,7 +16,7 @@
 ## 4. 業務邏輯遷移：auth
 
 - [x] 4.1 從 `legacy/packages/auth` 複製到新建的 `packages/auth`，在新底座 `apps/saas` 重新接線 Better Auth provider（email/password + Google + LINE socialProviders.line），滿足 Decision「業務邏輯遷移：整包搬遷 + 重新接線，不重寫」，驗證方式：`legacy/packages/auth/src/auth.test.ts` 對應測試在新底座執行全部通過
-- [ ] 4.2 用 `admin@startkiter.local` / `StartKiter2026!` 測試帳密在新底座實際登入一次，滿足 Migration Plan 第 4 步的登入驗收判準，驗證方式：用 ego-browser 完成登入操作並截圖確認導向已驗證後台頁面
+- [x] 4.2 用 `admin@startkiter.local` / `StartKiter2026!` 測試帳密在新底座實際登入一次，滿足 Migration Plan 第 4 步的登入驗收判準，驗證方式：用 ego-browser 完成登入操作並截圖確認導向已驗證後台頁面
 
 ## 5. 業務邏輯遷移：payments
 
