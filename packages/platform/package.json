@@ -1,0 +1,19 @@
+{
+	"name": "@startkiter/platform",
+	"version": "0.0.0",
+	"main": "./index.ts",
+	"types": "./**/*.ts",
+	"private": true,
+	"scripts": {
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"test": "vitest run",
+		"type-check": "tsc --noEmit"
+	},
+	"dependencies": {},
+	"devDependencies": {
+		"@startkiter/tsconfig": "workspace:*",
+		"@types/node": "catalog:",
+		"typescript": "catalog:",
+		"vitest": "catalog:"
+	}
+}
