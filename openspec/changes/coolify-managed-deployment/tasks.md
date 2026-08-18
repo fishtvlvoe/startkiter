@@ -4,7 +4,7 @@
 
 - [x] 1.1 買一台真實 VPS（Vultr 新加坡機房，2vCPU/4GB），走一次「取得 IP + SSH 存取權」流程，記錄實際步驟與卡點——見 `docs/coolify-vps-setup-runbook.md`
 - [x] 1.2 把這台 VPS 加入 StartKiter 的 Coolify 帳號（`Add Server`），確認連線成功——已驗證，狀態 Ready，Docker 29.7.2 / Compose 5.5.0 自動安裝完成
-- [ ] 1.3 在這台伺服器上部署一個測試用 Next.js 應用，確認 git push 觸發自動重建部署——**部分完成**：用 Docker Image（`nginxdemos/hello`）直接部署驗證了「Coolify 能成功部署並對外提供服務」，但未測試 Git 來源的 push-triggered 自動重建這個特定機制，仍需補測
+- [x] 1.3 在這台伺服器上部署一個測試用 Next.js 應用，確認 git push 觸發自動重建部署——**已完整驗證**：改用真實 Public Git Repository 來源測試（見 design.md 2026-08-18 實測驗證段落），git push 後 Coolify 透過手動設定的 GitHub Webhook 自動觸發重建，`curl` 確認部署內容真的更新，不是只看介面顯示 Success
 - [x] 1.4 測試從 Coolify 端遠端介入（重啟服務、查看 log、redeploy），確認不需要向「買家」索取任何額外存取權——已驗證，Actions 選單可直接 Redeploy／查看 Deployment Logs，全程用 StartKiter 自己的 Coolify 存取權完成
 - [x] 1.5 走一次自訂網域綁定流程，確認 SSL 自動簽發成功——`coolify-test.startkiter.dev` 已綁定，`curl -v` 確認 issuer 為 Let's Encrypt、SSL certificate verify ok。**注意**：這次是用 StartKiter 自己持有的 Cloudflare 帳號直接加 DNS 記錄，尚未測試「買家自己的 Cloudflare 帳號 + scoped API token 交給 AI」這個買家端交接流程本身
 - [x] 1.6 把 1.1–1.5 實際踩到的坑，回寫進 `design.md` 的 Context 或 Risks 章節——見 `docs/coolify-vps-setup-runbook.md` 與 design.md Context 章節更新

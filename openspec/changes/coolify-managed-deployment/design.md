@@ -23,6 +23,22 @@
 - **一個真的裝錯的坑**：VPS 一開始選了 Vultr 的「Coolify」Marketplace App（自架版 Coolify，跟 Coolify Cloud 是兩個獨立系統），跟已經在用的 Coolify Cloud 訂閱衝突，後來重裝成乾淨 Ubuntu 才解決。**教訓寫入 Non-Goals／buyer-facing 教學文件**：VPS 系統一律選純 OS，不要選任何預裝面板類的 Marketplace App
 - **未驗證到的部分**：這次測試用的是 Docker Image 直接部署（非 Git 來源），git-push 觸發自動重建這個特定機制還沒實測；自訂網域是用 StartKiter 自己的 Cloudflare 帳號直接操作，「買家自己的 Cloudflare 帳號生成 scoped API token 交給 AI」這個買家端交接流程本身也還沒測過——這兩項留待下一輪驗證
 
+### 2026-08-19 補測：Git 來源 push 觸發自動重建部署
+
+同一個 `startkiter-test` 專案（`production` environment）、同一台 `startkiter-managed-fleet-01` 伺服器上，另建一個測試資源，這次用 **Public Git Repository** 來源補測 1.3 剩下的部分：
+
+- 測試 repo：`https://github.com/fishtvlvoe/startkiter-coolify-git-deploy-test`（全新極簡 repo，`index.html` + `Dockerfile`，nginx:alpine 直接 serve 靜態頁，跟 StartKiter 正式/TEST repo 完全無關）
+- Coolify 新增資源選「Deploy Public Git Repository」，填 repo URL + branch（`master`，注意 repo 預設分支不是 `main`，Coolify 表單初始帶入的 `main` 要手動改掉，不然會報 `git branch field is required`），Build pack 用預設 Railpack（實際偵測到 Dockerfile 走 Dockerfile build）
+- 第一次手動 Deploy 成功，`*.sslip.io` 臨時網址可正常存取，`curl` 確認內容為 v1
+- **關鍵發現：Public Git Repository（純 HTTPS，無 GitHub App 綁定）不會自動偵測 push，需要手動設定 Webhook 才會觸發自動重建**——這不是預設開啟的功能。開啟方式：
+  1. 進資源的 **Webhooks** 分頁，「Manual Git webhooks」區塊裡有針對 GitHub/GitLab/Bitbucket/Gitea 各自的固定 Webhook URL（本例用的是 `https://app.coolify.io/webhooks/source/github/events/manual`）跟一個要自己填的 Webhook secret 欄位
+  2. 在 Coolify 端填入一組 secret 存檔（`Save changes` 後出現「Webhook secrets saved.」）
+  3. 到 GitHub repo 的 Settings → Webhooks（或用 `gh api repos/<owner>/<repo>/hooks` 直接建立）新增一個 webhook：Payload URL 填上面那條、Content type `application/json`、Secret 填同一組值、事件勾 `push`
+  4. 只有這樣接好，Coolify 才會在收到 GitHub push 事件時自動觸發重建；若只是走「Deploy Git Repository (with GitHub App)」來源，官方文件說明是自動帶 webhook，不需要這段手動接線——但本次驗證的是 StartKiter 實際情境更接近的 Public Git Repository 模式（買家不會把 GitHub App 裝到自己帳號上），所以手動 webhook 這條路徑才是要寫進買家端教學文件的版本
+- 驗證結果：`git commit` + `git push` 一次新版本（頁面內容改成帶時間戳記的 `VERSION: v2-push-triggered-<timestamp>`）後，**沒有點任何 Coolify 按鈕**，Deployment History 自動出現一筆新紀錄，Source 欄位顯示 `Webhook`（不是 `Manual`）、Commit hash 對應到剛 push 的那個 commit，狀態從 In progress 到 Success
+- `curl` 打帶 cache-buster 的網址，確認回傳內容真的是 push 之後的新版本文字（`VERSION: v2-push-triggered-1787068821`），不是只看 Coolify 介面顯示 Success 就算數
+- 這兩個測試資源（GitHub repo + Coolify 資源）留著當佐證，之後有需要可以再拿來覆測
+
 ## Goals / Non-Goals
 
 **Goals:**
