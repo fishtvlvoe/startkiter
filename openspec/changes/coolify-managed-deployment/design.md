@@ -13,6 +13,16 @@
 
 `platform-shell-plugin-architecture` 的 Non-Goal 寫著「不做 StartKiter AI 反向連線客戶伺服器」，這句話寫於只考慮 Tier 1（買家自行部署、自己維運）情境的時間點，與這張 change 定案的 Tier 2 模式矛盾。已在該 change 的 proposal.md / design.md 個別修正措辭，改為「此 change 範圍不含反向連線機制本身，定義於 `coolify-managed-deployment`」。
 
+### 2026-08-18 實測驗證（tasks.md 1.1–1.5）
+
+同一天完成一次端到端手動驗證，完整步驟與踩坑記錄見 `docs/coolify-vps-setup-runbook.md`。摘要：
+
+- 買了一台 Vultr VPS（新加坡機房，2vCPU/4GB），Coolify Cloud 生成專用 SSH 金鑰，公鑰裝進 VPS，`Validate connection` 通過，狀態 Ready（Docker 29.7.2、Compose 5.5.0 自動安裝）
+- 部署測試應用（Docker Image `nginxdemos/hello`）成功，Coolify 自動配的 `*.sslip.io` 臨時網址可正常存取
+- 綁定正式子網域 `coolify-test.startkiter.dev`：Cloudflare 新增 A 記錄（**Proxy 狀態務必設「僅 DNS」，開 Proxy 會讓 Coolify 的 Let's Encrypt 簽發卡住**，這是本次最容易誤踩的坑）→ Coolify Domains 頁面加網域 → Redeploy → `curl -v` 確認 `issuer: Let's Encrypt`、`SSL certificate verify ok`
+- **一個真的裝錯的坑**：VPS 一開始選了 Vultr 的「Coolify」Marketplace App（自架版 Coolify，跟 Coolify Cloud 是兩個獨立系統），跟已經在用的 Coolify Cloud 訂閱衝突，後來重裝成乾淨 Ubuntu 才解決。**教訓寫入 Non-Goals／buyer-facing 教學文件**：VPS 系統一律選純 OS，不要選任何預裝面板類的 Marketplace App
+- **未驗證到的部分**：這次測試用的是 Docker Image 直接部署（非 Git 來源），git-push 觸發自動重建這個特定機制還沒實測；自訂網域是用 StartKiter 自己的 Cloudflare 帳號直接操作，「買家自己的 Cloudflare 帳號生成 scoped API token 交給 AI」這個買家端交接流程本身也還沒測過——這兩項留待下一輪驗證
+
 ## Goals / Non-Goals
 
 **Goals:**
