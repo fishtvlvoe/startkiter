@@ -24,7 +24,7 @@ StartKiter 要從「賣一次性代碼包」進化成「買家用 AI 工具自�
 - 不做 block editor / shortcode 解析器實作
 - 不做交易型 Plugin migration 工具鏈
 - 不做 Agent 管理 Plugin
-- 不做 StartKiter AI 反向連線客戶伺服器
+- 此 change 不定義 StartKiter AI 反向連線客戶伺服器的機制本身——這屬於部署主機模式的維運決策，見 `coolify-managed-deployment`（該 change 定案：Tier 2／集中管理模式下，StartKiter 可反向連線協助；Tier 1／自行部署模式下維持不連線）
 - 不改動 `/checkout`、`/`、`/login`、`/signup` 的版面
 - 不處理 Organization 多租戶、電子發票範圍（另開 change）
 - 不整合 refero.design MCP（v1 僅內建模版，refero.design 留作後續探索）

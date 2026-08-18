@@ -38,7 +38,7 @@ v1 既有硬邊界（openspec/config.yaml context）維持不變：不做 Organi
 - 不做「一鍵裝/解」的 Marketplace 操作介面
 - 不做 zip 上傳安裝流程、block editor、shortcode 解析器、交易型 Plugin migration 工具鏈
 - 不整合 refero.design MCP（v1 僅內建模版）
-- 不做 Agent 管理 Plugin、不做 AI 反向連線客戶伺服器
+- 不做 Agent 管理 Plugin；AI 反向連線客戶伺服器的機制不在此 change 定義，見 `coolify-managed-deployment`
 
 ## Decisions
 
@@ -235,5 +235,5 @@ CREATE INDEX "McpConnection_userId_idx" ON "McpConnection"("userId");
 
 - 內建模版的具體視覺風格需要老闆看 HTML demo 才能定案——這張 change 先定義模版的資料結構與接合方式，視覺設計留給 Demo-first 流程
 - refero.design MCP 整合的價值確認——是否值得讓買家的 AI 工具能查真實產品介面當設計參考，或者內建模版 + 自由修改已經足夠。v1 先不做，收集使用回饋再議
-- Coolify VPS 的具體建置（常駐 Node、固定 IP、PAYUNi webhook 穩定性）是獨立的維運決策，不在這張 change 範圍內，需另開 change 或維運票處理
+- Coolify VPS 的具體建置（常駐 Node、固定 IP、PAYUNi webhook 穩定性、三層客群主機模式）已另開 `coolify-managed-deployment` change 處理，不在這張 change 範圍內
 - Marketplace 的模版選擇與 buyer-extension-convention 的 AI prompt 引導如何串接——模版定義檔的 `aiPromptHint` 欄位可以給 AI 工具直接使用，但具體的 prompt 品質需要實測調整
