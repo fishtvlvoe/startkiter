@@ -104,133 +104,133 @@
   },
   "app": {
     "menu": {
-      "accountSettings": "Account settings",
-      "admin": "Admin",
-      "aiChatbot": "AI Chatbot",
-      "collapseSidebar": "Collapse sidebar",
-      "expandSidebar": "Expand sidebar",
-      "navigationTitle": "Menu",
-      "openNavigation": "Open navigation",
-      "organizationSettings": "Organization settings",
-      "start": "Start"
+      "accountSettings": "账户设置",
+      "admin": "管理",
+      "aiChatbot": "AI 助手",
+      "collapseSidebar": "收起侧栏",
+      "expandSidebar": "展开侧栏",
+      "navigationTitle": "菜单",
+      "openNavigation": "打开导航",
+      "organizationSettings": "组织设置",
+      "start": "首页"
     },
     "userMenu": {
-      "accountSettings": "Account settings",
-      "colorMode": "Color mode",
-      "documentation": "Documentation",
-      "home": "Home",
-      "logout": "Logout"
+      "accountSettings": "账户设置",
+      "colorMode": "显示模式",
+      "documentation": "文档",
+      "home": "首页",
+      "logout": "退出登录"
     },
     "notifications": {
-      "title": "Notifications",
-      "empty": "No notifications yet.",
-      "markAllRead": "Mark all as read",
-      "fallbackTitle": "Notification",
+      "title": "通知",
+      "empty": "目前没有通知。",
+      "markAllRead": "全部标记为已读",
+      "fallbackTitle": "通知",
       "aria": {
-        "open": "Open notifications"
+        "open": "打开通知"
       }
     }
   },
   "auth": {
     "errors": {
-      "invalidEmailOrPassword": "The credentials you entered are invalid. Please check them and try again.",
-      "unknown": "Something went wrong. Please try again.",
-      "userNotFound": "This user does not exists",
-      "failedToCreateUser": "Could not create user. Please try again.",
-      "failedToCreateSession": "Could not create a session. Please try again.",
-      "failedToUpdateUser": "Could not update user. Please try again.",
-      "failedToGetSession": "Could not get the session.",
-      "invalidPassword": "The entered password is incorrect.",
-      "invalidEmail": "The entered email is invalid.",
-      "invalidToken": "The token you entered is invalid or has expired.",
-      "credentialAccountNotFound": "Account not found.",
-      "emailCanNotBeUpdated": "Email could not be updated. Please try again.",
-      "emailNotVerified": "Please verify your email first before logging in.",
-      "failedToGetUserInfo": "Could not load user information.",
-      "idTokenNotSupported": "ID token is not supported.",
-      "passwordTooLong": "Password is too long.",
-      "passwordTooShort": "Password is too short.",
-      "providerNotFound": "This provider is not suppported.",
-      "socialAccountAlreadyLinked": "This account is already linked to a user.",
-      "userEmailNotFound": "Email not found.",
-      "userAlreadyExists": "This user already exists.",
-      "userAlreadyExistsUseAnotherEmail": "User already exists. Use another email.",
-      "invalidInvitation": "The invitation is invalid or expired.",
-      "sessionExpired": "The session has expired.",
-      "failedToUnlinkLastAccount": "Failed to unlink account",
-      "accountNotFound": "Account not found"
+      "invalidEmailOrPassword": "你输入的账号密码不正确，请检查后再试。",
+      "unknown": "发生错误，请稍后再试。",
+      "userNotFound": "找不到这个用户",
+      "failedToCreateUser": "无法创建用户，请稍后再试。",
+      "failedToCreateSession": "无法创建会话，请稍后再试。",
+      "failedToUpdateUser": "无法更新用户，请稍后再试。",
+      "failedToGetSession": "无法获取会话。",
+      "invalidPassword": "输入的密码不正确。",
+      "invalidEmail": "输入的 Email 不正确。",
+      "invalidToken": "输入的令牌无效或已过期。",
+      "credentialAccountNotFound": "找不到账号。",
+      "emailCanNotBeUpdated": "无法更新 Email，请稍后再试。",
+      "emailNotVerified": "请先验证 Email 再登录。",
+      "failedToGetUserInfo": "无法加载用户信息。",
+      "idTokenNotSupported": "不支持 ID 令牌。",
+      "passwordTooLong": "密码太长。",
+      "passwordTooShort": "密码太短。",
+      "providerNotFound": "找不到这个登录服务。",
+      "socialAccountAlreadyLinked": "这个账号已关联其他用户。",
+      "userEmailNotFound": "找不到 Email。",
+      "userAlreadyExists": "这个用户已存在。",
+      "userAlreadyExistsUseAnotherEmail": "用户已存在，请改用其他 Email。",
+      "invalidInvitation": "邀请无效或已过期。",
+      "sessionExpired": "会话已过期。",
+      "failedToUnlinkLastAccount": "无法解除最后一个账号的关联",
+      "accountNotFound": "找不到账号"
     },
     "forgotPassword": {
-      "backToSignin": "Back to signin",
+      "backToSignin": "返回登录",
       "email": "Email",
       "hints": {
         "linkNotSent": {
-          "message": "We are sorry, but we were unable to send you a link to reset your password. Please try again later.",
-          "title": "Link not sent"
+          "message": "目前无法发送重置密码链接，请稍后再试。",
+          "title": "链接未发送"
         },
         "linkSent": {
-          "message": "We have sent you a link to continue. Please check your inbox.",
-          "title": "Link sent"
+          "message": "链接已发送，请查看收件箱。",
+          "title": "链接已发送"
         }
       },
-      "message": "Please enter your email address and we will send you a link to reset your password.",
-      "submit": "Send link",
-      "title": "Forgot your password?"
+      "message": "请输入 Email，我们会发送重置密码链接。",
+      "submit": "发送链接",
+      "title": "忘记密码？"
     },
     "login": {
-      "continueWith": "Or continue with",
-      "createAnAccount": "Create an account",
-      "dontHaveAnAccount": "Don't have an account yet?",
-      "forgotPassword": "Forgot password?",
+      "continueWith": "或使用以下方式登录",
+      "createAnAccount": "创建账号",
+      "dontHaveAnAccount": "还没有账号？",
+      "forgotPassword": "忘记密码？",
       "hints": {
-        "invalidCredentials": "The email or password you entered are invalid. Please try again.",
-        "socialSigninFailed": "Could not sign in. Please try again.",
+        "invalidCredentials": "Email 或密码不正确，请再试一次。",
+        "socialSigninFailed": "无法登录，请稍后再试。",
         "linkSent": {
-          "message": "We have sent you a link to continue. Please check your inbox.",
-          "title": "Link sent"
+          "message": "链接已发送，请查看收件箱。",
+          "title": "链接已发送"
         }
       },
-      "loginWithPasskey": "Login with passkey",
+      "loginWithPasskey": "使用通行密钥登录",
       "modes": {
-        "magicLink": "Magic link",
-        "password": "Password"
+        "magicLink": "魔法链接",
+        "password": "密码"
       },
-      "submit": "Sign in",
-      "subtitle": "Please enter your credentials to sign in.",
-      "title": "Welcome back",
-      "sendMagicLink": "Send magic link"
+      "submit": "登录",
+      "subtitle": "请输入账号密码登录。",
+      "title": "欢迎回来",
+      "sendMagicLink": "发送登录链接"
     },
     "resetPassword": {
-      "backToSignin": "Back to signin",
+      "backToSignin": "返回登录",
       "hints": {
-        "error": "We are sorry, but we were unable to reset your password. Please try again.",
-        "success": "Your password has been reset successfully."
+        "error": "无法重置密码，请稍后再试。",
+        "success": "密码已成功重置。"
       },
-      "message": "Please enter a new password.",
-      "newPassword": "New password",
-      "submit": "Reset password",
-      "title": "Reset your password"
+      "message": "请输入新密码。",
+      "newPassword": "新密码",
+      "submit": "重置密码",
+      "title": "重置密码"
     },
     "signup": {
-      "alreadyHaveAccount": "Already have an account?",
+      "alreadyHaveAccount": "已经有账号？",
       "email": "Email",
       "hints": {
-        "signupFailed": "We are sorry, but we were unable to create your account. Please try again later.",
-        "verifyEmail": "We have sent you a link to verify your email. Please check your inbox."
+        "signupFailed": "无法创建账号，请稍后再试。",
+        "verifyEmail": "验证链接已发送，请查看收件箱。"
       },
-      "message": "We are happy that you want to join us. Please fill in the form below to create your account.",
-      "name": "Name",
-      "password": "Password",
-      "signIn": "Sign in",
-      "submit": "Create account",
-      "title": "Create an account"
+      "message": "很高兴你想加入我们，请填写下面的表单创建账号。",
+      "name": "姓名",
+      "password": "密码",
+      "signIn": "登录",
+      "submit": "创建账号",
+      "title": "创建账号"
     },
     "verify": {
-      "title": "Verify your account",
-      "code": "One-time password",
-      "submit": "Verify",
-      "backToSignin": "Back to login",
-      "message": "Enter the one-time password from your authenticator app to continue."
+      "title": "验证你的账号",
+      "code": "一次性密码",
+      "submit": "验证",
+      "backToSignin": "返回登录",
+      "message": "输入验证器 App 显示的一次性密码以继续。"
     }
   },
   "choosePlan": {
@@ -423,45 +423,45 @@
   "settings": {
     "account": {
       "avatar": {
-        "description": "To change your avatar click the picture in this block and select a file from your computer to upload.",
+        "description": "要更换头像，请点击这个区块的图片，再从电脑选择要上传的文件。",
         "notifications": {
-          "error": "Could not update avatar",
-          "success": "Avatar was updated successfully"
+          "error": "无法更新头像",
+          "success": "头像已更新"
         },
-        "title": "Your avatar"
+        "title": "你的头像"
       },
       "changeEmail": {
-        "description": "To change your email, enter the new email and hit save. You will have to confirm the new email before it will become active.",
+        "description": "要更换 Email，请输入新的 Email 并点击保存；新 Email 必须完成验证后才会启用。",
         "notifications": {
-          "error": "Could not update email",
-          "success": "Email was updated successfully"
+          "error": "无法更新 Email",
+          "success": "Email 已更新"
         },
-        "title": "Your email"
+        "title": "你的 Email"
       },
       "changeName": {
         "notifications": {
-          "error": "Could not update name",
-          "success": "Name was updated successfully"
+          "error": "无法更新名称",
+          "success": "名称已更新"
         },
-        "title": "Your name"
+        "title": "你的名称"
       },
       "deleteAccount": {
-        "confirmation": "Are you sure you want to delete your account?",
-        "description": "Permanently delete your account. Once you delete your account, there is no going back. To confirm, please enter your password below:",
+        "confirmation": "确定要删除账号吗？",
+        "description": "永久删除你的账号。删除后无法恢复。要确认，请在下方输入密码：",
         "notifications": {
-          "error": "Could not delete account",
-          "success": "Account was deleted successfully"
+          "error": "无法删除账号",
+          "success": "账号已删除"
         },
-        "submit": "Delete account",
-        "title": "Delete account"
+        "submit": "删除账号",
+        "title": "删除账号"
       },
       "language": {
-        "description": "To change the language of the app for your account, select a language from the list and click save.",
+        "description": "要更改账号使用的界面语言，请从列表选择语言并点击保存。",
         "notifications": {
-          "error": "Could not update language",
-          "success": "Language was updated successfully"
+          "error": "无法更新语言",
+          "success": "语言已更新"
         },
-        "title": "Your language"
+        "title": "你的语言"
       },
       "security": {
         "activeSessions": {
@@ -585,101 +585,134 @@
           "enabled": "You have two-factor authentication enabled for your account."
         }
       },
-      "subtitle": "Manage the settings of your personal account.",
-      "title": "Account settings"
+      "subtitle": "管理你的个人账号设置。",
+      "title": "账号设置"
     },
     "billing": {
       "createCustomerPortal": {
-        "label": "Manage billing",
+        "label": "管理账单",
         "notifications": {
           "error": {
-            "title": "Could not create a customer portal session. Please try again."
+            "title": "无法建立客户入口会话，请再试一次。"
           }
         }
       },
       "activePlan": {
         "status": {
-          "active": "Active",
-          "canceled": "Canceled",
-          "expired": "Expired",
-          "incomplete": "Incomplete",
-          "past_due": "Past due",
-          "paused": "Paused",
-          "trialing": "Trialing",
-          "unpaid": "Unpaid"
+          "active": "使用中",
+          "canceled": "已取消",
+          "expired": "已过期",
+          "incomplete": "未完成",
+          "past_due": "逾期",
+          "paused": "已暂停",
+          "trialing": "试用中",
+          "unpaid": "未付款"
         },
-        "title": "Your plan"
+        "title": "你的方案"
       },
       "changePlan": {
-        "description": "Choose a plan to subscribe to.",
-        "title": "Change your plan"
+        "description": "选择要订阅的方案。",
+        "title": "更改方案"
       },
-      "title": "Billing"
+      "title": "账单"
     },
     "notificationsPage": {
-      "title": "Notifications",
-      "description": "Choose how you receive notifications. Disabled options are stored; everything is enabled by default.",
+      "title": "通知",
+      "description": "选择接收通知的方式。停用的选项会被保存；默认全部启用。",
       "groups": {
         "general": {
-          "title": "General"
+          "title": "常规"
         }
       },
       "types": {
         "APP_UPDATE": {
-          "label": "App updates"
+          "label": "应用更新"
         }
       },
       "columns": {
-        "type": "Notification",
-        "inApp": "In-app",
+        "type": "通知",
+        "inApp": "应用内",
         "email": "Email"
       }
     },
     "menu": {
       "account": {
-        "billing": "Billing",
-        "dangerZone": "Danger zone",
-        "general": "General",
-        "notifications": "Notifications",
-        "security": "Security",
-        "title": "Account"
+        "billing": "账单",
+        "dangerZone": "危险区域",
+        "general": "常规",
+        "notifications": "通知",
+        "security": "安全性",
+        "title": "账号"
       },
       "organization": {
-        "billing": "Billing",
-        "general": "General",
-        "members": "Members",
-        "title": "Organization",
-        "dangerZone": "Danger zone"
+        "billing": "账单",
+        "general": "常规",
+        "members": "成员",
+        "title": "组织",
+        "dangerZone": "危险区域"
       }
     },
-    "save": "Save"
+    "save": "保存"
   },
   "start": {
-    "subtitle": "See the latest stats of your awesome business.",
-    "welcome": "Welcome {name}!"
+    "subtitle": "查看你的业务最新统计资料。",
+    "welcome": "欢迎，{name}！"
+  },
+  "course": {
+    "navLabel": "课程",
+    "title": "课程",
+    "entitledDescription": "买断后即可观看全部单元。",
+    "lockedDescription": "购买开站包后即可解锁全部单元。",
+    "lockedNotice": "目前尚未取得课程权限，视频内容不会发送到浏览器。",
+    "checkout": "前往结账",
+    "lessonsTitle": "单元列表",
+    "lessonsAria": "课程单元",
+    "watch": "开始观看",
+    "lockedPlayback": "购买后才能播放课程。",
+    "lessonProgress": "课程单元 {order} / {total}",
+    "videoUnsupported": "你的浏览器不支持视频播放。",
+    "demoFallback": "目前播放的是临时示范视频；接上 Bunny 课程视频后会自动换成正式内容。",
+    "previous": "上一单元",
+    "next": "下一单元",
+    "forbiddenTitle": "这堂课还不能看",
+    "forbiddenDescription": "需要先购买开站包。如果订单已退款，课程也会重新锁住。",
+    "lessons": {
+      "lesson-01": {
+        "title": "开站包是什么、为什么要买断",
+        "description": "产品定位、8800 一次买断、课程与终身代码包同一 SKU。"
+      },
+      "lesson-02": {
+        "title": "站壳、登录与结账路径",
+        "description": "Better Auth、PAYUNi、Order 权限如何串联。"
+      },
+      "lesson-03": {
+        "title": "课程模块与权限闸门",
+        "description": "付款后才能播放；退款后必须重新锁住。"
+      }
+    }
   },
   "common": {
     "confirmation": {
-      "cancel": "Cancel",
-      "confirm": "Confirm"
+      "cancel": "取消",
+      "confirm": "确认"
     },
     "actions": {
-      "continue": "Continue",
-      "verify": "Verify"
+      "continue": "继续",
+      "verify": "验证"
     },
     "aria": {
-      "language": "Language"
+      "language": "语言"
     },
     "colorMode": {
-      "system": "System",
-      "light": "Light",
-      "dark": "Dark"
+      "system": "系统",
+      "light": "浅色",
+      "dark": "深色"
     },
     "passwordCriteria": {
-      "minLength": "Min. 8 characters",
-      "upperAndLowercase": "Upper & lowercase",
-      "number": "Number",
-      "specialCharacter": "Special character"
+      "minLength": "至少 8 个字符",
+      "upperAndLowercase": "大小写字母",
+      "number": "数字",
+      "specialCharacter": "特殊字符"
     }
   },
   "checkoutReturn": {

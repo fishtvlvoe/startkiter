@@ -33,3 +33,41 @@ describe("launch message catalogs", () => {
 		expect(messages.home.title).toBe(expectedTitle);
 	});
 });
+
+describe("translated app surfaces", () => {
+	it.each([
+		[
+			"zh-tw",
+			{
+				loginTitle: "歡迎回來",
+				accountSettings: "帳號設定",
+				courseLabel: "課程",
+				courseLocked: "購買開站包後即可解鎖全部單元。",
+				marketingPricing: "價格",
+			},
+		],
+		[
+			"zh-cn",
+			{
+				loginTitle: "欢迎回来",
+				accountSettings: "账户设置",
+				courseLabel: "课程",
+				courseLocked: "购买开站包后即可解锁全部单元。",
+				marketingPricing: "价格",
+			},
+		],
+	] as const)("provides translated strings for %s", async (locale, expected) => {
+		const saas = await getMessagesForLocale<{
+			auth: { login: { title: string } };
+			app: { menu: { accountSettings: string } };
+			course: { navLabel: string; lockedDescription: string };
+		}>(locale, "saas");
+		const marketing = await getMessagesForLocale<{ pricing: { title: string } }>(locale, "marketing");
+
+		expect(saas.auth.login.title).toBe(expected.loginTitle);
+		expect(saas.app.menu.accountSettings).toBe(expected.accountSettings);
+		expect(saas.course.navLabel).toBe(expected.courseLabel);
+		expect(saas.course.lockedDescription).toBe(expected.courseLocked);
+		expect(marketing.pricing.title).toBe(expected.marketingPricing);
+	});
+});

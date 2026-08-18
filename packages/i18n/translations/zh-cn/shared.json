@@ -1,63 +1,63 @@
 {
   "pricing": {
-    "badge": "Pricing",
-    "choosePlan": "Choose plan",
-    "contactSales": "Contact sales",
-    "description": "Simple plans that scale with your team. Upgrade when you are ready.",
-    "getStarted": "Get started",
-    "month": "{count, plural, one {month} other {{count} months}}",
-    "monthly": "Monthly",
+    "badge": "价格",
+    "choosePlan": "选择方案",
+    "contactSales": "联系销售",
+    "description": "简单透明的方案，随团队成长。准备好后再升级。",
+    "getStarted": "开始使用",
+    "month": "{count, plural, one {个月} other {{count} 个月}}",
+    "monthly": "每月",
     "products": {
       "basic": {
-        "description": "For solo founders validating the first release.",
+        "description": "适合正在验证第一个版本的个人创业者。",
         "features": {
-          "anotherFeature": "Core product features",
-          "limitedSupport": "Community support"
+          "anotherFeature": "核心产品功能",
+          "limitedSupport": "社区支持"
         },
-        "title": "Basic"
+        "title": "基础"
       },
       "enterprise": {
-        "description": "Security, support, and terms tailored to your organization.",
+        "description": "根据你的组织需求提供安全性、支持与合同条款。",
         "features": {
-          "enterpriseSupport": "Dedicated support",
-          "unlimitedProjects": "Unlimited workspaces"
+          "enterpriseSupport": "专属支持",
+          "unlimitedProjects": "不限工作区"
         },
-        "title": "Enterprise"
+        "title": "企业"
       },
       "free": {
-        "description": "Explore the product with no commitment.",
+        "description": "零负担探索产品。",
         "features": {
-          "anotherFeature": "Core product features",
-          "limitedSupport": "Community support"
+          "anotherFeature": "核心产品功能",
+          "limitedSupport": "社区支持"
         },
-        "title": "Free"
+        "title": "免费"
       },
       "lifetime": {
-        "description": "Pay once and keep access as the product grows.",
+        "description": "一次付费，产品成长期间持续拥有访问权限。",
         "features": {
-          "extendSupport": "Priority support window",
-          "noRecurringCosts": "No recurring fees"
+          "extendSupport": "优先支持时段",
+          "noRecurringCosts": "无周期性费用"
         },
-        "title": "Lifetime"
+        "title": "终身"
       },
       "pro": {
-        "description": "For teams collaborating across workspaces.",
+        "description": "适合跨工作区协作的团队。",
         "features": {
-          "anotherFeature": "Advanced product features",
-          "fiveMembers": "Up to 5 members",
-          "fullSupport": "Email support"
+          "anotherFeature": "进阶产品功能",
+          "fiveMembers": "最多 5 位成员",
+          "fullSupport": "Email 支持"
         },
-        "title": "Pro"
+        "title": "专业"
       }
     },
-    "purchase": "Purchase",
-    "recommended": "Recommended",
-    "subscribe": "Subscribe",
-    "title": "Pricing",
-    "trialPeriod": "{days} {days, plural, one {day} other {days}} free trial",
-    "year": "{count, plural, one {year} other {{count} years}}",
-    "yearly": "Yearly",
-    "perSeat": "seat"
+    "purchase": "购买",
+    "recommended": "推荐",
+    "subscribe": "订阅",
+    "title": "价格",
+    "trialPeriod": "{days} {days, plural, one {天} other {天}} 免费试用",
+    "year": "{count, plural, one {年} other {{count} 年}}",
+    "yearly": "每年",
+    "perSeat": "每席"
   },
   "brand": "开站包",
   "navigation": {

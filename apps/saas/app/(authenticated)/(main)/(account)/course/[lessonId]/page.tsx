@@ -1,6 +1,8 @@
 import { getSession } from "@auth/lib/server";
 import { decideLessonPlayback, getLesson, listLessons } from "@startkiter/course";
 import { Card } from "@startkiter/ui";
+import { localizeLesson } from "@course/lib/localize-lesson";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
@@ -22,28 +24,31 @@ export default async function LessonPage({ params }: LessonPageProps) {
 		redirect("/login");
 	}
 
-	const lesson = getLesson(lessonId);
+	const rawLesson = getLesson(lessonId);
 	const entitled = await userHasCourseAccess(session.user.id);
 	const decision = decideLessonPlayback({
 		sessionPresent: true,
 		hasCourseAccess: entitled,
-		lessonExists: Boolean(lesson),
+		lessonExists: Boolean(rawLesson),
 		lessonId,
 	});
 
-	if (decision.status === "not_found" || !lesson) {
+	if (decision.status === "not_found" || !rawLesson) {
 		notFound();
 	}
+
+	const t = await getTranslations("course");
+	const lesson = localizeLesson(rawLesson, t);
 
 	if (decision.status === "forbidden") {
 		return (
 			<Card className="p-8">
-				<h1 className="text-xl font-semibold">這堂課還不能看</h1>
+				<h1 className="text-xl font-semibold">{t("forbiddenTitle")}</h1>
 				<p className="text-muted-foreground mt-2">
-					需要先購買開站包。若訂單已退款，課程也會重新鎖住。
+					{t("forbiddenDescription")}
 				</p>
 				<Link className="text-primary mt-4 inline-block underline" href="/checkout">
-					前往結帳
+					{t("checkout")}
 				</Link>
 			</Card>
 		);
@@ -57,7 +62,9 @@ export default async function LessonPage({ params }: LessonPageProps) {
 	return (
 		<div className="space-y-6">
 			<div>
-				<p className="text-muted-foreground text-sm">課程單元 {lesson.order} / {lessons.length}</p>
+				<p className="text-muted-foreground text-sm">
+					{t("lessonProgress", { order: lesson.order, total: lessons.length })}
+				</p>
 				<h1 className="mt-1 text-2xl font-semibold">{lesson.title}</h1>
 				<p className="text-muted-foreground mt-2">{lesson.description}</p>
 			</div>
@@ -73,20 +80,20 @@ export default async function LessonPage({ params }: LessonPageProps) {
 					/>
 				) : (
 					<video className="aspect-video w-full bg-black" controls playsInline preload="metadata" src={lesson.mediaUrl}>
-						你的瀏覽器不支援影片播放。
+						{t("videoUnsupported")}
 					</video>
 				)}
 			</Card>
 
 			{lesson.isDemoFallback && (
 				<p className="text-muted-foreground text-sm">
-					目前播放的是暫時示範影片；接上 Bunny 課片後會自動換成正式內容。
+					{t("demoFallback")}
 				</p>
 			)}
 
 			<div className="flex gap-3">
-				{previous && <Link className="text-primary underline" href={`/course/${previous.id}`}>上一單元</Link>}
-				{next && <Link className="text-primary underline" href={`/course/${next.id}`}>下一單元</Link>}
+				{previous && <Link className="text-primary underline" href={`/course/${previous.id}`}>{t("previous")}</Link>}
+				{next && <Link className="text-primary underline" href={`/course/${next.id}`}>{t("next")}</Link>}
 			</div>
 		</div>
 	);

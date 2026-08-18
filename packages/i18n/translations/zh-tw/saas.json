@@ -104,133 +104,133 @@
   },
   "app": {
     "menu": {
-      "accountSettings": "Account settings",
-      "admin": "Admin",
-      "aiChatbot": "AI Chatbot",
-      "collapseSidebar": "Collapse sidebar",
-      "expandSidebar": "Expand sidebar",
-      "navigationTitle": "Menu",
-      "openNavigation": "Open navigation",
-      "organizationSettings": "Organization settings",
-      "start": "Start"
+      "accountSettings": "帳號設定",
+      "admin": "管理",
+      "aiChatbot": "AI 助手",
+      "collapseSidebar": "收合側欄",
+      "expandSidebar": "展開側欄",
+      "navigationTitle": "選單",
+      "openNavigation": "開啟導覽",
+      "organizationSettings": "組織設定",
+      "start": "首頁"
     },
     "userMenu": {
-      "accountSettings": "Account settings",
-      "colorMode": "Color mode",
-      "documentation": "Documentation",
-      "home": "Home",
-      "logout": "Logout"
+      "accountSettings": "帳號設定",
+      "colorMode": "顯示模式",
+      "documentation": "文件",
+      "home": "首頁",
+      "logout": "登出"
     },
     "notifications": {
-      "title": "Notifications",
-      "empty": "No notifications yet.",
-      "markAllRead": "Mark all as read",
-      "fallbackTitle": "Notification",
+      "title": "通知",
+      "empty": "目前沒有通知。",
+      "markAllRead": "全部標示為已讀",
+      "fallbackTitle": "通知",
       "aria": {
-        "open": "Open notifications"
+        "open": "開啟通知"
       }
     }
   },
   "auth": {
     "errors": {
-      "invalidEmailOrPassword": "The credentials you entered are invalid. Please check them and try again.",
-      "unknown": "Something went wrong. Please try again.",
-      "userNotFound": "This user does not exists",
-      "failedToCreateUser": "Could not create user. Please try again.",
-      "failedToCreateSession": "Could not create a session. Please try again.",
-      "failedToUpdateUser": "Could not update user. Please try again.",
-      "failedToGetSession": "Could not get the session.",
-      "invalidPassword": "The entered password is incorrect.",
-      "invalidEmail": "The entered email is invalid.",
-      "invalidToken": "The token you entered is invalid or has expired.",
-      "credentialAccountNotFound": "Account not found.",
-      "emailCanNotBeUpdated": "Email could not be updated. Please try again.",
-      "emailNotVerified": "Please verify your email first before logging in.",
-      "failedToGetUserInfo": "Could not load user information.",
-      "idTokenNotSupported": "ID token is not supported.",
-      "passwordTooLong": "Password is too long.",
-      "passwordTooShort": "Password is too short.",
-      "providerNotFound": "This provider is not suppported.",
-      "socialAccountAlreadyLinked": "This account is already linked to a user.",
-      "userEmailNotFound": "Email not found.",
-      "userAlreadyExists": "This user already exists.",
-      "userAlreadyExistsUseAnotherEmail": "User already exists. Use another email.",
-      "invalidInvitation": "The invitation is invalid or expired.",
-      "sessionExpired": "The session has expired.",
-      "failedToUnlinkLastAccount": "Failed to unlink account",
-      "accountNotFound": "Account not found"
+      "invalidEmailOrPassword": "你輸入的帳密不正確，請檢查後再試。",
+      "unknown": "發生錯誤，請稍後再試。",
+      "userNotFound": "找不到這個使用者",
+      "failedToCreateUser": "無法建立使用者，請稍後再試。",
+      "failedToCreateSession": "無法建立工作階段，請稍後再試。",
+      "failedToUpdateUser": "無法更新使用者，請稍後再試。",
+      "failedToGetSession": "無法取得工作階段。",
+      "invalidPassword": "輸入的密碼不正確。",
+      "invalidEmail": "輸入的 Email 不正確。",
+      "invalidToken": "輸入的權杖無效或已過期。",
+      "credentialAccountNotFound": "找不到帳號。",
+      "emailCanNotBeUpdated": "無法更新 Email，請稍後再試。",
+      "emailNotVerified": "請先驗證 Email 再登入。",
+      "failedToGetUserInfo": "無法載入使用者資訊。",
+      "idTokenNotSupported": "不支援 ID 權杖。",
+      "passwordTooLong": "密碼太長。",
+      "passwordTooShort": "密碼太短。",
+      "providerNotFound": "找不到這個登入服務。",
+      "socialAccountAlreadyLinked": "這個帳號已連結其他使用者。",
+      "userEmailNotFound": "找不到 Email。",
+      "userAlreadyExists": "這個使用者已存在。",
+      "userAlreadyExistsUseAnotherEmail": "使用者已存在，請改用其他 Email。",
+      "invalidInvitation": "邀請無效或已過期。",
+      "sessionExpired": "工作階段已過期。",
+      "failedToUnlinkLastAccount": "無法解除最後一個帳號的連結",
+      "accountNotFound": "找不到帳號"
     },
     "forgotPassword": {
-      "backToSignin": "Back to signin",
+      "backToSignin": "返回登入",
       "email": "Email",
       "hints": {
         "linkNotSent": {
-          "message": "We are sorry, but we were unable to send you a link to reset your password. Please try again later.",
-          "title": "Link not sent"
+          "message": "目前無法寄出重設密碼連結，請稍後再試。",
+          "title": "連結未寄出"
         },
         "linkSent": {
-          "message": "We have sent you a link to continue. Please check your inbox.",
-          "title": "Link sent"
+          "message": "連結已寄出，請查看收件匣。",
+          "title": "連結已寄出"
         }
       },
-      "message": "Please enter your email address and we will send you a link to reset your password.",
-      "submit": "Send link",
-      "title": "Forgot your password?"
+      "message": "請輸入 Email，我們會寄出重設密碼連結。",
+      "submit": "寄出連結",
+      "title": "忘記密碼？"
     },
     "login": {
-      "continueWith": "Or continue with",
-      "createAnAccount": "Create an account",
-      "dontHaveAnAccount": "Don't have an account yet?",
-      "forgotPassword": "Forgot password?",
+      "continueWith": "或使用以下方式登入",
+      "createAnAccount": "建立帳號",
+      "dontHaveAnAccount": "還沒有帳號？",
+      "forgotPassword": "忘記密碼？",
       "hints": {
-        "invalidCredentials": "The email or password you entered are invalid. Please try again.",
-        "socialSigninFailed": "Could not sign in. Please try again.",
+        "invalidCredentials": "Email 或密碼不正確，請再試一次。",
+        "socialSigninFailed": "無法登入，請稍後再試。",
         "linkSent": {
-          "message": "We have sent you a link to continue. Please check your inbox.",
-          "title": "Link sent"
+          "message": "連結已寄出，請查看收件匣。",
+          "title": "連結已寄出"
         }
       },
-      "loginWithPasskey": "Login with passkey",
+      "loginWithPasskey": "使用通行金鑰登入",
       "modes": {
-        "magicLink": "Magic link",
-        "password": "Password"
+        "magicLink": "魔法連結",
+        "password": "密碼"
       },
-      "submit": "Sign in",
-      "subtitle": "Please enter your credentials to sign in.",
-      "title": "Welcome back",
-      "sendMagicLink": "Send magic link"
+      "submit": "登入",
+      "subtitle": "請輸入帳密登入。",
+      "title": "歡迎回來",
+      "sendMagicLink": "寄出登入連結"
     },
     "resetPassword": {
-      "backToSignin": "Back to signin",
+      "backToSignin": "返回登入",
       "hints": {
-        "error": "We are sorry, but we were unable to reset your password. Please try again.",
-        "success": "Your password has been reset successfully."
+        "error": "無法重設密碼，請稍後再試。",
+        "success": "密碼已成功重設。"
       },
-      "message": "Please enter a new password.",
-      "newPassword": "New password",
-      "submit": "Reset password",
-      "title": "Reset your password"
+      "message": "請輸入新密碼。",
+      "newPassword": "新密碼",
+      "submit": "重設密碼",
+      "title": "重設密碼"
     },
     "signup": {
-      "alreadyHaveAccount": "Already have an account?",
+      "alreadyHaveAccount": "已經有帳號？",
       "email": "Email",
       "hints": {
-        "signupFailed": "We are sorry, but we were unable to create your account. Please try again later.",
-        "verifyEmail": "We have sent you a link to verify your email. Please check your inbox."
+        "signupFailed": "無法建立帳號，請稍後再試。",
+        "verifyEmail": "驗證連結已寄出，請查看收件匣。"
       },
-      "message": "We are happy that you want to join us. Please fill in the form below to create your account.",
-      "name": "Name",
-      "password": "Password",
-      "signIn": "Sign in",
-      "submit": "Create account",
-      "title": "Create an account"
+      "message": "很高興你想加入我們，請填寫下方表單建立帳號。",
+      "name": "姓名",
+      "password": "密碼",
+      "signIn": "登入",
+      "submit": "建立帳號",
+      "title": "建立帳號"
     },
     "verify": {
-      "title": "Verify your account",
-      "code": "One-time password",
-      "submit": "Verify",
-      "backToSignin": "Back to login",
-      "message": "Enter the one-time password from your authenticator app to continue."
+      "title": "驗證你的帳號",
+      "code": "一次性密碼",
+      "submit": "驗證",
+      "backToSignin": "返回登入",
+      "message": "輸入驗證器 App 顯示的一次性密碼以繼續。"
     }
   },
   "choosePlan": {
@@ -423,45 +423,45 @@
   "settings": {
     "account": {
       "avatar": {
-        "description": "To change your avatar click the picture in this block and select a file from your computer to upload.",
+        "description": "要更換頭像，請點擊這個區塊的圖片，再從電腦選擇要上傳的檔案。",
         "notifications": {
-          "error": "Could not update avatar",
-          "success": "Avatar was updated successfully"
+          "error": "無法更新頭像",
+          "success": "頭像已更新"
         },
-        "title": "Your avatar"
+        "title": "你的頭像"
       },
       "changeEmail": {
-        "description": "To change your email, enter the new email and hit save. You will have to confirm the new email before it will become active.",
+        "description": "要更換 Email，請輸入新的 Email 並按下儲存；新 Email 必須完成驗證後才會啟用。",
         "notifications": {
-          "error": "Could not update email",
-          "success": "Email was updated successfully"
+          "error": "無法更新 Email",
+          "success": "Email 已更新"
         },
-        "title": "Your email"
+        "title": "你的 Email"
       },
       "changeName": {
         "notifications": {
-          "error": "Could not update name",
-          "success": "Name was updated successfully"
+          "error": "無法更新名稱",
+          "success": "名稱已更新"
         },
-        "title": "Your name"
+        "title": "你的名稱"
       },
       "deleteAccount": {
-        "confirmation": "Are you sure you want to delete your account?",
-        "description": "Permanently delete your account. Once you delete your account, there is no going back. To confirm, please enter your password below:",
+        "confirmation": "確定要刪除帳號嗎？",
+        "description": "永久刪除你的帳號。刪除後無法復原。若要確認，請在下方輸入密碼：",
         "notifications": {
-          "error": "Could not delete account",
-          "success": "Account was deleted successfully"
+          "error": "無法刪除帳號",
+          "success": "帳號已刪除"
         },
-        "submit": "Delete account",
-        "title": "Delete account"
+        "submit": "刪除帳號",
+        "title": "刪除帳號"
       },
       "language": {
-        "description": "To change the language of the app for your account, select a language from the list and click save.",
+        "description": "要變更帳號使用的介面語言，請從清單選擇語言並按下儲存。",
         "notifications": {
-          "error": "Could not update language",
-          "success": "Language was updated successfully"
+          "error": "無法更新語言",
+          "success": "語言已更新"
         },
-        "title": "Your language"
+        "title": "你的語言"
       },
       "security": {
         "activeSessions": {
@@ -585,101 +585,134 @@
           "enabled": "You have two-factor authentication enabled for your account."
         }
       },
-      "subtitle": "Manage the settings of your personal account.",
-      "title": "Account settings"
+      "subtitle": "管理你的個人帳號設定。",
+      "title": "帳號設定"
     },
     "billing": {
       "createCustomerPortal": {
-        "label": "Manage billing",
+        "label": "管理帳單",
         "notifications": {
           "error": {
-            "title": "Could not create a customer portal session. Please try again."
+            "title": "無法建立客戶入口工作階段，請再試一次。"
           }
         }
       },
       "activePlan": {
         "status": {
-          "active": "Active",
-          "canceled": "Canceled",
-          "expired": "Expired",
-          "incomplete": "Incomplete",
-          "past_due": "Past due",
-          "paused": "Paused",
-          "trialing": "Trialing",
-          "unpaid": "Unpaid"
+          "active": "使用中",
+          "canceled": "已取消",
+          "expired": "已過期",
+          "incomplete": "未完成",
+          "past_due": "逾期",
+          "paused": "已暫停",
+          "trialing": "試用中",
+          "unpaid": "未付款"
         },
-        "title": "Your plan"
+        "title": "你的方案"
       },
       "changePlan": {
-        "description": "Choose a plan to subscribe to.",
-        "title": "Change your plan"
+        "description": "選擇要訂閱的方案。",
+        "title": "變更方案"
       },
-      "title": "Billing"
+      "title": "帳單"
     },
     "notificationsPage": {
-      "title": "Notifications",
-      "description": "Choose how you receive notifications. Disabled options are stored; everything is enabled by default.",
+      "title": "通知",
+      "description": "選擇接收通知的方式。停用的選項會被儲存；預設全部啟用。",
       "groups": {
         "general": {
-          "title": "General"
+          "title": "一般"
         }
       },
       "types": {
         "APP_UPDATE": {
-          "label": "App updates"
+          "label": "應用程式更新"
         }
       },
       "columns": {
-        "type": "Notification",
-        "inApp": "In-app",
+        "type": "通知",
+        "inApp": "應用程式內",
         "email": "Email"
       }
     },
     "menu": {
       "account": {
-        "billing": "Billing",
-        "dangerZone": "Danger zone",
-        "general": "General",
-        "notifications": "Notifications",
-        "security": "Security",
-        "title": "Account"
+        "billing": "帳單",
+        "dangerZone": "危險區域",
+        "general": "一般",
+        "notifications": "通知",
+        "security": "安全性",
+        "title": "帳號"
       },
       "organization": {
-        "billing": "Billing",
-        "general": "General",
-        "members": "Members",
-        "title": "Organization",
-        "dangerZone": "Danger zone"
+        "billing": "帳單",
+        "general": "一般",
+        "members": "成員",
+        "title": "組織",
+        "dangerZone": "危險區域"
       }
     },
-    "save": "Save"
+    "save": "儲存"
   },
   "start": {
-    "subtitle": "See the latest stats of your awesome business.",
-    "welcome": "Welcome {name}!"
+    "subtitle": "查看你的業務最新統計資料。",
+    "welcome": "歡迎，{name}！"
+  },
+  "course": {
+    "navLabel": "課程",
+    "title": "課程",
+    "entitledDescription": "買斷後可看全部單元。",
+    "lockedDescription": "購買開站包後即可解鎖全部單元。",
+    "lockedNotice": "目前尚未取得課程權限，影片內容不會送到瀏覽器。",
+    "checkout": "前往結帳",
+    "lessonsTitle": "單元列表",
+    "lessonsAria": "課程單元",
+    "watch": "開始觀看",
+    "lockedPlayback": "購買後才能播放課程。",
+    "lessonProgress": "課程單元 {order} / {total}",
+    "videoUnsupported": "你的瀏覽器不支援影片播放。",
+    "demoFallback": "目前播放的是暫時示範影片；接上 Bunny 課片後會自動換成正式內容。",
+    "previous": "上一單元",
+    "next": "下一單元",
+    "forbiddenTitle": "這堂課還不能看",
+    "forbiddenDescription": "需要先購買開站包。若訂單已退款，課程也會重新鎖住。",
+    "lessons": {
+      "lesson-01": {
+        "title": "開站包是什麼、為什麼要買斷",
+        "description": "產品定位、8800 一次買斷、課與終身代碼包同一 SKU。"
+      },
+      "lesson-02": {
+        "title": "站殼、登入與結帳路徑",
+        "description": "Better Auth、PAYUNi、Order 權限怎麼串起來。"
+      },
+      "lesson-03": {
+        "title": "課程模組與權限閘門",
+        "description": "付了才能播；退款後必須重新鎖住。"
+      }
+    }
   },
   "common": {
     "confirmation": {
-      "cancel": "Cancel",
-      "confirm": "Confirm"
+      "cancel": "取消",
+      "confirm": "確認"
     },
     "actions": {
-      "continue": "Continue",
-      "verify": "Verify"
+      "continue": "繼續",
+      "verify": "驗證"
     },
     "aria": {
-      "language": "Language"
+      "language": "語言"
     },
     "colorMode": {
-      "system": "System",
-      "light": "Light",
-      "dark": "Dark"
+      "system": "系統",
+      "light": "淺色",
+      "dark": "深色"
     },
     "passwordCriteria": {
-      "minLength": "Min. 8 characters",
-      "upperAndLowercase": "Upper & lowercase",
-      "number": "Number",
-      "specialCharacter": "Special character"
+      "minLength": "至少 8 個字元",
+      "upperAndLowercase": "大小寫字母",
+      "number": "數字",
+      "specialCharacter": "特殊字元"
     }
   },
   "checkoutReturn": {

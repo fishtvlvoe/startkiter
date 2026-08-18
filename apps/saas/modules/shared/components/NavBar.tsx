@@ -389,7 +389,7 @@ export function NavBar() {
 				isActive: pathname === "/" || pathname === basePath,
 			},
 			{
-				label: "課程",
+				label: t("course.navLabel"),
 				href: "/course",
 				icon: BookOpenIcon,
 				isActive: pathname.startsWith("/course"),

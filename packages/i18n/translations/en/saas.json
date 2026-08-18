@@ -658,6 +658,39 @@
     "subtitle": "See the latest stats of your awesome business.",
     "welcome": "Welcome {name}!"
   },
+  "course": {
+    "navLabel": "Course",
+    "title": "Course",
+    "entitledDescription": "Your purchase unlocks every lesson.",
+    "lockedDescription": "Purchase the StartKiter package to unlock every lesson.",
+    "lockedNotice": "You do not have course access yet. Video content will not be sent to your browser.",
+    "checkout": "Go to checkout",
+    "lessonsTitle": "Lessons",
+    "lessonsAria": "Course lessons",
+    "watch": "Start watching",
+    "lockedPlayback": "Purchase the package to play the course.",
+    "lessonProgress": "Lesson {order} / {total}",
+    "videoUnsupported": "Your browser does not support video playback.",
+    "demoFallback": "This is a temporary demo video; it will be replaced automatically when the Bunny course video is connected.",
+    "previous": "Previous lesson",
+    "next": "Next lesson",
+    "forbiddenTitle": "This lesson is not available yet",
+    "forbiddenDescription": "Purchase the StartKiter package first. If an order is refunded, the course will be locked again.",
+    "lessons": {
+      "lesson-01": {
+        "title": "What is the StartKiter package, and why buy it once?",
+        "description": "Product positioning, the one-time NT$8,800 purchase, and the course plus lifetime code package as one SKU."
+      },
+      "lesson-02": {
+        "title": "Site shell, sign-in, and checkout paths",
+        "description": "How Better Auth, PAYUNi, and Order permissions connect."
+      },
+      "lesson-03": {
+        "title": "Course module and access gates",
+        "description": "Playback requires purchase; a refund locks the course again."
+      }
+    }
+  },
   "common": {
     "confirmation": {
       "cancel": "Cancel",

@@ -330,6 +330,11 @@
       "system": "System",
       "light": "Light",
       "dark": "Dark"
+    },
+    "consent": {
+      "description": "This site doesn't use cookies yet, but we added this banner to demo it to you.",
+      "decline": "Decline",
+      "allow": "Allow"
     }
   },
   "auth": {

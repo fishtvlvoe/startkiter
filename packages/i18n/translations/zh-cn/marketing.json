@@ -1,278 +1,278 @@
 {
   "blog": {
-    "badge": "Blog",
-    "description": "How we think about workspaces, billing, and the details that show up after you invite the team.",
-    "title": "Notes from the product",
-    "back": "Back to journal",
-    "allTags": "All",
-    "filterLabel": "Filter by tag",
-    "emptyFilter": "No notes with this tag."
+    "badge": "博客",
+    "description": "我们如何看待工作区、账单，以及邀请团队后会遇到的细节。",
+    "title": "产品笔记",
+    "back": "返回文章列表",
+    "allTags": "全部",
+    "filterLabel": "按标签筛选",
+    "emptyFilter": "没有符合这个标签的文章。"
   },
   "changelog": {
-    "badge": "Updates",
-    "description": "New roles, faster switching, and the billing details we shipped this season.",
-    "title": "See what just shipped",
-    "latest": "New",
+    "badge": "更新",
+    "description": "本季推出的新角色、更快的切换，以及账单细节。",
+    "title": "看看最近推出了什么",
+    "latest": "最新",
     "kinds": {
-      "added": "New",
-      "improved": "Improved",
-      "fixed": "Fixed"
+      "added": "新增",
+      "improved": "改进",
+      "fixed": "修复"
     },
     "entries": {
       "clientPortals": {
         "date": "2026-08-06",
         "version": "v1.4",
-        "title": "A home for every client",
-        "summary": "Clients can step into their own workspace, review what’s in progress, and leave a note — without borrowing a teammate’s login.",
+        "title": "每位客户都有自己的空间",
+        "summary": "客户可以进入自己的工作区、查看进度并留言，不必借用队友的登录信息。",
         "changes": {
           "item1": {
             "kind": "added",
-            "text": "Guest access with a view-only role, so clients see progress without a full seat."
+            "text": "提供仅限查看的访客角色，客户不用完整席位也能查看进度。"
           },
           "item2": {
             "kind": "added",
-            "text": "A client-ready overview on the start page with the work that matters this week."
+            "text": "首页提供适合客户查看的总览，聚焦本周重要工作。"
           },
           "item3": {
             "kind": "improved",
-            "text": "Switching organizations keeps your place, even with a long client list."
+            "text": "即使客户列表很长，切换组织也会保留当前位置。"
           }
         }
       },
       "planClarity": {
         "date": "2026-07-22",
         "version": "v1.3",
-        "title": "Plans you can explain in one sitting",
-        "summary": "Checkout and the pricing table now lead with the amount, then the details — so nobody has to decode a spreadsheet on a sales call.",
+        "title": "一次说清楚的方案",
+        "summary": "结账与价格表现在先呈现金额，再显示细节，销售通话时不用解读表格。",
         "changes": {
           "item1": {
             "kind": "improved",
-            "text": "The pricing table leads with the price, then the features that come with it."
+            "text": "价格表先呈现价格，再列出包含的功能。"
           },
           "item2": {
             "kind": "added",
-            "text": "Annual plans show the savings at checkout, not after the invoice lands."
+            "text": "年付方案在结账时就显示省下的金额，不必等账单寄来才知道。"
           },
           "item3": {
             "kind": "fixed",
-            "text": "Subscription status could lag right after checkout. It now updates immediately."
+            "text": "订阅状态过去可能在结账后延迟，现在会立即更新。"
           }
         }
       },
       "quietWeek": {
         "date": "2026-07-08",
         "version": "",
-        "title": "A quieter week of polish",
-        "summary": "No headline feature — just the empty states, emails, and invite edges that make the product feel finished.",
+        "title": "安静打磨的一周",
+        "summary": "没有头条功能，只有让产品更完整的空状态、Email 与邀请流程细节。",
         "changes": {
           "item1": {
             "kind": "improved",
-            "text": "Empty members and invitations screens now suggest a next step instead of staring back at you."
+            "text": "成员与邀请空白页现在会提示下一步，不再只显示空白。"
           },
           "item2": {
             "kind": "fixed",
-            "text": "Invite links failed when the person already had an account. They now drop into the right workspace."
+            "text": "受邀者已有账号时，邀请链接过去会失效；现在会直接进入正确工作区。"
           },
           "item3": {
             "kind": "improved",
-            "text": "Billing emails name the workspace they belong to, so a multi-client inbox stays readable."
+            "text": "账单 Email 会标注所属工作区，让多客户收件箱更容易阅读。"
           }
         }
       },
       "workspaceSwitching": {
         "date": "2026-06-30",
         "version": "v1.2",
-        "title": "Switch workspaces without the wait",
-        "summary": "Moving between clients should feel like changing folders, not reloading the app. This release is about that click.",
+        "title": "无需等待即可切换工作区",
+        "summary": "在客户之间移动应该像换文件夹，而不是重新加载应用；这次更新就是让那一下点击更顺。",
         "changes": {
           "item1": {
             "kind": "improved",
-            "text": "Organization switching stays snappy even with dozens of memberships."
+            "text": "即使有数十个成员资格，组织切换仍然快速。"
           },
           "item2": {
             "kind": "added",
-            "text": "We remember the last workspace you had open and take you back there."
+            "text": "系统会记住你上次打开的工作区，并带你回到那里。"
           },
           "item3": {
             "kind": "fixed",
-            "text": "The org switcher could show a stale name after a rename. It now follows the workspace."
+            "text": "组织重命名后，切换器过去可能显示旧名称；现在会跟随工作区更新。"
           }
         }
       },
       "invites": {
         "date": "2026-05-14",
         "version": "v1.1",
-        "title": "Invites that feel like a handshake",
-        "summary": "The first email someone gets from Acme should name the workspace, the person who asked, and what to do next.",
+        "title": "像握手一样自然的邀请",
+        "summary": "对方收到 Acme 的第一封 Email 应该能看到工作区、邀请人与下一步该做什么。",
         "changes": {
           "item1": {
             "kind": "added",
-            "text": "Invite emails include the workspace name and who asked you in."
+            "text": "邀请 Email 会包含工作区名称与邀请人。"
           },
           "item2": {
             "kind": "improved",
-            "text": "First-run setup walks you through creating the first organization instead of dumping you on an empty start page."
+            "text": "首次设置会引导你创建第一个组织，不会把你丢在空白首页。"
           },
           "item3": {
             "kind": "fixed",
-            "text": "Expired invites now say so, instead of a generic error."
+            "text": "过期邀请现在会明确显示，不再只返回笼统错误。"
           }
         }
       },
       "launch": {
         "date": "2026-04-02",
         "version": "v1.0",
-        "title": "Acme, from first login",
-        "summary": "The first public release: organizations, roles, and billing in one place — so a team can invite people and charge for work without a side quest.",
+        "title": "从第一次登录开始使用 Acme",
+        "summary": "第一个公开版本把组织、角色与账单放在一起，团队可以邀请成员并为工作收费，不必绕远路。",
         "changes": {
           "item1": {
             "kind": "added",
-            "text": "Organizations, roles, and billing live together from day one."
+            "text": "从第一天起，组织、角色与账单就集中在同一处。"
           },
           "item2": {
             "kind": "added",
-            "text": "A start page for each workspace so teams know where to begin."
+            "text": "每个工作区都有首页，团队知道该从哪里开始。"
           },
           "item3": {
             "kind": "added",
-            "text": "Self-serve plan changes from the customer portal."
+            "text": "客户可以从入口自助变更方案。"
           }
         }
       }
     }
   },
   "contact": {
-    "badge": "Contact",
-    "description": "Questions about plans, onboarding, or a workspace for your team. We usually reply within one business day.",
+    "badge": "联系我们",
+    "description": "对方案、导入流程或团队工作区有疑问吗？我们通常会在一个工作日内回复。",
     "form": {
       "email": "Email",
-      "message": "Message",
-      "name": "Name",
+      "message": "消息",
+      "name": "名称",
       "notifications": {
-        "error": "We could not send your message. Please try again in a moment.",
-        "success": "Message sent. We will get back to you soon."
+        "error": "无法发送消息，请稍后再试。",
+        "success": "消息已发送，我们很快会回复。"
       },
-      "submit": "Send message"
+      "submit": "发送消息"
     },
-    "title": "Tell us what you need"
+    "title": "告诉我们你的需求"
   },
   "documentation": {
-    "title": "Documentation"
+    "title": "文档"
   },
   "faq": {
-    "badge": "Questions",
-    "description": "Straight answers to the questions teams ask before they start.",
-    "title": "Frequently asked questions",
+    "badge": "常见问题",
+    "description": "直接回答团队开始使用前最常问的问题。",
+    "title": "常见问题",
     "items": {
       "refundPolicy": {
-        "question": "What is the refund policy?",
-        "answer": "If the product is not a fit, request a refund within 30 days and we will process it in full."
+        "question": "退款政策是什么？",
+        "answer": "如果产品不适合你，请在 30 天内申请退款，我们会全额处理。"
       },
       "cancelSubscription": {
-        "question": "How do I cancel my subscription?",
-        "answer": "Open Billing in your account settings and cancel anytime. Access continues through the end of the current period."
+        "question": "如何取消订阅？",
+        "answer": "在账号设置打开账单即可随时取消，访问权限会持续到当前周期结束。"
       },
       "changePlan": {
-        "question": "Can I change my plan?",
-        "answer": "Yes. Upgrade or downgrade from Billing at any time. Changes take effect on the next invoice unless noted otherwise."
+        "question": "可以更改方案吗？",
+        "answer": "可以，随时从账单升级或降级。除非另有说明，更改会在下一张账单生效。"
       },
       "freeTrial": {
-        "question": "Do you offer a free trial?",
-        "answer": "Yes. Paid plans include a 7-day trial so you can evaluate the full product with your team."
+        "question": "有提供免费试用吗？",
+        "answer": "有，付费方案包含 7 天试用期，让你和团队完整评估产品。"
       }
     }
   },
   "home": {
     "hero": {
-      "new": "New",
-      "featureBadge": "Multi-tenant auth, billing, and orgs — ready to ship",
+      "new": "新功能",
+      "featureBadge": "多租户登录、账单与组织功能，开箱即可上线",
       "title": "已经在用 AI 做事的人，需要的是一套 SaaS 开站包",
-      "subtitle": "A production-minded Next.js starter with authentication, organizations, billing, and the UI patterns you need to launch faster.",
-      "getStarted": "Start building",
-      "documentation": "Read the docs",
-      "imageAlt": "Product dashboard preview",
+      "subtitle": "以正式上线为目标打造的 Next.js 起始套件，整合登录、组织、账单与加速上线所需的 UI 模式。",
+      "getStarted": "开始打造",
+      "documentation": "阅读文档",
+      "imageAlt": "产品控制台预览",
       "preview": {
         "organization": "Acme",
-        "start": "Start",
-        "chatbot": "AI Chatbot",
-        "organizationSettings": "Organization settings",
-        "accountSettings": "Account settings",
-        "welcome": "Welcome to the start page of this organization!",
-        "newClients": "New clients",
-        "revenue": "Revenue",
-        "churn": "Churn",
-        "placeholder": "Place your content here...",
+        "start": "首页",
+        "chatbot": "AI 助手",
+        "organizationSettings": "组织设置",
+        "accountSettings": "账号设置",
+        "welcome": "欢迎来到这个组织的首页！",
+        "newClients": "新客户",
+        "revenue": "营收",
+        "churn": "流失率",
+        "placeholder": "把你的内容放在这里⋯",
         "userName": "Maya Chen",
         "userEmail": "maya@acme.com"
       }
     },
     "features": {
-      "badge": "Product",
-      "title": "Everything between signup and scale",
-      "description": "Opinionated defaults for the hard parts of a SaaS — so your team can focus on the product customers pay for.",
+      "badge": "产品",
+      "title": "从注册到成长所需的一切",
+      "description": "为 SaaS 难题准备好有主见的默认值，让团队专心打造客户愿意付费的产品。",
       "feature1": {
-        "title": "Teams and organizations",
-        "subtitle": "Invite members, manage roles, and keep every workspace isolated from day one.",
-        "description": "Multi-tenant structure is built in: create an organization, invite your team, and switch contexts without custom scaffolding.",
+        "title": "团队与组织",
+        "subtitle": "邀请成员、管理角色，从第一天就让每个工作区彼此隔离。",
+        "description": "内置多租户结构：创建组织、邀请团队，不用自行搭建就能切换工作环境。",
         "benefit1": {
-          "title": "Role-aware access",
-          "description": "Owners, admins, and members get clear permissions out of the box."
+          "title": "按角色控制访问",
+          "description": "所有者、管理员与成员开箱即有清晰的权限。"
         },
         "benefit2": {
-          "title": "Invites that work",
-          "description": "Email invitations and join flows are wired for real onboarding, not demos."
+          "title": "真正可用的邀请流程",
+          "description": "Email 邀请与加入流程可直接用于正式 onboarding，不是演示用假流程。"
         },
         "benefit3": {
-          "title": "Active workspace context",
-          "description": "Users move between organizations without losing their place in the product."
+          "title": "保留当前工作区",
+          "description": "用户切换组织时，不会在产品中丢失当前位置。"
         }
       },
       "feature2": {
-        "title": "Billing that stays out of the way",
-        "subtitle": "Subscriptions, trials, and customer portals with a clean plan catalog.",
-        "description": "Configure plans once, then let checkout and billing portals handle the rest while you keep shipping product features.",
+        "title": "不打扰产品工作的账单功能",
+        "subtitle": "清晰的方案目录、订阅、试用与客户入口。",
+        "description": "设置一次方案，就让结账与账单入口处理后续工作，你可以继续推出产品功能。",
         "benefit1": {
-          "title": "Flexible plan catalog",
-          "description": "Monthly, yearly, and one-time options map cleanly to your pricing model."
+          "title": "灵活的方案目录",
+          "description": "每月、每年与一次性方案，都能清楚对应你的定价模式。"
         },
         "benefit2": {
-          "title": "Trials without custom code",
-          "description": "Give teams time to evaluate before they commit."
+          "title": "无需定制代码的试用期",
+          "description": "让团队先评估，再决定是否投入。"
         },
         "benefit3": {
-          "title": "Self-serve upgrades",
-          "description": "Customers manage payment methods and plan changes from a portal."
+          "title": "自助升级",
+          "description": "客户可以从入口管理付款方式与方案变更。"
         }
       }
     },
     "testimonials": {
-      "badge": "Customers",
-      "title": "Trusted by teams shipping real products",
-      "description": "Example quotes you can replace with your own customers once you launch.",
+      "badge": "客户",
+      "title": "正在交付真实产品的团队都信任",
+      "description": "上线后可以把这些示例引言换成你的真实客户反馈。",
       "items": {
         "item1": {
-          "quote": "We replaced months of auth and billing work with a foundation we could actually extend. Our first paying customers were live in weeks, not quarters.",
+          "quote": "我们用一套真正可扩展的基础，取代数月的登录与账单工作。第一批付费客户几周内就上线，不必等上几季。",
           "name": "Maya Chen",
-          "role": "Founder, Northline"
+          "role": "Northline 创始人"
         },
         "item2": {
-          "quote": "The organization model matched how we already sell. Invites, roles, and workspace switching just worked — we spent our time on the product instead.",
+          "quote": "组织模型符合我们原本的销售方式。邀请、角色与工作区切换都能直接运行，我们把时间花在产品上。",
           "name": "Jonas Weber",
-          "role": "CTO, Latticeworks"
+          "role": "Latticeworks 技术负责人"
         },
         "item3": {
-          "quote": "Clean defaults, clear structure, and nothing fighting us when we customized. It feels like a senior team left us a strong starting point.",
+          "quote": "干净的默认值、清晰的结构，定制时没有任何阻力。就像资深团队替我们留下了很好的起点。",
           "name": "Amelia Ortiz",
-          "role": "Product Lead, Harbor Studio"
+          "role": "Harbor Studio 产品负责人"
         }
       }
     },
     "cta": {
-      "badge": "Get started",
-      "title": "Ready to ship your next release?",
-      "description": "Start with a complete SaaS foundation — auth, orgs, billing, and UI — then make it yours.",
-      "primary": "Create your account",
-      "secondary": "Talk to us"
+      "badge": "开始使用",
+      "title": "准备好推出下一个版本了吗？",
+      "description": "从完整的 SaaS 基础开始——登录、组织、账单与 UI——再把它变成你的产品。",
+      "primary": "创建账号",
+      "secondary": "联系我们"
     },
     "title": "一次买断，带走课程与终身代码包",
     "description": "教你把 AI 服务做成自己的站。付一次 NT$8,800，课程与 GitHub 代码包一起到手。",
@@ -283,53 +283,58 @@
     "email": "Email",
     "hints": {
       "error": {
-        "message": "Could not subscribe. Please try again later."
+        "message": "无法订阅，请稍后再试。"
       },
       "success": {
-        "message": "You are on the list. We will share product updates sparingly.",
-        "title": "Subscribed"
+        "message": "你已加入名单，我们只会偶尔分享产品更新。",
+        "title": "订阅成功"
       }
     },
-    "submit": "Subscribe",
-    "subtitle": "Product notes and launch updates — no noise.",
-    "title": "Stay in the loop"
+    "submit": "订阅",
+    "subtitle": "产品笔记与上线更新，不制造噪音。",
+    "title": "掌握最新消息"
   },
   "notFound": {
     "code": "404",
-    "title": "This page does not exist",
-    "goToDashboard": "Go to dashboard",
-    "goToHomepage": "Go to homepage"
+    "title": "这个页面不存在",
+    "goToDashboard": "前往控制台",
+    "goToHomepage": "前往首页"
   },
   "common": {
     "footer": {
-      "blog": "Blog",
-      "features": "Features",
-      "pricing": "Pricing",
-      "privacyPolicy": "Privacy policy",
-      "termsAndConditions": "Terms and conditions",
-      "builtWith": "Built with supastarter"
+      "blog": "博客",
+      "features": "功能",
+      "pricing": "价格",
+      "privacyPolicy": "隐私政策",
+      "termsAndConditions": "条款与细则",
+      "builtWith": "使用 supastarter 打造"
     },
     "menu": {
-      "blog": "Blog",
-      "changelog": "Changelog",
-      "contact": "Contact",
-      "dashboard": "Dashboard",
-      "docs": "Docs",
-      "faq": "FAQ",
-      "login": "Login",
-      "pricing": "Pricing"
+      "blog": "博客",
+      "changelog": "更新记录",
+      "contact": "联系我们",
+      "dashboard": "控制台",
+      "docs": "文档",
+      "faq": "常见问题",
+      "login": "登录",
+      "pricing": "价格"
     },
     "aria": {
-      "menu": "Menu",
-      "language": "Language"
+      "menu": "菜单",
+      "language": "语言"
     },
     "tableOfContents": {
-      "title": "On this page"
+      "title": "本页内容"
     },
     "colorMode": {
-      "system": "System",
-      "light": "Light",
-      "dark": "Dark"
+      "system": "系统",
+      "light": "浅色",
+      "dark": "深色"
+    },
+    "consent": {
+      "description": "这个网站目前还没有使用 Cookie，但我们加上这个横幅让你看看效果。",
+      "decline": "拒绝",
+      "allow": "允许"
     }
   },
   "auth": {
