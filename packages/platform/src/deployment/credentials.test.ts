@@ -56,4 +56,47 @@ describe("acceptCredentialHandoff", () => {
 			expect(message).not.toContain("cf_scoped_token_abc123");
 		}
 	});
+
+	it("never passes the kind to the logger either, even for a valid handoff", () => {
+		const { sink, logs } = fakeSink();
+		const handoff: ThirdPartyCredentialHandoff = {
+			kind: "payment",
+			targetEnvKey: "PAYMENT_PROVIDER_API_KEY",
+			value: "sk_live_super_secret",
+		};
+
+		acceptCredentialHandoff(handoff, sink);
+
+		for (const message of logs) {
+			expect(message).not.toContain("payment");
+		}
+	});
+
+	it("rejects a kind value that is not one of the known literals, even though runtime callers can bypass the TypeScript type", () => {
+		const { sink, envWrites } = fakeSink();
+		const handoff = {
+			kind: "not-a-real-kind",
+			targetEnvKey: "PAYMENT_PROVIDER_API_KEY",
+			value: "sk_live_super_secret",
+		} as unknown as ThirdPartyCredentialHandoff;
+
+		const result = acceptCredentialHandoff(handoff, sink);
+
+		expect(result).toEqual({ ok: false, reason: "unknown_kind" });
+		expect(envWrites).toHaveLength(0);
+	});
+
+	it("rejects a mismatched kind/targetEnvKey pair even when both are individually valid", () => {
+		const { sink, envWrites } = fakeSink();
+		const handoff: ThirdPartyCredentialHandoff = {
+			kind: "payment",
+			targetEnvKey: "CLOUDFLARE_DNS_TOKEN",
+			value: "sk_live_super_secret",
+		};
+
+		const result = acceptCredentialHandoff(handoff, sink);
+
+		expect(result).toEqual({ ok: false, reason: "kind_env_key_mismatch" });
+		expect(envWrites).toHaveLength(0);
+	});
 });
