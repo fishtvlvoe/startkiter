@@ -9,7 +9,9 @@
 		"test": "vitest run",
 		"type-check": "tsc --noEmit"
 	},
-	"dependencies": {},
+	"dependencies": {
+		"@startkiter/database": "workspace:*"
+	},
 	"devDependencies": {
 		"@startkiter/tsconfig": "workspace:*",
 		"@types/node": "catalog:",
