@@ -432,6 +432,9 @@ importers:
       '@startkiter/permissions':
         specifier: workspace:*
         version: link:../../packages/permissions
+      '@startkiter/platform':
+        specifier: workspace:*
+        version: link:../../packages/platform
       '@startkiter/storage':
         specifier: workspace:*
         version: link:../../packages/storage
