@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StartKiter 中量級架構 + 自動化部署管線：現況差距圖</title>
+<style>
+  :root {
+    --color-background: #f8fafc;
+    --color-surface: #ffffff;
+    --color-surface-raised: #f1f5f9;
+    --color-border: #e2e8f0;
+    --color-text: #0f172a;
+    --color-text-secondary: #334155;
+    --color-text-muted: #64748b;
+    --color-text-subtle: #94a3b8;
+    --color-primary: #3b82f6;
+    --color-primary-dark: #2563eb;
+    --color-primary-50: #eff6ff;
+    --color-success: #10b981;
+    --color-success-bg: #f0fdf4;
+    --color-warning: #f59e0b;
+    --color-warning-bg: #fffbeb;
+    --color-danger: #ef4444;
+    --color-danger-bg: #fef2f2;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--color-background);
+    color: var(--color-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    padding: 48px 24px 96px;
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; }
+  h1 {
+    font-family: 'Fira Sans', 'Noto Sans TC', -apple-system, sans-serif;
+    font-size: 1.875rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    margin: 0 0 8px;
+  }
+  .subtitle { color: var(--color-text-muted); font-size: 1rem; margin: 0 0 40px; }
+  h2 {
+    font-family: 'Fira Sans', 'Noto Sans TC', -apple-system, sans-serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 56px 0 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--color-border);
+  }
+
+  /* 總體完成度 */
+  .overall {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  .overall .ring {
+    flex: 0 0 120px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: conic-gradient(var(--color-primary) 0deg 43deg, var(--color-surface-raised) 43deg 360deg);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .overall .ring-inner {
+    width: 92px; height: 92px; border-radius: 50%; background: var(--color-surface);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .overall .ring-inner strong { font-family: 'Fira Code',monospace; font-size: 1.5rem; }
+  .overall .ring-inner span { font-size: 0.6875rem; color: var(--color-text-muted); }
+  .overall .text h3 { margin: 0 0 8px; font-size: 1.125rem; }
+  .overall .text p { margin: 0; color: var(--color-text-secondary); font-size: 0.875rem; }
+
+  /* 架構圖 */
+  .arch {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow-x: auto;
+  }
+  .arch-row { display: flex; align-items: center; gap: 0; margin-bottom: 8px; }
+  .arch-col { display: flex; flex-direction: column; gap: 16px; flex: 1; min-width: 220px; }
+  .arch-arrow-v { display: flex; justify-content: center; color: var(--color-text-subtle); font-size: 1.5rem; padding: 4px 0; }
+  .arch-arrow-h { flex: 0 0 36px; display: flex; align-items: center; justify-content: center; color: var(--color-text-subtle); font-size: 1.25rem; }
+
+  .node {
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1.5px solid var(--color-border);
+    background: var(--color-surface-raised);
+    position: relative;
+  }
+  .node .title { font-weight: 600; font-size: 0.875rem; margin-bottom: 4px; }
+  .node .desc { font-size: 0.75rem; color: var(--color-text-muted); }
+  .node .status {
+    position: absolute; top: 10px; right: 10px;
+    font-size: 0.625rem; font-weight: 700; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 9999px;
+  }
+  .st-done { background: var(--color-success-bg); color: #059669; border: 1px solid #a7f3d0; }
+  .st-stale { background: var(--color-warning-bg); color: #b45309; border: 1px solid #fde68a; }
+  .st-none { background: var(--color-danger-bg); color: #dc2626; border: 1px solid #fecaca; }
+  .node.st-done-node { border-color: #a7f3d0; background: var(--color-success-bg); }
+  .node.st-stale-node { border-color: #fde68a; background: var(--color-warning-bg); }
+  .node.st-none-node { border-color: #fecaca; background: var(--color-danger-bg); }
+
+  .legend { display: flex; gap: 24px; margin: 16px 0 0; font-size: 0.8125rem; color: var(--color-text-muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  table { width: 100%; border-collapse: collapse; background: var(--color-surface); border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-top: 8px; }
+  th, td { text-align: left; padding: 12px 16px; font-size: 0.8125rem; border-bottom: 1px solid var(--color-border); vertical-align: top; }
+  th { background: var(--color-surface-raised); color: var(--color-text-muted); font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; }
+  tr:last-child td { border-bottom: none; }
+  td.num { font-family: 'Fira Code',monospace; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pill { display: inline-block; font-size: 0.6875rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; }
+  .pill-done { background: var(--color-success-bg); color: #059669; }
+  .pill-stale { background: var(--color-warning-bg); color: #b45309; }
+  .pill-none { background: var(--color-danger-bg); color: #dc2626; }
+
+  .callout {
+    background: var(--color-primary-50);
+    border-left: 4px solid var(--color-primary);
+    border-radius: 6px;
+    padding: 16px 20px;
+    font-size: 0.875rem;
+    margin: 24px 0;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>方案二 + 自動化部署管線：現況差距圖</h1>
+  <p class="subtitle">「Core Mount Points + Marketplace」架構，疊加「打包 → MCP 推送 → 自動安裝」部署管線</p>
+
+  <div class="overall">
+    <div class="ring"><div class="ring-inner"><strong>~12%</strong><span>整體完成度</span></div></div>
+    <div class="text">
+      <h3>目前真正能用的，只有兩個「形狀相似」的既有機制</h3>
+      <p>一鍵部署（Zeabur，git push 觸發）跟 GitHub kit 領取（付款後呼叫 API 自動授權）——這兩個提供了「自動化、買家不碰終端機」的既有先例與信心，但不是能直接搬過來用的代碼。整條「打包 → MCP 推送 → 自動安裝」管線，跟 Mount Points／Marketplace 本體，都還沒真的動工。</p>
+    </div>
+  </div>
+
+  <h2>架構圖：從買家寫代碼到自動生效</h2>
+  <div class="arch">
+    <div class="arch-row">
+      <div class="arch-col">
+        <div class="node st-none-node">
+          <span class="status st-none">未做</span>
+          <div class="title">① 桌面套件</div>
+          <div class="desc">買家用 Codex／AI 寫模組代碼，照 buyer-extension-convention 格式</div>
+        </div>
+      </div>
+      <div class="arch-arrow-h">→</div>
+      <div class="arch-col">
+        <div class="node st-none-node">
+          <span class="status st-none">未做</span>
+          <div class="title">② 打包工具</div>
+          <div class="desc">驗證 manifest 格式，壓成單一安裝檔（全新工具，之前完全沒規劃過）</div>
+        </div>
+      </div>
+      <div class="arch-arrow-h">→</div>
+      <div class="arch-col">
+        <div class="node st-none-node">
+          <span class="status st-none">未做</span>
+          <div class="title">③ MCP Gateway（推送用途）</div>
+          <div class="desc">原設計是給外部 AI 連進帳號操作，要擴充成「接收安裝包」用途</div>
+        </div>
+      </div>
+    </div>
+    <div class="arch-row" style="margin-top:8px">
+      <div class="arch-col" style="flex:1">
+        <div class="node st-stale-node" style="max-width:340px">
+          <span class="status st-stale">部分先例</span>
+          <div class="title">參考先例 A：GitHub kit 領取</div>
+          <div class="desc">付款後 POST /api/github/claim 自動呼叫 GitHub API 授權——證明「authenticated API 呼叫→自動生效」這個形狀可行，可以參照但不是同一段代碼</div>
+        </div>
+      </div>
+      <div class="arch-col" style="flex:1">
+        <div class="node st-stale-node" style="max-width:340px">
+          <span class="status st-stale">部分先例</span>
+          <div class="title">參考先例 B：一鍵部署 Zeabur</div>
+          <div class="desc">已建好 deploy/zeabur.yaml + README 部署按鈕，但這是「整包首次部署」，不是「安裝包推送後觸發重建」，機制不同</div>
+        </div>
+      </div>
+    </div>
+    <div class="arch-arrow-v">↓</div>
+    <div class="arch-row">
+      <div class="arch-col">
+        <div class="node st-stale-node">
+          <span class="status st-stale">規劃過但已過時</span>
+          <div class="title">④ 伺服器接收 + 自動 build/deploy</div>
+          <div class="desc">收到安裝包後自動觸發重新建置部署（全新，未規劃過）</div>
+        </div>
+      </div>
+      <div class="arch-arrow-h">→</div>
+      <div class="arch-col">
+        <div class="node st-stale-node">
+          <span class="status st-stale">規劃過但已過時</span>
+          <div class="title">⑤ Core Mount Points</div>
+          <div class="desc">路由／選單／內容／資料表四種掛載點，packages/platform（platform-shell-plugin-architecture 規劃過，12/45 task，但參照的檔案結構重建後已不在）</div>
+        </div>
+      </div>
+      <div class="arch-arrow-h">→</div>
+      <div class="arch-col">
+        <div class="node st-stale-node">
+          <span class="status st-stale">規劃過但已過時</span>
+          <div class="title">⑥ Marketplace 頁面</div>
+          <div class="desc">列出已裝/可裝的 Plugin（同一張 change 規劃，尚未實作，task 8 之後全部未開始）</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span><span class="dot" style="background:#059669"></span> 已完成且可直接沿用</span>
+    <span><span class="dot" style="background:#b45309"></span> 有規劃／有相似先例，但要重做或調整</span>
+    <span><span class="dot" style="background:#dc2626"></span> 完全沒開始，是新工程</span>
+  </div>
+
+  <h2>逐項差距清單</h2>
+  <table>
+    <thead>
+      <tr><th>組件</th><th>狀態</th><th>現況</th><th>還要做什麼</th><th>估計工時</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>買家寫模組代碼慣例</td>
+        <td><span class="pill pill-done">已完成</span></td>
+        <td><code>docs/buyer-extension-convention.md</code> 已寫好且驗證過</td>
+        <td>不用動</td>
+        <td class="num">0</td>
+      </tr>
+      <tr>
+        <td>Core Mount Points（路由/選單/內容/資料表）</td>
+        <td><span class="pill pill-stale">部分規劃</span></td>
+        <td>design.md 定義過型別與四種掛載點，但 <code>packages/platform</code> 完全沒建立</td>
+        <td>重新對照現在的 <code>apps/saas/(authenticated)</code> 結構，補建 package</td>
+        <td class="num">1–1.5 週</td>
+      </tr>
+      <tr>
+        <td>Plugin Manifest 型別 + 靜態掛載點清單</td>
+        <td><span class="pill pill-none">未做</span></td>
+        <td>只有 design.md 文字描述，沒有一行型別定義代碼</td>
+        <td>從零實作 TypeScript 型別 + MOUNT_POINTS 陣列</td>
+        <td class="num">併入上一項</td>
+      </tr>
+      <tr>
+        <td>Marketplace 頁面</td>
+        <td><span class="pill pill-none">未做</span></td>
+        <td>只有規劃，無任何頁面代碼</td>
+        <td>新增 <code>apps/saas/app/(authenticated)/marketplace</code>，讀 MOUNT_POINTS 顯示</td>
+        <td class="num">3–5 天</td>
+      </tr>
+      <tr>
+        <td>打包工具（模組 → 安裝檔）</td>
+        <td><span class="pill pill-none">未做</span></td>
+        <td>之前完全沒規劃過這個環節</td>
+        <td>寫一支 CLI／腳本，驗證 manifest、壓縮打包，格式待定</td>
+        <td class="num">1 週</td>
+      </tr>
+      <tr>
+        <td>MCP Gateway（推送安裝包用途）</td>
+        <td><span class="pill pill-none">未做</span></td>
+        <td>原本規劃是「外部 AI 連進帳號操作」，沒設計過接收安裝包這個方向</td>
+        <td>擴充授權協定 + 新增接收安裝包的 endpoint</td>
+        <td class="num">1–1.5 週</td>
+      </tr>
+      <tr>
+        <td>伺服器端自動 build/deploy 觸發</td>
+        <td><span class="pill pill-none">未做</span></td>
+        <td>目前只有「git push 觸發整包重新部署」（Zeabur），沒有「收到單一安裝包後局部重建」機制</td>
+        <td>設計安裝包落地方式 + 觸發重建流程（可能借用 Zeabur webhook 或自建 build server）</td>
+        <td class="num">1–1.5 週</td>
+      </tr>
+      <tr>
+        <td>桌面套件封裝這整套體驗</td>
+        <td><span class="pill pill-none">未做</span></td>
+        <td>目前買家是直接用 Claude Code / Cursor 這類通用工具，沒有 StartKiter 自己包裝的桌面工具</td>
+        <td>視範圍決定——最小可以先做 CLI，桌面 App 是更大規模的另一個工程</td>
+        <td class="num">CLI：3–5 天／桌面 App：另計</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>白話總結：</strong>你現在手上真正握有的，是「買家寫代碼要照什麼格式」這一小塊（已完成），跟兩個「證明這個方向可行」的先例（GitHub 領取、Zeabur 部署）。中間「打包 → 推送 → 自動裝好」這一整條線，加上 Mount Points／Marketplace 本體，<strong>幾乎是從零開始</strong>，之前只停在文字規劃層級，沒有半行對應的實作代碼。抓整體 <strong>4–6 週</strong>是把這些都算進去的估計，其中 Mount Points／Marketplace 這半邊風險較低（架構清楚），打包／MCP 推送／自動部署這半邊是全新設計，時程比較有彈性空間（可能超出，也可能因為借用 Zeabur 既有機制而縮短）。
+  </div>
+
+</div>
+</body>
+</html>
