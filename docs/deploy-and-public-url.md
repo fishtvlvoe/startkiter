@@ -77,9 +77,25 @@ flowchart TD
 
 理由：邊裝邊部署需要真實托管環境（Vercel／VPS／CF）與雲端 DB，Tunnel 只是把本機捅出去，測不到學生會遇到的部署問題。
 
-▋ Coolify／VPS（之後）
+▋ Coolify／VPS 與代管主機模型
 
-Coolify 仍是維運層選項（常駐 Node、固定 IP 利於 PAYUNi webhook），掛在「測試站或正式站的托管路徑」上，不是學員產品功能。不急開 change。
+Coolify 為 StartKiter 集中代管式機群維運核心（常駐 Node、固定 IP 支援金流 webhook 與容器生命週期管理）。
+
+▋ Tier 2：StartKiter 代管部署（主機與費用模型）
+
+適用對象：在 onboarding 選擇「幫我設定好（小白推薦：由 StartKiter 協助代管部署）」的買家。
+
+主機規格要求：
+• 最低規格：2 vCPU / 4GB RAM（Ubuntu 22.04 LTS）
+• 推薦服務商：Vultr（新加坡機房，連線台灣延遲低）或 Hetzner（德國/芬蘭機房，性價比極高）
+
+費用結構與責任邊界：
+• **主機費用由買家自行負擔**：StartKiter 不經手代收主機費、不加收伺服器管理溢價。
+• 費用參考：Vultr 約 USD $24/月，Hetzner 約 EUR €5.77/月（以各雲端廠商實際結帳為準）。
+• 帳單維持：買家需自行在 Vultr/Hetzner 綁定信用卡以維持主機開機狀態；主機因欠費停機時網站將暫停服務。
+• StartKiter 支援邊界：
+  - 涵蓋：Coolify 機群連接、開站包自動拉取與部署、環境變數更新與部署失敗排查。
+  - 不涵蓋：買家主機供應商硬體故障/機房斷線（依供應商 SLA 為準）、買家自訂網域 DNS 代管。
 
 ▋ TEST 站現況（2026-08-15 bootstrap）
 

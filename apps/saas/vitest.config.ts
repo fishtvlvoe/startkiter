@@ -7,6 +7,9 @@ export default defineConfig({
 		globals: true,
 		environment: "node",
 		exclude: ["**/node_modules/**", "**/tests/**", "**/.next/**"],
+		env: {
+			DATABASE_URL: "postgresql://mock:mock@localhost:5432/mock",
+		},
 	},
 	resolve: {
 		alias: {
@@ -19,6 +22,7 @@ export default defineConfig({
 			"@admin": path.resolve(import.meta.dirname, "./modules/admin"),
 			"@ai": path.resolve(import.meta.dirname, "./modules/ai"),
 			"@onboarding": path.resolve(import.meta.dirname, "./modules/onboarding"),
+			"@deployment": path.resolve(import.meta.dirname, "./modules/deployment"),
 			"@settings": path.resolve(import.meta.dirname, "./modules/settings"),
 		},
 	},
