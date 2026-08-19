@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
 	addServerToCoolify,
 	createApplication,
+	fetchCoolifyAppLogs,
 	fetchCoolifyAppStatus,
 	redeployApplication,
 	setApplicationEnv,
@@ -61,6 +62,30 @@ describe("fetchCoolifyAppStatus", () => {
 		vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ message: "Unauthorized" }, 401)));
 
 		await expect(fetchCoolifyAppStatus("app_1", TOKEN)).resolves.toEqual({ kind: "api_error" });
+	});
+});
+
+describe("fetchCoolifyAppLogs", () => {
+	it("returns recent logs on success using GET", async () => {
+		vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse({ logs: "Ready on port 3000" })));
+
+		await expect(fetchCoolifyAppLogs("app_1", TOKEN)).resolves.toEqual({
+			kind: "ok",
+			logs: "Ready on port 3000",
+		});
+		expect(fetch).toHaveBeenCalledWith(
+			"https://app.coolify.io/api/v1/applications/app_1/logs",
+			expect.objectContaining({
+				method: "GET",
+				headers: expect.objectContaining({ Authorization: `Bearer ${TOKEN}` }),
+			}),
+		);
+	});
+
+	it("returns network_error when fetch throws", async () => {
+		vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+
+		await expect(fetchCoolifyAppLogs("app_1", TOKEN)).resolves.toEqual({ kind: "network_error" });
 	});
 });
 

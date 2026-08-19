@@ -45,19 +45,19 @@ TDD：每個功能群組先列紅燈測試 task，再列實作 task。
 
 ## 6. AI Webhook 消費者（對應設計決策「AI 介入 Coolify 只到「唯讀 + 建議修復步驟」，不做自動修復」）
 
-- [ ] 6.1 撰寫紅燈測試：`POST /support/webhook/chatwoot` 缺少或簽章錯誤時回傳 401 且不處理事件，對應 Requirement「Webhook signature verification」Scenario「Invalid or missing webhook signature」，驗證方式為 API 測試斷言狀態碼與無副作用
-- [ ] 6.2 撰寫紅燈測試：AI 模型呼叫失敗或逾時時，`SupportTicket.status` 維持不變且標記轉真人，對應 Requirement「AI auto-reply on new ticket messages」Scenario「AI model call fails or times out」，驗證方式為 mock AI 呼叫失敗情境斷言資料庫狀態未變
-- [ ] 6.3 撰寫紅燈測試：Coolify API 呼叫失敗時，internal note 顯示「暫時無法取得」而非誤報健康或壞掉，對應 Requirement「Read-only Coolify deployment context」Scenario「Coolify API unreachable」，驗證方式為 mock Coolify 客戶端失敗情境斷言 note 內容
-- [ ] 6.4 撰寫紅燈測試：AI 生成的修復建議只寫入 internal note，不出現在任何發送給買家的訊息內容中，對應 Requirement「AI-generated remediation suggestions are advisory only」Scenario「Suggestion never sent to buyer automatically」，驗證方式為斷言外發訊息內容不含建議文字
-- [ ] 6.5 撰寫紅燈測試：任何 AI 流程嘗試直接把 `status` 設成 `RESOLVED`（略過買家確認/逾時）會被拒絕，對應 Requirement「Ticket status transition triggers」Scenario「AI does not have authority to fully resolve」，驗證方式為單元測試直接呼叫該路徑斷言拋出錯誤或被忽略
-- [ ] 6.5b（2026-08-19 新增）撰寫紅燈測試：`SupportTicket.buyerDeploymentId` 為 null 時，AI 不呼叫 Coolify API，internal note 直接寫「無部署資料，人工直接處理」，對應 Requirement「Read-only Coolify deployment context」Scenario「Ticket has no linked deployment」，驗證方式為 mock 情境斷言 Coolify 客戶端未被呼叫且 note 文字符合預期
-- [ ] 6.6 實作 `POST /support/webhook/chatwoot` 簽章驗證，使第 6.1 節測試轉綠燈，對應 Requirement「Webhook signature verification」Scenario「Valid webhook signature」，驗證方式為 `pnpm test` 全綠
-- [ ] 6.7 實作 AI 自動回覆/轉真人判斷邏輯，使第 6.2 節測試轉綠燈，對應 Requirement「AI auto-reply on new ticket messages」Scenario「AI answers with sufficient confidence」與「AI cannot answer confidently」，驗證方式為 `pnpm test` 全綠
-- [ ] 6.8 串接既有 `packages/platform/src/deployment/coolify-client.ts` 唯讀查詢，將部署狀態/log 摘要寫入 Chatwoot internal note，使第 6.3 節測試轉綠燈，對應 Requirement「Read-only Coolify deployment context」Scenario「Coolify status pulled successfully」，驗證方式為 `pnpm test` 全綠
-- [ ] 6.9 實作 AI 建議修復步驟生成並寫入 internal note（標記「AI 建議、未經驗證」），使第 6.4 節測試轉綠燈，驗證方式為 `pnpm test` 全綠 + 手動檢查 internal note 格式
-- [ ] 6.10 實作狀態轉換權限守門（僅買家確認端點與逾時排程可設 `RESOLVED`），使第 6.5 節測試轉綠燈，驗證方式為 `pnpm test` 全綠
-- [ ] 6.11 實作 AI 判斷「像是解決了」時把 `status` 設為 `AI_SUGGESTED_RESOLVED` 並在對話中貼出確認提示，對應 Requirement「Ticket status transition triggers」Scenario「AI suggests resolution」，驗證方式為 `pnpm test` 全綠 + 手動測試對話出現確認提示文字
-- [ ] 6.12（2026-08-19 新增）實作無部署資料分支：`buyerDeploymentId` 為 null 時跳過 Coolify 查詢，直接寫入「無部署資料，人工直接處理」internal note，使第 6.5b 節測試轉綠燈，驗證方式為 `pnpm test` 全綠
+- [x] 6.1 撰寫紅燈測試：`POST /support/webhook/chatwoot` 缺少或簽章錯誤時回傳 401 且不處理事件，對應 Requirement「Webhook signature verification」Scenario「Invalid or missing webhook signature」，驗證方式為 API 測試斷言狀態碼與無副作用
+- [x] 6.2 撰寫紅燈測試：AI 模型呼叫失敗或逾時時，`SupportTicket.status` 維持不變且標記轉真人，對應 Requirement「AI auto-reply on new ticket messages」Scenario「AI model call fails or times out」，驗證方式為 mock AI 呼叫失敗情境斷言資料庫狀態未變
+- [x] 6.3 撰寫紅燈測試：Coolify API 呼叫失敗時，internal note 顯示「暫時無法取得」而非誤報健康或壞掉，對應 Requirement「Read-only Coolify deployment context」Scenario「Coolify API unreachable」，驗證方式為 mock Coolify 客戶端失敗情境斷言 note 內容
+- [x] 6.4 撰寫紅燈測試：AI 生成的修復建議只寫入 internal note，不出現在任何發送給買家的訊息內容中，對應 Requirement「AI-generated remediation suggestions are advisory only」Scenario「Suggestion never sent to buyer automatically」，驗證方式為斷言外發訊息內容不含建議文字
+- [x] 6.5 撰寫紅燈測試：任何 AI 流程嘗試直接把 `status` 設成 `RESOLVED`（略過買家確認/逾時）會被拒絕，對應 Requirement「Ticket status transition triggers」Scenario「AI does not have authority to fully resolve」，驗證方式為單元測試直接呼叫該路徑斷言拋出錯誤或被忽略
+- [x] 6.5b（2026-08-19 新增）撰寫紅燈測試：`SupportTicket.buyerDeploymentId` 為 null 時，AI 不呼叫 Coolify API，internal note 直接寫「無部署資料，人工直接處理」，對應 Requirement「Read-only Coolify deployment context」Scenario「Ticket has no linked deployment」，驗證方式為 mock 情境斷言 Coolify 客戶端未被呼叫且 note 文字符合預期
+- [x] 6.6 實作 `POST /support/webhook/chatwoot` 簽章驗證，使第 6.1 節測試轉綠燈，對應 Requirement「Webhook signature verification」Scenario「Valid webhook signature」，驗證方式為 `pnpm test` 全綠
+- [x] 6.7 實作 AI 自動回覆/轉真人判斷邏輯，使第 6.2 節測試轉綠燈，對應 Requirement「AI auto-reply on new ticket messages」Scenario「AI answers with sufficient confidence」與「AI cannot answer confidently」，驗證方式為 `pnpm test` 全綠
+- [x] 6.8 串接既有 `packages/platform/src/deployment/coolify-client.ts` 唯讀查詢，將部署狀態/log 摘要寫入 Chatwoot internal note，使第 6.3 節測試轉綠燈，對應 Requirement「Read-only Coolify deployment context」Scenario「Coolify status pulled successfully」，驗證方式為 `pnpm test` 全綠
+- [x] 6.9 實作 AI 建議修復步驟生成並寫入 internal note（標記「AI 建議、未經驗證」），使第 6.4 節測試轉綠燈，驗證方式為 `pnpm test` 全綠 + 手動檢查 internal note 格式
+- [x] 6.10 實作狀態轉換權限守門（僅買家確認端點與逾時排程可設 `RESOLVED`），使第 6.5 節測試轉綠燈，驗證方式為 `pnpm test` 全綠
+- [x] 6.11 實作 AI 判斷「像是解決了」時把 `status` 設為 `AI_SUGGESTED_RESOLVED` 並在對話中貼出確認提示，對應 Requirement「Ticket status transition triggers」Scenario「AI suggests resolution」，驗證方式為 `pnpm test` 全綠 + 手動測試對話出現確認提示文字
+- [x] 6.12（2026-08-19 新增）實作無部署資料分支：`buyerDeploymentId` 為 null 時跳過 Coolify 查詢，直接寫入「無部署資料，人工直接處理」internal note，使第 6.5b 節測試轉綠燈，驗證方式為 `pnpm test` 全綠
 
 ## 7. 前端入口（對應設計決策「客服入口：全站浮動客服框 + `/deployment` 頁面快捷按鈕」）
 

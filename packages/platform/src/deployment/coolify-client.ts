@@ -64,6 +64,23 @@ export async function fetchCoolifyAppStatus(coolifyAppId: string, apiToken: stri
 	};
 }
 
+export type CoolifyLogProbe =
+	| { kind: "ok"; logs: string }
+	| { kind: "api_error" }
+	| { kind: "network_error" };
+
+export async function fetchCoolifyAppLogs(coolifyAppId: string, apiToken: string): Promise<CoolifyLogProbe> {
+	const result = await coolifyRequest(`/applications/${coolifyAppId}/logs`, apiToken, { method: "GET" });
+	if (!result.ok) {
+		return { kind: result.kind };
+	}
+	const body = result.data as { logs?: unknown };
+	if (typeof body.logs !== "string") {
+		return { kind: "api_error" };
+	}
+	return { kind: "ok", logs: body.logs };
+}
+
 export async function addServerToCoolify(args: {
 	ip: string;
 	publicKey: string;
