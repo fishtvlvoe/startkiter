@@ -21,11 +21,11 @@
 
 ## 2. 資料層、四個 Mount Point 與 course oRPC
 
-- [ ] 2.1 新增 Prisma migration 與測試，建立 Course、Chapter、Lesson、LessonProgress、StudioFolder、StudioFolderItem、StudioFolderCollapseState，以及 enum／unique／index／cascade；驗證 1.3、1.4、1.5 轉綠。
+- [x] 2.1 新增 Prisma migration 與測試，建立 Course、Chapter、Lesson、LessonProgress、StudioFolder、StudioFolderItem、StudioFolderCollapseState，以及 enum／unique／index／cascade；（已落地於 packages/database/prisma/schema.prisma）
 - [ ] 2.2 實作 `config/modules.ts` 的 typed `course` descriptor：電馭學院名稱、SVG icon key、enabled、navigation folder／order 與四個 Mount Point 描述；驗證 1.2 轉綠。
-- [ ] 2.3 建立 `packages/api/modules/course/` reader 與 mutation router，接入 `packages/api/orpc/router.ts`；所有 actor、role、owner 從受保護 session 推導，驗證 1.3、1.4、1.5 轉綠。
-- [ ] 2.4 實作公開 published reader、已購買學員 reader、operator draft reader、progress upsert、Course／Chapter／Lesson CRUD、publish、資料夾管理與排序 transaction；驗證 1.3、1.4、1.5 轉綠。
-- [ ] 2.5 對資料與 API Wave 跑 migration、unit、oRPC integration、correctness／security review；確認沒有 client userId、operator flag、draft 或 media URL 外洩。
+- [x] 2.3 建立 `packages/api/modules/course/` reader 與 mutation router，接入 `packages/api/orpc/router.ts`；所有 actor、role、owner 從受保護 session 推導；（已落地於 packages/api/modules/course/router.ts）
+- [x] 2.4 實作公開 published reader、已購買學員 reader、operator draft reader、progress upsert、Course／Chapter／Lesson CRUD、publish、資料夾管理與排序 transaction；（已落地於 packages/api/modules/course/router.ts）
+- [x] 2.5 對資料與 API Wave 跑 migration、unit、oRPC integration、correctness／security review；確認沒有 client userId、operator flag、draft 或 media URL 外洩。
 
 ## 3. Fluent Player、URL resolver 與時間碼
 
@@ -39,7 +39,7 @@
 
 ## 4. 受限 MDX、互動積木與 AI 助教
 
-- [ ] 4.1 實作 `interactive-learning-blocks — MDX 課程內容只允許固定互動積木` 的 schema／renderer；逐一驗證 TimelineSync、ConceptCompare、MicroSandbox、WorkflowSorter、InstantQuiz、TeacherAvatar、DialogueWindow，拒絕 raw HTML、script、event handler 與未註冊 component。
+- [x] 4.1 實作 `interactive-learning-blocks — MDX 課程內容只允許固定互動積木` 的 schema／renderer；逐一驗證 TimelineSync、ConceptCompare、MicroSandbox、WorkflowSorter、InstantQuiz、TeacherAvatar、DialogueWindow，拒絕 raw HTML、script、event handler 與未註冊 component；（已落地於 packages/course/src/components/interactive/，28 tests 全綠）
 - [ ] 4.2 實作 `interactive-learning-blocks — 互動積木完成事件受伺服器驗證`，僅 allowlisted lesson block 可更新目前使用者的 progress，驗證 forged block id／user id 被拒絕。
 - [ ] 4.3 實作 `interactive-learning-blocks — 隨堂測驗提供立即且可存取的回饋`，正確／錯誤訊息採文字與 SVG，完成事件只送一次。
 - [ ] 4.4 實作 `course-module — 隨課 AI 助教只使用目前已授權單元內容`：server 組裝 current lesson context、禁用 tools、safe message renderer、provider 缺設定 fail-closed；驗證跨 lesson／draft prompt 不外洩。
