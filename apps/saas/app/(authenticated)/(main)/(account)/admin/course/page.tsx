@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Card, Input, Label, Textarea } from "@startkiter/ui";
 
 type ProviderType = "BUNNY" | "YOUTUBE" | "VIMEO" | "CUSTOM_MP4" | "HLS";
@@ -24,7 +24,7 @@ interface ChapterItem {
 
 export default function CourseAdminStudioPage() {
 	// 資料夾管理狀態
-	const [folders, setFolders] = useState([
+	const [folders, setFolders] = useState<Array<{ id: string; name: string; isCollapsed: boolean }>>([
 		{ id: "f1", name: "產品業務", isCollapsed: false },
 		{ id: "f2", name: "營運管理", isCollapsed: false },
 	]);
@@ -32,59 +32,50 @@ export default function CourseAdminStudioPage() {
 	const [editingFolderName, setEditingFolderName] = useState("");
 
 	// 課綱狀態
-	const [chapters, setChapters] = useState<ChapterItem[]>([
-		{
-			id: "ch1",
-			title: "第 1 章：代碼庫架構與基礎",
-			lessons: [
-				{
-					id: "l1",
-					title: "1-1 商業與產品架構總覽 (電馭學院)",
-					duration: "14:20",
-					isFreePreview: true,
-					videoUrl: "https://iframe.mediadelivery.net/play/12345/bunny-demo",
-					provider: "BUNNY",
-					content: "# 1-1 商業與產品架構總覽\n\n歡迎來到電馭學院！",
-					aiContext: "本單元重點：電馭學院整體架構、三大門戶與微內核 Mount Points。",
-				},
-				{
-					id: "l2",
-					title: "1-2 部署與網域綁定",
-					duration: "21:05",
-					isFreePreview: false,
-					videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-					provider: "YOUTUBE",
-					content: "# 1-2 部署與網域綁定\n\n如何一鍵部署到 Coolify/Vercel。",
-					aiContext: "本單元重點：Coolify 與 Vercel 部署流程。",
-				},
-			],
-		},
-		{
-			id: "ch2",
-			title: "第 2 章：金流與會員權限",
-			lessons: [
-				{
-					id: "l3",
-					title: "2-1 PAYUNi 台灣金流全解析",
-					duration: "18:40",
-					isFreePreview: false,
-					videoUrl: "https://vimeo.com/123456789",
-					provider: "VIMEO",
-					content: "# 2-1 PAYUNi 金流\n\n一次買斷 TWD 8,800 實作。",
-					aiContext: "本單元重點：PAYUNi 信用卡與 ATM 虛擬帳號結帳閉環。",
-				},
-			],
-		},
-	]);
-
-	// 當前編輯中的單元
-	const [selectedLesson, setSelectedLesson] = useState<LessonItem | null>(chapters[0].lessons[0]);
-	const [videoInputUrl, setVideoInputUrl] = useState(chapters[0].lessons[0]?.videoUrl || "");
+	const [chapters, setChapters] = useState<ChapterItem[]>([]);
+	const [selectedLesson, setSelectedLesson] = useState<LessonItem | null>(null);
+	const [videoInputUrl, setVideoInputUrl] = useState("");
 	const [resolvedCard, setResolvedCard] = useState<{
 		provider: ProviderType;
 		sourceId?: string;
 		status: "valid" | "invalid";
-	} | null>({ provider: "BUNNY", sourceId: "12345/bunny-demo", status: "valid" });
+	} | null>(null);
+
+	// 載入真實資料庫課綱與資料夾
+	useEffect(() => {
+		fetch("/api/course/studio")
+			.then((res) => res.json())
+			.then((data) => {
+				if (data.courses && data.courses.length > 0) {
+					const firstCourse = data.courses[0];
+					const mappedChapters: ChapterItem[] = firstCourse.chapters.map((ch: any) => ({
+						id: ch.id,
+						title: ch.title,
+						lessons: ch.lessons.map((l: any) => ({
+							id: l.id,
+							title: l.title,
+							duration: l.videoDuration || "10:00",
+							isFreePreview: l.isFreePreview,
+							videoUrl: l.videoUrl || "",
+							provider: l.videoProvider || undefined,
+							content: l.content || "",
+							aiContext: l.aiContext || "",
+						})),
+					}));
+					setChapters(mappedChapters);
+					if (mappedChapters[0]?.lessons[0]) {
+						const firstL = mappedChapters[0].lessons[0];
+						setSelectedLesson(firstL);
+						setVideoInputUrl(firstL.videoUrl);
+						handleVideoUrlChange(firstL.videoUrl);
+					}
+				}
+				if (data.folders && data.folders.length > 0) {
+					setFolders(data.folders);
+				}
+			})
+			.catch(console.error);
+	}, []);
 
 	// 貼上影片網址時的智慧解析
 	const handleVideoUrlChange = (url: string) => {
@@ -108,22 +99,48 @@ export default function CourseAdminStudioPage() {
 		}
 	};
 
-	// 儲存單元
-	const handleSaveLesson = () => {
+	// 儲存單元至真實資料庫
+	const handleSaveLesson = async () => {
 		if (!selectedLesson) return;
 		const updated = {
 			...selectedLesson,
 			videoUrl: videoInputUrl,
 			provider: resolvedCard?.status === "valid" ? resolvedCard.provider : undefined,
 		};
-		setSelectedLesson(updated);
-		setChapters((prev) =>
-			prev.map((ch) => ({
-				...ch,
-				lessons: ch.lessons.map((l) => (l.id === updated.id ? updated : l)),
-			})),
-		);
-		alert("單元已儲存！");
+
+		try {
+			const res = await fetch("/api/course/studio", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					action: "update_lesson",
+					payload: {
+						id: updated.id,
+						title: updated.title,
+						videoUrl: updated.videoUrl,
+						videoDuration: updated.duration,
+						isFreePreview: updated.isFreePreview,
+						content: updated.content,
+						aiContext: updated.aiContext,
+					},
+				}),
+			});
+
+			if (res.ok) {
+				setSelectedLesson(updated);
+				setChapters((prev) =>
+					prev.map((ch) => ({
+						...ch,
+						lessons: ch.lessons.map((l) => (l.id === updated.id ? updated : l)),
+					})),
+				);
+				alert("✅ 單元變更已成功持久化至 PostgreSQL 資料庫！");
+			} else {
+				alert("❌ 儲存失敗，請檢查權限與連線。");
+			}
+		} catch (e) {
+			alert("❌ 儲存發生錯誤: " + String(e));
+		}
 	};
 
 	return (
