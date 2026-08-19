@@ -1,7 +1,7 @@
 import type { StatusPanelView } from "@startkiter/platform";
 import { Card } from "@startkiter/ui/components/card";
-import { Button } from "@startkiter/ui/components/button";
-import { ExternalLink, Mail, RefreshCw } from "lucide-react";
+import { ExternalLink, Mail } from "lucide-react";
+import { ReportIssueButton } from "./ReportIssueButton";
 
 export function StatusBadge({ view }: { view: StatusPanelView }) {
 	if (view.reachable === "unavailable") {
@@ -53,7 +53,8 @@ export function DeploymentStatusPanel({
 					<p>
 						系統暫時查不到最新狀態，通常幾分鐘內會自動恢復。你的網站很可能還在正常運作，不用擔心。
 					</p>
-					<div className="flex items-center gap-3 pt-1">
+					<div className="flex flex-wrap items-center gap-3 pt-1">
+						<ReportIssueButton buyerDeploymentId={view.deploymentId} variant="outline" size="sm" />
 						<a
 							href={`mailto:${supportEmail}?subject=【開站包】部署狀態查詢問題`}
 							className="inline-flex items-center gap-1.5 rounded-md border border-amber-300 bg-amber-100/70 px-3 py-1.5 text-xs font-medium text-amber-900 hover:bg-amber-200/70 dark:border-amber-800 dark:bg-amber-900/40 dark:text-amber-200 transition"
@@ -69,7 +70,8 @@ export function DeploymentStatusPanel({
 					<p>
 						檢測到你的網站目前可能未正常上線。你可以聯絡我們協助排查，或稍後重新整理再確認一次。
 					</p>
-					<div className="flex items-center gap-3 pt-1">
+					<div className="flex flex-wrap items-center gap-3 pt-1">
+						<ReportIssueButton buyerDeploymentId={view.deploymentId} variant="destructive" size="sm" />
 						<a
 							href={`mailto:${supportEmail}?subject=【開站包】網站部署失敗協助排查`}
 							className="inline-flex items-center gap-1.5 rounded-md border border-red-300 bg-red-100/70 px-3 py-1.5 text-xs font-medium text-red-900 hover:bg-red-200/70 dark:border-red-800 dark:bg-red-900/40 dark:text-red-200 transition"
@@ -104,6 +106,14 @@ export function DeploymentStatusPanel({
 						</span>
 					</div>
 				)}
+			</div>
+
+			<div className="border-border flex items-center justify-between border-t pt-4">
+				<div>
+					<p className="text-sm font-medium">需要專人協助？</p>
+					<p className="text-muted-foreground text-xs">開啟客服對話並自動帶入此網站部署資訊</p>
+				</div>
+				<ReportIssueButton buyerDeploymentId={view.deploymentId} size="sm" />
 			</div>
 		</Card>
 	);

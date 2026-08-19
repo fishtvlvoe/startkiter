@@ -11,11 +11,14 @@ export function buildStatusPanelView(deployment: BuyerDeployment, probe: Coolify
 			reachable: "unavailable",
 			publicUrl: deployment.publicUrl,
 			lastDeployedAt: deployment.lastDeployedAt,
+			deploymentId: deployment.id,
 		};
 	}
 	return {
 		reachable: probe.reachable,
 		publicUrl: probe.publicUrl,
 		lastDeployedAt: probe.lastDeployedAt ?? deployment.lastDeployedAt,
+		deploymentId: deployment.id,
 	};
 }
+

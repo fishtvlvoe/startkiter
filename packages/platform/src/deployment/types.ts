@@ -26,4 +26,6 @@ export type StatusPanelView = {
 	reachable: boolean | "unavailable";
 	publicUrl: string;
 	lastDeployedAt?: string;
+	deploymentId?: string;
 };
+
