@@ -17,7 +17,12 @@ async function loadStatusPanelView(userId: string): Promise<StatusPanelView | nu
 
 	const coolifyApiToken = process.env.COOLIFY_API_TOKEN;
 	if (!coolifyApiToken || !deployment.coolifyAppId) {
-		return { reachable: "unavailable", publicUrl: deployment.publicUrl, lastDeployedAt: deployment.lastDeployedAt };
+		return {
+			reachable: "unavailable",
+			publicUrl: deployment.publicUrl,
+			lastDeployedAt: deployment.lastDeployedAt,
+			deploymentId: deployment.id,
+		};
 	}
 
 	const probe = await fetchCoolifyAppStatus(deployment.coolifyAppId, coolifyApiToken);

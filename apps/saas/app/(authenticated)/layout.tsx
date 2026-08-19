@@ -16,6 +16,8 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import type { PropsWithChildren } from "react";
 
+import { ChatwootScript } from "./ChatwootScript";
+
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
@@ -69,7 +71,10 @@ export default async function AuthenticatedLayout({ children }: PropsWithChildre
 			<SessionProvider>
 				<PermixProvider state={permix.dehydrate()}>
 					<ActiveOrganizationProvider>
-						<ConfirmationAlertProvider>{children}</ConfirmationAlertProvider>
+						<ConfirmationAlertProvider>
+							{children}
+							<ChatwootScript />
+						</ConfirmationAlertProvider>
 					</ActiveOrganizationProvider>
 				</PermixProvider>
 			</SessionProvider>
