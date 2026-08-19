@@ -1,46 +1,22 @@
 import { describe, expect, it } from "vitest";
 
-import { buildBunnyEmbedUrl, getLesson, listLessons, resolveLessonMedia } from "./catalog";
+import { readPublishedCourseCatalog } from "./catalog";
 
-describe("lesson catalog", () => {
-	it("lists MVP lesson ids and titles", () => {
-		const lessons = listLessons();
-		expect(lessons.length).toBeGreaterThanOrEqual(1);
-		expect(lessons[0]?.id).toBe("lesson-01");
-		expect(lessons.every((l) => typeof l.title === "string" && l.title.length > 0)).toBe(true);
-	});
+describe("published course catalog", () => {
+	it("filters draft data and orders chapters and lessons deterministically", async () => {
+		const catalog = await readPublishedCourseCatalog({
+			findLessons: async () => [
+				{ chapterId: "chapter-b", chapterOrder: 1, chapterTitle: "第二章", courseStatus: "PUBLISHED", id: "lesson-b", isFreePreview: false, lessonStatus: "PUBLISHED", order: 0, slug: "lesson-b", title: "B", videoDuration: "02:00" },
+				{ chapterId: "chapter-a", chapterOrder: 0, chapterTitle: "第一章", courseStatus: "PUBLISHED", id: "lesson-a2", isFreePreview: false, lessonStatus: "PUBLISHED", order: 1, slug: "lesson-a2", title: "A2", videoDuration: "02:00" },
+				{ chapterId: "chapter-a", chapterOrder: 0, chapterTitle: "第一章", courseStatus: "PUBLISHED", id: "lesson-draft", isFreePreview: false, lessonStatus: "DRAFT", order: 0, slug: "lesson-draft", title: "草稿", videoDuration: "02:00" },
+				{ chapterId: "chapter-a", chapterOrder: 0, chapterTitle: "第一章", courseStatus: "PUBLISHED", id: "lesson-a1", isFreePreview: true, lessonStatus: "PUBLISHED", order: 0, slug: "lesson-a1", title: "A1", videoDuration: "02:00" },
+				{ chapterId: "chapter-hidden", chapterOrder: 0, chapterTitle: "草稿課", courseStatus: "DRAFT", id: "lesson-hidden", isFreePreview: false, lessonStatus: "PUBLISHED", order: 0, slug: "lesson-hidden", title: "不公開", videoDuration: "02:00" },
+			],
+		});
 
-	it("returns null for unknown lesson id", () => {
-		expect(getLesson("lesson-does-not-exist")).toBeNull();
-	});
-
-	it("uses Bunny embed when library id is configured", () => {
-		const lesson = getLesson("lesson-01", { BUNNY_LIBRARY_ID: "416184" });
-		expect(lesson?.mediaKind).toBe("bunny_embed");
-		expect(lesson?.isDemoFallback).toBe(false);
-		expect(lesson?.mediaUrl).toBe(
-			buildBunnyEmbedUrl("416184", "efc1790b-83a8-46e4-a319-4d2b2761b9bc"),
-		);
-	});
-
-	it("falls back to placeholder when Bunny library missing", () => {
-		const lesson = getLesson("lesson-01", {});
-		expect(lesson?.mediaKind).toBe("placeholder");
-		expect(lesson?.isDemoFallback).toBe(true);
-		expect(lesson?.mediaUrl).toContain("flower.mp4");
-	});
-
-	it("allows env override per lesson video id", () => {
-		const media = resolveLessonMedia(
-			{
-				id: "lesson-02",
-				title: "t",
-				order: 2,
-				description: "d",
-				bunnyVideoId: "default-guid",
-			},
-			{ BUNNY_LIBRARY_ID: "416184", BUNNY_LESSON_02_VIDEO_ID: "custom-guid" },
-		);
-		expect(media.mediaUrl).toContain("custom-guid");
+		expect(catalog).toEqual([
+			{ id: "chapter-a", lessons: [expect.objectContaining({ id: "lesson-a1" }), expect.objectContaining({ id: "lesson-a2" })], title: "第一章" },
+			{ id: "chapter-b", lessons: [expect.objectContaining({ id: "lesson-b" })], title: "第二章" },
+		]);
 	});
 });

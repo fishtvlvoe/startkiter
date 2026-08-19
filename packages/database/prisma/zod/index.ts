@@ -114,7 +114,7 @@ export type SupportTicketScalarFieldEnum = z.infer<typeof SupportTicketScalarFie
 
 // File: CourseScalarFieldEnum.schema.ts
 
-export const CourseScalarFieldEnumSchema = z.enum(['id', 'slug', 'title', 'description', 'status', 'createdAt', 'updatedAt'])
+export const CourseScalarFieldEnumSchema = z.enum(['id', 'slug', 'title', 'description', 'status', 'publishedAt', 'createdAt', 'updatedAt'])
 
 export type CourseScalarFieldEnum = z.infer<typeof CourseScalarFieldEnumSchema>;
 
@@ -132,7 +132,7 @@ export type LessonScalarFieldEnum = z.infer<typeof LessonScalarFieldEnumSchema>;
 
 // File: LessonProgressScalarFieldEnum.schema.ts
 
-export const LessonProgressScalarFieldEnumSchema = z.enum(['id', 'userId', 'lessonId', 'completedAt', 'createdAt', 'updatedAt'])
+export const LessonProgressScalarFieldEnumSchema = z.enum(['id', 'userId', 'lessonId', 'completedAt', 'completedBlockIds', 'createdAt', 'updatedAt'])
 
 export type LessonProgressScalarFieldEnum = z.infer<typeof LessonProgressScalarFieldEnumSchema>;
 
@@ -147,6 +147,12 @@ export type StudioFolderScalarFieldEnum = z.infer<typeof StudioFolderScalarField
 export const StudioFolderItemScalarFieldEnumSchema = z.enum(['id', 'folderId', 'moduleId', 'order', 'createdAt', 'updatedAt'])
 
 export type StudioFolderItemScalarFieldEnum = z.infer<typeof StudioFolderItemScalarFieldEnumSchema>;
+
+// File: StudioFolderCollapseStateScalarFieldEnum.schema.ts
+
+export const StudioFolderCollapseStateScalarFieldEnumSchema = z.enum(['id', 'userId', 'folderId', 'isCollapsed', 'createdAt', 'updatedAt'])
+
+export type StudioFolderCollapseStateScalarFieldEnum = z.infer<typeof StudioFolderCollapseStateScalarFieldEnumSchema>;
 
 // File: SortOrder.schema.ts
 
@@ -552,7 +558,8 @@ export const CourseSchema = z.object({
   slug: z.string(),
   title: z.string(),
   description: z.string().nullish(),
-  status: PublishStatusSchema.default("PUBLISHED"),
+  status: PublishStatusSchema.default("DRAFT"),
+  publishedAt: z.date().nullish(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -584,7 +591,7 @@ export const LessonSchema = z.object({
   content: z.string().nullish(),
   isFreePreview: z.boolean(),
   order: z.number().int(),
-  status: PublishStatusSchema.default("PUBLISHED"),
+  status: PublishStatusSchema.default("DRAFT"),
   videoProvider: VideoProviderSchema.nullish(),
   videoUrl: z.string().nullish(),
   videoDuration: z.string().nullish(),
@@ -603,7 +610,8 @@ export const LessonProgressSchema = z.object({
   id: z.string(),
   userId: z.string(),
   lessonId: z.string(),
-  completedAt: z.date(),
+  completedAt: z.date().nullish(),
+  completedBlockIds: z.array(z.string()),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -637,4 +645,18 @@ export const StudioFolderItemSchema = z.object({
 });
 
 export type StudioFolderItemType = z.infer<typeof StudioFolderItemSchema>;
+
+
+// File: StudioFolderCollapseState.schema.ts
+
+export const StudioFolderCollapseStateSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  folderId: z.string(),
+  isCollapsed: z.boolean(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type StudioFolderCollapseStateType = z.infer<typeof StudioFolderCollapseStateSchema>;
 

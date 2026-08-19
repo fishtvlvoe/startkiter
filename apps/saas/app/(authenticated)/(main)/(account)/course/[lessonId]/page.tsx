@@ -1,3 +1,13 @@
+import { getSession } from "@auth/lib/server";
+import { calculateCourseProgress } from "@startkiter/api/modules/course/progress";
+import { resolveVideoSource } from "@startkiter/course/video-resolver";
+import { db } from "@startkiter/database";
+import { notFound, redirect } from "next/navigation";
+
+import { userHasCourseAccess } from "../../../../../../lib/course-access";
+import { canReadCourseLesson } from "../../../../../../lib/course-lesson-access";
+import { isCourseOperator } from "../../../../../../lib/course-operator";
+
 import { AcademyClassroomClient } from "./classroom-client";
 
 type LessonPageProps = {
@@ -5,56 +15,103 @@ type LessonPageProps = {
 };
 
 export default async function LessonPage({ params }: LessonPageProps) {
+	const session = await getSession();
+	if (!session) {
+		redirect("/login");
+	}
 	const { lessonId } = await params;
-
-	// 預設電馭學院課綱資料
-	const mockCurriculum = [
-		{
-			id: "ch1",
-			title: "第 1 章：代碼庫架構與基礎",
-			lessons: [
-				{
-					id: "l1",
-					title: "1-1 商業與產品架構總覽 (電馭學院)",
-					duration: "14:20",
-					isFreePreview: true,
-					videoUrl: "https://iframe.mediadelivery.net/play/12345/bunny-demo",
-					provider: "BUNNY",
-					content: "# 1-1 商業與產品架構總覽\n\n歡迎來到電馭學院！",
-					aiContext: "本單元重點：電馭學院整體架構、三大門戶與微內核 Mount Points。",
-				},
-				{
-					id: "l2",
-					title: "1-2 部署與網域綁定",
-					duration: "21:05",
-					isFreePreview: false,
-					videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-					provider: "YOUTUBE",
-					content: "# 1-2 部署與網域綁定\n\n如何一鍵部署到 Coolify/Vercel。",
-					aiContext: "本單元重點：Coolify 與 Vercel 部署流程。",
-				},
-			],
+	const lesson = await db.lesson.findFirst({
+		where: {
+			OR: [{ id: lessonId }, { slug: lessonId }],
+			status: "PUBLISHED",
+			chapter: { course: { status: "PUBLISHED" } },
 		},
-		{
-			id: "ch2",
-			title: "第 2 章：金流與會員權限",
-			lessons: [
-				{
-					id: "l3",
-					title: "2-1 PAYUNi 台灣金流全解析",
-					duration: "18:40",
-					isFreePreview: false,
-					videoUrl: "https://vimeo.com/123456789",
-					provider: "VIMEO",
-					content: "# 2-1 PAYUNi 金流\n\n一次買斷 TWD 8,800 實作。",
-					aiContext: "本單元重點：PAYUNi 信用卡與 ATM 虛擬帳號結帳閉環。",
+		include: {
+			chapter: {
+				include: {
+					course: true,
 				},
-			],
+			},
 		},
-	];
+	});
+	if (!lesson) {
+		notFound();
+	}
 
-	const allLessons = mockCurriculum.flatMap((c) => c.lessons);
-	const initialLesson = allLessons.find((l) => l.id === lessonId) || allLessons[0];
+	const hasCourseAccess = await userHasCourseAccess(session.user.id);
+	if (
+		!canReadCourseLesson({
+			hasCourseAccess,
+			isFreePreview: lesson.isFreePreview,
+			status: lesson.status,
+		})
+	) {
+		redirect("/course");
+	}
 
-	return <AcademyClassroomClient initialLesson={initialLesson} curriculum={mockCurriculum} />;
+	const [course, completedProgresses] = await Promise.all([
+		db.course.findUnique({
+			where: { id: lesson.chapter.courseId },
+			include: {
+				chapters: {
+					orderBy: [{ order: "asc" }, { id: "asc" }],
+					include: {
+						lessons: {
+							where: { status: "PUBLISHED" },
+							orderBy: [{ order: "asc" }, { id: "asc" }],
+						},
+					},
+				},
+			},
+		}),
+		db.lessonProgress.findMany({
+			where: {
+				userId: session.user.id,
+				completedAt: { not: null },
+				lesson: {
+					status: "PUBLISHED",
+					chapter: {
+						courseId: lesson.chapter.courseId,
+						course: { status: "PUBLISHED" },
+					},
+				},
+			},
+			select: { lessonId: true },
+		}),
+	]);
+	if (!course) {
+		notFound();
+	}
+
+	const publishedLessons = course.chapters.flatMap((chapter) => chapter.lessons);
+	const source = lesson.videoUrl ? resolveVideoSource(lesson.videoUrl) : null;
+	const videoSource = source?.ok ? source : null;
+
+	return (
+		<AcademyClassroomClient
+			curriculum={course.chapters.map((chapter) => ({
+				id: chapter.id,
+				lessons: chapter.lessons.map((item) => ({
+					id: item.id,
+					isFreePreview: item.isFreePreview,
+					title: item.title,
+					videoDuration: item.videoDuration,
+				})),
+				title: chapter.title,
+			}))}
+			initialLesson={{
+				content: lesson.content,
+				id: lesson.id,
+				isFreePreview: lesson.isFreePreview,
+				title: lesson.title,
+				videoDuration: lesson.videoDuration,
+				videoSource,
+			}}
+			initialProgress={calculateCourseProgress({
+				completedLessonIds: completedProgresses.map((progress) => progress.lessonId),
+				publishedLessonIds: publishedLessons.map((item) => item.id),
+			})}
+			isOperator={isCourseOperator(session.user)}
+		/>
+	);
 }

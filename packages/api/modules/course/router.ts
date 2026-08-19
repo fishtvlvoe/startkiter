@@ -1,169 +1,231 @@
 import { ORPCError } from "@orpc/server";
-import { db, VideoProvider } from "@startkiter/database";
+import { auth } from "@startkiter/auth";
+import { db } from "@startkiter/database";
+import { canAccessCourse } from "@startkiter/course";
+import { parseCourseMdx } from "@startkiter/course/src/mdx/course-mdx";
 import { z } from "zod";
+
 import { adminProcedure, protectedProcedure, publicProcedure } from "../../orpc/procedures";
+import { readPublishedCourseCatalogFromDatabase } from "./catalog-reader";
 import { resolveVideoSource } from "./lib/video-resolver";
+import { appendCompletedBlockId, calculateCourseProgress } from "./progress";
+import {
+	executeStudioCommand,
+	getStudioSnapshot,
+	studioCommandSchema,
+} from "./studio-service";
+
+async function hasCourseAccess(userId: string) {
+	return canAccessCourse(userId, {
+		findOrdersForUser: (id) =>
+			db.order.findMany({
+				where: { userId: id },
+				select: { courseAccess: true, sku: true },
+			}),
+	});
+}
+
+async function publishedLessonIds(courseId: string) {
+	const lessons = await db.lesson.findMany({
+		where: {
+			status: "PUBLISHED",
+			chapter: { courseId, course: { status: "PUBLISHED" } },
+		},
+		select: { id: true },
+	});
+	return lessons.map((lesson) => lesson.id);
+}
+
+async function requireEntitledPublishedLesson(userId: string, lessonId: string) {
+	if (!(await hasCourseAccess(userId))) {
+		throw new ORPCError("FORBIDDEN");
+	}
+	const lesson = await db.lesson.findUnique({
+		where: { id: lessonId },
+		select: {
+			content: true,
+			id: true,
+			status: true,
+			chapter: { select: { courseId: true, course: { select: { status: true } } } },
+		},
+	});
+	if (!lesson || lesson.status !== "PUBLISHED" || lesson.chapter.course.status !== "PUBLISHED") {
+		throw new ORPCError("NOT_FOUND");
+	}
+	return lesson;
+}
 
 export const courseRouter = publicProcedure.router({
-	// 1. 公開/試看課綱大綱 (Public)
 	getPublicCurriculum: publicProcedure.handler(async () => {
 		const course = await db.course.findFirst({
 			where: { status: "PUBLISHED" },
-			include: {
-				chapters: {
-					orderBy: { order: "asc" },
-					include: {
-						lessons: {
-							where: { status: "PUBLISHED" },
-							orderBy: { order: "asc" },
-							select: {
-								id: true,
-								slug: true,
-								title: true,
-								isFreePreview: true,
-								videoDuration: true,
-								order: true,
-								chapterId: true,
-							},
-						},
-					},
-				},
-			},
+			orderBy: [{ publishedAt: "asc" }, { id: "asc" }],
+			select: { description: true, id: true, publishedAt: true, slug: true, title: true },
 		});
-
-		return { course };
+		const chapters = course ? await readPublishedCourseCatalogFromDatabase(course.id) : [];
+		return { course: course ? { ...course, chapters } : null };
 	}),
 
-	// 2. 學員教室課綱與個人進度 (Protected)
 	getLearnerCurriculum: protectedProcedure.handler(async ({ context }) => {
 		const course = await db.course.findFirst({
 			where: { status: "PUBLISHED" },
+			orderBy: [{ publishedAt: "asc" }, { id: "asc" }],
 			include: {
 				chapters: {
-					orderBy: { order: "asc" },
+					orderBy: [{ order: "asc" }, { id: "asc" }],
 					include: {
 						lessons: {
 							where: { status: "PUBLISHED" },
-							orderBy: { order: "asc" },
+							orderBy: [{ order: "asc" }, { id: "asc" }],
 							select: {
 								id: true,
+								isFreePreview: true,
 								slug: true,
 								title: true,
-								isFreePreview: true,
 								videoDuration: true,
-								order: true,
-								chapterId: true,
 							},
 						},
 					},
 				},
 			},
 		});
-
-		if (!course) {
-			return {
-				course: null,
-				progress: { completedCount: 0, totalCount: 0, percentage: 0, completedLessonIds: [] as string[] },
-			};
-		}
-
-		// 計算進度
-		const allPublishedLessons = course.chapters.flatMap((c: { lessons: Array<{ id: string }> }) => c.lessons);
-		const totalCount = allPublishedLessons.length;
-
-		const userProgresses = await db.lessonProgress.findMany({
-			where: {
-				userId: context.user.id,
-				lesson: { status: "PUBLISHED" },
-			},
-			select: { lessonId: true },
-		});
-
-		const completedLessonIds = userProgresses.map((p: { lessonId: string }) => p.lessonId);
-		const completedCount = completedLessonIds.length;
-		const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
-
+		const completedProgresses = course
+			? await db.lessonProgress.findMany({
+					where: {
+						userId: context.user.id,
+						completedAt: { not: null },
+						lesson: {
+							status: "PUBLISHED",
+							chapter: {
+								courseId: course.id,
+								course: { status: "PUBLISHED" },
+							},
+						},
+					},
+					select: { lessonId: true },
+				})
+			: [];
+		const ids = course?.chapters.flatMap((chapter) => chapter.lessons.map((lesson) => lesson.id)) ?? [];
 		return {
 			course,
-			progress: {
-				completedCount,
-				totalCount,
-				percentage,
-				completedLessonIds,
-			},
+			progress: calculateCourseProgress({
+				completedLessonIds: completedProgresses.map((progress) => progress.lessonId),
+				publishedLessonIds: ids,
+			}),
 		};
 	}),
 
-	// 3. 取得單元詳情與媒體內容 (Protected / Public preview)
 	getLessonDetail: publicProcedure
-		.input(z.object({ lessonId: z.string() }))
-		.handler(async ({ input, context }) => {
-			const lesson = await db.lesson.findUnique({
-				where: { id: input.lessonId },
+		.input(z.object({ lessonId: z.string().min(1) }).strict())
+		.handler(async ({ context, input }) => {
+			const lesson = await db.lesson.findFirst({
+				where: {
+					OR: [{ id: input.lessonId }, { slug: input.lessonId }],
+					status: "PUBLISHED",
+					chapter: { course: { status: "PUBLISHED" } },
+				},
 				include: { chapter: true },
 			});
-
-			if (!lesson || lesson.status !== "PUBLISHED") {
+			if (!lesson) {
 				throw new ORPCError("NOT_FOUND");
 			}
-
-			// 若非免費試看，必須驗證已登入且具備權限
-			if (!lesson.isFreePreview) {
-				// @ts-expect-error optional user in context
-				const userId = context?.user?.id;
-				if (!userId) {
-					throw new ORPCError("UNAUTHORIZED");
-				}
-
-				const order = await db.order.findFirst({
-					where: {
-						userId,
-						courseAccess: true,
-						status: "paid",
-					},
-				});
-
-				if (!order) {
-					throw new ORPCError("FORBIDDEN");
-				}
+			const videoSource = lesson.videoUrl ? resolveVideoSource(lesson.videoUrl) : null;
+			if (!videoSource?.ok) {
+				throw new ORPCError("NOT_FOUND");
+			}
+			const responseLesson = {
+				content: lesson.content,
+				id: lesson.id,
+				isFreePreview: lesson.isFreePreview,
+				title: lesson.title,
+				videoDuration: lesson.videoDuration,
+				videoSource,
+			};
+			if (lesson.isFreePreview) {
+				return { lesson: responseLesson };
 			}
 
-			return { lesson };
+			const session = await auth.api.getSession({ headers: context.headers });
+			if (!session) {
+				throw new ORPCError("UNAUTHORIZED");
+			}
+			if (!(await hasCourseAccess(session.user.id))) {
+				throw new ORPCError("FORBIDDEN");
+			}
+			return { lesson: responseLesson };
 		}),
 
-	// 4. 切換/標記單元完成 (Protected)
-	toggleLessonProgress: protectedProcedure
-		.input(z.object({ lessonId: z.string() }))
-		.handler(async ({ input, context }) => {
-			const existing = await db.lessonProgress.findUnique({
+	completeLesson: protectedProcedure
+		.input(z.object({ lessonId: z.string().min(1) }).strict())
+		.handler(async ({ context, input }) => {
+			const lesson = await requireEntitledPublishedLesson(context.user.id, input.lessonId);
+			await db.lessonProgress.upsert({
 				where: {
 					userId_lessonId: {
+						lessonId: lesson.id,
 						userId: context.user.id,
-						lessonId: input.lessonId,
 					},
 				},
-			});
-
-			if (existing) {
-				await db.lessonProgress.delete({
-					where: { id: existing.id },
-				});
-				return { completed: false };
-			}
-
-			await db.lessonProgress.create({
-				data: {
+				create: {
+					completedAt: new Date(),
+					lessonId: lesson.id,
 					userId: context.user.id,
-					lessonId: input.lessonId,
 				},
+				update: { completedAt: new Date() },
 			});
+			const completed = await db.lessonProgress.findMany({
+				where: { userId: context.user.id, completedAt: { not: null } },
+				select: { lessonId: true },
+			});
+			return {
+				progress: calculateCourseProgress({
+					completedLessonIds: completed.map((progress) => progress.lessonId),
+					publishedLessonIds: await publishedLessonIds(lesson.chapter.courseId),
+				}),
+			};
+		}),
 
+	recordBlockCompletion: protectedProcedure
+		.input(z.object({ blockId: z.string().min(1).max(80), lessonId: z.string().min(1) }).strict())
+		.handler(async ({ context, input }) => {
+			const lesson = await requireEntitledPublishedLesson(context.user.id, input.lessonId);
+			const content = parseCourseMdx(lesson.content);
+			if (!content.ok || !content.blocks.some((block) => block.id === input.blockId)) {
+				throw new ORPCError("BAD_REQUEST");
+			}
+			await appendCompletedBlockId(db.lessonProgress, {
+				blockId: input.blockId,
+				lessonId: lesson.id,
+				userId: context.user.id,
+			});
+			return { accepted: true };
+		}),
+
+	// Retained temporarily for old clients. Completion is now idempotent and never
+	// clears a persisted record, so repeated requests cannot lower the total.
+	toggleLessonProgress: protectedProcedure
+		.input(z.object({ lessonId: z.string().min(1) }).strict())
+		.handler(async ({ context, input }) => {
+			const lesson = await requireEntitledPublishedLesson(context.user.id, input.lessonId);
+			await db.lessonProgress.upsert({
+				where: {
+					userId_lessonId: {
+						lessonId: lesson.id,
+						userId: context.user.id,
+					},
+				},
+				create: {
+					completedAt: new Date(),
+					lessonId: lesson.id,
+					userId: context.user.id,
+				},
+				update: { completedAt: new Date() },
+			});
 			return { completed: true };
 		}),
 
-	// 5. 智慧影音來源解析 (Admin)
 	resolveVideo: adminProcedure
-		.input(z.object({ videoUrl: z.string() }))
+		.input(z.object({ videoUrl: z.string().trim().min(1) }).strict())
 		.handler(async ({ input }) => {
 			const result = resolveVideoSource(input.videoUrl);
 			if (!result.ok) {
@@ -172,67 +234,30 @@ export const courseRouter = publicProcedure.router({
 			return result;
 		}),
 
-	// 6. Course Studio 總數據 (Admin)
-	getStudioData: adminProcedure.handler(async () => {
-		const courses = await db.course.findMany({
-			include: {
-				chapters: {
-					orderBy: { order: "asc" },
-					include: {
-						lessons: {
-							orderBy: { order: "asc" },
-						},
-					},
-				},
-			},
-		});
+	getStudioData: adminProcedure.handler(async ({ context }) => getStudioSnapshot(context.user.id)),
 
-		const folders = await db.studioFolder.findMany({
-			orderBy: { order: "asc" },
-			include: {
-				items: {
-					orderBy: { order: "asc" },
-				},
-			},
-		});
+	studioCommand: adminProcedure
+		.input(studioCommandSchema)
+		.handler(async ({ context, input }) => ({
+			result: await executeStudioCommand(input, context.user.id),
+		})),
 
-		return { courses, folders };
-	}),
-
-	// 7. 更新單元 (Admin)
 	updateLesson: adminProcedure
 		.input(
-			z.object({
-				id: z.string(),
-				title: z.string().optional(),
-				isFreePreview: z.boolean().optional(),
-				videoUrl: z.string().optional(),
-				videoDuration: z.string().optional(),
-				content: z.string().optional(),
-				aiPrompt: z.string().optional(),
-				aiContext: z.string().optional(),
-			}),
+			z
+				.object({
+					aiContext: z.string().trim().max(20_000).nullable().optional(),
+					content: z.string().trim().max(20_000).nullable().optional(),
+					id: z.string().min(1),
+					isFreePreview: z.boolean().optional(),
+					status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]).optional(),
+					title: z.string().trim().min(1).max(160).optional(),
+					videoDuration: z.string().trim().max(32).nullable().optional(),
+					videoUrl: z.string().trim().max(2_000).nullable().optional(),
+				})
+				.strict(),
 		)
-		.handler(async ({ input }) => {
-			const { id, ...data } = input;
-			let videoProvider: VideoProvider | undefined = undefined;
-
-			if (data.videoUrl) {
-				const resolved = resolveVideoSource(data.videoUrl);
-				if (resolved.ok) {
-					videoProvider = resolved.provider as VideoProvider;
-				}
-			}
-
-			const updated = await db.lesson.update({
-				where: { id },
-				data: {
-					...data,
-					...(videoProvider ? { videoProvider } : {}),
-				},
-			});
-
-			return { lesson: updated };
-		}),
+		.handler(async ({ context, input }) => ({
+			lesson: await executeStudioCommand({ action: "updateLesson", ...input }, context.user.id),
+		})),
 });
-

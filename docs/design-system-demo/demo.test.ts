@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 
 const demoDir = dirname(fileURLToPath(import.meta.url));
 
-const sourceThemePath = resolve(demoDir, "../../vendor/supastarter-nextjs/tooling/tailwind/theme.css");
+const sourceThemePath = resolve(demoDir, "../../tooling/tailwind/theme.css");
 
 function readDemo(name: string) {
 	return readFileSync(resolve(demoDir, name), "utf8");
@@ -133,4 +133,3 @@ describe("design-system HTML demos", () => {
 		expect(html).not.toMatch(/<form\b[^>]*(course|lesson|admin)/i);
 	});
 });
-

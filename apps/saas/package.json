@@ -22,6 +22,7 @@
 		"@orpc/tanstack-query": "catalog:",
 		"@prisma/nextjs-monorepo-workaround-plugin": "catalog:",
 		"@startkiter/api": "workspace:*",
+		"@startkiter/ai": "workspace:*",
 		"@startkiter/auth": "workspace:*",
 		"@startkiter/course": "workspace:*",
 		"@startkiter/database": "workspace:*",

@@ -295,7 +295,8 @@ describe("interactive learning blocks", () => {
 	it("useTimeSync parses timecodes and reports active ranges", () => {
 		expect(parseTimecode("01:30")).toBe(90);
 		expect(parseTimecode("01:02:03")).toBe(3723);
-		expect(parseTimecode(12.5)).toBe(12.5);
+		expect(() => parseTimecode(12.5)).toThrow("Invalid timecode");
+		expect(() => parseTimecode("-1")).toThrow("Invalid timecode");
 		expect(isTimeActive(90, "01:30", "02:00")).toBe(true);
 		expect(isTimeActive(120, "01:30", "02:00")).toBe(false);
 

@@ -5,6 +5,7 @@
 		"paths": {
 			"@config": ["./config"],
 			"@analytics": ["./modules/analytics"],
+			"@academy/*": ["./modules/academy/*"],
 			"@home/*": ["./modules/home/*"],
 			"@blog/*": ["./modules/blog/*"],
 			"@i18n/*": ["./modules/i18n/*"],

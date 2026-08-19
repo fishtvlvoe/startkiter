@@ -39,9 +39,7 @@ export function SocialSigninButton({
 	return (
 		<Button onClick={() => onSignin()} variant="secondary" type="button" className={className}>
 			{providerData.icon && (
-				<i className="mr-2 text-primary">
-					<providerData.icon className="size-4" />
-				</i>
+				<providerData.icon className="mr-2 size-4 text-primary" />
 			)}
 			{providerData.name}
 		</Button>

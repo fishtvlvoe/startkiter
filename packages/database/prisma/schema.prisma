@@ -15,36 +15,37 @@ generator zod {
 }
 
 model User {
-  id                       String                       @id @default(cuid())
-  name                     String
-  email                    String
-  emailVerified            Boolean
-  image                    String?
-  createdAt                DateTime
-  updatedAt                DateTime
-  role                     String?
-  banned                   Boolean?
-  banReason                String?
-  banExpires               DateTime?
-  onboardingComplete       Boolean                      @default(false)
-  paymentsCustomerId       String?
-  locale                   String?
-  twoFactorEnabled         Boolean?
-  lastActiveOrganizationId String?
-  sessions                 Session[]
-  accounts                 Account[]
-  passkeys                 Passkey[]
-  invitations              Invitation[]
-  purchases                Purchase[]
-  members                  Member[]
-  twofactors               TwoFactor[]
-  notifications            Notification[]
-  notificationPreferences  UserNotificationPreference[]
-  orders                   Order[]
-  githubKitGrants          GithubKitGrant[]
-  buyerDeployments         BuyerDeployment[]
-  supportTickets           SupportTicket[]
-  lessonProgresses         LessonProgress[]
+  id                         String                       @id @default(cuid())
+  name                       String
+  email                      String
+  emailVerified              Boolean
+  image                      String?
+  createdAt                  DateTime
+  updatedAt                  DateTime
+  role                       String?
+  banned                     Boolean?
+  banReason                  String?
+  banExpires                 DateTime?
+  onboardingComplete         Boolean                      @default(false)
+  paymentsCustomerId         String?
+  locale                     String?
+  twoFactorEnabled           Boolean?
+  lastActiveOrganizationId   String?
+  sessions                   Session[]
+  accounts                   Account[]
+  passkeys                   Passkey[]
+  invitations                Invitation[]
+  purchases                  Purchase[]
+  members                    Member[]
+  twofactors                 TwoFactor[]
+  notifications              Notification[]
+  notificationPreferences    UserNotificationPreference[]
+  orders                     Order[]
+  githubKitGrants            GithubKitGrant[]
+  buyerDeployments           BuyerDeployment[]
+  supportTickets             SupportTicket[]
+  lessonProgresses           LessonProgress[]
+  studioFolderCollapseStates StudioFolderCollapseState[]
 
   @@unique([email])
   @@map("user")
@@ -349,38 +350,38 @@ enum SupportTicketResolvedBy {
 }
 
 model BuyerDeployment {
-  id               String                 @id @default(cuid())
-  userId           String
-  tier             BuyerDeploymentTier
-  coolifyServerId  String?
-  coolifyAppId     String?
-  publicUrl        String
-  customDomain     String?
-  status           BuyerDeploymentStatus  @default(provisioning)
-  lastDeployedAt   DateTime?
-  createdAt        DateTime               @default(now())
-  updatedAt        DateTime               @updatedAt
-  user             User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  supportTickets   SupportTicket[]
+  id              String                @id @default(cuid())
+  userId          String
+  tier            BuyerDeploymentTier
+  coolifyServerId String?
+  coolifyAppId    String?
+  publicUrl       String
+  customDomain    String?
+  status          BuyerDeploymentStatus @default(provisioning)
+  lastDeployedAt  DateTime?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  supportTickets  SupportTicket[]
 
   @@index([userId])
   @@map("buyer_deployment")
 }
 
 model SupportTicket {
-  id                    String                   @id @default(cuid())
-  buyerDeploymentId     String?
-  buyerDeployment       BuyerDeployment?        @relation(fields: [buyerDeploymentId], references: [id])
-  userId                String
-  user                  User                     @relation(fields: [userId], references: [id])
+  id                     String                   @id @default(cuid())
+  buyerDeploymentId      String?
+  buyerDeployment        BuyerDeployment?         @relation(fields: [buyerDeploymentId], references: [id])
+  userId                 String
+  user                   User                     @relation(fields: [userId], references: [id])
   chatwootConversationId Int                      @unique
-  channel               SupportTicketChannel
-  status                SupportTicketStatus      @default(OPEN)
-  aiSuggestedResolvedAt DateTime?
-  resolvedAt            DateTime?
-  resolvedBy            SupportTicketResolvedBy?
-  createdAt             DateTime                 @default(now())
-  updatedAt             DateTime                 @updatedAt
+  channel                SupportTicketChannel
+  status                 SupportTicketStatus      @default(OPEN)
+  aiSuggestedResolvedAt  DateTime?
+  resolvedAt             DateTime?
+  resolvedBy             SupportTicketResolvedBy?
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
 
   @@index([buyerDeploymentId])
   @@index([status])
@@ -406,11 +407,12 @@ model Course {
   slug        String        @unique
   title       String
   description String?       @db.Text
-  status      PublishStatus @default(PUBLISHED)
+  status      PublishStatus @default(DRAFT)
+  publishedAt DateTime?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
-  chapters    Chapter[]
+  chapters Chapter[]
 
   @@map("course")
 }
@@ -423,47 +425,48 @@ model Chapter {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  lessons   Lesson[]
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
 
   @@index([courseId])
   @@map("chapter")
 }
 
 model Lesson {
-  id              String         @id @default(cuid())
-  chapterId       String
-  slug            String         @unique
-  title           String
-  content         String?        @db.Text
-  isFreePreview   Boolean        @default(false)
-  order           Int            @default(0)
-  status          PublishStatus  @default(PUBLISHED)
-  videoProvider   VideoProvider?
-  videoUrl        String?
-  videoDuration   String?
-  aiPrompt        String?        @db.Text
-  aiContext       String?        @db.Text
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  id            String         @id @default(cuid())
+  chapterId     String
+  slug          String         @unique
+  title         String
+  content       String?        @db.Text
+  isFreePreview Boolean        @default(false)
+  order         Int            @default(0)
+  status        PublishStatus  @default(DRAFT)
+  videoProvider VideoProvider?
+  videoUrl      String?
+  videoDuration String?
+  aiPrompt      String?        @db.Text
+  aiContext     String?        @db.Text
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 
-  chapter         Chapter        @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-  progresses      LessonProgress[]
+  chapter    Chapter          @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  progresses LessonProgress[]
 
   @@index([chapterId])
   @@map("lesson")
 }
 
 model LessonProgress {
-  id          String   @id @default(cuid())
-  userId      String
-  lessonId    String
-  completedAt DateTime @default(now())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                String    @id @default(cuid())
+  userId            String
+  lessonId          String
+  completedAt       DateTime?
+  completedBlockIds String[]  @default([])
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@unique([userId, lessonId])
   @@index([userId])
@@ -472,30 +475,46 @@ model LessonProgress {
 }
 
 model StudioFolder {
-  id          String             @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
-  order       Int                @default(0)
-  isCollapsed Boolean            @default(false)
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
+  order       Int      @default(0)
+  isCollapsed Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  items       StudioFolderItem[]
+  items          StudioFolderItem[]
+  collapseStates StudioFolderCollapseState[]
 
   @@map("studio_folder")
 }
 
 model StudioFolderItem {
-  id        String       @id @default(cuid())
+  id        String   @id @default(cuid())
   folderId  String
-  moduleId  String
-  order     Int          @default(0)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  moduleId  String   @unique
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  folder    StudioFolder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  folder StudioFolder @relation(fields: [folderId], references: [id], onDelete: Cascade)
 
-  @@unique([folderId, moduleId])
   @@index([folderId])
   @@map("studio_folder_item")
 }
 
+model StudioFolderCollapseState {
+  id          String   @id @default(cuid())
+  userId      String
+  folderId    String
+  isCollapsed Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folder StudioFolder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, folderId])
+  @@index([userId])
+  @@index([folderId])
+  @@map("studio_folder_collapse_state")
+}

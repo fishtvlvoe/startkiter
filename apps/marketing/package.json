@@ -19,6 +19,7 @@
 		"@bprogress/next": "^3.2.12",
 		"@hookform/resolvers": "catalog:",
 		"@next/third-parties": "catalog:",
+		"@startkiter/course": "workspace:*",
 		"@startkiter/i18n": "workspace:*",
 		"@startkiter/payments": "workspace:*",
 		"@startkiter/ui": "workspace:*",

@@ -12,6 +12,7 @@ export default defineConfig({
 		alias: {
 			"@config": path.resolve(import.meta.dirname, "./config"),
 			"@analytics": path.resolve(import.meta.dirname, "./modules/analytics"),
+			"@academy": path.resolve(import.meta.dirname, "./modules/academy"),
 			"@home": path.resolve(import.meta.dirname, "./modules/home"),
 			"@blog": path.resolve(import.meta.dirname, "./modules/blog"),
 			"@i18n": path.resolve(import.meta.dirname, "./modules/i18n"),

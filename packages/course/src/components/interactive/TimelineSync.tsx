@@ -11,6 +11,7 @@ export type TimelineSyncProps = {
 	currentTime?: number;
 	autoScroll?: boolean;
 	onActiveChange?: (isActive: boolean) => void;
+	onSeek?: (seconds: number) => void;
 	children?: ReactNode;
 	className?: string;
 };
@@ -22,6 +23,7 @@ export function TimelineSync({
 	currentTime = Number.NaN,
 	autoScroll = true,
 	onActiveChange,
+	onSeek,
 	children,
 	className,
 }: TimelineSyncProps) {
@@ -49,7 +51,15 @@ export function TimelineSync({
 			data-start={sync.startSeconds}
 			ref={blockRef}
 		>
-			{title ? <h3>{title}</h3> : null}
+			{title ? (
+				<button
+					aria-label={"跳到時間碼 " + sync.startSeconds + " 秒"}
+					onClick={() => onSeek?.(sync.startSeconds)}
+					type="button"
+				>
+					{title}
+				</button>
+			) : null}
 			<div>{children}</div>
 		</section>
 	);

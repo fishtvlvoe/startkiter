@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Card } from "@startkiter/ui/components/card";
 import { Button } from "@startkiter/ui/components/button";
-import { Sparkles, Terminal, ArrowRight, ExternalLink } from "lucide-react";
+import { ArrowLeft, ArrowRight, ExternalLink, Server, Sparkles, Terminal } from "lucide-react";
 import { ManagedVpsGuide } from "./ManagedVpsGuide";
 
 type SelectedTier = "managed" | "self-hosted" | null;
@@ -33,7 +33,8 @@ export function TierSelector({ onProvisionSuccess }: TierSelectorProps) {
 					onClick={() => setSelectedTier(null)}
 					className="gap-1.5 text-muted-foreground hover:text-foreground -ml-2"
 				>
-					← 返回選擇部署方式
+					<ArrowLeft className="size-4" />
+					返回選擇部署方式
 				</Button>
 
 				<Card className="p-6 space-y-4">
@@ -87,7 +88,7 @@ export function TierSelector({ onProvisionSuccess }: TierSelectorProps) {
 
 				<div className="space-y-3">
 					<div className="flex items-center gap-2">
-						<span className="text-2xl">🙌</span>
+						<Server aria-hidden="true" className="size-6 text-primary" />
 						<h3 className="text-lg font-semibold group-hover:text-primary transition-colors">
 							由 StartKiter 協助代管部署
 						</h3>
@@ -127,7 +128,7 @@ export function TierSelector({ onProvisionSuccess }: TierSelectorProps) {
 			>
 				<div className="space-y-3">
 					<div className="flex items-center gap-2">
-						<span className="text-2xl">💻</span>
+						<Terminal aria-hidden="true" className="size-6 text-muted-foreground" />
 						<h3 className="text-lg font-semibold group-hover:text-foreground transition-colors">
 							我自己來（自行部署）
 						</h3>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveVideoSource } from "./lib/video-resolver";
+import { resolveVideoSource } from "@startkiter/course/video-resolver";
 
 describe("Course Video Resolver (Fluent Player)", () => {
 	it("correctly identifies Bunny Stream URLs", () => {
@@ -43,5 +43,28 @@ describe("Course Video Resolver (Fluent Player)", () => {
 
 		const unknownRes = resolveVideoSource("https://unsupported-site.com/watch");
 		expect(unknownRes.ok).toBe(false);
+	});
+
+	it("accepts HLS but rejects hostname suffix spoofing and Cloudflare Stream", () => {
+		expect(resolveVideoSource("https://media.example.test/lesson.m3u8")).toMatchObject({
+			ok: true,
+			provider: "HLS",
+		});
+		expect(resolveVideoSource("https://evilmediadelivery.net/play/library/video")).toMatchObject({
+			ok: false,
+		});
+		expect(resolveVideoSource("https://customer.cloudflarestream.com/video-id/manifest/video.m3u8")).toMatchObject({
+			ok: false,
+		});
+	});
+
+	it("only treats real Bunny player URLs as Bunny and keeps Bunny CDN manifests as HLS", () => {
+		expect(resolveVideoSource("https://assets.bunny.net/not-a-player")).toMatchObject({
+			ok: false,
+		});
+		expect(resolveVideoSource("https://vz-abc.b-cdn.net/video/playlist.m3u8")).toMatchObject({
+			ok: true,
+			provider: "HLS",
+		});
 	});
 });
