@@ -20,7 +20,7 @@
 
 - [x] 3.1 實作 `POST /api/deployment/provision`：接收買家提供的 VPS IP，呼叫 Coolify Server API 完成加入
 - [x] 3.2 實作 `GET /api/deployment/status`：呼叫 Coolify API 取得部署狀態，轉換為 `BuyerDeployment` 簡化結構
-- [ ] 3.3 `COOLIFY_API_TOKEN` 走既有金鑰管理流程（後台填入 + env fallback），確認不落地明文於程式碼或版控
+- [x] 3.3 `COOLIFY_API_TOKEN` 走既有金鑰管理流程（後台填入 + env fallback），確認不落地明文於程式碼或版控
 
 ## 4. 買家狀態面板
 
@@ -39,6 +39,6 @@
 ## 6. 文件與驗收
 
 - [x] 6.1 更新 `docs/deploy-and-public-url.md`，補上 Tier 2 主機/費用模型章節
-- [ ] 6.2 `pnpm test` 全綠
-- [ ] 6.3 `spectra validate` 通過，0 Critical
-- [ ] 6.4 三方角度 CR（correctness / security / performance），重點檢查憑證處理路徑的資安面
+- [x] 6.2 `pnpm test` 全綠
+- [x] 6.3 `spectra validate` 通過，0 Critical
+- [x] 6.4 三方角度 CR（correctness / security / performance），重點檢查憑證處理路徑的資安面
