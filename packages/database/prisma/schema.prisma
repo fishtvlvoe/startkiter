@@ -42,6 +42,7 @@ model User {
   notificationPreferences  UserNotificationPreference[]
   orders                   Order[]
   githubKitGrants          GithubKitGrant[]
+  buyerDeployments         BuyerDeployment[]
 
   @@unique([email])
   @@map("user")
@@ -312,4 +313,35 @@ model SiteSetting {
 
   @@index([updatedAt], map: "site_setting_updated_at_idx")
   @@map("site_setting")
+}
+
+enum BuyerDeploymentTier {
+  self_hosted
+  managed
+  advanced
+}
+
+enum BuyerDeploymentStatus {
+  provisioning
+  live
+  building
+  error
+}
+
+model BuyerDeployment {
+  id               String                 @id @default(cuid())
+  userId           String
+  tier             BuyerDeploymentTier
+  coolifyServerId  String?
+  coolifyAppId     String?
+  publicUrl        String
+  customDomain     String?
+  status           BuyerDeploymentStatus  @default(provisioning)
+  lastDeployedAt   DateTime?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  user             User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("buyer_deployment")
 }

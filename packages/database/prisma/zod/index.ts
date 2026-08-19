@@ -100,6 +100,12 @@ export const SiteSettingScalarFieldEnumSchema = z.enum(['id', 'ciphertext', 'upd
 
 export type SiteSettingScalarFieldEnum = z.infer<typeof SiteSettingScalarFieldEnumSchema>;
 
+// File: BuyerDeploymentScalarFieldEnum.schema.ts
+
+export const BuyerDeploymentScalarFieldEnumSchema = z.enum(['id', 'userId', 'tier', 'coolifyServerId', 'coolifyAppId', 'publicUrl', 'customDomain', 'status', 'lastDeployedAt', 'createdAt', 'updatedAt'])
+
+export type BuyerDeploymentScalarFieldEnum = z.infer<typeof BuyerDeploymentScalarFieldEnumSchema>;
+
 // File: SortOrder.schema.ts
 
 export const SortOrderSchema = z.enum(['asc', 'desc'])
@@ -159,6 +165,18 @@ export type OrderStatus = z.infer<typeof OrderStatusSchema>;
 export const GithubKitGrantStatusSchema = z.enum(['invited', 'accepted', 'revoked', 'failed'])
 
 export type GithubKitGrantStatus = z.infer<typeof GithubKitGrantStatusSchema>;
+
+// File: BuyerDeploymentTier.schema.ts
+
+export const BuyerDeploymentTierSchema = z.enum(['self_hosted', 'managed', 'advanced'])
+
+export type BuyerDeploymentTier = z.infer<typeof BuyerDeploymentTierSchema>;
+
+// File: BuyerDeploymentStatus.schema.ts
+
+export const BuyerDeploymentStatusSchema = z.enum(['provisioning', 'live', 'building', 'error'])
+
+export type BuyerDeploymentStatus = z.infer<typeof BuyerDeploymentStatusSchema>;
 
 // File: User.schema.ts
 
@@ -415,4 +433,23 @@ export const SiteSettingSchema = z.object({
 });
 
 export type SiteSettingType = z.infer<typeof SiteSettingSchema>;
+
+
+// File: BuyerDeployment.schema.ts
+
+export const BuyerDeploymentSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  tier: BuyerDeploymentTierSchema,
+  coolifyServerId: z.string().nullish(),
+  coolifyAppId: z.string().nullish(),
+  publicUrl: z.string(),
+  customDomain: z.string().nullish(),
+  status: BuyerDeploymentStatusSchema.default("provisioning"),
+  lastDeployedAt: z.date().nullish(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type BuyerDeploymentType = z.infer<typeof BuyerDeploymentSchema>;
 
