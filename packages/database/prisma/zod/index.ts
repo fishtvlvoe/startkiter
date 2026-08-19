@@ -148,6 +148,12 @@ export const StudioFolderItemScalarFieldEnumSchema = z.enum(['id', 'folderId', '
 
 export type StudioFolderItemScalarFieldEnum = z.infer<typeof StudioFolderItemScalarFieldEnumSchema>;
 
+// File: StudioFolderCollapseStateScalarFieldEnum.schema.ts
+
+export const StudioFolderCollapseStateScalarFieldEnumSchema = z.enum(['id', 'userId', 'folderId', 'isCollapsed', 'createdAt', 'updatedAt'])
+
+export type StudioFolderCollapseStateScalarFieldEnum = z.infer<typeof StudioFolderCollapseStateScalarFieldEnumSchema>;
+
 // File: SortOrder.schema.ts
 
 export const SortOrderSchema = z.enum(['asc', 'desc'])
@@ -637,4 +643,18 @@ export const StudioFolderItemSchema = z.object({
 });
 
 export type StudioFolderItemType = z.infer<typeof StudioFolderItemSchema>;
+
+
+// File: StudioFolderCollapseState.schema.ts
+
+export const StudioFolderCollapseStateSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  folderId: z.string(),
+  isCollapsed: z.boolean(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type StudioFolderCollapseStateType = z.infer<typeof StudioFolderCollapseStateSchema>;
 
