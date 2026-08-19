@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>蓋神 × Orca 多代理並行開發視覺化手冊</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#f0fdf4', 500: '#22c55e', 600: '#16a34a', 900: '#14532d' }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans p-6 md:p-12">
+  <div class="max-w-4xl mx-auto space-y-8">
+    
+    <!-- Header -->
+    <div class="border-b border-slate-800 pb-6">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-mono mb-3">
+        SSOT 實體規範 • Orca Orchestration Ready
+      </div>
+      <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-white">
+        蓋神 × Orca 多代理並行開發視覺化手冊
+      </h1>
+      <p class="text-slate-400 mt-2 text-base">
+        給所有團隊成員與開發代理的白話操作指南：從一句話交代，到多 Agent 獨立房間施工與即時網頁驗收。
+      </p>
+    </div>
+
+    <!-- 3 Step Quick Start -->
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5 space-y-2">
+        <div class="text-emerald-400 font-mono text-xs font-semibold">STEP 01</div>
+        <h3 class="font-bold text-lg text-white">交代一句話</h3>
+        <p class="text-slate-400 text-sm">「叫蓋神做：實作 PAYUNi 結帳 Webhook」</p>
+      </div>
+      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5 space-y-2">
+        <div class="text-blue-400 font-mono text-xs font-semibold">STEP 02</div>
+        <h3 class="font-bold text-lg text-white">點開提案網頁</h3>
+        <p class="text-slate-400 text-sm">收到 Orca 分享連結，看架構圖並確認拍板（硬停點 1）。</p>
+      </div>
+      <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-5 space-y-2">
+        <div class="text-purple-400 font-mono text-xs font-semibold">STEP 03</div>
+        <h3 class="font-bold text-lg text-white">收取驗收成果</h3>
+        <p class="text-slate-400 text-sm">多 Agent 在獨立房間完工，自動產出驗收報告與測試網址。</p>
+      </div>
+    </div>
+
+    <!-- Core Architecture -->
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-4">
+      <h2 class="text-xl font-bold text-white flex items-center gap-2">
+        <span>🏛️</span> 雙層總管與隔離房間架構
+      </h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-slate-300">
+          <thead class="bg-slate-800/60 text-slate-200 uppercase font-mono text-xs">
+            <tr>
+              <th class="p-3">維度</th>
+              <th class="p-3">通用版：蓋神 (Gaishen)</th>
+              <th class="p-3">專用版：StartKiter 開發代理</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800">
+            <tr>
+              <td class="p-3 font-semibold text-white">定位</td>
+              <td class="p-3">全專案通用的全自動 SDD 工地主任</td>
+              <td class="p-3">專為 StartKiter 特化的產品總管</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-semibold text-white">硬規則</td>
+              <td class="p-3">Spectra 5 步走 + 3 個硬停點</td>
+              <td class="p-3">三倉兩層站、PAYUNi 8800、不抽 libon.me</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-semibold text-white">派工方式</td>
+              <td class="p-3">Orca Worktree 實體隔離 (Codex / Claude)</td>
+              <td class="p-3">Apply Gate 嚴格閉環 + 測試站部署驗證</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CLI Dispatch Registry -->
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 space-y-4">
+      <h2 class="text-xl font-bold text-white flex items-center gap-2">
+        <span>🧭</span> 5 大 AI 代理「派工身分證」
+      </h2>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <div class="p-4 bg-slate-950/60 border border-slate-800 rounded-lg space-y-1">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-white">Codex</span>
+            <span class="text-xs font-mono text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded">--agent codex</span>
+          </div>
+          <p class="text-xs text-slate-400">專注：後端 API、演算法、資料庫遷移、單元測試</p>
+        </div>
+        <div class="p-4 bg-slate-950/60 border border-slate-800 rounded-lg space-y-1">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-white">Claude Code</span>
+            <span class="text-xs font-mono text-blue-400 bg-blue-950 px-2 py-0.5 rounded">--agent claude</span>
+          </div>
+          <p class="text-xs text-slate-400">專注：全域架構、前端頁面、Tailwind 樣式、整合流程</p>
+        </div>
+        <div class="p-4 bg-slate-950/60 border border-slate-800 rounded-lg space-y-1">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-white">Cursor CLI</span>
+            <span class="text-xs font-mono text-purple-400 bg-purple-950 px-2 py-0.5 rounded">--agent cursor</span>
+          </div>
+          <p class="text-xs text-slate-400">專注：跨檔案多處程式碼同步大重構</p>
+        </div>
+        <div class="p-4 bg-slate-950/60 border border-slate-800 rounded-lg space-y-1">
+          <div class="flex justify-between items-center">
+            <span class="font-bold text-white">Antigravity</span>
+            <span class="text-xs font-mono text-amber-400 bg-amber-950 px-2 py-0.5 rounded">--agent antigravity</span>
+          </div>
+          <p class="text-xs text-slate-400">專注：全自動流水線執行與自我修復閉環</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="text-center text-xs text-slate-500 pt-4 border-t border-slate-800">
+      StartKiter Development Infrastructure • Powered by Orca & Gaishen
+    </div>
+
+  </div>
+</body>
+</html>

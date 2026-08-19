@@ -57,3 +57,18 @@ LINE Login Channel 做登入。學員社群是邀請連結，不能靜默入群�
 【下一步】
 
 對齊文件後，施工 `extract-github-kit-fulfillment`（`/spectra-apply extract-github-kit-fulfillment`）。不要在 Development 根目錄開施工單。不要改來源 repo。產品衝突以 `openspec/specs/` 為準，不以 `docs/discuss/` 舊稿為準。
+
+---
+
+## 🤖 AI 代理協同開發與蓋神工作流 (AI Agents & SDD)
+
+本專案全面支援 **【通用版：蓋神 (Gaishen)】** 與 **【StartKiter 專屬開發代理】**，結合 Orca 實體房間隔離 (Worktree) 與雲端網頁即時對焦 (Artifacts)。
+
+- 📖 **完整規範文件**：[`docs/gaishen-orca-workflow.md`](./docs/gaishen-orca-workflow.md)
+- 🌐 **視覺化手冊 (即時網頁)**：[https://share.onorca.dev/a/5fkuSmAYDJLS](https://share.onorca.dev/a/5fkuSmAYDJLS)
+- 📚 **Orca 官方文檔庫 (本機 SSOT)**：[`/Users/fishtv/Development/docs/orca`](file:///Users/fishtv/Development/docs/orca/)
+
+### 快速上手 3 步驟：
+1. **交代需求**：對著對話框打一句話（例如：「`叫蓋神做：實作 PAYUNi 結帳 Webhook`」）。
+2. **網頁對焦**：收到蓋神發布的【提案網頁】（包含架構圖與規格表），點開確認拍板（硬停點 1）。
+3. **無干擾驗收**：多個 AI 代理在獨立 Worktree 施工完畢，自動產出【完工驗收網頁】與測試證據。
