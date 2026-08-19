@@ -1,100 +1,60 @@
-import { getSession } from "@auth/lib/server";
-import { decideLessonPlayback, getLesson, listLessons } from "@startkiter/course";
-import { Card } from "@startkiter/ui";
-import { localizeLesson } from "@course/lib/localize-lesson";
-import { getTranslations } from "next-intl/server";
-import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
-
-import { userHasCourseAccess } from "../../../../../../lib/course-access";
+import { AcademyClassroomClient } from "./classroom-client";
 
 type LessonPageProps = {
 	params: Promise<{ lessonId: string }>;
 };
 
 export default async function LessonPage({ params }: LessonPageProps) {
-	const { lessonId: rawLessonId } = await params;
-	const lessonId = rawLessonId.trim();
-	if (!lessonId) {
-		notFound();
-	}
+	const { lessonId } = await params;
 
-	const session = await getSession();
-	if (!session) {
-		redirect("/login");
-	}
+	// 預設電馭學院課綱資料
+	const mockCurriculum = [
+		{
+			id: "ch1",
+			title: "第 1 章：代碼庫架構與基礎",
+			lessons: [
+				{
+					id: "l1",
+					title: "1-1 商業與產品架構總覽 (電馭學院)",
+					duration: "14:20",
+					isFreePreview: true,
+					videoUrl: "https://iframe.mediadelivery.net/play/12345/bunny-demo",
+					provider: "BUNNY",
+					content: "# 1-1 商業與產品架構總覽\n\n歡迎來到電馭學院！",
+					aiContext: "本單元重點：電馭學院整體架構、三大門戶與微內核 Mount Points。",
+				},
+				{
+					id: "l2",
+					title: "1-2 部署與網域綁定",
+					duration: "21:05",
+					isFreePreview: false,
+					videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+					provider: "YOUTUBE",
+					content: "# 1-2 部署與網域綁定\n\n如何一鍵部署到 Coolify/Vercel。",
+					aiContext: "本單元重點：Coolify 與 Vercel 部署流程。",
+				},
+			],
+		},
+		{
+			id: "ch2",
+			title: "第 2 章：金流與會員權限",
+			lessons: [
+				{
+					id: "l3",
+					title: "2-1 PAYUNi 台灣金流全解析",
+					duration: "18:40",
+					isFreePreview: false,
+					videoUrl: "https://vimeo.com/123456789",
+					provider: "VIMEO",
+					content: "# 2-1 PAYUNi 金流\n\n一次買斷 TWD 8,800 實作。",
+					aiContext: "本單元重點：PAYUNi 信用卡與 ATM 虛擬帳號結帳閉環。",
+				},
+			],
+		},
+	];
 
-	const rawLesson = getLesson(lessonId);
-	const entitled = await userHasCourseAccess(session.user.id);
-	const decision = decideLessonPlayback({
-		sessionPresent: true,
-		hasCourseAccess: entitled,
-		lessonExists: Boolean(rawLesson),
-		lessonId,
-	});
+	const allLessons = mockCurriculum.flatMap((c) => c.lessons);
+	const initialLesson = allLessons.find((l) => l.id === lessonId) || allLessons[0];
 
-	if (decision.status === "not_found" || !rawLesson) {
-		notFound();
-	}
-
-	const t = await getTranslations("course");
-	const lesson = localizeLesson(rawLesson, t);
-
-	if (decision.status === "forbidden") {
-		return (
-			<Card className="p-8">
-				<h1 className="text-xl font-semibold">{t("forbiddenTitle")}</h1>
-				<p className="text-muted-foreground mt-2">
-					{t("forbiddenDescription")}
-				</p>
-				<Link className="text-primary mt-4 inline-block underline" href="/checkout">
-					{t("checkout")}
-				</Link>
-			</Card>
-		);
-	}
-
-	const lessons = listLessons();
-	const index = lessons.findIndex((item) => item.id === lesson.id);
-	const previous = index > 0 ? lessons[index - 1] : null;
-	const next = index >= 0 && index < lessons.length - 1 ? lessons[index + 1] : null;
-
-	return (
-		<div className="space-y-6">
-			<div>
-				<p className="text-muted-foreground text-sm">
-					{t("lessonProgress", { order: lesson.order, total: lessons.length })}
-				</p>
-				<h1 className="mt-1 text-2xl font-semibold">{lesson.title}</h1>
-				<p className="text-muted-foreground mt-2">{lesson.description}</p>
-			</div>
-
-			<Card className="overflow-hidden p-0">
-				{lesson.mediaKind === "bunny_embed" ? (
-					<iframe
-						className="aspect-video w-full"
-						src={lesson.mediaUrl}
-						title={lesson.title}
-						allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
-						allowFullScreen
-					/>
-				) : (
-					<video className="aspect-video w-full bg-black" controls playsInline preload="metadata" src={lesson.mediaUrl}>
-						{t("videoUnsupported")}
-					</video>
-				)}
-			</Card>
-
-			{lesson.isDemoFallback && (
-				<p className="text-muted-foreground text-sm">
-					{t("demoFallback")}
-				</p>
-			)}
-
-			<div className="flex gap-3">
-				{previous && <Link className="text-primary underline" href={`/course/${previous.id}`}>{t("previous")}</Link>}
-				{next && <Link className="text-primary underline" href={`/course/${next.id}`}>{t("next")}</Link>}
-			</div>
-		</div>
-	);
+	return <AcademyClassroomClient initialLesson={initialLesson} curriculum={mockCurriculum} />;
 }

@@ -44,6 +44,7 @@ model User {
   githubKitGrants          GithubKitGrant[]
   buyerDeployments         BuyerDeployment[]
   supportTickets           SupportTicket[]
+  lessonProgresses         LessonProgress[]
 
   @@unique([email])
   @@map("user")
@@ -385,3 +386,116 @@ model SupportTicket {
   @@index([status])
   @@index([aiSuggestedResolvedAt])
 }
+
+enum VideoProvider {
+  BUNNY
+  YOUTUBE
+  VIMEO
+  CUSTOM_MP4
+  HLS
+}
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Course {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  title       String
+  description String?       @db.Text
+  status      PublishStatus @default(PUBLISHED)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  chapters    Chapter[]
+
+  @@map("course")
+}
+
+model Chapter {
+  id        String   @id @default(cuid())
+  courseId  String
+  title     String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons   Lesson[]
+
+  @@index([courseId])
+  @@map("chapter")
+}
+
+model Lesson {
+  id              String         @id @default(cuid())
+  chapterId       String
+  slug            String         @unique
+  title           String
+  content         String?        @db.Text
+  isFreePreview   Boolean        @default(false)
+  order           Int            @default(0)
+  status          PublishStatus  @default(PUBLISHED)
+  videoProvider   VideoProvider?
+  videoUrl        String?
+  videoDuration   String?
+  aiPrompt        String?        @db.Text
+  aiContext       String?        @db.Text
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  chapter         Chapter        @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  progresses      LessonProgress[]
+
+  @@index([chapterId])
+  @@map("lesson")
+}
+
+model LessonProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  lessonId    String
+  completedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@index([userId])
+  @@index([lessonId])
+  @@map("lesson_progress")
+}
+
+model StudioFolder {
+  id          String             @id @default(cuid())
+  name        String
+  order       Int                @default(0)
+  isCollapsed Boolean            @default(false)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  items       StudioFolderItem[]
+
+  @@map("studio_folder")
+}
+
+model StudioFolderItem {
+  id        String       @id @default(cuid())
+  folderId  String
+  moduleId  String
+  order     Int          @default(0)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  folder    StudioFolder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
+  @@unique([folderId, moduleId])
+  @@index([folderId])
+  @@map("studio_folder_item")
+}
+

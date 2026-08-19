@@ -112,6 +112,42 @@ export const SupportTicketScalarFieldEnumSchema = z.enum(['id', 'buyerDeployment
 
 export type SupportTicketScalarFieldEnum = z.infer<typeof SupportTicketScalarFieldEnumSchema>;
 
+// File: CourseScalarFieldEnum.schema.ts
+
+export const CourseScalarFieldEnumSchema = z.enum(['id', 'slug', 'title', 'description', 'status', 'createdAt', 'updatedAt'])
+
+export type CourseScalarFieldEnum = z.infer<typeof CourseScalarFieldEnumSchema>;
+
+// File: ChapterScalarFieldEnum.schema.ts
+
+export const ChapterScalarFieldEnumSchema = z.enum(['id', 'courseId', 'title', 'order', 'createdAt', 'updatedAt'])
+
+export type ChapterScalarFieldEnum = z.infer<typeof ChapterScalarFieldEnumSchema>;
+
+// File: LessonScalarFieldEnum.schema.ts
+
+export const LessonScalarFieldEnumSchema = z.enum(['id', 'chapterId', 'slug', 'title', 'content', 'isFreePreview', 'order', 'status', 'videoProvider', 'videoUrl', 'videoDuration', 'aiPrompt', 'aiContext', 'createdAt', 'updatedAt'])
+
+export type LessonScalarFieldEnum = z.infer<typeof LessonScalarFieldEnumSchema>;
+
+// File: LessonProgressScalarFieldEnum.schema.ts
+
+export const LessonProgressScalarFieldEnumSchema = z.enum(['id', 'userId', 'lessonId', 'completedAt', 'createdAt', 'updatedAt'])
+
+export type LessonProgressScalarFieldEnum = z.infer<typeof LessonProgressScalarFieldEnumSchema>;
+
+// File: StudioFolderScalarFieldEnum.schema.ts
+
+export const StudioFolderScalarFieldEnumSchema = z.enum(['id', 'name', 'order', 'isCollapsed', 'createdAt', 'updatedAt'])
+
+export type StudioFolderScalarFieldEnum = z.infer<typeof StudioFolderScalarFieldEnumSchema>;
+
+// File: StudioFolderItemScalarFieldEnum.schema.ts
+
+export const StudioFolderItemScalarFieldEnumSchema = z.enum(['id', 'folderId', 'moduleId', 'order', 'createdAt', 'updatedAt'])
+
+export type StudioFolderItemScalarFieldEnum = z.infer<typeof StudioFolderItemScalarFieldEnumSchema>;
+
 // File: SortOrder.schema.ts
 
 export const SortOrderSchema = z.enum(['asc', 'desc'])
@@ -201,6 +237,18 @@ export type SupportTicketStatus = z.infer<typeof SupportTicketStatusSchema>;
 export const SupportTicketResolvedBySchema = z.enum(['BUYER_CONFIRMED', 'AUTO_TIMEOUT'])
 
 export type SupportTicketResolvedBy = z.infer<typeof SupportTicketResolvedBySchema>;
+
+// File: PublishStatus.schema.ts
+
+export const PublishStatusSchema = z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED'])
+
+export type PublishStatus = z.infer<typeof PublishStatusSchema>;
+
+// File: VideoProvider.schema.ts
+
+export const VideoProviderSchema = z.enum(['BUNNY', 'YOUTUBE', 'VIMEO', 'CUSTOM_MP4', 'HLS'])
+
+export type VideoProvider = z.infer<typeof VideoProviderSchema>;
 
 // File: User.schema.ts
 
@@ -495,4 +543,98 @@ export const SupportTicketSchema = z.object({
 });
 
 export type SupportTicketType = z.infer<typeof SupportTicketSchema>;
+
+
+// File: Course.schema.ts
+
+export const CourseSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  title: z.string(),
+  description: z.string().nullish(),
+  status: PublishStatusSchema.default("PUBLISHED"),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type CourseType = z.infer<typeof CourseSchema>;
+
+
+// File: Chapter.schema.ts
+
+export const ChapterSchema = z.object({
+  id: z.string(),
+  courseId: z.string(),
+  title: z.string(),
+  order: z.number().int(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type ChapterType = z.infer<typeof ChapterSchema>;
+
+
+// File: Lesson.schema.ts
+
+export const LessonSchema = z.object({
+  id: z.string(),
+  chapterId: z.string(),
+  slug: z.string(),
+  title: z.string(),
+  content: z.string().nullish(),
+  isFreePreview: z.boolean(),
+  order: z.number().int(),
+  status: PublishStatusSchema.default("PUBLISHED"),
+  videoProvider: VideoProviderSchema.nullish(),
+  videoUrl: z.string().nullish(),
+  videoDuration: z.string().nullish(),
+  aiPrompt: z.string().nullish(),
+  aiContext: z.string().nullish(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type LessonType = z.infer<typeof LessonSchema>;
+
+
+// File: LessonProgress.schema.ts
+
+export const LessonProgressSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  lessonId: z.string(),
+  completedAt: z.date(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type LessonProgressType = z.infer<typeof LessonProgressSchema>;
+
+
+// File: StudioFolder.schema.ts
+
+export const StudioFolderSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  order: z.number().int(),
+  isCollapsed: z.boolean(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type StudioFolderType = z.infer<typeof StudioFolderSchema>;
+
+
+// File: StudioFolderItem.schema.ts
+
+export const StudioFolderItemSchema = z.object({
+  id: z.string(),
+  folderId: z.string(),
+  moduleId: z.string(),
+  order: z.number().int(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type StudioFolderItemType = z.infer<typeof StudioFolderItemSchema>;
 
