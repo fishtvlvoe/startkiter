@@ -18,7 +18,12 @@ export const app = new Hono()
 	.use(
 		cors({
 			origin: getBaseUrl(process.env.NEXT_PUBLIC_SAAS_URL, 3000),
-			allowHeaders: ["Content-Type", "Authorization"],
+			allowHeaders: [
+				"Content-Type",
+				"Authorization",
+				"X-Chatwoot-Signature",
+				"X-Chatwoot-Timestamp",
+			],
 			allowMethods: ["POST", "GET", "OPTIONS"],
 			exposeHeaders: ["Content-Length"],
 			maxAge: 600,
@@ -33,8 +38,12 @@ export const app = new Hono()
 	.get("/health", (c) => c.text("OK"))
 	// oRPC handlers (for RPC and OpenAPI)
 	.use("*", async (c, next) => {
+		const isChatwootWebhook =
+			c.req.method === "POST" && c.req.path.includes("/support/webhook/chatwoot");
+		const rawBody = isChatwootWebhook ? await c.req.raw.clone().text() : undefined;
 		const context = {
 			headers: c.req.raw.headers,
+			rawBody,
 		};
 
 		const isRpc = c.req.path.includes("/rpc/");
