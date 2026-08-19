@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
 
 import { afterAll, afterEach, describe, expect, it } from "vitest";
 
@@ -29,8 +29,7 @@ async function createTestUser() {
 }
 
 function nextChatwootConversationId() {
-	nextConversationId += 1;
-	return nextConversationId;
+	return randomInt(1_000_000, 2_000_000_000);
 }
 
 describe.sequential("SupportTicket database constraints", () => {
