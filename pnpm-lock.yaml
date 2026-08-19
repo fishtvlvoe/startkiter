@@ -721,6 +721,12 @@ importers:
       '@startkiter/payments':
         specifier: workspace:*
         version: link:../payments
+      react:
+        specifier: 'catalog:'
+        version: 19.2.8
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.2.8(react@19.2.8)
     devDependencies:
       '@startkiter/tsconfig':
         specifier: workspace:*
@@ -728,6 +734,12 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 26.2.0
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: 'catalog:'
+        version: 19.2.4(@types/react@19.2.18)
       typescript:
         specifier: 'catalog:'
         version: 7.0.2

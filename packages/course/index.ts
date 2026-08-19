@@ -13,3 +13,35 @@ export {
 	resolveLineCommunityInviteUrl,
 } from "./line-invite";
 export type { LineInviteAccessReader, LineInviteResult } from "./line-invite";
+export {
+	ConceptCompare,
+	DialogueWindow,
+	InstantQuiz,
+	MicroSandbox,
+	TeacherAvatar,
+	TimelineSync,
+	WorkflowSorter,
+	isWorkflowOrderCorrect,
+	moveWorkflowItem,
+} from "./src/components/interactive";
+export type {
+	ConceptCompareProps,
+	ConceptCompareTab,
+	DialoguePrompt,
+	DialogueWindowProps,
+	InstantQuizProps,
+	InstantQuizResult,
+	MicroSandboxProps,
+	SandboxControl,
+	SandboxOption,
+	SandboxValue,
+	SandboxValues,
+	TeacherAvatarProps,
+	TeacherMood,
+	TimelineSyncProps,
+	WorkflowItem,
+	WorkflowSorterProps,
+	WorkflowSortResult,
+} from "./src/components/interactive";
+export { isTimeActive, parseTimecode, useTimeSync } from "./src/hooks/use-time-sync";
+export type { Timecode, TimeSyncOptions, TimeSyncState } from "./src/hooks/use-time-sync";
