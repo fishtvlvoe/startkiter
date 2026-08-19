@@ -499,3 +499,17 @@ model StudioFolderItem {
   @@map("studio_folder_item")
 }
 
+model StudioFolderCollapseState {
+  id          String   @id @default(cuid())
+  userId      String
+  folderId    String
+  isCollapsed Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, folderId])
+  @@index([folderId])
+  @@index([userId])
+  @@map("studio_folder_collapse_state")
+}
+
