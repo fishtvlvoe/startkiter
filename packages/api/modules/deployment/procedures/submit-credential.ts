@@ -1,5 +1,13 @@
 import { ORPCError } from "@orpc/server";
-import { acceptCredentialHandoff, findBuyerDeploymentForUser, CREDENTIAL_ENV_KEY_ALLOWLIST } from "@startkiter/platform";
+import {
+	acceptCredentialHandoff,
+	CREDENTIAL_ENV_KEY_ALLOWLIST,
+	findBuyerDeploymentForUser,
+	redeployApplication,
+	requireCoolifyApiToken,
+	setApplicationEnv,
+	upsertBuyerDeployment,
+} from "@startkiter/platform";
 import { logger } from "@startkiter/logs";
 import { z } from "zod";
 
@@ -25,20 +33,63 @@ export const submitCredential = protectedProcedure
 	.output(z.object({ accepted: z.literal(true) }))
 	.handler(async ({ input, context: { user } }) => {
 		const deployment = await findBuyerDeploymentForUser(user.id);
-		if (!deployment) {
+		if (!deployment?.coolifyAppId) {
 			throw new ORPCError("NOT_FOUND", { message: "No managed deployment found for this account" });
 		}
 
+		const tokenResult = requireCoolifyApiToken(process.env);
+		if (!tokenResult.ok) {
+			logger.error("COOLIFY_API_TOKEN missing, cannot write deployment credential");
+			throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Deployment service is temporarily unavailable" });
+		}
+
+		const pendingWrites: { envKey: string; value: string }[] = [];
 		const result = acceptCredentialHandoff(input, {
-			// TODO: replace with a real call into Coolify's environment-variable
-			// API for deployment.coolifyAppId, then trigger a redeploy. Not yet
-			// implemented — this sink only proves the no-log guarantee for now.
-			writeEnv: () => {},
+			writeEnv: (envKey, value) => {
+				pendingWrites.push({ envKey, value });
+			},
 			log: (message) => logger.info(message),
 		});
 
 		if (!result.ok) {
 			throw new ORPCError("BAD_REQUEST", { message: "Environment key is not on the allowed list" });
+		}
+
+		const write = pendingWrites[0];
+		if (!write) {
+			throw new ORPCError("BAD_REQUEST", { message: "Environment key is not on the allowed list" });
+		}
+
+		const envResult = await setApplicationEnv({
+			appId: deployment.coolifyAppId,
+			key: write.envKey,
+			value: write.value,
+			apiToken: tokenResult.token,
+		});
+		if (!envResult.ok) {
+			logger.error("Coolify set-env failed", { kind: envResult.kind, envKey: write.envKey, userId: user.id });
+			throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Deployment service is temporarily unavailable" });
+		}
+
+		const redeployResult = await redeployApplication({
+			appId: deployment.coolifyAppId,
+			apiToken: tokenResult.token,
+		});
+		if (!redeployResult.ok) {
+			await upsertBuyerDeployment({
+				userId: user.id,
+				tier: deployment.tier,
+				coolifyServerId: deployment.coolifyServerId,
+				coolifyAppId: deployment.coolifyAppId,
+				publicUrl: deployment.publicUrl,
+				status: "error",
+			});
+			logger.error("Coolify redeploy failed after env write", {
+				kind: redeployResult.kind,
+				envKey: write.envKey,
+				userId: user.id,
+			});
+			throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Deployment service is temporarily unavailable" });
 		}
 
 		return { accepted: true };

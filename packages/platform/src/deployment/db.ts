@@ -32,6 +32,49 @@ export async function findBuyerDeploymentForUser(userId: string): Promise<BuyerD
 	return row ? toBuyerDeployment(row) : null;
 }
 
+function toPrismaTier(tier: BuyerDeploymentTier): "self_hosted" | "managed" | "advanced" {
+	if (tier === "self-hosted") {
+		return "self_hosted";
+	}
+	return tier;
+}
+
+function toPrismaStatus(status: BuyerDeployment["status"]): "provisioning" | "live" | "building" | "error" {
+	if (status === "status-unavailable") {
+		return "error";
+	}
+	return status;
+}
+
+export async function upsertBuyerDeployment(input: {
+	userId: string;
+	tier: BuyerDeploymentTier;
+	coolifyServerId?: string;
+	coolifyAppId?: string;
+	publicUrl: string;
+	status: BuyerDeployment["status"];
+}): Promise<BuyerDeployment> {
+	const existing = await db.buyerDeployment.findFirst({ where: { userId: input.userId } });
+	const data = {
+		tier: toPrismaTier(input.tier),
+		coolifyServerId: input.coolifyServerId ?? null,
+		coolifyAppId: input.coolifyAppId ?? null,
+		publicUrl: input.publicUrl,
+		status: toPrismaStatus(input.status),
+	};
+
+	const row = existing
+		? await db.buyerDeployment.update({ where: { id: existing.id }, data })
+		: await db.buyerDeployment.create({
+				data: {
+					userId: input.userId,
+					...data,
+				},
+			});
+
+	return toBuyerDeployment(row);
+}
+
 /**
  * Status probe is injected because it comes from the Coolify API, which this
  * package does not call directly — the caller (apps/saas) owns COOLIFY_API_TOKEN.

@@ -18,8 +18,8 @@
 
 ## 3. Coolify Fleet 管理
 
-- [ ] 3.1 實作 `POST /api/deployment/provision`：接收買家提供的 VPS IP，呼叫 Coolify Server API 完成加入
-- [ ] 3.2 實作 `GET /api/deployment/status`：呼叫 Coolify API 取得部署狀態，轉換為 `BuyerDeployment` 簡化結構
+- [x] 3.1 實作 `POST /api/deployment/provision`：接收買家提供的 VPS IP，呼叫 Coolify Server API 完成加入
+- [x] 3.2 實作 `GET /api/deployment/status`：呼叫 Coolify API 取得部署狀態，轉換為 `BuyerDeployment` 簡化結構
 - [ ] 3.3 `COOLIFY_API_TOKEN` 走既有金鑰管理流程（後台填入 + env fallback），確認不落地明文於程式碼或版控
 
 ## 4. 買家狀態面板
@@ -31,10 +31,10 @@
 
 ## 5. 第三方憑證交接
 
-- [ ] 5.1 定義 `targetEnvKey` 允許清單（白名單），拒絕清單外的鍵名
-- [ ] 5.2 實作 `POST /api/deployment/credentials`：接收憑證、寫入買家部署實例環境變數、觸發 Coolify 重新部署
-- [ ] 5.3 稽核此 endpoint 的所有程式碼路徑與 log 輸出，確認憑證明文不落地資料庫、log、錯誤回報
-- [ ] 5.4 撰寫測試驗證：白名單外的 `targetEnvKey` 一律被拒絕，且不觸發任何寫入
+- [x] 5.1 定義 `targetEnvKey` 允許清單（白名單），拒絕清單外的鍵名
+- [x] 5.2 實作 `POST /api/deployment/credentials`：接收憑證、寫入買家部署實例環境變數、觸發 Coolify 重新部署
+- [x] 5.3 稽核此 endpoint 的所有程式碼路徑與 log 輸出，確認憑證明文不落地資料庫、log、錯誤回報
+- [x] 5.4 撰寫測試驗證：白名單外的 `targetEnvKey` 一律被拒絕，且不觸發任何寫入
 
 ## 6. 文件與驗收
 
