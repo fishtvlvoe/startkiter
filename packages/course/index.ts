@@ -45,3 +45,8 @@ export type {
 } from "./src/components/interactive";
 export { isTimeActive, parseTimecode, useTimeSync } from "./src/hooks/use-time-sync";
 export type { Timecode, TimeSyncOptions, TimeSyncState } from "./src/hooks/use-time-sync";
+export { LessonMdx } from "./src/mdx/LessonMdx";
+export type { LessonMdxProps } from "./src/mdx/LessonMdx";
+export { inspectMdxSource } from "./src/mdx/inspect-mdx-source";
+export { FluentPlayer } from "./src/player/FluentPlayer";
+export type { FluentPlayerSource } from "./src/player/FluentPlayer";

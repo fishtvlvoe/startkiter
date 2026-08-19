@@ -10,6 +10,7 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@mdx-js/mdx": "catalog:",
 		"@startkiter/payments": "workspace:*",
 		"react": "catalog:",
 		"react-dom": "catalog:"
