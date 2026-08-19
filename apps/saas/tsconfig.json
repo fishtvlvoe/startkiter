@@ -13,6 +13,7 @@
 			"@admin/*": ["./modules/admin/*"],
 			"@ai/*": ["./modules/ai/*"],
 			"@onboarding/*": ["./modules/onboarding/*"],
+			"@deployment/*": ["./modules/deployment/*"],
 			"@shared/*": ["./modules/shared/*"]
 		}
 	},
