@@ -1,60 +1,112 @@
+import { auth } from "@startkiter/auth";
+import { db } from "@startkiter/database";
+import { createProcedureClient, ORPCError } from "@orpc/server";
+import { headers } from "next/headers";
+import { notFound } from "next/navigation";
+import { courseRouter } from "@startkiter/api/modules/course/router";
 import { AcademyClassroomClient } from "./classroom-client";
 
 type LessonPageProps = {
 	params: Promise<{ lessonId: string }>;
 };
 
+interface LessonData {
+	id: string;
+	title: string;
+	duration: string;
+	isFreePreview: boolean;
+	videoUrl: string;
+	provider?: string;
+	content: string;
+	aiContext: string;
+}
+
+interface ChapterData {
+	id: string;
+	title: string;
+	lessons: LessonData[];
+}
+
+function stripSensitiveFields(lesson: LessonData): LessonData {
+	return {
+		...lesson,
+		videoUrl: "",
+		content: "",
+		aiContext: "",
+	};
+}
+
 export default async function LessonPage({ params }: LessonPageProps) {
 	const { lessonId } = await params;
+	const requestHeaders = await headers();
+	const session = await auth.api.getSession({ headers: requestHeaders });
 
-	// 預設電馭學院課綱資料
-	const mockCurriculum = [
-		{
-			id: "ch1",
-			title: "第 1 章：代碼庫架構與基礎",
-			lessons: [
-				{
-					id: "l1",
-					title: "1-1 商業與產品架構總覽 (電馭學院)",
-					duration: "14:20",
-					isFreePreview: true,
-					videoUrl: "https://iframe.mediadelivery.net/play/12345/bunny-demo",
-					provider: "BUNNY",
-					content: "# 1-1 商業與產品架構總覽\n\n歡迎來到電馭學院！",
-					aiContext: "本單元重點：電馭學院整體架構、三大門戶與微內核 Mount Points。",
-				},
-				{
-					id: "l2",
-					title: "1-2 部署與網域綁定",
-					duration: "21:05",
-					isFreePreview: false,
-					videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-					provider: "YOUTUBE",
-					content: "# 1-2 部署與網域綁定\n\n如何一鍵部署到 Coolify/Vercel。",
-					aiContext: "本單元重點：Coolify 與 Vercel 部署流程。",
-				},
-			],
+	// 從 PostgreSQL 資料庫真實讀取已發布課綱
+	const chaptersFromDb = await db.chapter.findMany({
+		where: {
+			course: { status: "PUBLISHED" },
 		},
-		{
-			id: "ch2",
-			title: "第 2 章：金流與會員權限",
-			lessons: [
-				{
-					id: "l3",
-					title: "2-1 PAYUNi 台灣金流全解析",
-					duration: "18:40",
-					isFreePreview: false,
-					videoUrl: "https://vimeo.com/123456789",
-					provider: "VIMEO",
-					content: "# 2-1 PAYUNi 金流\n\n一次買斷 TWD 8,800 實作。",
-					aiContext: "本單元重點：PAYUNi 信用卡與 ATM 虛擬帳號結帳閉環。",
-				},
-			],
+		orderBy: { order: "asc" },
+		include: {
+			lessons: {
+				where: { status: "PUBLISHED" },
+				orderBy: { order: "asc" },
+			},
 		},
-	];
+	});
 
-	const allLessons = mockCurriculum.flatMap((c) => c.lessons);
-	const initialLesson = allLessons.find((l) => l.id === lessonId) || allLessons[0];
+	if (!chaptersFromDb.length) {
+		notFound();
+	}
 
-	return <AcademyClassroomClient initialLesson={initialLesson} curriculum={mockCurriculum} />;
+	// 使用 oRPC getLessonDetail 逐單元驗證觀看權限
+	const getLessonDetail = createProcedureClient(courseRouter.getLessonDetail, {
+		context: {
+			headers: requestHeaders,
+			...(session?.user?.id ? { user: { id: session.user.id } } : {}),
+		} as any,
+	});
+
+	const curriculum: ChapterData[] = [];
+	for (const ch of chaptersFromDb) {
+		const chapterLessons: LessonData[] = [];
+		for (const l of ch.lessons) {
+			const baseLesson: LessonData = {
+				id: l.id,
+				title: l.title,
+				duration: l.videoDuration || "10:00",
+				isFreePreview: l.isFreePreview,
+				videoUrl: l.videoUrl || "",
+				provider: l.videoProvider || undefined,
+				content: l.content || "",
+				aiContext: l.aiContext || "",
+			};
+
+			try {
+				await getLessonDetail({ lessonId: l.id });
+				chapterLessons.push(baseLesson);
+			} catch (error) {
+				if (error instanceof ORPCError) {
+					// 未登入、非付費或未發布的單元：只保留大綱欄位，移除敏感內容
+					chapterLessons.push(stripSensitiveFields(baseLesson));
+				} else {
+					throw error;
+				}
+			}
+		}
+		curriculum.push({
+			id: ch.id,
+			title: ch.title,
+			lessons: chapterLessons,
+		});
+	}
+
+	const allLessons = curriculum.flatMap((c) => c.lessons);
+	const currentLesson = allLessons.find((l) => l.id === lessonId) || allLessons[0];
+
+	if (!currentLesson) {
+		notFound();
+	}
+
+	return <AcademyClassroomClient initialLesson={currentLesson} curriculum={curriculum} />;
 }
