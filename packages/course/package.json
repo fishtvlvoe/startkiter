@@ -12,8 +12,12 @@
 	"dependencies": {
 		"@mdx-js/mdx": "catalog:",
 		"@startkiter/payments": "workspace:*",
+		"mdast-util-from-markdown": "2.0.3",
+		"mdast-util-mdx": "3.0.0",
+		"micromark-extension-mdxjs": "3.0.0",
 		"react": "catalog:",
-		"react-dom": "catalog:"
+		"react-dom": "catalog:",
+		"unist-util-visit": "5.1.0"
 	},
 	"devDependencies": {
 		"@startkiter/tsconfig": "workspace:*",

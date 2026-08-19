@@ -730,12 +730,24 @@ importers:
       '@startkiter/payments':
         specifier: workspace:*
         version: link:../payments
+      mdast-util-from-markdown:
+        specifier: 2.0.3
+        version: 2.0.3(supports-color@7.2.0)
+      mdast-util-mdx:
+        specifier: 3.0.0
+        version: 3.0.0(supports-color@7.2.0)
+      micromark-extension-mdxjs:
+        specifier: 3.0.0
+        version: 3.0.0
       react:
         specifier: 'catalog:'
         version: 19.2.8
       react-dom:
         specifier: 'catalog:'
         version: 19.2.8(react@19.2.8)
+      unist-util-visit:
+        specifier: 5.1.0
+        version: 5.1.0
     devDependencies:
       '@startkiter/tsconfig':
         specifier: workspace:*

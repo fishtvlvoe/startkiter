@@ -31,4 +31,17 @@ describe("inspectMdxSource", () => {
 	it("rejects import statements", () => {
 		expect(inspectMdxSource('import x from "y"\n\n# hi')).toMatchObject({ ok: false });
 	});
+
+	it("rejects MDX JavaScript expressions", () => {
+		expect(
+			inspectMdxSource("{(function(){ document.title = 'PWNED' })()}"),
+		).toMatchObject({ ok: false });
+	});
+
+	it("allows allowlisted JSX with array and object attribute values", () => {
+		const source =
+			'<InstantQuiz question="Q" options={["A","B"]} answerIndex={1} explanation="E" />';
+
+		expect(inspectMdxSource(source)).toEqual({ ok: true });
+	});
 });
