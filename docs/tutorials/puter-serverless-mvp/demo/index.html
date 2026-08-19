@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="h-full bg-slate-950 text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puter To-Do 清單</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Puter.js SDK v2 -->
+  <script src="https://js.puter.com/v2/"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(30, 41, 59, 0.5);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(71, 85, 105, 0.8);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="min-h-full flex flex-col bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur sticky top-0 z-30">
+    <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-brand-500/20 border border-brand-500/30 flex items-center justify-center text-brand-500 shadow-sm shadow-brand-500/20">
+          <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h1 class="text-base font-bold text-white tracking-wide flex items-center gap-2">
+            Puter To-Do
+            <span class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Cloud Sync</span>
+          </h1>
+        </div>
+      </div>
+
+      <!-- Auth State / User Profile -->
+      <div id="authContainer" class="flex items-center gap-3 text-sm">
+        <div id="authLoading" class="text-xs text-slate-400 flex items-center gap-2">
+          <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-brand-500"></i>
+          連線 Puter...
+        </div>
+        <div id="userProfile" class="hidden flex items-center gap-3">
+          <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/70 border border-slate-700">
+            <i data-lucide="user" class="w-4 h-4 text-slate-400"></i>
+            <span id="usernameDisplay" class="text-xs font-medium text-slate-200 truncate max-w-[120px]"></span>
+          </div>
+          <button id="signOutBtn" class="text-xs text-slate-400 hover:text-rose-400 transition-colors px-2 py-1">
+            登出
+          </button>
+        </div>
+        <button id="signInBtn" class="hidden px-3.5 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white font-medium text-xs transition-all shadow-sm flex items-center gap-1.5">
+          <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+          Puter 登入
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-8 flex flex-col gap-6">
+
+    <!-- Input Card -->
+    <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 shadow-xl backdrop-blur-sm">
+      <form id="todoForm" class="flex flex-col gap-3">
+        <div class="flex gap-2">
+          <div class="relative flex-1">
+            <input
+              type="text"
+              id="taskInput"
+              placeholder="新增待辦事項..."
+              required
+              class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all"
+            />
+          </div>
+          <button
+            type="submit"
+            class="px-5 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-medium text-sm transition-all shadow-md shadow-brand-600/20 flex items-center gap-2 whitespace-nowrap"
+          >
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>新增</span>
+          </button>
+          <button
+            type="button"
+            id="aiBreakdownBtn"
+            title="利用 Puter AI 將此任務拆解為子任務"
+            class="px-3.5 py-3 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 font-medium text-sm transition-all flex items-center gap-1.5 whitespace-nowrap"
+          >
+            <i data-lucide="sparkles" class="w-4 h-4 text-purple-400"></i>
+            <span class="hidden sm:inline">AI 拆解</span>
+          </button>
+        </div>
+
+        <!-- Extra attributes: Priority & Due Date -->
+        <div class="flex flex-wrap items-center gap-3 pt-1 text-xs text-slate-400">
+          <div class="flex items-center gap-1.5">
+            <label for="prioritySelect">優先級：</label>
+            <select id="prioritySelect" class="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-slate-200 focus:outline-none focus:border-slate-700">
+              <option value="medium">一般 (中)</option>
+              <option value="high">重要 (高)</option>
+              <option value="low">低優先</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <label for="dueDateInput">截止日：</label>
+            <input type="date" id="dueDateInput" class="bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs text-slate-200 focus:outline-none focus:border-slate-700" />
+          </div>
+          <div class="ml-auto text-[11px] text-slate-500 flex items-center gap-1">
+            <i data-lucide="database" class="w-3 h-3 text-brand-500"></i>
+            <span id="storageStatus">雲端自動儲存 (Puter KV)</span>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Filters & Stats -->
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-1 bg-slate-900/60 p-1 rounded-xl border border-slate-800/80 text-xs">
+        <button data-filter="all" class="filter-btn active px-3 py-1.5 rounded-lg font-medium text-white bg-slate-800 transition-colors">全部 (<span id="countAll">0</span>)</button>
+        <button data-filter="active" class="filter-btn px-3 py-1.5 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition-colors">未完成 (<span id="countActive">0</span>)</button>
+        <button data-filter="completed" class="filter-btn px-3 py-1.5 rounded-lg font-medium text-slate-400 hover:text-slate-200 transition-colors">已完成 (<span id="countCompleted">0</span>)</button>
+      </div>
+
+      <div class="flex items-center gap-2 text-xs">
+        <button id="clearCompletedBtn" class="text-slate-400 hover:text-rose-400 transition-colors flex items-center gap-1 px-2 py-1">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          清除已完成
+        </button>
+      </div>
+    </div>
+
+    <!-- Todo List Items -->
+    <div class="flex-1 bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4 min-h-[300px] flex flex-col">
+      <div id="todoList" class="flex flex-col gap-2.5 flex-1 custom-scrollbar">
+        <!-- Todo Items rendered dynamically -->
+      </div>
+      
+      <!-- Empty State -->
+      <div id="emptyState" class="hidden flex-1 flex flex-col items-center justify-center py-12 text-slate-500 text-center">
+        <div class="w-12 h-12 rounded-2xl bg-slate-800/50 flex items-center justify-center text-slate-600 mb-3">
+          <i data-lucide="clipboard-list" class="w-6 h-6"></i>
+        </div>
+        <p class="text-sm font-medium text-slate-400">目前沒有待辦事項</p>
+        <p class="text-xs text-slate-600 mt-1">在上方輸入並按下「新增」開始記錄！</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer (Includes mandatory Puter Developer link) -->
+  <footer class="border-t border-slate-900 bg-slate-950 py-4 text-center text-xs text-slate-500">
+    <div class="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p>© 2026 Puter To-Do App</p>
+      <p>
+        <a href="https://developer.puter.com" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-brand-500 underline transition-colors">
+          Powered by Puter
+        </a>
+      </p>
+    </div>
+  </footer>
+
+  <!-- App Script -->
+  <script>
+    // State
+    let todos = [];
+    let currentFilter = 'all';
+    const KV_KEY = 'user_todos_v1';
+
+    // Elements
+    const authLoading = document.getElementById('authLoading');
+    const userProfile = document.getElementById('userProfile');
+    const usernameDisplay = document.getElementById('usernameDisplay');
+    const signInBtn = document.getElementById('signInBtn');
+    const signOutBtn = document.getElementById('signOutBtn');
+    const todoForm = document.getElementById('todoForm');
+    const taskInput = document.getElementById('taskInput');
+    const prioritySelect = document.getElementById('prioritySelect');
+    const dueDateInput = document.getElementById('dueDateInput');
+    const aiBreakdownBtn = document.getElementById('aiBreakdownBtn');
+    const todoList = document.getElementById('todoList');
+    const emptyState = document.getElementById('emptyState');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const countAll = document.getElementById('countAll');
+    const countActive = document.getElementById('countActive');
+    const countCompleted = document.getElementById('countCompleted');
+    const clearCompletedBtn = document.getElementById('clearCompletedBtn');
+    const storageStatus = document.getElementById('storageStatus');
+
+    // Initialize Puter Auth & Load Data
+    async function initApp() {
+      lucide.createIcons();
+      try {
+        if (puter.auth.isSignedIn()) {
+          const user = await puter.auth.getUser();
+          showUser(user);
+        } else {
+          showLoggedOut();
+        }
+      } catch (err) {
+        console.warn('Puter Auth Check Error:', err);
+        showLoggedOut();
+      }
+
+      await loadTodos();
+    }
+
+    function showUser(user) {
+      authLoading.classList.add('hidden');
+      userProfile.classList.remove('hidden');
+      signInBtn.classList.add('hidden');
+      usernameDisplay.textContent = user.username || user.email || '已登入用戶';
+    }
+
+    function showLoggedOut() {
+      authLoading.classList.add('hidden');
+      userProfile.classList.add('hidden');
+      signInBtn.classList.remove('hidden');
+    }
+
+    // Load from Puter KV (with local fallback)
+    async function loadTodos() {
+      try {
+        storageStatus.textContent = '讀取中...';
+        const data = await puter.kv.get(KV_KEY);
+        if (data) {
+          todos = typeof data === 'string' ? JSON.parse(data) : data;
+        } else {
+          const local = localStorage.getItem(KV_KEY);
+          todos = local ? JSON.parse(local) : [
+            { id: '1', title: '體驗 Puter.js 雲端儲存 (KV)', completed: true, priority: 'high', dueDate: '', createdAt: Date.now() - 100000 },
+            { id: '2', title: '點擊「AI 拆解」快速拆分大任務', completed: false, priority: 'medium', dueDate: '', createdAt: Date.now() - 50000 },
+            { id: '3', title: '使用 Puter 帳號登入同步多端資料', completed: false, priority: 'low', dueDate: '', createdAt: Date.now() }
+          ];
+        }
+        storageStatus.textContent = '已從 Puter 雲端同步';
+      } catch (err) {
+        console.error('Failed to load from Puter KV:', err);
+        const local = localStorage.getItem(KV_KEY);
+        todos = local ? JSON.parse(local) : [];
+        storageStatus.textContent = '本機快取模式';
+      }
+      render();
+    }
+
+    // Save to Puter KV
+    async function saveTodos() {
+      localStorage.setItem(KV_KEY, JSON.stringify(todos));
+      try {
+        storageStatus.textContent = '儲存中...';
+        await puter.kv.set(KV_KEY, todos);
+        storageStatus.textContent = '已儲存至 Puter 雲端';
+      } catch (err) {
+        console.warn('Puter KV Save Error:', err);
+        storageStatus.textContent = '雲端儲存失敗 (保留於本機)';
+      }
+      render();
+    }
+
+    // Add new Task
+    todoForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = taskInput.value.trim();
+      if (!title) return;
+
+      const newTask = {
+        id: 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        title,
+        priority: prioritySelect.value,
+        dueDate: dueDateInput.value,
+        completed: false,
+        createdAt: Date.now()
+      };
+
+      todos.unshift(newTask);
+      taskInput.value = '';
+      dueDateInput.value = '';
+      prioritySelect.value = 'medium';
+      await saveTodos();
+    });
+
+    // AI Breakdown using puter.ai.chat
+    aiBreakdownBtn.addEventListener('click', async () => {
+      const task = taskInput.value.trim();
+      if (!task) {
+        alert('請先在輸入框填寫想拆解的任務主題（例如：「規劃一趟日本五天四夜自由行」）');
+        return;
+      }
+
+      const originalBtnText = aiBreakdownBtn.innerHTML;
+      aiBreakdownBtn.disabled = true;
+      aiBreakdownBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-purple-400"></i><span>拆解中...</span>';
+      lucide.createIcons();
+
+      try {
+        const prompt = `請將以下任務拆解為 3 到 5 個具體、簡短的執行步驟（每個步驟一律繁體中文、不超過 20 字）。請僅以 JSON 格式陣列回傳，範例格式：["步驟一", "步驟二", "步驟三"]。\n\n任務主題：${task}`;
+        
+        const response = await puter.ai.chat(prompt);
+        let content = response.message?.content || response.text || (typeof response === 'string' ? response : '');
+        
+        const match = content.match(/\[[\s\S]*\]/);
+        if (match) {
+          const steps = JSON.parse(match[0]);
+          if (Array.isArray(steps) && steps.length > 0) {
+            for (const step of steps) {
+              todos.unshift({
+                id: 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+                title: `${task} - ${step}`,
+                priority: 'medium',
+                dueDate: '',
+                completed: false,
+                createdAt: Date.now()
+              });
+            }
+            taskInput.value = '';
+            await saveTodos();
+          }
+        } else {
+          alert('AI 拆解完成，但格式解析異常：\n' + content);
+        }
+      } catch (err) {
+        console.error('AI Breakdown Error:', err);
+        alert('AI 拆解失敗：' + (err.message || err));
+      } finally {
+        aiBreakdownBtn.disabled = false;
+        aiBreakdownBtn.innerHTML = originalBtnText;
+        lucide.createIcons();
+      }
+    });
+
+    // Toggle Complete
+    window.toggleTodo = async function(id) {
+      const todo = todos.find(t => t.id === id);
+      if (todo) {
+        todo.completed = !todo.completed;
+        await saveTodos();
+      }
+    };
+
+    // Delete Task
+    window.deleteTodo = async function(id) {
+      todos = todos.filter(t => t.id !== id);
+      await saveTodos();
+    };
+
+    // Filter switching
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => {
+          b.classList.remove('active', 'text-white', 'bg-slate-800');
+          b.classList.add('text-slate-400');
+        });
+        btn.classList.add('active', 'text-white', 'bg-slate-800');
+        btn.classList.remove('text-slate-400');
+        currentFilter = btn.dataset.filter;
+        render();
+      });
+    });
+
+    // Clear completed
+    clearCompletedBtn.addEventListener('click', async () => {
+      if (confirm('確定清除所有已完成的待辦事項嗎？')) {
+        todos = todos.filter(t => !t.completed);
+        await saveTodos();
+      }
+    });
+
+    // Auth handlers
+    signInBtn.addEventListener('click', async () => {
+      try {
+        await puter.auth.signIn();
+        const user = await puter.auth.getUser();
+        showUser(user);
+        await loadTodos();
+      } catch (err) {
+        console.error('Sign In Error:', err);
+      }
+    });
+
+    signOutBtn.addEventListener('click', async () => {
+      try {
+        await puter.auth.signOut();
+        showLoggedOut();
+        await loadTodos();
+      } catch (err) {
+        console.error('Sign Out Error:', err);
+      }
+    });
+
+    // Render list
+    function render() {
+      const filtered = todos.filter(todo => {
+        if (currentFilter === 'active') return !todo.completed;
+        if (currentFilter === 'completed') return todo.completed;
+        return true;
+      });
+
+      // Update counters
+      countAll.textContent = todos.length;
+      countActive.textContent = todos.filter(t => !t.completed).length;
+      countCompleted.textContent = todos.filter(t => t.completed).length;
+
+      if (filtered.length === 0) {
+        todoList.innerHTML = '';
+        emptyState.classList.remove('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+        todoList.innerHTML = filtered.map(todo => {
+          const priorityBadge = {
+            high: '<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">高</span>',
+            medium: '<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">中</span>',
+            low: '<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30">低</span>'
+          }[todo.priority || 'medium'];
+
+          const dateBadge = todo.dueDate ? `
+            <span class="flex items-center gap-1 text-[11px] text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700/60">
+              <i data-lucide="calendar" class="w-3 h-3 text-slate-500"></i>
+              ${todo.dueDate}
+            </span>
+          ` : '';
+
+          return `
+            <div class="group flex items-center justify-between p-3.5 rounded-xl bg-slate-950/60 hover:bg-slate-800/50 border border-slate-800/80 hover:border-slate-700/80 transition-all">
+              <div class="flex items-center gap-3 flex-1 min-w-0">
+                <button
+                  onclick="toggleTodo('${todo.id}')"
+                  class="w-5 h-5 rounded-lg border flex items-center justify-center transition-all ${
+                    todo.completed
+                      ? 'bg-brand-600 border-brand-500 text-white'
+                      : 'border-slate-700 hover:border-brand-500/80 bg-slate-900/80'
+                  }"
+                >
+                  ${todo.completed ? '<i data-lucide="check" class="w-3.5 h-3.5 stroke-[3]"></i>' : ''}
+                </button>
+                <div class="flex flex-col min-w-0 flex-1">
+                  <span class="text-sm font-medium transition-all ${
+                    todo.completed ? 'line-through text-slate-500' : 'text-slate-200'
+                  }">
+                    ${escapeHtml(todo.title)}
+                  </span>
+                  <div class="flex items-center gap-2 mt-1">
+                    ${priorityBadge}
+                    ${dateBadge}
+                  </div>
+                </div>
+              </div>
+              <button
+                onclick="deleteTodo('${todo.id}')"
+                class="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-rose-400 p-1.5 rounded-lg hover:bg-slate-800 transition-all ml-2"
+                title="刪除"
+              >
+                <i data-lucide="trash" class="w-4 h-4"></i>
+              </button>
+            </div>
+          `;
+        }).join('');
+      }
+
+      lucide.createIcons();
+    }
+
+    function escapeHtml(str) {
+      return (str || '').replace(/[&<>"']/g, m => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      }[m]));
+    }
+
+    // Startup
+    initApp();
+  </script>
+</body>
+</html>

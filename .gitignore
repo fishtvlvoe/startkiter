@@ -9,6 +9,7 @@ node_modules/
 
 # next.js / build
 .next/
+.turbo/
 out/
 dist/
 build/
