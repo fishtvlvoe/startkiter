@@ -106,6 +106,12 @@ export const BuyerDeploymentScalarFieldEnumSchema = z.enum(['id', 'userId', 'tie
 
 export type BuyerDeploymentScalarFieldEnum = z.infer<typeof BuyerDeploymentScalarFieldEnumSchema>;
 
+// File: SupportTicketScalarFieldEnum.schema.ts
+
+export const SupportTicketScalarFieldEnumSchema = z.enum(['id', 'buyerDeploymentId', 'userId', 'chatwootConversationId', 'channel', 'status', 'aiSuggestedResolvedAt', 'resolvedAt', 'resolvedBy', 'createdAt', 'updatedAt'])
+
+export type SupportTicketScalarFieldEnum = z.infer<typeof SupportTicketScalarFieldEnumSchema>;
+
 // File: SortOrder.schema.ts
 
 export const SortOrderSchema = z.enum(['asc', 'desc'])
@@ -177,6 +183,24 @@ export type BuyerDeploymentTier = z.infer<typeof BuyerDeploymentTierSchema>;
 export const BuyerDeploymentStatusSchema = z.enum(['provisioning', 'live', 'building', 'error'])
 
 export type BuyerDeploymentStatus = z.infer<typeof BuyerDeploymentStatusSchema>;
+
+// File: SupportTicketChannel.schema.ts
+
+export const SupportTicketChannelSchema = z.enum(['WEB_WIDGET', 'LINE', 'TELEGRAM'])
+
+export type SupportTicketChannel = z.infer<typeof SupportTicketChannelSchema>;
+
+// File: SupportTicketStatus.schema.ts
+
+export const SupportTicketStatusSchema = z.enum(['OPEN', 'AI_SUGGESTED_RESOLVED', 'RESOLVED', 'ESCALATED'])
+
+export type SupportTicketStatus = z.infer<typeof SupportTicketStatusSchema>;
+
+// File: SupportTicketResolvedBy.schema.ts
+
+export const SupportTicketResolvedBySchema = z.enum(['BUYER_CONFIRMED', 'AUTO_TIMEOUT'])
+
+export type SupportTicketResolvedBy = z.infer<typeof SupportTicketResolvedBySchema>;
 
 // File: User.schema.ts
 
@@ -452,4 +476,23 @@ export const BuyerDeploymentSchema = z.object({
 });
 
 export type BuyerDeploymentType = z.infer<typeof BuyerDeploymentSchema>;
+
+
+// File: SupportTicket.schema.ts
+
+export const SupportTicketSchema = z.object({
+  id: z.string(),
+  buyerDeploymentId: z.string().nullish(),
+  userId: z.string(),
+  chatwootConversationId: z.number().int(),
+  channel: SupportTicketChannelSchema,
+  status: SupportTicketStatusSchema.default("OPEN"),
+  aiSuggestedResolvedAt: z.date().nullish(),
+  resolvedAt: z.date().nullish(),
+  resolvedBy: SupportTicketResolvedBySchema.nullish(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type SupportTicketType = z.infer<typeof SupportTicketSchema>;
 

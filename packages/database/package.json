@@ -9,6 +9,7 @@
 		"push": "dotenv -c -e ../../.env -- prisma db push",
 		"migrate": "dotenv -c -e ../../.env -- prisma migrate dev",
 		"studio": "dotenv -c -e ../../.env -- prisma studio",
+		"test": "dotenv -c -e ../../.env -- vitest run ../../packages/database",
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {

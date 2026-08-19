@@ -5,15 +5,15 @@ TDD：每個功能群組先列紅燈測試 task，再列實作 task。
 
 ## 1. 前置依賴檢查（阻塞，Apply 開跑前必須先確認）
 
-- [ ] 1.1 確認 `coolify-managed-deployment` change 已 apply 完成且分支已 merge 回 main：驗證方式為 `git log main --grep="coolify-managed-deployment"` 能找到對應 merge commit，且 `packages/database/prisma/schema.prisma` 在 main 上已存在 `BuyerDeployment` model（`grep -n "^model BuyerDeployment" packages/database/prisma/schema.prisma` 有命中）。**未滿足此條件前，禁止開始第 2 節以後的任務**
-- [ ] 1.2（已解決，2026-08-19）design.md Open Questions 中「沒有 BuyerDeployment 記錄的買家怎麼處理」等 3 題 Fish 已全數裁決，答案記錄於 design.md「`SupportTicket` 關聯 `BuyerDeployment`（優先強關聯，允許 null 因應無部署買家）」決策段落與 Open Questions 追溯記錄，第 2、6、7 節任務已依裁決結果調整，驗證方式為 `grep -n "已裁決（2026-08-19）" design.md` 有命中
+- [x] 1.1 確認 `coolify-managed-deployment` change 已 apply 完成且分支已 merge 回 main：驗證方式為 `git log main --grep="coolify-managed-deployment"` 能找到對應 merge commit，且 `packages/database/prisma/schema.prisma` 在 main 上已存在 `BuyerDeployment` model（`grep -n "^model BuyerDeployment" packages/database/prisma/schema.prisma` 有命中）。**未滿足此條件前，禁止開始第 2 節以後的任務**
+- [x] 1.2（已解決，2026-08-19）design.md Open Questions 中「沒有 BuyerDeployment 記錄的買家怎麼處理」等 3 題 Fish 已全數裁決，答案記錄於 design.md「`SupportTicket` 關聯 `BuyerDeployment`（優先強關聯，允許 null 因應無部署買家）」決策段落與 Open Questions 追溯記錄，第 2、6、7 節任務已依裁決結果調整，驗證方式為 `grep -n "已裁決（2026-08-19）" design.md` 有命中
 
 ## 2. 資料模型：`SupportTicket`（對應設計決策「`SupportTicket` 關聯 `BuyerDeployment`（優先強關聯，允許 null 因應無部署買家）」）
 
-- [ ] 2.1 撰寫紅燈測試：`SupportTicket` 插入 `buyerDeploymentId = null` 時資料庫正常接受寫入（無部署記錄的買家仍可開單），對應 Requirement「Ticket-to-deployment linkage」Scenario「Ticket created without a deployment link」，驗證方式為 `pnpm --filter database test` 出現預期失敗（目前 schema 尚未建立，插入會直接報錯缺少 table/column）
-- [ ] 2.2 撰寫紅燈測試：`SupportTicket` 插入的 `buyerDeploymentId` 指向不存在的 `BuyerDeployment` id 時資料庫拒絕寫入（外鍵約束），對應 Requirement「Ticket-to-deployment linkage」Scenario「Invalid deployment reference rejected」，驗證方式同 2.1
-- [ ] 2.3 撰寫紅燈測試：對同一 `chatwootConversationId` 重複建立 `SupportTicket` 會違反 unique 約束，對應 Requirement「Ticket-to-deployment linkage」Scenario「Chatwoot conversation deduplication」，驗證方式為對應測試檔案跑出預期失敗
-- [ ] 2.4 在 `packages/database/prisma/schema.prisma` 新增 `SupportTicket` model（`buyerDeploymentId` 為可為 null 的外鍵）與 `SupportTicketChannel`／`SupportTicketStatus`／`SupportTicketResolvedBy` enum（依 design.md Implementation Contract 的 Prisma schema），執行 `pnpm --filter database db push` 使第 2.1、2.2、2.3 節測試轉綠燈，驗證方式為 `pnpm --filter database test` 全綠且 `psql` 查詢 `\d "SupportTicket"` 確認索引存在、`buyerDeploymentId` 欄位為 nullable
+- [x] 2.1 撰寫紅燈測試：`SupportTicket` 插入 `buyerDeploymentId = null` 時資料庫正常接受寫入（無部署記錄的買家仍可開單），對應 Requirement「Ticket-to-deployment linkage」Scenario「Ticket created without a deployment link」，驗證方式為 `pnpm --filter database test` 出現預期失敗（目前 schema 尚未建立，插入會直接報錯缺少 table/column）
+- [x] 2.2 撰寫紅燈測試：`SupportTicket` 插入的 `buyerDeploymentId` 指向不存在的 `BuyerDeployment` id 時資料庫拒絕寫入（外鍵約束），對應 Requirement「Ticket-to-deployment linkage」Scenario「Invalid deployment reference rejected」，驗證方式同 2.1
+- [x] 2.3 撰寫紅燈測試：對同一 `chatwootConversationId` 重複建立 `SupportTicket` 會違反 unique 約束，對應 Requirement「Ticket-to-deployment linkage」Scenario「Chatwoot conversation deduplication」，驗證方式為對應測試檔案跑出預期失敗
+- [x] 2.4 在 `packages/database/prisma/schema.prisma` 新增 `SupportTicket` model（`buyerDeploymentId` 為可為 null 的外鍵）與 `SupportTicketChannel`／`SupportTicketStatus`／`SupportTicketResolvedBy` enum（依 design.md Implementation Contract 的 Prisma schema），執行 `pnpm --filter database db push` 使第 2.1、2.2、2.3 節測試轉綠燈，驗證方式為 `pnpm --filter database test` 全綠且 `psql` 查詢 `\d "SupportTicket"` 確認索引存在、`buyerDeploymentId` 欄位為 nullable
 
 ## 3. Chatwoot 基礎設施（對應設計決策「客服系統選 Chatwoot 自架，不用 Chatwoot Cloud 或另建工單系統」「獨立 VPS，不跟買家的 managed fleet 共用主機」）
 

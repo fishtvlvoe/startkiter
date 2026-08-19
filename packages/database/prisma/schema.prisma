@@ -43,6 +43,7 @@ model User {
   orders                   Order[]
   githubKitGrants          GithubKitGrant[]
   buyerDeployments         BuyerDeployment[]
+  supportTickets           SupportTicket[]
 
   @@unique([email])
   @@map("user")
@@ -328,6 +329,24 @@ enum BuyerDeploymentStatus {
   error
 }
 
+enum SupportTicketChannel {
+  WEB_WIDGET
+  LINE
+  TELEGRAM
+}
+
+enum SupportTicketStatus {
+  OPEN
+  AI_SUGGESTED_RESOLVED
+  RESOLVED
+  ESCALATED
+}
+
+enum SupportTicketResolvedBy {
+  BUYER_CONFIRMED
+  AUTO_TIMEOUT
+}
+
 model BuyerDeployment {
   id               String                 @id @default(cuid())
   userId           String
@@ -341,7 +360,28 @@ model BuyerDeployment {
   createdAt        DateTime               @default(now())
   updatedAt        DateTime               @updatedAt
   user             User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  supportTickets   SupportTicket[]
 
   @@index([userId])
   @@map("buyer_deployment")
+}
+
+model SupportTicket {
+  id                    String                   @id @default(cuid())
+  buyerDeploymentId     String?
+  buyerDeployment       BuyerDeployment?        @relation(fields: [buyerDeploymentId], references: [id])
+  userId                String
+  user                  User                     @relation(fields: [userId], references: [id])
+  chatwootConversationId Int                      @unique
+  channel               SupportTicketChannel
+  status                SupportTicketStatus      @default(OPEN)
+  aiSuggestedResolvedAt DateTime?
+  resolvedAt            DateTime?
+  resolvedBy            SupportTicketResolvedBy?
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+
+  @@index([buyerDeploymentId])
+  @@index([status])
+  @@index([aiSuggestedResolvedAt])
 }
