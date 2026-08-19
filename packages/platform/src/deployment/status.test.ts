@@ -24,6 +24,12 @@ describe("buildStatusPanelView", () => {
 		expect(view.reachable).toBe("unavailable");
 	});
 
+	it("shows unavailable, not down, when the Coolify API is unreachable", () => {
+		const probe: CoolifyStatusProbe = { kind: "network_error" };
+		const view = buildStatusPanelView(deploymentWith(), probe);
+		expect(view.reachable).toBe("unavailable");
+	});
+
 	it("shows reachable true when the site is live", () => {
 		const probe: CoolifyStatusProbe = {
 			kind: "ok",

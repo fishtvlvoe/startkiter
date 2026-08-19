@@ -1,7 +1,13 @@
 export type FleetTokenCheckResult = { ok: true; token: string } | { ok: false; reason: "token_missing" };
 
-export function requireCoolifyApiToken(env: Record<string, string | undefined>): FleetTokenCheckResult {
-	const token = env.COOLIFY_API_TOKEN?.trim();
+/**
+ * Admin-stored token wins, then env. Never log the token.
+ */
+export function requireCoolifyApiToken(
+	env: Record<string, string | undefined>,
+	settingsToken?: string,
+): FleetTokenCheckResult {
+	const token = settingsToken?.trim() || env.COOLIFY_API_TOKEN?.trim();
 	if (!token) {
 		return { ok: false, reason: "token_missing" };
 	}

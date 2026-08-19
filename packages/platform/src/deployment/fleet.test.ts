@@ -12,6 +12,11 @@ describe("requireCoolifyApiToken", () => {
 		const result = requireCoolifyApiToken({ COOLIFY_API_TOKEN: "secret-token" });
 		expect(result).toEqual({ ok: true, token: "secret-token" });
 	});
+
+	it("prefers an admin-stored token over env fallback", () => {
+		const result = requireCoolifyApiToken({ COOLIFY_API_TOKEN: "env-token" }, "admin-token");
+		expect(result).toEqual({ ok: true, token: "admin-token" });
+	});
 });
 
 describe("validateSshHandoff", () => {

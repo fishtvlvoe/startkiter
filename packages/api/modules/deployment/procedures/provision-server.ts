@@ -1,5 +1,13 @@
 import { ORPCError } from "@orpc/server";
-import { classifyTier, guardCoolifyProvision, requireCoolifyApiToken, validateSshHandoff } from "@startkiter/platform";
+import {
+	addServerToCoolify,
+	classifyTier,
+	createApplication,
+	guardCoolifyProvision,
+	requireCoolifyApiToken,
+	upsertBuyerDeployment,
+	validateSshHandoff,
+} from "@startkiter/platform";
 import { logger } from "@startkiter/logs";
 import { z } from "zod";
 
@@ -21,7 +29,7 @@ export const provisionServer = protectedProcedure
 		}),
 	)
 	.output(z.object({ accepted: z.literal(true) }))
-	.handler(async ({ input }) => {
+	.handler(async ({ input, context: { user } }) => {
 		const tierResult = classifyTier(input.tier);
 		if (!tierResult.ok) {
 			throw new ORPCError("BAD_REQUEST", { message: "Unknown deployment tier" });
@@ -43,8 +51,53 @@ export const provisionServer = protectedProcedure
 			throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Deployment service is temporarily unavailable" });
 		}
 
-		// TODO: call Coolify's "Add Server" API with tokenResult.token, input.ip,
-		// input.publicKey and persist the resulting BuyerDeployment row. Not yet
-		// implemented — this endpoint currently only validates the handoff.
+		const projectUuid = process.env.COOLIFY_PROJECT_UUID?.trim();
+		const repoUrl = process.env.COOLIFY_APP_REPO_URL?.trim();
+		const branch = process.env.COOLIFY_APP_GIT_BRANCH?.trim() || "main";
+		if (!projectUuid || !repoUrl) {
+			logger.error("Coolify project or application repo is not configured, cannot provision server");
+			throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Deployment service is temporarily unavailable" });
+		}
+
+		const serverResult = await addServerToCoolify({
+			ip: input.ip,
+			publicKey: input.publicKey,
+			name: `buyer-${user.id}`,
+			apiToken: tokenResult.token,
+			privateKeyUuid: process.env.COOLIFY_PRIVATE_KEY_UUID?.trim(),
+		});
+		if (!serverResult.ok) {
+			logger.error("Coolify add-server failed", { kind: serverResult.kind, userId: user.id });
+			throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Deployment service is temporarily unavailable" });
+		}
+
+		const appResult = await createApplication({
+			serverId: serverResult.data.uuid,
+			repoUrl,
+			branch,
+			apiToken: tokenResult.token,
+			projectUuid,
+		});
+		if (!appResult.ok) {
+			await upsertBuyerDeployment({
+				userId: user.id,
+				tier: "managed",
+				coolifyServerId: serverResult.data.uuid,
+				publicUrl: `https://${input.ip}`,
+				status: "error",
+			});
+			logger.error("Coolify create-application failed", { kind: appResult.kind, userId: user.id });
+			throw new ORPCError("INTERNAL_SERVER_ERROR", { message: "Deployment service is temporarily unavailable" });
+		}
+
+		await upsertBuyerDeployment({
+			userId: user.id,
+			tier: "managed",
+			coolifyServerId: serverResult.data.uuid,
+			coolifyAppId: appResult.data.uuid,
+			publicUrl: `https://${input.ip}`,
+			status: "provisioning",
+		});
+
 		return { accepted: true };
 	});
