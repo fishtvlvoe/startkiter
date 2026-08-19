@@ -22,7 +22,7 @@ The system SHALL allow any authenticated buyer to open a support ticket from a f
 #### Scenario: Buyer has no BuyerDeployment record
 
 - **WHEN** the buyer's account has zero `BuyerDeployment` records
-- **THEN** the system SHALL NOT create a `SupportTicket` through this widget flow and SHALL show a message directing the buyer to the existing email support channel
+- **THEN** the system SHALL still create a `SupportTicket` with `buyerDeploymentId = null`, and the ticket SHALL be routed to a human agent without an AI-generated deployment status summary
 
 #### Scenario: Empty message submission
 
@@ -83,12 +83,22 @@ The system SHALL accept buyer messages sent to the StartKiter Telegram Bot and r
 
 ### Requirement: Ticket-to-deployment linkage
 
-Every `SupportTicket` SHALL be linked to exactly one `BuyerDeployment` via a required foreign key.
+Every `SupportTicket` SHALL be linked to at most one `BuyerDeployment` via an optional foreign key. When the buyer's account has a matching `BuyerDeployment`, the system SHALL populate the link; when it does not, `buyerDeploymentId` SHALL be null and the ticket SHALL still be created.
 
-#### Scenario: Database constraint enforcement
+#### Scenario: Ticket created with a valid deployment link
 
-- **WHEN** the system attempts to insert a `SupportTicket` row without a `buyerDeploymentId`
-- **THEN** the database SHALL reject the insert due to the `NOT NULL` foreign key constraint
+- **WHEN** the system inserts a `SupportTicket` row with a `buyerDeploymentId` referencing an existing `BuyerDeployment`
+- **THEN** the database SHALL accept the insert and the foreign key SHALL resolve to that `BuyerDeployment`
+
+#### Scenario: Ticket created without a deployment link
+
+- **WHEN** the buyer's account has zero `BuyerDeployment` records at the time a ticket is created
+- **THEN** the system SHALL insert the `SupportTicket` row with `buyerDeploymentId = null`, and the database SHALL accept the insert (the foreign key column is nullable)
+
+#### Scenario: Invalid deployment reference rejected
+
+- **WHEN** the system attempts to insert a `SupportTicket` row with a `buyerDeploymentId` that does not reference any existing `BuyerDeployment`
+- **THEN** the database SHALL reject the insert due to the foreign key constraint
 
 #### Scenario: Chatwoot conversation deduplication
 

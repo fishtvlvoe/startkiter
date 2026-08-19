@@ -47,6 +47,11 @@ When a ticket is linked to a `BuyerDeployment` managed via Coolify, the AI SHALL
 - **WHEN** the Coolify API call fails or times out
 - **THEN** the system SHALL post an internal note stating the status is temporarily unavailable and SHALL NOT report a false "healthy" or "broken" state
 
+#### Scenario: Ticket has no linked deployment
+
+- **WHEN** a new ticket's `buyerDeploymentId` is null
+- **THEN** the system SHALL NOT call the Coolify API and SHALL post an internal note stating "no deployment data, requires manual handling" instead of a status/log summary
+
 #### Scenario: No write operations performed
 
 - **WHEN** the AI processes any ticket linked to a Coolify-managed deployment

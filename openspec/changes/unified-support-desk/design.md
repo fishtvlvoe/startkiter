@@ -22,6 +22,7 @@
 - **不修改 `coolify-managed-deployment` 的任何既有程式碼或資料模型**，只新增唯讀呼叫；那張 change 本身未完成的部分（`provisionServer`/`submitCredential` 真的呼叫 Coolify API、endpoint 路徑驗證）不屬於這張 change 的範圍，這張 change 假設它已經 apply 完成。
 - **不做工單系統的 SLA/客服排班/多客服帳號權限分級**——Chatwoot 本身支援，但本輪只設最低限度的帳號（1-5 個客服帳號，跟目前團隊規模一致），不特別設計權限矩陣。
 - **不改動 `packages/notifications`（買家方向的站內通知）的行為**——那是「系統通知買家」，這張 change 是「買家通知 StartKiter 團隊」，方向相反，不合併也不互相依賴實作。
+- **Chatwoot 高可用/多機備援不在本輪範圍**（延後決定，2026-08-19 確認）——本輪只上單一 VPS，先上線運行一段時間，依實際流量評估要不要做 HA/備援，不是本輪要解決的問題，也不是遺漏，是刻意延後。
 
 ## Decisions
 
@@ -42,13 +43,14 @@ Chatwoot 架在 Coolify Cloud 帳號下**新增一台獨立 VPS**，跟買家部
 - **塞進既有 buyer-managed fleet 的某台機器**：否決。這是內部客服系統，不是買家資源，混在一起會讓「哪些資源屬於買家、哪些屬於公司內部」的權限模型混亂，未來稽核或买家資料保護要求時難以切割。
 - **用 Vercel serverless 或其他 serverless 平台跑 Chatwoot**：否決。Chatwoot 是常駐 Rails + Redis + PostgreSQL 應用，官方本身建議跑在常駐容器/VM，不是為 serverless 冷啟動設計；跟這個專案「部署走常駐 Node/服務」的既有 Tech Stack 慣例一致，不要為了這張 change 另開一種部署形態。
 
-### `SupportTicket` 強關聯 `BuyerDeployment`（NOT NULL 外鍵）
+### `SupportTicket` 關聯 `BuyerDeployment`（優先強關聯，允許 null 因應無部署買家）
 
-工單資料表的 `buyerDeploymentId` 是必填外鍵，不做成 nullable「先獨立、以後再接」。
+**2026-08-19 二次確認補充**：原始決策是 NOT NULL 外鍵（強關聯）。Fish 針對「沒有 `BuyerDeployment` 記錄的買家怎麼開單」的裁決是：**流程完全一樣，工單照樣進 Chatwoot、照樣自動建立 `SupportTicket`，不強制要求先建立 `BuyerDeployment` 才能開單**；差別只在 AI Webhook 那層找不到對應部署時，沒有 log 摘要可貼，直接標記「無部署資料，人工直接處理」。這個行為要求跟 NOT NULL 外鍵互相矛盾（沒有部署記錄就沒有 id 可填），因此把 `buyerDeploymentId` 改為**可為 null 的外鍵**，其餘不變：多數工單（Tier 2 買家）仍然會自動帶入部署 id，只有少數邊界情況（Tier 1 自行部署、購買流程中尚未完成 provisioning）允許為 null。
 
 **Alternatives considered：**
-- **nullable 外鍵，日後再補關聯**：否決（Fish 明確選強關聯）。會導致早期工單資料「看不出這人在用哪台機器」，AI 唯讀查 Coolify 狀態這個核心價值就無法在工單建立當下自動生效，還要事後補資料。
+- **維持 NOT NULL，日後再補關聯**：否決。跟 Fish 的裁決直接衝突——會導致沒有部署記錄的買家完全無法開單，被迫走舊有 email 客服，違背「買家只跟一個介面互動」的核心目標。
 - **不建自己的表，全部塞進 Chatwoot 的 custom attributes**：否決。Chatwoot 的自訂欄位是給人看的 metadata，不是關聯式資料庫外鍵，AI 判斷邏輯、報表、跨表查詢（例如「這個部署最近 3 個月開過幾張單」）都做不到型別安全的 join，效能與可維護性都差。
+- **為無部署買家建立一筆佔位 `BuyerDeployment` 記錄以維持 NOT NULL**：否決。會污染 `BuyerDeployment` 表的語意（那張表代表真實部署），且需要額外邏輯辨識「這是不是假記錄」，比允許 null 更複雜、更容易出錯。
 
 ### 「已解決」採混合判斷制：AI 標記建議 → 買家確認或逾時才真的關單
 
@@ -76,8 +78,13 @@ Chatwoot 官方 widget 注入全站 layout，`/deployment` 頁面另外加一顆
 
 ### 進線管道：網站 + LINE + Telegram 三個核心管道，IG/FB 等留待未來
 
+**2026-08-19 查證更正**：propose 階段原本寫「LINE 官方帳號申請較慢，需企業認證，可能卡幾天」不準確，已查證修正（來源見下）：
+- LINE 官方帳號分「一般帳號」與「認證帳號」兩種。**一般帳號建立後立即可用，不需要審核**；只有「認證帳號」（訊息額度較高）才需要送審，審核天數 LINE 官方文件未給固定數字（坊間代理商講的「5-30 個工作天」是第三方業者自己的服務承諾，不是 LINE 官方 SLA，不可引用為事實）。（來源：[LINE Biz-Solutions FAQ](https://tw.linebiz.com/faq/oa-basic/59/)）
+- **StartKiter 已有 LINE Developers Provider**（先前做 LINE Login 時建立）。在同一個 Provider 底下新增一個 Messaging API Channel，技術上可以立即建立、立即測試，不需要重跑一次 Provider 審核——「已有 Provider」跟「新增 Channel」是兩件互相獨立的事。（來源：[LINE Developers Console overview](https://developers.line.biz/en/docs/line-developers-console/overview/)、[Get started with the Messaging API](https://developers.line.biz/en/docs/messaging-api/getting-started/)）
+- 結論：v1 用一般帳號即可，**LINE Messaging Channel 建立不是阻塞項**，不需要在 apply 前提早送審。
+
 **Alternatives considered：**
-- **只做 LINE（選項 A）**：否決。LINE Messaging Channel 申請要企業認證，審核期間完全沒有 Messaging 管道可用/可測，且排除掉 Fish 提到「可能有國外客戶」的情境。
+- **只做 LINE（選項 A）**：否決。即使 LINE 一般帳號免審核、可立即建立，仍然排除掉 Fish 提到「可能有國外客戶」的情境，Telegram 申請成本極低，沒有理由不順手做。
 - **只做 Telegram（選項 B）**：否決。台灣一般消費者幾乎不用 Telegram，等於主力客群要多裝一個不熟的 App 才能找到客服，體驗反而變差。
 
 ### v1 邊界政策文字同步改寫（`config.yaml` + `AGENTS.md` + `README.md` 三處）
@@ -125,8 +132,8 @@ enum SupportTicketResolvedBy {
 
 model SupportTicket {
   id                     String                   @id @default(cuid())
-  buyerDeploymentId      String
-  buyerDeployment        BuyerDeployment          @relation(fields: [buyerDeploymentId], references: [id])
+  buyerDeploymentId      String?
+  buyerDeployment        BuyerDeployment?         @relation(fields: [buyerDeploymentId], references: [id])
   userId                 String
   user                   User                     @relation(fields: [userId], references: [id])
   chatwootConversationId Int                      @unique
@@ -149,7 +156,7 @@ model SupportTicket {
 ```sql
 CREATE TABLE "SupportTicket" (
   "id" TEXT PRIMARY KEY,
-  "buyerDeploymentId" TEXT NOT NULL REFERENCES "BuyerDeployment"("id"),
+  "buyerDeploymentId" TEXT REFERENCES "BuyerDeployment"("id"),
   "userId" TEXT NOT NULL REFERENCES "User"("id"),
   "chatwootConversationId" INTEGER NOT NULL UNIQUE,
   "channel" TEXT NOT NULL,
@@ -176,7 +183,7 @@ CREATE INDEX "SupportTicket_aiSuggestedResolvedAt_idx" ON "SupportTicket"("aiSug
 - Chatwoot API 打不通（VPS 掛了/網路問題）→ 買家端開單按鈕顯示「客服系統暫時無法使用，請稍後再試」，不誤報成功；比照 `coolify-managed-deployment` 的 `status.ts` 安全降級慣例，不猜測狀態
 - LINE/Telegram Webhook 簽章驗證失敗 → 直接拒絕（401），不寫入任何 `SupportTicket`，避免偽造訊息污染工單
 - AI 判斷邏輯本身呼叫外部模型失敗/逾時 → 工單保持 `OPEN`，不自動標記已解決，寧可讓真人多看一眼也不要誤關單
-- 買家帳號名下沒有任何 `BuyerDeployment`（例如 Tier 1 自行部署、或購買流程尚未完成 provisioning）→ 見下方 Open Questions，本輪先假設這類買家不會出現在 `/deployment` 快捷按鈕入口，全站浮動框入口的處理方式待 Fish 確認
+- 買家帳號名下沒有任何 `BuyerDeployment`（例如 Tier 1 自行部署、或購買流程尚未完成 provisioning）→ **已裁決（2026-08-19）**：全站浮動框入口一樣正常建立 `SupportTicket`（`buyerDeploymentId = null`），AI Webhook 找不到部署記錄時，internal note 直接標記「無部署資料，人工直接處理」，不查 Coolify、不生成修復建議；`/deployment` 頁面快捷按鈕入口本來就只會出現在有部署記錄的頁面上，不受影響
 
 **Acceptance criteria：**
 
@@ -193,11 +200,11 @@ CREATE INDEX "SupportTicket_aiSuggestedResolvedAt_idx" ON "SupportTicket"("aiSug
 
 ## Risks / Trade-offs
 
-- **[Risk]** Chatwoot 自架在單一 VPS，這台機器掛掉會讓網站/LINE/Telegram 三個管道同時斷線（單點故障，客服系統本身也需要客服）→ **Mitigation**：沿用 Coolify 健康檢查機制；本輪不做高可用/多機器容錯，故障時人工重啟，SLA 保證不在本輪範圍內，記錄進 Open Questions 供未來評估
-- **[Risk]** LINE Messaging Channel 審核可能卡數天，阻塞這輪 apply 時程 → **Mitigation**：apply 開跑當下立刻送出 LINE 官方帳號審核（可與等待 `coolify-managed-deployment` merge 平行進行），Telegram Bot 申請幾分鐘完成，不受阻塞，可以先行整合測試
+- **[Risk]** Chatwoot 自架在單一 VPS，這台機器掛掉會讓網站/LINE/Telegram 三個管道同時斷線（單點故障，客服系統本身也需要客服）→ **Mitigation**：沿用 Coolify 健康檢查機制；**已裁決（2026-08-19）：本輪明確不做高可用/多機器容錯，故障時人工重啟，先上線運行一段時間，依實際流量再評估是否需要 HA/備援**，不是懸而未決，是刻意延後的決定，記錄於下方「延後決定」段落，不要被之後的 apply/archive 遺忘
+- **[Risk]** LINE Messaging Channel 建立/測試時機不明確 → **已釐清（2026-08-19，查證見「進線管道」決策段落）**：一般帳號免審核、立即可用，StartKiter 已有 Provider，新增 Messaging Channel 不受阻塞，這條風險已解除，不再是本輪的時程風險
 - **[Risk]** AI 誤判「像解決了」，買家沒注意到確認提示，3 天逾時自動關單但問題其實還在 → **Mitigation**：逾時關單前系統於同一管道發一次提醒通知；Chatwoot 原生行為是買家在已關閉的 conversation 回覆會自動重開，不會真的失聯
 - **[Risk]** AI 生成的「建議修復步驟」被工程師無腦照做、跳過人工判斷本意 → **Mitigation**：草稿只寫進 internal note（買家看不到），且草稿內容明確標記「AI 建議、未經驗證」字樣，不偽裝成已確認的操作手冊
-- **[Risk]** `SupportTicket` 強關聯 `BuyerDeployment`，沒有部署記錄的買家（Tier 1 自行部署／購買流程中）可能開不了工單 → **Mitigation**：見 Open Questions，需要 Fish 在 apply 前明確裁決這類邊界情況怎麼處理，不能讓 apply 階段自己猜
+- **[Risk]** 沒有部署記錄的買家（Tier 1 自行部署／購買流程中）開的工單缺少 Coolify 上下文，AI 無法自動提供狀態摘要 → **已裁決（2026-08-19）**：`buyerDeploymentId` 改為可為 null，這類工單一樣正常建立，AI Webhook 標記「無部署資料，人工直接處理」，不阻塞開單流程，見上方「`SupportTicket` 關聯 `BuyerDeployment`」決策段落
 - **[Risk]** 這張 change 完全依賴 `coolify-managed-deployment` 先 merge，若那張 change 進度延誤，這張 change 會跟著卡住 → **Mitigation**：tasks.md 第一項明文列為阻塞前置條件，propose/design/specs 現在先寫完準備好，apply 階段開跑前再次確認 merge 狀態
 
 ## Migration Plan
@@ -205,15 +212,19 @@ CREATE INDEX "SupportTicket_aiSuggestedResolvedAt_idx" ON "SupportTicket"("aiSug
 1. 確認 `coolify-managed-deployment` 已 merge 回 main（阻塞前提，見 tasks.md 第一項）
 2. `packages/database/prisma/schema.prisma` 新增 `SupportTicket` model + 3 個 enum，執行 `pnpm --filter database db push`（沿用本專案既有慣例，不用 `migrate dev`——多個 worktree 共用本機 Postgres，`migrate dev` 會要求 reset 整個資料庫）
 3. 在 Coolify Cloud 帳號新增獨立 VPS，走 Chatwoot 官方一鍵安裝服務（沿用 `docs/coolify-vps-setup-runbook.md` 已驗證過的 Cloudflare DNS 灰雲朵 + SSL 簽發 SOP）
-4. 申請 LINE Messaging Channel（企業審核，需提前送出）、Telegram Bot（`@BotFather`，即時完成）
+4. 在既有 LINE Developers Provider 底下建立 Messaging API Channel（一般帳號，免審核、立即可用，非阻塞項）、申請 Telegram Bot（`@BotFather`，即時完成）
 5. 三個管道接進 Chatwoot：Web Widget script 注入全站 layout、LINE/Telegram 官方 Channel 串接 Chatwoot 對應整合設定
 6. 新增 `packages/api/modules/support/` oRPC 模組 + Webhook endpoint，部署上線
 7. `/deployment` 頁面加「回報這個部署的問題」快捷按鈕
 8. `openspec/config.yaml`、`AGENTS.md`、`README.md` 三處同步改寫政策文字
 9. **回滾策略**：這張 change 是新增能力，不修改任何既有 model 或既有頁面的既有行為（只新增按鈕），回滾只需要：(a) 停用/移除客服框 script 注入、(b) 移除 `/deployment` 頁面的新按鈕、(c) `SupportTicket` 表可保留不需砍（不影響既有功能運作）、(d) v1 邊界政策文字若已誤改可用 git revert 還原三份文件
 
-## Open Questions
+## Open Questions（2026-08-19 全數已由 Fish 裁決，記錄於此供追溯）
 
-- **沒有 `BuyerDeployment` 記錄的買家（Tier 1 自行部署、或購買流程中尚未完成 provisioning）遇到問題時，工單要怎麼處理？** 強關聯外鍵目前假設每個開單的買家都有至少一筆 `BuyerDeployment`，但這個假設可能不成立。需要 Fish 在 apply 開始前明確裁決：(a) 允許這類買家開單但走一個特殊的「無部署關聯」分類，需要放寬外鍵或另建分類欄位；(b) 這類買家一律走既有的 email 客服（不接進 Chatwoot 統一工單），只有 Tier 2（Coolify managed）買家用這套新系統
-- **Chatwoot 自架的高可用/備援策略**——本輪明確不做，但要不要在 design 層先預留擴充空間（例如 Coolify 支援的多副本），還是完全不用考慮，等真的出問題再處理？
-- **LINE Messaging Channel 審核所需的企業資料/流程細節**——需要在 apply 開始前實際跑一次 LINE Developers 申請流程確認，目前只查過費用結構，沒查過審核所需文件與時程
+以下三題原本是待裁決的 Open Questions，Fish 已全部回答，答案已同步寫回上方對應的 Decisions / Risks / Non-Goals / Migration Plan 段落，這裡只留追溯記錄：
+
+1. **沒有 `BuyerDeployment` 記錄的買家怎麼開單？** → 已解決。流程一樣，正常建單，只是 AI 找不到部署資料時標記「無部署資料，人工直接處理」，不強制要求先建 `BuyerDeployment`。詳見「`SupportTicket` 關聯 `BuyerDeployment`」決策段落與 Implementation Contract 的 Failure modes。
+2. **Chatwoot 要不要做高可用/備援？** → 已解決（延後決定，非懸而未決）。本輪不做，先上線觀察一段時間流量，之後再評估。詳見 Non-Goals 與 Risks 對應條目。
+3. **LINE Messaging Channel 審核流程細節？** → 已解決。一般帳號免審核、立即可用，StartKiter 已有 Provider，新增 Channel 不用重跑審核，不是阻塞項。詳見「進線管道」決策段落的查證更正（附官方來源連結）。
+
+本輪 propose 階段目前沒有其餘待裁決的 Open Question。
