@@ -69,8 +69,10 @@ describe.sequential("PluginContent database constraints", () => {
 		});
 
 		expect(found.map((record) => record.id)).toContain(created.id);
-		expect(found[0].title).toBe("Lesson 1");
-		expect(found[0].authorId).toBe(user.id);
+		const match = found.find((record) => record.id === created.id);
+		expect(match).toBeDefined();
+		expect(match?.title).toBe("Lesson 1");
+		expect(match?.authorId).toBe(user.id);
 	});
 
 	it("rejects a record with a missing body", async () => {
