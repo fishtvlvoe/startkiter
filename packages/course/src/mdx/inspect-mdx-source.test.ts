@@ -44,4 +44,20 @@ describe("inspectMdxSource", () => {
 
 		expect(inspectMdxSource(source)).toEqual({ ok: true });
 	});
+
+	it("rejects JavaScript in JSX attribute values", () => {
+		expect(
+			inspectMdxSource(
+				'<InstantQuiz question={(function(){ return "x" })()} options={["A"]} answerIndex={0} explanation="E" />',
+			),
+		).toMatchObject({ ok: false });
+	});
+
+	it("still allows data literals in JSX attributes", () => {
+		expect(
+			inspectMdxSource(
+				'<ConceptCompare tabs={[{ title: "之前", description: "舊方法" }]} />',
+			),
+		).toEqual({ ok: true });
+	});
 });

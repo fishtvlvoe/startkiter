@@ -38,6 +38,123 @@ const EXPRESSION_NODE_TYPES = new Set([
 	"mdxTextExpression",
 ]);
 
+type EstreeNode = {
+	type: string;
+	argument?: EstreeNode;
+	body?: EstreeNode[] | EstreeNode;
+	computed?: boolean;
+	elements?: Array<EstreeNode | null>;
+	expression?: EstreeNode;
+	expressions?: EstreeNode[];
+	key?: EstreeNode;
+	kind?: string;
+	method?: boolean;
+	name?: string;
+	operator?: string;
+	properties?: EstreeNode[];
+	value?: EstreeNode;
+};
+
+function isSafeDataEstree(node: EstreeNode | null | undefined): boolean {
+	if (!node) {
+		return false;
+	}
+
+	switch (node.type) {
+		case "Program":
+			return Array.isArray(node.body) && node.body.length === 1 && isSafeDataEstree(node.body[0]);
+
+		case "ExpressionStatement":
+			return isSafeDataEstree(node.expression);
+
+		case "Literal":
+			return true;
+
+		case "TemplateLiteral":
+			return Array.isArray(node.expressions) && node.expressions.length === 0;
+
+		case "UnaryExpression":
+			return (node.operator === "+" || node.operator === "-") && isSafeDataEstree(node.argument);
+
+		case "ArrayExpression":
+			return (node.elements ?? []).every((element) => element == null || isSafeDataEstree(element));
+
+		case "ObjectExpression":
+			return (node.properties ?? []).every((property) => {
+				if (property.type !== "Property" || property.computed || property.method || property.kind !== "init") {
+					return false;
+				}
+
+				const keyIsSafe =
+					property.key?.type === "Identifier" || isSafeDataEstree(property.key);
+
+				return keyIsSafe && isSafeDataEstree(property.value);
+			});
+
+		default:
+			return false;
+	}
+}
+
+function isSafeAttributeExpression(value: {
+	data?: { estree?: EstreeNode };
+	value?: string;
+}): boolean {
+	if (value.data?.estree) {
+		return isSafeDataEstree(value.data.estree);
+	}
+
+	const raw = value.value?.trim() ?? "";
+
+	if (!raw) {
+		return false;
+	}
+
+	try {
+		JSON.parse(raw);
+
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+function inspectJsxAttributes(attributes: unknown): MdxInspectResult | null {
+	if (!Array.isArray(attributes)) {
+		return null;
+	}
+
+	for (const attribute of attributes) {
+		if (!attribute || typeof attribute !== "object" || !("type" in attribute)) {
+			continue;
+		}
+
+		if (attribute.type === "mdxJsxExpressionAttribute") {
+			return { ok: false, error: "講義內容不允許 JavaScript 表達式。" };
+		}
+
+		if (attribute.type !== "mdxJsxAttribute") {
+			continue;
+		}
+
+		const name = "name" in attribute && typeof attribute.name === "string" ? attribute.name : "";
+
+		if (/^on[A-Z]/.test(name) || name === "dangerouslySetInnerHTML") {
+			return { ok: false, error: "講義內容不允許事件處理或危險屬性。" };
+		}
+
+		const value = "value" in attribute ? attribute.value : null;
+
+		if (value && typeof value === "object" && "type" in value && value.type === "mdxJsxAttributeValueExpression") {
+			if (!isSafeAttributeExpression(value as { data?: { estree?: EstreeNode }; value?: string })) {
+				return { ok: false, error: "講義內容不允許 JavaScript 表達式。" };
+			}
+		}
+	}
+
+	return null;
+}
+
 function inspectJsxTagName(name: string | null | undefined): MdxInspectResult | null {
 	if (name == null) {
 		return null;
@@ -143,6 +260,16 @@ export function inspectMdxSource(source: string): MdxInspectResult {
 
 			if (jsxResult) {
 				astResult = jsxResult;
+
+				return EXIT;
+			}
+
+			const attributeResult = inspectJsxAttributes(
+				"attributes" in node ? node.attributes : undefined,
+			);
+
+			if (attributeResult) {
+				astResult = attributeResult;
 
 				return EXIT;
 			}
