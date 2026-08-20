@@ -20,7 +20,7 @@
 ## 2. 資料層、四個 Mount Point 與 course oRPC
 
 - [x] 2.1 新增 Prisma migration 與測試，建立 Course、Chapter、Lesson、LessonProgress、StudioFolder、StudioFolderItem、StudioFolderCollapseState，以及 enum／unique／index／cascade；（已落地於 packages/database/prisma/schema.prisma + 新 migration，`pnpm --filter @startkiter/database test` 3/3 通過）
-- [ ] 2.2 實作 `config/modules.ts` 的 typed `course` descriptor：電馭學院名稱、SVG icon key、enabled、navigation folder／order 與四個 Mount Point 描述；驗證 1.2 轉綠。（PM 審查發現：descriptor 存在但缺 SVG icon key 與 navigation folder／order，本輪修復未涵蓋，待補）
+- [x] 2.2 實作 `config/modules.ts` 的 typed `course` descriptor：電馭學院名稱、SVG icon key、enabled、navigation folder／order 與四個 Mount Point 描述；驗證 1.2 轉綠。（已補齊 `packages/course/src/config/modules.ts` 與 `config/modules.ts` 的 icon key 與 navigation 欄位，`modules.test.ts` 通過）
 - [x] 2.3 建立 `packages/api/modules/course/` reader 與 mutation router，接入 `packages/api/orpc/router.ts`；所有 actor、role、owner 從受保護 session 推導；（已落地於 packages/api/modules/course/router.ts）
 - [x] 2.4 實作公開 published reader、已購買學員 reader、operator draft reader、progress upsert、Course／Chapter／Lesson CRUD、publish、資料夾管理與排序 transaction；（CRUD/publish/reorder/folder 已落地於 apps/saas/app/api/course/studio/route.ts，含 operator 401/403 gate，親自讀碼＋curl 驗證）
 - [x] 2.5 對資料與 API Wave 跑 migration、unit、oRPC integration、correctness／security review；確認沒有 client userId、operator flag、draft 或 media URL 外洩。

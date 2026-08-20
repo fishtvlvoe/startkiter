@@ -51,3 +51,9 @@ export { inspectMdxSource } from "./src/mdx/inspect-mdx-source";
 export { extractLessonBlockIds } from "./src/mdx/extract-lesson-block-ids";
 export { FluentPlayer } from "./src/player/FluentPlayer";
 export type { FluentPlayerSource } from "./src/player/FluentPlayer";
+export { courseModuleDescriptor } from "./src/config/modules";
+export type {
+	ModuleDescriptor,
+	ModuleMountPoints,
+	ModuleNavigation,
+} from "./src/config/modules";
