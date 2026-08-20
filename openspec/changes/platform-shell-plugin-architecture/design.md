@@ -20,6 +20,8 @@ v1 既有硬邊界（openspec/config.yaml context）維持不變：不做 Organi
 - `docs/buyer-extension-convention.md` — 買家模組擴充慣例（已完成）
 - `docs/deploy-and-public-url.md` — 部署結構紀錄
 
+2026-08-20 補充背景：已封存的 `github-kit-fulfillment` 定義買家倉庫拓樸為「全買家 pull-only 進同一個 `org/startkiter-private-kit`」。但本 change 既有決策「買家用 AI 工具改自己倉庫代碼 → AI 幫他 commit + push main → Coolify/Vercel 自動重建部署」的前提是買家有自己一份可寫的倉庫，兩者互斥。老闆確認：買家倉庫拓樸改為「per-buyer 專屬可寫倉庫」，且要求買家倉庫要能比照 StartKiter 自己追蹤 supastarter 官方更新的方式（`docs/reference/supastarter-nextjs-docs/codebase/update.mdx`：`git remote add upstream` + `git pull upstream main`）追蹤 StartKiter 官方模板倉庫的後續更新。
+
 ## Goals / Non-Goals
 
 **Goals:**
@@ -31,6 +33,7 @@ v1 既有硬邊界（openspec/config.yaml context）維持不變：不做 Organi
 - MCP Gateway 讓外部 AI 工具連線唯讀操作帳號
 - 買家 UI 模版選擇：提供 2-3 個內建模版，買家選完後 AI 工具自動套用
 - 明確聲明 Core 邊界
+- 每位買家在付款履約後取得一份專屬、可寫的私有倉庫，並能透過 AI 工具追蹤 StartKiter 官方模板倉庫的後續更新（新模組/新 Plugin/修補）
 
 **Non-Goals:**
 
@@ -39,6 +42,7 @@ v1 既有硬邊界（openspec/config.yaml context）維持不變：不做 Organi
 - 不做 zip 上傳安裝流程、block editor、shortcode 解析器、交易型 Plugin migration 工具鏈
 - 不整合 refero.design MCP（v1 僅內建模版）
 - 不做 Agent 管理 Plugin；AI 反向連線客戶伺服器的機制不在此 change 定義，見 `coolify-managed-deployment`
+- 不做買家倉庫更新的自動背景同步、不做 merge conflict 自動解決、不做即時 webhook 版本通知、不把買家倉庫轉移到買家個人 GitHub 帳號
 
 ## Decisions
 
@@ -115,6 +119,37 @@ Alternatives Considered:
 
 與原 design 一致。
 
+### 買家倉庫拓樸從「共用 pull-only」改為「per-buyer 專屬可寫」
+
+背景：`github-kit-fulfillment` 已封存的設計是「所有買家 pull-only 進同一個 `org/startkiter-private-kit`」。但買家要能用 AI 改自己的代碼、AI push、Coolify/Vercel 自動部署，前提是每位買家有自己一份可寫的獨立倉庫，不能是共用唯讀的單一 repo。
+
+新設計：付款履約完成後，系統呼叫 GitHub API 的「Generate repository from template」端點（`POST /repos/{template_owner}/{template_repo}/generate`），以 StartKiter 官方模板倉庫（環境變數 `GITHUB_KIT_TEMPLATE_REPO`）為模板，在 StartKiter GitHub org 下生成一份專屬給該買家的私有倉庫（命名 `org/kit-<orderId>`），並邀請買家的 GitHub 帳號進去、授予 **write**（不是 pull）權限。倉庫仍歸 StartKiter org 所有，不轉移到買家個人帳號，維持 `github-kit-fulfillment` 既有「organization-owned」規則。
+
+Alternatives Considered:
+- 買家 fork 到自己個人 GitHub 帳號 — 否決：github-kit-fulfillment 既有規則明文「Personal-account repositories MUST NOT be used for kit delivery」，倉庫要維持 org 管控，方便退款時撤銷存取、方便日後 StartKiter 反向連線協助 Tier 2 集中管理買家
+- 維持共用單一 repo，買家改代碼另開一個全新獨立 repo（跟 kit 履約的 repo 脫鉤） — 否決：多一層「這份代碼跟那份代碼是不是同一份」的認知負擔，且無法沿用既有的 kit 存取撤銷機制（退款移除權限）
+
+### 買家倉庫追蹤 StartKiter 官方模板倉庫更新（upstream sync）
+
+比照 StartKiter 自己追蹤 supastarter 官方的方式（`docs/reference/supastarter-nextjs-docs/codebase/update.mdx`）。GitHub 平台的 repo 之間沒有原生「git remote」概念（remote 是本機 git 概念），實際機制是：
+
+1. 每個買家專屬倉庫與 StartKiter 官方模板倉庫的根目錄各自維護一份 `STARTKITER_VERSION` 文字檔（內容為版本字串，如 `2026.08.20`）
+2. `GET /api/repo-version` 讀取買家倉庫（透過 GitHub API `GET /repos/{owner}/{buyerRepo}/contents/STARTKITER_VERSION`）與官方模板倉庫（同一 API 打模板 repo）各自的版本字串，回傳 `{ buyerVersion, latestVersion, upToDate, syncPromptHint }`
+3. 若 `upToDate` 為 false，Marketplace 頁面顯示「有新版本可同步」，並提供 `syncPromptHint`——一段可直接貼給買家 AI 工具的指示文字，內容比照官方 supastarter 的更新慣例：
+
+```bash
+git remote add startkiter-upstream https://github.com/<org>/<template-repo>.git   # 只需加一次，已存在則跳過
+git fetch startkiter-upstream
+git merge startkiter-upstream/main --allow-unrelated-histories
+```
+
+4. 若合併出現衝突，由買家的 AI 工具依買家指示解決，系統不介入、不提供自動衝突解決引擎
+
+Alternatives Considered:
+- StartKiter 主動 push 更新進每個買家倉庫 — 否決：買家可能已經改過同一份代碼，主動 push 會覆蓋買家的修改或造成無預警的衝突，風險遠高於「買家主動觸發同步」
+- 用 webhook 即時通知買家有新版本 — 否決：v1 範圍排除即時通知（Non-Goals），Marketplace 頁面被動顯示已足夠達成「買家可以自助同步」的目標
+- 版本比對改用 git commit SHA 而非獨立版本檔 — 否決：買家倉庫是從模板 generate 出來的獨立倉庫，兩邊沒有共同的 git history 可比對 commit SHA（`--allow-unrelated-histories` 正是因為這個原因），獨立版本檔字串比對更簡單可靠
+
 ## Implementation Contract
 
 **Behavior**（使用者可觀察的行為）：
@@ -126,6 +161,8 @@ Alternatives Considered:
 - 外部 AI 工具在 MCP 設定填入 `https://<domain>/api/mcp` 後完成授權，可唯讀操作
 - 課程內容透過 `packages/course` 引擎產出，掛載於 `/course` 路由
 - 買家用 AI 工具依照 buyer-extension-convention 改代碼 → AI commit + push → Coolify/Vercel 自動重建部署
+- 付款履約後，買家取得一份專屬（非共用）GitHub 私有倉庫，帳號權限為 write
+- Marketplace 頁面新增「版本」區塊，顯示買家倉庫版本 vs StartKiter 模板倉庫最新版本；不同步時顯示可貼給 AI 工具的同步 prompt
 
 **Interface / data shape:**
 
@@ -160,6 +197,7 @@ type SiteTemplate = {
 - `GET/POST /api/mcp` → 遵循 MCP 協定標準 HTTP transport
 - `GET /api/mcp/connections` → 回傳 `McpConnection[]`
 - `DELETE /api/mcp/connections/:id` → 撤銷指定連線
+- `GET /api/repo-version` → 回傳 `{ buyerVersion: string, latestVersion: string, upToDate: boolean | null, syncPromptHint: string }`，需有效 session；`upToDate` 為 `null` 表示任一端版本檔缺失，無法判斷
 
 DB DDL（PostgreSQL，對應 Prisma model）：
 
@@ -195,6 +233,9 @@ CREATE INDEX "McpConnection_userId_idx" ON "McpConnection"("userId");
 - `DATABASE_URL` 或 `BETTER_AUTH_SECRET` 缺失 → MCP Gateway 與 Marketplace 一併回傳 503
 - 模版定義檔格式錯誤 → TypeScript 編譯期失敗
 - 側邊欄 menu 項目未設定 `requiresOperator` 但目標路由需 operator 權限 → 頁面本身仍走既有權限檢查做 redirect
+- GitHub「Generate repository from template」API 呼叫失敗 → 履約流程回報錯誤，不建立部分完成的 grant 記錄（比照既有 github-kit-fulfillment fail-closed 慣例）
+- `STARTKITER_VERSION` 檔案在買家倉庫或模板倉庫任一端不存在 → `/api/repo-version` 回傳 `upToDate: null`，不誤報「已是最新」
+- `GITHUB_KIT_TEMPLATE_REPO` 未設定 → 履約流程回傳 503，比照既有 `GITHUB_APP_ID`/`GITHUB_KIT_ORG`/`GITHUB_KIT_REPO` 缺失時的 fail-closed 慣例
 
 **Acceptance criteria:**
 
@@ -205,11 +246,13 @@ CREATE INDEX "McpConnection_userId_idx" ON "McpConnection"("userId");
 - MCP Gateway `/api/mcp` 握手成功回應符合 MCP 協定格式
 - Marketplace 頁面顯示「已啟用模組」與「模版選擇」兩個 tab
 - 每個模版的靜態 HTML demo 經老闆確認後才寫真代碼
+- 付款履約後，買家倉庫是專屬（非共用）私有倉庫，買家帳號權限為 write
+- `curl /api/repo-version` 回傳格式含 buyerVersion/latestVersion/upToDate/syncPromptHint
 
 **Scope boundaries:**
 
-- In scope: 後台 Shell 統一（對照新結構）、PluginManifest 型別與靜態掛載點清單、課程示範 Plugin manifest、Marketplace 展示頁 + 模版選擇、MCP Gateway 唯讀操作、PluginContent/McpConnection 兩張新表、2-3 個內建模版定義 + HTML demo
-- Out of scope: 客製打包工具、MCP 推送安裝包、伺服器端自動 build/deploy 觸發、zip 上傳安裝流程、block editor/shortcode 解析器、refero.design MCP 整合、交易型 Plugin migration 工具鏈
+- In scope: 後台 Shell 統一（對照新結構）、PluginManifest 型別與靜態掛載點清單、課程示範 Plugin manifest、Marketplace 展示頁 + 模版選擇、MCP Gateway 唯讀操作、PluginContent/McpConnection 兩張新表、2-3 個內建模版定義 + HTML demo、買家專屬可寫倉庫 provision（取代共用 pull-only）、版本比對 API、同步 prompt 提示
+- Out of scope: 客製打包工具、MCP 推送安裝包、伺服器端自動 build/deploy 觸發、zip 上傳安裝流程、block editor/shortcode 解析器、refero.design MCP 整合、交易型 Plugin migration 工具鏈、自動背景同步、自動 merge conflict 解決、即時 webhook 版本通知
 
 ## Risks / Trade-offs
 
@@ -219,6 +262,9 @@ CREATE INDEX "McpConnection_userId_idx" ON "McpConnection"("userId");
 - [Risk] 掛載點清單 v1 用靜態陣列，未來動態安裝需額外開發 → Mitigation: PluginManifest 型別介面現在就定義好，渲染端只依賴型別，之後替換資料來源時消費端不用改
 - [Risk] MCP Gateway 唯讀權限若範圍不對可能洩漏敏感資料 → Mitigation: v1 範圍比照 site-agent 既有兩支唯讀工具，不開放任何寫入操作
 - [Risk] 統一 Shell 是 BREAKING 變更 → Mitigation: tasks 含更新既有測試選擇器的任務
+- [Risk] 買家倉庫從共用改成 per-buyer 專屬，倉庫數量隨買家數量線性增長，GitHub org 私有倉庫數量/API rate limit 可能受影響 → Mitigation: GitHub Team/Enterprise 方案下私有倉庫數量無實質上限，rate limit 沿用既有 GitHub App 認證機制分攤
+- [Risk] 買家自己改過的代碼跟 upstream 合併時出現衝突不知道怎麼辦 → Mitigation: `syncPromptHint` 明確引導買家把衝突訊息貼給自己的 AI 工具，AI 工具處理 merge conflict 是本身既有能力，不需要 StartKiter 額外開發衝突解決引擎
+- [Risk] 既有已用舊共用 pull-only 模式完成履約的買家，需要一次性遷移到 per-buyer 專屬倉庫，遷移期間可能造成短暫存取中斷 → Mitigation: 遷移排程與是否需要提前通知買家，留待 Open Questions 由老闆裁決，tasks.md 列出遷移任務但不預設立即執行時間
 
 ## Migration Plan
 
@@ -226,10 +272,13 @@ CREATE INDEX "McpConnection_userId_idx" ON "McpConnection"("userId");
 
 1. 合併資料庫 migration，新增 `PluginContent`、`McpConnection` 兩張表（新增表，不影響既有資料）
 2. 部署新版 NavBar + sidebar-context 擴充（向後相容）
-3. 部署 `/marketplace`、`/api/plugins`、`/api/templates`、`/api/mcp` 路由
-4. 驗證通過後，移除導覽元件對舊路由結構的殘留引用
+3. 部署 `/marketplace`、`/api/plugins`、`/api/templates`、`/api/mcp`、`/api/repo-version` 路由
+4. 設定 `GITHUB_KIT_TEMPLATE_REPO` 環境變數，指向 StartKiter 官方模板倉庫
+5. 新買家履約流程切換為 generate-from-template + write 權限
+6. 既有已用舊共用 pull-only 模式完成履約的買家，執行一次性遷移任務：為每位既有買家 generate 一份專屬 repo、授予 write，並撤銷舊共用 repo 的 pull 權限（遷移排程時機見 Open Questions）
+7. 驗證通過後，移除導覽元件對舊路由結構的殘留引用
 
-回滾策略：migration 為新增表，回滾時可直接 `DROP TABLE`；NavBar 變更可 `git revert`。
+回滾策略：migration 為新增表，回滾時可直接 `DROP TABLE`；NavBar 變更可 `git revert`；新履約流程若出問題可暫時切回舊有的共用 repo pull-only 邀請邏輯（`packages/github-kit/src/claim.ts` 的變更用 `git revert`還原），已生成的 per-buyer 專屬 repo 不需要刪除。
 
 ## Open Questions
 
@@ -237,3 +286,5 @@ CREATE INDEX "McpConnection_userId_idx" ON "McpConnection"("userId");
 - refero.design MCP 整合的價值確認——是否值得讓買家的 AI 工具能查真實產品介面當設計參考，或者內建模版 + 自由修改已經足夠。v1 先不做，收集使用回饋再議
 - Coolify VPS 的具體建置（常駐 Node、固定 IP、PAYUNi webhook 穩定性、三層客群主機模式）已另開 `coolify-managed-deployment` change 處理，不在這張 change 範圍內
 - Marketplace 的模版選擇與 buyer-extension-convention 的 AI prompt 引導如何串接——模版定義檔的 `aiPromptHint` 欄位可以給 AI 工具直接使用，但具體的 prompt 品質需要實測調整
+- 既有買家（已用舊共用 pull-only 模式完成履約者）要怎麼一次性遷移到 per-buyer 專屬倉庫？是否需要提前通知買家、給遷移期限、還是直接背景批次處理？這需要老闆裁決，tasks.md 先列出遷移任務但不預設執行時間點
+- `STARTKITER_VERSION` 版本號格式（semver、date-based 如 `2026.08.20`、或其他）與 StartKiter 團隊更新版本檔的頻率/流程，留待實作時決定，不影響本 change 的機制設計

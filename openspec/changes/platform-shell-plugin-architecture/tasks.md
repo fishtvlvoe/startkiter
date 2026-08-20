@@ -187,3 +187,59 @@
 - [ ] 32.1 `pnpm build` 與 `pnpm test` 全專案通過
 - [ ] 32.2 用 Chrome MCP 跑完所有已登入路由（/app, /course, /agent, /admin/settings, /marketplace），截圖確認 Shell 一致性與功能正確
 - [ ] 32.3 `spectra validate platform-shell-plugin-architecture` 通過，0 warnings
+
+## Phase 8：買家倉庫拓樸從「共用 pull-only」改為「per-buyer 專屬可寫」，並提供買家倉庫追蹤 StartKiter 官方模板倉庫更新（upstream sync）機制
+
+### 33. 紅燈測試：per-buyer 專屬倉庫生成
+
+- [ ] 33.1 [P] 撰寫測試驗證 spec github-kit-fulfillment「In-site GitHub claim after payment」修訂後行為——POST /api/github/claim 成功時呼叫 GitHub template-generate API 並產生 write 權限的 github_kit_grants 列，不再呼叫舊的共用 repo collaborator 邀請邏輯；同時驗證同一 spec 修訂後的 Requirement「Claim entitlement reads Order.kitClaimEligible」——kitClaimEligible true 的使用者呼叫時系統必須嘗試產生專屬倉庫並授予 write，成功時寫入 github_kit_grants
+- [ ] 33.2 [P] 撰寫測試驗證 spec github-kit-fulfillment「Invite grants write access on a dedicated per-buyer organization repository」——寫入的 grant permission 恆等於 write，不等於 pull/maintain/admin
+- [ ] 33.3 [P] 撰寫測試驗證同一 Requirement 的「No two buyers share a delivered repository」scenario——兩個不同買家各自 claim 成功後，github_kit_grants 的 repo 欄位不相同
+- [ ] 33.4 [P] 撰寫測試驗證 spec buyer-repo-upstream-sync「Missing template repo configuration fails closed」——`GITHUB_KIT_TEMPLATE_REPO` 未設定時 POST /api/github/claim 回 503，不建立部分完成的 grant
+
+### 34. 實作：per-buyer 專屬倉庫生成
+
+- [ ] 34.1 新增 `packages/github-kit/src/provision-buyer-repo.ts`，呼叫 GitHub「Generate repository from template」API（以 `GITHUB_KIT_TEMPLATE_REPO` 為模板），在 org 下建立 `org/kit-<orderId>` 私有倉庫，驗證：33.1、33.4 轉綠燈
+- [ ] 34.2 修改 `packages/github-kit/src/claim.ts`，改為呼叫 34.1 的 provision 函式取代原有的共用 repo collaborator 邀請邏輯（該邏輯原本實作已移除的 Requirement「Invite is read-only on an organization repository」），邀請買家帳號時授予 `write` 權限，滿足取代它的 Requirement「Paid buyers receive a dedicated writable repository generated from the StartKiter template」與「Invite grants write access on a dedicated per-buyer organization repository」，驗證：33.2、33.3 轉綠燈
+- [ ] 34.3 修改 `packages/github-kit/src/config.ts`，新增 `GITHUB_KIT_TEMPLATE_REPO` 環境變數讀取（`.trim()`、缺值時 fail-closed），比照既有 `GITHUB_KIT_ORG`/`GITHUB_KIT_REPO` 讀取慣例
+
+### 35. 紅燈測試：既有撤銷邏輯適配專屬倉庫
+
+- [ ] 35.1 [P] 撰寫測試驗證 spec github-kit-fulfillment「Refund revokes existing collaborator access」在新拓樸下的行為——退款時系統對買家專屬倉庫（非共用倉庫）呼叫移除 collaborator 或取消邀請的 GitHub API
+
+### 36. 實作：撤銷邏輯適配專屬倉庫
+
+- [ ] 36.1 修改 `packages/github-kit/src/revoke.ts`，撤銷操作的目標 repo 改讀取該筆 github_kit_grants 記錄的專屬 repo 欄位，而非固定的共用 repo 常數，驗證：35.1 轉綠燈
+
+### 37. 紅燈測試：版本比對 API
+
+- [ ] 37.1 [P] 撰寫測試驗證 spec buyer-repo-upstream-sync「Buyer repository is up to date」——買家倉庫與模板倉庫 `STARTKITER_VERSION` 內容相同時回傳 `upToDate: true`
+- [ ] 37.2 [P] 撰寫測試驗證同一 Requirement 群組「Buyer repository is behind」——內容不同時回傳 `upToDate: false` 且 `syncPromptHint` 非空字串
+- [ ] 37.3 [P] 撰寫測試驗證「Missing version file on either side returns an indeterminate result」——任一端讀取失敗回傳 `upToDate: null`，不得回傳 `true`
+- [ ] 37.4 [P] 撰寫測試驗證「Unauthenticated request is denied」——無 session 呼叫 GET /api/repo-version 回 401
+
+### 38. 實作：版本比對 API
+
+- [ ] 38.1 新增 `apps/saas/app/api/repo-version/route.ts`，實作 Requirement「Version comparison API reports whether the buyer's repository is behind the template」：讀取買家專屬倉庫與 `GITHUB_KIT_TEMPLATE_REPO` 各自的 `STARTKITER_VERSION` 檔案內容並比較，回傳 `{ buyerVersion, latestVersion, upToDate, syncPromptHint }`，驗證：37.1、37.2、37.3、37.4 轉綠燈
+
+### 39. 紅燈測試：Marketplace 版本區塊
+
+- [ ] 39.1 [P] 撰寫測試驗證 spec buyer-repo-upstream-sync「Version section hidden when up to date」——買家倉庫已同步時，/marketplace 版本區塊不顯示同步 prompt
+- [ ] 39.2 [P] 撰寫測試驗證同一 Requirement 群組「Version section shows sync prompt when behind」——落後時顯示可複製的 syncPromptHint 文字
+
+### 40. 實作：Marketplace 版本區塊
+
+- [ ] 40.1 在 `apps/saas/app/(authenticated)/(main)/marketplace/page.tsx` 新增版本區塊，實作 Requirement「Marketplace surfaces an AI-executable sync prompt when a new version is available」：呼叫 `/api/repo-version`，依 `upToDate` 顯示「已是最新」或落後狀態 + 可複製的同步 prompt（內容為 `git remote add startkiter-upstream ...` / `git fetch` / `git merge --allow-unrelated-histories` 三行指令），驗證：39.1、39.2 轉綠燈
+- [ ] 40.2 確認 40.1 的版本區塊與 38.1 的 `/api/repo-version` 皆為讀取型操作，不建立任何排程任務或 webhook 監聽 `STARTKITER_VERSION` 變化，滿足 Requirement「Repository synchronization is buyer-triggered only」——同步動作只能由買家的 AI 工具在買家指示下執行 git 指令觸發，系統本身不主動推送或合併進買家倉庫
+
+### 41. Phase 8 Review 與驗收
+
+- [ ] 41.1 對 `packages/github-kit/`、`apps/saas/app/api/repo-version/`、Marketplace 版本區塊變更跑 correctness / security / performance code review，特別檢查退款撤銷邏輯是否正確指向專屬倉庫、write 權限授予範圍是否過寬，Critical 為零
+- [ ] 41.2 `curl /api/repo-version` 回傳格式符合 spec 範例（含 buyerVersion/latestVersion/upToDate/syncPromptHint）
+- [ ] 41.3 用假的兩個買家帳號跑一次完整 claim 流程，確認產生兩個不同的專屬 repo，並確認退款後撤銷操作正確作用在對應的專屬 repo 上，保存實際輸出
+- [ ] 41.4 `pnpm build` 與 `pnpm test` 通過
+- [ ] 41.5 `spectra validate platform-shell-plugin-architecture` 通過，0 warnings（涵蓋 github-kit-fulfillment 修改後的 delta spec 一致性）
+
+### 42. 待老闆裁決：既有買家遷移排程（非阻塞，記錄於 design.md Open Questions）
+
+- [ ] 42.1 待老闆裁決既有已用舊共用 pull-only 模式完成履約的買家的一次性遷移排程（是否提前通知、遷移期限）後，補寫遷移批次任務的具體 task 內容；裁決前不執行任何既有買家的權限變更
