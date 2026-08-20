@@ -22,7 +22,7 @@ type MdxContent = ComponentType<{ components?: Record<string, ComponentType<neve
 
 export type LessonMdxProps = {
 	source: string;
-	onInteractiveComplete?: () => void;
+	onInteractiveComplete?: (blockId: string) => void;
 	currentTime?: number;
 };
 
@@ -42,7 +42,9 @@ export function LessonMdx({ source, onInteractiveComplete, currentTime }: Lesson
 					<WorkflowSorter
 						{...props}
 						onComplete={() => {
-							onInteractiveComplete?.();
+							if (props.blockId) {
+								onInteractiveComplete?.(props.blockId);
+							}
 						}}
 					/>
 				),
@@ -50,8 +52,8 @@ export function LessonMdx({ source, onInteractiveComplete, currentTime }: Lesson
 					<InstantQuiz
 						{...props}
 						onComplete={(result) => {
-							if (result.correct) {
-								onInteractiveComplete?.();
+							if (result.correct && props.blockId) {
+								onInteractiveComplete?.(props.blockId);
 							}
 						}}
 					/>

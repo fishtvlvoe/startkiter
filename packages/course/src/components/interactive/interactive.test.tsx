@@ -63,6 +63,7 @@ describe("interactive learning blocks", () => {
 
 		await harness.render(
 			<InstantQuiz
+				blockId="quiz-01"
 				question="哪一個是正確答案？"
 				options={["錯誤", "正確"]}
 				answerIndex={1}
@@ -95,6 +96,7 @@ describe("interactive learning blocks", () => {
 
 		await harness.render(
 			<InstantQuiz
+				blockId="quiz-02"
 				question="選出兩個正確答案"
 				options={["A", "B", "C"]}
 				answerIndex={[0, 2]}
@@ -188,6 +190,7 @@ describe("interactive learning blocks", () => {
 
 		await harness.render(
 			<WorkflowSorter
+				blockId="sorter-01"
 				items={[
 					{ id: "build", label: "建置" },
 					{ id: "plan", label: "規劃" },

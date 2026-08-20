@@ -1,4 +1,5 @@
 import { ORPCError } from "@orpc/server";
+import { extractLessonBlockIds } from "../../../course/src/mdx/extract-lesson-block-ids";
 import { db, VideoProvider } from "@startkiter/database";
 import { z } from "zod";
 import { adminProcedure, protectedProcedure, publicProcedure } from "../../orpc/procedures";
@@ -131,10 +132,32 @@ export const courseRouter = publicProcedure.router({
 			return { lesson };
 		}),
 
-	// 4. 切換/標記單元完成 (Protected)
+	// 4. 積木完成事件寫入單元進度 (Protected, idempotent)
 	toggleLessonProgress: protectedProcedure
-		.input(z.object({ lessonId: z.string() }))
+		.input(
+			z.object({
+				lessonId: z.string(),
+				blockId: z.string().min(1),
+			}),
+		)
 		.handler(async ({ input, context }) => {
+			const lesson = await db.lesson.findUnique({
+				where: { id: input.lessonId },
+				select: { id: true, content: true },
+			});
+
+			if (!lesson) {
+				throw new ORPCError("NOT_FOUND", { message: "找不到這個單元。" });
+			}
+
+			const allowedBlockIds = extractLessonBlockIds(lesson.content ?? "");
+
+			if (!allowedBlockIds.includes(input.blockId)) {
+				throw new ORPCError("FORBIDDEN", {
+					message: "這個積木不屬於目前單元，完成事件已被拒絕。",
+				});
+			}
+
 			const existing = await db.lessonProgress.findUnique({
 				where: {
 					userId_lessonId: {
@@ -145,10 +168,7 @@ export const courseRouter = publicProcedure.router({
 			});
 
 			if (existing) {
-				await db.lessonProgress.delete({
-					where: { id: existing.id },
-				});
-				return { completed: false };
+				return { completed: true };
 			}
 
 			await db.lessonProgress.create({

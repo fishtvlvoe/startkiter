@@ -17,6 +17,7 @@
 		"@orpc/zod": "catalog:",
 		"@startkiter/ai": "workspace:*",
 		"@startkiter/auth": "workspace:*",
+		"@startkiter/course": "workspace:*",
 		"@startkiter/database": "workspace:*",
 		"@startkiter/i18n": "workspace:*",
 		"@startkiter/logs": "workspace:*",

@@ -10,6 +10,7 @@ export type WorkflowSortResult = {
 };
 
 export type WorkflowSorterProps = {
+	blockId: string;
 	items: readonly WorkflowItem[];
 	correctOrder: readonly string[];
 	explanation?: ReactNode;
@@ -56,6 +57,7 @@ export function isWorkflowOrderCorrect(
 }
 
 export function WorkflowSorter({
+	blockId,
 	items,
 	correctOrder,
 	explanation,
@@ -105,6 +107,7 @@ export function WorkflowSorter({
 	return (
 		<section
 			className={"interactive-block interactive-workflow " + (className ?? "")}
+			data-block-id={blockId}
 			data-component="workflow-sorter"
 			data-complete={String(isCorrect)}
 		>

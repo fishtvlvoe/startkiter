@@ -8,6 +8,7 @@ export type InstantQuizResult = {
 };
 
 export type InstantQuizProps = {
+	blockId: string;
 	question: ReactNode;
 	options: readonly ReactNode[];
 	answerIndex: number | readonly number[];
@@ -26,6 +27,7 @@ function sameAnswerSet(selectedIndices: readonly number[], correctIndices: reado
 }
 
 export function InstantQuiz({
+	blockId,
 	question,
 	options,
 	answerIndex,
@@ -79,6 +81,7 @@ export function InstantQuiz({
 	return (
 		<section
 			className={"interactive-block interactive-quiz " + (className ?? "")}
+			data-block-id={blockId}
 			data-component="instant-quiz"
 			data-submitted={String(result !== null)}
 		>

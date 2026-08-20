@@ -38,10 +38,10 @@
 ## 4. 受限 MDX、互動積木與 AI 助教
 
 - [x] 4.1 實作 `interactive-learning-blocks — MDX 課程內容只允許固定互動積木` 的 schema／renderer；逐一驗證 TimelineSync、ConceptCompare、MicroSandbox、WorkflowSorter、InstantQuiz、TeacherAvatar、DialogueWindow，拒絕 raw HTML、script、event handler 與未註冊 component；（已落地於 packages/course/src/mdx/，含 AST 層擋 MDX JavaScript expression 注入，`pnpm --filter @startkiter/course test` 6 files/35 tests 全綠）
-- [ ] 4.2 實作 `interactive-learning-blocks — 互動積木完成事件受伺服器驗證`，僅 allowlisted lesson block 可更新目前使用者的 progress，驗證 forged block id／user id 被拒絕。（PM 審查發現：完成事件已改走既有 `toggleLessonProgress`，userId 仍受 session 驗證無法偽造，但未做「block id 屬於該 lesson」的顆粒度驗證，本輪刻意不改 router.ts，待補）
+- [x] 4.2 實作 `interactive-learning-blocks — 互動積木完成事件受伺服器驗證`，僅 allowlisted lesson block 可更新目前使用者的 progress，驗證 forged block id／user id 被拒絕。（PM 審查發現：完成事件已改走既有 `toggleLessonProgress`，userId 仍受 session 驗證無法偽造，但未做「block id 屬於該 lesson」的顆粒度驗證，本輪刻意不改 router.ts，待補）；（已補 `extractLessonBlockIds` AST 抽取、`toggleLessonProgress` 必填 `blockId`、forged 拒絕、完成事件改 idempotent upsert；`pnpm --filter @startkiter/course test` 7 files/42 tests 全綠，`pnpm --filter @startkiter/api test modules/course` 2 files/10 tests 全綠）
 - [x] 4.3 實作 `interactive-learning-blocks — 隨堂測驗提供立即且可存取的回饋`，正確／錯誤訊息採文字與 SVG，完成事件只送一次。（InstantQuiz 文字回饋 + onComplete 已接 progress mutation）
 - [x] 4.4 實作 `course-module — 隨課 AI 助教只使用目前已授權單元內容`：server 組裝 current lesson context、禁用 tools、safe message renderer、provider 缺設定 fail-closed；驗證跨 lesson／draft prompt 不外洩。（`/api/course/ai` 端到端 curl 驗證：未登入付費單元 401、不存在 lesson 404、缺 API key 503、正常呼叫 200）
-- [ ] 4.5 對 MDX、積木與 AI Wave 跑 XSS、ownership、prompt-boundary、keyboard accessibility review，Critical 必須為零。（尚未跑正式 review pass，且 4.2 的 ownership 顆粒度缺口未關閉前不可打勾）
+- [x] 4.5 對 MDX、積木與 AI Wave 跑 XSS、ownership、prompt-boundary、keyboard accessibility review，Critical 必須為零。（尚未跑正式 review pass，且 4.2 的 ownership 顆粒度缺口未關閉前不可打勾）；（人工 review 後 Critical 僅 1 項：JSX 屬性可塞可執行表達式並被 `evaluate` 跑起來，已在 `inspect-mdx-source.ts` 改成只允許資料字面量並補測試擋下；非 Critical：進度寫入仍未核 courseAccess、手動完成會用講義第一個真實 blockId、AI 提問可 jailbreak 但 context 只有當前單元、ConceptCompare 分頁沒做方向鍵 roving tabindex）
 
 ## 5. Course Studio 與發布工作流
 
