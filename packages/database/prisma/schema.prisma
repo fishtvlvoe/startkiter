@@ -46,6 +46,7 @@ model User {
   supportTickets           SupportTicket[]
   lessonProgresses         LessonProgress[]
   pluginContents           PluginContent[]
+  mcpConnections           McpConnection[]
 
   @@unique([email])
   @@map("user")
@@ -486,6 +487,20 @@ model PluginContent {
 
   @@index([pluginId, type])
   @@index([authorId])
+}
+
+model McpConnection {
+  id           String    @id @default(cuid())
+  userId       String
+  clientName   String
+  authorizedAt DateTime  @default(now())
+  lastUsedAt   DateTime?
+  revokedAt    DateTime?
+
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("mcp_connection")
 }
 
 model StudioFolder {

@@ -142,6 +142,12 @@ export const PluginContentScalarFieldEnumSchema = z.enum(['id', 'pluginId', 'typ
 
 export type PluginContentScalarFieldEnum = z.infer<typeof PluginContentScalarFieldEnumSchema>;
 
+// File: McpConnectionScalarFieldEnum.schema.ts
+
+export const McpConnectionScalarFieldEnumSchema = z.enum(['id', 'userId', 'clientName', 'authorizedAt', 'lastUsedAt', 'revokedAt'])
+
+export type McpConnectionScalarFieldEnum = z.infer<typeof McpConnectionScalarFieldEnumSchema>;
+
 // File: StudioFolderScalarFieldEnum.schema.ts
 
 export const StudioFolderScalarFieldEnumSchema = z.enum(['id', 'name', 'order', 'isCollapsed', 'createdAt', 'updatedAt'])
@@ -637,6 +643,20 @@ export const PluginContentSchema = z.object({
 });
 
 export type PluginContentType = z.infer<typeof PluginContentSchema>;
+
+
+// File: McpConnection.schema.ts
+
+export const McpConnectionSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  clientName: z.string(),
+  authorizedAt: z.date(),
+  lastUsedAt: z.date().nullish(),
+  revokedAt: z.date().nullish(),
+});
+
+export type McpConnectionType = z.infer<typeof McpConnectionSchema>;
 
 
 // File: StudioFolder.schema.ts
