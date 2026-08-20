@@ -2,25 +2,25 @@
 
 ### 1. 紅燈測試：PluginManifest 型別定義
 
-- [ ] 1.1 [P] 撰寫型別測試驗證 Requirement「Core defines a fixed set of mount point kinds」——PluginManifest 只接受 route/menu/content/dataSpec 四種 mount 鍵,不支援的鍵型別檢查失敗（spec: platform-mount-points）
-- [ ] 1.2 [P] 撰寫型別測試驗證 Requirement「Content data specs are limited to content and none」——dataSpec 只接受 "content" | "none",宣告 "payment" 型別檢查失敗（spec: platform-mount-points）
-- [ ] 1.3 [P] 撰寫型別測試驗證 Requirement「Content mount point supports three placement modes」——mount.content.kind 只接受 "auto" | "shortcode" | "block"（spec: platform-mount-points）
+- [x] 1.1 [P] 撰寫型別測試驗證 Requirement「Core defines a fixed set of mount point kinds」——PluginManifest 只接受 route/menu/content/dataSpec 四種 mount 鍵,不支援的鍵型別檢查失敗（spec: platform-mount-points）
+- [x] 1.2 [P] 撰寫型別測試驗證 Requirement「Content data specs are limited to content and none」——dataSpec 只接受 "content" | "none",宣告 "payment" 型別檢查失敗（spec: platform-mount-points）
+- [x] 1.3 [P] 撰寫型別測試驗證 Requirement「Content mount point supports three placement modes」——mount.content.kind 只接受 "auto" | "shortcode" | "block"（spec: platform-mount-points）
 
 ### 2. 實作：PluginManifest 型別與靜態掛載點清單
 
-- [ ] 2.1 新增 `packages/platform/src/types.ts`，匯出 PluginManifest TypeScript 型別（design.md Interface 定義），滿足 spec platform-mount-points 的型別相關 Requirement，驗證：1.1、1.2、1.3 轉綠燈
-- [ ] 2.2 新增 `packages/platform/src/mount-points.ts`，匯出 `MOUNT_POINTS: PluginManifest[]` 靜態陣列，含課程 Plugin manifest（`id: "course"`, `mount.content: { kind: "auto", boundTo: "/course" }`, `dataSpec: "content"`），滿足 spec course-module「Course content is exposed as the first official demonstration Plugin」與 spec platform-mount-points「Menu mount points render from a static registry in v1」
+- [x] 2.1 新增 `packages/platform/src/types.ts`，匯出 PluginManifest TypeScript 型別（design.md Interface 定義），滿足 spec platform-mount-points 的型別相關 Requirement，驗證：1.1、1.2、1.3 轉綠燈
+- [x] 2.2 新增 `packages/platform/src/mount-points.ts`，匯出 `MOUNT_POINTS: PluginManifest[]` 靜態陣列，含課程 Plugin manifest（`id: "course"`, `mount.content: { kind: "auto", boundTo: "/course" }`, `dataSpec: "content"`），滿足 spec course-module「Course content is exposed as the first official demonstration Plugin」與 spec platform-mount-points「Menu mount points render from a static registry in v1」
 
 ### 3. 紅燈測試：靜態掛載點清單行為
 
-- [ ] 3.1 [P] 撰寫測試驗證 spec course-module「Course manifest is registered」——MOUNT_POINTS 含 `id: "course"` 且 `mount.content.kind` 為 "auto"
+- [x] 3.1 [P] 撰寫測試驗證 spec course-module「Course manifest is registered」——MOUNT_POINTS 含 `id: "course"` 且 `mount.content.kind` 為 "auto"
 - [ ] 3.2 [P] 撰寫測試驗證 spec platform-mount-points「Menu item appears from manifest without editing the Shell component」——側欄從 MOUNT_POINTS 動態渲染
 - [ ] 3.3 [P] 撰寫測試驗證 spec platform-mount-points「Operator-only menu item is hidden from learners」——requiresOperator: true 的項目對非 operator 隱藏
 
 ### 4. Phase 1 Review 與驗收
 
-- [ ] 4.1 對 `packages/platform/` 跑 correctness / security code review，Critical 為零
-- [ ] 4.2 `pnpm type-check` 通過（含新增型別測試）
+- [x] 4.1 對 `packages/platform/` 跑 correctness / security code review，Critical 為零
+- [x] 4.2 `pnpm type-check` 通過（含新增型別測試）
 
 ## Phase 2：後台 Shell 統一對照重建後結構，擴充 NavBar + sidebar-context
 

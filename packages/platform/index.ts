@@ -5,3 +5,5 @@ export * from "./src/deployment/status";
 export * from "./src/deployment/credentials";
 export * from "./src/deployment/coolify-client";
 export * from "./src/deployment/db";
+export * from "./src/types";
+export * from "./src/mount-points";
