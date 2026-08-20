@@ -14,8 +14,8 @@
 ### 3. 紅燈測試：靜態掛載點清單行為
 
 - [x] 3.1 [P] 撰寫測試驗證 spec course-module「Course manifest is registered」——MOUNT_POINTS 含 `id: "course"` 且 `mount.content.kind` 為 "auto"
-- [ ] 3.2 [P] 撰寫測試驗證 spec platform-mount-points「Menu item appears from manifest without editing the Shell component」——側欄從 MOUNT_POINTS 動態渲染
-- [ ] 3.3 [P] 撰寫測試驗證 spec platform-mount-points「Operator-only menu item is hidden from learners」——requiresOperator: true 的項目對非 operator 隱藏
+- [x] 3.2 [P] 撰寫測試驗證 spec platform-mount-points「Menu item appears from manifest without editing the Shell component」——側欄從 MOUNT_POINTS 動態渲染
+- [x] 3.3 [P] 撰寫測試驗證 spec platform-mount-points「Operator-only menu item is hidden from learners」——requiresOperator: true 的項目對非 operator 隱藏
 
 ### 4. Phase 1 Review 與驗收
 
