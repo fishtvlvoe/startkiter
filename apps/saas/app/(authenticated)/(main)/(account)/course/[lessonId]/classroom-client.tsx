@@ -5,7 +5,7 @@ import { BookOpenIcon, LightbulbIcon, XIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Button, Card, Input } from "@startkiter/ui";
-import { FluentPlayer, LessonMdx } from "@startkiter/course";
+import { extractLessonBlockIds, FluentPlayer, LessonMdx } from "@startkiter/course";
 import { resolveVideoSource } from "@startkiter/api/modules/course/lib/video-resolver";
 import { orpc } from "@shared/lib/orpc-query-utils";
 
@@ -73,15 +73,25 @@ export function AcademyClassroomClient({
 	}, [currentLesson.videoUrl]);
 
 	const toggleCompletion = () => {
-		toggleProgress.mutate({ lessonId: currentLesson.id });
-	};
-
-	const markLessonCompleteFromBlock = () => {
 		if (completedLessonIds.includes(currentLesson.id) || toggleProgress.isPending) {
 			return;
 		}
 
-		toggleProgress.mutate({ lessonId: currentLesson.id });
+		const [blockId] = extractLessonBlockIds(currentLesson.content);
+
+		if (!blockId) {
+			return;
+		}
+
+		toggleProgress.mutate({ lessonId: currentLesson.id, blockId });
+	};
+
+	const markLessonCompleteFromBlock = (blockId: string) => {
+		if (!blockId || toggleProgress.isPending) {
+			return;
+		}
+
+		toggleProgress.mutate({ lessonId: currentLesson.id, blockId });
 	};
 
 	const handleAskAi = async (event: React.FormEvent) => {
