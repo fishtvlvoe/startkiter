@@ -136,6 +136,12 @@ export const LessonProgressScalarFieldEnumSchema = z.enum(['id', 'userId', 'less
 
 export type LessonProgressScalarFieldEnum = z.infer<typeof LessonProgressScalarFieldEnumSchema>;
 
+// File: PluginContentScalarFieldEnum.schema.ts
+
+export const PluginContentScalarFieldEnumSchema = z.enum(['id', 'pluginId', 'type', 'title', 'body', 'authorId', 'createdAt', 'updatedAt'])
+
+export type PluginContentScalarFieldEnum = z.infer<typeof PluginContentScalarFieldEnumSchema>;
+
 // File: StudioFolderScalarFieldEnum.schema.ts
 
 export const StudioFolderScalarFieldEnumSchema = z.enum(['id', 'name', 'order', 'isCollapsed', 'createdAt', 'updatedAt'])
@@ -615,6 +621,22 @@ export const LessonProgressSchema = z.object({
 });
 
 export type LessonProgressType = z.infer<typeof LessonProgressSchema>;
+
+
+// File: PluginContent.schema.ts
+
+export const PluginContentSchema = z.object({
+  id: z.string(),
+  pluginId: z.string(),
+  type: z.string(),
+  title: z.string(),
+  body: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10"),
+  authorId: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type PluginContentType = z.infer<typeof PluginContentSchema>;
 
 
 // File: StudioFolder.schema.ts

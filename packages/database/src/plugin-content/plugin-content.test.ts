@@ -82,9 +82,9 @@ describe.sequential("PluginContent database constraints", () => {
 					pluginId: "course",
 					type: "lesson",
 					title: "Lesson without body",
-					// @ts-expect-error body is required
-					body: null,
 					authorId: user.id,
+					// @ts-expect-error body is required
+					body: undefined,
 				},
 			}),
 		).rejects.toMatchObject({
