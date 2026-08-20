@@ -63,17 +63,17 @@
 
 ### 12. 紅燈測試：PluginContent 共用表
 
-- [ ] 12.1 撰寫測試驗證 spec platform-mount-points「Shared PluginContent table stores content-type Plugin data」——插入 pluginId=course / type=lesson 記錄後可依條件查回
-- [ ] 12.2 撰寫測試驗證同一 Requirement——空 body 值被資料庫拒絕
+- [x] 12.1 撰寫測試驗證 spec platform-mount-points「Shared PluginContent table stores content-type Plugin data」——插入 pluginId=course / type=lesson 記錄後可依條件查回
+- [x] 12.2 撰寫測試驗證同一 Requirement——空 body 值被資料庫拒絕
 
 ### 13. 實作：PluginContent 資料表
 
-- [ ] 13.1 新增 Prisma migration 建立 PluginContent 表（id/pluginId/type/title/body(JSONB)/authorId/createdAt/updatedAt，索引 (pluginId,type) 與 authorId），驗證：12.1、12.2 轉綠燈
+- [x] 13.1 新增 Prisma migration 建立 PluginContent 表（id/pluginId/type/title/body(JSONB)/authorId/createdAt/updatedAt，索引 (pluginId,type) 與 authorId），驗證：12.1、12.2 轉綠燈
 
 ### 14. Phase 3 Review 與驗收
 
-- [ ] 14.1 對 migration 跑 correctness / security review，Critical 為零
-- [ ] 14.2 `pnpm build` 與 `pnpm test` 通過
+- [x] 14.1 對 migration 跑 correctness / security review，Critical 為零
+- [x] 14.2 `pnpm build` 與 `pnpm test` 通過
 
 ## Phase 4：Marketplace 角色降級為展示頁 + 模版選擇，不做「裝/解」操作
 
@@ -130,29 +130,29 @@
 
 ### 24. 紅燈測試：MCP Gateway
 
-- [ ] 24.1 [P] 撰寫測試驗證 spec mcp-gateway「MCP endpoint is reachable at a fixed path」——有效 session 對 /api/mcp 握手成功回傳 serverInfo 與 capabilities
-- [ ] 24.2 [P] 撰寫測試驗證同一 Requirement——無 session 導向授權流程
-- [ ] 24.3 [P] 撰寫測試驗證 spec mcp-gateway「MCP Gateway authorizes via OAuth-style session flow, not API keys」——授權流程不顯示 API key
-- [ ] 24.4 [P] 撰寫測試驗證 spec mcp-gateway「Successful authorization creates a revocable connection record」——授權建立連線記錄、GET 回自己的清單、DELETE 撤銷自己的、無法 DELETE 他人的（4 scenarios）
-- [ ] 24.5 [P] 撰寫測試驗證 spec mcp-gateway「MCP Gateway exposes read-only operations only」——唯讀呼叫成功、寫入呼叫被拒且不變更
-- [ ] 24.6 [P] 撰寫測試驗證 spec mcp-gateway「MCP Gateway fails closed when auth configuration is missing」——BETTER_AUTH_SECRET 未設定回 503
+- [x] 24.1 [P] 撰寫測試驗證 spec mcp-gateway「MCP endpoint is reachable at a fixed path」——有效 session 對 /api/mcp 握手成功回傳 serverInfo 與 capabilities
+- [x] 24.2 [P] 撰寫測試驗證同一 Requirement——無 session 導向授權流程
+- [x] 24.3 [P] 撰寫測試驗證 spec mcp-gateway「MCP Gateway authorizes via OAuth-style session flow, not API keys」——授權流程不顯示 API key
+- [x] 24.4 [P] 撰寫測試驗證 spec mcp-gateway「Successful authorization creates a revocable connection record」——授權建立連線記錄、GET 回自己的清單、DELETE 撤銷自己的、無法 DELETE 他人的（4 scenarios）
+- [x] 24.5 [P] 撰寫測試驗證 spec mcp-gateway「MCP Gateway exposes read-only operations only」——唯讀呼叫成功、寫入呼叫被拒且不變更
+- [x] 24.6 [P] 撰寫測試驗證 spec mcp-gateway「MCP Gateway fails closed when auth configuration is missing」——BETTER_AUTH_SECRET 未設定回 503
 
 ### 25. 實作：McpConnection 資料表
 
-- [ ] 25.1 新增 Prisma migration 建立 McpConnection 表（id/userId/clientName/authorizedAt/lastUsedAt/revokedAt，索引 userId）
+- [x] 25.1 新增 Prisma migration 建立 McpConnection 表（id/userId/clientName/authorizedAt/lastUsedAt/revokedAt，索引 userId）
 
 ### 26. 實作：MCP Gateway 端點
 
-- [ ] 26.1 新增 `apps/saas/app/api/mcp/route.ts`，實作 MCP 協定握手，重用 Better Auth session 授權，驗證：24.1、24.2、24.3 轉綠燈
-- [ ] 26.2 授權成功寫入 McpConnection，新增連線管理 API（GET /api/mcp/connections、DELETE /api/mcp/connections/[id]），驗證：24.4 轉綠燈
-- [ ] 26.3 MCP Gateway 只註冊唯讀工具，範圍比照 site-agent 既有兩支唯讀工具，驗證：24.5 轉綠燈
-- [ ] 26.4 DATABASE_URL 或 BETTER_AUTH_SECRET 缺失時回傳 503，驗證：24.6 轉綠燈
+- [x] 26.1 新增 `apps/saas/app/api/mcp/route.ts`，實作 MCP 協定握手，重用 Better Auth session 授權，驗證：24.1、24.2、24.3 轉綠燈
+- [x] 26.2 授權成功寫入 McpConnection，新增連線管理 API（GET /api/mcp/connections、DELETE /api/mcp/connections/[id]），驗證：24.4 轉綠燈
+- [x] 26.3 MCP Gateway 只註冊唯讀工具，範圍比照 site-agent 既有兩支唯讀工具，驗證：24.5 轉綠燈
+- [x] 26.4 DATABASE_URL 或 BETTER_AUTH_SECRET 缺失時回傳 503，驗證：24.6 轉綠燈
 
 ### 27. Phase 5 Review 與驗收
 
-- [ ] 27.1 對 MCP Gateway 全部變更跑 correctness / security / performance code review，特別檢查唯讀限制是否確實、有無意外寫入路徑，Critical 為零
-- [ ] 27.2 `curl /api/mcp`、`/api/mcp/connections` 回傳格式符合 spec
-- [ ] 27.3 `pnpm build` 與 `pnpm test` 通過
+- [x] 27.1 對 MCP Gateway 全部變更跑 correctness / security / performance code review，特別檢查唯讀限制是否確實、有無意外寫入路徑，Critical 為零
+- [x] 27.2 `curl /api/mcp`、`/api/mcp/connections` 回傳格式符合 spec
+- [x] 27.3 `pnpm build` 與 `pnpm test` 通過
 
 ## Phase 6：Core 邊界聲明維持不變
 
