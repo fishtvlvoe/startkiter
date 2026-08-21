@@ -18,6 +18,14 @@ describe("MOUNT_POINTS registry tests (Task 3.1)", () => {
 		const coursePlugin = MOUNT_POINTS.find((plugin) => plugin.id === "course");
 		expect(coursePlugin?.mount.menu?.requiresOperator).toBeUndefined();
 	});
+
+	it("7.3 contains bundles plugin manifest, operator-only menu item pointing at /admin/bundles", () => {
+		const bundlesPlugin = MOUNT_POINTS.find((plugin) => plugin.id === "bundles");
+		expect(bundlesPlugin).toBeDefined();
+		expect(bundlesPlugin?.mount.route?.path).toBe("/admin/bundles");
+		expect(bundlesPlugin?.mount.menu?.requiresOperator).toBe(true);
+		expect(bundlesPlugin?.mount.menu?.label).toBe("課程綁定包");
+	});
 });
 
 describe("MOUNT_POINTS menu rendering tests (Task 3.2)", () => {

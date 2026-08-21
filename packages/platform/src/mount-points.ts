@@ -12,4 +12,14 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		},
 		dataSpec: "content",
 	},
+	{
+		id: "bundles",
+		name: "課程綁定包",
+		version: "0.1.0",
+		mount: {
+			route: { path: "/admin/bundles" },
+			menu: { label: "課程綁定包", icon: "package", order: 15, requiresOperator: true },
+		},
+		dataSpec: "none",
+	},
 ];

@@ -40,14 +40,14 @@
 
 ### 7. 實作：Bundle 前後台頁面
 
-- [ ] 7.1 新增 `apps/saas/app/(authenticated)/(main)/(account)/admin/bundles/page.tsx`（operator 後台管理頁），依 6.1 確認過的 demo 實作
-- [ ] 7.2 新增 `apps/saas/app/(main)/bundles/[slug]/page.tsx`（前台銷售頁），依 6.1 確認過的 demo 實作
-- [ ] 7.3 修改 `packages/platform/src/mount-points.ts`，新增 bundles 管理頁選單項目（`requiresOperator: true`）
+- [x] 7.1 新增 `apps/saas/app/(authenticated)/(main)/(account)/admin/bundles/page.tsx`（operator 後台管理頁），依 6.1 確認過的 demo 實作（列表+新增/編輯表單，用 `@startkiter/ui` 元件；實作時發現 Phase 2 只做了 CREATE，demo 卻有編輯/刪除，補了 `updateBundle`/`deleteBundle`（`packages/bundles/src/catalog.ts`）+ `PUT`/`DELETE /api/bundles/:id` + `GET /api/bundles/admin`（operator 專用列表，`GET /api/bundles` 依 spec 只能回已發布不能共用），design.md 已同步補這幾支端點）
+- [x] 7.2 新增 `apps/saas/app/(main)/bundles/[slug]/page.tsx`（前台銷售頁），依 `docs/design-canvas/bundle-sales-page/Main.dc.html`／`Dark.dc.html` 定案版本實作（比 6.1 demo 更新，用真實 olive/primary token，深色模式沿用專案既有 `next-themes` 機制自動運作）。結帳按鈕與優惠券暫時 disabled 顯示「準備中」——Phase 3（Coupon）、Phase 4（結帳支援 productId）還沒做，先放行會讓買家以為買 bundle 卻被結帳成 MVP 單一課程，money-integrity 風險，故意擋住
+- [x] 7.3 修改 `packages/platform/src/mount-points.ts`，新增 bundles 管理頁選單項目（`requiresOperator: true`），並補一則單元測試（`mount-points.test.ts`）
 
 ### 8. Phase 2 Review 與驗收
 
 - [x] 8.1 對 Phase 2 全部變更跑 correctness / security / performance code review，特別檢查 bundle 存取權整合是否有遺漏，Critical 為零（PM 覆核：無 SQL injection、operator gate 在 body 解析前執行、draft bundle 不可枚舉、退款是整筆 all-or-nothing 撤銷無 partial-revocation 漏洞。發現 5.3 新函式未接進真實課程頁面的缺口，已補 15.4 追蹤）
-- [ ] 8.2 用 Chrome MCP 截圖 bundle 管理頁與銷售頁，比對 demo 確認一致（等 7.1/7.2 頁面落地才能做）
+- [x] 8.2 用真實資料行為驗證取代截圖比對（PM 執行）：`pnpm dev` 啟動後灌一筆真實 Bundle+2 門課，curl 驗證 `GET /api/bundles` 回真資料、`GET /bundles/<slug>` 200 且頁面含正確標題/金額/課程 id、`GET /bundles/<不存在slug>` 404、`GET /api/bundles/admin` 未登入 401、`GET /admin/bundles` 未登入 307 導去登入頁；驗證後清除測試資料，`GET /api/bundles` 確認回空陣列
 - [x] 8.3 `pnpm build` 與 `pnpm test` 通過（PM 自行重跑：bundles 7/7、course 48/48、saas 71/71 全綠；`pnpm build`/`type-check` 唯一失敗點是既有未 commit 的 `apps/saas/app/api/repo-version/route.ts`，與本次改動無關，非本輪範圍）
 
 ## Phase 3：實作 Coupon 驗證與結帳整合（抽取對應：THE-TU → StartKiter；Coupon 驗證邏輯放進獨立 packages/coupons/，不放進 packages/payments/）

@@ -4,82 +4,128 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Next.js 全端班 + React 進階班 組合包 - StartKiter</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
   <style>
+    /* 色票／半徑直接照抄 tooling/tailwind/theme.css + packages/ui/components/card.tsx、button.tsx，
+       不是另外挑的配色——這份 demo 要跟真實 apps/saas 頁面（如 checkout/page.tsx）長一樣。 */
     :root {
-      --ink: #0f172a; --ink-soft: #475569; --ink-faint: #94a3b8;
-      --ground: #f8fafc; --surface: #ffffff;
-      --border: #e2e8f0; --border-soft: #f1f5f9;
-      --accent: #4f46e5; --accent-hover: #6366f1;
-      --accent-soft-bg: #eef2ff; --accent-soft-border: #c7d2fe; --accent-soft-text: #4338ca;
-      --dark-surface: #0f172a; --dark-surface-2: #1e293b; --dark-border: #1e293b;
-      --emerald: #34d399;
+      --olive-50: oklch(98.8% 0.003 106.5);
+      --olive-100: oklch(96.6% 0.005 106.5);
+      --olive-200: oklch(93% 0.007 106.5);
+      --olive-300: oklch(88% 0.011 106.6);
+      --olive-400: oklch(73.7% 0.021 106.9);
+      --olive-500: oklch(58% 0.031 107.3);
+      --olive-600: oklch(46.6% 0.025 107.3);
+      --olive-700: oklch(39.4% 0.023 107.4);
+      --olive-800: oklch(28.6% 0.016 107.4);
+      --olive-900: oklch(22.8% 0.013 107.4);
+      --olive-950: oklch(15.3% 0.006 107.1);
+
+      --background: var(--olive-50);
+      --foreground: var(--olive-950);
+      --primary: var(--olive-950);
+      --primary-foreground: var(--olive-50);
+      --secondary: var(--olive-100);
+      --secondary-foreground: var(--olive-900);
+      --muted: var(--olive-100);
+      --muted-foreground: var(--olive-600);
+      --accent: var(--olive-100);
+      --accent-foreground: var(--olive-900);
+      --touch: oklch(0.51 0.12 128);
+      --touch-foreground: oklch(0.99 0.01 128);
+      --border: var(--olive-200);
+      --card: #ffffff;
+      --card-foreground: var(--olive-950);
+      --destructive: oklch(0.5 0.19 25);
+      --radius-card: 1.5rem; /* rounded-3xl */
     }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --background: var(--olive-950); --foreground: var(--olive-50);
+        --primary: var(--olive-50); --primary-foreground: var(--olive-950);
+        --secondary: var(--olive-800); --secondary-foreground: var(--olive-50);
+        --muted: var(--olive-900); --muted-foreground: var(--olive-400);
+        --accent: var(--olive-900); --accent-foreground: var(--olive-50);
+        --touch: oklch(0.76 0.11 128); --touch-foreground: oklch(0.22 0.04 128);
+        --border: var(--olive-800); --card: var(--olive-900); --card-foreground: var(--olive-50);
+      }
+    }
+    :root[data-theme="dark"] {
+      --background: var(--olive-950); --foreground: var(--olive-50);
+      --primary: var(--olive-50); --primary-foreground: var(--olive-950);
+      --secondary: var(--olive-800); --secondary-foreground: var(--olive-50);
+      --muted: var(--olive-900); --muted-foreground: var(--olive-400);
+      --accent: var(--olive-900); --accent-foreground: var(--olive-50);
+      --touch: oklch(0.76 0.11 128); --touch-foreground: oklch(0.22 0.04 128);
+      --border: var(--olive-800); --card: var(--olive-900); --card-foreground: var(--olive-50);
+    }
+
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: 'Inter', 'Noto Sans TC', sans-serif; background: var(--ground); color: var(--ink); min-height: 100vh; display: flex; flex-direction: column; -webkit-font-smoothing: antialiased; }
+    body { margin: 0; font-family: 'Inter', ui-sans-serif, system-ui, "PingFang TC", "Microsoft JhengHei", sans-serif; background: var(--background); color: var(--foreground); min-height: 100vh; display: flex; flex-direction: column; -webkit-font-smoothing: antialiased; }
     a { color: inherit; text-decoration: none; }
     button { font-family: inherit; cursor: pointer; border: none; }
     input { font-family: inherit; }
-
     .icon { display: inline-block; vertical-align: middle; flex-shrink: 0; }
 
-    /* header */
-    header.top { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 40; padding: 0 1.5rem; height: 4rem; display: flex; align-items: center; justify-content: space-between; }
-    .brand { font-weight: 700; color: var(--ink); font-size: 1rem; letter-spacing: -0.01em; display: flex; align-items: center; gap: 0.5rem; }
-    .brand .mark { width: 1.75rem; height: 1.75rem; border-radius: 0.5rem; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.875rem; }
+    /* header — 比照 AuthWrapper 頂欄慣例：簡單、border-b、無強對比 */
+    header.top { background: var(--card); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 40; padding: 0 1.5rem; height: 4rem; display: flex; align-items: center; justify-content: space-between; }
+    .brand { font-weight: 600; color: var(--foreground); font-size: 1rem; letter-spacing: -0.01em; display: flex; align-items: center; gap: 0.5rem; }
+    .brand .mark { width: 1.75rem; height: 1.75rem; border-radius: 9999px; background: var(--primary); color: var(--primary-foreground); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.875rem; }
     .top-right { display: flex; align-items: center; gap: 0.75rem; font-size: 0.75rem; }
-    .path-hint { color: var(--ink-faint); font-family: 'SF Mono', ui-monospace, monospace; display: none; }
-    .btn-primary { padding: 0.5rem 1rem; background: var(--accent); color: #fff; font-weight: 700; border-radius: 0.5rem; transition: background 0.15s; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); }
-    .btn-primary:hover { background: var(--accent-hover); }
+    .path-hint { color: var(--muted-foreground); font-family: ui-monospace, monospace; display: none; }
+    /* Button md：packages/ui/components/button.tsx 的 h-9 rounded-full px-4 text-sm，bg-primary */
+    .btn { height: 2.25rem; padding: 0 1rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; transition: background 0.15s; }
+    .btn-primary { background: var(--primary); color: var(--primary-foreground); }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-outline { border: 1px solid color-mix(in srgb, var(--foreground) 10%, transparent); background: transparent; color: var(--foreground); }
+    .btn-outline:hover { background: color-mix(in srgb, var(--foreground) 6%, transparent); }
+    .btn-full { width: 100%; height: 3.25rem; font-size: 0.9375rem; }
 
     /* hero */
     .hero { max-width: 64rem; margin: 0 auto; padding: 3rem 1.5rem 2rem; text-align: center; display: flex; flex-direction: column; gap: 1rem; align-items: center; }
-    .badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0.75rem; border-radius: 9999px; background: var(--accent-soft-bg); border: 1px solid var(--accent-soft-border); color: var(--accent-soft-text); font-size: 0.75rem; font-weight: 600; }
+    .badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0.75rem; border-radius: 9999px; background: var(--accent); color: var(--accent-foreground); font-size: 0.75rem; font-weight: 600; }
     .badge .icon { width: 10px; height: 10px; }
-    h1.hero-title { font-size: 1.875rem; font-weight: 900; color: var(--ink); letter-spacing: -0.02em; line-height: 1.15; max-width: 48rem; margin: 0; text-wrap: balance; }
-    .hero-desc { font-size: 0.875rem; color: var(--ink-soft); line-height: 1.7; max-width: 42rem; margin: 0; }
+    h1.hero-title { font-size: 1.875rem; font-weight: 700; color: var(--foreground); letter-spacing: -0.02em; line-height: 1.15; max-width: 48rem; margin: 0; text-wrap: balance; }
+    .hero-desc { font-size: 0.875rem; color: var(--muted-foreground); line-height: 1.7; max-width: 42rem; margin: 0; }
 
     /* included courses */
     .section { max-width: 56rem; margin: 0 auto; padding: 2rem 1.5rem; }
-    .section-title { font-size: 1.125rem; font-weight: 700; color: var(--ink); margin: 0 0 1rem; display: flex; align-items: center; gap: 0.5rem; }
-    .section-title .icon { color: var(--accent); width: 14px; height: 14px; }
+    .section-title { font-size: 1.125rem; font-weight: 600; color: var(--foreground); margin: 0 0 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .section-title .icon { color: var(--foreground); width: 14px; height: 14px; }
     .course-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
-    .course-card { background: var(--surface); border: 1px solid var(--border); border-radius: 1rem; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); }
-    .course-thumb { width: 100%; aspect-ratio: 16 / 9; background: var(--dark-surface); border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.7); }
-    .course-thumb .icon { width: 28px; height: 28px; }
-    .course-name { font-weight: 700; color: var(--ink); font-size: 0.875rem; margin: 0 0 0.25rem; }
-    .course-desc { font-size: 0.75rem; color: var(--ink-faint); margin: 0; }
-    .course-price-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; padding-top: 0.25rem; border-top: 1px solid var(--border-soft); }
-    .course-price-row .label { color: var(--ink-faint); }
-    .course-price-row .value { font-weight: 700; color: #334155; }
+    /* Card：rounded-3xl border bg-card text-card-foreground */
+    .card { border-radius: var(--radius-card); border: 1px solid var(--border); background: var(--card); color: var(--card-foreground); }
+    .course-card { padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .course-thumb { width: 100%; aspect-ratio: 16 / 9; background: var(--secondary); color: var(--secondary-foreground); border-radius: 1rem; display: flex; align-items: center; justify-content: center; }
+    .course-thumb .icon { width: 28px; height: 28px; opacity: 0.6; }
+    .course-name { font-weight: 600; color: var(--card-foreground); font-size: 0.9375rem; margin: 0 0 0.25rem; }
+    .course-desc { font-size: 0.8125rem; color: var(--muted-foreground); margin: 0; }
+    .course-price-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; padding-top: 0.5rem; border-top: 1px solid var(--border); }
+    .course-price-row .label { color: var(--muted-foreground); }
+    .course-price-row .value { font-weight: 600; color: var(--card-foreground); }
 
-    /* buy box */
+    /* buy card */
     .buy-wrap { max-width: 42rem; margin: 0 auto; padding: 2.5rem 1.5rem; }
-    .buy-box { background: var(--dark-surface); color: #fff; border-radius: 1.5rem; padding: 2rem; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); display: flex; flex-direction: column; gap: 1.5rem; border: 1px solid var(--dark-border); }
+    .buy-box { padding: 2rem; display: flex; flex-direction: column; gap: 1.5rem; }
     .price-head { text-align: center; display: flex; flex-direction: column; gap: 0.5rem; }
-    .price-tag { font-size: 0.75rem; font-weight: 700; color: #a5b4fc; background: #1e1b4b; padding: 0.25rem 0.75rem; border-radius: 9999px; border: 1px solid #3730a3; display: inline-block; margin: 0 auto; }
+    .price-tag { font-size: 0.75rem; font-weight: 600; color: var(--accent-foreground); background: var(--accent); padding: 0.25rem 0.75rem; border-radius: 9999px; display: inline-block; margin: 0 auto; }
     .price-row { display: flex; align-items: center; justify-content: center; gap: 0.75rem; padding-top: 0.25rem; }
-    .price-original { font-size: 1rem; color: #64748b; text-decoration: line-through; }
-    .price-final { font-size: 2.25rem; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; }
-    .price-savings { font-size: 0.75rem; color: var(--emerald); font-weight: 600; margin: 0; }
+    .price-original { font-size: 1rem; color: var(--muted-foreground); text-decoration: line-through; }
+    .price-final { font-size: 2.25rem; font-weight: 700; color: var(--card-foreground); font-variant-numeric: tabular-nums; }
+    .price-savings { font-size: 0.8125rem; color: var(--touch); font-weight: 600; margin: 0; }
     .field-group { display: flex; flex-direction: column; gap: 0.5rem; }
-    .field-label { font-size: 0.75rem; font-weight: 700; color: #cbd5e1; }
+    .field-label { font-size: 0.8125rem; font-weight: 600; color: var(--card-foreground); }
     .coupon-row { display: flex; gap: 0.5rem; }
-    .coupon-input { flex: 1; padding: 0.625rem 0.75rem; border-radius: 0.5rem; background: var(--dark-surface-2); border: 1px solid #334155; color: #fff; font-size: 0.875rem; font-family: 'SF Mono', ui-monospace, monospace; text-transform: uppercase; }
-    .coupon-input::placeholder { color: #64748b; }
-    .coupon-input:focus { outline: none; border-color: var(--accent-hover); }
-    .coupon-apply { padding: 0.625rem 1rem; background: #334155; color: #fff; font-size: 0.75rem; font-weight: 700; border-radius: 0.5rem; transition: background 0.15s; }
-    .coupon-apply:hover { background: #475569; }
-    .coupon-msg { font-size: 0.75rem; height: 1rem; margin: 0; }
-    .buy-btn { width: 100%; padding: 0.875rem; background: var(--accent); color: #fff; font-weight: 700; border-radius: 0.75rem; font-size: 0.875rem; transition: background 0.15s; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
-    .buy-btn:hover { background: var(--accent-hover); }
-    .buy-note { text-align: center; font-size: 0.6875rem; color: #64748b; margin: 0; }
+    .coupon-input { flex: 1; padding: 0 0.875rem; height: 2.5rem; border-radius: 0.75rem; background: var(--background); border: 1px solid var(--border); color: var(--foreground); font-size: 0.875rem; font-family: ui-monospace, monospace; text-transform: uppercase; }
+    .coupon-input::placeholder { color: var(--muted-foreground); text-transform: none; }
+    .coupon-input:focus { outline: 2px solid var(--touch); outline-offset: 1px; }
+    .coupon-apply { padding: 0 1.25rem; height: 2.5rem; border-radius: 0.75rem; }
+    .coupon-msg { font-size: 0.75rem; min-height: 1rem; margin: 0; }
+    .buy-note { text-align: center; font-size: 0.75rem; color: var(--muted-foreground); margin: 0; }
 
-    footer.foot { background: var(--surface); border-top: 1px solid var(--border); padding: 1.5rem; text-align: center; font-size: 0.75rem; color: var(--ink-faint); margin-top: auto; }
+    footer.foot { background: var(--card); border-top: 1px solid var(--border); padding: 1.5rem; text-align: center; font-size: 0.75rem; color: var(--muted-foreground); margin-top: auto; }
 
-    @media (min-width: 640px) {
-      .path-hint { display: inline; }
-    }
+    @media (min-width: 640px) { .path-hint { display: inline; } }
     @media (min-width: 768px) {
       h1.hero-title { font-size: 3rem; }
       .hero-desc { font-size: 1rem; }
@@ -96,7 +142,7 @@
     </a>
     <div class="top-right">
       <span class="path-hint">/bundles/fullstack-combo</span>
-      <a href="#buy" class="btn-primary">立即購買</a>
+      <a href="#buy" class="btn btn-primary">立即購買</a>
     </div>
   </header>
 
@@ -115,7 +161,7 @@
       <span>這個組合包包含 2 堂課</span>
     </h2>
     <div class="course-grid">
-      <div class="course-card">
+      <div class="card course-card">
         <div class="course-thumb">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="7" rx="1"/><rect x="3" y="13" width="18" height="7" rx="1"/><path d="M7 7.5h.01M7 16.5h.01"/></svg>
         </div>
@@ -129,7 +175,7 @@
         </div>
       </div>
 
-      <div class="course-card">
+      <div class="card course-card">
         <div class="course-thumb">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.2"/><circle cx="18" cy="6" r="2.2"/><circle cx="12" cy="18" r="2.2"/><path d="M7.8 7.5L11 15.5M16.2 7.5L13 15.5"/></svg>
         </div>
@@ -146,7 +192,7 @@
   </section>
 
   <section id="buy" class="buy-wrap">
-    <div class="buy-box">
+    <div class="card buy-box">
       <div class="price-head">
         <span class="price-tag">組合包價格</span>
         <div class="price-row">
@@ -160,12 +206,12 @@
         <label class="field-label">有優惠碼嗎？</label>
         <div class="coupon-row">
           <input id="coupon-input" class="coupon-input" type="text" placeholder="輸入折扣碼，例如 SAVE500">
-          <button class="coupon-apply" onclick="applyCoupon()">套用</button>
+          <button class="btn btn-outline coupon-apply" onclick="applyCoupon()">套用</button>
         </div>
         <p id="coupon-message" class="coupon-msg"></p>
       </div>
 
-      <button class="buy-btn" onclick="checkout()">立即購買組合包（PAYUNi 信用卡結帳）</button>
+      <button class="btn btn-primary btn-full" onclick="checkout()">立即購買組合包（PAYUNi 信用卡結帳）</button>
       <p class="buy-note">付款成功後，即取得組合包內兩堂課的完整存取權</p>
     </div>
   </section>
@@ -205,7 +251,7 @@
       if (!coupon) {
         appliedDiscount = 0;
         msg.textContent = '折扣碼不存在，請確認拼字';
-        msg.style.color = '#fb7185';
+        msg.style.color = 'var(--destructive)';
         updatePrice();
         return;
       }
@@ -220,7 +266,7 @@
       }
 
       msg.textContent = `已套用折扣碼 ${code}，折抵 NT$ ${appliedDiscount.toLocaleString()}`;
-      msg.style.color = '#34d399';
+      msg.style.color = 'var(--touch)';
       updatePrice();
     }
 
@@ -234,7 +280,7 @@
     function checkout() {
       const finalAmount = Math.max(bundle.priceTwd - appliedDiscount, 0);
       const note = document.getElementById('coupon-message');
-      note.style.color = '#a5b4fc';
+      note.style.color = 'var(--muted-foreground)';
       note.textContent = `💳 Demo：跳轉至 PAYUNi 結帳頁面，結帳金額 NT$ ${finalAmount.toLocaleString()}`;
     }
   </script>

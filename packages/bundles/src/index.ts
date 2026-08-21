@@ -1,3 +1,17 @@
 export type { Bundle } from "./types";
-export { createBundle, getBundleBySlug, listPublishedBundles } from "./catalog";
-export type { CreateBundleInput, CreateBundleResult } from "./catalog";
+export {
+	createBundle,
+	deleteBundle,
+	getBundleById,
+	getBundleBySlug,
+	listAllBundles,
+	listPublishedBundles,
+	updateBundle,
+} from "./catalog";
+export type {
+	CreateBundleInput,
+	CreateBundleResult,
+	DeleteBundleResult,
+	UpdateBundleInput,
+	UpdateBundleResult,
+} from "./catalog";

@@ -103,7 +103,8 @@ function getProduct(productId: string): Promise<Product | null>;
 ```
 
 - `GET /api/bundles` → 回傳已發布 `Bundle[]`（前台銷售頁用），未登入可存取
-- `POST /api/bundles`／`PUT /api/bundles/:id` → operator 專用，新增/編輯 bundle
+- `POST /api/bundles`／`PUT /api/bundles/:id`／`DELETE /api/bundles/:id` → operator 專用，新增/編輯/刪除 bundle
+- `GET /api/bundles/admin` → operator 專用，回傳全部 Bundle（含 draft／archived）＋現有課程目錄（id/title），後台管理頁列表與 courseIds 多選用（task 7.1 實作時發現：`GET /api/bundles` 依 spec 只能回已發布，operator 列表需要另一支端點，不能共用同一支）
 - `POST /api/coupons/validate` → body `{ code: string; productId: string }`，回傳 `{ valid: true, finalAmount: number, discountAmount: number } | { valid: false, reason: "not_found" | "expired" | "not_started" | "max_redemptions_reached" }`
 - `POST /api/checkout` 既有端點擴充：body 新增可選 `productId`（預設 `"startkiter-mvp"`）與可選 `couponCode`
 

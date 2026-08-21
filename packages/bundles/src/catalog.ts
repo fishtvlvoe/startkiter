@@ -112,7 +112,97 @@ export async function getBundleBySlug(slug: string): Promise<Bundle | null> {
 	return toBundle(row);
 }
 
-// ponytail: 原本這裡還有一個 `getBundleById`（operator 後台編輯用，任何 status 都查得到）。
-// 拿掉了——`PUT /api/bundles/:id` 不在 tasks.md 5.2 這輪範圍內，沒有呼叫端會用到它，先不加。
-// 之後做 operator 編輯頁（tasks.md 7.1 之後）需要時，照 `getBundleBySlug` 的寫法補一個
-// 不過濾 status 的版本即可。
+/** operator 後台管理頁（task 7.1）用：回傳全部 Bundle，不過濾 status。僅供 operator-gated API 呼叫，不對外公開。 */
+export async function listAllBundles(): Promise<Bundle[]> {
+	const rows = await db.bundle.findMany({
+		include: { courses: { orderBy: { order: "asc" } } },
+		orderBy: { createdAt: "desc" },
+	});
+	return rows.map(toBundle);
+}
+
+/** operator 後台編輯用：任何 status 都查得到，找不到回傳 null。 */
+export async function getBundleById(id: string): Promise<Bundle | null> {
+	const row = await db.bundle.findUnique({
+		where: { id },
+		include: { courses: { orderBy: { order: "asc" } } },
+	});
+	return row ? toBundle(row) : null;
+}
+
+export type UpdateBundleInput = {
+	slug: string;
+	title: string;
+	description?: string | null;
+	priceTwd: number;
+	status: "draft" | "published" | "archived";
+	courseIds: string[];
+};
+
+export type UpdateBundleResult =
+	| { ok: true; bundle: Bundle }
+	| { ok: false; reason: "not_found" }
+	| { ok: false; reason: "course_not_found"; missingCourseIds: string[] };
+
+/**
+ * 更新 Bundle：courseIds 驗證邏輯比照 `createBundle`，整批替換課程清單
+ * （先刪舊的 BundleCourse 列再依新順序建立，避免殘留舊排序）。
+ */
+export async function updateBundle(id: string, input: UpdateBundleInput): Promise<UpdateBundleResult> {
+	const existing = await db.bundle.findUnique({ where: { id }, select: { id: true } });
+	if (!existing) {
+		return { ok: false, reason: "not_found" };
+	}
+
+	const foundCourses = await db.course.findMany({
+		where: { id: { in: input.courseIds } },
+		select: { id: true },
+	});
+	const foundCourseIds = new Set(foundCourses.map((course) => course.id));
+	const missingCourseIds = input.courseIds.filter((courseId) => !foundCourseIds.has(courseId));
+
+	if (missingCourseIds.length > 0) {
+		return { ok: false, reason: "course_not_found", missingCourseIds };
+	}
+
+	const updated = await db.$transaction(async (tx) => {
+		await tx.bundle.update({
+			where: { id },
+			data: {
+				slug: input.slug,
+				title: input.title,
+				description: input.description ?? null,
+				priceTwd: input.priceTwd,
+				status: input.status,
+			},
+		});
+
+		await tx.bundleCourse.deleteMany({ where: { bundleId: id } });
+		await tx.bundleCourse.createMany({
+			data: input.courseIds.map((courseId, index) => ({
+				bundleId: id,
+				courseId,
+				order: index,
+			})),
+		});
+
+		return tx.bundle.findUniqueOrThrow({
+			where: { id },
+			include: { courses: { orderBy: { order: "asc" } } },
+		});
+	});
+
+	return { ok: true, bundle: toBundle(updated) };
+}
+
+export type DeleteBundleResult = { ok: true } | { ok: false; reason: "not_found" };
+
+/** 刪除 Bundle；`BundleCourse` 有 onDelete: Cascade，會一併清掉關聯列。 */
+export async function deleteBundle(id: string): Promise<DeleteBundleResult> {
+	const existing = await db.bundle.findUnique({ where: { id }, select: { id: true } });
+	if (!existing) {
+		return { ok: false, reason: "not_found" };
+	}
+	await db.bundle.delete({ where: { id } });
+	return { ok: true };
+}
