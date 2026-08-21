@@ -65,9 +65,13 @@ Changes can be parked（暫存）— temporarily moved out of `openspec/changes/
 
 課 + 終身代碼包。對外課名可用「開站包」。
 
+**產品定位（2026-08-22 補寫，之前遺漏）：StartKiter 要做成類似 WordPress 的平台，不是單一固定功能的 SaaS。** 買家拿到的不是一個寫死功能清單的網站，而是一個殼（platform shell）＋可掛載的模組（plugin）架構：後台掛載點、Marketplace 展示頁、模組各自獨立 `packages/<name>/`，買家或第三方可以像裝 WordPress 外掛一樣加裝功能。這個定位對應 `openspec/changes/platform-shell-plugin-architecture/`（Mount Points、PluginContent、Marketplace、MCP Gateway 唯讀連線），不是事後補的功能，是產品第一性——之前的對焦摘要漏講這段，只講了「一次買斷拿到 SaaS 骨架」，沒講「這骨架長成什麼架構」。
+
 產品現行邊界以 `openspec/specs/` 為準（由已封存的 `mvp-test-scope` 灌入）。`extract-shell-auth`、`extract-payuni-checkout`、`extract-course-module`、`test-to-clean-package-promotion` 已封存。兩倉＋晉升規則見 `openspec/specs/test-clean-package-promotion/` 與 `docs/deploy-and-public-url.md`。
 
-MVP extract 佇列已清空：`extract-site-agent`、`extract-line-learner-community`、`extract-github-kit-fulfillment` 皆已封存。`bootstrap-test-startkiter` 已封存：TEST=`https://github.com/fishtvlvoe/test-startkiter`，站=`https://test-startkiter.vercel.app`（Neon；Git 自動部署已接通）。mvp-sell-flow-usable 已封存。仍卡老闆：GITHUB_KIT_ORG／REPO／完整 PEM、LINE_COMMUNITY_INVITE_URL、Google／LINE OAuth callback。
+MVP extract 佇列已清空：`extract-site-agent`、`extract-line-learner-community`、`extract-github-kit-fulfillment` 皆已封存。`bootstrap-test-startkiter` 已封存：TEST=`https://github.com/fishtvlvoe/test-startkiter`。mvp-sell-flow-usable 已封存。仍卡老闆：GITHUB_KIT_ORG／REPO／完整 PEM、LINE_COMMUNITY_INVITE_URL、Google／LINE OAuth callback。
+
+**部署方向轉彎（2026-08-22 老闆定案）：不再用 Vercel，全部搬到 Coolify + VPS**（`https://test-startkiter.vercel.app` 部署已停止更新，該站最後一次真正部署是 2026-08-15，之後 6+ 天的 commit 都沒反映上去，過去查 webhook 404 才發現）。現有唯一一台 Coolify 伺服器 `startkiter-managed-fleet-01`（Vultr，Ubuntu 26.04、2 vCPU/3.3GB、Docker 29.7.2，2026-08-18 建立，IP `45.76.187.247`，DNS `coolify-test.startkiter.dev` 已指過去）目前只跑兩個測試用 resource（nginx demo image、一個 git-deploy 測試），還沒正式扛過主站。細節與遷移步驟待寫成新 Spectra change，尚未 propose。`startkiter.dev` 這個網域已在 Cloudflare 買好、zone 已啟用（zone id `631be2a55e0c1b0a15038ad244b7665d`），新建了一個只管這個 zone 的 DNS 編輯 API Token 存在 `.env` 的 `CLOUDFLARE_API_TOKEN`。
 
 這是獨立 git repo。零耦合 libon.me。不要改抽取來源。站內 agent／LINE 社群／GitHub kit 履約已封存落地。本階段不以新 extract 白名單為準，而以 `openspec/specs/` 為現行真相。
 
@@ -78,6 +82,8 @@ MVP extract 佇列已清空：`extract-site-agent`、`extract-line-learner-commu
 台灣金流／訂單：`/Users/fishtv/Development/THE-TU-Project/dev/thetu` 的 PAYUNi／訂單抽象 → `packages/payments`（含 Order 模型欄位契約）
 
 課程 UI 當模組留下：從舊售出包（thetu）抽觀看與權限畫面 → `packages/course`。原「不抽整套學院營運」的範圍限制已封存作廢——2026-08-21 老闆定案：`dev/thetu` 全套內容/行銷/金流模組（courses、bundles、coupons、subscriptions、newsletters、course-invites、assignment、lesson-comments/private-messages、invoice）開放抽取，當成 StartKiter 的「核心基本模組」，各自拆成獨立 `packages/<name>/`（依 `docs/buyer-extension-convention.md` 慣例），實際拆解規劃走新開的 Spectra change，尚未 propose。
+
+**`https://github.com/woomini-flow/woomin`（WuMin 買方專屬課程 repo 樣板）跟 `THE-TU-Project/dev/thetu` 是同一套代碼家族**（2026-08-22 核對：`app/`、`lib/` 檔案清單逐一比對幾乎完全一致，`.env` 裡多處「from woomin notes」的設定其實就是這套代碼本身的設定，不是另一個獨立來源）。差別在 woomin 目前走 Zeabur 部署（有自己的 cron-worker、customer-deployment 文件），thetu/StartKiter 走 Coolify+VPS，部署層不通用，但功能模組（`lib/` 底下的 setup-config、settings-page-tabs、site-brand、deployment-capabilities 等）視為同一份抽取來源的別名，不用另外重新盤點。
 
 LINE 登入契約：`/Users/fishtv/Development/8-外掛/line-hub`（網頁 OAuth 決策；PHP／LIFF／Bot 不搬）
 
