@@ -15,6 +15,10 @@ describe.sequential("packages/coupons validateCoupon", () => {
 	});
 
 	async function createTestCoupon(overrides: Partial<Parameters<typeof db.coupon.create>[0]["data"]>) {
+		// 固定字面碼（如 SAVE100）可能是前一次中斷的測試留下的殘料，先清掉避免 unique constraint 誤判。
+		if (overrides.code) {
+			await db.coupon.deleteMany({ where: { code: overrides.code as string } });
+		}
 		const coupon = await db.coupon.create({
 			data: {
 				code: `TEST${randomUUID().slice(0, 8).toUpperCase()}`,
