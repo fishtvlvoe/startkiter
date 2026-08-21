@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { initChatwootSdk, syncChatwootUser } from "../../app/(authenticated)/ChatwootScript";
+import {
+	initChatwootSdk,
+	syncChatwootDeployment,
+	syncChatwootUser,
+} from "../../app/(authenticated)/ChatwootScript";
 
 describe("ChatwootScript - SDK Initialization & User Sync", () => {
 	beforeEach(() => {
@@ -114,5 +118,50 @@ describe("ChatwootScript - SDK Initialization & User Sync", () => {
 		(globalThis as unknown as { window: { $chatwoot?: unknown } }).window.$chatwoot = undefined;
 
 		expect(syncChatwootUser({ id: "usr_1" })).toBe(false);
+	});
+
+	describe("syncChatwootDeployment - 部署資訊綁定與選擇邏輯", () => {
+		it("無部署時不設定 buyerDeploymentId 且不需手動選擇", () => {
+			const result = syncChatwootDeployment([]);
+
+			expect(result).toEqual({ selectedId: null, needsSelection: false });
+			expect(window.$chatwoot?.setCustomAttributes).not.toHaveBeenCalled();
+		});
+
+		it("單一部署時自動設定 buyerDeploymentId", () => {
+			const result = syncChatwootDeployment([
+				{ id: "dep_abc", publicUrl: "https://shop.example.com" },
+			]);
+
+			expect(result).toEqual({ selectedId: "dep_abc", needsSelection: false });
+			expect(window.$chatwoot?.setCustomAttributes).toHaveBeenCalledWith({
+				buyerDeploymentId: "dep_abc",
+			});
+		});
+
+		it("多個部署且未選擇時回報 needsSelection = true 且不設定 custom attributes", () => {
+			const result = syncChatwootDeployment([
+				{ id: "dep_1", publicUrl: "https://shop1.example.com" },
+				{ id: "dep_2", publicUrl: "https://shop2.example.com" },
+			]);
+
+			expect(result).toEqual({ selectedId: null, needsSelection: true });
+			expect(window.$chatwoot?.setCustomAttributes).not.toHaveBeenCalled();
+		});
+
+		it("多個部署且指定 selectedDeploymentId 時正確設定 custom attributes", () => {
+			const result = syncChatwootDeployment(
+				[
+					{ id: "dep_1", publicUrl: "https://shop1.example.com" },
+					{ id: "dep_2", publicUrl: "https://shop2.example.com" },
+				],
+				"dep_2",
+			);
+
+			expect(result).toEqual({ selectedId: "dep_2", needsSelection: false });
+			expect(window.$chatwoot?.setCustomAttributes).toHaveBeenCalledWith({
+				buyerDeploymentId: "dep_2",
+			});
+		});
 	});
 });

@@ -14,6 +14,8 @@ import { setupPermissions, permix } from "@shared/lib/permix";
 import { getServerQueryClient } from "@shared/lib/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
+import { findBuyerDeploymentsForUser } from "@startkiter/platform";
+import { SupportWidget } from "@deployment/components/SupportWidget";
 import type { PropsWithChildren } from "react";
 
 import { ChatwootScript } from "./ChatwootScript";
@@ -66,6 +68,13 @@ export default async function AuthenticatedLayout({ children }: PropsWithChildre
 		});
 	}
 
+	const buyerDeployments = await findBuyerDeploymentsForUser(session.user.id);
+	const deployments = buyerDeployments.map((d) => ({
+		id: d.id,
+		publicUrl: d.publicUrl,
+		tier: d.tier,
+	}));
+
 	return (
 		<HydrationBoundary state={dehydrate(queryClient)}>
 			<SessionProvider>
@@ -73,7 +82,8 @@ export default async function AuthenticatedLayout({ children }: PropsWithChildre
 					<ActiveOrganizationProvider>
 						<ConfirmationAlertProvider>
 							{children}
-							<ChatwootScript />
+							<ChatwootScript deployments={deployments} />
+							<SupportWidget deployments={deployments} />
 						</ConfirmationAlertProvider>
 					</ActiveOrganizationProvider>
 				</PermixProvider>

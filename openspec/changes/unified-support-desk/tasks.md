@@ -61,10 +61,11 @@ TDD：每個功能群組先列紅燈測試 task，再列實作 task。
 
 ## 7. 前端入口（對應設計決策「客服入口：全站浮動客服框 + `/deployment` 頁面快捷按鈕」）
 
-- [ ] 7.1（2026-08-19 修正行為：改為仍建單，不再導向 email）撰寫紅燈測試：買家帳號無 `BuyerDeployment` 記錄時，全站浮動客服框仍正常送出並建立 `SupportTicket`（`buyerDeploymentId = null`），對應 Requirement「Ticket creation from the site-wide support widget」Scenario「Buyer has no BuyerDeployment record」，驗證方式為元件測試斷言建單 API 被呼叫且請求體不含 `buyerDeploymentId` 或為 null
-- [ ] 7.2 撰寫紅燈測試：買家有多個 `BuyerDeployment` 時，浮動客服框要求先選擇部署才能送出，對應同一 Requirement 的「Buyer has multiple BuyerDeployment records」Scenario，驗證方式為元件測試斷言選擇器出現且未選擇時無法送出
-- [ ] 7.3 在 `apps/saas` 全站 layout 注入 Chatwoot Widget script，並實作單一部署自動帶入、多部署選擇邏輯，使第 7.1、7.2 節測試轉綠燈，對應 Requirement「Ticket creation from the site-wide support widget」Scenario「Buyer opens the widget and sends a message」與「Buyer has exactly one BuyerDeployment」，驗證方式為 `pnpm test` 全綠 + 手動開啟三種帳號情境（0/1/多部署）截圖確認
-- [ ] 7.4 在 `apps/saas/app/(authenticated)/(main)/(account)/deployment/page.tsx` 新增「回報這個部署的問題」快捷按鈕，點擊時透過 widget API 夾帶 `buyerDeploymentId`，對應 Requirement「Ticket creation from the deployment status page」Scenario「Buyer reports an issue from the deployment page」，驗證方式為 E2E 測試斷言送出的 `SupportTicket.buyerDeploymentId` 與頁面顯示的部署一致
+- [x] 7.1（2026-08-19 修正行為：改為仍建單，不再導向 email）撰寫紅燈測試：買家帳號無 `BuyerDeployment` 記錄時，全站浮動客服框仍正常送出並建立 `SupportTicket`（`buyerDeploymentId = null`），對應 Requirement「Ticket creation from the site-wide support widget」Scenario「Buyer has no BuyerDeployment record」，驗證方式為元件測試斷言建單 API 被呼叫且請求體不含 `buyerDeploymentId` 或為 null
+- [x] 7.2 撰寫紅燈測試：買家有多個 `BuyerDeployment` 時，浮動客服框要求先選擇部署才能送出，對應同一 Requirement 的「Buyer has multiple BuyerDeployment records」Scenario，驗證方式為元件測試斷言選擇器出現且未選擇時無法送出
+- [x] 7.3 在 `apps/saas` 全站 layout 注入 Chatwoot Widget script，並實作單一部署自動帶入、多部署選擇邏輯，使第 7.1、7.2 節測試轉綠燈，對應 Requirement「Ticket creation from the site-wide support widget」Scenario「Buyer opens the widget and sends a message」與「Buyer has exactly one BuyerDeployment」，驗證方式為 `pnpm test` 全綠 + 手動開啟三種帳號情境（0/1/多部署）截圖確認
+- [x] 7.4 在 `apps/saas/app/(authenticated)/(main)/(account)/deployment/page.tsx` 新增「回報這個部署的問題」快捷按鈕，點擊時透過 widget API 夾帶 `buyerDeploymentId`，對應 Requirement「Ticket creation from the deployment status page」Scenario「Buyer reports an issue from the deployment page」，驗證方式為 E2E 測試斷言送出的 `SupportTicket.buyerDeploymentId` 與頁面顯示的部署一致
+
 
 ## 8. 政策文件同步（對應設計決策「v1 邊界政策文字同步改寫（`config.yaml` + `AGENTS.md` + `README.md` 三處）」）
 

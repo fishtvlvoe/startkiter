@@ -39,6 +39,13 @@ export interface ChatwootUser {
 	image?: string | null;
 }
 
+export interface ChatwootDeployment {
+	id: string;
+	name?: string | null;
+	publicUrl?: string | null;
+	tier?: string | null;
+}
+
 export function initChatwootSdk(options: { websiteToken?: string; baseUrl?: string }): boolean {
 	if (!options.websiteToken || typeof window === "undefined") {
 		return false;
@@ -79,14 +86,50 @@ export function syncChatwootUser(user?: ChatwootUser | null): boolean {
 	return true;
 }
 
+export function syncChatwootDeployment(
+	deployments?: ChatwootDeployment[] | null,
+	selectedDeploymentId?: string | null,
+): { selectedId: string | null; needsSelection: boolean } {
+	if (!deployments || deployments.length === 0) {
+		return { selectedId: null, needsSelection: false };
+	}
+
+	// 剛好一個部署：自動帶入
+	if (deployments.length === 1 && deployments[0]) {
+		const depId = deployments[0].id;
+		if (typeof window !== "undefined" && window.$chatwoot) {
+			window.$chatwoot.setCustomAttributes({
+				buyerDeploymentId: depId,
+			});
+		}
+		return { selectedId: depId, needsSelection: false };
+	}
+
+	// 多個部署：若已指定選取的部署則設定，否則需使用者主動選擇
+	if (selectedDeploymentId) {
+		if (typeof window !== "undefined" && window.$chatwoot) {
+			window.$chatwoot.setCustomAttributes({
+				buyerDeploymentId: selectedDeploymentId,
+			});
+		}
+		return { selectedId: selectedDeploymentId, needsSelection: false };
+	}
+
+	return { selectedId: null, needsSelection: true };
+}
+
 export interface ChatwootScriptProps {
 	websiteToken?: string;
 	baseUrl?: string;
+	deployments?: ChatwootDeployment[];
+	selectedDeploymentId?: string | null;
 }
 
 export function ChatwootScript({
 	websiteToken = process.env.NEXT_PUBLIC_CHATWOOT_WEBSITE_TOKEN,
 	baseUrl = process.env.NEXT_PUBLIC_CHATWOOT_BASE_URL || "https://chatwoot.startkiter.com",
+	deployments,
+	selectedDeploymentId,
 }: ChatwootScriptProps) {
 	const { user } = useSession();
 
@@ -99,6 +142,7 @@ export function ChatwootScript({
 
 		const handleSync = () => {
 			syncChatwootUser(user);
+			syncChatwootDeployment(deployments, selectedDeploymentId);
 		};
 
 		handleSync();
@@ -107,7 +151,7 @@ export function ChatwootScript({
 		return () => {
 			window.removeEventListener("chatwoot:ready", handleSync);
 		};
-	}, [websiteToken, baseUrl, user]);
+	}, [websiteToken, baseUrl, user, deployments, selectedDeploymentId]);
 
 	if (!websiteToken) {
 		return null;

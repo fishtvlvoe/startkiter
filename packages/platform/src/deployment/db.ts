@@ -32,6 +32,12 @@ export async function findBuyerDeploymentForUser(userId: string): Promise<BuyerD
 	return row ? toBuyerDeployment(row) : null;
 }
 
+export async function findBuyerDeploymentsForUser(userId: string): Promise<BuyerDeployment[]> {
+	const rows = await db.buyerDeployment.findMany({ where: { userId } });
+	return rows.map(toBuyerDeployment);
+}
+
+
 function toPrismaTier(tier: BuyerDeploymentTier): "self_hosted" | "managed" | "advanced" {
 	if (tier === "self-hosted") {
 		return "self_hosted";
