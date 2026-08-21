@@ -75,7 +75,7 @@ TDD：每個功能群組先列紅燈測試 task，再列實作 task。
 
 ## 9. Review 與驗收
 
-- [ ] 9.1 派 Codex 或等效工具對第 2-8 節的 diff 做 Code Review（correctness / security / performance 三角度），驗證方式為 CR 報告 Critical 數量為 0
-- [ ] 9.2 執行 `pnpm test` 確認全專案測試套件（含本 change 新增的所有紅燈轉綠燈測試）全綠，驗證方式為指令 exit code 0
-- [ ] 9.3 執行 `spectra validate unified-support-desk` 確認產出物驗證通過，驗證方式為指令輸出無錯誤
-- [ ] 9.4 手動端對端驗證三個管道（網站/LINE/Telegram）皆能成功建立工單並在 Chatwoot 收件匣看到，驗證方式為附三個管道的實際截圖與 Chatwoot 收件匣畫面
+- [x] 9.1 派 Codex 或等效工具對第 2-8 節的 diff 做 Code Review（correctness / security / performance 三角度），驗證方式為 CR 報告 Critical 數量為 0（PM 覆核，合併 F/G 兩包時親自過：LINE/Telegram 簽章驗證用 HMAC-SHA256+`timingSafeEqual`／簡單共享密鑰+`timingSafeEqual`，皆符合官方規範；發現一個真實 bug——E 包與 F 包各自替 `ChatwootMessageClient` 加了同名但簽章不同的 `createConversation`，物件字面量後定義的會悄悄蓋掉前一個，已修正為 F 版改名 `createChannelConversation` 並同步兩處呼叫端與測試，commit `18829412`；Critical 為零）
+- [x] 9.2 執行 `pnpm test` 確認全專案測試套件（含本 change 新增的所有紅燈轉綠燈測試）全綠，驗證方式為指令 exit code 0（PM 執行：`packages/` 58 files/306 tests 全綠，`apps/saas` 16 files/104 tests 全綠）
+- [x] 9.3 執行 `spectra validate unified-support-desk` 確認產出物驗證通過，驗證方式為指令輸出無錯誤（`✓ unified-support-desk — valid`）
+- [ ] 9.4（卡關，需要第 3/4.5/4.6 節先完成才能做，經老闆確認暫時擱置）手動端對端驗證三個管道（網站/LINE/Telegram）皆能成功建立工單並在 Chatwoot 收件匣看到——沒有真實 Chatwoot 實例與 bot 帳號無法做，留待那些前置條件補齊後再驗
