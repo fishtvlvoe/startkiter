@@ -30,33 +30,33 @@
 - E2E：⬜ 未跑正式 e2e（archive 前已用行為驗證代替）
 
 ### 2. unified-support-desk
-- 狀態：🔵 進行中
-- Task 進度：30/49（61%，2026-08-21 發現第 6 節 AI Webhook 消費者其實已完成但看板數字沒同步）
+- 狀態：🔵 進行中（僅剩卡關項目）
+- Task 進度：43/49（88%）
 - 指派對象：
   - 第 3 節（Chatwoot VPS 建置）→ 🔴 卡關，需要真人開帳號/花錢，經老闆確認先跳過不做
   - 第 4.5/4.6（LINE/Telegram bot 帳號申請）→ 🔴 卡關，需要真人操作，跳過不做
-  - 第 4.1-4.4/4.7/4.8（LINE/Telegram webhook 程式碼，可用 mock 不依賴真實帳號）→ 派工中（agy），見下方
-  - 第 7 節（前端客服入口）→ 派工中（agy），見下方
-  - 第 9 節（Review 與驗收）→ 待做，9.4（三管道實際截圖）依賴第 3/4.5/4.6 節，會卡住，其餘可做
-- E2E：⬜ 未跑
+  - 第 4.1-4.4/4.7/4.8（LINE/Telegram webhook 程式碼）→ ✅ 已完成，agy→codex（agy 額度用完自動切換），PM 合併時發現並修正一個真實 bug（E/F 兩包各自加了同名不同簽章的 `createConversation`，物件字面量後定義的悄悄蓋掉前一個）
+  - 第 7 節（前端客服入口）→ ✅ 已完成，agy→codex
+  - 第 9 節（Review 與驗收）→ ✅ 9.1-9.3 完成，9.4（三管道實際截圖）依賴第 3/4.5/4.6 節卡關，暫時擱置
+- E2E：⬜ 未跑（9.4 卡關，無真實 Chatwoot 實例可測）
 - 備註：Chatwoot VPS 老闆一度以為在別的地方（「ego」專案）設定過，PM 查證 `.env`／`.env.local`／`/Users/fishtv/Development/ego`（完全不相關的 Cloudflare Workers 專案）皆無 Chatwoot 憑證，確認尚未真的建置，經老闆確認暫時擱置不追
 
 ### 3. platform-shell-plugin-architecture
 - 狀態：🔵 進行中
-- Task 進度：50/120（42%，2026-08-21 補 commit 了原本卡住沒存檔的 Phase 2 側欄動態渲染）
+- Task 進度：68/120（57%）
 - 子項：
-  - Phase 4（Marketplace 展示+模版選擇，task 15-23）→ 純展示頁面照 spec 抄 → **Haiku 子代理**；模版套用邏輯跟 Mount Points 接合 → **Sonnet 子代理**
-  - Phase 6（Core 邊界文件，task 28-30）→ 純文件 → **Haiku 子代理**
-  - Phase 7（既有測試更新+全面驗收，task 31-32）→ **PM 親自**（涉及既有測試全面確認，需要判斷哪些是本次改動造成、哪些是既有 baseline，不外派）
-  - Phase 9（側邊欄 WordPress 視覺+拖曳分組持久化，task 43-48）→ **PM 親自或 Sonnet 子代理**（2026-08-21 發現這塊有半成品 bug：icon fallback 字重疊、拖曳把手定位跑掉，需要抓根因，不適合 Haiku）+ 網頁設計師 agent（Demo-first HTML）
-- E2E：⬜ 未跑
-- 2026-08-21 追加派工中：側邊欄拖曳把手 bug（task 49.2）、sidebar-context 路由涵蓋確認+紅燈測試補寫（task 50.1/5.1/5.2/9.3）、nav-menu-items 剩餘 2 個過時斷言（task 50.7），三包都派 agy
-- 待處理清單（2026-08-21 老闆點出，先列清單再修，不當場亂改）：
-  1. NavBar `iconMap`（`apps/saas/modules/shared/components/NavBar.tsx`）缺多個圖示 key，fallback 會把字串印出來蓋到選單文字（已修一例：bundles 選單改用 `settings` key 頂著，其他未知 key 可能還有同樣問題）
-  2. 側邊欄拖曳調整寬度的把手（sidebar edge resize handle）定位邏輯沒做完，會不正常持續顯示
-  3. task 6.2（`sidebar-context.tsx` 狀態涵蓋 /app, /course, /agent, /admin/settings 全部路由）未確認/未擴充
-  4. task 5.1/5.2/9.3 紅燈測試未補寫
-  5. task 11.1-11.3（Review、Chrome MCP 截圖、build+test 全綠）未做
+  - Phase 4（Marketplace 展示+模版選擇，task 15-23）→ 待做，純展示頁面照 spec 抄 → **Haiku 子代理**；模版套用邏輯跟 Mount Points 接合 → **Sonnet 子代理**
+  - Phase 6（Core 邊界文件，task 28-30）→ ✅ 已完成（agy）
+  - Phase 7（既有測試更新+全面驗收，task 31-32）→ 待做，**PM 親自**
+  - Phase 9（側邊欄 WordPress 視覺+拖曳分組持久化，task 43-48）→ 部分完成（拖曳把手 bug 已修，見下方），其餘待做
+- E2E：🟡 跑過有失敗——PM 用真實登入 session 點過多個頁面，抓到一個真 server/client boundary bug 並修復；nav-menu-items.test.ts 從 6/7 失敗修到全綠
+- 待處理清單（2026-08-21 老闆點出，先列清單再修，不當場亂改）進度：
+  1. ✅ NavBar `iconMap` 缺圖示 key 問題 → 已修（icon fallback 修復 + 側邊欄拖曳把手定位 bug 修復，commit `703ce9fe`）
+  2. ✅ 側邊欄拖曳把手定位邏輯 → 已修
+  3. ✅ task 6.2（sidebar-context 涵蓋全部路由）→ 已確認補齊
+  4. ✅ task 5.1/5.2/9.3 紅燈測試 → 已補寫
+  5. ⬜ task 11.1-11.3（Review、Chrome MCP 截圖、build+test 全綠）未做，待推進
+  6. ✅ nav-menu-items.test.ts 過時斷言（task 50.7）→ agy 自報完成但實際只改措辭沒改對數值，PM 親自核對 MOUNT_POINTS 真實內容重寫，7/7 真綠燈
 
 ### 4. core-module-bundles-coupons
 - 狀態：🔵 進行中
