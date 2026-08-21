@@ -3,7 +3,7 @@ context: |
   # 產品定位與現行狀態
   StartKiter（對外課名可用「開站包」）是課 + 終身代碼包。MVP 用這包自己的站賣課；課程是模組，不是整站唯一長相。
   結帳金額鎖 8800 TWD（不是區間）。主金流只接通 PAYUNi，一次買斷 TWD。付款後站內領 GitHub 組織私人倉庫只讀。
-  站內 agent 可接模型，v1 只掛兩支唯讀工具。付費學員在課程內加入 LINE 交流群；客服走 email。
+  站內 agent 可接模型，v1 只掛兩支唯讀工具。付費學員在課程內加入 LINE 交流群；客服走 Chatwoot 統一工單（網站/LINE/Telegram）。
   不是 libon.me 的一部分。
   `mvp-test-scope`、`extract-shell-auth`、`extract-payuni-checkout`、`extract-course-module`、`test-to-clean-package-promotion` 皆已封存。
   MVP extract 佇列已清空（site-agent／line／kit 皆封存）。`bootstrap-test-startkiter`／`mvp-sell-flow-usable` 已封存。TEST HTTPS：https://test-startkiter.vercel.app（Neon via Vercel；Git auto-deploy 已接通）。kit 真測需 GITHUB_KIT_ORG／REPO／完整 PEM。
@@ -32,7 +32,7 @@ context: |
   - 商品常數：price_twd = 8800, currency = TWD, sku = startkiter-mvp
   - 一次買斷 TWD，不做月繳、不做三階
   - 不做 Organization / Member / Invitation；帳單掛 user
-  - LINE Login Channel 做登入；學員社群用課程內 LINE 邀請連結，不做 Messaging / LIFF / Bot，不能靜默入群
+  - LINE Login Channel 做登入；學員社群用課程內 LINE 邀請連結，允許客服用途的 LINE Messaging，不做 LIFF / 行銷 Bot，不能靜默入群。客服走 Chatwoot 統一工單（網站/LINE/Telegram）
   - 金鑰填後台、env fallback；沒設金流必須 fail-closed（POST /api/checkout → 503，不是 500）
   - 發票不在 MVP
 
@@ -47,6 +47,7 @@ context: |
   - 「現行待施工 extract-payuni-checkout」已廢：該 change 已封存
   - 「現行待施工 extract-course-module」已廢：該 change 已封存
   - 「i18n 只留 zh-TW」已廢：多語系已起跳，zh-tw 是 fallback 不是唯一語言
+  - 「客服走 email」「不做 Messaging」已廢：已由 unified-support-desk 改為 Chatwoot 統一工單（網站/LINE/Telegram）與客服用途 LINE Messaging
 
   # 程式碼規範
   - 程式碼英文、註解繁中

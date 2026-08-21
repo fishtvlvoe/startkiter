@@ -68,9 +68,9 @@ TDD：每個功能群組先列紅燈測試 task，再列實作 task。
 
 ## 8. 政策文件同步（對應設計決策「v1 邊界政策文字同步改寫（`config.yaml` + `AGENTS.md` + `README.md` 三處）」）
 
-- [ ] 8.1 改寫 `openspec/config.yaml` 的 v1 硬邊界段落：「LINE Login Channel 做登入⋯不做 Messaging / LIFF / Bot」改為允許客服用途的 LINE Messaging；「客服走 email」改為「客服走 Chatwoot 統一工單（網站/LINE/Telegram）」；並在「已廢」段落加一行標記舊規則已被本 change 取代，驗證方式為 `grep -n "Chatwoot 統一工單" openspec/config.yaml` 命中
-- [ ] 8.2 同步改寫 `AGENTS.md` 第 106 行附近對應文字，驗證方式為 `grep -n "客服走" AGENTS.md` 顯示已更新為 Chatwoot 相關描述
-- [ ] 8.3 同步改寫 `README.md` 第 5 行附近對應文字，驗證方式為 `grep -n "客服走" README.md` 顯示已更新為 Chatwoot 相關描述
+- [x] 8.1 改寫 `openspec/config.yaml` 的 v1 硬邊界段落：「LINE Login Channel 做登入⋯不做 Messaging / LIFF / Bot」改為允許客服用途的 LINE Messaging；「客服走 email」改為「客服走 Chatwoot 統一工單（網站/LINE/Telegram）」；並在「已廢」段落加一行標記舊規則已被本 change 取代，驗證方式為 `grep -n "Chatwoot 統一工單" openspec/config.yaml` 命中
+- [x] 8.2 同步改寫 `AGENTS.md` 第 106 行附近對應文字，驗證方式為 `grep -n "客服走" AGENTS.md` 顯示已更新為 Chatwoot 相關描述
+- [x] 8.3 同步改寫 `README.md` 第 5 行附近對應文字，驗證方式為 `grep -n "客服走" README.md` 顯示已更新為 Chatwoot 相關描述
 
 ## 9. Review 與驗收
 
