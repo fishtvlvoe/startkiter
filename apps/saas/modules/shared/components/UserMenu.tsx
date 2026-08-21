@@ -5,7 +5,6 @@ import { config } from "@config";
 import { authClient } from "@startkiter/auth/client";
 import {
 	cn,
-	ColorModeToggle,
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuGroup,
@@ -87,24 +86,6 @@ export function UserMenu({ showUserName }: { showUserName?: boolean }) {
 						<span className="font-normal text-xs block opacity-70">{email}</span>
 					</DropdownMenuLabel>
 				</DropdownMenuGroup>
-
-				<DropdownMenuSeparator />
-
-				{/* Color mode selection */}
-				<DropdownMenuItem
-					className="gap-4 flex items-center justify-between hover:bg-transparent focus:bg-transparent"
-					closeOnClick={false}
-				>
-					<span className="whitespace-nowrap">{t("app.userMenu.colorMode")}</span>
-					<ColorModeToggle
-						modes={["system", "light", "dark"]}
-						labels={{
-							system: t("common.colorMode.system"),
-							light: t("common.colorMode.light"),
-							dark: t("common.colorMode.dark"),
-						}}
-					/>
-				</DropdownMenuItem>
 
 				<DropdownMenuSeparator />
 
