@@ -103,7 +103,7 @@ GitHub kit 邀請已封存（GitHub App + 站內 OAuth）。本刀不做 kit 履
 
 不做 Organization 多租戶。帳單掛 user。
 
-LINE Login Channel 做登入。學員社群用課程內 LINE 邀請連結，不能靜默入群。客服走 email。不做 SKOOL。
+LINE Login Channel 做登入。學員社群用課程內 LINE 邀請連結，不能靜默入群；允許客服用途的 LINE Messaging。客服走 Chatwoot 統一工單（網站/LINE/Telegram）。不做 SKOOL。
 
 金鑰填後台，env fallback。沒設金流 fail-closed。
 
