@@ -1,7 +1,8 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { NavBar } from "./NavBar";
+import { MOUNT_POINTS } from "@startkiter/platform";
+import { iconMap, NavBar, resolveIcon } from "./NavBar";
 
 const mockPathname = "/";
 const mockIsCollapsed = false;
@@ -103,5 +104,40 @@ describe("NavBar shell layout (Phase 2)", () => {
 		const topBarHtml = topBarEnd > 0 ? html.slice(0, topBarEnd) : html;
 		expect(topBarHtml).toContain("color-mode-toggle");
 		expect(topBarHtml).not.toContain("locale-switch");
+	});
+});
+
+describe("NavBar iconMap & resolveIcon coverage", () => {
+	it("every MOUNT_POINTS icon has a matching entry in iconMap", () => {
+		const mountIcons = MOUNT_POINTS.filter((p) => p.mount.menu).map((p) => p.mount.menu!.icon);
+		expect(mountIcons.length).toBeGreaterThan(0);
+
+		for (const icon of mountIcons) {
+			expect(icon in iconMap).toBe(true);
+			const IconComponent = resolveIcon(icon);
+			expect(IconComponent).toBeDefined();
+
+			const rendered = renderToStaticMarkup(React.createElement(IconComponent));
+			// Should render SVG icon, not raw string fallback span
+			expect(rendered).toContain("<svg");
+			expect(rendered).not.toContain(`>${icon}<`);
+		}
+	});
+
+	it("resolveIcon resolves package and book-open to valid SVG icons", () => {
+		const PackageComp = resolveIcon("package");
+		const BookOpenComp = resolveIcon("book-open");
+
+		expect(renderToStaticMarkup(React.createElement(PackageComp))).toContain("<svg");
+		expect(renderToStaticMarkup(React.createElement(BookOpenComp))).toContain("<svg");
+	});
+
+	it("resolveIcon does not render raw multi-character string on unknown key fallback", () => {
+		const UnknownComp = resolveIcon("unknown-feature-key");
+		const html = renderToStaticMarkup(React.createElement(UnknownComp));
+
+		// Should NOT render span containing the long string
+		expect(html).not.toContain("unknown-feature-key");
+		expect(html).toContain("<svg");
 	});
 });

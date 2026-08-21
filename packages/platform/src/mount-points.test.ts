@@ -11,6 +11,7 @@ describe("MOUNT_POINTS registry tests (Task 3.1)", () => {
 		expect(coursePlugin?.mount.content?.boundTo).toBe("/course");
 		expect(coursePlugin?.mount.menu).toBeDefined();
 		expect(coursePlugin?.mount.menu?.label).toBe("課程");
+		expect(coursePlugin?.mount.menu?.icon).toBe("book-open");
 	});
 
 	it("supports requiresOperator on menu mount points", () => {
@@ -25,6 +26,7 @@ describe("MOUNT_POINTS registry tests (Task 3.1)", () => {
 		expect(bundlesPlugin?.mount.route?.path).toBe("/admin/bundles");
 		expect(bundlesPlugin?.mount.menu?.requiresOperator).toBe(true);
 		expect(bundlesPlugin?.mount.menu?.label).toBe("課程綁定包");
+		expect(bundlesPlugin?.mount.menu?.icon).toBe("package");
 	});
 });
 
