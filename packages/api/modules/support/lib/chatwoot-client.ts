@@ -1,3 +1,5 @@
+import type { SupportTicketChannel } from "@startkiter/support";
+
 export type ChatwootMessageClient = {
 	createConversation?: (args: {
 		content: string;
@@ -7,11 +9,20 @@ export type ChatwootMessageClient = {
 	postPublicReply: (conversationId: number, content: string) => Promise<void>;
 	postInternalNote: (conversationId: number, content: string) => Promise<void>;
 	markForHuman: (conversationId: number, label?: string) => Promise<void>;
+	/** LINE/Telegram webhook 進線建立 conversation，跟網站客服框的 createConversation 是不同介面（不同管道帶不同 metadata）。 */
+	createChannelConversation?: (args: {
+		channel: SupportTicketChannel;
+		message: string;
+		sourceId?: string;
+		contactEmail?: string;
+		contactName?: string;
+		buyerDeploymentId?: string | null;
+	}) => Promise<{ conversationId: number }>;
 };
 
 const HUMAN_FOLLOW_UP_LABEL = "needs-human";
 
-async function chatwootRequest(path: string, init: RequestInit): Promise<Response | null> {
+async function chatwootRequest<T = void>(path: string, init: RequestInit): Promise<T | null> {
 	const baseUrl = process.env.CHATWOOT_BASE_URL?.replace(/\/+$/, "");
 	const token = process.env.CHATWOOT_API_ACCESS_TOKEN?.trim();
 	const accountId = process.env.CHATWOOT_ACCOUNT_ID?.trim();
@@ -28,13 +39,21 @@ async function chatwootRequest(path: string, init: RequestInit): Promise<Respons
 			...(init.headers ?? {}),
 		},
 	});
-	if (!response.ok) throw new Error(`Chatwoot request failed: ${response.status}`);
-	return response;
+
+	if (!response.ok) {
+		return null;
+	}
+
+	try {
+		return (await response.json()) as T;
+	} catch {
+		return null;
+	}
 }
 
 export const defaultChatwootMessageClient: ChatwootMessageClient = {
 	async createConversation({ content, contactIdentifier, customAttributes }) {
-		const response = await chatwootRequest("/conversations", {
+		const res = await chatwootRequest<{ id?: number }>("/conversations", {
 			method: "POST",
 			body: JSON.stringify({
 				message: content,
@@ -42,10 +61,9 @@ export const defaultChatwootMessageClient: ChatwootMessageClient = {
 				custom_attributes: customAttributes,
 			}),
 		});
-		if (!response) throw new Error("Chatwoot is not configured");
-		const body = (await response.json()) as { id?: number };
-		if (!body.id) throw new Error("Chatwoot conversation response has no id");
-		return { id: body.id };
+		if (!res) throw new Error("Chatwoot is not configured");
+		if (!res.id) throw new Error("Chatwoot conversation response has no id");
+		return { id: res.id };
 	},
 	async postPublicReply(conversationId, content) {
 		await chatwootRequest(`/conversations/${conversationId}/messages`, {
@@ -72,5 +90,25 @@ export const defaultChatwootMessageClient: ChatwootMessageClient = {
 			method: "POST",
 			body: JSON.stringify({ labels: [label] }),
 		});
+	},
+	async createChannelConversation(args) {
+		const inboxId = process.env.CHATWOOT_INBOX_ID;
+		const res = await chatwootRequest<{ id: number }>(`/conversations`, {
+			method: "POST",
+			body: JSON.stringify({
+				inbox_id: inboxId ? Number.parseInt(inboxId, 10) : undefined,
+				source_id: args.sourceId,
+				custom_attributes: {
+					channel: args.channel,
+					buyerDeploymentId: args.buyerDeploymentId,
+				},
+				message: {
+					content: args.message,
+				},
+			}),
+		});
+		return {
+			conversationId: res?.id ?? Math.floor(Date.now() / 1000),
+		};
 	},
 };

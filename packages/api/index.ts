@@ -23,6 +23,8 @@ export const app = new Hono()
 				"Authorization",
 				"X-Chatwoot-Signature",
 				"X-Chatwoot-Timestamp",
+				"X-Line-Signature",
+				"X-Telegram-Bot-Api-Secret-Token",
 			],
 			allowMethods: ["POST", "GET", "OPTIONS"],
 			exposeHeaders: ["Content-Length"],
@@ -38,9 +40,9 @@ export const app = new Hono()
 	.get("/health", (c) => c.text("OK"))
 	// oRPC handlers (for RPC and OpenAPI)
 	.use("*", async (c, next) => {
-		const isChatwootWebhook =
-			c.req.method === "POST" && c.req.path.includes("/support/webhook/chatwoot");
-		const rawBody = isChatwootWebhook ? await c.req.raw.clone().text() : undefined;
+		const isSupportWebhook =
+			c.req.method === "POST" && c.req.path.includes("/support/webhook");
+		const rawBody = isSupportWebhook ? await c.req.raw.clone().text() : undefined;
 		const context = {
 			headers: c.req.raw.headers,
 			rawBody,

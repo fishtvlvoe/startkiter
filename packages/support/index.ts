@@ -33,3 +33,21 @@ export {
 	applyTicketStatusTransition,
 } from "./src/ticket-status";
 export type { SupportTicketStatus, TicketStatusActor } from "./src/ticket-status";
+export {
+	getAvailableSupportChannels,
+	isLineSupportConfigured,
+	isTelegramSupportConfigured,
+} from "./src/channel-config";
+export {
+	LINE_SIGNATURE_HEADER,
+	createLineWebhookSignature,
+	parseLineWebhookPayload,
+	verifyLineWebhookSignature,
+} from "./src/line-signature";
+export type { LineWebhookEvent } from "./src/line-signature";
+export {
+	TELEGRAM_SECRET_TOKEN_HEADER,
+	parseTelegramWebhookPayload,
+	verifyTelegramWebhookSecret,
+} from "./src/telegram-signature";
+export type { TelegramWebhookMessage } from "./src/telegram-signature";
