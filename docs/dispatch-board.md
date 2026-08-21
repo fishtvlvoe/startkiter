@@ -31,12 +31,15 @@
 
 ### 2. unified-support-desk
 - 狀態：🔵 進行中
-- Task 進度：19/49（39%）
+- Task 進度：30/49（61%，2026-08-21 發現第 6 節 AI Webhook 消費者其實已完成但看板數字沒同步）
 - 指派對象：
-  - 純資料模型/API 照既有 spec 補齊的部分 → **Haiku 子代理**，PM 抽查 diff
-  - 涉及跟既有客服流程整合、判斷邊界案例的部分 → **Sonnet 子代理**，或外部 CLI（優先 `agy`）
+  - 第 3 節（Chatwoot VPS 建置）→ 🔴 卡關，需要真人開帳號/花錢，經老闆確認先跳過不做
+  - 第 4.5/4.6（LINE/Telegram bot 帳號申請）→ 🔴 卡關，需要真人操作，跳過不做
+  - 第 4.1-4.4/4.7/4.8（LINE/Telegram webhook 程式碼，可用 mock 不依賴真實帳號）→ 派工中（agy），見下方
+  - 第 7 節（前端客服入口）→ 派工中（agy），見下方
+  - 第 9 節（Review 與驗收）→ 待做，9.4（三管道實際截圖）依賴第 3/4.5/4.6 節，會卡住，其餘可做
 - E2E：⬜ 未跑
-- 備註：範圍獨立、可平行推進、風險低（不碰金流/資料完整性）
+- 備註：Chatwoot VPS 老闆一度以為在別的地方（「ego」專案）設定過，PM 查證 `.env`／`.env.local`／`/Users/fishtv/Development/ego`（完全不相關的 Cloudflare Workers 專案）皆無 Chatwoot 憑證，確認尚未真的建置，經老闆確認暫時擱置不追
 
 ### 3. platform-shell-plugin-architecture
 - 狀態：🔵 進行中
@@ -47,6 +50,7 @@
   - Phase 7（既有測試更新+全面驗收，task 31-32）→ **PM 親自**（涉及既有測試全面確認，需要判斷哪些是本次改動造成、哪些是既有 baseline，不外派）
   - Phase 9（側邊欄 WordPress 視覺+拖曳分組持久化，task 43-48）→ **PM 親自或 Sonnet 子代理**（2026-08-21 發現這塊有半成品 bug：icon fallback 字重疊、拖曳把手定位跑掉，需要抓根因，不適合 Haiku）+ 網頁設計師 agent（Demo-first HTML）
 - E2E：⬜ 未跑
+- 2026-08-21 追加派工中：側邊欄拖曳把手 bug（task 49.2）、sidebar-context 路由涵蓋確認+紅燈測試補寫（task 50.1/5.1/5.2/9.3）、nav-menu-items 剩餘 2 個過時斷言（task 50.7），三包都派 agy
 - 待處理清單（2026-08-21 老闆點出，先列清單再修，不當場亂改）：
   1. NavBar `iconMap`（`apps/saas/modules/shared/components/NavBar.tsx`）缺多個圖示 key，fallback 會把字串印出來蓋到選單文字（已修一例：bundles 選單改用 `settings` key 頂著，其他未知 key 可能還有同樣問題）
   2. 側邊欄拖曳調整寬度的把手（sidebar edge resize handle）定位邏輯沒做完，會不正常持續顯示
