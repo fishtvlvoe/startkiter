@@ -1,5 +1,5 @@
-import { MOUNT_POINTS } from "@startkiter/platform/src/mount-points";
-import type { PluginManifest } from "@startkiter/platform/src/types";
+import { MOUNT_POINTS, type PluginManifest } from "@startkiter/platform";
+
 
 export interface MountMenuItem {
 	id: string;
