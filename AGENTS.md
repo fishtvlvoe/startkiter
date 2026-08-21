@@ -83,7 +83,7 @@ MVP extract 佇列已清空：`extract-site-agent`、`extract-line-learner-commu
 
 課程 UI 當模組留下：從舊售出包（thetu）抽觀看與權限畫面 → `packages/course`。原「不抽整套學院營運」的範圍限制已封存作廢——2026-08-21 老闆定案：`dev/thetu` 全套內容/行銷/金流模組（courses、bundles、coupons、subscriptions、newsletters、course-invites、assignment、lesson-comments/private-messages、invoice）開放抽取，當成 StartKiter 的「核心基本模組」，各自拆成獨立 `packages/<name>/`（依 `docs/buyer-extension-convention.md` 慣例），實際拆解規劃走新開的 Spectra change，尚未 propose。
 
-**`https://github.com/woomini-flow/woomin`（WuMin 買方專屬課程 repo 樣板）跟 `THE-TU-Project/dev/thetu` 是同一套代碼家族**（2026-08-22 核對：`app/`、`lib/` 檔案清單逐一比對幾乎完全一致，`.env` 裡多處「from woomin notes」的設定其實就是這套代碼本身的設定，不是另一個獨立來源）。差別在 woomin 目前走 Zeabur 部署（有自己的 cron-worker、customer-deployment 文件），thetu/StartKiter 走 Coolify+VPS，部署層不通用，但功能模組（`lib/` 底下的 setup-config、settings-page-tabs、site-brand、deployment-capabilities 等）視為同一份抽取來源的別名，不用另外重新盤點。
+**`https://github.com/woomini-flow/woomin`（WuMin 買方專屬課程 repo 樣板）跟 `THE-TU-Project/dev/thetu` 是同一套代碼家族**（2026-08-22 核對：`app/`、`lib/` 檔案清單逐一比對幾乎完全一致，`.env` 裡多處「from woomin notes」的設定其實就是這套代碼本身的設定，不是另一個獨立來源）。**2026-08-22 老闆定案：抽取以 `woomin` repo 為主，`thetu` 為輔**——兩邊檔案結構雖幾乎一樣，但細部功能實作不完全同步，woomin 是目前維護中的正本，thetu 不確定是不是舊版本；之後要抽任何模組先看 woomin 那邊的實作，thetu 只在 woomin 缺檔案時當備援參考。部署層不通用（woomin 走 Zeabur，thetu/StartKiter 走 Coolify+VPS），不影響抽取優先順序。
 
 LINE 登入契約：`/Users/fishtv/Development/8-外掛/line-hub`（網頁 OAuth 決策；PHP／LIFF／Bot 不搬）
 
