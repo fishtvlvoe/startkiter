@@ -158,19 +158,19 @@
 
 ### 28. 紅燈測試：Core 邊界
 
-- [ ] 28.1 [P] 撰寫測試驗證 spec platform-core-boundary「Payment, notification, page-editing, and course-engine infrastructure are fixed Core capabilities」——manifest 宣告 dataSpec: "payment" 型別檢查失敗、/api/plugins 不含金流項目
-- [ ] 28.2 [P] 撰寫測試驗證 spec platform-core-boundary「Plugin scope is limited to service-type capabilities」——課程 manifest 通過驗證、不存在的 mount kind 型別檢查失敗
-- [ ] 28.3 [P] 撰寫測試驗證 spec platform-core-boundary「Transaction-type data spec is documented but not scaffolded in v1」——codebase 不含交易型 Plugin scaffold
+- [x] 28.1 [P] 撰寫測試驗證 spec platform-core-boundary「Payment, notification, page-editing, and course-engine infrastructure are fixed Core capabilities」——manifest 宣告 dataSpec: "payment" 型別檢查失敗、/api/plugins 不含金流項目
+- [x] 28.2 [P] 撰寫測試驗證 spec platform-core-boundary「Plugin scope is limited to service-type capabilities」——課程 manifest 通過驗證、不存在的 mount kind 型別檢查失敗
+- [x] 28.3 [P] 撰寫測試驗證 spec platform-core-boundary「Transaction-type data spec is documented but not scaffolded in v1」——codebase 不含交易型 Plugin scaffold
 
 ### 29. 實作：Core 邊界文件與確認
 
-- [ ] 29.1 撰寫擴充文件聲明官方 AI 引導擴充路徑僅支援 Plugin 機制，直接修改 Core 不受官方保護（spec platform-core-boundary「Customers may modify Core source code without platform restriction」的文件 scenario）
-- [ ] 29.2 確認 Phase 1 建立的 PluginManifest 型別本身即滿足 Core 邊界相關型別限制，不需額外程式碼，驗證：28.1、28.2、28.3 轉綠燈
+- [x] 29.1 撰寫擴充文件聲明官方 AI 引導擴充路徑僅支援 Plugin 機制，直接修改 Core 不受官方保護（spec platform-core-boundary「Customers may modify Core source code without platform restriction」的文件 scenario）
+- [x] 29.2 確認 Phase 1 建立的 PluginManifest 型別本身即滿足 Core 邊界相關型別限制，不需額外程式碼，驗證：28.1、28.2、28.3 轉綠燈
 
 ### 30. Phase 6 Review 與驗收
 
-- [ ] 30.1 對 Phase 6 變更跑 review，Critical 為零
-- [ ] 30.2 `pnpm build` 與 `pnpm test` 通過
+- [x] 30.1 對 Phase 6 變更跑 review，Critical 為零
+- [x] 30.2 `pnpm build` 與 `pnpm test` 通過
 
 ## 架構決策引用：部署管線採 git-push-auto-deploy，取消客製打包/MCP推送/自動build 三層
 
