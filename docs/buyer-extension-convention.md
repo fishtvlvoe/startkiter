@@ -2,6 +2,8 @@
 
 本文件給買家自己的 AI 工具（Claude Code / Cursor）閱讀與執行。新增一個業務模組時，必須遵守以下規則，不得引入 runtime plugin 框架（如 cordis）。
 
+關於 Core 邊界定義、直接修改 Core 的免責聲明與型別防護機制，請參閱 [`docs/core-boundary-and-extension-guide.md`](file:///Users/fishtv/orca/workspaces/startkiter/task-core-boundary-docs/docs/core-boundary-and-extension-guide.md)。
+
 ## 強制規則
 
 1. **模組根目錄必須是 `packages/<name>/`**。不許放在 `apps/saas/` 裡，也不許放在倉庫根目錄。
