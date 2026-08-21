@@ -73,14 +73,19 @@
 - 備註：Phase 3/4 禁止外派，money-related 一律 PM 親自
 
 ### 4.5 sheets-export-engine（新增，2026-08-21 補進 dispatch board）
-- 狀態：🔵 進行中，無阻塞、無依賴，適合插隊快速收尾
-- Task 進度：11/18（61%）
+- 狀態：🟢 可收尾（Phase 1-3 全做完，只剩 Phase 4 AI 整合非本輪必要）
+- Task 進度：16/18（89%）
 - 指派對象：
   - Phase 1（核心套件+匯出服務）→ ✅ 已完成
-  - Phase 2（bundles/coupons 報表範本）→ 待做，機械性照抄既有 orders/revenue 範本結構，可派 **Codex**
-  - Phase 3（SaaS API+前端匯出按鈕）→ 待做，可派 **Codex**，PM 驗收
-  - Phase 4（AI Agent 產表整合）→ 待做，需要判斷 MCP tool 介面設計，**Sonnet/PM**
-- E2E：⬜ 未跑
+  - Phase 2（bundles/coupons 報表範本）→ ✅ 已完成，Codex（orca worktree `sheets-phase2-3`）
+  - Phase 3（SaaS API+前端匯出按鈕）→ ✅ 已完成，Codex
+  - Phase 4（AI Agent 產表整合）→ 待做，需要判斷 MCP tool 介面設計，**Sonnet/PM**，非阻塞可另排
+- Codex 自報「完整 test/type-check 被既有問題擋住」但沒講清楚是哪個問題，**PM 沒採信自報**，親自重跑抓到三個真問題並修掉：
+  1. `packages/sheets` 全套件對 `@open-sheet/core` 的 JSX 元件回傳自訂 Node 型別（非 ReactNode），tsc 判為 TS2786——根因是 tsconfig 用預設 React JSX 型別檢查，@open-sheet/core 有自己的 `jsx-runtime`。修法：每個 template 檔案頂部加 `/** @jsxImportSource @open-sheet/core */` pragma（Codex 後來自己也补上了同樣修法）
+  2. `packages/sheets/src/index.ts` 用 `.js` 副檔名 re-export `.tsx` 檔（`export * from './templates/orders.js'`），tsc/vitest 靠 moduleResolution 能自動映射回 `.tsx`，但 Next.js Turbopack 打包時不吃這套映射，直接報 Module not found——這個問題要等到有人真的在 apps/saas 裡 import 這個套件才會噴出來（Phase 1 沒人用，Phase 3 才第一次真的接上），改成不寫副檔名（比照 `packages/bundles`／`packages/course` 既有慣例）
+  3. `@open-sheet/core/node` 內部依賴 `vite`（含 `lightningcss` 原生 `.node` binary），一旦 API route 匯入 sheets exporter，Next.js 會想把 vite 整個打包進 server bundle 而失敗——`next.config.ts` 加 `serverExternalPackages: ["@open-sheet/core", "vite", "lightningcss"]` 排除
+- 這次也順手修了一個**跟 sheets 無關但擋住全 repo `pnpm build`／`pnpm test` 的循環依賴**：`payments→bundles→course→payments`。根因是 `packages/bundles` 有一份整合測試 import `@startkiter/course`（僅測試用），造成三個套件互相依賴成環。搬到 `apps/saas/tests/integration/`（apps/saas 本來就同時依賴兩者，安全落點），並發現 **15/20 個套件沒有自己的 vitest.config.ts**，會 fallback 抓 repo 根目錄設定去掃全 repo 測試——這才是 `packages/coupons` flaky test（SAVE20PCT 撞號）的真正根因，不是缺清理邏輯。已補齊全部 15 個套件的獨立 vitest config + coupons 建立前先清同碼舊資料，`pnpm test`／`pnpm build`／`pnpm type-check` 三者連跑兩輪皆穩定全綠。
+- E2E：⬜ 未跑（後台按鈕實際下載 Excel 檔的視覺驗證還沒做）
 
 ### 5. plan-clean-install-package-repo（已 park）
 - 狀態：⏸️ 排隊中，優先序未定
