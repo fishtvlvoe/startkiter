@@ -1,0 +1,10 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 640, "h": 1180, "title": "淺色 Light" },
+    { "file": "Dark.dc.html", "x": 720, "y": 0, "w": 640, "h": 1180, "title": "深色 Dark" }
+  ],
+  "annotations": [
+    { "id": "note-token-source", "x": 0, "y": -100, "w": 480, "text": "色票／圓角直接照抄 tooling/tailwind/theme.css + packages/ui/components/card.tsx、button.tsx，跟真實 apps/saas 頁面（如 checkout/page.tsx）一致，不是另外挑的配色。" }
+  ],
+  "launch": { "view": "canvas" }
+}
