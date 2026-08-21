@@ -8,13 +8,22 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 			const learnerItems = getMountMenuItems({ pathname: "/course", isOperator: false });
 			const operatorItems = getMountMenuItems({ pathname: "/course", isOperator: true });
 
-			// Learner should see non-operator items
-			expect(learnerItems.map((item) => item.label)).toEqual(["課程"]);
-			expect(learnerItems[0]?.isActive).toBe(true);
+			// Learner should see every non-operator-only menu item, sorted by order.
+			expect(learnerItems.map((item) => item.label)).toEqual(["開始", "課程", "客服", "帳號設定"]);
+			expect(learnerItems.find((item) => item.href === "/course")?.isActive).toBe(true);
 
-			// Operator should see all items sorted by order
-			expect(operatorItems.map((item) => item.label)).toEqual(["課程", "課程綁定包"]);
-			expect(operatorItems[0]?.order).toBeLessThan(operatorItems[1]!.order);
+			// Operator should additionally see the requiresOperator items, sorted by order.
+			expect(operatorItems.map((item) => item.label)).toEqual([
+				"開始",
+				"課程",
+				"客服",
+				"帳號設定",
+				"後台設定",
+				"課程綁定包",
+			]);
+			for (let i = 1; i < operatorItems.length; i++) {
+				expect(operatorItems[i]!.order).toBeGreaterThan(operatorItems[i - 1]!.order);
+			}
 		});
 
 		it("5.3 hides operator-only menu items from learners", () => {
@@ -26,7 +35,7 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 		});
 
 		it("5.1 / 5.2 includes the unified Shell navigation on /course and /admin/bundles", () => {
-			// Verify MOUNT_POINTS covers the authenticated routes
+			// Verify MOUNT_POINTS covers the authenticated routes that render inside AppWrapper
 			const courseItem = MOUNT_POINTS.find((p) => p.id === "course");
 			const bundlesItem = MOUNT_POINTS.find((p) => p.id === "bundles");
 
@@ -73,12 +82,26 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 			expect(more?.subItems?.some((item) => item.href === "/admin/bundles")).toBe(true);
 		});
 
-		it("9.3 wide viewport uses sidebar, tab bar helper correctly handles single/few items", () => {
-			const items = getMountMenuItems({ pathname: "/", isOperator: false });
-			const { fixed, overflow } = getTabBarItems(items);
+		it("9.2 More drawer contains admin settings for operators only", () => {
+			const operatorOverflow = getTabBarItems(getMountMenuItems({ pathname: "/", isOperator: true })).overflow;
+			const learnerOverflow = getTabBarItems(getMountMenuItems({ pathname: "/", isOperator: false })).overflow;
 
-			expect(fixed.length).toBe(1);
-			expect(overflow.length).toBe(0);
+			expect(operatorOverflow[0]?.subItems?.some((item) => item.href === "/admin/bundles")).toBe(true);
+			expect(learnerOverflow.some((entry) => entry.subItems?.some((item) => item.href === "/admin/bundles"))).toBe(
+				false,
+			);
+		});
+
+		it("9.3 tab bar helper puts everything in fixed and creates no overflow when there are 3 or fewer items", () => {
+			const mockItems: MountMenuItem[] = [
+				{ id: "start", label: "開始", href: "/", icon: "home", order: 0, isActive: true },
+				{ id: "course", label: "課程", href: "/course", icon: "book-open", order: 1, isActive: false },
+			];
+
+			const { fixed, overflow } = getTabBarItems(mockItems);
+
+			expect(fixed).toHaveLength(2);
+			expect(overflow).toHaveLength(0);
 		});
 	});
 });
