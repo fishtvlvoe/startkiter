@@ -34,14 +34,14 @@ TDD：每個功能群組先列紅燈測試 task，再列實作 task。
 
 ## 5. 工單 API 與已解決混合判斷流程（對應設計決策「「已解決」採混合判斷制：AI 標記建議 → 買家確認或逾時才真的關單」）
 
-- [ ] 5.1 撰寫紅燈測試：`POST /support/tickets` 帶空白 `message` 回傳 400 且不建立 Chatwoot conversation，對應 Requirement「Ticket creation from the deployment status page」Scenario「POST /support/tickets endpoint contract」，驗證方式為 API 測試斷言狀態碼與資料庫無新增紀錄
-- [ ] 5.2 撰寫紅燈測試：`POST /support/tickets` 帶不屬於當前使用者的 `buyerDeploymentId` 回傳 403，對應同一 Requirement 的 endpoint contract scenario，驗證方式同 5.1
-- [ ] 5.3 撰寫紅燈測試：`POST /support/tickets/:id/confirm-resolved` 在 `status` 為 `OPEN`／`RESOLVED`／`ESCALATED` 時回傳 409 且不改變狀態，對應 Requirement「Hybrid resolved-confirmation workflow」Scenario「Confirm-resolved called on a non-pending ticket」，驗證方式為 API 測試逐一斷言三種狀態下的回應
-- [ ] 5.4 撰寫紅燈測試：買家在 `AI_SUGGESTED_RESOLVED` 等待期間回覆新訊息會把 `status` 打回 `OPEN` 並清空 `aiSuggestedResolvedAt`，對應 Requirement「Hybrid resolved-confirmation workflow」Scenario「Buyer replies during the waiting window」，驗證方式為 webhook 處理測試斷言資料庫欄位變化
-- [ ] 5.5 實作 `POST /support/tickets`（`packages/api/modules/support/`，比照 `packages/api/modules/deployment/` 慣例），使第 5.1、5.2 節測試轉綠燈，對應 Requirement「Ticket creation from the site-wide support widget」與「Ticket creation from the deployment status page」，驗證方式為 `pnpm test` 全綠
-- [ ] 5.6 實作 `POST /support/tickets/:id/confirm-resolved`，使第 5.3 節測試轉綠燈，對應 Requirement「Hybrid resolved-confirmation workflow」Scenario「Buyer confirms resolution」，驗證方式為 `pnpm test` 全綠
-- [ ] 5.7 實作買家回覆打回 `OPEN` 的 webhook 處理邏輯，使第 5.4 節測試轉綠燈，驗證方式為 `pnpm test` 全綠
-- [ ] 5.8 實作 3 天逾時自動關單排程任務（`aiSuggestedResolvedAt` 超過 3 天且無買家回覆 → `status = RESOLVED`、`resolvedBy = AUTO_TIMEOUT`），對應 Requirement「Hybrid resolved-confirmation workflow」Scenario「Timeout auto-close」，驗證方式為排程邏輯單元測試使用假時間推進斷言狀態轉換
+- [x] 5.1 撰寫紅燈測試：`POST /support/tickets` 帶空白 `message` 回傳 400 且不建立 Chatwoot conversation，對應 Requirement「Ticket creation from the deployment status page」Scenario「POST /support/tickets endpoint contract」，驗證方式為 API 測試斷言狀態碼與資料庫無新增紀錄
+- [x] 5.2 撰寫紅燈測試：`POST /support/tickets` 帶不屬於當前使用者的 `buyerDeploymentId` 回傳 403，對應同一 Requirement 的 endpoint contract scenario，驗證方式同 5.1
+- [x] 5.3 撰寫紅燈測試：`POST /support/tickets/:id/confirm-resolved` 在 `status` 為 `OPEN`／`RESOLVED`／`ESCALATED` 時回傳 409 且不改變狀態，對應 Requirement「Hybrid resolved-confirmation workflow」Scenario「Confirm-resolved called on a non-pending ticket」，驗證方式為 API 測試逐一斷言三種狀態下的回應
+- [x] 5.4 撰寫紅燈測試：買家在 `AI_SUGGESTED_RESOLVED` 等待期間回覆新訊息會把 `status` 打回 `OPEN` 並清空 `aiSuggestedResolvedAt`，對應 Requirement「Hybrid resolved-confirmation workflow」Scenario「Buyer replies during the waiting window」，驗證方式為 webhook 處理測試斷言資料庫欄位變化
+- [x] 5.5 實作 `POST /support/tickets`（`packages/api/modules/support/`，比照 `packages/api/modules/deployment/` 慣例），使第 5.1、5.2 節測試轉綠燈，對應 Requirement「Ticket creation from the site-wide support widget」與「Ticket creation from the deployment status page」，驗證方式為 API support 測試全綠
+- [x] 5.6 實作 `POST /support/tickets/:id/confirm-resolved`，使第 5.3 節測試轉綠燈，對應 Requirement「Hybrid resolved-confirmation workflow」Scenario「Buyer confirms resolution」，驗證方式為 API support 測試全綠
+- [x] 5.7 實作買家回覆打回 `OPEN` 的 webhook 處理邏輯，使第 5.4 節測試轉綠燈，驗證方式為 API support 測試全綠
+- [x] 5.8 實作 3 天逾時自動關單排程任務（`aiSuggestedResolvedAt` 超過 3 天且無買家回覆 → `status = RESOLVED`、`resolvedBy = AUTO_TIMEOUT`），對應 Requirement「Hybrid resolved-confirmation workflow」Scenario「Timeout auto-close」，驗證方式為排程邏輯單元測試使用假時間推進斷言狀態轉換
 
 ## 6. AI Webhook 消費者（對應設計決策「AI 介入 Coolify 只到「唯讀 + 建議修復步驟」，不做自動修復」）
 
