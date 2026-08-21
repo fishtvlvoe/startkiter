@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
 	experimental: {
 		useTypeScriptCli: true,
 	},
+	// @open-sheet/core/node 匯出的 Headless XLSX exporter 依賴 vite（含 lightningcss 原生
+	// binary）做內部轉譯，這些在 Node runtime 直接 require 就好，不需要／不能被 Next 打包器
+	// 重新 bundle（會撞到動態 require 與 .node 原生檔解析失敗）。
+	serverExternalPackages: ["@open-sheet/core", "vite", "lightningcss"],
 	transpilePackages: ["@startkiter/api", "@startkiter/auth", "@startkiter/database", "@startkiter/ui"],
 	images: {
 		remotePatterns: [

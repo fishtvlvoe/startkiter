@@ -1,8 +1,8 @@
-export * from './exporter.js'
-export * from './templates/orders.js'
-export * from './templates/revenue.js'
-export * from './templates/bundles.js'
-export * from './templates/coupons.js'
+export * from './exporter'
+export * from './templates/orders'
+export * from './templates/revenue'
+export * from './templates/bundles'
+export * from './templates/coupons'
 
 // Re-export common primitives from @open-sheet/core
 export {
