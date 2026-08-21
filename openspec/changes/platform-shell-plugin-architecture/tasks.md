@@ -79,52 +79,52 @@
 
 ### 15. 紅燈測試：Plugin 列表 API
 
-- [ ] 15.1 [P] 撰寫測試驗證 spec platform-marketplace「Plugin listing API returns manifest data with enabled status」——GET /api/plugins 回傳含 `id: "course"` 且 `enabled: true` 的 JSON 陣列
-- [ ] 15.2 [P] 撰寫測試驗證同一 Requirement——未登入請求回 401
+- [x] 15.1 [P] 撰寫測試驗證 spec platform-marketplace「Plugin listing API returns manifest data with enabled status」——GET /api/plugins 回傳含 `id: "course"` 且 `enabled: true` 的 JSON 陣列
+- [x] 15.2 [P] 撰寫測試驗證同一 Requirement——未登入請求回 401
 
 ### 16. 實作：Plugin 列表 API
 
-- [ ] 16.1 新增 `apps/saas/app/api/plugins/route.ts`，回傳 MOUNT_POINTS 衍生的 JSON 陣列，含 enabled 布林欄位，驗證：15.1、15.2 轉綠燈
+- [x] 16.1 新增 `apps/saas/app/api/plugins/route.ts`，回傳 MOUNT_POINTS 衍生的 JSON 陣列，含 enabled 布林欄位，驗證：15.1、15.2 轉綠燈
 
 ### 17. 紅燈測試：模版定義與 API
 
-- [ ] 17.1 [P] 撰寫測試驗證 spec buyer-template-selection「Template array contains at least two entries」——SITE_TEMPLATES 長度 >= 2，每個有唯一 id
-- [ ] 17.2 [P] 撰寫型別測試驗證 spec buyer-template-selection「Template with missing required fields fails type check」——SiteTemplate 缺 defaultMountConfig 型別檢查失敗
-- [ ] 17.3 [P] 撰寫測試驗證 spec buyer-template-selection「Template listing API returns template data」——GET /api/templates 回傳 >= 2 個模版物件
-- [ ] 17.4 [P] 撰寫測試驗證同一 API Requirement——未登入請求回 401
-- [ ] 17.5 [P] 撰寫型別測試驗證 spec buyer-template-selection「Templates connect to mount points through defaultMountConfig」——defaultMountConfig entry 可賦值給 Partial<PluginManifest>
+- [x] 17.1 [P] 撰寫測試驗證 spec buyer-template-selection「Template array contains at least two entries」——SITE_TEMPLATES 長度 >= 2，每個有唯一 id
+- [x] 17.2 [P] 撰寫型別測試驗證 spec buyer-template-selection「Template with missing required fields fails type check」——SiteTemplate 缺 defaultMountConfig 型別檢查失敗
+- [x] 17.3 [P] 撰寫測試驗證 spec buyer-template-selection「Template listing API returns template data」——GET /api/templates 回傳 >= 2 個模版物件
+- [x] 17.4 [P] 撰寫測試驗證同一 API Requirement——未登入請求回 401
+- [x] 17.5 [P] 撰寫型別測試驗證 spec buyer-template-selection「Templates connect to mount points through defaultMountConfig」——defaultMountConfig entry 可賦值給 Partial<PluginManifest>
 
 ### 18. 實作：SiteTemplate 型別與內建模版定義（買家 UI 模版選擇：v1 內建 2-3 個靜態模版，不整合外部設計參考庫）
 
-- [ ] 18.1 新增 `packages/platform/src/templates/types.ts`，匯出 SiteTemplate 型別（design.md Interface 定義），滿足 Requirement「Platform provides a fixed set of site templates for buyers to choose from」，驗證：17.2、17.5 轉綠燈
-- [ ] 18.2 新增 `packages/platform/src/templates/index.ts`，匯出 `SITE_TEMPLATES: SiteTemplate[]` 靜態陣列（v1: 課程教學站、服務型 SaaS、作品集展示，三個內建模版），滿足同一 Requirement 的「Template array contains at least two entries」scenario，驗證：17.1 轉綠燈
+- [x] 18.1 新增 `packages/platform/src/templates/types.ts`，匯出 SiteTemplate 型別（design.md Interface 定義），滿足 Requirement「Platform provides a fixed set of site templates for buyers to choose from」，驗證：17.2、17.5 轉綠燈
+- [x] 18.2 新增 `packages/platform/src/templates/index.ts`，匯出 `SITE_TEMPLATES: SiteTemplate[]` 靜態陣列（v1: 課程教學站、服務型 SaaS、作品集展示，三個內建模版），滿足同一 Requirement 的「Template array contains at least two entries」scenario，驗證：17.1 轉綠燈
 
 ### 19. 實作：模版列表 API
 
-- [ ] 19.1 新增 `apps/saas/app/api/templates/route.ts`，回傳 SITE_TEMPLATES JSON 陣列，需有效 session，驗證：17.3、17.4 轉綠燈
+- [x] 19.1 新增 `apps/saas/app/api/templates/route.ts`，回傳 SITE_TEMPLATES JSON 陣列，需有效 session，驗證：17.3、17.4 轉綠燈
 
 ### 20. Demo-first：模版靜態 HTML demo
 
-- [ ] 20.1 為每個內建模版製作靜態 HTML demo 放入 `docs/design-system-demo/templates/`，使用 DESIGN.md token，老闆確認後才能進下一步的 React 實作（spec buyer-template-selection「Each template has a static HTML demo approved before implementation」）
+- [x] 20.1 為每個內建模版製作靜態 HTML demo 放入 `docs/design-system-demo/templates/`，使用 DESIGN.md token，老闆確認後才能進下一步的 React 實作（spec buyer-template-selection「Each template has a static HTML demo approved before implementation」）
 
 ### 21. 紅燈測試：Marketplace 頁面
 
-- [ ] 21.1 [P] 撰寫測試驗證 spec platform-marketplace「Marketplace page lists known Plugins from the mount point registry」——已登入使用者於 /marketplace 看到課程項目
-- [ ] 21.2 [P] 撰寫測試驗證同一 Requirement——未登入訪客重導至 /login?next=/marketplace
-- [ ] 21.3 [P] 撰寫測試驗證 spec platform-marketplace——Marketplace 頁面不含 install/uninstall 操作按鈕
-- [ ] 21.4 [P] 撰寫測試驗證 spec buyer-template-selection「Marketplace page includes a template selection tab」——已登入使用者看到模版 tab 並顯示 >= 2 張預覽卡片
+- [x] 21.1 [P] 撰寫測試驗證 spec platform-marketplace「Marketplace page lists known Plugins from the mount point registry」——已登入使用者於 /marketplace 看到課程項目
+- [x] 21.2 [P] 撰寫測試驗證同一 Requirement——未登入訪客重導至 /login?next=/marketplace
+- [x] 21.3 [P] 撰寫測試驗證 spec platform-marketplace——Marketplace 頁面不含 install/uninstall 操作按鈕
+- [x] 21.4 [P] 撰寫測試驗證 spec buyer-template-selection「Marketplace page includes a template selection tab」——已登入使用者看到模版 tab 並顯示 >= 2 張預覽卡片
 
 ### 22. 實作：Marketplace 頁面（展示 + 模版選擇）
 
-- [ ] 22.1 新增 `apps/saas/app/(authenticated)/(main)/marketplace/page.tsx`，含兩個 tab：「已啟用模組」（呼叫 /api/plugins）與「模版選擇」（呼叫 /api/templates），使用統一 Shell，驗證：21.1、21.2、21.3、21.4 轉綠燈
-- [ ] 22.2 模版詳細頁（或展開區塊）顯示 description、aiPromptHint、視覺引導說明如何用 AI 工具套用。模版與 Mount Points 的接合方式：模版的 `defaultMountConfig` 描述預設掛載點配置，AI 工具讀取後更新 `MOUNT_POINTS` 靜態陣列 + CSS token，不引入新抽象層
+- [x] 22.1 新增 `apps/saas/app/(authenticated)/(main)/marketplace/page.tsx`，含兩個 tab：「已啟用模組」（呼叫 /api/plugins）與「模版選擇」（呼叫 /api/templates），使用統一 Shell，驗證：21.1、21.2、21.3、21.4 轉綠燈
+- [x] 22.2 模版詳細頁（或展開區塊）顯示 description、aiPromptHint、視覺引導說明如何用 AI 工具套用。模版與 Mount Points 的接合方式：模版的 `defaultMountConfig` 描述預設掛載點配置，AI 工具讀取後更新 `MOUNT_POINTS` 靜態陣列 + CSS token，不引入新抽象層
 
 ### 23. Phase 4 Review 與驗收
 
-- [ ] 23.1 對 Phase 4 全部變更跑 correctness / security / performance code review，Critical 為零
-- [ ] 23.2 用 Chrome MCP 截圖 /marketplace 頁面兩個 tab 的呈現，確認展示正確
-- [ ] 23.3 `curl /api/plugins` 與 `curl /api/templates` 回傳格式符合 spec 範例
-- [ ] 23.4 `pnpm build` 與 `pnpm test` 通過
+- [x] 23.1 對 Phase 4 全部變更跑 correctness / security / performance code review，Critical 為零
+- [x] 23.2 用 Chrome MCP 截圖 /marketplace 頁面兩個 tab 的呈現，確認展示正確
+- [x] 23.3 `curl /api/plugins` 與 `curl /api/templates` 回傳格式符合 spec 範例
+- [x] 23.4 `pnpm build` 與 `pnpm test` 通過
 
 ## Phase 5：MCP Gateway 維持外部 AI 唯讀連線，收窄用途
 

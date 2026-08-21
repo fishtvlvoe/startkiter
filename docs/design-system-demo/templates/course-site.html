@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="zh-Hant">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>模版 demo — 課程教學站</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap"
+			rel="stylesheet"
+		/>
+		<style>
+			/* Palette values from tailwindcss theme.css (olive / red / green / yellow / white) */
+			:root {
+				--color-olive-50: oklch(98.8% 0.003 106.5);
+				--color-olive-100: oklch(96.6% 0.005 106.5);
+				--color-olive-200: oklch(93% 0.007 106.5);
+				--color-olive-300: oklch(88% 0.011 106.6);
+				--color-olive-400: oklch(73.7% 0.021 106.9);
+				--color-olive-500: oklch(58% 0.031 107.3);
+				--color-olive-600: oklch(46.6% 0.025 107.3);
+				--color-olive-700: oklch(39.4% 0.023 107.4);
+				--color-olive-800: oklch(28.6% 0.016 107.4);
+				--color-olive-900: oklch(22.8% 0.013 107.4);
+				--color-olive-950: oklch(15.3% 0.006 107.1);
+				--color-red-400: oklch(70.4% 0.191 22.216);
+				--color-red-700: oklch(50.5% 0.213 27.518);
+				--color-yellow-500: oklch(79.5% 0.184 86.047);
+				--color-yellow-700: oklch(55.4% 0.135 66.442);
+				--color-green-400: oklch(79.2% 0.209 151.711);
+				--color-green-800: oklch(44.8% 0.119 151.328);
+				--color-white: #fff;
+
+				/* Exact assignments from tooling/tailwind/theme.css :root */
+				--border: var(--color-olive-200);
+				--input: var(--color-olive-200);
+				--ring: var(--color-olive-400);
+				--background: var(--color-olive-50);
+				--foreground: var(--color-olive-950);
+				--primary: var(--color-olive-950);
+				--primary-foreground: var(--color-olive-50);
+				--secondary: var(--color-olive-100);
+				--secondary-foreground: var(--color-olive-900);
+				--destructive: var(--color-red-700);
+				--destructive-foreground: var(--color-white);
+				--success: var(--color-green-800);
+				--success-foreground: var(--color-white);
+				--warning: var(--color-yellow-700);
+				--warning-foreground: var(--color-white);
+				--muted: var(--color-olive-100);
+				--muted-foreground: var(--color-olive-600);
+				--accent: var(--color-olive-100);
+				--accent-foreground: var(--color-olive-900);
+				--touch: oklch(0.51 0.12 128);
+				--touch-foreground: oklch(0.99 0.01 128);
+				--popover: var(--color-white);
+				--popover-foreground: var(--color-olive-950);
+				--card: var(--color-white);
+				--card-foreground: var(--color-olive-950);
+				--radius: 0.625rem;
+				--font-sans: "Inter", "Noto Sans TC", sans-serif;
+			}
+
+			/* Exact assignments from tooling/tailwind/theme.css .dark */
+			.dark {
+				--border: var(--color-olive-800);
+				--input: var(--color-olive-800);
+				--ring: var(--color-olive-500);
+				--background: var(--color-olive-950);
+				--foreground: var(--color-olive-50);
+				--primary: var(--color-olive-50);
+				--primary-foreground: var(--color-olive-950);
+				--secondary: var(--color-olive-800);
+				--secondary-foreground: var(--color-olive-50);
+				--destructive: var(--color-red-400);
+				--destructive-foreground: var(--color-white);
+				--success: var(--color-green-400);
+				--success-foreground: var(--color-olive-950);
+				--warning: var(--color-yellow-500);
+				--warning-foreground: var(--color-olive-950);
+				--muted: var(--color-olive-900);
+				--muted-foreground: var(--color-olive-400);
+				--accent: var(--color-olive-900);
+				--accent-foreground: var(--color-olive-50);
+				--touch: oklch(0.76 0.11 128);
+				--touch-foreground: oklch(0.22 0.04 128);
+				--popover: var(--color-olive-900);
+				--popover-foreground: var(--color-olive-50);
+				--card: var(--color-olive-900);
+				--card-foreground: var(--color-olive-50);
+			}
+
+			*,
+			*::before,
+			*::after {
+				box-sizing: border-box;
+			}
+
+			html {
+				color-scheme: light;
+			}
+
+			html.dark {
+				color-scheme: dark;
+			}
+
+			html,
+			body {
+				margin: 0;
+				min-height: 100%;
+			}
+
+			body {
+				background: var(--background);
+				color: var(--foreground);
+				font-family: var(--font-sans);
+				line-height: 1.5;
+				-webkit-font-smoothing: antialiased;
+			}
+
+			a {
+				color: inherit;
+				text-decoration: none;
+			}
+
+			.wrap {
+				width: min(72rem, calc(100% - 2rem));
+				margin-inline: auto;
+			}
+
+			.topbar {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 1rem 0;
+				border-bottom: 1px solid var(--border);
+			}
+
+			.brand {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+				font-weight: 600;
+			}
+
+			.brand-mark {
+				display: inline-grid;
+				place-items: center;
+				width: 1.75rem;
+				height: 1.75rem;
+				border-radius: 9999px;
+				background: var(--primary);
+				color: var(--primary-foreground);
+				font-size: 0.75rem;
+			}
+
+			.nav {
+				display: flex;
+				align-items: center;
+				gap: 1rem;
+				color: var(--muted-foreground);
+				font-size: 0.875rem;
+			}
+
+			.mode-toggle {
+				display: inline-flex;
+				border: 1px solid var(--border);
+				border-radius: 9999px;
+				overflow: hidden;
+			}
+
+			.mode-toggle button {
+				border: 0;
+				background: transparent;
+				color: var(--muted-foreground);
+				padding: 0.3rem 0.65rem;
+				cursor: pointer;
+				font-size: 0.75rem;
+			}
+
+			.mode-toggle button[aria-pressed="true"] {
+				background: var(--primary);
+				color: var(--primary-foreground);
+			}
+
+			.hero {
+				display: grid;
+				grid-template-columns: 1.1fr 0.9fr;
+				gap: 2rem;
+				padding: 3.5rem 0 2.5rem;
+				align-items: center;
+			}
+
+			@media (max-width: 800px) {
+				.hero {
+					grid-template-columns: 1fr;
+				}
+			}
+
+			.eyebrow {
+				display: inline-block;
+				padding: 0.25rem 0.65rem;
+				border-radius: 9999px;
+				background: var(--muted);
+				color: var(--muted-foreground);
+				font-size: 0.75rem;
+				font-weight: 600;
+			}
+
+			h1 {
+				margin: 0.85rem 0 0;
+				font-size: clamp(2rem, 5vw, 3.25rem);
+				font-weight: 600;
+				letter-spacing: -0.04em;
+				line-height: 1.12;
+			}
+
+			.lead {
+				margin: 0.9rem 0 0;
+				max-width: 36rem;
+				color: var(--muted-foreground);
+				font-size: 1.05rem;
+			}
+
+			.cta-row {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.75rem;
+				margin-top: 1.5rem;
+			}
+
+			.btn {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				height: 2.75rem;
+				padding: 0 1.25rem;
+				border: 0;
+				border-radius: 9999px;
+				font-weight: 600;
+				cursor: pointer;
+			}
+
+			.btn-primary {
+				background: var(--primary);
+				color: var(--primary-foreground);
+			}
+
+			.btn-ghost {
+				background: transparent;
+				color: var(--foreground);
+				border: 1px solid var(--border);
+			}
+
+			.hero-panel {
+				min-height: 18rem;
+				border-radius: calc(var(--radius) * 1.4);
+				background:
+					linear-gradient(160deg, color-mix(in srgb, var(--primary) 12%, transparent), transparent 55%),
+					var(--card);
+				border: 1px solid var(--border);
+				padding: 1.25rem;
+				display: grid;
+				gap: 0.75rem;
+				align-content: end;
+			}
+
+			.lesson {
+				padding: 0.85rem 1rem;
+				border-radius: var(--radius);
+				background: var(--secondary);
+				color: var(--secondary-foreground);
+				border: 1px solid var(--border);
+				font-size: 0.9rem;
+			}
+
+			.lesson strong {
+				display: block;
+				font-size: 0.8rem;
+				color: var(--muted-foreground);
+				font-weight: 500;
+			}
+
+			.catalog {
+				padding: 0 0 3.5rem;
+			}
+
+			.catalog h2 {
+				margin: 0 0 1rem;
+				font-size: 1.35rem;
+				letter-spacing: -0.02em;
+			}
+
+			.grid {
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 1rem;
+			}
+
+			@media (max-width: 800px) {
+				.grid {
+					grid-template-columns: 1fr;
+				}
+			}
+
+			.card {
+				background: var(--card);
+				color: var(--card-foreground);
+				border: 1px solid var(--border);
+				border-radius: calc(var(--radius) * 1.2);
+				padding: 1.1rem 1.15rem;
+			}
+
+			.card h3 {
+				margin: 0;
+				font-size: 1rem;
+			}
+
+			.card p {
+				margin: 0.45rem 0 0;
+				color: var(--muted-foreground);
+				font-size: 0.875rem;
+			}
+
+			.meta {
+				margin-top: 0.85rem;
+				font-size: 0.75rem;
+				color: var(--muted-foreground);
+			}
+
+			.note {
+				margin: 0 0 2rem;
+				padding: 0.75rem 1rem;
+				border-left: 3px solid var(--primary);
+				background: var(--muted);
+				color: var(--muted-foreground);
+				font-size: 0.85rem;
+			}
+
+			.swatch-row {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.5rem;
+				margin: 0 0 1.25rem;
+			}
+
+			.swatch {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.4rem;
+				font-size: 0.7rem;
+				color: var(--muted-foreground);
+			}
+
+			.swatch i {
+				display: inline-block;
+				width: 1rem;
+				height: 1rem;
+				border-radius: 0.25rem;
+				border: 1px solid var(--border);
+			}
+		</style>
+		<script>
+			(function () {
+				var mode =
+					new URLSearchParams(location.search).get("mode") ||
+					localStorage.getItem("startkiter-demo-color-mode") ||
+					"light";
+				document.documentElement.classList.toggle("dark", mode === "dark");
+			})();
+			function setDemoColorMode(mode) {
+				document.documentElement.classList.toggle("dark", mode === "dark");
+				localStorage.setItem("startkiter-demo-color-mode", mode);
+				document.querySelectorAll("[data-mode]").forEach(function (btn) {
+					btn.setAttribute("aria-pressed", String(btn.getAttribute("data-mode") === mode));
+				});
+			}
+		</script>
+	</head>
+	<body>
+		<div class="wrap">
+			<header class="topbar">
+				<a class="brand" href="#">
+					<span class="brand-mark">課</span>
+					課程教學站
+				</a>
+				<nav class="nav" aria-label="模版導覽">
+					<a href="#">課程</a>
+					<a href="#">定價</a>
+					<a href="#">登入</a>
+					<div class="mode-toggle" role="group" aria-label="顏色模式">
+						<button type="button" data-mode="light" aria-pressed="true" onclick="setDemoColorMode('light')">
+							Light
+						</button>
+						<button type="button" data-mode="dark" aria-pressed="false" onclick="setDemoColorMode('dark')">
+							Dark
+						</button>
+					</div>
+				</nav>
+			</header>
+
+			<p class="note">
+				SiteTemplate id: <code>course-site</code> · token 來源
+				<code>tooling/tailwind/theme.css</code>（olive primary light=
+				<code>--color-olive-950</code>／dark=<code>--color-olive-50</code>）
+			</p>
+
+			<div class="swatch-row" aria-label="色票抽樣">
+				<span class="swatch"><i style="background: var(--primary)"></i>primary</span>
+				<span class="swatch"><i style="background: var(--background)"></i>background</span>
+				<span class="swatch"><i style="background: var(--card)"></i>card</span>
+				<span class="swatch"><i style="background: var(--border)"></i>border</span>
+				<span class="swatch"><i style="background: var(--muted)"></i>muted</span>
+				<span class="swatch"><i style="background: var(--success)"></i>success</span>
+			</div>
+
+			<section class="hero">
+				<div>
+					<span class="eyebrow">一次買斷 · 課與代碼包</span>
+					<h1>把課程賣出去，學員接著就能看</h1>
+					<p class="lead">
+						首頁講清楚價值，目錄列出單元，結帳後進觀看頁。側欄預設掛上「開始／課程」。
+					</p>
+					<div class="cta-row">
+						<button type="button" class="btn btn-primary">立即購買 NT$8,800</button>
+						<button type="button" class="btn btn-ghost">預覽課程目錄</button>
+					</div>
+				</div>
+				<div class="hero-panel" aria-label="課程預覽">
+					<div class="lesson">
+						<strong>第 1 單元</strong>
+						從空白站到可賣課
+					</div>
+					<div class="lesson">
+						<strong>第 2 單元</strong>
+						金流與履約接線
+					</div>
+					<div class="lesson">
+						<strong>第 3 單元</strong>
+						學員學習路徑
+					</div>
+				</div>
+			</section>
+
+			<section class="catalog">
+				<h2>課程目錄預覽</h2>
+				<div class="grid">
+					<article class="card">
+						<h3>開站基礎</h3>
+						<p>帳號、環境、第一頁上線。</p>
+						<div class="meta">4 堂 · 約 90 分鐘</div>
+					</article>
+					<article class="card">
+						<h3>賣課動線</h3>
+						<p>賣點頁、結帳、履約狀態。</p>
+						<div class="meta">5 堂 · 約 120 分鐘</div>
+					</article>
+					<article class="card">
+						<h3>學員體驗</h3>
+						<p>觀看頁、進度、社群邀請。</p>
+						<div class="meta">3 堂 · 約 70 分鐘</div>
+					</article>
+				</div>
+			</section>
+		</div>
+		<script>
+			setDemoColorMode(document.documentElement.classList.contains("dark") ? "dark" : "light");
+		</script>
+	</body>
+</html>
