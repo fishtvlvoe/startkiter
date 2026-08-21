@@ -1,4 +1,9 @@
-import { MOUNT_POINTS, type PluginManifest } from "@startkiter/platform";
+// 只 import mount-points 子路徑，不要 import 整個 @startkiter/platform barrel——
+// barrel 還 re-export packages/platform/src/deployment/db.ts（會拉進 Prisma/pg），
+// 這個檔案被 "use client" 的 NavBar.tsx 引用，整包 barrel 進到 client bundle 會建置失敗
+// （pg 需要 Node 的 util/types，瀏覽器打包解析不到）。
+import { MOUNT_POINTS } from "@startkiter/platform/src/mount-points";
+import type { PluginManifest } from "@startkiter/platform/src/types";
 
 
 export interface MountMenuItem {
