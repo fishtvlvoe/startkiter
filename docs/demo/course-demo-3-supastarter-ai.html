@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>電馭學院 - 學員專屬教室 (StartKiter Academy)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap');
+    body { font-family: 'Inter', 'Noto Sans TC', sans-serif; }
+    .wp-admin-bar { background-color: #1d2327; color: #c3c4c7; }
+    #course-sidebar { transition: all 0.25s ease; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased">
+  <!-- 1. 全域頂部 Admin Bar (32px) -->
+  <div class="wp-admin-bar text-[11px] h-8 px-4 flex items-center justify-between z-50 sticky top-0 border-b border-black/40 select-none">
+    <div class="flex items-center space-x-3">
+      <div class="font-black text-xs text-white flex items-center gap-1.5">
+        <span class="w-4 h-4 rounded bg-indigo-600 text-white flex items-center justify-center font-black text-[10px]">S</span>
+        <span>StartKiter</span>
+      </div>
+
+      <div class="relative group cursor-pointer py-1 px-2 hover:bg-[#2c3338] hover:text-white transition rounded-sm flex items-center gap-1.5">
+        <i class="fa-solid fa-house text-[10px]"></i>
+        <span class="font-bold text-white">Fish 老魚 開站包 ▾</span>
+        <div class="absolute left-0 top-full mt-0 w-48 bg-[#2c3338] border border-black/30 shadow-2xl py-1 hidden group-hover:block text-xs z-50">
+          <a href="./course-admin-studio-demo.html" class="px-3 py-2 hover:bg-[#2271b1] hover:text-white flex items-center gap-2 text-indigo-300 font-bold">
+            <i class="fa-solid fa-gauge text-[10px]"></i> <span>總管理後台</span>
+          </a>
+          <a href="./course-sales-page-powercourse.html" class="px-3 py-2 hover:bg-[#2271b1] hover:text-white flex items-center gap-2 text-slate-200">
+            <i class="fa-solid fa-file-invoice text-[10px]"></i> <span>課程銷售頁</span>
+          </a>
+          <a href="./course-frontend-landing-demo.html" class="px-3 py-2 hover:bg-[#2271b1] hover:text-white flex items-center gap-2 text-slate-200">
+            <i class="fa-solid fa-globe text-[10px]"></i> <span>官網首頁</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="h-3.5 w-px bg-white/10"></div>
+      <span class="text-[10px] text-indigo-300 flex items-center gap-1">
+        <i class="fa-solid fa-graduation-cap"></i> <span>學員教室 (已登入)</span>
+      </span>
+    </div>
+
+    <div class="flex items-center space-x-3">
+      <a href="./course-admin-studio-demo.html" class="px-2.5 py-0.5 rounded bg-[#2271b1] hover:bg-[#135e96] text-white text-[10px] font-bold flex items-center gap-1.5 transition shadow-sm">
+        <i class="fa-solid fa-arrow-left text-[9px]"></i> <span>回管理後台</span>
+      </a>
+      <div class="flex items-center gap-1.5 text-slate-200 font-medium">
+        <span>Fish 老魚</span>
+        <div class="w-4 h-4 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[9px] font-bold">F</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 電馭學院官方 Header (含大綱收合按鈕) -->
+  <header class="h-14 border-b border-slate-200 bg-white sticky top-8 z-40 px-4 md:px-6 flex items-center justify-between select-none">
+    <!-- Left: 收合大綱按鈕 + 品牌 + 單元名稱 -->
+    <div class="flex items-center space-x-3 md:space-x-4">
+      <button onclick="toggleCourseSidebar()" class="p-2 rounded-lg hover:bg-slate-100 text-slate-600 hover:text-indigo-600 transition" title="收合/展開章節大綱">
+        <i class="fa-solid fa-bars text-sm"></i>
+      </button>
+
+      <a href="#" class="font-black text-slate-900 text-lg tracking-tight flex items-center gap-2">
+        <span class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-black text-sm">電</span>
+        <span class="font-bold text-slate-900 hidden sm:inline">電馭學院</span>
+      </a>
+
+      <div class="h-4 w-px bg-slate-200"></div>
+
+      <!-- 當前播放單元名稱 -->
+      <div class="flex items-center gap-2 text-xs">
+        <span class="text-slate-400 hidden md:inline">開站包實戰 /</span>
+        <span class="font-bold text-slate-900 truncate max-w-[200px] sm:max-w-none">2-2 Coolify 集中納管與 VPS 自動開通</span>
+        <span class="text-[11px] text-slate-400 font-mono hidden sm:inline">12:45</span>
+      </div>
+    </div>
+
+    <!-- Right: 學生學習進度條 + AI 助教 + 個人頭像 -->
+    <div class="flex items-center space-x-3 md:space-x-4 text-xs">
+      <div class="hidden md:flex items-center space-x-3 bg-slate-50 border border-slate-200 px-3.5 py-1.5 rounded-full">
+        <div class="flex items-center gap-1.5 font-bold text-slate-700">
+          <i class="fa-solid fa-chart-pie text-indigo-600 text-[11px]"></i>
+          <span>學習進度 38%</span>
+        </div>
+        <div class="w-20 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+          <div class="h-full bg-indigo-600 rounded-full" style="width: 38%"></div>
+        </div>
+        <span class="text-[10px] text-slate-400 font-mono font-bold">3/8 單元</span>
+      </div>
+
+      <button onclick="toggleAiTutor()" class="px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 font-bold hover:bg-indigo-100 transition flex items-center gap-1.5 shadow-xs">
+        <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i>
+        <span>隨課 AI 助教</span>
+      </button>
+
+      <!-- 個人頭像選單 -->
+      <div class="relative">
+        <button onclick="toggleUserPopover()" class="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-sm hover:ring-2 hover:ring-indigo-500 transition">
+          F
+        </button>
+
+        <div id="user-popover" class="absolute right-0 top-full mt-2 w-56 bg-white border border-slate-200 rounded-2xl shadow-2xl p-3.5 hidden z-50 space-y-3">
+          <div class="flex items-center space-x-2.5 pb-2.5 border-b border-slate-100">
+            <div class="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs">F</div>
+            <div class="overflow-hidden">
+              <div class="font-bold text-slate-900 text-xs truncate">余啟彰 (Fish 老魚)</div>
+              <div class="text-[11px] text-slate-400 truncate">fish.myfb@gmail.com</div>
+            </div>
+          </div>
+
+          <div class="space-y-1 text-xs">
+            <a href="#" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-slate-50 text-slate-700 font-medium">
+              <i class="fa-solid fa-chart-line text-slate-400 w-4 text-center"></i>
+              <span>學習進度 (38%)</span>
+            </a>
+            <a href="./course-admin-studio-demo.html" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 font-bold">
+              <i class="fa-solid fa-gear text-indigo-600 w-4 text-center"></i>
+              <span>總管理後台</span>
+            </a>
+            <a href="#" class="flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-slate-50 text-slate-700 font-medium">
+              <i class="fa-solid fa-circle-question text-slate-400 w-4 text-center"></i>
+              <span>回報問題</span>
+            </a>
+          </div>
+
+          <div class="pt-2 border-t border-slate-100">
+            <a href="#" class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-rose-50 text-rose-600 font-medium text-xs">
+              <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center"></i>
+              <span>登出系統</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 3. 主學習區：左側大綱 (支援收折) + 中間影片與講義 + 右側 AI 助教 -->
+  <div class="flex-1 flex overflow-hidden relative">
+    <!-- Left Sidebar: 課表大綱 (可收折) -->
+    <aside id="course-sidebar" class="w-72 bg-white border-r border-slate-200 flex flex-col flex-shrink-0 select-none overflow-y-auto">
+      <div class="p-3.5 border-b border-slate-100 font-bold text-xs text-slate-800 flex items-center justify-between">
+        <span>章節與單元大綱</span>
+        <button onclick="toggleCourseSidebar()" class="text-slate-400 hover:text-slate-700 p-1" title="收起大綱">
+          <i class="fa-solid fa-chevron-left text-[11px]"></i>
+        </button>
+      </div>
+
+      <div class="p-3 space-y-4 text-xs">
+        <div>
+          <div class="px-2 py-1 font-bold text-slate-400 text-[11px]">章節 1：產品願景與架構解構</div>
+          <div class="space-y-0.5 mt-1">
+            <div class="p-2.5 rounded-lg hover:bg-slate-50 flex items-center justify-between text-slate-600 cursor-pointer">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-500"></i> 1-1 產品願景與架構解構</span>
+              <span class="text-[10px] text-slate-400 font-mono">05:20</span>
+            </div>
+            <div class="p-2.5 rounded-lg hover:bg-slate-50 flex items-center justify-between text-slate-600 cursor-pointer">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-500"></i> 1-2 模組化底座與四種掛載點</span>
+              <span class="text-[10px] text-slate-400 font-mono">10:15</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="px-2 py-1 font-bold text-indigo-600 text-[11px]">章節 2：Coolify 機群代管實務</div>
+          <div class="space-y-0.5 mt-1">
+            <div class="p-2.5 rounded-lg hover:bg-slate-50 flex items-center justify-between text-slate-600 cursor-pointer">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-500"></i> 2-1 VPS 開機指引與 SSH</span>
+              <span class="text-[10px] text-slate-400 font-mono">08:40</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-indigo-50/80 border border-indigo-200 text-indigo-900 font-bold flex items-center justify-between cursor-pointer">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-circle-play text-indigo-600"></i> 2-2 Coolify 集中納管實務</span>
+              <span class="text-[10px] text-indigo-600 font-mono">播放中</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center Workspace: 統一播放器 + 講義 -->
+    <main class="flex-1 p-6 md:p-8 overflow-y-auto space-y-6" id="center-main">
+      <!-- 統一播放器 -->
+      <div class="relative bg-slate-950 rounded-2xl overflow-hidden shadow-xl aspect-video max-w-4xl mx-auto border border-slate-800">
+        <video class="w-full h-full object-contain" controls poster="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80">
+          <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+        </video>
+      </div>
+
+      <!-- 單元講義與互動積木 -->
+      <div class="max-w-4xl mx-auto bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+          <div class="space-y-1">
+            <h1 class="text-xl font-bold text-slate-900">2-2 Coolify 集中納管實務與 API 整合</h1>
+            <p class="text-xs text-slate-500">講師：Fish 老魚 · 繁體中文 SSOT 開發教學</p>
+          </div>
+          <button onclick="alert('已標記為完成！進度已更新')" class="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+            <i class="fa-solid fa-check text-xs"></i> <span>標記為已完成</span>
+          </button>
+        </div>
+
+        <div class="text-xs text-slate-700 leading-relaxed space-y-3">
+          <p>
+            在 StartKiter 系統中，我們採用集中代管架構。買家在自己帳號租用 VPS 後，將 SSH 憑證直接透過 API 交由 StartKiter 納管。系統堅持 <strong>No-Log 安全原則</strong>，資料庫與日誌零儲存私鑰。
+          </p>
+        </div>
+
+        <!-- 隨堂小測驗 (InstantQuiz) -->
+        <div class="bg-indigo-50/40 border border-indigo-200 rounded-xl p-5 space-y-3">
+          <div class="font-bold text-indigo-900 text-xs flex items-center gap-2">
+            <i class="fa-solid fa-circle-question text-indigo-600"></i>
+            <span>隨堂隨課小測驗 (InstantQuiz)</span>
+          </div>
+          <div class="text-xs font-semibold text-slate-900">Q: 買家交付的 VPS SSH 憑證如何儲存與傳輸？</div>
+          <div class="space-y-2 text-xs">
+            <button onclick="checkQuiz(this, true)" class="w-full text-left p-3 rounded-lg bg-white border border-slate-200 hover:border-indigo-400 transition font-medium text-slate-700">
+              A. 直傳 Coolify API，資料庫與日誌零儲存 (No-Log Policy)
+            </button>
+            <button onclick="checkQuiz(this, false)" class="w-full text-left p-3 rounded-lg bg-white border border-slate-200 hover:border-indigo-400 transition font-medium text-slate-700">
+              B. 儲存於 StartKiter 的公開 Postgres 資料表
+            </button>
+          </div>
+          <div id="quiz-result" class="text-xs font-bold hidden pt-1"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Right: 隨課文字 AI 助教 -->
+    <aside id="ai-tutor-sidebar" class="w-80 bg-white border-l border-slate-200 flex flex-col flex-shrink-0 select-none">
+      <div class="p-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
+        <div class="flex items-center gap-2">
+          <div class="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs">
+            <i class="fa-solid fa-robot"></i>
+          </div>
+          <div>
+            <div class="font-bold text-xs text-slate-900">隨課文字 AI 助教</div>
+            <div class="text-[10px] text-emerald-600 font-semibold">● 已載入單元 2-2 講義</div>
+          </div>
+        </div>
+        <button onclick="toggleAiTutor()" class="text-slate-400 hover:text-slate-600 text-xs">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 p-3 overflow-y-auto space-y-3 text-xs" id="ai-chat-messages">
+        <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-3 text-slate-800 space-y-1">
+          <div class="font-bold text-indigo-700 text-[11px]">AI 助教：</div>
+          <p class="leading-relaxed">嗨！我是本單元的隨課 AI 助教。我已經研讀過《2-2 Coolify 集中納管》的架構與筆記，有任何問題隨時問我！</p>
+        </div>
+      </div>
+
+      <div class="p-3 border-t border-slate-200 bg-white">
+        <div class="flex items-center gap-1.5">
+          <input type="text" id="ai-chat-input" placeholder="輸入問題..." class="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-indigo-500" onkeydown="if(event.key==='Enter') sendAiMsg()">
+          <button onclick="sendAiMsg()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    let isSidebarOpen = true;
+    let isAiOpen = true;
+
+    function toggleCourseSidebar() {
+      const sidebar = document.getElementById('course-sidebar');
+      isSidebarOpen = !isSidebarOpen;
+      if (isSidebarOpen) {
+        sidebar.classList.remove('w-0', 'hidden');
+        sidebar.classList.add('w-72');
+      } else {
+        sidebar.classList.remove('w-72');
+        sidebar.classList.add('w-0', 'hidden');
+      }
+    }
+
+    function toggleAiTutor() {
+      const sidebar = document.getElementById('ai-tutor-sidebar');
+      isAiOpen = !isAiOpen;
+      sidebar.classList.toggle('hidden');
+    }
+
+    function toggleUserPopover() {
+      const pop = document.getElementById('user-popover');
+      pop.classList.toggle('hidden');
+    }
+
+    function checkQuiz(btn, isCorrect) {
+      const res = document.getElementById('quiz-result');
+      res.classList.remove('hidden');
+      if (isCorrect) {
+        btn.className = 'w-full text-left p-3 rounded-lg bg-emerald-50 border border-emerald-400 text-emerald-900 font-bold';
+        res.innerHTML = '✓ 答對了！StartKiter 堅持 No-Log 原則，密鑰直傳 Coolify API！';
+        res.className = 'text-xs font-bold text-emerald-700 pt-1 block';
+      } else {
+        btn.className = 'w-full text-left p-3 rounded-lg bg-rose-50 border border-rose-400 text-rose-900 font-medium';
+        res.innerHTML = '✗ 答錯了，私鑰若存入公開資料庫會有極大資安風險，請重試！';
+        res.className = 'text-xs font-bold text-rose-700 pt-1 block';
+      }
+    }
+
+    function sendAiMsg() {
+      const input = document.getElementById('ai-chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const container = document.getElementById('ai-chat-messages');
+      container.innerHTML += `
+        <div class="bg-slate-100 rounded-xl p-3 text-slate-800 space-y-1 ml-6 text-right">
+          <div class="font-bold text-slate-600 text-[11px]">學員提問：</div>
+          <p>${text}</p>
+        </div>
+      `;
+      input.value = '';
+      container.scrollTop = container.scrollHeight;
+
+      setTimeout(() => {
+        container.innerHTML += `
+          <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-3 text-slate-800 space-y-1">
+            <div class="font-bold text-indigo-700 text-[11px]">AI 助教：</div>
+            <p class="leading-relaxed">針對你問的「${text}」，在單元 2-2 中，我們是透過 <code>/api/v1/servers</code> 進行自動認證開通，你可以查看講義中的說明！</p>
+          </div>
+        `;
+        container.scrollTop = container.scrollHeight;
+      }, 500);
+    }
+  </script>
+</body>
+</html>

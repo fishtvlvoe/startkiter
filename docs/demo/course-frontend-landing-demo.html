@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StartKiter 開站包 - 現代軟體開發與主機代管實戰課</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap');
+    body { font-family: 'Inter', 'Noto Sans TC', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased">
+  <!-- Top Navigation (supastarter Clean SaaS Header) -->
+  <header class="border-b border-slate-200 bg-white/95 backdrop-blur px-6 h-16 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center space-x-6">
+      <a href="#" class="flex items-center gap-2 font-bold text-slate-900 text-base tracking-tight">
+        <span class="w-7 h-7 rounded-lg bg-slate-900 text-white flex items-center justify-center font-black text-sm">S</span>
+        <span>StartKiter</span>
+      </a>
+      <nav class="hidden md:flex items-center space-x-5 text-xs font-medium text-slate-600">
+        <a href="#curriculum" class="hover:text-slate-900 transition">課程模組大綱</a>
+        <a href="#features" class="hover:text-slate-900 transition">四大交付物</a>
+        <a href="#pricing" class="hover:text-slate-900 transition">定價方案</a>
+      </nav>
+    </div>
+
+    <div class="flex items-center space-x-3 text-xs">
+      <a href="./course-demo-3-supastarter-ai.html" class="px-3.5 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 font-semibold text-slate-700 transition flex items-center gap-1.5">
+        <i class="fa-solid fa-play text-indigo-600 text-[10px]"></i>
+        <span>免費試看 1-1</span>
+      </a>
+      <a href="#pricing" class="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 font-semibold text-white transition shadow-sm">
+        立即購買開站
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="max-w-6xl mx-auto px-6 pt-16 pb-12 text-center space-y-6">
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-semibold">
+      <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
+      <span>2026 全新架構 · 課 + 終身代碼包 + 代管主機</span>
+    </div>
+
+    <h1 class="text-4xl md:text-5xl font-black text-slate-900 tracking-tight max-w-3xl mx-auto leading-tight">
+      AI 時代，讓你的軟體想法<br><span class="text-indigo-600">一鍵變成能收款、能代管的真站台</span>
+    </h1>
+
+    <p class="text-base text-slate-600 max-w-2xl mx-auto leading-relaxed">
+      拒絕拼裝玩具。從 WordPress 式模組架構、PAYUNi 台灣金流買斷、Coolify 機群代管，到內建 AI 客服工單，買了就能上線，終身擁有完整代碼。
+    </p>
+
+    <!-- CTAs -->
+    <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+      <a href="#pricing" class="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-sm transition shadow-md flex items-center gap-2">
+        <span>立即買斷開站 (TWD 8,800)</span>
+        <i class="fa-solid fa-arrow-right text-xs"></i>
+      </a>
+      <a href="./course-demo-3-supastarter-ai.html" class="px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 font-bold rounded-xl text-sm transition shadow-sm flex items-center gap-2">
+        <i class="fa-solid fa-play text-indigo-600 text-xs"></i>
+        <span>進入互動學習系統 (試看)</span>
+      </a>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="pt-8 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto text-left border-t border-slate-200/80 mt-10">
+      <div class="p-4 bg-white border border-slate-200/80 rounded-xl">
+        <div class="text-xs text-slate-500 font-medium">交付代碼</div>
+        <div class="text-lg font-bold text-slate-900 mt-0.5">終身私有庫</div>
+        <div class="text-[11px] text-slate-400">零依賴、全自主</div>
+      </div>
+      <div class="p-4 bg-white border border-slate-200/80 rounded-xl">
+        <div class="text-xs text-slate-500 font-medium">主機部署</div>
+        <div class="text-lg font-bold text-slate-900 mt-0.5">Coolify 集中代管</div>
+        <div class="text-[11px] text-slate-400">免碰 Linux / Docker</div>
+      </div>
+      <div class="p-4 bg-white border border-slate-200/80 rounded-xl">
+        <div class="text-xs text-slate-500 font-medium">台灣金流</div>
+        <div class="text-lg font-bold text-slate-900 mt-0.5">PAYUNi 信用卡</div>
+        <div class="text-[11px] text-slate-400">自動開通與驗章</div>
+      </div>
+      <div class="p-4 bg-white border border-slate-200/80 rounded-xl">
+        <div class="text-xs text-slate-500 font-medium">技術支援</div>
+        <div class="text-lg font-bold text-slate-900 mt-0.5">Chatwoot AI 工單</div>
+        <div class="text-[11px] text-slate-400">自動看 Log 修復診斷</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Curriculum / Module Cards Section (VibeAcademy Style) -->
+  <section id="curriculum" class="max-w-5xl mx-auto px-6 py-12 space-y-8">
+    <div class="text-center space-y-2">
+      <h2 class="text-2xl font-bold text-slate-900 tracking-tight">📚 課程模組大綱</h2>
+      <p class="text-xs text-slate-500">3 大核心模組 · 8 個精實實戰單元 · 支援隨課文字 AI 助教隨時提問</p>
+    </div>
+
+    <div class="space-y-4">
+      <!-- Module 1 -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4 hover:border-slate-300 transition">
+        <div class="flex items-start justify-between">
+          <div class="space-y-1">
+            <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">模組 1 · 基礎底座</span>
+            <h3 class="text-lg font-bold text-slate-900">產品願景與 WordPress 式模組架構</h3>
+            <p class="text-xs text-slate-600 max-w-2xl">
+              看懂軟體架構如何從單體走向可插拔模組化。解構 4 種 Mount Points（路由、選單、內容、資料表），學會隨心所欲擴展系統。
+            </p>
+          </div>
+          <span class="text-xs text-slate-400 font-medium">2 單元 · 15 分鐘</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-xs">
+          <div class="p-3 bg-slate-50 rounded-lg flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <i class="fa-solid fa-circle-play text-indigo-600"></i>
+              <span class="font-medium text-slate-800">1-1 產品願景與架構解構</span>
+            </div>
+            <a href="./course-demo-3-supastarter-ai.html" class="text-[11px] text-indigo-600 font-bold hover:underline">免費試看 →</a>
+          </div>
+          <div class="p-3 bg-slate-50 rounded-lg flex items-center justify-between text-slate-600">
+            <div class="flex items-center space-x-2">
+              <i class="fa-solid fa-lock text-slate-400"></i>
+              <span>1-2 模組化底座與四種掛載點</span>
+            </div>
+            <span class="text-[11px] text-slate-400">10 分鐘</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module 2 -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4 hover:border-slate-300 transition">
+        <div class="flex items-start justify-between">
+          <div class="space-y-1">
+            <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">模組 2 · 主機自動化</span>
+            <h3 class="text-lg font-bold text-slate-900">Coolify 機群代管與 VPS 自動開通</h3>
+            <p class="text-xs text-slate-600 max-w-2xl">
+              自租 Vultr/Hetzner VPS 後，如何一鍵將主機納入 StartKiter 控制台代管，實現自動配置環境變數、SSL 簽發與零日誌安全交接。
+            </p>
+          </div>
+          <span class="text-xs text-slate-400 font-medium">3 單元 · 36 分鐘</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-xs">
+          <div class="p-3 bg-slate-50 rounded-lg flex items-center justify-between text-slate-600">
+            <div class="flex items-center space-x-2 truncate">
+              <i class="fa-solid fa-lock text-slate-400"></i>
+              <span class="truncate">2-1 VPS 開機與 SSH 取得</span>
+            </div>
+          </div>
+          <div class="p-3 bg-slate-50 rounded-lg flex items-center justify-between text-slate-600">
+            <div class="flex items-center space-x-2 truncate">
+              <i class="fa-solid fa-lock text-slate-400"></i>
+              <span class="truncate">2-2 Coolify 集中納管實務</span>
+            </div>
+          </div>
+          <div class="p-3 bg-slate-50 rounded-lg flex items-center justify-between text-slate-600">
+            <div class="flex items-center space-x-2 truncate">
+              <i class="fa-solid fa-lock text-slate-400"></i>
+              <span class="truncate">2-3 憑證安全交接 (No-Log)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Module 3 -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4 hover:border-slate-300 transition">
+        <div class="flex items-start justify-between">
+          <div class="space-y-1">
+            <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded">模組 3 · 客服與 AI</span>
+            <h3 class="text-lg font-bold text-slate-900">Chatwoot 統一客服與 AI Copilot 自動化</h3>
+            <p class="text-xs text-slate-600 max-w-2xl">
+              學會打造全站即時工單系統，結合後端 AI 唯讀調閱主機日誌，遇到錯誤時自動產生排查診斷建議，並透過 LINE/網站混合關單。
+            </p>
+          </div>
+          <span class="text-xs text-slate-400 font-medium">3 單元 · 34 分鐘</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-xs text-slate-600">
+          <div class="p-3 bg-slate-50 rounded-lg flex items-center space-x-2 truncate">
+            <i class="fa-solid fa-lock text-slate-400"></i>
+            <span class="truncate">3-1 Chatwoot Webhook 簽章</span>
+          </div>
+          <div class="p-3 bg-slate-50 rounded-lg flex items-center space-x-2 truncate">
+            <i class="fa-solid fa-lock text-slate-400"></i>
+            <span class="truncate">3-2 AI Copilot 日誌診斷</span>
+          </div>
+          <div class="p-3 bg-slate-50 rounded-lg flex items-center space-x-2 truncate">
+            <i class="fa-solid fa-lock text-slate-400"></i>
+            <span class="truncate">3-3 逾時自動結案排程</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section id="pricing" class="max-w-3xl mx-auto px-6 py-12 text-center space-y-6">
+    <div class="space-y-2">
+      <h2 class="text-2xl font-bold text-slate-900 tracking-tight">💳 單一 SKU 一次買斷方案</h2>
+      <p class="text-xs text-slate-500">不玩訂閱制套路。一次性買斷，終身享有代碼更新與實戰課程權限。</p>
+    </div>
+
+    <div class="bg-white border-2 border-slate-900 rounded-3xl p-8 shadow-xl text-left relative overflow-hidden">
+      <div class="absolute top-0 right-0 bg-slate-900 text-white text-[10px] font-bold px-4 py-1 rounded-bl-xl uppercase tracking-wider">
+        Lifetime All-in-One
+      </div>
+
+      <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-100 pb-6">
+        <div>
+          <h3 class="text-xl font-black text-slate-900">StartKiter 終身開站創業者方案</h3>
+          <p class="text-xs text-slate-500 mt-1">代碼包 + 實戰課程 + 代管主機 + 專屬學員群</p>
+        </div>
+        <div class="mt-4 md:mt-0 text-right">
+          <div class="text-3xl font-black text-slate-900">NT$ 8,800</div>
+          <div class="text-xs text-emerald-600 font-medium">一次買斷 · 終身授權</div>
+        </div>
+      </div>
+
+      <!-- Feature Checklist -->
+      <div class="py-6 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-700">
+        <div class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500"></i> 完整 Next.js 15 Monorepo 原始代碼庫</div>
+        <div class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500"></i> PAYUNi 台灣金流模組（防篡改驗章）</div>
+        <div class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500"></i> Coolify 機群代管自動化管線</div>
+        <div class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500"></i> Chatwoot AI 客服診斷 Copilot 系統</div>
+        <div class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500"></i> 7 款 MDX 互動學習積木組件庫</div>
+        <div class="flex items-center gap-2"><i class="fa-solid fa-check text-emerald-500"></i> 私有 GitHub Repository 邀請與終身更新</div>
+      </div>
+
+      <a href="https://test-startkiter.vercel.app/checkout" target="_blank" class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition shadow">
+        <span>立即付款買斷 (PAYUNi 安全結帳)</span>
+        <i class="fa-solid fa-arrow-right text-xs"></i>
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-200 bg-white py-8 text-center text-xs text-slate-500 mt-auto">
+    <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center space-x-2 font-bold text-slate-900">
+        <span class="w-5 h-5 rounded bg-slate-900 text-white flex items-center justify-center text-[10px]">S</span>
+        <span>StartKiter</span>
+      </div>
+      <p>© 2026 StartKiter. 繁體中文 SSOT 架構 · 零依賴獨立發行。</p>
+      <div class="flex items-center space-x-4">
+        <a href="#" class="hover:text-slate-900">服務條款</a>
+        <a href="#" class="hover:text-slate-900">隱私政策</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

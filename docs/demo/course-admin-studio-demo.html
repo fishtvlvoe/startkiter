@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StartKiter Admin - 極簡課程後台 (Fluent Player 統一播放器 & Icon 列表)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap');
+    body { font-family: 'Inter', 'Noto Sans TC', sans-serif; }
+    .wp-admin-bar { background-color: #1d2327; color: #c3c4c7; }
+    .wp-sidebar { background-color: #1d2327; color: #c3c4c7; transition: width 0.25s ease; }
+    .wp-sidebar-item:hover { background-color: #13171a; color: #72aee6; }
+    .wp-sidebar-active { background-color: #2271b1 !important; color: #ffffff !important; font-weight: 600; }
+    .dragging-nav { opacity: 0.4; transform: scale(0.96); background-color: #3b82f6 !important; }
+    .drag-over-nav { border-top: 2px solid #60a5fa !important; }
+    .dragging { opacity: 0.4; transform: scale(0.98); background-color: #e0e7ff !important; }
+    .drag-over-ch { border: 2px dashed #4f46e5 !important; }
+    .drag-over-unit { border-top: 2px solid #4f46e5 !important; }
+  </style>
+</head>
+<body class="bg-[#f0f0f1] text-[#2c3338] min-h-screen flex flex-col antialiased">
+  <!-- 1. 全域頂部 WordPress Admin Bar (32px) -->
+  <div class="wp-admin-bar text-[11px] h-8 px-3 flex items-center justify-between z-50 sticky top-0 border-b border-black/40 select-none">
+    <div class="flex items-center space-x-2 md:space-x-3">
+      <button onclick="toggleMobileSidebar()" class="md:hidden p-1 text-slate-300 hover:text-white">
+        <i class="fa-solid fa-bars text-xs"></i>
+      </button>
+
+      <div class="font-black text-xs text-white">Ⓢ StartKiter</div>
+
+      <div class="relative group cursor-pointer py-1 px-1.5 md:px-2 hover:bg-[#2c3338] hover:text-white transition rounded-sm flex items-center gap-1.5">
+        <i class="fa-solid fa-house text-[10px]"></i>
+        <span class="font-bold text-white hidden sm:inline">Fish 老魚 開站包</span>
+        <div class="absolute left-0 top-full mt-0 w-48 bg-[#2c3338] border border-black/30 shadow-2xl py-1 hidden group-hover:block text-xs z-50">
+          <a href="./course-frontend-landing-demo.html" class="px-3 py-2 hover:bg-[#2271b1] hover:text-white flex items-center gap-2 text-slate-200">
+            <i class="fa-solid fa-globe text-[10px]"></i> <span>官網首頁</span>
+          </a>
+          <a href="./course-sales-page-powercourse.html" class="px-3 py-2 hover:bg-[#2271b1] hover:text-white flex items-center gap-2 text-slate-200">
+            <i class="fa-solid fa-file-invoice text-[10px]"></i> <span>課程銷售頁</span>
+          </a>
+          <a href="./course-demo-3-supastarter-ai.html" class="px-3 py-2 hover:bg-[#2271b1] hover:text-white flex items-center gap-2 text-slate-200">
+            <i class="fa-solid fa-play text-[10px]"></i> <span>學員教室</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="h-3.5 w-px bg-white/10 hidden md:block"></div>
+      <span class="text-[10px] text-emerald-400 hidden md:flex items-center gap-1">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>系統正常</span>
+      </span>
+    </div>
+
+    <div class="flex items-center space-x-3">
+      <a href="./course-demo-3-supastarter-ai.html" class="px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-indigo-300 text-[10px] flex items-center gap-1 font-semibold">
+        <i class="fa-solid fa-graduation-cap"></i> <span>學員教室</span>
+      </a>
+      <div class="flex items-center gap-1.5 text-slate-200 font-medium">
+        <span class="hidden sm:inline">Fish 老魚</span>
+        <div class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold">F</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. WordPress 雙欄佈局 -->
+  <div class="flex-1 flex overflow-hidden relative">
+    <!-- Left Sidebar -->
+    <aside id="wp-sidebar" class="w-52 wp-sidebar flex flex-col flex-shrink-0 select-none border-r border-black/30 absolute md:static inset-y-0 left-0 z-40 transform -translate-x-full md:translate-x-0">
+      <div class="px-3 py-2 text-[10px] text-slate-400 border-b border-white/5 flex items-center justify-between">
+        <span class="nav-text">選單分組 (可拖曳/收折)</span>
+        <button onclick="addNewGroup()" class="text-[#72aee6] hover:text-white font-bold flex items-center gap-1">
+          <i class="fa-solid fa-plus text-[9px]"></i> <span class="nav-text">新增</span>
+        </button>
+      </div>
+
+      <nav class="flex-1 py-2 space-y-2 text-xs overflow-y-auto" id="sidebar-nav-container">
+        <!-- 動態渲染群組 -->
+      </nav>
+
+      <div onclick="toggleCollapseSidebar()" class="hidden md:flex p-3 border-t border-white/5 text-[11px] text-slate-400 hover:text-white cursor-pointer items-center gap-2.5 transition">
+        <i id="collapse-icon" class="fa-solid fa-circle-chevron-left w-4 text-center text-xs"></i>
+        <span class="nav-text whitespace-nowrap">收合選單</span>
+      </div>
+    </aside>
+
+    <div id="mobile-backdrop" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden"></div>
+
+    <!-- Right Main Area -->
+    <main class="flex-1 p-4 md:p-6 overflow-y-auto" id="main-content">
+      <div id="dynamic-content"></div>
+    </main>
+  </div>
+
+  <script>
+    let currentView = 'course';
+    let currentCourseTab = 'curriculum';
+    let isCollapsed = false;
+    let isMobileOpen = false;
+
+    // 當前正在編輯的單元詳細資料
+    let editingLesson = {
+      id: "u1-1",
+      code: "1-1",
+      title: "產品願景與架構解構",
+      chapterTitle: "章節 1：產品願景與 WordPress 式模組架構",
+      videoUrl: "https://iframe.mediadelivery.net/play/12345/bunny-demo-video",
+      detectedProvider: "Bunny Stream (CDN)",
+      videoDuration: "05:20",
+      isFree: true,
+      content: `# 1-1 產品願景與架構解構
+
+歡迎來到 StartKiter 創業者開站包實戰課程！
+
+在傳統開發中，建立一個系統通常需要耗費數週。StartKiter 採用 **Next.js 15 Monorepo + 4 大 Mount Points**，讓你隨插隨用各種業務模組！
+
+<InstantQuiz
+  question="StartKiter 核心底座包含哪些能力？"
+  options={[
+    "Auth 認證、Prisma 資料庫、PAYUNi 金流、i18n 多語系與 WordPress Admin Bar",
+    "只有靜態 HTML 網頁"
+  ]}
+  answerIndex={0}
+/>`,
+      aiPrompt: "你是 StartKiter 的資深架構師與隨課助教。請用親切的大白話解答本單元架構疑問。",
+      aiContext: "- 核心底座: packages/auth, database, payments, i18n\n- 4 大掛載點: DB, API, UI, config/modules.ts"
+    };
+
+    // 一級選單資料結構
+    let navGroups = [
+      {
+        id: "g-core",
+        title: "核心控制 CORE",
+        isFolderCollapsed: false,
+        items: [
+          { id: "dashboard", label: "控制台", sub: "Dashboard", icon: "fa-gauge" }
+        ]
+      },
+      {
+        id: "g-products",
+        title: "產品業務 PRODUCTS",
+        isFolderCollapsed: false,
+        items: [
+          { id: "course", label: "課程", sub: "Courses", icon: "fa-graduation-cap" },
+          { id: "deployments", label: "主機", sub: "Hosting", icon: "fa-server" },
+          { id: "support", label: "客服", sub: "Support", icon: "fa-headset" },
+          { id: "orders", label: "金流", sub: "Billing", icon: "fa-credit-card" }
+        ]
+      },
+      {
+        id: "g-system",
+        title: "系統管理 SYSTEM",
+        isFolderCollapsed: false,
+        items: [
+          { id: "plugins", label: "外掛", sub: "Plugins", icon: "fa-plug" },
+          { id: "admins", label: "用戶", sub: "Users", icon: "fa-users" },
+          { id: "settings", label: "設定", sub: "Settings", icon: "fa-gear" }
+        ]
+      }
+    ];
+
+    // 章節與單元資料
+    let chapters = [
+      {
+        id: "c1",
+        title: "章節 1：產品願景與 WordPress 式模組架構",
+        units: [
+          { id: "u1-1", code: "1-1", title: "產品願景與架構解構", isFree: true, time: "05:20", provider: "Bunny", videoUrl: "https://iframe.mediadelivery.net/play/12345/bunny-demo-video" },
+          { id: "u1-2", code: "1-2", title: "模組化底座與四種掛載點", isFree: false, time: "10:15", provider: "YouTube", videoUrl: "https://youtube.com/watch?v=demo" }
+        ]
+      },
+      {
+        id: "c2",
+        title: "章節 2：Coolify 機群代管與 VPS 自動開通",
+        units: [
+          { id: "u2-1", code: "2-1", title: "VPS 開機指引與 SSH 取得", isFree: false, time: "08:40", provider: "Vimeo", videoUrl: "https://vimeo.com/demo" },
+          { id: "u2-2", code: "2-2", title: "Coolify 集中納管實務與 API 整合", isFree: false, time: "12:45", provider: "MP4", videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }
+        ]
+      }
+    ];
+
+    function renderSidebar() {
+      const container = document.getElementById('sidebar-nav-container');
+      container.innerHTML = navGroups.map((group, gIdx) => `
+        <div class="nav-group-section" data-gidx="${gIdx}">
+          <div class="px-3 pt-1.5 pb-1 text-[10px] font-bold text-slate-400 flex items-center justify-between group-header group/gh hover:text-slate-200 transition select-none">
+            <div class="flex items-center gap-1.5 cursor-pointer flex-1 overflow-hidden" onclick="toggleFolderCollapse(${gIdx})">
+              <i class="fa-solid ${group.isFolderCollapsed ? 'fa-chevron-right text-[8px]' : 'fa-chevron-down text-[8px]'} text-slate-500 transition w-3"></i>
+              <span class="nav-text uppercase tracking-wider truncate font-semibold">${group.title}</span>
+            </div>
+            <div class="flex items-center space-x-1 nav-text opacity-0 group-hover/gh:opacity-100 transition">
+              <button onclick="renameGroup(${gIdx})" class="text-slate-400 hover:text-white p-0.5" title="改名">
+                <i class="fa-solid fa-pen text-[9px]"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="space-y-0.5 nav-item-dropzone ${group.isFolderCollapsed ? 'hidden' : ''}" id="nav-dropzone-${gIdx}">
+            ${group.items.map((item, iIdx) => `
+              <a href="#" onclick="switchView('${item.id}')" id="nav-${item.id}"
+                 class="${currentView === item.id ? 'wp-sidebar-active' : 'wp-sidebar-item'} flex items-center gap-3 px-3.5 py-2 transition relative group draggable-nav-item cursor-grab"
+                 draggable="true" data-gidx="${gIdx}" data-iidx="${iIdx}" title="${item.label} (${item.sub})">
+                <i class="fa-solid ${item.icon} text-slate-400 w-4 text-center ${currentView === item.id ? 'text-white' : ''}"></i>
+                <span class="nav-text whitespace-nowrap">${item.label} <span class="text-[10px] ${currentView === item.id ? 'opacity-80' : 'opacity-60'}">${item.sub}</span></span>
+                <i class="fa-solid fa-grip-vertical text-white/20 hover:text-white ml-auto text-[10px] hidden group-hover:inline"></i>
+              </a>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      attachNavDragEvents();
+    }
+
+    function toggleFolderCollapse(gIdx) {
+      navGroups[gIdx].isFolderCollapsed = !navGroups[gIdx].isFolderCollapsed;
+      renderSidebar();
+    }
+
+    function renameGroup(gIdx) {
+      const currentName = navGroups[gIdx].title;
+      const newName = prompt('修改分組名稱：', currentName);
+      if (newName && newName.trim()) {
+        navGroups[gIdx].title = newName.trim();
+        renderSidebar();
+      }
+    }
+
+    function addNewGroup() {
+      const groupName = prompt('輸入新分組名稱：', '新自訂業務');
+      if (groupName && groupName.trim()) {
+        navGroups.push({
+          id: 'g-' + Date.now(),
+          title: groupName.trim().toUpperCase(),
+          isFolderCollapsed: false,
+          items: []
+        });
+        renderSidebar();
+      }
+    }
+
+    function attachNavDragEvents() {
+      document.querySelectorAll('.draggable-nav-item').forEach(item => {
+        item.addEventListener('dragstart', (e) => {
+          draggedNavItem = item;
+          item.classList.add('dragging-nav');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+
+        item.addEventListener('dragend', () => {
+          if (draggedNavItem) draggedNavItem.classList.remove('dragging-nav');
+          draggedNavItem = null;
+          document.querySelectorAll('.draggable-nav-item').forEach(el => el.classList.remove('drag-over-nav'));
+        });
+
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          item.classList.add('drag-over-nav');
+        });
+
+        item.addEventListener('dragleave', () => {
+          item.classList.remove('drag-over-nav');
+        });
+
+        item.addEventListener('drop', (e) => {
+          e.preventDefault();
+          item.classList.remove('drag-over-nav');
+
+          if (draggedNavItem && draggedNavItem !== item) {
+            const fromGIdx = parseInt(draggedNavItem.getAttribute('data-gidx'));
+            const fromIIdx = parseInt(draggedNavItem.getAttribute('data-iidx'));
+            const toGIdx = parseInt(item.getAttribute('data-gidx'));
+            const toIIdx = parseInt(item.getAttribute('data-iidx'));
+
+            const movingItem = navGroups[fromGIdx].items.splice(fromIIdx, 1)[0];
+            navGroups[toGIdx].items.splice(toIIdx, 0, movingItem);
+
+            renderSidebar();
+          }
+        });
+      });
+    }
+
+    function toggleCollapseSidebar() {
+      const sidebar = document.getElementById('wp-sidebar');
+      const icon = document.getElementById('collapse-icon');
+      const navTexts = document.querySelectorAll('.nav-text');
+      const groupHeaders = document.querySelectorAll('.group-header');
+
+      isCollapsed = !isCollapsed;
+
+      if (isCollapsed) {
+        sidebar.className = 'w-14 wp-sidebar flex flex-col flex-shrink-0 select-none border-r border-black/30 absolute md:static inset-y-0 left-0 z-40';
+        icon.className = 'fa-solid fa-circle-chevron-right w-4 text-center text-xs';
+        navTexts.forEach(el => el.classList.add('hidden'));
+        groupHeaders.forEach(el => el.classList.add('hidden'));
+      } else {
+        sidebar.className = 'w-52 wp-sidebar flex flex-col flex-shrink-0 select-none border-r border-black/30 absolute md:static inset-y-0 left-0 z-40';
+        icon.className = 'fa-solid fa-circle-chevron-left w-4 text-center text-xs';
+        navTexts.forEach(el => el.classList.remove('hidden'));
+        groupHeaders.forEach(el => el.classList.remove('hidden'));
+      }
+    }
+
+    function toggleMobileSidebar() {
+      const sidebar = document.getElementById('wp-sidebar');
+      const backdrop = document.getElementById('mobile-backdrop');
+      isMobileOpen = !isMobileOpen;
+
+      if (isMobileOpen) {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+    }
+
+    function switchView(view) {
+      currentView = view;
+      renderSidebar();
+      renderContent();
+    }
+
+    function setCourseTab(tab) {
+      currentCourseTab = tab;
+      renderContent();
+    }
+
+    function openEditUnit(chIdx, uIdx) {
+      const u = chapters[chIdx].units[uIdx];
+      editingLesson.id = u.id;
+      editingLesson.code = u.code;
+      editingLesson.title = u.title;
+      editingLesson.chapterTitle = chapters[chIdx].title;
+      editingLesson.videoUrl = u.videoUrl;
+      editingLesson.detectedProvider = u.provider || "Bunny Stream";
+      editingLesson.videoDuration = u.time;
+      editingLesson.isFree = u.isFree;
+
+      currentCourseTab = 'editor';
+      renderContent();
+    }
+
+    function deleteUnit(chIdx, uIdx) {
+      if (confirm('確定要刪除單元《' + chapters[chIdx].units[uIdx].title + '》嗎？')) {
+        chapters[chIdx].units.splice(uIdx, 1);
+        renderContent();
+      }
+    }
+
+    // 智慧分析影片 URL (Bunny / YouTube / Vimeo / MP4)
+    function onVideoUrlChange(url) {
+      const infoBox = document.getElementById('video-detected-info');
+      const previewTitle = document.getElementById('video-preview-title');
+      const previewBadge = document.getElementById('video-preview-badge');
+
+      editingLesson.videoUrl = url;
+
+      if (url.includes('bunny') || url.includes('mediadelivery')) {
+        editingLesson.detectedProvider = 'Bunny Stream (專用 CDN)';
+        previewBadge.className = 'px-2 py-0.5 rounded bg-orange-50 text-orange-700 font-bold border border-orange-200 text-[10px]';
+      } else if (url.includes('youtube') || url.includes('youtu.be')) {
+        editingLesson.detectedProvider = 'YouTube (不公開)';
+        previewBadge.className = 'px-2 py-0.5 rounded bg-red-50 text-red-700 font-bold border border-red-200 text-[10px]';
+      } else if (url.includes('vimeo')) {
+        editingLesson.detectedProvider = 'Vimeo PRO';
+        previewBadge.className = 'px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-bold border border-blue-200 text-[10px]';
+      } else {
+        editingLesson.detectedProvider = '自訂 MP4 直連網址';
+        previewBadge.className = 'px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-bold text-[10px]';
+      }
+
+      previewTitle.innerText = editingLesson.detectedProvider;
+      infoBox.classList.remove('hidden');
+    }
+
+    function renderContent() {
+      const container = document.getElementById('dynamic-content');
+
+      if (currentView === 'course') {
+        container.innerHTML = `
+          <div class="space-y-4">
+            <!-- 頂部標題列 -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h1 class="text-lg md:text-xl font-bold text-[#1d2327]">課程管理</h1>
+                <p class="text-xs text-slate-500">管理章節大綱、影片連結、講義與隨課 AI 助教。</p>
+              </div>
+              <div class="flex items-center space-x-2 text-xs">
+                <a href="./course-demo-3-supastarter-ai.html" target="_blank" class="px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 rounded text-slate-700 font-semibold transition flex items-center gap-1.5 shadow-sm">
+                  <i class="fa-solid fa-eye text-indigo-600 text-[10px]"></i> <span>預覽學員教室</span>
+                </a>
+                <button onclick="alert('💾 課程發布成功！')" class="px-4 py-1.5 bg-[#2271b1] hover:bg-[#135e96] text-white rounded font-bold transition shadow-sm">
+                  儲存並發布
+                </button>
+              </div>
+            </div>
+
+            <!-- 主工作區 -->
+            <div class="bg-white border border-[#c3c4c7] rounded-lg shadow-sm overflow-hidden">
+              <div class="border-b border-[#c3c4c7] bg-[#f6f7f7] px-4 flex space-x-6 text-xs font-semibold">
+                <button onclick="setCourseTab('curriculum')" class="py-3 transition ${currentCourseTab === 'curriculum' ? 'text-[#2271b1] border-b-2 border-[#2271b1] font-bold' : 'text-slate-600 hover:text-[#2271b1]'}">
+                  章節與單元清單
+                </button>
+                <button onclick="setCourseTab('editor')" class="py-3 transition ${currentCourseTab === 'editor' ? 'text-[#2271b1] border-b-2 border-[#2271b1] font-bold' : 'text-slate-600 hover:text-[#2271b1]'}">
+                  編輯單元：${editingLesson.code} ${editingLesson.title}
+                </button>
+              </div>
+
+              <div class="p-4 md:p-6">
+                ${renderCourseTabBody()}
+              </div>
+            </div>
+          </div>
+        `;
+        if (currentCourseTab === 'curriculum') attachAllDragEvents();
+      } else {
+        container.innerHTML = `<div class="p-8 text-center text-xs text-slate-500">${currentView.toUpperCase()} 內容載入中...</div>`;
+      }
+    }
+
+    function renderCourseTabBody() {
+      if (currentCourseTab === 'curriculum') {
+        return `
+          <div class="space-y-4 text-xs">
+            <div class="flex items-center justify-between text-slate-600">
+              <span>上下拖曳可調整順序；右側使用 <strong>Icon 按鈕 (✏️ 編輯 / 👁️ 預覽 / 🗑️ 刪除)</strong> 操作：</span>
+              <div class="flex items-center space-x-2">
+                <button onclick="alert('➕ 新增章節')" class="px-2.5 py-1 bg-white border border-slate-300 rounded font-bold hover:bg-slate-50">+ 新增章節</button>
+                <button onclick="alert('➕ 新增單元')" class="px-2.5 py-1 bg-[#2271b1] text-white rounded font-bold">+ 新增單元</button>
+              </div>
+            </div>
+
+            <!-- Chapters List -->
+            <div class="space-y-4" id="chapters-container">
+              ${chapters.map((ch, chIdx) => `
+                <div class="border border-slate-200 rounded-lg overflow-hidden bg-white shadow-xs chapter-drag-card" draggable="true" data-chidx="${chIdx}">
+                  <!-- 章節 Header -->
+                  <div class="p-3 bg-slate-50 border-b border-slate-200 font-bold text-slate-800 flex items-center justify-between cursor-grab hover:bg-slate-100 transition">
+                    <div class="flex items-center gap-2">
+                      <i class="fa-solid fa-grip-vertical text-slate-400 text-xs"></i>
+                      <span>${ch.title}</span>
+                    </div>
+                    <span class="text-[11px] text-slate-400 font-normal">${ch.units.length} 個單元</span>
+                  </div>
+
+                  <!-- 單元列表 (使用 Icon 按鈕列) -->
+                  <div class="divide-y divide-slate-100" id="unit-container-${chIdx}">
+                    ${ch.units.map((u, uIdx) => `
+                      <div class="p-3 flex items-center justify-between hover:bg-slate-50 transition cursor-grab unit-drag-row" draggable="true" data-chidx="${chIdx}" data-uidx="${uIdx}">
+                        <div class="flex items-center space-x-3">
+                          <i class="fa-solid fa-grip-vertical text-slate-300 text-xs"></i>
+                          <span class="font-mono text-slate-400 font-bold">${u.code}</span>
+                          <span class="font-medium text-slate-800">${u.title}</span>
+                          ${u.isFree ? '<span class="text-[10px] px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">免費試看</span>' : ''}
+                          <span class="text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-500 font-mono">${u.provider}</span>
+                        </div>
+
+                        <!-- 簡化 Icon 按鈕列 (✏️ / 👁️ / 🗑️) -->
+                        <div class="flex items-center space-x-1">
+                          <span class="text-slate-400 text-[11px] mr-2">${u.time}</span>
+                          <button onclick="openEditUnit(${chIdx}, ${uIdx})" class="p-1.5 text-slate-500 hover:text-[#2271b1] hover:bg-slate-100 rounded transition" title="編輯單元">
+                            <i class="fa-solid fa-pen-to-square text-sm"></i>
+                          </button>
+                          <a href="./course-demo-3-supastarter-ai.html" target="_blank" class="p-1.5 text-slate-500 hover:text-emerald-600 hover:bg-slate-100 rounded transition" title="預覽播放">
+                            <i class="fa-solid fa-eye text-sm"></i>
+                          </a>
+                          <button onclick="deleteUnit(${chIdx}, ${uIdx})" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-slate-100 rounded transition" title="刪除單元">
+                            <i class="fa-solid fa-trash-can text-sm"></i>
+                          </button>
+                        </div>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      } else if (currentCourseTab === 'editor') {
+        // 極簡直覺的單元編輯工作區 (Fluent Player 影片解析 + 雙欄講義 + AI 助教)
+        return `
+          <div class="space-y-6 text-xs max-w-4xl">
+            <!-- 1. 影片設定區 (貼上連結即時出現影片資訊) -->
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4">
+              <div class="flex items-center justify-between border-b border-slate-200 pb-2.5">
+                <span class="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                  <i class="fa-solid fa-video text-[#2271b1]"></i> <span>單元影音設定</span>
+                </span>
+                <span class="text-slate-400">支援 Bunny、YouTube、Vimeo 與 MP4 直連</span>
+              </div>
+
+              <div class="space-y-3">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div class="md:col-span-2 space-y-1">
+                    <label class="font-bold text-slate-700">單元名稱</label>
+                    <input type="text" value="${editingLesson.title}" class="w-full p-2 border border-slate-300 rounded bg-white font-medium focus:outline-none focus:border-[#2271b1]">
+                  </div>
+                  <div class="space-y-1">
+                    <label class="font-bold text-slate-700">免費試看</label>
+                    <select class="w-full p-2 border border-slate-300 rounded bg-white font-bold text-slate-800">
+                      <option ${editingLesson.isFree ? 'selected' : ''}>開啟 (Free Preview)</option>
+                      <option ${!editingLesson.isFree ? 'selected' : ''}>關閉 (需購買解鎖)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- 影片網址輸入 (即時自動辨識) -->
+                <div class="space-y-1.5">
+                  <label class="font-bold text-slate-700">影片網址 (貼上任意 Bunny / YouTube / Vimeo / MP4 連結)</label>
+                  <input type="text" value="${editingLesson.videoUrl}" oninput="onVideoUrlChange(this.value)" placeholder="例如：https://iframe.mediadelivery.net/play/... 或 YouTube 網址" class="w-full p-2.5 border border-slate-300 rounded bg-white font-mono text-slate-800 focus:outline-none focus:border-[#2271b1]">
+                </div>
+
+                <!-- 貼上連結後自動出現的解析卡片 (Fluent Player 核心體驗) -->
+                <div id="video-detected-info" class="p-3.5 bg-white border border-slate-200 rounded-lg flex items-center justify-between shadow-xs">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-12 h-8 bg-slate-900 rounded flex items-center justify-center text-white text-xs">
+                      <i class="fa-solid fa-play"></i>
+                    </div>
+                    <div>
+                      <div class="font-bold text-slate-900 text-xs flex items-center gap-2">
+                        <span id="video-preview-title">${editingLesson.detectedProvider}</span>
+                        <span id="video-preview-badge" class="px-2 py-0.5 rounded bg-orange-50 text-orange-700 font-bold border border-orange-200 text-[10px]">自動辨識成功</span>
+                      </div>
+                      <div class="text-[11px] text-slate-400 font-mono mt-0.5">播放器已統一封裝 · 全裝置一致體驗</div>
+                    </div>
+                  </div>
+                  <div class="text-right text-xs">
+                    <span class="font-bold text-slate-700 font-mono">${editingLesson.videoDuration}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. 文字講義與隨堂測驗 (雙欄編輯) -->
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                  <i class="fa-solid fa-book-open text-indigo-600"></i> <span>文字講義與小測驗</span>
+                </span>
+                <div class="flex items-center space-x-1.5">
+                  <button onclick="alert('已插入隨堂測驗')" class="px-2.5 py-1 bg-white border border-slate-300 rounded hover:bg-slate-50 font-medium">+ 隨堂測驗</button>
+                  <button onclick="alert('已插入微沙盒')" class="px-2.5 py-1 bg-white border border-slate-300 rounded hover:bg-slate-50 font-medium">+ 微沙盒</button>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 h-80">
+                <div class="border border-slate-200 rounded-xl flex flex-col bg-white overflow-hidden">
+                  <div class="p-2 bg-slate-50 border-b border-slate-200 font-bold text-slate-600 text-[11px]">Markdown 講義輸入</div>
+                  <textarea class="flex-1 p-3 font-mono text-xs text-slate-800 resize-none focus:outline-none leading-relaxed">${editingLesson.content}</textarea>
+                </div>
+                <div class="border border-slate-200 rounded-xl flex flex-col bg-white overflow-hidden shadow-xs">
+                  <div class="p-2 bg-slate-50 border-b border-slate-200 font-bold text-slate-600 text-[11px] flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> <span>學員端預覽</span>
+                  </div>
+                  <div class="flex-1 p-4 overflow-y-auto space-y-3 text-xs">
+                    <h2 class="font-bold text-slate-900 text-sm">${editingLesson.title}</h2>
+                    <p class="text-slate-600">歡迎來到 StartKiter 創業者開站包實戰課程！</p>
+                    <div class="p-3 bg-indigo-50/50 border border-indigo-200 rounded-lg space-y-1.5">
+                      <div class="font-bold text-indigo-700">隨堂小測驗</div>
+                      <div class="text-slate-800">Q: StartKiter 核心底座包含哪些能力？</div>
+                      <div class="p-1.5 rounded bg-white border border-indigo-300 text-indigo-900 font-medium">A. Auth 認證、Prisma 資料庫、PAYUNi 金流</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. 隨課 AI 助教 -->
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
+              <span class="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                <i class="fa-solid fa-wand-magic-sparkles text-indigo-600"></i> <span>隨課 AI 助教筆記 (學員提問時 AI 會參考這裡)</span>
+              </span>
+              <textarea class="w-full h-20 p-2.5 border border-slate-300 rounded bg-white font-mono text-xs focus:outline-none">${editingLesson.aiContext}</textarea>
+            </div>
+
+            <!-- 儲存按鈕 -->
+            <div class="flex items-center justify-between pt-2">
+              <button onclick="setCourseTab('curriculum')" class="px-4 py-2 border border-slate-300 rounded hover:bg-slate-50 font-bold text-slate-700">
+                返回清單
+              </button>
+              <button onclick="alert('💾 單元設定已儲存！'); setCourseTab('curriculum');" class="px-6 py-2 bg-[#2271b1] hover:bg-[#135e96] text-white font-bold rounded shadow-sm">
+                儲存單元
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // 雙層拖曳
+    let draggedItem = null;
+    let dragType = null;
+
+    function attachAllDragEvents() {
+      document.querySelectorAll('.chapter-drag-card').forEach(card => {
+        card.addEventListener('dragstart', (e) => {
+          if (e.target.classList.contains('unit-drag-row')) return;
+          draggedItem = card;
+          dragType = 'chapter';
+          card.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+
+        card.addEventListener('dragend', () => {
+          if (dragType === 'chapter') {
+            card.classList.remove('dragging');
+            draggedItem = null;
+            dragType = null;
+            document.querySelectorAll('.chapter-drag-card').forEach(c => c.classList.remove('drag-over-ch'));
+          }
+        });
+
+        card.addEventListener('dragover', (e) => {
+          if (dragType === 'chapter') {
+            e.preventDefault();
+            card.classList.add('drag-over-ch');
+          }
+        });
+
+        card.addEventListener('dragleave', () => {
+          card.classList.remove('drag-over-ch');
+        });
+
+        card.addEventListener('drop', (e) => {
+          if (dragType === 'chapter' && draggedItem && draggedItem !== card) {
+            e.preventDefault();
+            card.classList.remove('drag-over-ch');
+            const fromIdx = parseInt(draggedItem.getAttribute('data-chidx'));
+            const toIdx = parseInt(card.getAttribute('data-chidx'));
+            const movingCh = chapters.splice(fromIdx, 1)[0];
+            chapters.splice(toIdx, 0, movingCh);
+            renderContent();
+          }
+        });
+      });
+
+      document.querySelectorAll('.unit-drag-row').forEach(row => {
+        row.addEventListener('dragstart', (e) => {
+          e.stopPropagation();
+          draggedItem = row;
+          dragType = 'unit';
+          row.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+
+        row.addEventListener('dragend', (e) => {
+          e.stopPropagation();
+          if (dragType === 'unit') {
+            row.classList.remove('dragging');
+            draggedItem = null;
+            dragType = null;
+            document.querySelectorAll('.unit-drag-row').forEach(r => r.classList.remove('drag-over-unit'));
+          }
+        });
+
+        row.addEventListener('dragover', (e) => {
+          if (dragType === 'unit') {
+            e.preventDefault();
+            e.stopPropagation();
+            row.classList.add('drag-over-unit');
+          }
+        });
+
+        row.addEventListener('dragleave', () => {
+          e.stopPropagation();
+          row.classList.remove('drag-over-unit');
+        });
+
+        row.addEventListener('drop', (e) => {
+          if (dragType === 'unit' && draggedItem && draggedItem !== row) {
+            e.preventDefault();
+            e.stopPropagation();
+            row.classList.remove('drag-over-unit');
+            const chId = parseInt(row.getAttribute('data-chidx'));
+            const fromUIdx = parseInt(draggedItem.getAttribute('data-uidx'));
+            const toUIdx = parseInt(row.getAttribute('data-uidx'));
+
+            const movingU = chapters[chId].units.splice(fromUIdx, 1)[0];
+            chapters[chId].units.splice(toUIdx, 0, movingU);
+            renderContent();
+          }
+        });
+      });
+    }
+
+    renderSidebar();
+    renderContent();
+  </script>
+</body>
+</html>

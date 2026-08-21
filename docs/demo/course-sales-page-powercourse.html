@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StartKiter 開站包 - 課程專屬銷售頁 (PowerCourse Style)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap');
+    body { font-family: 'Inter', 'Noto Sans TC', sans-serif; }
+    .wp-admin-bar { background-color: #1d2327; color: #c3c4c7; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen antialiased flex flex-col">
+  <!-- 1. 全域常駐 WordPress 頂部 Admin Bar (32px) -->
+  <div class="wp-admin-bar text-[11px] h-8 px-4 flex items-center justify-between z-50 sticky top-0 border-b border-black/40 select-none">
+    <div class="flex items-center space-x-3">
+      <div class="font-black text-xs text-white">Ⓢ StartKiter</div>
+
+      <!-- 前往其他頁面下拉 -->
+      <div class="relative group cursor-pointer py-1 px-2 hover:bg-[#2c3338] hover:text-white transition rounded-sm flex items-center gap-1.5">
+        <i class="fa-solid fa-house text-[10px]"></i>
+        <span class="font-bold text-white">Fish 老魚 開站包 ▾</span>
+        <div class="absolute left-0 top-full mt-0 w-48 bg-[#2c3338] border border-black/30 shadow-2xl py-1 hidden group-hover:block text-xs z-50">
+          <a href="./course-admin-studio-demo.html" class="px-3 py-2 hover:bg-[#2271b1] hover:text-white flex items-center gap-2 text-indigo-300 font-bold">
+            <i class="fa-solid fa-gauge text-[10px]"></i> <span>⚙️ 總管理後台 (Studio)</span>
+          </a>
+          <a href="./course-demo-3-supastarter-ai.html" class="px-3 py-2 hover:bg-[#2271b1] hover:text-white flex items-center gap-2 text-slate-200">
+            <i class="fa-solid fa-play text-[10px]"></i> <span>學員教室播放器</span>
+          </a>
+          <a href="./course-frontend-landing-demo.html" class="px-3 py-2 hover:bg-[#2271b1] hover:text-white flex items-center gap-2 text-slate-200">
+            <i class="fa-solid fa-globe text-[10px]"></i> <span>網站前台首頁</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="h-3.5 w-px bg-white/10"></div>
+      <span class="text-[10px] text-amber-300 flex items-center gap-1">
+        <i class="fa-solid fa-tag"></i> <span>銷售頁模式 (Sales Page Preview)</span>
+      </span>
+    </div>
+
+    <!-- 右側：回後台按鈕 + 個人資訊 -->
+    <div class="flex items-center space-x-3">
+      <a href="./course-admin-studio-demo.html" class="px-2.5 py-0.5 rounded bg-[#2271b1] hover:bg-[#135e96] text-white text-[10px] font-bold flex items-center gap-1.5 transition shadow-sm">
+        <i class="fa-solid fa-arrow-left"></i> <span>回管理後台</span>
+      </a>
+      <div class="flex items-center gap-1.5 text-slate-200 font-medium">
+        <span>Fish 老魚</span>
+        <div class="w-4 h-4 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[9px] font-bold">F</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Top Navigation -->
+  <header class="bg-white border-b border-slate-200 sticky top-8 z-40 px-6 h-16 flex items-center justify-between">
+    <div class="flex items-center space-x-4">
+      <a href="#" class="font-bold text-slate-900 text-base tracking-tight flex items-center gap-2">
+        <span class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-black text-sm">S</span>
+        <span>StartKiter 學院</span>
+      </a>
+      <div class="h-4 w-px bg-slate-200 hidden md:block"></div>
+      <span class="text-xs font-semibold text-slate-500 hidden md:inline">2026 終身代碼包 + 實戰全套課</span>
+    </div>
+    <div class="flex items-center space-x-3 text-xs">
+      <a href="./course-demo-3-supastarter-ai.html" class="px-3.5 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 font-semibold text-slate-700 transition flex items-center gap-1.5">
+        <i class="fa-solid fa-play text-indigo-600 text-[10px]"></i> <span>試看單元 1-1</span>
+      </a>
+      <a href="#buy-now" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition shadow-sm">
+        立即買斷加入
+      </a>
+    </div>
+  </header>
+
+  <!-- Sales Hero: PowerCourse 結構 -->
+  <section class="max-w-5xl mx-auto px-6 pt-12 pb-16 space-y-8">
+    <div class="text-center space-y-4 max-w-3xl mx-auto">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold">
+        <span class="w-2 h-2 rounded-full bg-indigo-600 animate-ping"></span>
+        <span>一次買斷 · 終身授權 · 贈私有 GitHub 代碼庫</span>
+      </div>
+      <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+        開站包實戰：從模組架構、主機代管到 AI 客服工單
+      </h1>
+      <p class="text-sm md:text-base text-slate-600 leading-relaxed">
+        給想做自己產品的開發者與創業者。帶走 100% 獨立的 Next.js 15 Monorepo 代碼包，告別手動維運與被封鎖風險。
+      </p>
+    </div>
+
+    <!-- Video Preview Box -->
+    <div class="relative bg-black rounded-2xl overflow-hidden shadow-2xl border border-slate-200 aspect-video max-w-4xl mx-auto">
+      <video class="w-full h-full object-contain" controls poster="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1200&q=80">
+        <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <!-- Key Highlights Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto pt-6 text-xs">
+      <div class="p-4 bg-white border border-slate-200 rounded-xl space-y-1">
+        <div class="text-slate-500 font-medium">總課時長</div>
+        <div class="text-lg font-bold text-slate-900">3 大模組 · 85 分鐘</div>
+      </div>
+      <div class="p-4 bg-white border border-slate-200 rounded-xl space-y-1">
+        <div class="text-slate-500 font-medium">學習體驗</div>
+        <div class="text-lg font-bold text-slate-900">隨課文字 AI 助教</div>
+      </div>
+      <div class="p-4 bg-white border border-slate-200 rounded-xl space-y-1">
+        <div class="text-slate-500 font-medium">交付權益</div>
+        <div class="text-lg font-bold text-slate-900">私有 GitHub 庫邀請</div>
+      </div>
+      <div class="p-4 bg-white border border-slate-200 rounded-xl space-y-1">
+        <div class="text-slate-500 font-medium">交流社群</div>
+        <div class="text-lg font-bold text-slate-900">LINE VIP 學員群</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PowerCourse 課表大綱 -->
+  <section class="max-w-4xl mx-auto px-6 py-12 space-y-6">
+    <div class="border-b border-slate-200 pb-4 flex items-center justify-between">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900">📑 完整課程大綱與試看單元</h2>
+        <p class="text-xs text-slate-500 mt-1">隨課穿插 7 款 MDX 互動積木與隨課 AI 助教隨時提問</p>
+      </div>
+      <a href="./course-demo-3-supastarter-ai.html" class="text-xs font-bold text-indigo-600 hover:underline">
+        進入試看教室 →
+      </a>
+    </div>
+
+    <!-- Chapter 1 -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">章節 1</span>
+        <span class="text-xs text-slate-400">2 個單元 · 15 分鐘</span>
+      </div>
+      <h3 class="text-base font-bold text-slate-900">產品願景與 WordPress 式模組架構</h3>
+      <div class="space-y-2 text-xs">
+        <div class="p-3 bg-slate-50 rounded-lg flex items-center justify-between">
+          <span class="font-medium text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-circle-play text-indigo-600"></i>
+            <span>1-1 產品願景與架構解構</span>
+          </span>
+          <a href="./course-demo-3-supastarter-ai.html" class="px-2.5 py-1 rounded bg-indigo-600 text-white font-bold text-[11px]">免費試看</a>
+        </div>
+        <div class="p-3 bg-slate-50 rounded-lg flex items-center justify-between text-slate-600">
+          <span class="flex items-center gap-2">
+            <i class="fa-solid fa-lock text-slate-400"></i>
+            <span>1-2 模組化底座與四種掛載點 (Mount Points)</span>
+          </span>
+          <span class="text-[11px] text-slate-400">10:15</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chapter 2 -->
+    <div class="bg-white border border-slate-200 rounded-2xl p-6 space-y-4 shadow-sm">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">章節 2</span>
+        <span class="text-xs text-slate-400">3 個單元 · 36 分鐘</span>
+      </div>
+      <h3 class="text-base font-bold text-slate-900">Coolify 機群代管與 VPS 自動開通</h3>
+      <div class="space-y-2 text-xs text-slate-600">
+        <div class="p-3 bg-slate-50 rounded-lg flex items-center justify-between">
+          <span>2-1 VPS 開機指引與 SSH 取得</span>
+          <span class="text-slate-400">08:40</span>
+        </div>
+        <div class="p-3 bg-slate-50 rounded-lg flex items-center justify-between">
+          <span>2-2 Coolify 集中納管實務與 API 整合</span>
+          <span class="text-slate-400">12:45</span>
+        </div>
+        <div class="p-3 bg-slate-50 rounded-lg flex items-center justify-between">
+          <span>2-3 憑證安全交接 (No-Log Policy)</span>
+          <span class="text-slate-400">15:10</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Card -->
+  <section id="buy-now" class="max-w-3xl mx-auto px-6 py-12">
+    <div class="bg-slate-900 text-white rounded-3xl p-8 shadow-2xl space-y-6 text-center border border-slate-800">
+      <div class="space-y-2">
+        <span class="text-xs font-bold text-indigo-400 bg-indigo-950 px-3 py-1 rounded-full border border-indigo-800">單一買斷方案</span>
+        <h2 class="text-3xl font-black">StartKiter 終身開站方案</h2>
+        <p class="text-xs text-slate-400">一次性付費，終身代碼包更新與完整實戰教學</p>
+      </div>
+
+      <div class="text-4xl font-black text-white">NT$ 8,800</div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-left max-w-lg mx-auto text-slate-300">
+        <div>✓ 完整 Next.js 15 Monorepo 代碼包</div>
+        <div>✓ PAYUNi 台灣金流防篡改模組</div>
+        <div>✓ Coolify 機群代管自動化管線</div>
+        <div>✓ 隨課文字 AI 助教與 7 款積木</div>
+        <div>✓ 私有 GitHub Repository 終身邀請</div>
+        <div>✓ LINE 專屬學員群交流</div>
+      </div>
+
+      <button onclick="alert('💳 跳轉至 PAYUNi 台灣金流安全結帳頁面...')" class="w-full max-w-md mx-auto py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-sm transition shadow-lg block">
+        立即購買開站 (PAYUNi 信用卡)
+      </button>
+    </div>
+  </section>
+
+  <!-- Instructor Section -->
+  <section class="max-w-3xl mx-auto px-6 py-10 border-t border-slate-200 flex items-center space-x-6">
+    <div class="w-20 h-20 rounded-full bg-indigo-600 text-white flex items-center justify-center font-black text-2xl flex-shrink-0">
+      Fish
+    </div>
+    <div class="space-y-1 text-xs">
+      <h3 class="text-base font-bold text-slate-900">講師：Fish 老魚</h3>
+      <p class="text-slate-600 leading-relaxed">
+        資深全端工程師與架構師。專注於現代 SaaS Monorepo、WordPress 式模組化開站架構與台灣在地化金流自動化部署。
+      </p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-400">
+    © 2026 StartKiter. 繁體中文 SSOT 開發標準.
+  </footer>
+</body>
+</html>

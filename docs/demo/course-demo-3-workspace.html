@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StartKiter 課程 Demo 3 - 動態工作區 · 模式自由切換</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+    body { font-family: 'Inter', 'Noto Sans TC', sans-serif; }
+    .mode-btn-active { background-color: #4f46e5 !important; color: #ffffff !important; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+  <!-- Top Bar with Mode Switcher & Tools -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur px-6 h-16 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center space-x-4">
+      <div class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-black px-3 py-1 rounded-lg text-sm tracking-wider">StartKiter</div>
+      <div class="h-4 w-px bg-slate-700"></div>
+      
+      <!-- 模式切換按鈕組 -->
+      <div class="bg-slate-950 p-1 rounded-xl border border-slate-800 flex items-center space-x-1 text-xs">
+        <button onclick="setMode('theater')" id="btn-theater" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5">
+          <i class="fa-solid fa-film"></i> <span>純劇院影音</span>
+        </button>
+        <button onclick="setMode('split')" id="btn-split" class="px-3 py-1.5 rounded-lg mode-btn-active text-white transition flex items-center gap-1.5">
+          <i class="fa-solid fa-table-columns"></i> <span>左右互動</span>
+        </button>
+        <button onclick="setMode('ide')" id="btn-ide" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5">
+          <i class="fa-solid fa-code"></i> <span>三欄 IDE 沙盒</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Actions: Coupon, Voice Mic, Complete -->
+    <div class="flex items-center space-x-3 text-xs">
+      <button onclick="alert('🎟️ 折扣券已領取：STARTKITER88（結帳折 1200）')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 font-medium hover:bg-amber-500/20 transition">
+        <i class="fa-solid fa-ticket"></i> <span>優惠券 85 折</span>
+      </button>
+
+      <button onclick="alert('🎤 語音助理啟動中：請說出你的問題...')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 font-medium hover:bg-indigo-500/20 transition">
+        <i class="fa-solid fa-microphone"></i> <span>語音提問</span>
+      </button>
+
+      <button onclick="this.innerHTML='<i class=\'fa-solid fa-check\'></i> 已完成'; this.className='px-3.5 py-1.5 rounded-lg bg-emerald-600 text-white font-semibold'" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition">
+        <i class="fa-solid fa-check"></i> <span>標記完成</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Workspace Dynamic Content Container -->
+  <main class="flex-1 w-full p-6" id="workspace-container">
+    <!-- Dynamic View Injected Here by JavaScript -->
+    <div id="dynamic-view" class="h-full"></div>
+  </main>
+
+  <script>
+    let currentMode = 'split';
+
+    function renderView() {
+      const container = document.getElementById('dynamic-view');
+      document.querySelectorAll('[id^="btn-"]').forEach(b => b.classList.remove('mode-btn-active'));
+      document.getElementById('btn-' + currentMode).classList.add('mode-btn-active');
+
+      if (currentMode === 'theater') {
+        // Mode 1: Theater (Full-width video focus)
+        container.innerHTML = `
+          <div class="max-w-5xl mx-auto space-y-4">
+            <div class="bg-black rounded-2xl overflow-hidden border border-slate-800 aspect-video shadow-2xl">
+              <video class="w-full h-full object-contain" controls autoplay>
+                <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+              </video>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-center justify-between text-xs">
+              <span class="text-slate-300 font-semibold">單元 02：Coolify 機群代管實務操作</span>
+              <span class="text-slate-500">純影音劇院模式 · 支援快捷鍵 F 全螢幕</span>
+            </div>
+          </div>
+        `;
+      } else if (currentMode === 'split') {
+        // Mode 2: Split (60:40 Video + Synced Blocks)
+        container.innerHTML = `
+          <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-7 space-y-4">
+              <div class="bg-black rounded-2xl overflow-hidden border border-slate-800 aspect-video shadow-2xl">
+                <video class="w-full h-full object-contain" controls autoplay>
+                  <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+                </video>
+              </div>
+              <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl flex items-center justify-between text-xs">
+                <span class="text-slate-300">左右沉浸連動模式</span>
+                <span class="text-cyan-400 font-mono">時間軸秒數連動中</span>
+              </div>
+            </div>
+            <div class="lg:col-span-5 space-y-4">
+              <div class="text-xs font-bold uppercase text-slate-400 border-b border-slate-800 pb-2">隨課互動積木 (MDX Blocks)</div>
+              <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2">
+                <span class="text-[11px] font-bold text-indigo-400 bg-indigo-950/60 border border-indigo-800/60 px-2 py-0.5 rounded">隨堂測驗</span>
+                <div class="text-xs text-slate-200">StartKiter 部署模型的核心優勢是什麼？</div>
+                <div class="space-y-1 text-xs">
+                  <button class="w-full text-left p-2 rounded bg-slate-800 text-slate-300 border border-slate-700">A. 買家獨立 VPS + 控制台集中納管 (免密碼外洩)</button>
+                  <button class="w-full text-left p-2 rounded bg-slate-800 text-slate-300 border border-slate-700">B. 傳統手動上傳 ZIP</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (currentMode === 'ide') {
+        // Mode 3: IDE Workspace (3 columns: TOC / Video / Code Sandbox)
+        container.innerHTML = `
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 h-full">
+            <!-- Left: TOC Chapters -->
+            <div class="lg:col-span-3 bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3 text-xs">
+              <div class="font-bold text-slate-300 uppercase tracking-wider">章節目錄</div>
+              <div class="space-y-1 text-slate-400">
+                <div class="p-2 bg-slate-800 rounded text-indigo-400 font-medium">1. 產品願景與 WordPress 式架構</div>
+                <div class="p-2 hover:bg-slate-800/50 rounded">2. Coolify 機群代管實務</div>
+                <div class="p-2 hover:bg-slate-800/50 rounded">3. AI 客服工單自動化</div>
+              </div>
+            </div>
+
+            <!-- Middle: Video & Notes -->
+            <div class="lg:col-span-5 space-y-4">
+              <div class="bg-black rounded-xl overflow-hidden border border-slate-800 aspect-video shadow-xl">
+                <video class="w-full h-full object-contain" controls autoplay>
+                  <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+                </video>
+              </div>
+              <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl text-xs text-slate-300">
+                講師提示：點擊右側沙盒可即時修改參數並預覽效果。
+              </div>
+            </div>
+
+            <!-- Right: Code Sandbox & Micro-tools -->
+            <div class="lg:col-span-4 bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3 text-xs">
+              <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <span class="font-bold text-slate-300">即時代碼微沙盒 (MicroSandbox)</span>
+                <span class="text-[10px] text-emerald-400 font-mono">Live Preview</span>
+              </div>
+              <div class="bg-slate-950 p-2.5 rounded border border-slate-800 font-mono text-[11px] text-slate-300 space-y-1">
+                <div>const tier = "managed";</div>
+                <div>const provider = "vultr";</div>
+                <div>// 即時生成部署指令</div>
+                <div class="text-cyan-400">> pnpm deploy:vps --tier=$tier</div>
+              </div>
+              <button onclick="alert('🚀 微沙盒已執行！')" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 rounded text-white font-bold text-xs">實時執行測試</button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      renderView();
+    }
+
+    renderView();
+  </script>
+</body>
+</html>

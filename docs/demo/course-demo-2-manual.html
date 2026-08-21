@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StartKiter 課程 Demo 2 - 上下長流 · 現代技術手冊型</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+    body { font-family: 'Inter', 'Noto Sans TC', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+  <!-- Top Bar -->
+  <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur px-6 h-16 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center space-x-4">
+      <div class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-black px-3 py-1 rounded-lg text-sm tracking-wider">StartKiter Docs</div>
+      <div class="h-4 w-px bg-slate-700"></div>
+      <div class="text-sm font-semibold text-slate-200">單元 03：Coolify API 金鑰配置與環境變數管理</div>
+    </div>
+    <div class="flex items-center space-x-3 text-xs">
+      <button onclick="toggleMic()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 font-medium hover:bg-indigo-500/20 transition">
+        <i class="fa-solid fa-microphone"></i> <span>語音助理提問</span>
+      </button>
+      <button onclick="downloadPdf()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition">
+        <i class="fa-solid fa-file-pdf text-rose-400"></i> <span>下載單元講義 PDF</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Coupon Floating Top Banner -->
+  <div class="bg-gradient-to-r from-amber-950/60 via-amber-900/40 to-slate-950 border-b border-amber-500/30 px-6 py-2.5 flex items-center justify-between text-xs text-amber-300">
+    <div class="flex items-center gap-2">
+      <i class="fa-solid fa-ticket text-amber-400 animate-bounce"></i>
+      <span>限時折扣券：結帳輸入 <strong class="font-mono bg-amber-500/20 px-2 py-0.5 rounded text-amber-200 border border-amber-500/30">STARTKITER88</strong> 現折 TWD 1,200！</span>
+    </div>
+    <button onclick="this.parentElement.remove()" class="text-amber-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+
+  <div class="max-w-4xl mx-auto px-6 py-8 space-y-10">
+    <!-- Full-Width Video Player -->
+    <div class="space-y-3">
+      <div class="relative bg-black rounded-2xl overflow-hidden border border-slate-800 shadow-2xl aspect-video flex items-center justify-center">
+        <video id="course-video-2" class="w-full h-full object-contain" controls>
+          <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="flex items-center justify-between text-xs text-slate-400">
+        <span>講師：Fish (老魚) · 授課單元長度 15 分鐘</span>
+        <div class="flex items-center gap-2">
+          <button class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 rounded border border-slate-800 text-slate-300">上一單元</button>
+          <button class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 rounded border border-slate-800 text-slate-300">下一單元</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Long-form MDX Technical Manual Content -->
+    <div class="space-y-8 text-sm text-slate-300 leading-relaxed border-t border-slate-800/80 pt-8">
+      <div class="space-y-3">
+        <h1 class="text-2xl font-bold text-white tracking-tight">▍ 概念解構：Coolify 代管部署架構</h1>
+        <p>
+          在 StartKiter 系統中，我們採用了「集中控制台代管 + 買家獨立 VPS」的三層架構。買家在 Vultr 或 Hetzner 購買主機後，僅需將 IP 與 SSH 金鑰填入，即可由控制台自動完成 Docker 與 Coolify Agent 之部署。
+        </p>
+      </div>
+
+      <!-- In-text Interactive Quiz Block -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4 shadow-xl">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-question"></i> 本節隨堂小測驗 (InstantQuiz)
+          </span>
+          <span class="text-xs text-slate-500">回答正確解鎖下一節筆記</span>
+        </div>
+        <div class="text-sm font-semibold text-slate-200">
+          若買家在部署過程遭遇伺服器逾時，後端 AI Copilot 會採取哪種行為？
+        </div>
+        <div class="space-y-2 text-xs">
+          <button onclick="checkQuiz2(1)" class="w-full text-left p-3 rounded-lg bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300" id="q2-1">
+            A. 唯讀調閱 Coolify 日誌，生成修復建議寫入 Internal Note，不自動強制結案
+          </button>
+          <button onclick="checkQuiz2(2)" class="w-full text-left p-3 rounded-lg bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300" id="q2-2">
+            B. 自動刪除該買家的 VPS 重新安裝
+          </button>
+        </div>
+        <div id="quiz2-feedback" class="text-xs hidden p-3 rounded-lg font-medium"></div>
+      </div>
+
+      <!-- In-text Code / Sandbox Block -->
+      <div class="space-y-3">
+        <h2 class="text-lg font-bold text-white">▍ API 呼叫範例 (TypeScript / oRPC)</h2>
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 font-mono text-xs text-slate-300 overflow-x-auto">
+          <pre><code>// packages/platform/src/deployment/coolify-client.ts
+const result = await addServerToCoolify({
+  name: "Buyer VPS - Tokyo",
+  ip: "45.76.102.88",
+  user: "root",
+  port: 22,
+});</code></pre>
+        </div>
+      </div>
+
+      <!-- Mark as Complete CTA -->
+      <div class="pt-8 border-t border-slate-800 flex items-center justify-between">
+        <div class="text-xs text-slate-400">已學習此單元：85% 完成度</div>
+        <button onclick="this.innerHTML='<i class=\'fa-solid fa-check\'></i> 已完成此單元'; this.className='px-6 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs'" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition">
+          標記單元已完成
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function checkQuiz2(opt) {
+      const fb = document.getElementById('quiz2-feedback');
+      fb.classList.remove('hidden');
+      if (opt === 1) {
+        fb.className = 'text-xs p-3 rounded-lg font-medium bg-emerald-950/60 border border-emerald-800 text-emerald-300';
+        fb.innerHTML = '🎉 答對了！AI Copilot 遵守「唯讀 + 建議」安全邊界，絕不自動刪除用戶主機。';
+      } else {
+        fb.className = 'text-xs p-3 rounded-lg font-medium bg-rose-950/60 border border-rose-800 text-rose-300';
+        fb.innerHTML = '❌ 答錯囉！為了安全，系統絕對不會私自刪除買家伺服器。';
+      }
+    }
+
+    function toggleMic() {
+      alert('🎤 語音助理啟動中：正在聆聽你的提問...');
+    }
+
+    function downloadPdf() {
+      alert('📥 講義下載中：StartKiter-Lesson03-Notes.pdf');
+    }
+  </script>
+</body>
+</html>

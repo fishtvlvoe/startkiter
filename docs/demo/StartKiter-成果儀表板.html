@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StartKiter 系統全貌與多代理施工成果儀表板</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+    body { font-family: 'Inter', 'Noto Sans TC', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+  <!-- Top Navigation -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <span class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-extrabold px-3 py-1 rounded-lg text-lg tracking-wider">StartKiter</span>
+        <span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-medium flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Main 主分支 · 194 Tests 全數綠燈
+        </span>
+      </div>
+      <div class="flex items-center space-x-4 text-sm">
+        <a href="https://test-startkiter.vercel.app" target="_blank" class="text-slate-400 hover:text-cyan-400 flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i> 線上測試站
+        </a>
+        <span class="text-slate-700">|</span>
+        <span class="text-slate-400 font-mono text-xs">Commit: 1ece99a7</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-10 space-y-12">
+    <!-- Hero / Status Banner -->
+    <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950/40 border border-slate-800 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+      <div class="absolute -right-10 -bottom-10 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="relative z-10 space-y-4">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider">
+          <i class="fa-solid fa-microchip"></i> 多代理平行施工完全合流報告
+        </div>
+        <h1 class="text-3xl md:text-4xl font-black text-white tracking-tight">
+          AI 客服 Copilot × MDX 7 款互動積木 × Coolify 代管主機
+        </h1>
+        <p class="text-slate-400 text-base max-w-3xl leading-relaxed">
+          透過 3 路 Orca 隔離 Worktree 由 <strong class="text-slate-200">Cursor Agent</strong>、<strong class="text-slate-200">Antigravity (Gemini 3.7)</strong>、<strong class="text-slate-200">Codex</strong> 分工實作，已依據 Apply Gate 完成 0 Critical CR 審查，並全數合併回 <code class="text-cyan-400 font-mono">main</code>。
+        </p>
+
+        <!-- KPI Metrics Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
+          <div class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-4">
+            <div class="text-xs text-slate-400 uppercase font-medium">全域單元測試</div>
+            <div class="text-2xl font-black text-emerald-400 mt-1">194 / 194</div>
+            <div class="text-xs text-slate-500 mt-0.5">13 Packages · 100% 通過</div>
+          </div>
+          <div class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-4">
+            <div class="text-xs text-slate-400 uppercase font-medium">TypeScript 型別</div>
+            <div class="text-2xl font-black text-cyan-400 mt-1">0 Errors</div>
+            <div class="text-xs text-slate-500 mt-0.5">Next.js + Turborepo 通過</div>
+          </div>
+          <div class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-4">
+            <div class="text-xs text-slate-400 uppercase font-medium">MDX 互動學習積木</div>
+            <div class="text-2xl font-black text-indigo-400 mt-1">7 款全就位</div>
+            <div class="text-xs text-slate-500 mt-0.5">含秒數時間軸同步 hook</div>
+          </div>
+          <div class="bg-slate-800/60 border border-slate-700/50 rounded-xl p-4">
+            <div class="text-xs text-slate-400 uppercase font-medium">Chatwoot AI 客服</div>
+            <div class="text-2xl font-black text-amber-400 mt-1">自動 Log 診斷</div>
+            <div class="text-xs text-slate-500 mt-0.5">唯讀拉 Coolify 產生修復建議</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 1: MDX Interactive Learning Blocks Showcase -->
+    <section class="space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-shapes text-indigo-400"></i>
+            1. 課程模組：7 款 MDX 互動學習積木 Live 展示
+          </h2>
+          <p class="text-slate-400 text-sm mt-1">實作於 <code class="text-indigo-300">packages/course/src/components/interactive/</code>，支援純影片與互動 MDX 雙模式切換。</p>
+        </div>
+        <span class="text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2.5 py-1 rounded-full font-medium">
+          Codex 交付 · 28 Tests
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Block 1: InstantQuiz -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4 hover:border-slate-700 transition shadow-lg">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-question"></i> InstantQuiz
+            </span>
+            <span class="text-xs text-slate-500">隨堂小測驗</span>
+          </div>
+          <div class="text-sm font-medium text-slate-200">Q: StartKiter 的買家 VPS SSH 憑證儲存在哪裡？</div>
+          <div class="space-y-2 text-xs" id="quiz-options">
+            <button onclick="checkQuiz(0)" class="w-full text-left p-2.5 rounded-lg border border-slate-800 hover:bg-slate-800/80 transition flex items-center justify-between text-slate-300" id="opt-0">
+              <span>A. 直接存入公用資料庫</span>
+            </button>
+            <button onclick="checkQuiz(1)" class="w-full text-left p-2.5 rounded-lg border border-slate-800 hover:bg-slate-800/80 transition flex items-center justify-between text-slate-300" id="opt-1">
+              <span>B. 僅透過 Coolify API 加密寫入，資料庫零儲存 (No Log)</span>
+            </button>
+          </div>
+          <div id="quiz-feedback" class="text-xs hidden p-2 rounded-lg font-medium"></div>
+        </div>
+
+        <!-- Block 2: ConceptCompare -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4 hover:border-slate-700 transition shadow-lg">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-code-compare"></i> ConceptCompare
+            </span>
+            <span class="text-xs text-slate-500">概念對照</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="bg-rose-950/30 border border-rose-900/40 rounded-lg p-3 space-y-1">
+              <div class="font-bold text-rose-400">❌ 傳統賣課</div>
+              <p class="text-slate-400 text-[11px]">斷點式人工加 LINE、給一大包 ZIP 檔自己抓蟲、出事直接卡住。</p>
+            </div>
+            <div class="bg-emerald-950/30 border border-emerald-900/40 rounded-lg p-3 space-y-1">
+              <div class="font-bold text-emerald-400">✅ StartKiter</div>
+              <p class="text-slate-400 text-[11px]">終身代碼包 + AI 診斷工單 + Coolify 代管機群一鍵直通。</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Block 3: WorkflowSorter -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4 hover:border-slate-700 transition shadow-lg">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-arrow-down-1-9"></i> WorkflowSorter
+            </span>
+            <span class="text-xs text-slate-500">工作流排序</span>
+          </div>
+          <div class="space-y-1.5 text-xs">
+            <div class="p-2 bg-slate-800/80 rounded border border-slate-700/60 text-slate-300 flex items-center gap-2">
+              <span class="w-4 h-4 rounded bg-slate-700 flex items-center justify-center font-bold text-[10px]">1</span>
+              <span>1. 買家購買取得 GitHub 權限</span>
+            </div>
+            <div class="p-2 bg-slate-800/80 rounded border border-slate-700/60 text-slate-300 flex items-center gap-2">
+              <span class="w-4 h-4 rounded bg-slate-700 flex items-center justify-center font-bold text-[10px]">2</span>
+              <span>2. 輸入 VPS IP 納入代管</span>
+            </div>
+            <div class="p-2 bg-slate-800/80 rounded border border-slate-700/60 text-slate-300 flex items-center gap-2">
+              <span class="w-4 h-4 rounded bg-slate-700 flex items-center justify-center font-bold text-[10px]">3</span>
+              <span>3. 遭遇異常一鍵喚起 AI 客服</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: AI Support Desk & Coolify Copilot -->
+    <section class="space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-headset text-amber-400"></i>
+            2. 統一客服系統：Chatwoot Webhook 與 AI Copilot 自動看 Log
+          </h2>
+          <p class="text-slate-400 text-sm mt-1">實作於 <code class="text-amber-300">packages/support</code> 與 <code class="text-amber-300">packages/api/modules/support</code>。</p>
+        </div>
+        <span class="text-xs bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2.5 py-1 rounded-full font-medium">
+          Cursor Agent + Antigravity 交付
+        </span>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Left: Buyer Simulation -->
+          <div class="space-y-4">
+            <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-user text-cyan-400"></i> 前台買家回報介面 (/deployment)
+            </h3>
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
+              <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+                <div>
+                  <div class="text-sm font-bold text-white">代管主機 (Vultr Tokyo)</div>
+                  <div class="text-xs text-slate-500">IP: 45.76.102.88 · Coolify Managed</div>
+                </div>
+                <span class="text-xs px-2.5 py-1 bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-full font-semibold">
+                  🔴 Build Failed
+                </span>
+              </div>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                你的站台部署時遭遇錯誤。點擊下方按鈕將自動帶入主機 ID 並開啟 Chatwoot 客服。
+              </p>
+              <button onclick="simulateSupportTicket()" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-slate-950 font-bold rounded-lg text-xs flex items-center justify-center gap-2 transition shadow">
+                <i class="fa-solid fa-circle-exclamation"></i> 回報這個部署的問題（模擬開單）
+              </button>
+            </div>
+          </div>
+
+          <!-- Right: AI Copilot Simulation -->
+          <div class="space-y-4">
+            <h3 class="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-robot text-amber-400"></i> 後端 AI Copilot 自動診斷結果
+            </h3>
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3" id="copilot-panel">
+              <div class="text-xs text-slate-500 flex items-center gap-1.5">
+                <i class="fa-solid fa-clock"></i> 待命狀態：等待 Chatwoot Webhook 事件...
+              </div>
+              <div class="bg-slate-900 border border-slate-800 p-3 rounded-lg text-xs font-mono text-slate-400 space-y-1">
+                <div>> POST /api/support/webhook/chatwoot</div>
+                <div>> X-Chatwoot-Signature: Valid HMAC SHA256</div>
+                <div>> AI Copilot: 唯讀調閱 Coolify Logs (App ID: app_88a91)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Architecture & Quality Checklist -->
+    <section class="space-y-6">
+      <h2 class="text-xl font-bold text-white flex items-center gap-2">
+        <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+        3. 全域品質與護欄遵守確認
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
+          <div class="font-bold text-sm text-slate-200 flex items-center gap-2">
+            <i class="fa-solid fa-check text-emerald-400"></i> 零衝突 Worktree 生命週期
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            三路 Worktree 施工完畢後，已由主控自主執行 Apply Gate CR、Merge 回 main，並<strong>自動清理移除 Worktree</strong>，未遺留孤兒目錄。
+          </p>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
+          <div class="font-bold text-sm text-slate-200 flex items-center gap-2">
+            <i class="fa-solid fa-check text-emerald-400"></i> No-Log 憑證安全邊界
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            買家交付之 SSH Key 與環境變數僅經由嚴格白名單傳輸至 Coolify API，絕不寫入本地日誌或 DB，100% 遵守安全守則。
+          </p>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
+          <div class="font-bold text-sm text-slate-200 flex items-center gap-2">
+            <i class="fa-solid fa-check text-emerald-400"></i> SSOT 全域規則固化
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            SOP 規則已透過 <code class="text-cyan-300">sync_agent_rules.py</code> 同步進 Codex, Kimi, Opencode, Gemini, Cursor, Copilot 設定檔。
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-slate-800 bg-slate-900 py-6 text-center text-xs text-slate-500">
+    StartKiter Autonomous Agent System · 繁體中文 SSOT · 2026-08-19
+  </footer>
+
+  <script>
+    function checkQuiz(idx) {
+      const fb = document.getElementById('quiz-feedback');
+      fb.classList.remove('hidden');
+      if (idx === 1) {
+        fb.className = 'text-xs p-2.5 rounded-lg font-medium bg-emerald-950/60 border border-emerald-800 text-emerald-300';
+        fb.innerHTML = '🎉 答對了！StartKiter 採安全直傳 Coolify API，資料庫零儲存 (No-Log Policy)！';
+        document.getElementById('opt-1').classList.add('border-emerald-500', 'bg-emerald-950/20');
+      } else {
+        fb.className = 'text-xs p-2.5 rounded-lg font-medium bg-rose-950/60 border border-rose-800 text-rose-300';
+        fb.innerHTML = '❌ 答錯囉！為了安全，StartKiter 絕不在 DB 儲存敏感 SSH 私鑰。';
+      }
+    }
+
+    function simulateSupportTicket() {
+      const panel = document.getElementById('copilot-panel');
+      panel.innerHTML = `
+        <div class="text-xs text-amber-400 font-semibold flex items-center gap-1.5 animate-pulse">
+          <i class="fa-solid fa-spinner fa-spin"></i> Chatwoot Webhook 接收成功，AI 正在分析 Coolify 日誌...
+        </div>
+        <div class="bg-slate-900 border border-amber-500/30 p-3 rounded-lg text-xs space-y-2 mt-2">
+          <div class="text-slate-300 font-semibold flex items-center justify-between">
+            <span>[AI 內部診斷筆記 (Internal Note)]</span>
+            <span class="text-[10px] text-amber-400">已關聯 Deployment #dep_889</span>
+          </div>
+          <div class="text-slate-400 text-[11px] leading-relaxed font-mono bg-slate-950 p-2 rounded border border-slate-800">
+            [Coolify Log 摘要]<br>
+            Error: NEXT_PUBLIC_SUPABASE_URL is missing in environment variables.<br>
+            Build terminated with exit code 1.
+          </div>
+          <div class="text-emerald-400 text-[11px] font-medium">
+            💡 AI 修復建議草稿：檢測到買家缺少 Supabase 環境變數，已生成自動回覆指引草稿，工單標記為 AI_SUGGESTED_RESOLVED。
+          </div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
