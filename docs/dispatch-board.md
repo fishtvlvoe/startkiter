@@ -43,12 +43,13 @@
 
 ### 3. platform-shell-plugin-architecture
 - 狀態：🔵 進行中
-- Task 進度：90/120（75%）
+- Task 進度：90/129（70%，2026-08-21 22:xx 重算：K 包 Marketplace + Phase 8 github-kit 補 commit 後的真數字）
 - 子項：
-  - Phase 4（Marketplace 展示+模版選擇，task 15-23）→ ✅ 已完成，agy→cursor-agent（agy 額度用完切換）。第一輪 demo 用了自己發明的 zinc/slate 灰階配色，PM 覆核抓到退回重做，改用真實 olive token 通過
+  - Phase 4（Marketplace 展示+模版選擇，task 15-23）→ ✅ 已完成並**補進 main**（原本做完的分支 `worktree-bundles-coupons` 一直沒合併，main 上顯示「待做」是假象，2026-08-21 PM 發現並 fast-forward 合併）
   - Phase 6（Core 邊界文件，task 28-30）→ ✅ 已完成（agy）
-  - Phase 7（既有測試更新+全面驗收，task 31-32）→ 待做，**PM 親自**
-  - Phase 9（側邊欄 WordPress 視覺+拖曳分組持久化，task 43-48）→ 部分完成（拖曳把手 bug 已修，見下方），其餘待做
+  - Phase 7（既有測試更新+全面驗收，task 31-32）→ 待做，**PM 親自驗收**，實作可派 Codex
+  - Phase 8（per-buyer 專屬倉庫+版本比對 API，task 33-41）→ 33-38 ✅ 已補 commit（原本 tasks.md 標 `[x]` 但代碼一直卡在 stash 沒進版控，2026-08-21 PM 發現並修復，型別檢查通過），39-41 待做
+  - Phase 9（側邊欄 WordPress 視覺+拖曳分組持久化，task 43-48）→ 部分完成（拖曳把手 bug 已修），其餘待做，**下一波優先派 Codex**
 - E2E：🟡 跑過有失敗——PM 用真實登入 session 點過多個頁面，抓到一個真 server/client boundary bug 並修復；nav-menu-items.test.ts 從 6/7 失敗修到全綠
 - 待處理清單（2026-08-21 老闆點出，先列清單再修，不當場亂改）進度：
   1. ✅ NavBar `iconMap` 缺圖示 key 問題 → 已修（icon fallback 修復 + 側邊欄拖曳把手定位 bug 修復，commit `703ce9fe`）
@@ -59,16 +60,27 @@
   6. ✅ nav-menu-items.test.ts 過時斷言（task 50.7）→ agy 自報完成但實際只改措辭沒改對數值，PM 親自核對 MOUNT_POINTS 真實內容重寫，7/7 真綠燈
 
 ### 4. core-module-bundles-coupons
-- 狀態：🔵 進行中
-- Task 進度：50/56（89%）
+- 狀態：🟢 可收尾（實質完工，剩一項老闆裁決延後）
+- Task 進度：55/56（98%）
 - 指派對象：
   - Phase 1-2（資料表＋Bundle CRUD）→ 已完成，PM 親自+Sonnet 子代理混合，PM 全數驗證
   - Phase 3（Coupon 驗證＋結帳整合）→ ✅ 已完成，**PM 親自**（金流計算邏輯，風險最高，不外派）。順帶修正 `packages/payments` 既有的 `order.ts`／`notify.ts` 硬寫死 MVP_AMOUNT_TWD 的問題，改為信任伺服器端算出的折扣金額並守住上限
-  - Phase 4（商品目錄改造，BREAKING）→ ✅ 已完成（15.1-15.3），**PM 親自**。task 15.4（bundle-aware 課程存取權整合）發現卡在買家播放頁 `/course` 跟 `Bundle.courseIds` 指向的 `db.course` 是兩套無關系統，經老闆裁決縮小範圍、留到買家播放頁做出來才接
-  - Demo-first HTML → 已完成兩輪（一次 CSP bug 需 Sonnet 抓根因重做），純視覺重製部分可用 Haiku，但要 Sonnet/PM 覆核是否真的用了專案既有色票/元件規格
-  - Phase 5（既有 spec 對齊＋全面驗收，task 17-18）→ 待做，**PM 親自**（涉及既有測試斷言調整判斷，不外派）
-- E2E：🟡 跑過有失敗——PM 用真實登入 session 點過 `/admin/bundles`、`/settings/security`、`/course`（均 200，畫面正確），過程中抓到一個真 build bug（NavBar 透過 barrel import 拉進 server-only Prisma 依賴，見 platform-shell tasks.md 50.5）並已修復；agy 第一輪蒐證因登入態沒帶到而失敗（截圖其實是登入頁），教訓已寫進 `派工師.md`
+  - Phase 4（商品目錄改造，BREAKING）→ ✅ 已完成（15.1-15.3），**PM 親自**。task 15.4（bundle-aware 課程存取權整合）確認卡在買家播放頁 `/course` 跟 `Bundle.courseIds` 指向的 `db.course` 是兩套無關系統，經老闆裁決縮小範圍、留到買家播放頁做出來才接（=不阻擋本張 change 收尾）
+  - Phase 5（既有 spec 對齊＋全面驗收，task 17-18）→ ✅ 已完成
+- E2E：🟡 跑過有失敗——PM 用真實登入 session 點過 `/admin/bundles`、`/settings/security`、`/course`（均 200，畫面正確），過程中抓到一個真 build bug（NavBar 透過 barrel import 拉進 server-only Prisma 依賴）並已修復
+- ⚠️ 2026-08-21 新發現：`packages/coupons/src/validate.test.ts` SAVE20PCT 測試無資料清理，跟同套件其他測試共用真實 DB 會撞號，多跑幾次必有一次失敗（flaky，非本次改動造成）。**下一步待修**，機械性小改可派 Haiku（加 beforeEach 清資料）
+- 下一步：跑一次 `spectra archive core-module-bundles-coupons` 前置檢查（build+test 全綠、含修 flaky test），過了就能封存
 - 備註：Phase 3/4 禁止外派，money-related 一律 PM 親自
+
+### 4.5 sheets-export-engine（新增，2026-08-21 補進 dispatch board）
+- 狀態：🔵 進行中，無阻塞、無依賴，適合插隊快速收尾
+- Task 進度：11/18（61%）
+- 指派對象：
+  - Phase 1（核心套件+匯出服務）→ ✅ 已完成
+  - Phase 2（bundles/coupons 報表範本）→ 待做，機械性照抄既有 orders/revenue 範本結構，可派 **Codex**
+  - Phase 3（SaaS API+前端匯出按鈕）→ 待做，可派 **Codex**，PM 驗收
+  - Phase 4（AI Agent 產表整合）→ 待做，需要判斷 MCP tool 介面設計，**Sonnet/PM**
+- E2E：⬜ 未跑
 
 ### 5. plan-clean-install-package-repo（已 park）
 - 狀態：⏸️ 排隊中，優先序未定
@@ -80,6 +92,22 @@
 - core-module-subscriptions-invoice → 📝 待 propose，依賴 #6，金流相關 PM 親自
 - core-module-newsletter → 📝 待 propose，非金流，apply 階段機械性部分可用 Haiku，整合判斷部分 Sonnet/外部 CLI（優先 `agy`）
 - core-module-assignment-course-invites → 📝 待 propose，非金流，同上
+
+---
+
+## 2026-08-21 晚間 Git 衛生修復（PM 親自，不外派）
+
+老闆問「怎麼把網站做完，要定目標」時發現主工作樹在一個落後 main 34 個 commit 的舊分支（`feature/sheets-integration`）上，之前給的排序建議整個作廢。順手做了一次全面稽核：
+
+1. **7 個孤兒 orca worktree**：5 個（F/G/H/I/J 包）內容已完全併入 main，1 個（`worktree-bundles-coupons`，K 包 Marketplace）**做完但從沒合併回 main**，main 上 Phase 4 顯示「待做」是假象。已 fast-forward 合併 + 清空全部孤兒 worktree 與分支。
+2. **tasks.md 假完成**：Phase 8（task 33-38，per-buyer 專屬倉庫）標 `[x]` 但代碼一直卡在 `git stash` 沒進版控。已找回、型別檢查、補 commit。
+3. **sheets-export-engine 整包**（含 SR 文件）卡在舊分支沒進 main，已 cherry-pick 進來，lockfile 衝突已解。
+4. **新發現待修**：
+   - `packages/coupons/src/validate.test.ts` 缺測試隔離，SAVE20PCT 案例會跟其他測試撞號（flaky）
+   - `pnpm build` 對 `@startkiter/course` / `@startkiter/bundles` / `@startkiter/payments` 三個套件跑出**循環依賴**（course→payments→bundles→course），根因待查，會擋掉全專案一次性 `pnpm build`（單套件各自 build 沒事）
+5. 全部改動已 push 到 `origin/main`，工作區現在乾淨。
+
+**教訓**：worktree 派工完成後「合併回 main」跟「更新 tasks.md」必須同一個動作內完成，不能分兩步（分兩步就會發生「文件說做完、代碼沒進去」）。
 
 ---
 
