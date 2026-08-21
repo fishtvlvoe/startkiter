@@ -1,5 +1,9 @@
-export { canAccessCourse } from "./access";
-export type { CourseAccessOrderRow, CourseAccessReader } from "./access";
+export { canAccessCourse, canAccessCourseId } from "./access";
+export type {
+	BundleCourseAccessReader,
+	CourseAccessOrderRow,
+	CourseAccessReader,
+} from "./access";
 export {
 	getLesson,
 	listLessons,

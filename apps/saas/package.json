@@ -24,6 +24,7 @@
 		"@prisma/nextjs-monorepo-workaround-plugin": "catalog:",
 		"@startkiter/api": "workspace:*",
 		"@startkiter/auth": "workspace:*",
+		"@startkiter/bundles": "workspace:*",
 		"@startkiter/course": "workspace:*",
 		"@startkiter/database": "workspace:*",
 		"@startkiter/github-kit": "workspace:*",

@@ -87,6 +87,13 @@ export async function findOrderByNo(orderNo: string) {
 	return db.order.findUnique({ where: { orderNo } });
 }
 
+/**
+ * 通用退款：不區分 sku，MVP 單一課程訂單與 bundle 訂單（`sku` = bundle id）都適用。
+ * `courseAccess` 一旦被清成 false，`@startkiter/course` 的 `canAccessCourseId`（Phase 2 新增，
+ * design.md「Refunded bundle revokes access to all its courses」）在反查買家已授權 sku 清單時
+ * 就不會再看到這筆訂單的 sku，因此 bundle 內所有課程的存取權會一併撤銷，不需要另外針對
+ * bundle 訂單寫專屬的撤銷邏輯（驗證見 `packages/bundles/src/access-integration.test.ts`）。
+ */
 export async function markOrderRefundedInDb(orderNo: string) {
 	const result = await db.order.updateMany({
 		where: { orderNo, status: { in: ["pending", "paid"] } },

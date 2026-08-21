@@ -10,11 +10,17 @@
 	},
 	"scripts": {
 		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"test": "dotenv -c -e ../../.env -- vitest run ../../packages/bundles",
 		"type-check": "tsc --noEmit"
 	},
+	"dependencies": {
+		"@startkiter/database": "workspace:*"
+	},
 	"devDependencies": {
+		"@startkiter/course": "workspace:*",
 		"@startkiter/tsconfig": "workspace:*",
 		"@types/node": "catalog:",
+		"dotenv-cli": "catalog:",
 		"typescript": "catalog:",
 		"vitest": "catalog:"
 	}

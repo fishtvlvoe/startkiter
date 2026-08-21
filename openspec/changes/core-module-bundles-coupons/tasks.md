@@ -21,22 +21,22 @@
 
 ### 4. 紅燈測試：Bundle CRUD 與存取權
 
-- [ ] 4.1 [P] 撰寫測試驗證 Requirement「Courses can be grouped into a priced bundle」的「Operator creates a published bundle」scenario——operator 送出合法 bundle 後，公開 bundle 頁面對該 slug 回 200
-- [ ] 4.2 [P] 撰寫測試驗證同一 Requirement 的「Draft bundle is not publicly visible」scenario——status="draft" 的 bundle 公開頁面回 404
-- [ ] 4.3 [P] 撰寫測試驗證 Requirement「Bundle purchase grants access to all included courses」——模擬 PAYUNi 標記 bundle 訂單已付款後，買家對 bundle 內每一個 courseId 皆取得存取權（含兩堂課的具體範例）
-- [ ] 4.4 [P] 撰寫測試驗證同一 Requirement 的「Refunded bundle revokes access to all its courses」scenario——退款後 bundle 內所有課程存取權一併撤銷
-- [ ] 4.5 [P] 撰寫測試驗證 Requirement「Bundle listing API returns published bundles only」——未登入請求 GET /api/bundles 回 200 且僅含已發布項目
+- [x] 4.1 [P] 撰寫測試驗證 Requirement「Courses can be grouped into a priced bundle」的「Operator creates a published bundle」scenario——operator 送出合法 bundle 後，公開 bundle 頁面對該 slug 回 200（7.2 頁面未落地前，測試對象是 `getBundleBySlug` 查詢契約，非真實 HTTP 200；等 7.2/8.2 頁面實作後要再用真實頁面驗一次）
+- [x] 4.2 [P] 撰寫測試驗證同一 Requirement 的「Draft bundle is not publicly visible」scenario——status="draft" 的 bundle 公開頁面回 404（同上，測試對象是查詢契約回傳 null，7.2 頁面要用 `notFound()` 接手才是真的 404）
+- [x] 4.3 [P] 撰寫測試驗證 Requirement「Bundle purchase grants access to all included courses」——模擬 PAYUNi 標記 bundle 訂單已付款後，買家對 bundle 內每一個 courseId 皆取得存取權（含兩堂課的具體範例）；`packages/bundles/src/access-integration.test.ts`，真實 DB 驗證
+- [x] 4.4 [P] 撰寫測試驗證同一 Requirement 的「Refunded bundle revokes access to all its courses」scenario——退款後 bundle 內所有課程存取權一併撤銷；同上測試檔
+- [x] 4.5 [P] 撰寫測試驗證 Requirement「Bundle listing API returns published bundles only」——未登入請求 GET /api/bundles 回 200 且僅含已發布項目
 
 ### 5. 實作：Bundle CRUD API 與課程存取權整合
 
-- [ ] 5.1 新增 `packages/bundles/src/catalog.ts`，實作建立/查詢 bundle 邏輯，courseIds 驗證比照 THE-TU `model Bundle` 設計但簡化欄位（design.md「抽取對應」表），驗證：1.1、1.2 轉綠燈
-- [ ] 5.2 新增 `apps/saas/app/api/bundles/route.ts`（GET 公開、POST operator 限定），驗證：4.1、4.2、4.5、1.3 轉綠燈
-- [ ] 5.3 修改課程存取權判斷邏輯（`packages/course/src/access.ts` 的 `canAccessCourse` 或對應授權查詢），擴充為「buyer 已購買的 bundle 若包含該課程，亦視為有存取權」，驗證：4.3 轉綠燈
-- [ ] 5.4 修改退款流程，退款 bundle 訂單時撤銷該 bundle 內所有課程的存取權，驗證：4.4 轉綠燈
+- [x] 5.1 新增 `packages/bundles/src/catalog.ts`，實作建立/查詢 bundle 邏輯，courseIds 驗證比照 THE-TU `model Bundle` 設計但簡化欄位（design.md「抽取對應」表），驗證：1.1、1.2 轉綠燈
+- [x] 5.2 新增 `apps/saas/app/api/bundles/route.ts`（GET 公開、POST operator 限定），驗證：4.1、4.2、4.5、1.3 轉綠燈
+- [x] 5.3 修改課程存取權判斷邏輯（`packages/course/src/access.ts` 的 `canAccessCourse` 或對應授權查詢），擴充為「buyer 已購買的 bundle 若包含該課程，亦視為有存取權」，驗證：4.3 轉綠燈（新增 `canAccessCourseId`，`canAccessCourse` 保留不動以維持既有行為；**尚未接進 `apps/saas/lib/course-access.ts` 等真實課程頁面/API**，追蹤於新增的 15.4）
+- [x] 5.4 修改退款流程，退款 bundle 訂單時撤銷該 bundle 內所有課程的存取權，驗證：4.4 轉綠燈（既有 `markOrderRefundedInDb` 本來就不分 sku，無需改邏輯，只補文件註解）
 
 ### 6. Demo-first：Bundle 前後台頁面靜態 HTML demo
 
-- [ ] 6.1 為 bundle 管理頁（operator 後台）與 bundle 銷售頁（前台）各製作一份靜態 HTML demo 放入 `docs/design-system-demo/`，後台頁沿用 platform-shell-plugin-architecture 定案的 WordPress Admin 視覺語彙，老闆確認後才進下一步 React 實作
+- [x] 6.1 為 bundle 管理頁（operator 後台）與 bundle 銷售頁（前台）各製作一份靜態 HTML demo 放入 `docs/design-system-demo/`，後台頁沿用 platform-shell-plugin-architecture 定案的 WordPress Admin 視覺語彙，老闆確認後才進下一步 React 實作（已產出並發布 Artifact，等老闆視覺確認才可進 7.1/7.2）
 
 ### 7. 實作：Bundle 前後台頁面
 
@@ -46,9 +46,9 @@
 
 ### 8. Phase 2 Review 與驗收
 
-- [ ] 8.1 對 Phase 2 全部變更跑 correctness / security / performance code review，特別檢查 bundle 存取權整合是否有遺漏，Critical 為零
-- [ ] 8.2 用 Chrome MCP 截圖 bundle 管理頁與銷售頁，比對 demo 確認一致
-- [ ] 8.3 `pnpm build` 與 `pnpm test` 通過
+- [x] 8.1 對 Phase 2 全部變更跑 correctness / security / performance code review，特別檢查 bundle 存取權整合是否有遺漏，Critical 為零（PM 覆核：無 SQL injection、operator gate 在 body 解析前執行、draft bundle 不可枚舉、退款是整筆 all-or-nothing 撤銷無 partial-revocation 漏洞。發現 5.3 新函式未接進真實課程頁面的缺口，已補 15.4 追蹤）
+- [ ] 8.2 用 Chrome MCP 截圖 bundle 管理頁與銷售頁，比對 demo 確認一致（等 7.1/7.2 頁面落地才能做）
+- [x] 8.3 `pnpm build` 與 `pnpm test` 通過（PM 自行重跑：bundles 7/7、course 48/48、saas 71/71 全綠；`pnpm build`/`type-check` 唯一失敗點是既有未 commit 的 `apps/saas/app/api/repo-version/route.ts`，與本次改動無關，非本輪範圍）
 
 ## Phase 3：實作 Coupon 驗證與結帳整合（抽取對應：THE-TU → StartKiter；Coupon 驗證邏輯放進獨立 packages/coupons/，不放進 packages/payments/）
 
@@ -98,6 +98,7 @@
 - [ ] 15.1 新增 `packages/payments/src/catalog.ts`，實作 `getProduct(productId)`：未傳入或傳入 "startkiter-mvp" 時回傳既有 MVP_SKU/MVP_AMOUNT_TWD/MVP_CURRENCY 常數組成的結果，其餘視為 bundle id 查 `packages/bundles`，驗證：14.1、14.2 轉綠燈
 - [ ] 15.2 修改 `apps/saas/app/api/checkout/route.ts`，改為呼叫 15.1 的 `getProduct` 取得金額與 sku，`productId` 預設值 "startkiter-mvp"，驗證：14.3 轉綠燈
 - [ ] 15.3 確認既有 `packages/payments/src/order.ts`、`packages/payments/src/constants.ts` 的既有測試（不帶 productId 的情境）全數仍為綠燈，行為與改造前一致
+- [ ] 15.4 PM 審查 Phase 2 時發現的缺口：`packages/course/access.ts` 的 `canAccessCourseId`（bundle-aware 存取權判斷）目前只有測試呼叫，`apps/saas/lib/course-access.ts`／`app/(authenticated)/(main)/(account)/course/page.tsx`／`app/api/course/lessons/route.ts` 這些實際課程頁面/API 仍呼叫舊版 `canAccessCourse`（只認 `sku=startkiter-mvp`），買家買 bundle 後在真實頁面上還是看不到課程。15.2 讓 checkout 開始能產生 `sku=bundle.id` 的訂單後，這裡要把 `course-access.ts` 改成同時查 MVP 與 bundle 兩種來源（呼叫 `canAccessCourseId`），驗證：買家購買 bundle 後，`course/page.tsx` 與 `api/course/lessons/route.ts` 對 bundle 內每一堂課都顯示/回傳有權限，既有 MVP 單堂課存取行為不變
 
 ### 16. Phase 4 Review 與驗收
 
