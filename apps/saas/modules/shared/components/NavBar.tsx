@@ -444,6 +444,7 @@ export function NavBar() {
 		if (buttonElement.hasPointerCapture(event.pointerId)) {
 			buttonElement.releasePointerCapture(event.pointerId);
 		}
+		buttonElement.blur();
 		skipClickAfterPointerRef.current = true;
 		toggleCollapsed();
 	}
@@ -452,8 +453,10 @@ export function NavBar() {
 		if (skipClickAfterPointerRef.current) {
 			event.preventDefault();
 			skipClickAfterPointerRef.current = false;
+			event.currentTarget.blur();
 			return;
 		}
+		event.currentTarget.blur();
 		toggleCollapsed();
 	}
 
@@ -705,10 +708,11 @@ export function NavBar() {
 
 				{/*
 					Vercel-style: ~8px to each side of the border (16px = w-4) toggles; chip is
-					hidden until the strip is hovered or the control is focused.
+					hidden until the strip is hovered or the control is focused via keyboard.
 				*/}
 				<button
 					type="button"
+					data-testid="sidebar-edge-toggle"
 					onPointerDown={handleSidebarEdgePointerDown}
 					onPointerUp={handleSidebarEdgePointerUp}
 					onClick={handleSidebarEdgeClick}
@@ -731,7 +735,7 @@ export function NavBar() {
 							"pointer-events-none",
 							"opacity-0 transition-opacity",
 							"group-hover:opacity-100",
-							"group-focus-within:opacity-100",
+							"group-focus-visible:opacity-100",
 						)}
 						aria-hidden
 					>
