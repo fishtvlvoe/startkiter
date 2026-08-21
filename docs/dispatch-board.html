@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StartKiter 派工看板</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap');
+  body { font-family: 'Inter', 'Noto Sans TC', sans-serif; }
+  .card { border:1px solid #e2e8f0; border-radius:12px; background:#fff; }
+  .bar-track { background:#eef1f4; border-radius:999px; height:8px; overflow:hidden; }
+  .bar-fill { background:#2271b1; height:100%; }
+  .tag { font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; }
+</style>
+</head>
+<body class="bg-[#f0f0f1] text-[#1d2327] antialiased">
+  <div class="max-w-6xl mx-auto px-6 py-10 space-y-8">
+
+    <header class="space-y-1">
+      <div class="text-xs font-bold text-[#2271b1]">2026-08-21 · 資料來源 docs/dispatch-board.md</div>
+      <h1 class="text-2xl md:text-3xl font-black">StartKiter 派工看板</h1>
+      <p class="text-sm text-slate-600">進度數字用 <code class="bg-slate-100 px-1 rounded text-xs">grep -c '^- \[x\]' tasks.md</code> 實跑算出，不用 spectra list 快取（對不上）。</p>
+    </header>
+
+    <!-- item 1 -->
+    <div class="card p-5 space-y-3">
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <div class="font-bold text-sm">1. interactive-learning-system</div>
+        <div class="flex gap-2">
+          <span class="tag bg-emerald-100 text-emerald-700">🟢 可封存</span>
+          <span class="tag bg-slate-100 text-slate-500">E2E ⬜ 未跑</span>
+        </div>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+      <div class="text-xs text-slate-500">43/43（100%）· 指派：— 等 PM 執行 spectra archive · 建議封存前跑一次 pnpm e2e 留存證據</div>
+    </div>
+
+    <!-- item 2 -->
+    <div class="card p-5 space-y-3">
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <div class="font-bold text-sm">2. unified-support-desk</div>
+        <div class="flex gap-2">
+          <span class="tag bg-blue-100 text-blue-700">🔵 進行中</span>
+          <span class="tag bg-slate-100 text-slate-500">E2E ⬜ 未跑</span>
+        </div>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:39%"></div></div>
+      <div class="text-xs text-slate-500">19/49（39%）· 風險低、範圍獨立</div>
+      <div class="flex flex-wrap gap-1.5 text-[10px]">
+        <span class="tag bg-indigo-50 text-indigo-700 border border-indigo-200">Sonnet 子代理</span>
+        <span class="tag bg-amber-50 text-amber-700 border border-amber-200">codex</span>
+        <span class="tag bg-amber-50 text-amber-700 border border-amber-200">cursor-agent</span>
+        <span class="tag bg-amber-50 text-amber-700 border border-amber-200">kimi</span>
+        <span class="tag bg-amber-50 text-amber-700 border border-amber-200">agy</span>
+      </div>
+    </div>
+
+    <!-- item 3 -->
+    <div class="card p-5 space-y-3">
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <div class="font-bold text-sm">3. platform-shell-plugin-architecture</div>
+        <div class="flex gap-2">
+          <span class="tag bg-blue-100 text-blue-700">🔵 進行中</span>
+          <span class="tag bg-slate-100 text-slate-500">E2E ⬜ 未跑</span>
+        </div>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:42%"></div></div>
+      <div class="text-xs text-slate-500 mb-1">50/120（42%）· 拆 Phase 分派</div>
+      <div class="grid md:grid-cols-2 gap-2 text-[11px]">
+        <div class="box bg-slate-50 border border-slate-200 rounded p-2.5">
+          <div class="font-bold mb-1">Phase 4 · Marketplace（task 15-23）</div>
+          <span class="tag bg-indigo-50 text-indigo-700 border border-indigo-200">Sonnet</span>
+          <span class="tag bg-amber-50 text-amber-700 border border-amber-200">codex</span>
+          <span class="tag bg-amber-50 text-amber-700 border border-amber-200">cursor-agent</span>
+        </div>
+        <div class="box bg-slate-50 border border-slate-200 rounded p-2.5">
+          <div class="font-bold mb-1">Phase 6 · Core 邊界文件（task 28-30）</div>
+          <span class="tag bg-indigo-50 text-indigo-700 border border-indigo-200">Sonnet</span>
+          <span class="tag bg-amber-50 text-amber-700 border border-amber-200">kimi</span>
+          <span class="tag bg-amber-50 text-amber-700 border border-amber-200">agy</span>
+        </div>
+        <div class="box bg-rose-50 border border-rose-200 rounded p-2.5">
+          <div class="font-bold mb-1 text-rose-700">Phase 7 · 全面驗收（task 31-32）</div>
+          <span class="tag bg-rose-100 text-rose-700">PM 親自，不外派</span>
+        </div>
+        <div class="box bg-slate-50 border border-slate-200 rounded p-2.5">
+          <div class="font-bold mb-1">Phase 9 · 側邊欄視覺+拖曳（task 43-48）</div>
+          <span class="tag bg-indigo-50 text-indigo-700 border border-indigo-200">Sonnet</span>
+          <span class="tag bg-purple-50 text-purple-700 border border-purple-200">網頁設計師</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- item 4 -->
+    <div class="card p-5 space-y-3">
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <div class="font-bold text-sm">4. core-module-bundles-coupons <span class="text-slate-400 font-normal">（已 park）</span></div>
+        <div class="flex gap-2">
+          <span class="tag bg-amber-100 text-amber-700">⏸️ 排隊中，可 apply</span>
+          <span class="tag bg-slate-100 text-slate-500">E2E ⬜ 未跑</span>
+        </div>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <div class="text-xs text-slate-500 mb-1">0/55</div>
+      <div class="grid md:grid-cols-2 gap-2 text-[11px]">
+        <div class="box bg-slate-50 border border-slate-200 rounded p-2.5">
+          <div class="font-bold mb-1">Phase 1-2 · 資料表+Bundle CRUD</div>
+          <span class="tag bg-rose-100 text-rose-700">PM</span>
+          <span class="tag bg-indigo-50 text-indigo-700 border border-indigo-200">Sonnet（PM 驗收）</span>
+        </div>
+        <div class="box bg-rose-50 border border-rose-200 rounded p-2.5">
+          <div class="font-bold mb-1 text-rose-700">Phase 3 · Coupon+結帳整合</div>
+          <span class="tag bg-rose-100 text-rose-700">PM 親自，禁止外派</span>
+        </div>
+        <div class="box bg-rose-50 border border-rose-200 rounded p-2.5">
+          <div class="font-bold mb-1 text-rose-700">Phase 4 · 商品目錄改造（BREAKING）</div>
+          <span class="tag bg-rose-100 text-rose-700">PM 親自，禁止外派</span>
+        </div>
+        <div class="box bg-slate-50 border border-slate-200 rounded p-2.5">
+          <div class="font-bold mb-1">Demo-first HTML</div>
+          <span class="tag bg-purple-50 text-purple-700 border border-purple-200">網頁設計師</span>
+          <span class="tag bg-amber-50 text-amber-700 border border-amber-200">外部 CLI 皆可</span>
+        </div>
+      </div>
+      <div class="text-[10px] text-rose-700 bg-rose-50 border border-rose-200 rounded p-2">⚠️ money-related 一律禁止外派子代理／外部 CLI，PM 親自或逐行驗收</div>
+    </div>
+
+    <!-- item 5 -->
+    <div class="card p-5 space-y-3">
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <div class="font-bold text-sm">5. plan-clean-install-package-repo <span class="text-slate-400 font-normal">（已 park）</span></div>
+        <span class="tag bg-amber-100 text-amber-700">⏸️ 優先序未定</span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <div class="text-xs text-slate-500">0/10 · 待老闆排優先序</div>
+    </div>
+
+    <!-- item 6-9 -->
+    <div class="card p-5 space-y-3">
+      <div class="font-bold text-sm">6-9. 待 propose 的 4 張 change</div>
+      <table class="w-full text-[11px] mt-2">
+        <thead class="text-slate-400 text-left"><tr><th class="py-1">Change</th><th>備註</th><th>指派</th></tr></thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr><td class="py-1.5 font-mono">payuni-recurring-billing</td><td>PAYUNi 定期扣款地基</td><td><span class="tag bg-rose-100 text-rose-700">PM，金流</span></td></tr>
+          <tr><td class="py-1.5 font-mono">core-module-subscriptions-invoice</td><td>依賴上一項</td><td><span class="tag bg-rose-100 text-rose-700">PM，金流</span></td></tr>
+          <tr><td class="py-1.5 font-mono">core-module-newsletter</td><td>電子報</td><td><span class="tag bg-amber-50 text-amber-700 border border-amber-200">apply 階段可外部 CLI</span></td></tr>
+          <tr><td class="py-1.5 font-mono">core-module-assignment-course-invites</td><td>作業+課程邀請</td><td><span class="tag bg-amber-50 text-amber-700 border border-amber-200">apply 階段可外部 CLI</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 外部 CLI 規則 -->
+    <div class="card bg-slate-50 p-5 space-y-2 text-xs text-slate-700">
+      <div class="font-bold text-sm mb-1"><i class="fa-solid fa-diagram-project text-[#2271b1] mr-1"></i>外部 CLI 派工規則</div>
+      <ul class="list-disc pl-4 space-y-1">
+        <li>可用：<code>codex</code>、<code>cursor-agent</code>、<code>kimi</code>、<code>agy</code>（Antigravity）</li>
+        <li>派法：<code>orca worktree create</code> 開隔離 worktree → <code>orca terminal create --worktree path:&lt;path&gt; --command "&lt;cli&gt;"</code>，禁止 <code>--command "claude"</code></li>
+        <li>禁止背景一次性 headless 呼叫（<code>codex exec</code> / <code>kimi -p</code>）冒充派工，要開真正互動 session</li>
+        <li>派工師負責開 worktree、送指令、盯完成度、<code>git diff</code> 驗證實際改了什麼</li>
+        <li class="font-bold text-rose-700">money-related（金流計算、結帳、退款、DB schema 遷移）一律不外派</li>
+      </ul>
+    </div>
+
+  </div>
+</body>
+</html>
