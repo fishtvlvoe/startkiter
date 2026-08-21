@@ -1,20 +1,30 @@
+import type { SupportTicketChannel } from "@startkiter/support";
+
 export type ChatwootMessageClient = {
 	postPublicReply: (conversationId: number, content: string) => Promise<void>;
 	postInternalNote: (conversationId: number, content: string) => Promise<void>;
 	markForHuman: (conversationId: number, label?: string) => Promise<void>;
+	createConversation?: (args: {
+		channel: SupportTicketChannel;
+		message: string;
+		sourceId?: string;
+		contactEmail?: string;
+		contactName?: string;
+		buyerDeploymentId?: string | null;
+	}) => Promise<{ conversationId: number }>;
 };
 
 const HUMAN_FOLLOW_UP_LABEL = "needs-human";
 
-async function chatwootRequest(path: string, init: RequestInit): Promise<void> {
+async function chatwootRequest<T = void>(path: string, init: RequestInit): Promise<T | null> {
 	const baseUrl = process.env.CHATWOOT_BASE_URL?.replace(/\/+$/, "");
 	const token = process.env.CHATWOOT_API_ACCESS_TOKEN?.trim();
 	const accountId = process.env.CHATWOOT_ACCOUNT_ID?.trim();
 	if (!baseUrl || !token || !accountId) {
-		return;
+		return null;
 	}
 
-	await fetch(`${baseUrl}/api/v1/accounts/${accountId}${path}`, {
+	const response = await fetch(`${baseUrl}/api/v1/accounts/${accountId}${path}`, {
 		...init,
 		headers: {
 			Accept: "application/json",
@@ -23,6 +33,16 @@ async function chatwootRequest(path: string, init: RequestInit): Promise<void> {
 			...(init.headers ?? {}),
 		},
 	});
+
+	if (!response.ok) {
+		return null;
+	}
+
+	try {
+		return (await response.json()) as T;
+	} catch {
+		return null;
+	}
 }
 
 export const defaultChatwootMessageClient: ChatwootMessageClient = {
@@ -51,5 +71,25 @@ export const defaultChatwootMessageClient: ChatwootMessageClient = {
 			method: "POST",
 			body: JSON.stringify({ labels: [label] }),
 		});
+	},
+	async createConversation(args) {
+		const inboxId = process.env.CHATWOOT_INBOX_ID;
+		const res = await chatwootRequest<{ id: number }>(`/conversations`, {
+			method: "POST",
+			body: JSON.stringify({
+				inbox_id: inboxId ? Number.parseInt(inboxId, 10) : undefined,
+				source_id: args.sourceId,
+				custom_attributes: {
+					channel: args.channel,
+					buyerDeploymentId: args.buyerDeploymentId,
+				},
+				message: {
+					content: args.message,
+				},
+			}),
+		});
+		return {
+			conversationId: res?.id ?? Math.floor(Date.now() / 1000),
+		};
 	},
 };
