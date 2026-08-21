@@ -4,7 +4,7 @@ import { canAccessCourseId, type BundleCourseAccessReader } from "@startkiter/co
 import { db } from "@startkiter/database";
 import { afterAll, afterEach, describe, expect, it } from "vitest";
 
-import { createBundle } from "./catalog";
+import { createBundle } from "@startkiter/bundles";
 
 /**
  * Requirement: Bundle purchase grants access to all included courses（含 Refunded bundle
