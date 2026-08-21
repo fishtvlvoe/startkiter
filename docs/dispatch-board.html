@@ -156,6 +156,7 @@
       <div class="font-bold text-sm mb-1"><i class="fa-solid fa-diagram-project text-[#2271b1] mr-1"></i>外部 CLI 派工規則</div>
       <ul class="list-disc pl-4 space-y-1">
         <li>可用：<code>codex</code>、<code>cursor-agent</code>、<code>kimi</code>、<code>agy</code>（Antigravity）</li>
+        <li class="font-bold text-emerald-700">優先派 <code>agy</code>，其他三個少派（2026-08-21 老闆定案）</li>
         <li>派法：<code>orca worktree create</code> 開隔離 worktree → <code>orca terminal create --worktree path:&lt;path&gt; --command "&lt;cli&gt;"</code>，禁止 <code>--command "claude"</code></li>
         <li>禁止背景一次性 headless 呼叫（<code>codex exec</code> / <code>kimi -p</code>）冒充派工，要開真正互動 session</li>
         <li>派工師負責開 worktree、送指令、盯完成度、<code>git diff</code> 驗證實際改了什麼</li>

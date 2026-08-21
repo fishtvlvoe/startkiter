@@ -65,6 +65,7 @@
 ## 外部 CLI 派工規則（引用 routing.md，不重複展開）
 
 - 可用 CLI：`codex`、`cursor-agent`、`kimi`、`agy`（Antigravity）
+- **優先序（2026-08-21 老闆定案）：優先派 `agy`，其他三個（`codex`／`cursor-agent`／`kimi`）少派**，除非 `agy` 明顯不適合這類任務才退回用其他 CLI
 - 派法：`orca worktree create` 開隔離 worktree → `orca terminal create --worktree path:<path> --command "<cli>"`，**禁止** `--command "claude"`（等於自己分身，不算交叉驗證）
 - **禁止** `codex exec "..."` / `kimi -p "..."` 這類背景一次性 headless 呼叫冒充派工，要開真正互動 terminal session
 - 派工師負責：開 worktree、送指令、盯完成度、`git diff` 驗證實際改了什麼——不相信代理自報「做完了」
