@@ -8,7 +8,7 @@ import { NextResponse } from "next/server";
 import {
 	createPrismaGrantStore,
 	loadGithubKitRuntime,
-} from "../../../../lib/github-kit";
+} from "../../../lib/github-kit";
 
 export async function GET(request: Request) {
 	const session = await auth.api.getSession({ headers: request.headers });
