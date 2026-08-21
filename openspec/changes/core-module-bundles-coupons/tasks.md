@@ -89,21 +89,21 @@
 
 ### 14. 紅燈測試：商品目錄與既有行為相容性
 
-- [ ] 14.1 [P] 撰寫測試驗證 Requirement「Single MVP SKU price」的「Checkout amount is 8800 TWD for the MVP SKU」scenario——未帶 productId 或 productId="startkiter-mvp" 時金額恆為 8800（改造前後行為一致）
-- [ ] 14.2 [P] 撰寫測試驗證同一 Requirement 的「Checkout amount for a bundle product uses the bundle's configured price」scenario——帶已發布 bundle 的 productId 時金額等於該 bundle 價格，非 8800
-- [ ] 14.3 [P] 撰寫測試驗證 Requirement「MVP SKU constant is startkiter-mvp」的「Created order for a bundle stores the bundle's own product id」scenario——bundle 訂單的 productId 欄位等於該 bundle id
+- [x] 14.1 [P] 撰寫測試驗證 Requirement「Single MVP SKU price」的「Checkout amount is 8800 TWD for the MVP SKU」scenario——未帶 productId 或 productId="startkiter-mvp" 時金額恆為 8800（改造前後行為一致）
+- [x] 14.2 [P] 撰寫測試驗證同一 Requirement 的「Checkout amount for a bundle product uses the bundle's configured price」scenario——帶已發布 bundle 的 productId 時金額等於該 bundle 價格，非 8800
+- [x] 14.3 [P] 撰寫測試驗證 Requirement「MVP SKU constant is startkiter-mvp」的「Created order for a bundle stores the bundle's own product id」scenario——bundle 訂單的 productId 欄位等於該 bundle id
 
 ### 15. 實作：商品目錄
 
-- [ ] 15.1 新增 `packages/payments/src/catalog.ts`，實作 `getProduct(productId)`：未傳入或傳入 "startkiter-mvp" 時回傳既有 MVP_SKU/MVP_AMOUNT_TWD/MVP_CURRENCY 常數組成的結果，其餘視為 bundle id 查 `packages/bundles`，驗證：14.1、14.2 轉綠燈
-- [ ] 15.2 修改 `apps/saas/app/api/checkout/route.ts`，改為呼叫 15.1 的 `getProduct` 取得金額與 sku，`productId` 預設值 "startkiter-mvp"，驗證：14.3 轉綠燈
-- [ ] 15.3 確認既有 `packages/payments/src/order.ts`、`packages/payments/src/constants.ts` 的既有測試（不帶 productId 的情境）全數仍為綠燈，行為與改造前一致
-- [ ] 15.4 PM 審查 Phase 2 時發現的缺口：`packages/course/access.ts` 的 `canAccessCourseId`（bundle-aware 存取權判斷）目前只有測試呼叫，`apps/saas/lib/course-access.ts`／`app/(authenticated)/(main)/(account)/course/page.tsx`／`app/api/course/lessons/route.ts` 這些實際課程頁面/API 仍呼叫舊版 `canAccessCourse`（只認 `sku=startkiter-mvp`），買家買 bundle 後在真實頁面上還是看不到課程。15.2 讓 checkout 開始能產生 `sku=bundle.id` 的訂單後，這裡要把 `course-access.ts` 改成同時查 MVP 與 bundle 兩種來源（呼叫 `canAccessCourseId`），驗證：買家購買 bundle 後，`course/page.tsx` 與 `api/course/lessons/route.ts` 對 bundle 內每一堂課都顯示/回傳有權限，既有 MVP 單堂課存取行為不變
+- [x] 15.1 新增 `packages/payments/catalog.ts`（實際檔案結構是 flat，不是 design.md 寫的 `src/`，跟既有 payments 套件慣例一致），實作 `getProduct(productId)`：未傳入或傳入 "startkiter-mvp" 時回傳既有 MVP_SKU/MVP_AMOUNT_TWD/MVP_CURRENCY 常數組成的結果，其餘視為 bundle id 查 `packages/bundles`（未發布/不存在回傳 null），驗證：14.1、14.2 轉綠燈
+- [x] 15.2 修改 `apps/saas/app/api/checkout/route.ts`，改為呼叫 15.1 的 `getProduct` 取得金額與 sku，`productId` 預設值 "startkiter-mvp"，商品不存在回 404；同步把 `packages/payments/order.ts` 的 `buildPendingOrderInput` 上限檢查改成只對 `sku === MVP_SKU` 生效（bundle 價格是動態的，不能套 8800 上限），並把回傳物件的 `sku` 改成真的用傳入值而非寫死 `MVP_SKU`；`/api/coupons/validate` 也一併改用 `getProduct` 取代原本自己重複寫的 `resolveOriginalAmount`（DRY），驗證：14.3 轉綠燈
+- [x] 15.3 確認既有 `packages/payments/order.test.ts`、`packages/payments/notify.test.ts`（不帶 productId 的情境）全數仍為綠燈，行為與改造前一致（PM 執行：13/13 通過，含新增的 discounted-amount 案例）
+- [ ] 15.4（2026-08-21 老闆裁決：本輪不做，等買家播放頁做出來才接）PM 審查時發現：`packages/course/access.ts` 的 `canAccessCourseId`（bundle-aware 存取權判斷）目前只有測試呼叫；深入排查發現問題比原本描述的更根本——`Bundle.courseIds` 指向 `db.course`（真的資料庫課程/章節，operator 專用的 `/admin/course` studio 在編這個），但買家實際看到的 `/course` 頁面與 `/api/course/lessons` 完全是另一套系統，只服務 `packages/course/catalog.ts` 寫死的 `MVP_LESSON_SEEDS`（3 堂固定課），跟 `db.course` 完全無關。也就是說**目前沒有任何買家看得到的頁面會渲染 `db.course` 的內容**，`canAccessCourseId` 想接的「course/page.tsx 對 bundle 內每堂課顯示」這個頁面根本不存在。要接上必須先新建一個買家版 `db.course` 內容播放頁（讀 Chapter/Lesson），這是新功能不是「改幾行」，範圍已超出本輪 Phase 4，留到那個買家播放頁做出來後再回頭接 `canAccessCourseId`
 
 ### 16. Phase 4 Review 與驗收
 
-- [ ] 16.1 對商品目錄改造跑 correctness / security review，特別檢查 **BREAKING** 變更是否真的向後相容（未傳 productId 時行為不變），Critical 為零
-- [ ] 16.2 `pnpm build` 與 `pnpm test` 全專案通過（含既有 payuni-checkout 相關測試）
+- [x] 16.1 對商品目錄改造跑 correctness / security review，特別檢查 **BREAKING** 變更是否真的向後相容（未傳 productId 時行為不變），Critical 為零（PM 覆核：未帶 productId 時 `getProduct()` 預設回傳 MVP 固定值，行為與改造前逐位元相同；`buildPendingOrderInput` 的 8800 上限只在 `sku === MVP_SKU` 生效，bundle 訂單不受這條擋，也不會反過來讓 MVP 訂單金額失控；金額全程來自伺服器端 `getProduct` 查表結果，不信任任何客戶端輸入，符合 spec「Client-supplied alternate amount is ignored」）
+- [x] 16.2 `pnpm build` 與 `pnpm test` 全專案通過（PM 自行重跑：`packages/` 52 files/274 tests 全綠；`pnpm --filter @startkiter/saas build` 成功（這輪特別重跑，因為上一輪只跑了 test/type-check 沒跑 build，漏掉一個真的 server/client boundary bug，見 platform-shell tasks.md 50.5）；`apps/saas` 全套測試僅 2 個失敗，屬 platform-shell 既有測試期望值過時（見 50.7），非 Phase 4 改動造成，`git status` 確認相關檔案不在本輪 diff 內）
 
 ## Phase 5：既有 spec 對齊與全面驗收（v1 take-home capabilities）
 

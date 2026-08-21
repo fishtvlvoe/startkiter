@@ -34,10 +34,11 @@ export async function loadPayUniCredentials(opts?: {
 export async function createPendingOrderForUser(
 	userId: string,
 	amount: number = MVP_AMOUNT_TWD,
+	sku: string = MVP_SKU,
 ): Promise<OrderRecord> {
 	const pending = buildPendingOrderInput({
 		userId,
-		sku: MVP_SKU,
+		sku,
 		amount,
 	});
 	const row = await db.order.create({

@@ -1,6 +1,5 @@
-import { getBundleById } from "@startkiter/bundles";
 import { validateCoupon } from "@startkiter/coupons";
-import { MVP_AMOUNT_TWD, MVP_SKU } from "@startkiter/payments";
+import { MVP_SKU, getProduct } from "@startkiter/payments";
 import { NextResponse } from "next/server";
 
 import { checkRateLimit } from "../../../../lib/rate-limit";
@@ -11,17 +10,6 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 
 function clientIdentifier(request: Request) {
 	return request.headers.get("x-forwarded-for") ?? "unknown";
-}
-
-async function resolveOriginalAmount(productId: string): Promise<number | null> {
-	if (productId === MVP_SKU) {
-		return MVP_AMOUNT_TWD;
-	}
-	const bundle = await getBundleById(productId);
-	if (!bundle || bundle.status !== "published") {
-		return null;
-	}
-	return bundle.priceTwd;
 }
 
 export async function POST(request: Request) {
@@ -45,11 +33,11 @@ export async function POST(request: Request) {
 	}
 	const productId = typeof body.productId === "string" && body.productId ? body.productId : MVP_SKU;
 
-	const originalAmount = await resolveOriginalAmount(productId);
-	if (originalAmount === null) {
+	const product = await getProduct(productId);
+	if (product === null) {
 		return NextResponse.json({ error: "product_not_found" }, { status: 404 });
 	}
 
-	const result = await validateCoupon(body.code, originalAmount);
+	const result = await validateCoupon(body.code, product.amount);
 	return NextResponse.json(result, { status: 200 });
 }

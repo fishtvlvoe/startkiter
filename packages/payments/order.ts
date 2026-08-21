@@ -41,15 +41,14 @@ export function buildPendingOrderInput(args: {
 	if (amount === undefined || amount === null || Number.isNaN(amount) || amount <= 0) {
 		throw new Error("Order amount must be a positive number");
 	}
-	// amount 由呼叫端（apps/saas/lib/orders.ts）在伺服器端算出（原價，或已驗證過的 coupon 折扣後金額），
-	// 這裡只守住上限：不得超過 MVP 原價，防止任何管道把金額灌高。
-	if (amount > MVP_AMOUNT_TWD) {
-		throw new Error(`Order amount must be at most ${MVP_AMOUNT_TWD}`);
-	}
 
 	const sku = args.sku ?? MVP_SKU;
-	if (sku !== MVP_SKU) {
-		throw new Error(`Order sku must be ${MVP_SKU}`);
+	// amount 由呼叫端（apps/saas/lib/orders.ts，經 packages/payments/catalog.ts 的 getProduct 查
+	// 出來，MVP 或 bundle 皆為伺服器端信任來源，非客戶端輸入）算出。MVP SKU 才守「不得超過 8800」這條
+	// 上限（coupon 折扣後只會更低，不會更高）；bundle sku 的價格是動態的（各 bundle 自己的 priceTwd），
+	// 這裡不知道特定 bundle 的原價上限，交由 getProduct 已經是唯一信任來源這件事來把關，不重複假設。
+	if (sku === MVP_SKU && amount > MVP_AMOUNT_TWD) {
+		throw new Error(`Order amount must be at most ${MVP_AMOUNT_TWD}`);
 	}
 
 	const orderNo = args.orderNo ?? generateOrderNo();
@@ -60,7 +59,7 @@ export function buildPendingOrderInput(args: {
 	return {
 		userId: args.userId,
 		orderNo,
-		sku: MVP_SKU,
+		sku,
 		amount,
 		currency: MVP_CURRENCY,
 		status: "pending",

@@ -3,6 +3,8 @@ export * from "./lib/plans";
 export * from "./lib/provider-price-ids";
 export * from "./provider";
 export { MVP_AMOUNT_TWD, MVP_CURRENCY, MVP_SKU } from "./constants";
+export { getProduct } from "./catalog";
+export type { Product } from "./catalog";
 export { buildPendingOrderInput, generateOrderNo, MER_TRADE_NO_MAX_LEN } from "./order";
 export { createCheckout } from "./checkout";
 export { handlePayuniNotify, decidePayuniNotify } from "./notify";

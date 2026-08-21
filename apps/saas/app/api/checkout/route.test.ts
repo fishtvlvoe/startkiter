@@ -22,20 +22,21 @@ vi.mock("../../../lib/public-base-url", () => ({
 	resolvePublicBaseUrl: vi.fn(() => "https://example.com"),
 }));
 
-import { auth } from "@startkiter/auth";
-import { validateCoupon } from "@startkiter/coupons";
-import { createMvpCheckoutGateway } from "@startkiter/payments";
-
-import { buildPayuniSession, createPendingOrderForUser, loadPayUniCredentials } from "../../../lib/orders";
-import { POST } from "./route";
-
 vi.mock("@startkiter/payments", async (importOriginal) => {
 	const actual = await importOriginal<typeof import("@startkiter/payments")>();
 	return {
 		...actual,
 		createMvpCheckoutGateway: vi.fn(() => ({ createPaymentSession: vi.fn() })),
+		getProduct: vi.fn(),
 	};
 });
+
+import { auth } from "@startkiter/auth";
+import { validateCoupon } from "@startkiter/coupons";
+import { MVP_AMOUNT_TWD, MVP_SKU, createMvpCheckoutGateway, getProduct } from "@startkiter/payments";
+
+import { buildPayuniSession, createPendingOrderForUser, loadPayUniCredentials } from "../../../lib/orders";
+import { POST } from "./route";
 
 const mockedGetSession = vi.mocked(auth.api.getSession);
 const mockedValidateCoupon = vi.mocked(validateCoupon);
@@ -43,8 +44,11 @@ const mockedLoadCredentials = vi.mocked(loadPayUniCredentials);
 const mockedCreatePendingOrder = vi.mocked(createPendingOrderForUser);
 const mockedBuildPayuniSession = vi.mocked(buildPayuniSession);
 const mockedCreateGateway = vi.mocked(createMvpCheckoutGateway);
+const mockedGetProduct = vi.mocked(getProduct);
 
 const SESSION = { user: { id: "user_1", email: "buyer@example.com" } };
+const MVP_PRODUCT = { productId: MVP_SKU, sku: MVP_SKU, amount: MVP_AMOUNT_TWD, currency: "TWD" as const };
+const BUNDLE_PRODUCT = { productId: "bundle_1", sku: "bundle_1", amount: 6000, currency: "TWD" as const };
 
 function jsonRequest(body: unknown) {
 	return new Request("http://localhost/api/checkout", {
@@ -54,12 +58,12 @@ function jsonRequest(body: unknown) {
 	});
 }
 
-function baseOrder(amount: number) {
+function baseOrder(amount: number, sku = MVP_SKU) {
 	return {
 		id: "order_1",
 		userId: "user_1",
 		orderNo: "SK20260821abc",
-		sku: "startkiter-mvp",
+		sku,
 		amount,
 		currency: "TWD",
 		status: "pending" as const,
@@ -81,6 +85,7 @@ describe("POST /api/checkout coupon integration", () => {
 		mockedLoadCredentials.mockResolvedValue({} as never);
 		mockedCreateGateway.mockReturnValue({ createPaymentSession: vi.fn() } as never);
 		mockedBuildPayuniSession.mockResolvedValue({ formUrl: "https://payuni.example/pay" } as never);
+		mockedGetProduct.mockResolvedValue(MVP_PRODUCT);
 	});
 
 	afterEach(() => {
@@ -94,7 +99,7 @@ describe("POST /api/checkout coupon integration", () => {
 		const response = await POST(jsonRequest({ couponCode: "SAVE100" }));
 
 		expect(response.status).toBe(200);
-		expect(mockedCreatePendingOrder).toHaveBeenCalledWith("user_1", 8700);
+		expect(mockedCreatePendingOrder).toHaveBeenCalledWith("user_1", 8700, MVP_SKU);
 		const body = await response.json();
 		expect(body.amount).toBe(8700);
 	});
@@ -118,6 +123,29 @@ describe("POST /api/checkout coupon integration", () => {
 
 		expect(response.status).toBe(200);
 		expect(mockedValidateCoupon).not.toHaveBeenCalled();
-		expect(mockedCreatePendingOrder).toHaveBeenCalledWith("user_1", 8800);
+		expect(mockedCreatePendingOrder).toHaveBeenCalledWith("user_1", 8800, MVP_SKU);
+	});
+
+	it("charges the bundle's configured price and stores the bundle id as sku when productId is a bundle (Scenario: Checkout amount for a bundle product uses the bundle's configured price / Created order for a bundle stores the bundle's own product id)", async () => {
+		mockedGetProduct.mockResolvedValue(BUNDLE_PRODUCT);
+		mockedCreatePendingOrder.mockResolvedValue(baseOrder(6000, "bundle_1"));
+
+		const response = await POST(jsonRequest({ productId: "bundle_1" }));
+
+		expect(response.status).toBe(200);
+		expect(mockedGetProduct).toHaveBeenCalledWith("bundle_1");
+		expect(mockedCreatePendingOrder).toHaveBeenCalledWith("user_1", 6000, "bundle_1");
+		const body = await response.json();
+		expect(body.amount).toBe(6000);
+		expect(body.sku).toBe("bundle_1");
+	});
+
+	it("returns 404 without creating an order when productId does not resolve to a product", async () => {
+		mockedGetProduct.mockResolvedValue(null);
+
+		const response = await POST(jsonRequest({ productId: "nonexistent" }));
+
+		expect(response.status).toBe(404);
+		expect(mockedCreatePendingOrder).not.toHaveBeenCalled();
 	});
 });
