@@ -17,7 +17,6 @@
 		"@startkiter/database": "workspace:*"
 	},
 	"devDependencies": {
-		"@startkiter/course": "workspace:*",
 		"@startkiter/tsconfig": "workspace:*",
 		"@types/node": "catalog:",
 		"dotenv-cli": "catalog:",
