@@ -258,4 +258,49 @@ describe("Webhook marks order paid / Course and kit same purchase", () => {
 		expect(result.error).toBe("missing_trade_no");
 		expect(store.getByOrderNo("SK-8800-001")?.status).toBe("pending");
 	});
+
+	it("marks paid when TradeAmt matches a coupon-discounted order.amount below MVP_AMOUNT_TWD (Requirement: Checkout applies a validated coupon to compute the charged amount)", async () => {
+		const store = createMemoryOrderStore();
+		const discountedAmount = MVP_AMOUNT_TWD - 100;
+		store.create({
+			userId: "user_1",
+			orderNo: "SK-8800-002",
+			sku: MVP_SKU,
+			amount: discountedAmount,
+			currency: "TWD",
+			status: "pending",
+			paymentGateway: "payuni",
+			gatewayTradeNo: null,
+			courseAccess: false,
+			kitClaimEligible: false,
+		});
+
+		const service = new PayUniService({
+			merchantId: "MERCHANT",
+			hashKey: HASH_KEY,
+			hashIV: HASH_IV,
+			apiUrl: "https://sandbox-api.payuni.com.tw/api/upp",
+		});
+		const form = service.createFormData({
+			MerTradeNo: "SK-8800-002",
+			TradeAmt: discountedAmount,
+			Status: "SUCCESS",
+			TradeNo: "PU_TRADE_DISCOUNT",
+		});
+
+		const result = await handlePayuniNotify({
+			encryptInfo: form.EncryptInfo,
+			hashInfo: form.HashInfo,
+			credentials: {
+				merchantId: "MERCHANT",
+				hashKey: HASH_KEY,
+				hashIV: HASH_IV,
+				apiUrl: "https://sandbox-api.payuni.com.tw/api/upp",
+			},
+			store,
+		});
+
+		expect(result.status).toBe(200);
+		expect(store.getByOrderNo("SK-8800-002")?.status).toBe("paid");
+	});
 });

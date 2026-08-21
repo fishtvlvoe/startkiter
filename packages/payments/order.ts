@@ -41,8 +41,10 @@ export function buildPendingOrderInput(args: {
 	if (amount === undefined || amount === null || Number.isNaN(amount) || amount <= 0) {
 		throw new Error("Order amount must be a positive number");
 	}
-	if (amount !== MVP_AMOUNT_TWD) {
-		throw new Error(`Order amount must be ${MVP_AMOUNT_TWD}`);
+	// amount 由呼叫端（apps/saas/lib/orders.ts）在伺服器端算出（原價，或已驗證過的 coupon 折扣後金額），
+	// 這裡只守住上限：不得超過 MVP 原價，防止任何管道把金額灌高。
+	if (amount > MVP_AMOUNT_TWD) {
+		throw new Error(`Order amount must be at most ${MVP_AMOUNT_TWD}`);
 	}
 
 	const sku = args.sku ?? MVP_SKU;
@@ -59,7 +61,7 @@ export function buildPendingOrderInput(args: {
 		userId: args.userId,
 		orderNo,
 		sku: MVP_SKU,
-		amount: MVP_AMOUNT_TWD,
+		amount,
 		currency: MVP_CURRENCY,
 		status: "pending",
 		paymentGateway: "payuni",

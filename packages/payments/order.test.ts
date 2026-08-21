@@ -23,3 +23,25 @@ describe("generateOrderNo", () => {
 		).toThrow(/MerTradeNo max length/);
 	});
 });
+
+describe("buildPendingOrderInput amount handling (Requirement: Checkout applies a validated coupon to compute the charged amount)", () => {
+	it("returns the server-computed amount unchanged when it equals the MVP price", () => {
+		const pending = buildPendingOrderInput({ userId: "u1", amount: MVP_AMOUNT_TWD });
+		expect(pending.amount).toBe(MVP_AMOUNT_TWD);
+	});
+
+	it("accepts and returns a discounted amount below the MVP price", () => {
+		const pending = buildPendingOrderInput({ userId: "u1", amount: MVP_AMOUNT_TWD - 100 });
+		expect(pending.amount).toBe(MVP_AMOUNT_TWD - 100);
+	});
+
+	it("rejects an amount greater than the MVP price", () => {
+		expect(() => buildPendingOrderInput({ userId: "u1", amount: MVP_AMOUNT_TWD + 1 })).toThrow(
+			/Order amount must be/,
+		);
+	});
+
+	it("rejects a zero amount", () => {
+		expect(() => buildPendingOrderInput({ userId: "u1", amount: 0 })).toThrow(/positive number/);
+	});
+});

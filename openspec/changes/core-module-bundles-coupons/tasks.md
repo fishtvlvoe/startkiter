@@ -54,36 +54,36 @@
 
 ### 9. 紅燈測試：Coupon 驗證邏輯
 
-- [ ] 9.1 [P] 撰寫測試驗證 Requirement「Coupon validation endpoint checks code validity without leaking existence via status code」的「Valid unexpired coupon under redemption limit」scenario——固定金額折扣範例（SAVE100 折抵 100 元，原價 8800 → 8700）
-- [ ] 9.2 [P] 撰寫測試驗證同一 scenario 的百分比折扣範例——SAVE20PCT 20% 折扣但 maxDiscountAmount=500 上限，原價 8800 → 8300（非 7040）
-- [ ] 9.3 [P] 撰寫測試驗證「Nonexistent code returns 200 with not_found reason」——不存在的 code 回 200 而非 404，reason="not_found"
-- [ ] 9.4 [P] 撰寫測試驗證「Expired coupon is rejected」——expiresAt 早於現在回 reason="expired"
-- [ ] 9.5 [P] 撰寫測試驗證「Coupon not yet started is rejected」——startsAt 晚於現在回 reason="not_started"
-- [ ] 9.6 [P] 撰寫測試驗證「Coupon at redemption limit is rejected」——timesRedeemed 等於非 null 非零的 maxRedemptions 時回 reason="max_redemptions_reached"
+- [x] 9.1 [P] 撰寫測試驗證 Requirement「Coupon validation endpoint checks code validity without leaking existence via status code」的「Valid unexpired coupon under redemption limit」scenario——固定金額折扣範例（SAVE100 折抵 100 元，原價 8800 → 8700）
+- [x] 9.2 [P] 撰寫測試驗證同一 scenario 的百分比折扣範例——SAVE20PCT 20% 折扣但 maxDiscountAmount=500 上限，原價 8800 → 8300（非 7040）
+- [x] 9.3 [P] 撰寫測試驗證「Nonexistent code returns 200 with not_found reason」——不存在的 code 回 200 而非 404，reason="not_found"
+- [x] 9.4 [P] 撰寫測試驗證「Expired coupon is rejected」——expiresAt 早於現在回 reason="expired"
+- [x] 9.5 [P] 撰寫測試驗證「Coupon not yet started is rejected」——startsAt 晚於現在回 reason="not_started"
+- [x] 9.6 [P] 撰寫測試驗證「Coupon at redemption limit is rejected」——timesRedeemed 等於非 null 非零的 maxRedemptions 時回 reason="max_redemptions_reached"
 
 ### 10. 實作：Coupon 驗證邏輯與 API
 
-- [ ] 10.1 依 design.md 決策「Coupon 驗證邏輯放進獨立 `packages/coupons/`，不放進 `packages/payments/`」，新增 `packages/coupons/src/validate.ts`，實作折扣計算邏輯（固定金額／百分比＋上限），不 import `packages/payments/` 內部檔案，驗證：9.1、9.2 轉綠燈
-- [ ] 10.2 補齊 not_found／expired／not_started／max_redemptions_reached 四種失敗分支，一律回傳 valid:false + reason，不用 404，驗證：9.3、9.4、9.5、9.6 轉綠燈
-- [ ] 10.3 新增 `apps/saas/app/api/coupons/validate/route.ts`，串接 10.1／10.2 的驗證函式
+- [x] 10.1 依 design.md 決策「Coupon 驗證邏輯放進獨立 `packages/coupons/`，不放進 `packages/payments/`」，新增 `packages/coupons/src/validate.ts`，實作折扣計算邏輯（固定金額／百分比＋上限），不 import `packages/payments/` 內部檔案，驗證：9.1、9.2 轉綠燈
+- [x] 10.2 補齊 not_found／expired／not_started／max_redemptions_reached 四種失敗分支，一律回傳 valid:false + reason，不用 404，驗證：9.3、9.4、9.5、9.6 轉綠燈
+- [x] 10.3 新增 `apps/saas/app/api/coupons/validate/route.ts`，串接 10.1／10.2 的驗證函式
 
 ### 11. 紅燈測試：Rate limit 與結帳整合
 
-- [ ] 11.1 [P] 撰寫測試驗證 Requirement「Rate limit protects against brute-force enumeration」——同一 client identifier 短時間超過門檻後續請求回 429
-- [ ] 11.2 [P] 撰寫測試驗證 Requirement「Checkout applies a validated coupon to compute the charged amount」的「Checkout with valid coupon charges discounted amount」scenario——帶合法 couponCode 結帳，Order 金額為折扣後金額
-- [ ] 11.3 [P] 撰寫測試驗證同一 Requirement 的「Checkout with invalid coupon code fails closed」scenario——帶失效 couponCode 結帳回 400 且不建立 Order
-- [ ] 11.4 [P] 撰寫測試驗證同一 Requirement 的「Checkout without a coupon code charges full price」scenario——未帶 couponCode 時金額不變，行為與改造前一致
+- [x] 11.1 [P] 撰寫測試驗證 Requirement「Rate limit protects against brute-force enumeration」——同一 client identifier 短時間超過門檻後續請求回 429
+- [x] 11.2 [P] 撰寫測試驗證 Requirement「Checkout applies a validated coupon to compute the charged amount」的「Checkout with valid coupon charges discounted amount」scenario——帶合法 couponCode 結帳，Order 金額為折扣後金額
+- [x] 11.3 [P] 撰寫測試驗證同一 Requirement 的「Checkout with invalid coupon code fails closed」scenario——帶失效 couponCode 結帳回 400 且不建立 Order
+- [x] 11.4 [P] 撰寫測試驗證同一 Requirement 的「Checkout without a coupon code charges full price」scenario——未帶 couponCode 時金額不變，行為與改造前一致
 
 ### 12. 實作：Rate limit 與結帳整合
 
-- [ ] 12.1 對 `POST /api/coupons/validate` 加上 rate-limit（比照既有 StartKiter API 慣例；若尚無既有慣例則本任務一併建立最小可用版本），驗證：11.1 轉綠燈
-- [ ] 12.2 修改 `apps/saas/app/api/checkout/route.ts`，接受可選 `couponCode`，伺服器端重新驗證（不信任前端算好的折扣），驗證：11.2、11.3、11.4 轉綠燈
+- [x] 12.1 對 `POST /api/coupons/validate` 加上 rate-limit（比照既有 StartKiter API 慣例；若尚無既有慣例則本任務一併建立最小可用版本），驗證：11.1 轉綠燈
+- [x] 12.2 修改 `apps/saas/app/api/checkout/route.ts`，接受可選 `couponCode`，伺服器端重新驗證（不信任前端算好的折扣），驗證：11.2、11.3、11.4 轉綠燈
 
 ### 13. Phase 3 Review 與驗收
 
-- [ ] 13.1 對 `packages/coupons/`、checkout 路由變更跑 correctness / security / performance code review，特別檢查是否有信任前端折扣金額的漏洞，Critical 為零
-- [ ] 13.2 `curl -X POST /api/coupons/validate` 對有效碼與無效碼分別驗證回傳格式符合 spec 範例
-- [ ] 13.3 `pnpm build` 與 `pnpm test` 通過
+- [x] 13.1 對 `packages/coupons/`、checkout 路由變更跑 correctness / security / performance code review，特別檢查是否有信任前端折扣金額的漏洞，Critical 為零（PM 覆核：checkout 一律伺服器端重呼叫 `validateCoupon` 取 `finalAmount`，不信任前端數字；`buildPendingOrderInput` 只守上限 `<= MVP_AMOUNT_TWD`；PAYUNi notify 改比對 `order.amount`（下單當下鎖定）而非寫死常數，堵住折扣訂單付款金額對不上的漏洞；rate-limit 用 `x-forwarded-for` 當 key，v1 已知限制是可被偽造，非本輪要解的問題，記錄於此）
+- [x] 13.2 `curl -X POST /api/coupons/validate` 對有效碼與無效碼分別驗證回傳格式符合 spec 範例（PM 執行：`pnpm dev` port 3001，灌真實 coupon `E2ETEST100`，驗證大小寫皆命中、原價 8800→8700、不存在碼回 200+not_found、缺 code 回 400，驗證後清除測試資料）
+- [x] 13.3 `pnpm build` 與 `pnpm test` 通過（PM 自行重跑：coupons/payments/bundles/checkout/rate-limit 相關 12 files/51 tests 全綠；`pnpm --filter @startkiter/saas build` 成功，`/api/coupons/validate` 正確註冊；`nav-menu-items.test.ts` 6/7 失敗為既有 platform-shell WIP 遺留，非本輪改動造成，已記錄於 platform-shell-plugin-architecture/tasks.md 50.4）
 
 ## Phase 4：商品目錄改造取代寫死常數（商品目錄取代寫死常數）
 

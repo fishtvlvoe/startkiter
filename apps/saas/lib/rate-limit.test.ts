@@ -1,0 +1,29 @@
+import { describe, expect, it } from "vitest";
+
+import { checkRateLimit } from "./rate-limit";
+
+describe("checkRateLimit (Requirement: Rate limit protects against brute-force enumeration)", () => {
+	it("allows requests under the limit", () => {
+		const key = `test-${Date.now()}-a`;
+		for (let i = 0; i < 5; i++) {
+			expect(checkRateLimit(key, { limit: 5, windowMs: 60_000 })).toBe(true);
+		}
+	});
+
+	it("rejects the request once the same identifier exceeds the limit within the window", () => {
+		const key = `test-${Date.now()}-b`;
+		for (let i = 0; i < 5; i++) {
+			checkRateLimit(key, { limit: 5, windowMs: 60_000 });
+		}
+		expect(checkRateLimit(key, { limit: 5, windowMs: 60_000 })).toBe(false);
+	});
+
+	it("resets the count for a different identifier", () => {
+		const keyA = `test-${Date.now()}-c1`;
+		const keyB = `test-${Date.now()}-c2`;
+		for (let i = 0; i < 5; i++) {
+			checkRateLimit(keyA, { limit: 5, windowMs: 60_000 });
+		}
+		expect(checkRateLimit(keyB, { limit: 5, windowMs: 60_000 })).toBe(true);
+	});
+});

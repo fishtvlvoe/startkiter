@@ -1,5 +1,6 @@
 import { auth } from "@startkiter/auth";
-import { MVP_SKU, createMvpCheckoutGateway } from "@startkiter/payments";
+import { validateCoupon } from "@startkiter/coupons";
+import { MVP_AMOUNT_TWD, MVP_SKU, createMvpCheckoutGateway } from "@startkiter/payments";
 import { NextResponse } from "next/server";
 
 import {
@@ -42,6 +43,18 @@ export async function POST(request: Request) {
 		}
 	}
 
+	// couponCode 一律伺服器端重新驗證，不信任前端算好的折扣金額（spec: Checkout applies a validated
+	// coupon to compute the charged amount）。Phase 4 商品目錄尚未落地，v1 只有 MVP SKU 可結帳，原價固定
+	// MVP_AMOUNT_TWD；bundle 結帳與 coupon 併用留給 Phase 4 一起處理。
+	let amount: number = MVP_AMOUNT_TWD;
+	if (typeof body.couponCode === "string" && body.couponCode.trim() !== "") {
+		const couponResult = await validateCoupon(body.couponCode, MVP_AMOUNT_TWD);
+		if (!couponResult.valid) {
+			return NextResponse.json({ error: "invalid_coupon", reason: couponResult.reason }, { status: 400 });
+		}
+		amount = couponResult.finalAmount;
+	}
+
 	const credentials = await loadPayUniCredentials();
 	if (!credentials) {
 		return NextResponse.json({ error: "payuni_not_configured" }, { status: 503 });
@@ -58,7 +71,7 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: "public_base_url_required" }, { status: 503 });
 	}
 
-	const order = await createPendingOrderForUser(session.user.id);
+	const order = await createPendingOrderForUser(session.user.id, amount);
 	const payment = await buildPayuniSession(order, baseUrl, session.user.email);
 	if (!payment) {
 		return NextResponse.json({ error: "payuni_not_configured" }, { status: 503 });

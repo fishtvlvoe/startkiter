@@ -25,20 +25,22 @@ export function decidePayuniNotify(order: OrderRecord, payload: PayUniResponse):
 		return { status: 400, error: "invalid_trade" };
 	}
 
-	const tradeAmt = parseTradeAmt(payload.TradeAmt);
-	if (tradeAmt === null || tradeAmt !== MVP_AMOUNT_TWD) {
-		return { status: 400, error: "amount_mismatch" };
-	}
-
 	if (order.orderNo !== orderNo) {
 		return { status: 400, error: "order_no_mismatch" };
+	}
+
+	// TradeAmt 對照 order.amount（下單當下鎖定的金額，可能是 coupon 折扣後金額，恆 <= MVP_AMOUNT_TWD，
+	// 由 buildPendingOrderInput 保證），不是寫死的 MVP_AMOUNT_TWD——否則折扣訂單付款會永遠對不上。
+	const tradeAmt = parseTradeAmt(payload.TradeAmt);
+	if (tradeAmt === null || tradeAmt !== order.amount) {
+		return { status: 400, error: "amount_mismatch" };
 	}
 
 	if (order.paymentGateway !== "payuni") {
 		return { status: 400, error: "gateway_mismatch" };
 	}
 
-	if (order.sku !== MVP_SKU || order.amount !== MVP_AMOUNT_TWD || order.currency !== MVP_CURRENCY) {
+	if (order.sku !== MVP_SKU || order.amount > MVP_AMOUNT_TWD || order.currency !== MVP_CURRENCY) {
 		return { status: 400, error: "order_mismatch" };
 	}
 
