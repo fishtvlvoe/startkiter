@@ -16,14 +16,14 @@
 
 - [x] 實作訂單銷售明細範本 `packages/sheets/src/templates/orders.tsx`（數量、單價、動態小計公式、SUM 總計）
 - [x] 實作課程營收與分潤結算範本 `packages/sheets/src/templates/revenue.tsx`（Key-Value 假設參數、Defined Names、毛利與稅額連動）
-- [ ] 實作加值包/代碼庫領取統計範本 `packages/sheets/src/templates/bundles.tsx`
-- [ ] 實作優惠券折抵效益分析範本 `packages/sheets/src/templates/coupons.tsx`
+- [x] 實作加值包/代碼庫領取統計範本 `packages/sheets/src/templates/bundles.tsx`
+- [x] 實作優惠券折抵效益分析範本 `packages/sheets/src/templates/coupons.tsx`
 
 ## Phase 3: SaaS 後端 API & 前端匯出 UI 串接（SaaS Integration）
 
-- [ ] 在 `packages/api` 新增 `exportOrdersSpreadsheet` / `exportRevenueSpreadsheet` procedures
-- [ ] 在 `apps/saas` 建立匯出 API Route（`/api/export/orders`、`/api/export/revenue`）
-- [ ] 在 SaaS 後台管理介面（訂單列表、營收結算頁）加入「匯出活公式 Excel」按鈕
+- [x] 在 `packages/api` 新增 `exportOrdersSpreadsheet` / `exportRevenueSpreadsheet` procedures
+- [x] 在 `apps/saas` 建立匯出 API Route（`/api/export/orders`、`/api/export/revenue`）
+- [x] 在 SaaS 後台管理介面（訂單列表、營收結算頁）加入「匯出活公式 Excel」按鈕
 
 ## Phase 4: AI 代理人產表整合（AI Agent & MCP Integration）
 

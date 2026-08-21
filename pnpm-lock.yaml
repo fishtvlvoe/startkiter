@@ -653,6 +653,9 @@ importers:
       '@startkiter/platform':
         specifier: workspace:*
         version: link:../platform
+      '@startkiter/sheets':
+        specifier: workspace:*
+        version: link:../sheets
       '@startkiter/storage':
         specifier: workspace:*
         version: link:../storage

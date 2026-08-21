@@ -1,3 +1,4 @@
+/** @jsxImportSource @open-sheet/core */
 import React from 'react'
 import {
 	Cell,

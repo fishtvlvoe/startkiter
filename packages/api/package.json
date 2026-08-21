@@ -27,6 +27,7 @@
 		"@startkiter/platform": "workspace:*",
 		"@startkiter/support": "workspace:*",
 		"@startkiter/storage": "workspace:*",
+		"@startkiter/sheets": "workspace:*",
 		"@startkiter/utils": "workspace:*",
 		"@sindresorhus/slugify": "catalog:",
 		"hono": "catalog:",

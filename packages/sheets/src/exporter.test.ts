@@ -7,6 +7,8 @@ import {
 } from './exporter.js'
 import { OrdersSpreadsheet } from './templates/orders.js'
 import { RevenueSpreadsheet } from './templates/revenue.js'
+import { BundlesSpreadsheet } from './templates/bundles.js'
+import { CouponsSpreadsheet } from './templates/coupons.js'
 
 describe('@startkiter/sheets exporter', () => {
 	const mockOrders = [
@@ -80,5 +82,45 @@ describe('@startkiter/sheets exporter', () => {
 		expect(response.headers.get('Content-Disposition')).toContain(
 			'attachment; filename="july-report.xlsx"',
 		)
+	})
+
+	it('應成功產出加值包領取統計，並保留動態領取率公式', () => {
+		const csvRecords = toCsvRecords(
+			BundlesSpreadsheet({
+				bundles: [
+					{
+						bundleId: 'B-01',
+						title: '開站包',
+						purchaseCount: 10,
+						claimCount: 8,
+						price: 8800,
+					},
+				],
+			}),
+		)
+
+		expect(csvRecords['加值包統計']).toContain('開站包')
+		expect(csvRecords['加值包統計']).toContain('領取率')
+	})
+
+	it('應成功產出優惠券折抵效益分析，並包含折抵總額與平均折抵公式', () => {
+		const csvRecords = toCsvRecords(
+			CouponsSpreadsheet({
+				coupons: [
+					{
+						couponId: 'CP-01',
+						code: 'WELCOME100',
+						discountType: 'amount',
+						timesRedeemed: 12,
+						totalDiscountAmount: 1200,
+						totalOrderAmount: 105600,
+					},
+				],
+			}),
+		)
+
+		expect(csvRecords['優惠券效益']).toContain('WELCOME100')
+		expect(csvRecords['優惠券效益']).toContain('折抵總額')
+		expect(csvRecords['優惠券效益']).toContain('平均折抵')
 	})
 })
