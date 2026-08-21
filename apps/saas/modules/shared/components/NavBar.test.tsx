@@ -5,7 +5,7 @@ import { NavBar } from "./NavBar";
 
 const mockPathname = "/";
 const mockIsCollapsed = false;
-const mockIsMobile = false;
+let mockIsMobile = false;
 
 vi.mock("next/navigation", () => ({
 	usePathname: () => mockPathname,
@@ -78,6 +78,7 @@ vi.mock("@shared/components/NotificationCenter", () => ({
 describe("NavBar shell layout (Phase 2)", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mockIsMobile = false;
 	});
 
 	it("7.1 renders LocaleSwitch in the sidebar user area", () => {
@@ -103,5 +104,18 @@ describe("NavBar shell layout (Phase 2)", () => {
 		const topBarHtml = topBarEnd > 0 ? html.slice(0, topBarEnd) : html;
 		expect(topBarHtml).toContain("color-mode-toggle");
 		expect(topBarHtml).not.toContain("locale-switch");
+	});
+
+	it("9.3 renders sidebar navigation at 1280px wide viewport and does not render active tab bar (md:hidden)", () => {
+		mockIsMobile = false;
+		const html = renderToStaticMarkup(<NavBar />);
+
+		// Desktop sidebar nav structure is present
+		expect(html).toContain("md:fixed md:top-0 md:left-0 md:h-full md:w-[280px]");
+		expect(html).toContain("sidebar-user-area");
+
+		// Mobile tab bar has md:hidden class to prevent display on wide viewports (1280px)
+		expect(html).toContain("data-testid=\"mobile-tab-bar\"");
+		expect(html).toContain("md:hidden");
 	});
 });

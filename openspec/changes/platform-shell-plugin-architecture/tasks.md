@@ -26,14 +26,14 @@
 
 ### 5. 紅燈測試：統一 Shell 涵蓋所有已登入路由
 
-- [ ] 5.1 [P] 撰寫測試驗證 spec saas-shell「Unified Shell covers all authenticated routes」——GET /agent 回應含統一 Shell 側欄結構
-- [ ] 5.2 [P] 撰寫測試驗證同一 Requirement——GET /admin/settings 回應含統一 Shell 側欄結構
+- [x] 5.1 [P] 撰寫測試驗證 spec saas-shell「Unified Shell covers all authenticated routes」——GET /agent 回應含統一 Shell 側欄結構
+- [x] 5.2 [P] 撰寫測試驗證同一 Requirement——GET /admin/settings 回應含統一 Shell 側欄結構
 - [x] 5.3 [P] 撰寫測試驗證 spec saas-shell「Operator navigation reaches settings」——operator 側欄含 /admin/settings 連結，learner 不含
 
 ### 6. 實作：Shell 統一與選單動態渲染
 
 - [x] 6.1 修改 `modules/shared/components/NavBar.tsx` 的側欄 nav 區塊，從手寫 Link 改為 `.map()` 迭代 MOUNT_POINTS 渲染，menu 項目依 `order` 排序、依 `requiresOperator` 過濾，驗證：3.2、3.3、5.1、5.2、5.3 轉綠燈
-- [ ] 6.2 確認 `modules/lib/sidebar-context.tsx` 的狀態管理涵蓋所有已登入路由（/app, /course, /agent, /admin/settings），必要時擴充
+- [x] 6.2 確認 `modules/lib/sidebar-context.tsx` 的狀態管理涵蓋所有已登入路由（/app, /course, /agent, /admin/settings），必要時擴充
 
 ### 7. 紅燈測試：語系與深色模式配置
 
@@ -47,7 +47,7 @@
 
 - [x] 9.1 [P] 撰寫測試驗證 spec saas-shell「Narrow viewport renders a bottom tab bar with an overflow drawer」的 375px scenario——tab bar 恰好 4 個項目（開始/課程/客服/更多）
 - [x] 9.2 [P] 撰寫測試驗證同一 Requirement 的 More drawer scenario——operator 在 375px 點「更多」，抽屜含帳號設定
-- [ ] 9.3 [P] 撰寫測試驗證同一 Requirement 的 Wide viewport scenario——1280px 渲染側欄、不渲染 tab bar
+- [x] 9.3 [P] 撰寫測試驗證同一 Requirement 的 Wide viewport scenario——1280px 渲染側欄、不渲染 tab bar
 
 ### 10. 實作：窄螢幕 tab bar
 
@@ -293,7 +293,7 @@
 
 ### 50. Phase 2/3 遺留未確認項目
 
-- [ ] 50.1 確認 task 6.2（`sidebar-context.tsx` 狀態涵蓋 `/app`、`/course`、`/agent`、`/admin/settings` 全部路由）是否已完成，未完成則補上
-- [ ] 50.2 補寫 task 5.1、5.2、9.3 的紅燈測試（目前未寫）
+- [x] 50.1 確認 task 6.2（`sidebar-context.tsx` 狀態涵蓋 `/app`、`/course`、`/agent`、`/admin/settings` 全部路由）是否已完成，未完成則補上
+- [x] 50.2 補寫 task 5.1、5.2、9.3 的紅燈測試（目前未寫）
 - [ ] 50.3 執行 task 11.1-11.3（Review、Chrome MCP 或 `/ego-browser` 截圖、`pnpm build` + `pnpm test` 全綠），未做則補做
 - [ ] 50.4 修 `modules/shared/lib/nav-menu-items.test.ts` 6/7 測試失敗（2026-08-21 跑 `pnpm --filter @startkiter/saas test` 時發現，非本次 bundles-coupons 改動造成——`git status` 確認 `nav-menu-items.ts`／`.test.ts` 皆非本輪 diff）：`adminItem`／`courseItem` 找不到對應 route path（`/admin/users` 解析成 undefined）、`getTabBarItems` 回傳的 fixed/overflow 分組數量與測試預期（fixed 3／overflow 1）不符，研判是 commit `c7755156` 補進來的 Phase 2 WIP 本身就帶著失敗測試，需重新對照 task 9.1-9.3 spec 排查
