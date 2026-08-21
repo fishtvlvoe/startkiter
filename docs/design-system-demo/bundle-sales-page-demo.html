@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Next.js 全端班 + React 進階班 組合包 - StartKiter</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap">
+  <style>
+    :root {
+      --ink: #0f172a; --ink-soft: #475569; --ink-faint: #94a3b8;
+      --ground: #f8fafc; --surface: #ffffff;
+      --border: #e2e8f0; --border-soft: #f1f5f9;
+      --accent: #4f46e5; --accent-hover: #6366f1;
+      --accent-soft-bg: #eef2ff; --accent-soft-border: #c7d2fe; --accent-soft-text: #4338ca;
+      --dark-surface: #0f172a; --dark-surface-2: #1e293b; --dark-border: #1e293b;
+      --emerald: #34d399;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Inter', 'Noto Sans TC', sans-serif; background: var(--ground); color: var(--ink); min-height: 100vh; display: flex; flex-direction: column; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; cursor: pointer; border: none; }
+    input { font-family: inherit; }
+
+    .icon { display: inline-block; vertical-align: middle; flex-shrink: 0; }
+
+    /* header */
+    header.top { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 40; padding: 0 1.5rem; height: 4rem; display: flex; align-items: center; justify-content: space-between; }
+    .brand { font-weight: 700; color: var(--ink); font-size: 1rem; letter-spacing: -0.01em; display: flex; align-items: center; gap: 0.5rem; }
+    .brand .mark { width: 1.75rem; height: 1.75rem; border-radius: 0.5rem; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 0.875rem; }
+    .top-right { display: flex; align-items: center; gap: 0.75rem; font-size: 0.75rem; }
+    .path-hint { color: var(--ink-faint); font-family: 'SF Mono', ui-monospace, monospace; display: none; }
+    .btn-primary { padding: 0.5rem 1rem; background: var(--accent); color: #fff; font-weight: 700; border-radius: 0.5rem; transition: background 0.15s; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); }
+    .btn-primary:hover { background: var(--accent-hover); }
+
+    /* hero */
+    .hero { max-width: 64rem; margin: 0 auto; padding: 3rem 1.5rem 2rem; text-align: center; display: flex; flex-direction: column; gap: 1rem; align-items: center; }
+    .badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0.75rem; border-radius: 9999px; background: var(--accent-soft-bg); border: 1px solid var(--accent-soft-border); color: var(--accent-soft-text); font-size: 0.75rem; font-weight: 600; }
+    .badge .icon { width: 10px; height: 10px; }
+    h1.hero-title { font-size: 1.875rem; font-weight: 900; color: var(--ink); letter-spacing: -0.02em; line-height: 1.15; max-width: 48rem; margin: 0; text-wrap: balance; }
+    .hero-desc { font-size: 0.875rem; color: var(--ink-soft); line-height: 1.7; max-width: 42rem; margin: 0; }
+
+    /* included courses */
+    .section { max-width: 56rem; margin: 0 auto; padding: 2rem 1.5rem; }
+    .section-title { font-size: 1.125rem; font-weight: 700; color: var(--ink); margin: 0 0 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .section-title .icon { color: var(--accent); width: 14px; height: 14px; }
+    .course-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+    .course-card { background: var(--surface); border: 1px solid var(--border); border-radius: 1rem; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); }
+    .course-thumb { width: 100%; aspect-ratio: 16 / 9; background: var(--dark-surface); border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.7); }
+    .course-thumb .icon { width: 28px; height: 28px; }
+    .course-name { font-weight: 700; color: var(--ink); font-size: 0.875rem; margin: 0 0 0.25rem; }
+    .course-desc { font-size: 0.75rem; color: var(--ink-faint); margin: 0; }
+    .course-price-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; padding-top: 0.25rem; border-top: 1px solid var(--border-soft); }
+    .course-price-row .label { color: var(--ink-faint); }
+    .course-price-row .value { font-weight: 700; color: #334155; }
+
+    /* buy box */
+    .buy-wrap { max-width: 42rem; margin: 0 auto; padding: 2.5rem 1.5rem; }
+    .buy-box { background: var(--dark-surface); color: #fff; border-radius: 1.5rem; padding: 2rem; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25); display: flex; flex-direction: column; gap: 1.5rem; border: 1px solid var(--dark-border); }
+    .price-head { text-align: center; display: flex; flex-direction: column; gap: 0.5rem; }
+    .price-tag { font-size: 0.75rem; font-weight: 700; color: #a5b4fc; background: #1e1b4b; padding: 0.25rem 0.75rem; border-radius: 9999px; border: 1px solid #3730a3; display: inline-block; margin: 0 auto; }
+    .price-row { display: flex; align-items: center; justify-content: center; gap: 0.75rem; padding-top: 0.25rem; }
+    .price-original { font-size: 1rem; color: #64748b; text-decoration: line-through; }
+    .price-final { font-size: 2.25rem; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; }
+    .price-savings { font-size: 0.75rem; color: var(--emerald); font-weight: 600; margin: 0; }
+    .field-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    .field-label { font-size: 0.75rem; font-weight: 700; color: #cbd5e1; }
+    .coupon-row { display: flex; gap: 0.5rem; }
+    .coupon-input { flex: 1; padding: 0.625rem 0.75rem; border-radius: 0.5rem; background: var(--dark-surface-2); border: 1px solid #334155; color: #fff; font-size: 0.875rem; font-family: 'SF Mono', ui-monospace, monospace; text-transform: uppercase; }
+    .coupon-input::placeholder { color: #64748b; }
+    .coupon-input:focus { outline: none; border-color: var(--accent-hover); }
+    .coupon-apply { padding: 0.625rem 1rem; background: #334155; color: #fff; font-size: 0.75rem; font-weight: 700; border-radius: 0.5rem; transition: background 0.15s; }
+    .coupon-apply:hover { background: #475569; }
+    .coupon-msg { font-size: 0.75rem; height: 1rem; margin: 0; }
+    .buy-btn { width: 100%; padding: 0.875rem; background: var(--accent); color: #fff; font-weight: 700; border-radius: 0.75rem; font-size: 0.875rem; transition: background 0.15s; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); }
+    .buy-btn:hover { background: var(--accent-hover); }
+    .buy-note { text-align: center; font-size: 0.6875rem; color: #64748b; margin: 0; }
+
+    footer.foot { background: var(--surface); border-top: 1px solid var(--border); padding: 1.5rem; text-align: center; font-size: 0.75rem; color: var(--ink-faint); margin-top: auto; }
+
+    @media (min-width: 640px) {
+      .path-hint { display: inline; }
+    }
+    @media (min-width: 768px) {
+      h1.hero-title { font-size: 3rem; }
+      .hero-desc { font-size: 1rem; }
+      .course-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="top">
+    <a href="#" class="brand">
+      <span class="mark">S</span>
+      <span>StartKiter 學院</span>
+    </a>
+    <div class="top-right">
+      <span class="path-hint">/bundles/fullstack-combo</span>
+      <a href="#buy" class="btn-primary">立即購買</a>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="badge">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="12" width="7" height="7"/><rect x="13" y="12" width="7" height="7"/><rect x="8.5" y="4" width="7" height="7"/></svg>
+      <span>組合包限定優惠・兩堂課一起買更划算</span>
+    </div>
+    <h1 class="hero-title">Next.js 全端班 + React 進階班</h1>
+    <p class="hero-desc">打包全端與前端進階兩堂課，一次補齊「後端 API 到前端進階狀態管理」的完整路徑，組合價比分開買便宜 NT$ 2,200。</p>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg>
+      <span>這個組合包包含 2 堂課</span>
+    </h2>
+    <div class="course-grid">
+      <div class="course-card">
+        <div class="course-thumb">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="7" rx="1"/><rect x="3" y="13" width="18" height="7" rx="1"/><path d="M7 7.5h.01M7 16.5h.01"/></svg>
+        </div>
+        <div>
+          <h3 class="course-name">Next.js 全端班</h3>
+          <p class="course-desc">從路由、Server Actions 到部署，建立完整的全端心智模型。</p>
+        </div>
+        <div class="course-price-row">
+          <span class="label">單堂原價</span>
+          <span class="value">NT$ 8,000</span>
+        </div>
+      </div>
+
+      <div class="course-card">
+        <div class="course-thumb">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.2"/><circle cx="18" cy="6" r="2.2"/><circle cx="12" cy="18" r="2.2"/><path d="M7.8 7.5L11 15.5M16.2 7.5L13 15.5"/></svg>
+        </div>
+        <div>
+          <h3 class="course-name">React 進階班</h3>
+          <p class="course-desc">狀態管理、效能優化與元件架構設計的實戰進階課。</p>
+        </div>
+        <div class="course-price-row">
+          <span class="label">單堂原價</span>
+          <span class="value">NT$ 7,000</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="buy" class="buy-wrap">
+    <div class="buy-box">
+      <div class="price-head">
+        <span class="price-tag">組合包價格</span>
+        <div class="price-row">
+          <span class="price-original">NT$ 15,000</span>
+          <span id="final-price" class="price-final">NT$ 12,800</span>
+        </div>
+        <p id="savings-text" class="price-savings">已省 NT$ 2,200</p>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">有優惠碼嗎？</label>
+        <div class="coupon-row">
+          <input id="coupon-input" class="coupon-input" type="text" placeholder="輸入折扣碼，例如 SAVE500">
+          <button class="coupon-apply" onclick="applyCoupon()">套用</button>
+        </div>
+        <p id="coupon-message" class="coupon-msg"></p>
+      </div>
+
+      <button class="buy-btn" onclick="checkout()">立即購買組合包（PAYUNi 信用卡結帳）</button>
+      <p class="buy-note">付款成功後，即取得組合包內兩堂課的完整存取權</p>
+    </div>
+  </section>
+
+  <footer class="foot">© 2026 StartKiter. 繁體中文 SSOT 開發標準.</footer>
+
+  <script>
+    // 假資料：對應 design.md 的 Bundle / Coupon 型別，僅供視覺展示，未串接真實 API
+    const bundle = {
+      id: "bd-1",
+      slug: "fullstack-combo",
+      title: "Next.js 全端班 + React 進階班",
+      priceTwd: 12800,
+      originalTotal: 15000
+    };
+
+    // 假資料：對應 POST /api/coupons/validate 的回應形狀
+    const fakeCoupons = {
+      "SAVE500": { valid: true, discountType: "amount", amountOff: 500 },
+      "TENOFF": { valid: true, discountType: "percent", percentOff: 10, maxDiscountAmount: 2000 }
+    };
+
+    let appliedDiscount = 0;
+
+    function applyCoupon() {
+      const input = document.getElementById('coupon-input');
+      const msg = document.getElementById('coupon-message');
+      const code = input.value.trim().toUpperCase();
+
+      if (!code) {
+        msg.textContent = '';
+        return;
+      }
+
+      const coupon = fakeCoupons[code];
+
+      if (!coupon) {
+        appliedDiscount = 0;
+        msg.textContent = '折扣碼不存在，請確認拼字';
+        msg.style.color = '#fb7185';
+        updatePrice();
+        return;
+      }
+
+      if (coupon.discountType === 'amount') {
+        appliedDiscount = coupon.amountOff;
+      } else {
+        appliedDiscount = Math.min(
+          Math.round(bundle.priceTwd * coupon.percentOff / 100),
+          coupon.maxDiscountAmount || Infinity
+        );
+      }
+
+      msg.textContent = `已套用折扣碼 ${code}，折抵 NT$ ${appliedDiscount.toLocaleString()}`;
+      msg.style.color = '#34d399';
+      updatePrice();
+    }
+
+    function updatePrice() {
+      const finalAmount = Math.max(bundle.priceTwd - appliedDiscount, 0);
+      const totalSavings = bundle.originalTotal - finalAmount;
+      document.getElementById('final-price').textContent = `NT$ ${finalAmount.toLocaleString()}`;
+      document.getElementById('savings-text').textContent = `已省 NT$ ${totalSavings.toLocaleString()}`;
+    }
+
+    function checkout() {
+      const finalAmount = Math.max(bundle.priceTwd - appliedDiscount, 0);
+      const note = document.getElementById('coupon-message');
+      note.style.color = '#a5b4fc';
+      note.textContent = `💳 Demo：跳轉至 PAYUNi 結帳頁面，結帳金額 NT$ ${finalAmount.toLocaleString()}`;
+    }
+  </script>
+</body>
+</html>

@@ -166,6 +166,24 @@ export const StudioFolderCollapseStateScalarFieldEnumSchema = z.enum(['id', 'use
 
 export type StudioFolderCollapseStateScalarFieldEnum = z.infer<typeof StudioFolderCollapseStateScalarFieldEnumSchema>;
 
+// File: BundleScalarFieldEnum.schema.ts
+
+export const BundleScalarFieldEnumSchema = z.enum(['id', 'slug', 'title', 'description', 'priceTwd', 'status', 'createdAt', 'updatedAt'])
+
+export type BundleScalarFieldEnum = z.infer<typeof BundleScalarFieldEnumSchema>;
+
+// File: BundleCourseScalarFieldEnum.schema.ts
+
+export const BundleCourseScalarFieldEnumSchema = z.enum(['id', 'bundleId', 'courseId', 'order'])
+
+export type BundleCourseScalarFieldEnum = z.infer<typeof BundleCourseScalarFieldEnumSchema>;
+
+// File: CouponScalarFieldEnum.schema.ts
+
+export const CouponScalarFieldEnumSchema = z.enum(['id', 'code', 'discountType', 'amountOff', 'percentOff', 'maxDiscountAmount', 'maxRedemptions', 'timesRedeemed', 'active', 'startsAt', 'expiresAt', 'createdAt', 'updatedAt'])
+
+export type CouponScalarFieldEnum = z.infer<typeof CouponScalarFieldEnumSchema>;
+
 // File: SortOrder.schema.ts
 
 export const SortOrderSchema = z.enum(['asc', 'desc'])
@@ -699,4 +717,53 @@ export const StudioFolderCollapseStateSchema = z.object({
 });
 
 export type StudioFolderCollapseStateType = z.infer<typeof StudioFolderCollapseStateSchema>;
+
+
+// File: Bundle.schema.ts
+
+export const BundleSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  title: z.string(),
+  description: z.string().nullish(),
+  priceTwd: z.number().int(),
+  status: z.string().default("draft"),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type BundleType = z.infer<typeof BundleSchema>;
+
+
+// File: BundleCourse.schema.ts
+
+export const BundleCourseSchema = z.object({
+  id: z.string(),
+  bundleId: z.string(),
+  courseId: z.string(),
+  order: z.number().int(),
+});
+
+export type BundleCourseType = z.infer<typeof BundleCourseSchema>;
+
+
+// File: Coupon.schema.ts
+
+export const CouponSchema = z.object({
+  id: z.string(),
+  code: z.string(),
+  discountType: z.string(),
+  amountOff: z.number().int().nullish(),
+  percentOff: z.number().int().nullish(),
+  maxDiscountAmount: z.number().int().nullish(),
+  maxRedemptions: z.number().int().nullish(),
+  timesRedeemed: z.number().int(),
+  active: z.boolean().default(true),
+  startsAt: z.date().nullish(),
+  expiresAt: z.date().nullish(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type CouponType = z.infer<typeof CouponSchema>;
 
