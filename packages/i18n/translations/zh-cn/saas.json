@@ -465,124 +465,124 @@
       },
       "security": {
         "activeSessions": {
-          "description": "These are all the active sessions of your account. Click the X to end a specifc session.",
-          "title": "Active sessions",
+          "description": "这是你账号目前所有的活跃会话，点击 X 可结束特定会话。",
+          "title": "活跃会话",
           "notifications": {
             "revokeSession": {
-              "success": "Session revoked"
+              "success": "会话已撤销"
             }
           },
-          "currentSession": "Current session"
+          "currentSession": "当前会话"
         },
         "changePassword": {
-          "currentPassword": "Current password",
-          "newPassword": "New password",
+          "currentPassword": "当前密码",
+          "newPassword": "新密码",
           "notifications": {
-            "error": "Could not update password",
-            "success": "Password was updated successfully"
+            "error": "无法更新密码",
+            "success": "密码已成功更新"
           },
-          "title": "Your password"
+          "title": "你的密码"
         },
         "connectedAccounts": {
-          "connect": "Connect",
-          "connected": "Connected",
-          "disconnect": "Disconnect",
-          "title": "Connected accounts"
+          "connect": "连接",
+          "connected": "已连接",
+          "disconnect": "取消连接",
+          "title": "已连接账号"
         },
         "passkeys": {
-          "addPasskey": "Add passkey",
-          "deletePasskey": "Delete passkey",
-          "description": "Use passkeys as a secure alternative to passwords.",
+          "addPasskey": "新增通行密钥",
+          "deletePasskey": "删除通行密钥",
+          "description": "使用通行密钥作为密码的安全替代方案。",
           "dialog": {
             "editPasskey": {
-              "description": "Choose a recognizable name so you can identify this passkey later.",
-              "label": "Passkey name",
-              "placeholder": "Work laptop",
-              "title": "Name passkey"
+              "description": "选一个好辨识的名称，方便之后找到这个通行密钥。",
+              "label": "通行密钥名称",
+              "placeholder": "工作笔记本",
+              "title": "命名通行密钥"
             }
           },
-          "editPasskey": "Edit passkey",
-          "fallbackName": "Unnamed passkey",
+          "editPasskey": "编辑通行密钥",
+          "fallbackName": "未命名的通行密钥",
           "notifications": {
             "addPasskey": {
               "error": {
-                "title": "Could not add passkey"
+                "title": "无法新增通行密钥"
               },
               "success": {
-                "title": "Passkey added"
+                "title": "通行密钥已新增"
               }
             },
             "deletePasskey": {
               "error": {
-                "title": "Could not delete passkey"
+                "title": "无法删除通行密钥"
               },
               "loading": {
-                "title": "Deleting passkey..."
+                "title": "删除通行密钥中…"
               },
               "success": {
-                "title": "Passkey deleted"
+                "title": "通行密钥已删除"
               }
             },
             "updatePasskey": {
               "error": {
-                "title": "Could not update passkey"
+                "title": "无法更新通行密钥"
               },
               "success": {
-                "title": "Passkey updated"
+                "title": "通行密钥已更新"
               }
             }
           },
-          "title": "Passkeys"
+          "title": "通行密钥"
         },
         "setPassword": {
-          "description": "You have not set a password yet. To set one, you need to go through the password reset flow. Click the button below to send an email to reset your password and follow the instructions in the email.",
+          "description": "你还没有设定密码。要设定密码，需要透过重设密码流程：点击下方按钮，系统会寄出一封重设密码的邮件，请依信中指示完成设定。",
           "notifications": {
-            "error": "Could not send link to set password. Please try again.",
-            "success": "Check your inbox for the link to set your password."
+            "error": "无法寄出设定密码的连结，请再试一次。",
+            "success": "请查看你的信箱，取得设定密码的连结。"
           },
-          "submit": "Set password",
-          "title": "Your password"
+          "submit": "设定密码",
+          "title": "你的密码"
         },
-        "title": "Security",
+        "title": "安全性",
         "twoFactor": {
-          "title": "Two-factor authentication",
-          "description": "Add an extra layer of security to your account.",
+          "title": "两步验证",
+          "description": "为你的账号多加一层安全防护。",
           "dialog": {
             "password": {
-              "title": "Verify with password",
-              "description": "Please verify your account by entering your password:",
-              "label": "Your password:"
+              "title": "用密码验证身分",
+              "description": "请输入你的密码以验证账号：",
+              "label": "你的密码："
             },
             "totpUrl": {
-              "description": "Use your preferred authenticator app and scan the QR code with it or enter the secret below manually to set up two-factor authentication.",
-              "code": "Enter 6-digit code to verify the setup:",
-              "title": "Enable two-factor authentication"
+              "description": "用你惯用的验证器 App 扫描这个二维码，或手动输入下方密钥，完成两步验证设定。",
+              "code": "输入 6 位数验证码以完成设定：",
+              "title": "启用两步验证"
             }
           },
-          "enable": "Enable two-factor authentication",
+          "enable": "启用两步验证",
           "notifications": {
             "verify": {
               "success": {
-                "title": "Two-factor authentication has been enabled successfully."
+                "title": "两步验证已成功启用。"
               }
             },
             "enable": {
               "error": {
-                "title": "Could not verify your account with the provided password. Please try again."
+                "title": "无法用你提供的密码验证账号，请再试一次。"
               }
             },
             "disable": {
               "success": {
-                "title": "Two-factor authentication has been disabled successfully."
+                "title": "两步验证已成功停用。"
               }
             }
           },
           "passwordRequired": {
-            "description": "Set a password before enabling two-factor authentication. Your password is required to verify changes to this security setting.",
-            "title": "Password required"
+            "description": "启用两步验证前请先设定密码。变更这项安全设定时需要用密码验证身分。",
+            "title": "需要先设定密码"
           },
-          "disable": "Disable two-factor authentication",
-          "enabled": "You have two-factor authentication enabled for your account."
+          "disable": "停用两步验证",
+          "enabled": "你的账号已启用两步验证。"
         }
       },
       "subtitle": "管理你的个人账号设置。",
