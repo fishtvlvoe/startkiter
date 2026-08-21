@@ -1,0 +1,531 @@
+<title>StartKiter 藍圖現況</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --paper: #f1f2ee;
+    --paper-raised: #ffffff;
+    --ink: #1b2129;
+    --ink-soft: #4b5563;
+    --ink-faint: #8a8f98;
+    --line: #d7d9d2;
+    --line-soft: #e6e7e1;
+    --brass: #b3801f;
+    --brass-strong: #8f6416;
+    --navy: #1c2b3a;
+    --navy-soft: #2c4155;
+    --ok: #2f7a4f;
+    --ok-bg: #e3efe6;
+    --warn: #b3801f;
+    --warn-bg: #f4ead4;
+    --blocked: #a4342a;
+    --blocked-bg: #f4e2df;
+    --shadow: 0 1px 2px rgba(27,33,41,0.06), 0 8px 24px -12px rgba(27,33,41,0.18);
+    font-size: 16px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #12161c;
+      --paper-raised: #191f27;
+      --ink: #eef0ee;
+      --ink-soft: #b3b9c2;
+      --ink-faint: #74808c;
+      --line: #2c3440;
+      --line-soft: #232a34;
+      --brass: #e0ac4c;
+      --brass-strong: #f0c064;
+      --navy: #9fb4c9;
+      --navy-soft: #7f97ac;
+      --ok: #6fbf8e;
+      --ok-bg: #17301f;
+      --warn: #e0ac4c;
+      --warn-bg: #362a12;
+      --blocked: #e58579;
+      --blocked-bg: #3a1e1a;
+      --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px -12px rgba(0,0,0,0.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #12161c;
+    --paper-raised: #191f27;
+    --ink: #eef0ee;
+    --ink-soft: #b3b9c2;
+    --ink-faint: #74808c;
+    --line: #2c3440;
+    --line-soft: #232a34;
+    --brass: #e0ac4c;
+    --brass-strong: #f0c064;
+    --navy: #9fb4c9;
+    --navy-soft: #7f97ac;
+    --ok: #6fbf8e;
+    --ok-bg: #17301f;
+    --warn: #e0ac4c;
+    --warn-bg: #362a12;
+    --blocked: #e58579;
+    --blocked-bg: #3a1e1a;
+    --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 8px 24px -12px rgba(0,0,0,0.6);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 31px, var(--line-soft) 31px, var(--line-soft) 32px),
+      repeating-linear-gradient(90deg, transparent, transparent 31px, var(--line-soft) 31px, var(--line-soft) 32px),
+      var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    line-height: 1.55;
+  }
+  .wrap {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 48px 28px 80px;
+  }
+
+  h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; text-wrap: balance; margin: 0; }
+
+  .masthead {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 20px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .masthead .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brass-strong);
+    margin: 0 0 6px;
+  }
+  .masthead h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); font-weight: 600; }
+  .masthead .stamp {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .lede {
+    font-size: 1.05rem;
+    color: var(--ink-soft);
+    max-width: 62ch;
+    margin: 18px 0 40px;
+  }
+
+  section { margin-bottom: 52px; }
+  section > h2 {
+    font-size: 1.4rem;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  section > .section-sub {
+    font-size: 0.88rem;
+    color: var(--ink-faint);
+    margin-bottom: 20px;
+  }
+
+  /* 對焦摘要 */
+  .focus-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .focus-card {
+    background: var(--paper-raised);
+    padding: 22px 20px;
+  }
+  .focus-card .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--brass);
+    margin-bottom: 10px;
+  }
+  .focus-card p { margin: 0; font-size: 0.94rem; color: var(--ink); }
+  .focus-card p + p { margin-top: 8px; color: var(--ink-soft); font-size: 0.88rem; }
+
+  .caveat {
+    margin-top: 14px;
+    font-size: 0.85rem;
+    color: var(--ink-faint);
+    border-left: 3px solid var(--brass);
+    padding-left: 12px;
+  }
+
+  /* 進行中 change */
+  .change-list { display: flex; flex-direction: column; gap: 14px; }
+  .change {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px 22px;
+    box-shadow: var(--shadow);
+  }
+  .change-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .change-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.96rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .change-pct {
+    font-family: 'IBM Plex Mono', monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.88rem;
+    color: var(--ink-faint);
+  }
+  .bar-track {
+    height: 8px;
+    background: var(--line-soft);
+    border-radius: 5px;
+    margin: 10px 0 12px;
+    overflow: hidden;
+  }
+  .bar-fill { height: 100%; border-radius: 5px; }
+  .bar-fill.ok { background: var(--ok); }
+  .bar-fill.warn { background: var(--warn); }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .status-pill.ok { color: var(--ok); background: var(--ok-bg); }
+  .status-pill.warn { color: var(--warn); background: var(--warn-bg); }
+  .status-pill.blocked { color: var(--blocked); background: var(--blocked-bg); }
+
+  .change-note {
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+  .change-note b { color: var(--ink); }
+
+  /* 卡關 */
+  .blocked-box {
+    background: var(--blocked-bg);
+    border: 1px solid var(--blocked);
+    border-radius: 10px;
+    padding: 20px 22px;
+  }
+  .blocked-box h3 {
+    font-size: 1.02rem;
+    color: var(--blocked);
+    margin-bottom: 10px;
+    font-weight: 600;
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+  .blocked-box ul { margin: 0; padding-left: 20px; }
+  .blocked-box li { margin-bottom: 6px; font-size: 0.9rem; color: var(--ink); }
+
+  /* 已完成 */
+  details.archive {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 4px 22px;
+  }
+  details.archive > summary {
+    cursor: pointer;
+    padding: 14px 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ink);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  details.archive > summary::-webkit-details-marker { display: none; }
+  details.archive > summary::after {
+    content: "展開 ▾";
+    font-weight: 400;
+    color: var(--ink-faint);
+    font-size: 0.78rem;
+  }
+  details.archive[open] > summary::after { content: "收合 ▴"; }
+  .archive-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 8px 20px;
+    padding: 4px 0 20px;
+    border-top: 1px solid var(--line-soft);
+  }
+  .archive-item {
+    display: flex;
+    gap: 10px;
+    font-size: 0.85rem;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--line-soft);
+    color: var(--ink-soft);
+  }
+  .archive-item .date {
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--ink-faint);
+    white-space: nowrap;
+    font-size: 0.78rem;
+    flex-shrink: 0;
+  }
+
+  footer {
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  a { color: var(--brass-strong); }
+
+  @media (max-width: 900px) {
+    .focus-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 520px) {
+    .focus-grid { grid-template-columns: 1fr; }
+  }
+
+  /* 基礎設施現況 */
+  .infra-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .infra-card {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+  }
+  .infra-card h3 {
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.98rem;
+    font-weight: 600;
+    margin: 0 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .infra-card dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 12px;
+    font-size: 0.86rem;
+  }
+  .infra-card dt {
+    color: var(--ink-faint);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.76rem;
+    white-space: nowrap;
+  }
+  .infra-card dd {
+    margin: 0;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .infra-card p.note {
+    margin: 10px 0 0;
+    font-size: 0.86rem;
+    color: var(--ink-soft);
+  }
+  @media (max-width: 720px) {
+    .infra-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="wrap">
+
+  <div class="masthead">
+    <div>
+      <p class="eyebrow">開站包 / Blueprint Status</p>
+      <h1>StartKiter 現況</h1>
+    </div>
+    <div class="stamp">2026-08-22 對焦快照（第五版・儀表板固定化）<br>4 張進行中・18 張已封存</div>
+  </div>
+
+  <p class="lede">課 + 終身代碼包，長成一個類似 WordPress 的可擴充平台，不是單一固定功能清單的 SaaS。買家一次買斷拿到一個殼（platform shell）＋可掛載模組（plugin）的架構，外加台灣金流、課程系統、站內教學。這頁是固定網址的專案儀表板，每次工作完會更新這裡，不用重新對焦。</p>
+
+  <section>
+    <h2>對焦：我理解的目標</h2>
+    <p class="section-sub">四句話講完在賣什麼、長什麼架構、怎麼教、現行邊界</p>
+    <div class="focus-grid">
+      <div class="focus-card">
+        <p class="label">賣什麼</p>
+        <p>對外課名「開站包」。買家一次買斷（PAYUNi・TWD 8800），拿到一套自己的平台 ＋ 台灣金流模組 ＋ 課程系統，可以自己改、自己上線。</p>
+      </div>
+      <div class="focus-card">
+        <p class="label">長什麼架構</p>
+        <p>類似 WordPress：殼 + 可掛載模組。後台掛載點、Marketplace 展示頁、模組各自獨立 <code>packages/</code>，對應 <code>platform-shell-plugin-architecture</code> 這張施工單，是產品第一性。</p>
+      </div>
+      <div class="focus-card">
+        <p class="label">怎麼教</p>
+        <p>站內留一個只讀兩工具的 AI agent、內建課程模組講解怎麼改代碼、LINE 社群互相支援、GitHub Kit 交付原始碼讓買家自己接手開發。</p>
+      </div>
+      <div class="focus-card">
+        <p class="label">現行邊界</p>
+        <p>以 <code>openspec/specs/</code> 為準。THE-TU 全套內容/金流/行銷模組已開放抽取當核心模組——<b>抽取來源以 woomin repo 為主、thetu 為輔</b>；登入機制維持 Better Auth，不抽 NextAuth。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>進行中：4 張施工單</h2>
+    <p class="section-sub">依 tasks.md 打勾數計算，不是猜的</p>
+    <div class="change-list">
+
+      <div class="change">
+        <div class="change-head">
+          <span class="change-name">core-module-bundles-coupons</span>
+          <span class="status-pill ok">98% ・接近完工</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill ok" style="width:98%"></div></div>
+        <p class="change-note">55 / 56。剩 1 項故意延後：<b>bundle 存取權接課程播放頁</b>，因為買家版的課程播放頁根本還沒做出來（目前 <code>/course</code> 只是 3 堂寫死的假課），等那個頁面做出來才回頭接。老闆已裁決本輪不做。</p>
+      </div>
+
+      <div class="change">
+        <div class="change-head">
+          <span class="change-name">platform-shell-plugin-architecture</span>
+          <span class="status-pill warn">70% ・進度最慢</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill warn" style="width:70%"></div></div>
+        <p class="change-note">90 / 129。還有一大段：Shell 統一後的截圖驗證（375px / 1280px）、舊元件測試選擇器更新、marketplace 版本同步提示串接。體量最大的一張，還在正常施工中，沒卡關。</p>
+      </div>
+
+      <div class="change">
+        <div class="change-head">
+          <span class="change-name">sheets-export-engine</span>
+          <span class="status-pill ok">85% ・快完工</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill ok" style="width:85%"></div></div>
+        <p class="change-note">11 / 13。剩 2 項：AI agent 註冊試算表生成 Tool ＋ 對話式後台即時產出 .xlsx / HTML 預覽。</p>
+      </div>
+
+      <div class="change">
+        <div class="change-head">
+          <span class="change-name">unified-support-desk</span>
+          <span class="status-pill blocked">88% ・剩 Chatwoot 沒裝</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill warn" style="width:88%"></div></div>
+        <p class="change-note">43 / 49。<b>LINE Messaging Channel</b>（「StartKiter 客服」@958ghjex）跟 <b>Telegram Bot</b> 都建好、Token 存進 <code>.env</code>。剩 <b>Chatwoot 還沒裝到 VPS 上</b>——DNS（<code>support.startkiter.dev</code>）已指過去，等 Coolify 裝上服務。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>基礎設施現況（2026-08-22 定案）</h2>
+    <p class="section-sub">部署方向轉彎：不再用 Vercel，全部搬 Coolify + VPS，單一台機器扛主站+Chatwoot</p>
+    <div class="infra-grid">
+      <div class="infra-card">
+        <h3>Vercel（已停用）</h3>
+        <dl>
+          <dt>發現</dt><dd>最新部署卡在 6-7 天前，比最新 commit 晚一大段——webhook 一直 404 的真正原因</dd>
+          <dt>決定</dt><dd>不再用，全部搬 VPS</dd>
+        </dl>
+      </div>
+      <div class="infra-card">
+        <h3>Coolify VPS（定案：只用這一台）</h3>
+        <dl>
+          <dt>名稱</dt><dd>startkiter-managed-fleet-01</dd>
+          <dt>規格</dt><dd>Vultr・Ubuntu 26.04・2 vCPU / 3.3GB</dd>
+          <dt>預估用量</dt><dd>主站 ~0.5GB + Chatwoot ~2GB ≈ 2.5GB，剩約 0.8GB</dd>
+        </dl>
+        <p class="note">不買第二台。之後吃緊再升級規格。</p>
+      </div>
+      <div class="infra-card">
+        <h3>Zeabur 東京機器（已否決）</h3>
+        <dl>
+          <dt>規格</dt><dd>Tencent Cloud Tokyo・2 核 / 7.5GB（有空間）</dd>
+          <dt>結果</dt><dd>老闆確認：那是<b>客戶</b>的正式營運服務，不能碰</dd>
+        </dl>
+        <p class="note">查過但沒用上，維持現有 Vultr VPS 方案。</p>
+      </div>
+      <div class="infra-card">
+        <h3>網域規劃（已定案，DNS 已建好）</h3>
+        <dl>
+          <dt>本體</dt><dd><code>startkiter.dev</code> 先空著</dd>
+          <dt>主站</dt><dd><code>app.startkiter.dev</code> → 45.76.187.247 ✅</dd>
+          <dt>客服</dt><dd><code>support.startkiter.dev</code> → 45.76.187.247 ✅</dd>
+        </dl>
+        <p class="note">兩筆 DNS A 記錄已建立並 dig 驗證解析成功，等服務裝上去 Coolify 會自動簽 SSL。</p>
+      </div>
+      <div class="infra-card">
+        <h3>Cloudflare</h3>
+        <dl>
+          <dt>Zone</dt><dd><code>startkiter.dev</code> 已啟用（id <code>631be2a55e0c1b0a15038ad244b7665d</code>）</dd>
+          <dt>Token</dt><dd>限定此 zone 的 DNS 編輯 API Token，存進 <code>.env</code> 的 <code>CLOUDFLARE_API_TOKEN</code></dd>
+        </dl>
+      </div>
+      <div class="infra-card">
+        <h3>LINE + Telegram</h3>
+        <dl>
+          <dt>LINE</dt><dd>Channel ID <code>2011202536</code>，Token 存進 <code>.env</code></dd>
+          <dt>Telegram</dt><dd>Bot Token 已拿到，存進 <code>.env</code></dd>
+          <dt>Webhook</dt><dd>等主站部署完成後填</dd>
+        </dl>
+      </div>
+    </div>
+    <p class="caveat" style="margin-top:16px">完整記錄 → <code>docs/discuss/2026-08-22-platform-positioning-infra-alignment.md</code>　｜　下一步：主站從 Vercel 遷到這台 VPS、裝 Chatwoot</p>
+  </section>
+
+  <section>
+    <details class="archive">
+      <summary>已封存：18 張施工單</summary>
+      <div class="archive-grid">
+        <div class="archive-item"><span class="date">08-14</span> mvp-test-scope</div>
+        <div class="archive-item"><span class="date">08-15</span> bootstrap-test-startkiter</div>
+        <div class="archive-item"><span class="date">08-15</span> extract-course-module</div>
+        <div class="archive-item"><span class="date">08-15</span> extract-github-kit-fulfillment</div>
+        <div class="archive-item"><span class="date">08-15</span> extract-line-learner-community</div>
+        <div class="archive-item"><span class="date">08-15</span> extract-payuni-checkout</div>
+        <div class="archive-item"><span class="date">08-15</span> extract-shell-auth</div>
+        <div class="archive-item"><span class="date">08-15</span> extract-site-agent</div>
+        <div class="archive-item"><span class="date">08-15</span> mvp-dogfood-remaining</div>
+        <div class="archive-item"><span class="date">08-15</span> mvp-sell-flow-usable</div>
+        <div class="archive-item"><span class="date">08-15</span> operator-payuni-settings</div>
+        <div class="archive-item"><span class="date">08-15</span> test-to-clean-package-promotion</div>
+        <div class="archive-item"><span class="date">08-17</span> extract-supastarter-design-system</div>
+        <div class="archive-item"><span class="date">08-17</span> organization-role-model</div>
+        <div class="archive-item"><span class="date">08-18</span> rebuild-design-system-from-source</div>
+        <div class="archive-item"><span class="date">08-18</span> rebuild-from-official-upstream</div>
+        <div class="archive-item"><span class="date">08-19</span> coolify-managed-deployment</div>
+        <div class="archive-item"><span class="date">08-19</span> repo-foundation</div>
+        <div class="archive-item"><span class="date">08-21</span> interactive-learning-system</div>
+      </div>
+    </details>
+  </section>
+
+  <footer>
+    來源：openspec/changes/*/tasks.md 實跑計數 ・ AGENTS.md ・ docs/discuss/ 　｜　SOP 見 docs/dashboard/README.md
+  </footer>
+
+</div>

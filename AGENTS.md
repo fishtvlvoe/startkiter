@@ -75,6 +75,8 @@ MVP extract 佇列已清空：`extract-site-agent`、`extract-line-learner-commu
 
 這是獨立 git repo。零耦合 libon.me。不要改抽取來源。站內 agent／LINE 社群／GitHub kit 履約已封存落地。本階段不以新 extract 白名單為準，而以 `openspec/specs/` 為現行真相。
 
+**專案儀表板**：固定網址的進度儀表板 → `docs/dashboard/README.md`（含目前發布網址、更新 SOP、到期換網址流程）。任何 change 進度或基礎設施決策有變化，照那份 SOP 更新，不要只在對話裡講講就算了。
+
 【Allowed extract sources（只讀，禁止修改來源）】
 
 殼：`/Users/fishtv/Development/supastarter-nextjs-main` → 已抽 `apps/saas`、`packages/auth`；後續可再抽 `packages/ai`
