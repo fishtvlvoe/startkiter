@@ -43,9 +43,9 @@
 
 ### 3. platform-shell-plugin-architecture
 - 狀態：🔵 進行中
-- Task 進度：68/120（57%）
+- Task 進度：90/120（75%）
 - 子項：
-  - Phase 4（Marketplace 展示+模版選擇，task 15-23）→ 待做，純展示頁面照 spec 抄 → **Haiku 子代理**；模版套用邏輯跟 Mount Points 接合 → **Sonnet 子代理**
+  - Phase 4（Marketplace 展示+模版選擇，task 15-23）→ ✅ 已完成，agy→cursor-agent（agy 額度用完切換）。第一輪 demo 用了自己發明的 zinc/slate 灰階配色，PM 覆核抓到退回重做，改用真實 olive token 通過
   - Phase 6（Core 邊界文件，task 28-30）→ ✅ 已完成（agy）
   - Phase 7（既有測試更新+全面驗收，task 31-32）→ 待做，**PM 親自**
   - Phase 9（側邊欄 WordPress 視覺+拖曳分組持久化，task 43-48）→ 部分完成（拖曳把手 bug 已修，見下方），其餘待做
