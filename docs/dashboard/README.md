@@ -22,11 +22,12 @@
    - 讀最新一份 `docs/discuss/*.md` 看有沒有新的決策或待確認事項
    - 讀 `AGENTS.md` 確認產品定位、抽取來源等有沒有變
 2. **改 `docs/dashboard/status.html`**：用 Edit 工具改內容，不要整份重寫。保留現有的 CSS/版面結構，只動內容（進度數字、卡片文字、新增/移除區塊）。
-3. **發布**：
+3. **發布**（注意：orca artifacts 認的是「第一次 share 時的本機路徑」，不是 repo 路徑，兩者要同步）：
    ```bash
-   orca artifacts update /Users/fishtv/Development/products/startkiter/docs/dashboard/status.html --json
+   cp /Users/fishtv/Development/products/startkiter/docs/dashboard/status.html /tmp/startkiter-status.html
+   orca artifacts update /tmp/startkiter-status.html --json
    ```
-   （第一次發布用 `orca artifacts share`，之後都用 `update`，網址不會變）
+   第一次發布用 `orca artifacts share <path>`，之後都對**同一個本機路徑**（目前是 `/tmp/startkiter-status.html`）用 `update`，網址才不會變。repo 裡的 `docs/dashboard/status.html` 是版本留痕的真本，每次先改這份，再 `cp` 到 `/tmp` 那個發布路徑，不要搞反或只改一邊。
 4. **驗證**（不要只憑工具回傳 `ok:true` 就當完成）：
    ```bash
    curl -sS -o /dev/null -w "%{http_code}\n" https://share.onorca.dev/a/3CEeYhHiSGfP
