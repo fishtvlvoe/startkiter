@@ -7,7 +7,9 @@ import {
 } from "@startkiter/platform";
 import { redirect } from "next/navigation";
 import { DeploymentStatusPanel } from "@deployment/components/DeploymentStatusPanel";
+import { ReportIssueButton } from "@deployment/components/ReportIssueButton";
 import { TierSelector } from "@deployment/components/TierSelector";
+
 
 async function loadStatusPanelView(userId: string): Promise<StatusPanelView | null> {
 	const deployment = await findBuyerDeploymentForUser(userId);
@@ -39,9 +41,14 @@ export default async function DeploymentPage() {
 
 	return (
 		<div className="space-y-6 max-w-4xl">
-			<div>
-				<h1 className="text-2xl font-semibold">我的網站</h1>
-				<p className="text-muted-foreground mt-1 text-sm">你的開站包目前的運作與部署狀態</p>
+			<div className="flex items-center justify-between">
+				<div>
+					<h1 className="text-2xl font-semibold">我的網站</h1>
+					<p className="text-muted-foreground mt-1 text-sm">你的開站包目前的運作與部署狀態</p>
+				</div>
+				{view && (
+					<ReportIssueButton buyerDeploymentId={view.deploymentId} size="sm" />
+				)}
 			</div>
 
 			{view ? (
