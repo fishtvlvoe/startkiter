@@ -56,11 +56,18 @@ Fish 看了一份現況圖解（https://share.onorca.dev/a/3CEeYhHiSGfP）後指
 | SSH | root, port 22 |
 | 現有 Resources | `docker-image-rzbtl1kdjd9mdtfabeoaa9tj`（nginx demo）、`startkiter-coolify-git-deploy-test`（git 部署測試），皆屬 project `startkiter-test` / environment `production` |
 
-這台就是 `docs/coolify-vps-setup-runbook.md` 那次驗證用的機器（建立時間跟 runbook 日期都是 2026-08-18），目前只跑兩個測試用 resource，**還沒扛過任何正式服務**（沒有 Chatwoot、沒有主站）。2 vCPU / 3.3GB 這個規格如果要同時扛「主站 Next.js + Postgres」＋「Chatwoot（Rails+Redis+Postgres）」，大概率不夠，需要先決定：
+這台就是 `docs/coolify-vps-setup-runbook.md` 那次驗證用的機器（建立時間跟 runbook 日期都是 2026-08-18），目前只跑兩個測試用 resource，**還沒扛過任何正式服務**（沒有 Chatwoot、沒有主站）。2 vCPU / 3.3GB 這個規格如果要同時扛「主站 Next.js + Postgres」＋「Chatwoot（Rails+Redis+Postgres）」，大概率不夠。
 
-1. 主站跟 Chatwoot 是不是要分開兩台 VPS（design.md 原本就寫「Chatwoot 用獨立 VPS，不跟買家的 managed fleet 共用主機」）
-2. 這台要升級規格，還是另外買一台新的
-3. Fish 說「已經買好也串好 vps」是指這台，還是另一台還沒接進 Coolify 的新機器——目前 Coolify Cloud 帳號底下只看到這一台，沒看到第二台待驗證的伺服器
+**已確認（2026-08-22）：**
+- Fish 說「已經買好也串好 vps」就是指這台 Vultr 機器，沒有第二台待接的新機器。
+- 曾考慮用 Zeabur 上那台 Tencent Cloud 東京機器（2 核/7.5GB，當時查到只用了 2.7GB，還有 4.9GB 空間）塞 Chatwoot 省一台 VPS 錢——**已否決**：那台跑的 `thetu-platform-production` / `wumin` 是客戶的正式營運服務，不能碰（Fish 2026-08-22 明確定案）。
+
+**還沒決定（不要自己猜，等 Fish 選）：**
+1. 把現有這台 Vultr VPS 升級規格（加 RAM），主站＋Chatwoot 塞同一台，一張帳單
+2. 另外買一台便宜的小 VPS 專門跑 Chatwoot（Chatwoot 吃得不多，理論上小方案就夠），維持「Chatwoot 獨立主機」的原始設計決策
+3. 硬塞進現有 3.3GB（不建議，主站+Chatwoot 一起擠很容易 OOM，尤其流量一上來）
+
+沒有 Vultr API Key（`.env` 跟全域憑證索引都查不到），真的要選 1 或 2 之前需要先查 Vultr 帳號實際升級/新開機的價格，目前只能給概念性比較，不是報價。
 
 ### LINE Messaging Channel（已建好）
 
@@ -74,11 +81,17 @@ Fish 看了一份現況圖解（https://share.onorca.dev/a/3CEeYhHiSGfP）後指
 - Token 已存進 `.env` 的 `TELEGRAM_BOT_TOKEN`
 - Webhook 一樣要等主站網址確定才能設定
 
-## 4. 待 Fish 決策的問題（不確定，不要自己猜）
+## 4. 已定案的決策（2026-08-22）
 
-1. **VPS 規劃**：主站跟 Chatwoot 要不要分兩台？現有這台 `startkiter-managed-fleet-01` 規格夠不夠？「已經買好的 VPS」是指這台還是另一台？
-2. **主站遷移到 VPS 的範圍**：Next.js app 直接用 Docker 部署到 Coolify、DB 要不要也搬（現在用 Neon，可以繼續用外部 Neon，不一定要搬進 VPS 裡自架 Postgres）？
-3. **`startkiter.dev` 的網域結構**：主站要用 apex（`startkiter.dev`）還是子網域（例如 `app.startkiter.dev`）？Chatwoot、Coolify 各自要用什麼子網域？
+1. **VPS 規劃：只用現有這台 Vultr VPS（`startkiter-managed-fleet-01`），不買第二台。** 主站 + Chatwoot 都塞這台。原本「Chatwoot 要獨立 VPS」的規則是指「不跟買家自己部署的機器混」，不是「不能跟自己的主站混」——這台上面目前沒有任何買家資源，混在一起不違反原意。技術上 Coolify 本來就支援一台機器跑多服務。記憶體預估：主站 300-500MB + Chatwoot 1.5-2GB ≈ 2-2.5GB，這台有 3.3GB，早期流量小夠撐，之後吃緊再升級規格，不用現在先買機器。
+2. **Zeabur 東京機器（Tencent Cloud）已否決**：那台跑的是客戶的正式營運服務（`thetu-platform-production` / `wumin`），不能碰，只是查過但沒有用。
+3. **`startkiter.dev` 網域結構已定案**：`startkiter.dev` 本體先空著（之後放行銷首頁），主站用 `app.startkiter.dev`，Chatwoot 用 `support.startkiter.dev`。**兩筆 DNS A 記錄已建好**（都指向 `45.76.187.247`，僅 DNS/灰雲朵，等服務裝上去讓 Coolify 簽 SSL），已用 `dig` 驗證解析成功。
+
+## 5. 還沒動工的部分（下一步）
+
+1. 把主站從 Vercel 遷移到這台 Vultr VPS（走 Coolify Docker 部署），DB 繼續用 Neon 還是搬進 VPS 自架 Postgres——待決定，傾向繼續用外部 Neon（省 VPS 資源）
+2. 在同一台 VPS 上用 Coolify 的一鍵範本裝 Chatwoot，接上 `support.startkiter.dev`
+3. 主站部署好、網址確定後，回頭把 LINE / Telegram 的 webhook 網址填進 LINE Developers Console / Telegram Bot API
 
 ## 5. 環境設定變更（已生效，非討論項）
 
