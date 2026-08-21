@@ -289,7 +289,7 @@
 ### 49. NavBar icon fallback 與側欄拖曳把手 bug
 
 - [ ] 49.1 修 `apps/saas/modules/shared/components/NavBar.tsx` 的 `resolveIcon()`：盤點 `MOUNT_POINTS` 全部 `icon` 值，補齊 `iconMap` 缺的 key（目前已知至少缺 `"package"`，bundles manifest 暫用 `"settings"` 頂著，見 `packages/platform/src/mount-points.ts` 的 TODO 註解），驗收：畫面上任何選單項目不再出現原始字串 fallback 蓋到文字
-- [ ] 49.2 修側邊欄拖曳調整寬度把手（sidebar edge resize handle）定位邏輯——目前會不正常持續顯示，驗收：把手只在 hover 側欄邊緣時出現，拖曳結束後正確隱藏
+- [x] 49.2 修側邊欄拖曳調整寬度把手（sidebar edge resize handle）定位邏輯——目前會不正常持續顯示，驗收：把手只在 hover 側欄邊緣時出現，拖曳結束後正確隱藏
 
 ### 50. Phase 2/3 遺留未確認項目
 

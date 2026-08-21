@@ -104,4 +104,21 @@ describe("NavBar shell layout (Phase 2)", () => {
 		expect(topBarHtml).toContain("color-mode-toggle");
 		expect(topBarHtml).not.toContain("locale-switch");
 	});
+
+	it("49.2 renders sidebar edge resize handle with correct positioning and hover visibility classes", () => {
+		const html = renderToStaticMarkup(<NavBar />);
+
+		// Sidebar edge handle button should be present
+		expect(html).toContain("data-testid=\"sidebar-edge-toggle\"");
+		expect(html).toContain("cursor-col-resize");
+		expect(html).toContain("md:w-4");
+		expect(html).toContain("md:translate-x-1/2");
+
+		// Handle chip should be opacity-0 by default, visible on group-hover and group-focus-visible
+		expect(html).toContain("opacity-0");
+		expect(html).toContain("group-hover:opacity-100");
+		expect(html).toContain("group-focus-visible:opacity-100");
+		// Must not use group-focus-within which causes the handle to stay stuck visible after pointer interaction
+		expect(html).not.toContain("group-focus-within:opacity-100");
+	});
 });
