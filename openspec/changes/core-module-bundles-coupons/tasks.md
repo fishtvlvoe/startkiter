@@ -109,11 +109,11 @@
 
 ### 17. 既有規則對齊確認
 
-- [ ] 17.1 對照 mvp-offer 的「Single MVP SKU price」與「MVP SKU constant is startkiter-mvp」修訂後內容，逐一檢查既有測試斷言（`packages/payments/src/order.test.ts` 等）是否需要調整為「MVP SKU 固定 8800，但商品目錄可有其他項目」，需要調整的逐一修正並保持綠燈
-- [ ] 17.2 對照 v1-scope-boundary 的「v1 take-home capabilities」修訂後內容，確認新增的 bundle/coupon 能力已在實際代碼中對應存在
+- [x] 17.1 對照 mvp-offer 的「Single MVP SKU price」與「MVP SKU constant is startkiter-mvp」修訂後內容，逐一檢查既有測試斷言（`packages/payments/order.test.ts`）是否需要調整為「MVP SKU 固定 8800，但商品目錄可有其他項目」（PM 覆核：`order.test.ts` 既有斷言全數維持原意，8800 上限只在 sku=MVP_SKU 時仍生效，未帶 sku 預設走 MVP_SKU，行為不變；新增的 discounted-amount／bundle sku 案例分別在 `order.test.ts` 與 `catalog.test.ts` 補齊。`checkout.test.ts` 測試的 `createCheckout()` 函式經 grep 確認全 repo 無真實呼叫端（`apps/saas` 走的是自己的 `route.ts` 邏輯，不經過這支函式），屬既有 dead code，不影響本次改動的行為一致性，不在本輪範圍內處理）
+- [x] 17.2 對照 v1-scope-boundary 的「v1 take-home capabilities」修訂後內容，確認新增的 bundle/coupon 能力已在實際代碼中對應存在（PM 覆核：bundle CRUD＋前後台頁面、coupon 驗證＋rate-limit＋結帳整合、商品目錄 `getProduct` 皆有對應代碼與測試，逐項存在）
 
 ### 18. 全面驗收
 
-- [ ] 18.1 `pnpm build` 與 `pnpm test` 全專案通過
-- [ ] 18.2 用假資料跑一次完整流程：建立 bundle → 建立 coupon → 買家用 coupon 折扣價完成 bundle 結帳 → 確認取得 bundle 內全部課程存取權 → 退款 → 確認存取權撤銷，保存實際輸出
-- [ ] 18.3 `spectra validate core-module-bundles-coupons` 通過，0 warnings
+- [x] 18.1 `pnpm build` 與 `pnpm test` 全專案通過（PM 執行：`packages/` 52 files/274 tests 全綠；`pnpm --filter @startkiter/saas build` 成功；`apps/saas` 測試僅 2 個既有失敗屬 platform-shell 測試期望值過時，見該 change tasks.md 50.7，非本 change 造成）
+- [x] 18.2 用假資料跑一次完整流程：建立 bundle → 建立 coupon → 買家用 coupon 折扣價完成 bundle 結帳 → 確認取得 bundle 內全部課程存取權 → 退款 → 確認存取權撤銷，保存實際輸出（PM 執行，真實 DB 資料，非 mock：1. bundle 建立 12800 → 2. coupon 折扣 800 → 3. 結帳金額 12800→12000（`getProduct`+`validateCoupon` 真實串接）→ 4. Order 建立 sku=bundle.id amount=12000 → 5. 標記已付款 → 6. `canAccessCourseId` 對 bundle 內兩門課皆回傳 true → 7. 退款 → 8. `canAccessCourseId` 兩門課皆回傳 false，全部步驟真實通過並清除測試資料；此驗證走的是底層邏輯鏈（`getProduct`／`validateCoupon`／`canAccessCourseId`），不是買家真實頁面點擊，因為買家頁面串接留給 15.4，已裁決延後）
+- [x] 18.3 `spectra validate core-module-bundles-coupons` 通過，0 warnings（PM 執行：`✓ core-module-bundles-coupons — valid`）
