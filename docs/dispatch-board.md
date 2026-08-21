@@ -56,10 +56,10 @@
 
 ### 4. core-module-bundles-coupons
 - 狀態：🔵 進行中
-- Task 進度：24/56（43%）
+- Task 進度：42/56（75%）
 - 指派對象：
   - Phase 1-2（資料表＋Bundle CRUD）→ 已完成，PM 親自+Sonnet 子代理混合，PM 全數驗證
-  - Phase 3（Coupon 驗證＋結帳整合）→ **PM 親自**（金流計算邏輯，風險最高，不外派）
+  - Phase 3（Coupon 驗證＋結帳整合）→ ✅ 已完成，**PM 親自**（金流計算邏輯，風險最高，不外派）。順帶修正 `packages/payments` 既有的 `order.ts`／`notify.ts` 硬寫死 MVP_AMOUNT_TWD 的問題，改為信任伺服器端算出的折扣金額並守住上限
   - Phase 4（商品目錄改造，BREAKING）→ **PM 親自**（改既有結帳行為，不外派）
   - Demo-first HTML → 已完成兩輪（一次 CSP bug 需 Sonnet 抓根因重做），純視覺重製部分可用 Haiku，但要 Sonnet/PM 覆核是否真的用了專案既有色票/元件規格
 - E2E：⬜ 未跑
