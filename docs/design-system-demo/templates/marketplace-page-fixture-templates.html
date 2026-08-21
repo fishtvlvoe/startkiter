@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="zh-Hant">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Marketplace screenshot fixture</title>
+		<style>
+			:root {
+				--color-olive-50: oklch(98.8% 0.003 106.5);
+				--color-olive-100: oklch(96.6% 0.005 106.5);
+				--color-olive-200: oklch(93% 0.007 106.5);
+				--color-olive-600: oklch(46.6% 0.025 107.3);
+				--color-olive-950: oklch(15.3% 0.006 107.1);
+				--color-white: #fff;
+				--border: var(--color-olive-200);
+				--background: var(--color-olive-50);
+				--foreground: var(--color-olive-950);
+				--primary: var(--color-olive-950);
+				--primary-foreground: var(--color-olive-50);
+				--muted: var(--color-olive-100);
+				--muted-foreground: var(--color-olive-600);
+				--card: var(--color-white);
+				--radius: 0.625rem;
+				--font-sans: Inter, "Noto Sans TC", sans-serif;
+			}
+			body {
+				margin: 0;
+				font-family: var(--font-sans);
+				background: var(--background);
+				color: var(--foreground);
+			}
+			.wrap {
+				max-width: 56rem;
+				margin: 0 auto;
+				padding: 2rem 1rem;
+			}
+			h1 {
+				margin: 0;
+				font-size: 1.5rem;
+			}
+			.lead {
+				color: var(--muted-foreground);
+				font-size: 0.875rem;
+			}
+			.tabs {
+				display: flex;
+				gap: 0.5rem;
+				border-bottom: 2px solid var(--border);
+				margin: 1.5rem 0 1rem;
+			}
+			.tab {
+				padding: 0.5rem 0.75rem;
+				border: 0;
+				background: transparent;
+				border-bottom: 2px solid transparent;
+				margin-bottom: -2px;
+				cursor: pointer;
+				color: var(--muted-foreground);
+			}
+			.tab[aria-selected="true"] {
+				color: var(--foreground);
+				border-bottom-color: var(--primary);
+				font-weight: 600;
+			}
+			.panel {
+				display: none;
+			}
+			.panel.active {
+				display: grid;
+				gap: 0.75rem;
+			}
+			.card {
+				background: var(--card);
+				border: 1px solid var(--border);
+				border-radius: calc(var(--radius) * 1.2);
+				padding: 1rem;
+			}
+			.row {
+				display: flex;
+				justify-content: space-between;
+				gap: 1rem;
+			}
+			.badge {
+				align-self: start;
+				background: color-mix(in oklch, var(--primary) 12%, white);
+				color: var(--primary);
+				border-radius: 9999px;
+				padding: 0.2rem 0.6rem;
+				font-size: 0.7rem;
+				font-weight: 650;
+			}
+			.grid {
+				display: grid;
+				grid-template-columns: repeat(3, 1fr);
+				gap: 0.75rem;
+			}
+			.preview {
+				height: 6rem;
+				background: var(--muted);
+				border: 1px solid var(--border);
+				border-radius: var(--radius);
+				margin-bottom: 0.75rem;
+				display: grid;
+				place-items: center;
+				font-size: 0.75rem;
+				color: var(--muted-foreground);
+			}
+			.muted {
+				color: var(--muted-foreground);
+				font-size: 0.85rem;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="wrap">
+			<h1>Marketplace</h1>
+			<p class="lead">檢視已啟用模組與站點模版（截圖 fixture，對齊 Task 23.2）</p>
+			<div class="tabs" role="tablist">
+				<button class="tab" role="tab" aria-selected="false" data-tab="plugins">已啟用模組</button>
+				<button class="tab" role="tab" aria-selected="true" data-tab="templates">模版選擇</button>
+			</div>
+			<section class="panel" data-panel="plugins">
+				<article class="card row">
+					<div>
+						<strong>課程模組</strong>
+						<div class="muted">id: course · version: 0.1.0</div>
+					</div>
+					<span class="badge">已啟用</span>
+				</article>
+				<article class="card row">
+					<div>
+						<strong>開始</strong>
+						<div class="muted">id: start · version: 0.1.0</div>
+					</div>
+					<span class="badge">已啟用</span>
+				</article>
+			</section>
+			<section class="panel active" data-panel="templates">
+				<div class="grid">
+					<article class="card">
+						<div class="preview">course-site</div>
+						<strong>課程教學站</strong>
+						<p class="muted">賣課與學員學習為主軸</p>
+					</article>
+					<article class="card">
+						<div class="preview">service-saas</div>
+						<strong>服務型 SaaS</strong>
+						<p class="muted">儀表板與客服入口</p>
+					</article>
+					<article class="card">
+						<div class="preview">portfolio</div>
+						<strong>作品集展示</strong>
+						<p class="muted">作品牆落地頁</p>
+					</article>
+				</div>
+			</section>
+		</div>
+		<script>
+			document.querySelectorAll(".tab").forEach(function (btn) {
+				btn.addEventListener("click", function () {
+					document.querySelectorAll(".tab").forEach(function (b) {
+						b.setAttribute("aria-selected", String(b === btn));
+					});
+					document.querySelectorAll(".panel").forEach(function (panel) {
+						panel.classList.toggle("active", panel.getAttribute("data-panel") === btn.getAttribute("data-tab"));
+					});
+				});
+			});
+		</script>
+	</body>
+</html>
