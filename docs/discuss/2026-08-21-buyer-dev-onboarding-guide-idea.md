@@ -40,3 +40,7 @@ StartKiter 這包代碼是「引擎」，買家是「拿引擎做東西的人」
 
 - 要哪種形式（文件/Skill/混合）？
 - 現在就開新 change 規劃，還是等 Phase 8/9 落地後再回頭做？
+
+## 補充（2026-08-21 同日）
+
+`docs/startkiter-development-sop.md` 已寫成——這是「StartKiter 團隊自己怎麼開 SR」的 SOP，內含一份給買家的簡化版四步驟。這份 SOP 是本筆記提到的「StartKiter Agent」構想的核心內容來源之一，兩份筆記互相參照，之後真的要包成 Skill 時，主要素材從 SOP 那份文件搬。
