@@ -23,7 +23,10 @@ export async function POST(request: Request) {
 		identity: createPrismaGithubIdentityReaderWithUserApi(),
 		grants: createPrismaGrantStore(),
 		collaborators: collaborators ?? {
-			invitePullCollaborator: async () => {
+			generateRepoFromTemplate: async () => {
+				throw new Error("misconfigured");
+			},
+			inviteWriteCollaborator: async () => {
 				throw new Error("misconfigured");
 			},
 			removeCollaborator: async () => {
@@ -40,6 +43,6 @@ export async function POST(request: Request) {
 		ok: true,
 		status: result.status,
 		grantId: result.grantId,
-		message: "已送出 GitHub 邀請（pull）。請到 GitHub 接受邀請後才能看到私人倉庫。",
+		message: "已從模板建立專屬倉庫並送出 GitHub 邀請（write）。請到 GitHub 接受邀請後才能看到私人倉庫。",
 	});
 }

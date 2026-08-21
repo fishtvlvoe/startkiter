@@ -1,3 +1,4 @@
+import { provisionBuyerRepo } from "./provision-buyer-repo";
 import type {
 	GithubCollaboratorClient,
 	GithubIdentityReader,
@@ -32,12 +33,12 @@ export async function claimGithubKit(args: {
 		return { ok: false, httpStatus: 401, error: "authentication_required" };
 	}
 
-	const eligible = await args.eligibility.hasKitClaimEligible(args.userId);
-	if (!eligible) {
+	const order = await args.eligibility.getEligibleKitOrder(args.userId);
+	if (!order) {
 		return { ok: false, httpStatus: 403, error: "not_eligible" };
 	}
 
-	if (!args.config || !args.oauthConfigured) {
+	if (!args.config || !args.oauthConfigured || !args.config.templateRepo.trim()) {
 		return { ok: false, httpStatus: 503, error: "github_kit_misconfigured" };
 	}
 
@@ -46,41 +47,31 @@ export async function claimGithubKit(args: {
 		return { ok: false, httpStatus: 403, error: "github_not_linked" };
 	}
 
-	const { org, repo } = args.config;
-	const existing = await args.grants.findByUserRepo({
-		userId: args.userId,
-		org,
-		repo,
-	});
-	if (existing && (existing.status === "invited" || existing.status === "accepted")) {
-		return { ok: true, status: "invited", grantId: existing.id };
+	const existing = await args.grants.findActiveByUserId(args.userId);
+	const active = existing[0];
+	if (active) {
+		return { ok: true, status: "invited", grantId: active.id };
 	}
 
 	try {
-		await args.collaborators.invitePullCollaborator({
-			org,
-			repo,
-			username: identity.githubLogin,
+		const provisioned = await provisionBuyerRepo({
+			config: args.config,
+			orderId: order.id,
+			githubLogin: identity.githubLogin,
+			collaborators: args.collaborators,
 		});
-	} catch {
-		await args.grants.upsertFailed({
+		const grant = await args.grants.upsertInvited({
 			userId: args.userId,
 			githubUserId: identity.githubUserId,
 			githubLogin: identity.githubLogin,
-			org,
-			repo,
+			org: provisioned.org,
+			repo: provisioned.repo,
+			orderNo: order.orderNo,
 		});
+		return { ok: true, status: "invited", grantId: grant.id };
+	} catch {
 		return { ok: false, httpStatus: 502, error: "github_invite_failed" };
 	}
-
-	const grant = await args.grants.upsertInvited({
-		userId: args.userId,
-		githubUserId: identity.githubUserId,
-		githubLogin: identity.githubLogin,
-		org,
-		repo,
-	});
-	return { ok: true, status: "invited", grantId: grant.id };
 }
 
 export type ClaimStatusResult = {
@@ -105,18 +96,14 @@ export async function getClaimStatus(args: {
 	if (!args.config || args.oauthConfigured === false) {
 		return { ok: false, httpStatus: 503, error: "github_kit_misconfigured" };
 	}
-	const grant = await args.grants.findByUserRepo({
-		userId: args.userId,
-		org: args.config.org,
-		repo: args.config.repo,
-	});
+	const grant = await args.grants.findLatestByUserId(args.userId);
 	if (!grant) {
 		return {
 			ok: true,
 			body: {
 				status: "not_claimed",
 				githubLogin: null,
-				repo: `${args.config.org}/${args.config.repo}`,
+				repo: null,
 			},
 		};
 	}

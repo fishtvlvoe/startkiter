@@ -9,7 +9,7 @@ export type RevokeOnRefundResult = {
 	grantStatus: "revoked" | "failed" | "skipped" | null;
 };
 
-/** 退款後撤銷已邀請／已接受的 collaborator；無 grant 不打 API；API 失敗不拋、標 failed。 */
+/** 退款後撤銷已邀請／已接受的 collaborator；目標是 grant 上的專屬 repo，不是共用常數。 */
 export async function revokeKitGrantOnRefund(args: {
 	userId: string;
 	config: GithubKitConfig | null;
@@ -19,25 +19,22 @@ export async function revokeKitGrantOnRefund(args: {
 	if (!args.config) {
 		return { githubCalled: false, grantStatus: "skipped" };
 	}
-	const grant = await args.grants.findByUserRepo({
-		userId: args.userId,
-		org: args.config.org,
-		repo: args.config.repo,
-	});
-	if (!grant || (grant.status !== "invited" && grant.status !== "accepted")) {
+	const active = await args.grants.findActiveByUserId(args.userId);
+	const grant = active[0];
+	if (!grant) {
 		return { githubCalled: false, grantStatus: "skipped" };
 	}
 
 	try {
 		await args.collaborators.removeCollaborator({
-			org: args.config.org,
-			repo: args.config.repo,
+			org: grant.org,
+			repo: grant.repo,
 			username: grant.githubLogin,
 		});
 		await args.grants.markStatus({
 			userId: args.userId,
-			org: args.config.org,
-			repo: args.config.repo,
+			org: grant.org,
+			repo: grant.repo,
 			status: "revoked",
 			revokedAt: new Date(),
 		});
@@ -45,8 +42,8 @@ export async function revokeKitGrantOnRefund(args: {
 	} catch {
 		await args.grants.markStatus({
 			userId: args.userId,
-			org: args.config.org,
-			repo: args.config.repo,
+			org: grant.org,
+			repo: grant.repo,
 			status: "failed",
 		});
 		return { githubCalled: true, grantStatus: "failed" };

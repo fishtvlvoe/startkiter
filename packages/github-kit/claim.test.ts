@@ -15,8 +15,29 @@ const config: GithubKitConfig = {
 	installationId: "2",
 	privateKeyPem: "-----BEGIN PRIVATE KEY-----\nX\n-----END PRIVATE KEY-----",
 	org: "startkiter",
-	repo: "kit",
+	repo: "shared-kit",
+	templateRepo: "startkiter/kit-template",
 };
+
+function eligible(orderId = "ord_9001"): KitEligibilityReader {
+	return {
+		hasKitClaimEligible: async () => true,
+		getEligibleKitOrder: async () => ({ id: orderId, orderNo: "SK-8800-001" }),
+	};
+}
+
+function ineligible(): KitEligibilityReader {
+	return {
+		hasKitClaimEligible: async () => false,
+		getEligibleKitOrder: async () => null,
+	};
+}
+
+function identity(login = "bob-dev"): GithubIdentityReader {
+	return {
+		getGithubIdentity: async () => ({ githubUserId: "42", githubLogin: login }),
+	};
+}
 
 function createMemoryGrants(): GithubKitGrantStore & { rows: GithubKitGrantRecord[] } {
 	const rows: GithubKitGrantRecord[] = [];
@@ -30,6 +51,10 @@ function createMemoryGrants(): GithubKitGrantStore & { rows: GithubKitGrantRecor
 				(r) => r.userId === userId && (r.status === "invited" || r.status === "accepted"),
 			);
 		},
+		async findLatestByUserId(userId) {
+			const matches = rows.filter((r) => r.userId === userId);
+			return matches[matches.length - 1] ?? null;
+		},
 		async upsertInvited(args) {
 			const existing = rows.find(
 				(r) => r.userId === args.userId && r.org === args.org && r.repo === args.repo,
@@ -38,7 +63,8 @@ function createMemoryGrants(): GithubKitGrantStore & { rows: GithubKitGrantRecor
 				existing.githubUserId = args.githubUserId;
 				existing.githubLogin = args.githubLogin;
 				existing.status = "invited";
-				existing.permission = "pull";
+				existing.permission = "write";
+				existing.orderNo = args.orderNo ?? existing.orderNo;
 				return existing;
 			}
 			const row: GithubKitGrantRecord = {
@@ -48,7 +74,7 @@ function createMemoryGrants(): GithubKitGrantStore & { rows: GithubKitGrantRecor
 				githubLogin: args.githubLogin,
 				org: args.org,
 				repo: args.repo,
-				permission: "pull",
+				permission: "write",
 				status: "invited",
 				orderNo: args.orderNo ?? null,
 			};
@@ -70,7 +96,7 @@ function createMemoryGrants(): GithubKitGrantStore & { rows: GithubKitGrantRecor
 				githubLogin: args.githubLogin,
 				org: args.org,
 				repo: args.repo,
-				permission: "pull",
+				permission: "write",
 				status: "failed",
 				orderNo: args.orderNo ?? null,
 			};
@@ -88,176 +114,205 @@ function createMemoryGrants(): GithubKitGrantStore & { rows: GithubKitGrantRecor
 	};
 }
 
+function collaborators(overrides: Partial<GithubCollaboratorClient> = {}): GithubCollaboratorClient {
+	return {
+		generateRepoFromTemplate: vi.fn(async () => undefined),
+		inviteWriteCollaborator: vi.fn(async () => undefined),
+		removeCollaborator: vi.fn(async () => undefined),
+		...overrides,
+	};
+}
+
 describe("claimGithubKit", () => {
 	it("returns 401 without session user", async () => {
-		const invite = vi.fn();
+		const collab = collaborators();
 		const result = await claimGithubKit({
 			userId: null,
 			config,
 			oauthConfigured: true,
-			eligibility: { hasKitClaimEligible: async () => true },
-			identity: { getGithubIdentity: async () => ({ githubUserId: "1", githubLogin: "bob" }) },
+			eligibility: eligible(),
+			identity: identity(),
 			grants: createMemoryGrants(),
-			collaborators: {
-				invitePullCollaborator: invite,
-				removeCollaborator: vi.fn(),
-			},
+			collaborators: collab,
 		});
 		expect(result).toEqual({
 			ok: false,
 			httpStatus: 401,
 			error: "authentication_required",
 		});
-		expect(invite).not.toHaveBeenCalled();
+		expect(collab.generateRepoFromTemplate).not.toHaveBeenCalled();
 	});
 
-	it("returns 403 and never invites when kitClaimEligible is false", async () => {
-		const invite = vi.fn();
+	it("returns 403 and never generates when kitClaimEligible is false", async () => {
+		const collab = collaborators();
 		const result = await claimGithubKit({
 			userId: "user_refunded",
 			config,
 			oauthConfigured: true,
-			eligibility: { hasKitClaimEligible: async () => false },
-			identity: {
-				getGithubIdentity: async () => ({ githubUserId: "9", githubLogin: "bob-dev" }),
-			},
+			eligibility: ineligible(),
+			identity: identity(),
 			grants: createMemoryGrants(),
-			collaborators: {
-				invitePullCollaborator: invite,
-				removeCollaborator: vi.fn(),
-			},
+			collaborators: collab,
 		});
 		expect(result.ok).toBe(false);
 		if (!result.ok) {
 			expect(result.httpStatus).toBe(403);
 			expect(result.error).toBe("not_eligible");
 		}
-		expect(invite).not.toHaveBeenCalled();
+		expect(collab.generateRepoFromTemplate).not.toHaveBeenCalled();
 	});
 
 	it("returns 403 not 503 when ineligible even if config missing", async () => {
-		const invite = vi.fn();
+		const collab = collaborators();
 		const result = await claimGithubKit({
 			userId: "user_refunded",
 			config: null,
 			oauthConfigured: false,
-			eligibility: { hasKitClaimEligible: async () => false },
+			eligibility: ineligible(),
 			identity: { getGithubIdentity: async () => null },
 			grants: createMemoryGrants(),
-			collaborators: {
-				invitePullCollaborator: invite,
-				removeCollaborator: vi.fn(),
-			},
+			collaborators: collab,
 		});
 		expect(result).toEqual({
 			ok: false,
 			httpStatus: 403,
 			error: "not_eligible",
 		});
-		expect(invite).not.toHaveBeenCalled();
+		expect(collab.generateRepoFromTemplate).not.toHaveBeenCalled();
 	});
 
 	it("returns 503 when eligible but kit config missing", async () => {
-		const invite = vi.fn();
+		const collab = collaborators();
+		const grants = createMemoryGrants();
 		const result = await claimGithubKit({
 			userId: "user_paid",
 			config: null,
 			oauthConfigured: true,
-			eligibility: { hasKitClaimEligible: async () => true },
-			identity: {
-				getGithubIdentity: async () => ({ githubUserId: "1", githubLogin: "bob-dev" }),
-			},
-			grants: createMemoryGrants(),
-			collaborators: {
-				invitePullCollaborator: invite,
-				removeCollaborator: vi.fn(),
-			},
+			eligibility: eligible(),
+			identity: identity(),
+			grants,
+			collaborators: collab,
 		});
 		expect(result).toEqual({
 			ok: false,
 			httpStatus: 503,
 			error: "github_kit_misconfigured",
 		});
-		expect(invite).not.toHaveBeenCalled();
+		expect(collab.generateRepoFromTemplate).not.toHaveBeenCalled();
+		expect(grants.rows).toHaveLength(0);
 	});
 
-	it("invites pull collaborator and persists invited grant when eligible", async () => {
-		const invite = vi.fn(async () => undefined);
+	it("generates a dedicated write repo from template instead of inviting into the shared repo", async () => {
+		const collab = collaborators();
 		const grants = createMemoryGrants();
 		const result = await claimGithubKit({
 			userId: "user_paid",
 			config,
 			oauthConfigured: true,
-			eligibility: { hasKitClaimEligible: async () => true },
-			identity: {
-				getGithubIdentity: async () => ({ githubUserId: "42", githubLogin: "bob-dev" }),
-			},
+			eligibility: eligible("ord_9001"),
+			identity: identity("bob-dev"),
 			grants,
-			collaborators: {
-				invitePullCollaborator: invite,
-				removeCollaborator: vi.fn(),
-			},
+			collaborators: collab,
 		});
 		expect(result.ok).toBe(true);
-		expect(invite).toHaveBeenCalledTimes(1);
-		expect(invite).toHaveBeenCalledWith({
+		expect(collab.generateRepoFromTemplate).toHaveBeenCalledTimes(1);
+		expect(collab.generateRepoFromTemplate).toHaveBeenCalledWith({
+			templateOwner: "startkiter",
+			templateRepo: "kit-template",
+			owner: "startkiter",
+			name: "kit-ord_9001",
+		});
+		expect(collab.inviteWriteCollaborator).toHaveBeenCalledWith({
 			org: "startkiter",
-			repo: "kit",
+			repo: "kit-ord_9001",
 			username: "bob-dev",
 		});
-		expect(grants.rows[0]?.permission).toBe("pull");
+		expect(grants.rows[0]?.permission).toBe("write");
+		expect(grants.rows[0]?.permission).not.toBe("pull");
+		expect(grants.rows[0]?.repo).toBe("kit-ord_9001");
 		expect(grants.rows[0]?.status).toBe("invited");
 	});
 
-	it("returns 502 and keeps a failed grant when GitHub invite fails", async () => {
+	it("never writes pull, maintain, or admin permission on success", async () => {
+		const grants = createMemoryGrants();
+		await claimGithubKit({
+			userId: "user_paid",
+			config,
+			oauthConfigured: true,
+			eligibility: eligible("ord_9001"),
+			identity: identity(),
+			grants,
+			collaborators: collaborators(),
+		});
+		expect(grants.rows[0]?.permission).toBe("write");
+		expect(["pull", "maintain", "admin"]).not.toContain(grants.rows[0]?.permission);
+	});
+
+	it("gives two buyers different dedicated repos", async () => {
+		const grants = createMemoryGrants();
+		await claimGithubKit({
+			userId: "buyer_a",
+			config,
+			oauthConfigured: true,
+			eligibility: eligible("ord_aaa"),
+			identity: identity("alice"),
+			grants,
+			collaborators: collaborators(),
+		});
+		await claimGithubKit({
+			userId: "buyer_b",
+			config,
+			oauthConfigured: true,
+			eligibility: eligible("ord_bbb"),
+			identity: identity("bob"),
+			grants,
+			collaborators: collaborators(),
+		});
+		expect(grants.rows).toHaveLength(2);
+		expect(grants.rows[0]?.repo).not.toBe(grants.rows[1]?.repo);
+		expect(grants.rows.map((r) => r.repo).sort()).toEqual(["kit-ord_aaa", "kit-ord_bbb"]);
+	});
+
+	it("returns 502 and does not persist a grant when GitHub generate fails", async () => {
 		const grants = createMemoryGrants();
 		const result = await claimGithubKit({
 			userId: "user_paid",
 			config,
 			oauthConfigured: true,
-			eligibility: { hasKitClaimEligible: async () => true },
-			identity: {
-				getGithubIdentity: async () => ({ githubUserId: "42", githubLogin: "bob-dev" }),
-			},
+			eligibility: eligible(),
+			identity: identity(),
 			grants,
-			collaborators: {
-				invitePullCollaborator: async () => {
+			collaborators: collaborators({
+				generateRepoFromTemplate: async () => {
 					throw new Error("github unavailable");
 				},
-				removeCollaborator: vi.fn(),
-			},
+			}),
 		});
-
 		expect(result).toEqual({ ok: false, httpStatus: 502, error: "github_invite_failed" });
-		expect(grants.rows[0]?.status).toBe("failed");
+		expect(grants.rows).toHaveLength(0);
 	});
 
-	it("is idempotent when already invited without second invite", async () => {
-		const invite = vi.fn(async () => undefined);
+	it("is idempotent when already invited without a second generate", async () => {
+		const collab = collaborators();
 		const grants = createMemoryGrants();
 		await grants.upsertInvited({
 			userId: "user_paid",
 			githubUserId: "42",
 			githubLogin: "bob-dev",
 			org: "startkiter",
-			repo: "kit",
+			repo: "kit-ord_9001",
 		});
 		const result = await claimGithubKit({
 			userId: "user_paid",
 			config,
 			oauthConfigured: true,
-			eligibility: { hasKitClaimEligible: async () => true },
-			identity: {
-				getGithubIdentity: async () => ({ githubUserId: "42", githubLogin: "bob-dev" }),
-			},
+			eligibility: eligible("ord_9001"),
+			identity: identity(),
 			grants,
-			collaborators: {
-				invitePullCollaborator: invite,
-				removeCollaborator: vi.fn(),
-			},
+			collaborators: collab,
 		});
 		expect(result.ok).toBe(true);
-		expect(invite).not.toHaveBeenCalled();
+		expect(collab.generateRepoFromTemplate).not.toHaveBeenCalled();
 	});
 });
 
@@ -290,17 +345,14 @@ describe("getClaimStatus", () => {
 	});
 
 	it("never calls collaborator APIs", async () => {
-		const collaborators: GithubCollaboratorClient = {
-			invitePullCollaborator: vi.fn(),
-			removeCollaborator: vi.fn(),
-		};
+		const collab = collaborators();
 		const grants = createMemoryGrants();
 		await grants.upsertInvited({
 			userId: "u1",
 			githubUserId: "1",
 			githubLogin: "bob",
 			org: "startkiter",
-			repo: "kit",
+			repo: "kit-ord_9001",
 		});
 		const result = await getClaimStatus({
 			userId: "u1",
@@ -310,11 +362,9 @@ describe("getClaimStatus", () => {
 		expect(result.ok).toBe(true);
 		if (result.ok) {
 			expect(result.body.status).toBe("invited");
+			expect(result.body.repo).toBe("startkiter/kit-ord_9001");
 		}
-		expect(collaborators.invitePullCollaborator).not.toHaveBeenCalled();
-		expect(collaborators.removeCollaborator).not.toHaveBeenCalled();
+		expect(collab.generateRepoFromTemplate).not.toHaveBeenCalled();
+		expect(collab.removeCollaborator).not.toHaveBeenCalled();
 	});
 });
-
-// silence unused type imports in some runners
-void (0 as unknown as KitEligibilityReader | GithubIdentityReader);

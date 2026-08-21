@@ -8,7 +8,8 @@ const config: GithubKitConfig = {
 	installationId: "2",
 	privateKeyPem: "-----BEGIN PRIVATE KEY-----\nX\n-----END PRIVATE KEY-----",
 	org: "startkiter",
-	repo: "kit",
+	repo: "shared-kit",
+	templateRepo: "startkiter/kit-template",
 };
 
 function createMemoryGrants(seed: GithubKitGrantRecord[] = []): GithubKitGrantStore & {
@@ -24,6 +25,10 @@ function createMemoryGrants(seed: GithubKitGrantRecord[] = []): GithubKitGrantSt
 			return rows.filter(
 				(r) => r.userId === userId && (r.status === "invited" || r.status === "accepted"),
 			);
+		},
+		async findLatestByUserId(userId) {
+			const matches = rows.filter((r) => r.userId === userId);
+			return matches[matches.length - 1] ?? null;
 		},
 		async upsertInvited() {
 			throw new Error("unused");
@@ -51,7 +56,8 @@ describe("revokeKitGrantOnRefund", () => {
 			config,
 			grants: createMemoryGrants(),
 			collaborators: {
-				invitePullCollaborator: vi.fn(),
+				generateRepoFromTemplate: vi.fn(),
+				inviteWriteCollaborator: vi.fn(),
 				removeCollaborator: remove,
 			},
 		});
@@ -59,7 +65,7 @@ describe("revokeKitGrantOnRefund", () => {
 		expect(remove).not.toHaveBeenCalled();
 	});
 
-	it("revokes invited grant on success", async () => {
+	it("revokes the dedicated buyer repo, not the shared kit constant", async () => {
 		const remove = vi.fn(async () => undefined);
 		const grants = createMemoryGrants([
 			{
@@ -68,8 +74,8 @@ describe("revokeKitGrantOnRefund", () => {
 				githubUserId: "1",
 				githubLogin: "bob",
 				org: "startkiter",
-				repo: "kit",
-				permission: "pull",
+				repo: "kit-ord_9001",
+				permission: "write",
 				status: "invited",
 				orderNo: "SK-8800-002",
 			},
@@ -79,12 +85,21 @@ describe("revokeKitGrantOnRefund", () => {
 			config,
 			grants,
 			collaborators: {
-				invitePullCollaborator: vi.fn(),
+				generateRepoFromTemplate: vi.fn(),
+				inviteWriteCollaborator: vi.fn(),
 				removeCollaborator: remove,
 			},
 		});
 		expect(result).toEqual({ githubCalled: true, grantStatus: "revoked" });
 		expect(remove).toHaveBeenCalledTimes(1);
+		expect(remove).toHaveBeenCalledWith({
+			org: "startkiter",
+			repo: "kit-ord_9001",
+			username: "bob",
+		});
+		expect(remove).not.toHaveBeenCalledWith(
+			expect.objectContaining({ repo: "shared-kit" }),
+		);
 		expect(grants.rows[0]?.status).toBe("revoked");
 		expect(grants.rows[0]?.revokedAt).toBeInstanceOf(Date);
 	});
@@ -100,8 +115,8 @@ describe("revokeKitGrantOnRefund", () => {
 				githubUserId: "1",
 				githubLogin: "bob",
 				org: "startkiter",
-				repo: "kit",
-				permission: "pull",
+				repo: "kit-ord_9001",
+				permission: "write",
 				status: "invited",
 				orderNo: null,
 			},
@@ -111,7 +126,8 @@ describe("revokeKitGrantOnRefund", () => {
 			config,
 			grants,
 			collaborators: {
-				invitePullCollaborator: vi.fn(),
+				generateRepoFromTemplate: vi.fn(),
+				inviteWriteCollaborator: vi.fn(),
 				removeCollaborator: remove,
 			},
 		});

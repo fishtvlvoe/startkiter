@@ -4,6 +4,7 @@ export type GithubKitConfig = {
 	privateKeyPem: string;
 	org: string;
 	repo: string;
+	templateRepo: string;
 };
 
 export type GithubIdentity = {
@@ -28,7 +29,13 @@ export type GithubKitGrantRecord = {
 };
 
 export type GithubCollaboratorClient = {
-	invitePullCollaborator: (args: {
+	generateRepoFromTemplate: (args: {
+		templateOwner: string;
+		templateRepo: string;
+		owner: string;
+		name: string;
+	}) => Promise<void>;
+	inviteWriteCollaborator: (args: {
 		org: string;
 		repo: string;
 		username: string;
@@ -40,8 +47,13 @@ export type GithubCollaboratorClient = {
 	}) => Promise<void>;
 };
 
+export type GithubVersionFileReader = {
+	readStartkiterVersion: (args: { owner: string; repo: string }) => Promise<string | null>;
+};
+
 export type KitEligibilityReader = {
 	hasKitClaimEligible: (userId: string) => Promise<boolean>;
+	getEligibleKitOrder: (userId: string) => Promise<{ id: string; orderNo: string } | null>;
 };
 
 export type GithubIdentityReader = {
@@ -55,6 +67,7 @@ export type GithubKitGrantStore = {
 		repo: string;
 	}) => Promise<GithubKitGrantRecord | null>;
 	findActiveByUserId: (userId: string) => Promise<GithubKitGrantRecord[]>;
+	findLatestByUserId: (userId: string) => Promise<GithubKitGrantRecord | null>;
 	upsertInvited: (args: {
 		userId: string;
 		githubUserId: string;

@@ -31,6 +31,21 @@ describe("resolveGithubKitConfig", () => {
 			}),
 		).toBeNull();
 	});
+
+	it("fail-closed when GITHUB_KIT_TEMPLATE_REPO is missing", async () => {
+		const { generateKeyPairSync } = await import("node:crypto");
+		const { privateKey } = generateKeyPairSync("rsa", { modulusLength: 2048 });
+		const pem = privateKey.export({ type: "pkcs8", format: "pem" }).toString();
+		expect(
+			resolveGithubKitConfig({
+				GITHUB_APP_ID: "1",
+				GITHUB_APP_INSTALLATION_ID: "2",
+				GITHUB_APP_PRIVATE_KEY: pem,
+				GITHUB_KIT_ORG: "startkiter",
+				GITHUB_KIT_REPO: "shared-kit",
+			}),
+		).toBeNull();
+	});
 });
 
 describe("isGithubOAuthConfigured", () => {

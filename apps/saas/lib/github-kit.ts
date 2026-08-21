@@ -16,13 +16,18 @@ export function loadGithubKitRuntime() {
 }
 
 export function createPrismaEligibilityReader(): KitEligibilityReader {
+	async function getEligibleKitOrder(userId: string) {
+		const order = await db.order.findFirst({
+			where: { userId, sku: MVP_SKU, kitClaimEligible: true },
+			select: { id: true, orderNo: true },
+		});
+		return order;
+	}
+
 	return {
+		getEligibleKitOrder,
 		async hasKitClaimEligible(userId: string) {
-			const order = await db.order.findFirst({
-				where: { userId, sku: MVP_SKU, kitClaimEligible: true },
-				select: { id: true },
-			});
-			return Boolean(order);
+			return Boolean(await getEligibleKitOrder(userId));
 		},
 	};
 }
@@ -109,6 +114,12 @@ export function createPrismaGrantStore(): GithubKitGrantStore {
 				},
 			});
 		},
+		async findLatestByUserId(userId: string) {
+			return db.githubKitGrant.findFirst({
+				where: { userId },
+				orderBy: { createdAt: "desc" },
+			});
+		},
 		async upsertInvited(args) {
 			return db.githubKitGrant.upsert({
 				where: {
@@ -124,14 +135,14 @@ export function createPrismaGrantStore(): GithubKitGrantStore {
 					githubLogin: args.githubLogin,
 					org: args.org,
 					repo: args.repo,
-					permission: "pull",
+					permission: "write",
 					status: "invited",
 					orderNo: args.orderNo ?? null,
 				},
 				update: {
 					githubUserId: args.githubUserId,
 					githubLogin: args.githubLogin,
-					permission: "pull",
+					permission: "write",
 					status: "invited",
 					orderNo: args.orderNo ?? null,
 				},
@@ -152,14 +163,14 @@ export function createPrismaGrantStore(): GithubKitGrantStore {
 					githubLogin: args.githubLogin,
 					org: args.org,
 					repo: args.repo,
-					permission: "pull",
+					permission: "write",
 					status: "failed",
 					orderNo: args.orderNo ?? null,
 				},
 				update: {
 					githubUserId: args.githubUserId,
 					githubLogin: args.githubLogin,
-					permission: "pull",
+					permission: "write",
 					status: "failed",
 					orderNo: args.orderNo ?? null,
 				},

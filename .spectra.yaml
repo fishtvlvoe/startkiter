@@ -9,7 +9,12 @@ parallel_tasks: true
 
 claude_slash_commands: true
 
-worktree: true
+# Orca 也用 git worktree。Spectra 若 worktree: true，會把 openspec/changes
+# 綁到最新的 Orca 子目錄，CLI／App 進度就跟 main 對不上。
+# Spectra 自己的隔離目錄若要再開，只用 .spectra/worktrees，不要掃 Orca。
+worktree: false
+
+worktrees_dir: .spectra/worktrees
 
 claude_effort:
   apply: xhigh

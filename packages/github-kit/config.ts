@@ -43,13 +43,14 @@ export function resolveGithubKitConfig(
 	const installationId = env.GITHUB_APP_INSTALLATION_ID?.trim();
 	const org = env.GITHUB_KIT_ORG?.trim();
 	const repo = env.GITHUB_KIT_REPO?.trim();
+	const templateRepo = env.GITHUB_KIT_TEMPLATE_REPO?.trim();
 	const privateKeyPem = loadPrivateKeyPem(env);
 
-	if (!appId || !installationId || !org || !repo || !privateKeyPem) {
+	if (!appId || !installationId || !org || !repo || !templateRepo || !privateKeyPem) {
 		return null;
 	}
 
-	return { appId, installationId, privateKeyPem, org, repo };
+	return { appId, installationId, privateKeyPem, org, repo, templateRepo };
 }
 
 export function isGithubOAuthConfigured(env: Record<string, string | undefined>): boolean {

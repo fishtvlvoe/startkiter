@@ -1,6 +1,10 @@
 import { createSign } from "node:crypto";
 
-import type { GithubCollaboratorClient, GithubKitConfig } from "./types";
+import type {
+	GithubCollaboratorClient,
+	GithubKitConfig,
+	GithubVersionFileReader,
+} from "./types";
 
 function toBase64Url(input: string | Buffer): string {
 	return Buffer.from(input)
@@ -60,7 +64,34 @@ export function createGithubAppCollaboratorClient(
 	}
 
 	return {
-		async invitePullCollaborator({ org, repo, username }) {
+		async generateRepoFromTemplate({ templateOwner, templateRepo, owner, name }) {
+			await withToken(async (token) => {
+				const res = await fetchImpl(
+					`https://api.github.com/repos/${templateOwner}/${templateRepo}/generate`,
+					{
+						method: "POST",
+						headers: {
+							Accept: "application/vnd.github+json",
+							Authorization: `Bearer ${token}`,
+							"X-GitHub-Api-Version": "2022-11-28",
+							"User-Agent": "startkiter-github-kit",
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({
+							owner,
+							name,
+							private: true,
+							include_all_branches: false,
+						}),
+					},
+				);
+				if (res.ok || res.status === 422) {
+					return;
+				}
+				throw new Error(`github_generate_failed:${res.status}`);
+			});
+		},
+		async inviteWriteCollaborator({ org, repo, username }) {
 			await withToken(async (token) => {
 				const res = await fetchImpl(
 					`https://api.github.com/repos/${org}/${repo}/collaborators/${encodeURIComponent(username)}`,
@@ -73,7 +104,7 @@ export function createGithubAppCollaboratorClient(
 							"User-Agent": "startkiter-github-kit",
 							"Content-Type": "application/json",
 						},
-						body: JSON.stringify({ permission: "pull" }),
+						body: JSON.stringify({ permission: "push" }),
 					},
 				);
 				if (!res.ok && res.status !== 204) {
@@ -99,6 +130,45 @@ export function createGithubAppCollaboratorClient(
 					throw new Error(`github_revoke_failed:${res.status}`);
 				}
 			});
+		},
+	};
+}
+
+export function createGithubVersionFileReader(
+	config: GithubKitConfig,
+	fetchImpl: typeof fetch = fetch,
+): GithubVersionFileReader {
+	return {
+		async readStartkiterVersion({ owner, repo }) {
+			try {
+				const token = await fetchInstallationToken(config);
+				const res = await fetchImpl(
+					`https://api.github.com/repos/${owner}/${repo}/contents/STARTKITER_VERSION`,
+					{
+						headers: {
+							Accept: "application/vnd.github+json",
+							Authorization: `Bearer ${token}`,
+							"X-GitHub-Api-Version": "2022-11-28",
+							"User-Agent": "startkiter-github-kit",
+						},
+					},
+				);
+				if (!res.ok) {
+					return null;
+				}
+				const body = (await res.json()) as { content?: string; encoding?: string };
+				if (!body.content) {
+					return null;
+				}
+				const decoded =
+					body.encoding === "base64"
+						? Buffer.from(body.content.replace(/\n/g, ""), "base64").toString("utf8")
+						: body.content;
+				const version = decoded.trim();
+				return version.length > 0 ? version : null;
+			} catch {
+				return null;
+			}
 		},
 	};
 }
