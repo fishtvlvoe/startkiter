@@ -1,265 +1,36 @@
-# course-media-playback Specification
+# interactive-learning-blocks Specification
 
 ## Purpose
 
-TBD - created by archiving change 'mvp-dogfood-remaining'. Update Purpose after archive.
+TBD - created by archiving change 'interactive-learning-system'. Update Purpose after archive.
 
 ## Requirements
 
-### Requirement: Entitled lessons play configured Bunny media
+### Requirement: MDX 課程內容只允許固定互動積木
 
-當有課程權限的學員開啟已發布單元時，系統必須繼續支援已配置的 Bunny Stream 媒體，並將它放入電馭學院的 Fluent Player Shell。Shell 必須在所有核准 provider 上提供一致的深色外觀、16:9 響應式容器、播放控制與可存取 keyboard focus；不得因 provider 不同退回未包裝的裸播放器。
+課程 MDX renderer 必須只允許 TimelineSync、ConceptCompare、MicroSandbox、WorkflowSorter、InstantQuiz、TeacherAvatar、DialogueWindow 七個已註冊積木。每個積木 props 必須先通過 schema 驗證；renderer 不得執行 raw HTML、script、event handler、未註冊 JSX component 或遠端 import。
 
-#### Scenario: 有權學員以 Fluent Player Shell 播放 Bunny 單元
+#### Scenario: 合法的 InstantQuiz 被安全渲染
 
-- **WHEN** 已購買學員開啟已發布且 provider 為 Bunny 的 lesson-01
-- **THEN** 頁面必須以 Fluent Player Shell 與 Bunny adapter 播放該單元，且仍不得向無權使用者輸出該媒體 URL
+- **WHEN** 已發布 lesson 的 MDX 包含合法 InstantQuiz props
+- **THEN** renderer 必須渲染 allowlisted 積木，並保留其可存取題目、選項與回饋結構
 
-##### Example: 既有 Bunny 設定向後相容
+##### Example: 已發布單元安全呈現測驗
 
-- lesson-01 有合法 Bunny library／video identifier
-- 有 courseAccess 的 user A 看到可播放的統一 Shell
-- 未付款 user B 查詢同一 lesson 時回應不含 Bunny embed URL
+- lesson-03 的 MDX 只含已註冊 InstantQuiz 與合法 question、options、answerIndex
+- 有權學員開啟 lesson-03 時看到題目與可用鍵盤選擇的選項
+- renderer 不執行 lesson 內容以外的 HTML 或 script
 
+#### Scenario: 未註冊 component 被拒絕
 
-<!-- @trace
-source: interactive-learning-system
-updated: 2026-08-21
-code:
-  - docs/startkiter-development-sop.md
-  - packages/support/index.ts
-  - docs/tutorials/puter-serverless-mvp/presentation-kimi-prompt.md
-  - docs/dispatch-board.md
-  - config/modules.ts
-  - docs/discuss/2026-08-17-supastarter-gap-risk-report.md
-  - packages/api/modules/deployment/router.ts
-  - apps/saas/app/(authenticated)/(main)/(account)/admin/course/page.tsx
-  - apps/saas/tsconfig.json
-  - packages/api/index.ts
-  - packages/platform/src/deployment/coolify-client.ts
-  - packages/platform/src/deployment/status.ts
-  - packages/support/src/chatwoot-signature.ts
-  - apps/saas/modules/shared/components/AuthWrapper.tsx
-  - apps/saas/modules/deployment/components/ReportIssueButton.tsx
-  - packages/course/package.json
-  - apps/saas/modules/shared/components/NavBar.tsx
-  - apps/marketing/modules/course/components/CourseBuyCta.tsx
-  - packages/database/prisma/seed-course.ts
-  - packages/support/src/copilot.ts
-  - packages/course/index.ts
-  - apps/saas/modules/shared/components/UserMenu.tsx
-  - docs/demo/course-demo-2-manual.html
-  - apps/saas/vitest.config.ts
-  - docs/coolify-vps-setup-runbook.md
-  - docs/discuss/2026-08-17-supastarter-source-correction.md
-  - packages/course/src/mdx/LessonMdx.tsx
-  - packages/api/package.json
-  - packages/database/package.json
-  - apps/saas/AGENTS.md
-  - apps/marketing/modules/course/lib/public-curriculum.ts
-  - packages/platform/src/deployment/credentials.ts
-  - docs/discuss/2026-08-17-landing-signup-visual-feedback.md
-  - packages/platform/src/deployment/types.ts
-  - packages/platform/vitest.config.ts
-  - apps/saas/app/api/course/studio/route.ts
-  - packages/platform/src/mount-points.ts
-  - packages/course/src/config/modules.ts
-  - packages/github-kit/index.ts
-  - packages/github-kit/provision-buyer-repo.ts
-  - packages/api/modules/course/router.ts
-  - apps/saas/package.json
-  - apps/marketing/app/[locale]/course/preview/[lessonId]/page.tsx
-  - docs/gaishen-workflow-demo.html
-  - apps/saas/modules/deployment/constants.ts
-  - packages/api/modules/deployment/procedures/provision-server.ts
-  - packages/platform/tsconfig.json
-  - docs/demo/course-sales-page-powercourse.html
-  - packages/github-kit/repo-version.ts
-  - packages/github-kit/types.ts
-  - docs/tutorials/puter-serverless-mvp/README.md
-  - docs/为什么叫QQ – 你的AI编程总是翻车？因为你少做了一步：设计隔离  拆解 Grill-me，Superpowers，Openspec 的第一步.md
-  - packages/github-kit/revoke.ts
-  - packages/support/src/chatwoot-payload.ts
-  - docs/discuss/2026-08-21-buyer-dev-onboarding-guide-idea.md
-  - docs/discuss/2026-08-21-thetu-core-modules-architecture.html
-  - README.md
-  - docs/gaishen-orca-workflow.md
-  - packages/support/src/ticket-status.ts
-  - apps/saas/lib/operator.ts
-  - packages/api/modules/support/lib/chatwoot-client.ts
-  - packages/course/src/components/interactive/WorkflowSorter.tsx
-  - packages/course/src/mdx/extract-lesson-block-ids.ts
-  - packages/support/package.json
-  - docs/discuss/2026-08-17-wp-frontend-mount-research.md
-  - packages/support/src/generate-diagnosis.ts
-  - apps/saas/app/api/mcp/lib/config.ts
-  - packages/api/modules/support/procedures/chatwoot-webhook.ts
-  - .spectra.yaml
-  - packages/github-kit/github-app-client.ts
-  - apps/saas/modules/deployment/components/ManagedVpsGuide.tsx
-  - packages/course/src/components/interactive/MicroSandbox.tsx
-  - packages/platform/package.json
-  - packages/api/modules/support/router.ts
-  - apps/saas/app/api/mcp/connections/[id]/route.ts
-  - packages/support/vitest.config.ts
-  - apps/saas/app/api/mcp/connections/route.ts
-  - apps/saas/app/api/mcp/lib/handler.ts
-  - packages/course/src/components/interactive/TimelineSync.tsx
-  - packages/database/prisma/migrations/20260819120000_add_studio_folder_collapse_state/migration.sql
-  - apps/saas/app/api/repo-version/route.ts
-  - docs/demo/course-frontend-landing-demo.html
-  - packages/platform/src/deployment/db.ts
-  - apps/saas/app/api/github/claim/route.ts
-  - AGENTS.md
-  - apps/saas/app/api/mcp/lib/guard.ts
-  - apps/saas/app/api/course/ai/route.ts
-  - apps/saas/CLAUDE.md
-  - packages/platform/src/deployment/fleet.ts
-  - packages/platform/src/deployment/tiers.ts
-  - packages/course/src/components/interactive/DialogueWindow.tsx
-  - packages/github-kit/config.ts
-  - docs/demo/course-admin-studio-demo.html
-  - packages/course/src/components/interactive/ConceptCompare.tsx
-  - packages/database/prisma/zod/index.ts
-  - docs/dispatch-board.html
-  - docs/deploy-and-public-url.md
-  - packages/course/src/player/FluentPlayer.tsx
-  - docs/demo/course-demo-3-supastarter-ai.html
-  - apps/saas/modules/deployment/components/DeploymentStatusPanel.tsx
-  - packages/course/src/components/interactive/InstantQuiz.tsx
-  - apps/saas/lib/github-kit.ts
-  - apps/saas/modules/shared/lib/nav-menu-items.ts
-  - packages/course/vitest.config.ts
-  - packages/platform/src/types.ts
-  - apps/marketing/modules/course/lib/duration.ts
-  - docs/tutorials/puter-serverless-mvp/demo/index.html
-  - packages/course/src/components/interactive/TeacherAvatar.tsx
-  - packages/api/orpc/router.ts
-  - packages/course/src/hooks/use-time-sync.ts
-  - docs/demo/course-demo-1-split.html
-  - packages/api/modules/deployment/procedures/get-status.ts
-  - docs/demo/StartKiter-成果儀表板.html
-  - packages/database/prisma/schema.prisma
-  - apps/saas/modules/deployment/components/TierSelector.tsx
-  - packages/course/src/mdx/allowed-components.ts
-  - packages/database/prisma/index.ts
-  - packages/platform/index.ts
-  - docs/demo/course-demo-3-workspace.html
-  - docs/demo/buyer-status-panel-demo.html
-  - packages/database/prisma/migrations/20260820032747_add_plugin_content/migration.sql
-  - docs/startkiter開發討論.md
-  - packages/database/prisma/migrations/20260820033416_add_mcp_connection/migration.sql
-  - packages/api/modules/course/lib/video-resolver.ts
-  - packages/course/tsconfig.json
-  - apps/saas/app/api/mcp/route.ts
-  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/page.tsx
-  - docs/discuss/2026-08-17-hyperagent-reference.md
-  - apps/marketing/app/[locale]/course/page.tsx
-  - packages/support/tsconfig.json
-  - packages/api/modules/deployment/procedures/submit-credential.ts
-  - packages/course/src/components/interactive/index.ts
-  - packages/database/prisma/migrations/migration_lock.toml
-  - apps/saas/app/(authenticated)/ChatwootScript.tsx
-  - packages/course/src/mdx/inspect-mdx-source.ts
-  - apps/saas/app/(authenticated)/layout.tsx
-  - apps/saas/app/(authenticated)/(main)/(account)/deployment/page.tsx
-  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/classroom-client.tsx
-  - packages/api/orpc/procedures.ts
-  - docs/demo/puter-todo-app.html
-  - packages/github-kit/claim.ts
-tests:
-  - packages/api/modules/course/toggle-lesson-progress.test.ts
-  - packages/database/src/plugin-content/plugin-content.test.ts
-  - packages/platform/src/types.test.ts
-  - packages/support/src/copilot.test.ts
-  - packages/api/modules/course/course.test.ts
-  - apps/saas/modules/deployment/deployment-status.test.ts
-  - packages/platform/src/deployment/tiers.test.ts
-  - packages/api/modules/support/procedures/chatwoot-webhook.test.ts
-  - apps/saas/modules/shared/lib/nav-menu-items.test.ts
-  - packages/platform/src/deployment/fleet.test.ts
-  - packages/platform/src/deployment/status.test.ts
-  - packages/course/src/mdx/extract-lesson-block-ids.test.ts
-  - packages/platform/src/deployment/coolify-client.test.ts
-  - apps/saas/modules/deployment/chatwoot-script.test.ts
-  - packages/support/src/chatwoot-signature.test.ts
-  - apps/marketing/modules/course/lib/duration.test.ts
-  - packages/api/modules/deployment/procedures/deployment-procedures.test.ts
-  - packages/support/src/ticket-status.test.ts
-  - apps/saas/modules/shared/components/NavBar.test.tsx
-  - packages/course/src/config/modules.test.ts
-  - packages/course/src/components/interactive/interactive.test.tsx
-  - packages/github-kit/config.test.ts
-  - packages/github-kit/claim.test.ts
-  - apps/saas/modules/deployment/report-issue-button.test.tsx
-  - packages/database/src/support/ticket.test.ts
-  - packages/platform/src/deployment/credentials.test.ts
-  - packages/github-kit/repo-version.test.ts
-  - packages/platform/src/mount-points.test.ts
-  - packages/course/src/mdx/inspect-mdx-source.test.ts
-  - apps/saas/app/api/mcp/route.test.ts
-  - packages/github-kit/revoke.test.ts
--->
+- **WHEN** operator 儲存含未註冊 component 或 raw script 的 MDX
+- **THEN** Studio 必須回傳驗證錯誤，不能發布或在學員端渲染該內容
 
----
-### Requirement: Unauthorized learners do not receive media URLs
-Lesson APIs and pages MUST withhold Bunny or fallback media URLs when the learner lacks course access.
+##### Example: 受限集合可逐一測試
 
-#### Scenario: Locked lesson omits media URL
-- **WHEN** an authenticated learner without purchase requests lesson media metadata
-- **THEN** the response or page MUST NOT include the playable media URL
-
-<!-- @trace
-source: mvp-dogfood-remaining
-updated: 2026-08-15
-code:
-  - apps/saas/app/globals.css
-  - apps/saas/app/course/kit-claim-panel.tsx
-  - packages/course/src/catalog.ts
-  - apps/saas/app/course/[lessonId]/page.tsx
-  - apps/saas/app/checkout/checkout-button.tsx
-  - apps/saas/.env.example
-  - apps/saas/lib/support-email.ts
-  - apps/saas/app/agent/agent-chat-client.tsx
-  - apps/saas/app/components/site-footer.tsx
-  - apps/saas/lib/public-base-url.ts
-  - docs/deploy-and-public-url.md
-  - apps/saas/app/layout.tsx
-  - vitest.config.ts
-  - apps/saas/app/course/demo-grant-button.tsx
-  - apps/saas/app/api/checkout/route.ts
-tests:
-  - apps/saas/lib/support-email.test.ts
-  - apps/saas/lib/public-base-url.test.ts
-  - packages/course/src/catalog.test.ts
--->
-
----
-### Requirement: Studio 僅接受核准影音來源與安全 URL
-
-Course Studio 必須只接受 Bunny.net、YouTube、Vimeo、HTTPS MP4 與 HTTPS HLS 作為 lesson media source。URL resolver 必須驗證 HTTPS、provider host 或 direct 檔案格式、可抽取的 source identifier 與支援狀態。未知 URL、HTTP URL、Cloudflare Stream、缺少必要 identifier 或不支援格式必須以可修正錯誤拒絕，不能自動當成 MP4 儲存。
-
-#### Scenario: operator 貼上合法 Vimeo URL
-
-- **WHEN** operator 在 Studio 貼上合法 Vimeo URL
-- **THEN** resolver 必須回傳 provider 為 vimeo、可用 source identifier 與可解析 metadata 狀態，讓該 lesson 能進一步驗證
-
-##### Example: Vimeo URL 產生可發布前的資訊卡
-
-- operator 輸入一個合法的 HTTPS Vimeo URL
-- resolver 擷取 provider=vimeo 與影片 identifier
-- Studio 顯示 duration 取得狀態，完成 metadata 驗證後才可按發布
-
-#### Scenario: operator 貼上不支援 URL
-
-- **WHEN** operator 貼上 HTTP、Cloudflare Stream 或未知 host 的 URL
-- **THEN** Studio 必須顯示可修正錯誤、拒絕儲存該來源，且 lesson 不得發布
-
-##### Example: 未知 URL 不被靜默降級
-
-- 輸入 https://example.invalid/clip
-- resolver 回傳 unsupported_source
-- 資料庫不寫入 mediaUrl，也不將 provider 標為 direct MP4
+- 測試依序提供七個已註冊積木的最小合法 props
+- 每個都可渲染或驗證成功
+- 第八個未註冊名稱被拒絕
 
 
 <!-- @trace
@@ -442,20 +213,25 @@ tests:
 -->
 
 ---
-### Requirement: Studio 顯示可驗證的影音資訊卡
+### Requirement: 互動積木完成事件受伺服器驗證
 
-當 URL resolver 接受來源時，Studio 必須顯示資訊卡，至少包含 provider、source identifier、duration 與 Fluent Player Shell 相容狀態。duration 必須由 provider adapter 取得或由可驗證 metadata 補齊；未取得 duration 時必須顯示明確狀態並阻止發布，而非假造時長。
+互動積木的完成事件必須帶有 server 可驗證的 lesson id 與 allowlisted block id。server 必須從 session 推導 user，確認該 user 有權讀取 lesson 後才可寫入 progress；client 不能以任意 userId、草稿 lesson id 或偽造 block id 寫入資料。
 
-#### Scenario: 合法來源顯示完整資訊卡
+#### Scenario: 學員完成合法 block
 
-- **WHEN** resolver 成功解析有 metadata 的 Bunny、YouTube、Vimeo、MP4 或 HLS URL
-- **THEN** Studio 必須在同一張資訊卡顯示 provider、duration 與可由 Fluent Player Shell 播放的狀態
+- **WHEN** 有權學員完成 lesson-03 中已註冊的 quiz-01
+- **THEN** server 必須只為該學員記錄一次完成事件，並回傳更新後的自身進度
 
-##### Example: duration 缺失阻止發布
+#### Scenario: client 偽造其他使用者進度
 
-- operator 儲存一個可辨識但尚無法取得 duration 的 YouTube URL
-- Studio 顯示尚未取得時長而不是預設數字
-- operator 嘗試發布時收到阻擋原因，直到 adapter 取得或驗證補齊 metadata
+- **WHEN** user A 在完成事件 payload 填入 user B 的 id
+- **THEN** server 必須忽略 client user id、只以 user A session 判定，或拒絕格式不合法請求；user B 資料不得改變
+
+##### Example: 重複事件 idempotent
+
+- user A 對同一 lesson-03／quiz-01 送出兩次完成事件
+- 持久化資料只有一個對應完成紀錄
+- 聚合進度不會因第二次請求增加
 
 
 <!-- @trace
@@ -638,20 +414,20 @@ tests:
 -->
 
 ---
-### Requirement: 試看與完整播放遵守相同媒體權限邊界
+### Requirement: 隨堂測驗提供立即且可存取的回饋
 
-公開試看與完整學員播放必須使用同一套 media resolver 與 Fluent Player Shell，但授權輸出不同：匿名只可取得已發布且 isFreePreview=true 的媒體；非試看完整媒體只可給目前 session 具 Order.courseAccess=true 的使用者。draft 或無權媒體 URL 不能由資訊卡、API、page props 或 client state 外洩。
+InstantQuiz 必須在使用者選擇後提供立即的正確或錯誤文字回饋、解析與可存取狀態，不以 Emoji 或僅靠顏色表意。完成狀態只能在題目被有效回答後送出，並遵守 server 驗證與 idempotence。
 
-#### Scenario: 匿名試看不會解鎖相鄰單元
+#### Scenario: 選錯後仍可理解結果
 
-- **WHEN** 匿名訪客成功播放 lesson-01 試看後請求 lesson-02
-- **THEN** lesson-02 若不是試看，系統必須拒絕並不輸出其 provider URL、source identifier 或 duration
+- **WHEN** 學員選擇錯誤選項
+- **THEN** 元件必須顯示文字化錯誤提示與解析，讓鍵盤與螢幕閱讀器使用者也能取得結果
 
-##### Example: 付費學員使用同一 Shell 看完整課程
+##### Example: 選對後觸發一次完成事件
 
-- user A 有 courseAccess=true 且開啟非試看的 lesson-02
-- Shell 使用 lesson 的已驗證 adapter 播放
-- user A 不會因已付款而看到 draft lesson 或其他使用者資料
+- 學員選擇正確答案
+- 元件顯示文字化正確提示與解析
+- 完成事件只送出一次，即使使用者重複點選同一答案
 
 <!-- @trace
 source: interactive-learning-system
