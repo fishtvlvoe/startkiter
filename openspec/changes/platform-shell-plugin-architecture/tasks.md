@@ -296,4 +296,4 @@
 - [ ] 50.1 確認 task 6.2（`sidebar-context.tsx` 狀態涵蓋 `/app`、`/course`、`/agent`、`/admin/settings` 全部路由）是否已完成，未完成則補上
 - [ ] 50.2 補寫 task 5.1、5.2、9.3 的紅燈測試（目前未寫）
 - [ ] 50.3 執行 task 11.1-11.3（Review、Chrome MCP 或 `/ego-browser` 截圖、`pnpm build` + `pnpm test` 全綠），未做則補做
-- [ ] 50.4 修 `modules/shared/lib/nav-menu-items.test.ts` 6/7 測試失敗（2026-08-21 跑 `pnpm --filter @startkiter/saas test` 時發現，非本次 bundles-coupons 改動造成——`git status` 確認 `nav-menu-items.ts`／`.test.ts` 皆非本輪 diff）：`adminItem`／`courseItem` 找不到對應 route path（`/admin/users` 解析成 undefined）、`getTabBarItems` 回傳的 fixed/overflow 分組數量與測試預期（fixed 3／overflow 1）不符，研判是 commit `c7755156` 補進來的 Phase 2 WIP 本身就帶著失敗測試，需重新對照 task 9.1-9.3 spec 排查
+- [x] 50.4 修 `modules/shared/lib/nav-menu-items.test.ts` 6/7 測試失敗（2026-08-21 跑 `pnpm --filter @startkiter/saas test` 時發現，非本次 bundles-coupons 改動造成——`git status` 確認 `nav-menu-items.ts`／`.test.ts` 皆非本輪 diff）：`adminItem`／`courseItem` 找不到對應 route path（`/admin/users` 解析成 undefined）、`getTabBarItems` 回傳的 fixed/overflow 分組數量與測試預期（fixed 3／overflow 1）不符，研判是 commit `c7755156` 補進來的 Phase 2 WIP 本身就帶著失敗測試，需重新對照 task 9.1-9.3 spec 排查
