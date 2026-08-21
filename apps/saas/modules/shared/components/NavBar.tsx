@@ -39,6 +39,7 @@ import {
 	EllipsisIcon,
 	HomeIcon,
 	MenuIcon,
+	PackageIcon,
 	SettingsIcon,
 	ShieldUserIcon,
 	UserCogIcon,
@@ -75,18 +76,26 @@ interface NavMenuListProps {
 	onLinkClick?: () => void;
 }
 
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+export const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 	home: HomeIcon,
 	"book-open": BookOpenIcon,
 	"bot-message-square": BotMessageSquareIcon,
+	package: PackageIcon,
 	settings: SettingsIcon,
 	"shield-user": ShieldUserIcon,
 	"user-cog": UserCogIcon,
 	ellipsis: EllipsisIcon,
+	"📚": BookOpenIcon,
 };
 
-function resolveIcon(icon: string): React.ComponentType<{ className?: string }> {
-	return iconMap[icon] ?? (() => <span className="size-5 shrink-0 text-center text-xs">{icon}</span>);
+export function resolveIcon(icon: string): React.ComponentType<{ className?: string }> {
+	if (icon && icon in iconMap) {
+		return iconMap[icon];
+	}
+	if (icon && icon.length <= 2) {
+		return () => <span className="size-5 shrink-0 text-center text-xs">{icon}</span>;
+	}
+	return PackageIcon;
 }
 
 function isNavSubItemActive(pathname: string, href: string): boolean {
