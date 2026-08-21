@@ -56,13 +56,14 @@
 
 ### 4. core-module-bundles-coupons
 - 狀態：🔵 進行中
-- Task 進度：42/56（75%）
+- Task 進度：50/56（89%）
 - 指派對象：
   - Phase 1-2（資料表＋Bundle CRUD）→ 已完成，PM 親自+Sonnet 子代理混合，PM 全數驗證
   - Phase 3（Coupon 驗證＋結帳整合）→ ✅ 已完成，**PM 親自**（金流計算邏輯，風險最高，不外派）。順帶修正 `packages/payments` 既有的 `order.ts`／`notify.ts` 硬寫死 MVP_AMOUNT_TWD 的問題，改為信任伺服器端算出的折扣金額並守住上限
-  - Phase 4（商品目錄改造，BREAKING）→ **PM 親自**（改既有結帳行為，不外派）
+  - Phase 4（商品目錄改造，BREAKING）→ ✅ 已完成（15.1-15.3），**PM 親自**。task 15.4（bundle-aware 課程存取權整合）發現卡在買家播放頁 `/course` 跟 `Bundle.courseIds` 指向的 `db.course` 是兩套無關系統，經老闆裁決縮小範圍、留到買家播放頁做出來才接
   - Demo-first HTML → 已完成兩輪（一次 CSP bug 需 Sonnet 抓根因重做），純視覺重製部分可用 Haiku，但要 Sonnet/PM 覆核是否真的用了專案既有色票/元件規格
-- E2E：⬜ 未跑
+  - Phase 5（既有 spec 對齊＋全面驗收，task 17-18）→ 待做，**PM 親自**（涉及既有測試斷言調整判斷，不外派）
+- E2E：🟡 跑過有失敗——PM 用真實登入 session 點過 `/admin/bundles`、`/settings/security`、`/course`（均 200，畫面正確），過程中抓到一個真 build bug（NavBar 透過 barrel import 拉進 server-only Prisma 依賴，見 platform-shell tasks.md 50.5）並已修復；agy 第一輪蒐證因登入態沒帶到而失敗（截圖其實是登入頁），教訓已寫進 `派工師.md`
 - 備註：Phase 3/4 禁止外派，money-related 一律 PM 親自
 
 ### 5. plan-clean-install-package-repo（已 park）
