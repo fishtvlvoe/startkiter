@@ -59,8 +59,13 @@ const ticket = {
 	userId: "user-1",
 	buyerDeploymentId: "dep_1",
 	chatwootConversationId: 42,
+	channel: "WEB_WIDGET" as const,
 	status: "OPEN" as const,
 	aiSuggestedResolvedAt: null,
+	resolvedAt: null,
+	resolvedBy: null,
+	createdAt: new Date(),
+	updatedAt: new Date(),
 };
 
 const deployment = {

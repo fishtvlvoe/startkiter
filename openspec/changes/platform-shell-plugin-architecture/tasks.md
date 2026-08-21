@@ -28,30 +28,30 @@
 
 - [ ] 5.1 [P] 撰寫測試驗證 spec saas-shell「Unified Shell covers all authenticated routes」——GET /agent 回應含統一 Shell 側欄結構
 - [ ] 5.2 [P] 撰寫測試驗證同一 Requirement——GET /admin/settings 回應含統一 Shell 側欄結構
-- [ ] 5.3 [P] 撰寫測試驗證 spec saas-shell「Operator navigation reaches settings」——operator 側欄含 /admin/settings 連結，learner 不含
+- [x] 5.3 [P] 撰寫測試驗證 spec saas-shell「Operator navigation reaches settings」——operator 側欄含 /admin/settings 連結，learner 不含
 
 ### 6. 實作：Shell 統一與選單動態渲染
 
-- [ ] 6.1 修改 `modules/shared/components/NavBar.tsx` 的側欄 nav 區塊，從手寫 Link 改為 `.map()` 迭代 MOUNT_POINTS 渲染，menu 項目依 `order` 排序、依 `requiresOperator` 過濾，驗證：3.2、3.3、5.1、5.2、5.3 轉綠燈
+- [x] 6.1 修改 `modules/shared/components/NavBar.tsx` 的側欄 nav 區塊，從手寫 Link 改為 `.map()` 迭代 MOUNT_POINTS 渲染，menu 項目依 `order` 排序、依 `requiresOperator` 過濾，驗證：3.2、3.3、5.1、5.2、5.3 轉綠燈
 - [ ] 6.2 確認 `modules/lib/sidebar-context.tsx` 的狀態管理涵蓋所有已登入路由（/app, /course, /agent, /admin/settings），必要時擴充
 
 ### 7. 紅燈測試：語系與深色模式配置
 
-- [ ] 7.1 撰寫測試驗證 spec saas-shell「Locale switcher lives in the sidebar user area, color mode toggle stays in the top bar」——側欄使用者區塊含語系切換、頂欄含深色模式但不含語系切換
+- [x] 7.1 撰寫測試驗證 spec saas-shell「Locale switcher lives in the sidebar user area, color mode toggle stays in the top bar」——側欄使用者區塊含語系切換、頂欄含深色模式但不含語系切換
 
 ### 8. 實作：語系與深色模式配置
 
-- [ ] 8.1 將語系切換元件從頂欄移入 NavBar 側欄使用者區塊，驗證：7.1 轉綠燈
+- [x] 8.1 將語系切換元件從頂欄移入 NavBar 側欄使用者區塊，驗證：7.1 轉綠燈
 
 ### 9. 紅燈測試：窄螢幕 tab bar
 
-- [ ] 9.1 [P] 撰寫測試驗證 spec saas-shell「Narrow viewport renders a bottom tab bar with an overflow drawer」的 375px scenario——tab bar 恰好 4 個項目（開始/課程/客服/更多）
-- [ ] 9.2 [P] 撰寫測試驗證同一 Requirement 的 More drawer scenario——operator 在 375px 點「更多」，抽屜含帳號設定
+- [x] 9.1 [P] 撰寫測試驗證 spec saas-shell「Narrow viewport renders a bottom tab bar with an overflow drawer」的 375px scenario——tab bar 恰好 4 個項目（開始/課程/客服/更多）
+- [x] 9.2 [P] 撰寫測試驗證同一 Requirement 的 More drawer scenario——operator 在 375px 點「更多」，抽屜含帳號設定
 - [ ] 9.3 [P] 撰寫測試驗證同一 Requirement 的 Wide viewport scenario——1280px 渲染側欄、不渲染 tab bar
 
 ### 10. 實作：窄螢幕 tab bar
 
-- [ ] 10.1 在 NavBar 或新增獨立元件，螢幕寬度 < 768px 時渲染底部 tab bar（3 固定項目 + 更多抽屜），取代側欄。menu 項目超出固定 3 個的全部進「更多」抽屜，驗證：9.1、9.2、9.3 轉綠燈
+- [x] 10.1 在 NavBar 或新增獨立元件，螢幕寬度 < 768px 時渲染底部 tab bar（3 固定項目 + 更多抽屜），取代側欄。menu 項目超出固定 3 個的全部進「更多」抽屜，驗證：9.1、9.2、9.3 轉綠燈
 
 ### 11. Phase 2 Review 與驗收
 
@@ -63,17 +63,17 @@
 
 ### 12. 紅燈測試：PluginContent 共用表
 
-- [ ] 12.1 撰寫測試驗證 spec platform-mount-points「Shared PluginContent table stores content-type Plugin data」——插入 pluginId=course / type=lesson 記錄後可依條件查回
-- [ ] 12.2 撰寫測試驗證同一 Requirement——空 body 值被資料庫拒絕
+- [x] 12.1 撰寫測試驗證 spec platform-mount-points「Shared PluginContent table stores content-type Plugin data」——插入 pluginId=course / type=lesson 記錄後可依條件查回
+- [x] 12.2 撰寫測試驗證同一 Requirement——空 body 值被資料庫拒絕
 
 ### 13. 實作：PluginContent 資料表
 
-- [ ] 13.1 新增 Prisma migration 建立 PluginContent 表（id/pluginId/type/title/body(JSONB)/authorId/createdAt/updatedAt，索引 (pluginId,type) 與 authorId），驗證：12.1、12.2 轉綠燈
+- [x] 13.1 新增 Prisma migration 建立 PluginContent 表（id/pluginId/type/title/body(JSONB)/authorId/createdAt/updatedAt，索引 (pluginId,type) 與 authorId），驗證：12.1、12.2 轉綠燈
 
 ### 14. Phase 3 Review 與驗收
 
-- [ ] 14.1 對 migration 跑 correctness / security review，Critical 為零
-- [ ] 14.2 `pnpm build` 與 `pnpm test` 通過
+- [x] 14.1 對 migration 跑 correctness / security review，Critical 為零
+- [x] 14.2 `pnpm build` 與 `pnpm test` 通過
 
 ## Phase 4：Marketplace 角色降級為展示頁 + 模版選擇，不做「裝/解」操作
 
@@ -130,29 +130,29 @@
 
 ### 24. 紅燈測試：MCP Gateway
 
-- [ ] 24.1 [P] 撰寫測試驗證 spec mcp-gateway「MCP endpoint is reachable at a fixed path」——有效 session 對 /api/mcp 握手成功回傳 serverInfo 與 capabilities
-- [ ] 24.2 [P] 撰寫測試驗證同一 Requirement——無 session 導向授權流程
-- [ ] 24.3 [P] 撰寫測試驗證 spec mcp-gateway「MCP Gateway authorizes via OAuth-style session flow, not API keys」——授權流程不顯示 API key
-- [ ] 24.4 [P] 撰寫測試驗證 spec mcp-gateway「Successful authorization creates a revocable connection record」——授權建立連線記錄、GET 回自己的清單、DELETE 撤銷自己的、無法 DELETE 他人的（4 scenarios）
-- [ ] 24.5 [P] 撰寫測試驗證 spec mcp-gateway「MCP Gateway exposes read-only operations only」——唯讀呼叫成功、寫入呼叫被拒且不變更
-- [ ] 24.6 [P] 撰寫測試驗證 spec mcp-gateway「MCP Gateway fails closed when auth configuration is missing」——BETTER_AUTH_SECRET 未設定回 503
+- [x] 24.1 [P] 撰寫測試驗證 spec mcp-gateway「MCP endpoint is reachable at a fixed path」——有效 session 對 /api/mcp 握手成功回傳 serverInfo 與 capabilities
+- [x] 24.2 [P] 撰寫測試驗證同一 Requirement——無 session 導向授權流程
+- [x] 24.3 [P] 撰寫測試驗證 spec mcp-gateway「MCP Gateway authorizes via OAuth-style session flow, not API keys」——授權流程不顯示 API key
+- [x] 24.4 [P] 撰寫測試驗證 spec mcp-gateway「Successful authorization creates a revocable connection record」——授權建立連線記錄、GET 回自己的清單、DELETE 撤銷自己的、無法 DELETE 他人的（4 scenarios）
+- [x] 24.5 [P] 撰寫測試驗證 spec mcp-gateway「MCP Gateway exposes read-only operations only」——唯讀呼叫成功、寫入呼叫被拒且不變更
+- [x] 24.6 [P] 撰寫測試驗證 spec mcp-gateway「MCP Gateway fails closed when auth configuration is missing」——BETTER_AUTH_SECRET 未設定回 503
 
 ### 25. 實作：McpConnection 資料表
 
-- [ ] 25.1 新增 Prisma migration 建立 McpConnection 表（id/userId/clientName/authorizedAt/lastUsedAt/revokedAt，索引 userId）
+- [x] 25.1 新增 Prisma migration 建立 McpConnection 表（id/userId/clientName/authorizedAt/lastUsedAt/revokedAt，索引 userId）
 
 ### 26. 實作：MCP Gateway 端點
 
-- [ ] 26.1 新增 `apps/saas/app/api/mcp/route.ts`，實作 MCP 協定握手，重用 Better Auth session 授權，驗證：24.1、24.2、24.3 轉綠燈
-- [ ] 26.2 授權成功寫入 McpConnection，新增連線管理 API（GET /api/mcp/connections、DELETE /api/mcp/connections/[id]），驗證：24.4 轉綠燈
-- [ ] 26.3 MCP Gateway 只註冊唯讀工具，範圍比照 site-agent 既有兩支唯讀工具，驗證：24.5 轉綠燈
-- [ ] 26.4 DATABASE_URL 或 BETTER_AUTH_SECRET 缺失時回傳 503，驗證：24.6 轉綠燈
+- [x] 26.1 新增 `apps/saas/app/api/mcp/route.ts`，實作 MCP 協定握手，重用 Better Auth session 授權，驗證：24.1、24.2、24.3 轉綠燈
+- [x] 26.2 授權成功寫入 McpConnection，新增連線管理 API（GET /api/mcp/connections、DELETE /api/mcp/connections/[id]），驗證：24.4 轉綠燈
+- [x] 26.3 MCP Gateway 只註冊唯讀工具，範圍比照 site-agent 既有兩支唯讀工具，驗證：24.5 轉綠燈
+- [x] 26.4 DATABASE_URL 或 BETTER_AUTH_SECRET 缺失時回傳 503，驗證：24.6 轉綠燈
 
 ### 27. Phase 5 Review 與驗收
 
-- [ ] 27.1 對 MCP Gateway 全部變更跑 correctness / security / performance code review，特別檢查唯讀限制是否確實、有無意外寫入路徑，Critical 為零
-- [ ] 27.2 `curl /api/mcp`、`/api/mcp/connections` 回傳格式符合 spec
-- [ ] 27.3 `pnpm build` 與 `pnpm test` 通過
+- [x] 27.1 對 MCP Gateway 全部變更跑 correctness / security / performance code review，特別檢查唯讀限制是否確實、有無意外寫入路徑，Critical 為零
+- [x] 27.2 `curl /api/mcp`、`/api/mcp/connections` 回傳格式符合 spec
+- [x] 27.3 `pnpm build` 與 `pnpm test` 通過
 
 ## Phase 6：Core 邊界聲明維持不變
 
@@ -192,35 +192,35 @@
 
 ### 33. 紅燈測試：per-buyer 專屬倉庫生成
 
-- [ ] 33.1 [P] 撰寫測試驗證 spec github-kit-fulfillment「In-site GitHub claim after payment」修訂後行為——POST /api/github/claim 成功時呼叫 GitHub template-generate API 並產生 write 權限的 github_kit_grants 列，不再呼叫舊的共用 repo collaborator 邀請邏輯；同時驗證同一 spec 修訂後的 Requirement「Claim entitlement reads Order.kitClaimEligible」——kitClaimEligible true 的使用者呼叫時系統必須嘗試產生專屬倉庫並授予 write，成功時寫入 github_kit_grants
-- [ ] 33.2 [P] 撰寫測試驗證 spec github-kit-fulfillment「Invite grants write access on a dedicated per-buyer organization repository」——寫入的 grant permission 恆等於 write，不等於 pull/maintain/admin
-- [ ] 33.3 [P] 撰寫測試驗證同一 Requirement 的「No two buyers share a delivered repository」scenario——兩個不同買家各自 claim 成功後，github_kit_grants 的 repo 欄位不相同
-- [ ] 33.4 [P] 撰寫測試驗證 spec buyer-repo-upstream-sync「Missing template repo configuration fails closed」——`GITHUB_KIT_TEMPLATE_REPO` 未設定時 POST /api/github/claim 回 503，不建立部分完成的 grant
+- [x] 33.1 [P] 撰寫測試驗證 spec github-kit-fulfillment「In-site GitHub claim after payment」修訂後行為——POST /api/github/claim 成功時呼叫 GitHub template-generate API 並產生 write 權限的 github_kit_grants 列，不再呼叫舊的共用 repo collaborator 邀請邏輯；同時驗證同一 spec 修訂後的 Requirement「Claim entitlement reads Order.kitClaimEligible」——kitClaimEligible true 的使用者呼叫時系統必須嘗試產生專屬倉庫並授予 write，成功時寫入 github_kit_grants
+- [x] 33.2 [P] 撰寫測試驗證 spec github-kit-fulfillment「Invite grants write access on a dedicated per-buyer organization repository」——寫入的 grant permission 恆等於 write，不等於 pull/maintain/admin
+- [x] 33.3 [P] 撰寫測試驗證同一 Requirement 的「No two buyers share a delivered repository」scenario——兩個不同買家各自 claim 成功後，github_kit_grants 的 repo 欄位不相同
+- [x] 33.4 [P] 撰寫測試驗證 spec buyer-repo-upstream-sync「Missing template repo configuration fails closed」——`GITHUB_KIT_TEMPLATE_REPO` 未設定時 POST /api/github/claim 回 503，不建立部分完成的 grant
 
 ### 34. 實作：per-buyer 專屬倉庫生成
 
-- [ ] 34.1 新增 `packages/github-kit/src/provision-buyer-repo.ts`，呼叫 GitHub「Generate repository from template」API（以 `GITHUB_KIT_TEMPLATE_REPO` 為模板），在 org 下建立 `org/kit-<orderId>` 私有倉庫，驗證：33.1、33.4 轉綠燈
-- [ ] 34.2 修改 `packages/github-kit/src/claim.ts`，改為呼叫 34.1 的 provision 函式取代原有的共用 repo collaborator 邀請邏輯（該邏輯原本實作已移除的 Requirement「Invite is read-only on an organization repository」），邀請買家帳號時授予 `write` 權限，滿足取代它的 Requirement「Paid buyers receive a dedicated writable repository generated from the StartKiter template」與「Invite grants write access on a dedicated per-buyer organization repository」，驗證：33.2、33.3 轉綠燈
-- [ ] 34.3 修改 `packages/github-kit/src/config.ts`，新增 `GITHUB_KIT_TEMPLATE_REPO` 環境變數讀取（`.trim()`、缺值時 fail-closed），比照既有 `GITHUB_KIT_ORG`/`GITHUB_KIT_REPO` 讀取慣例
+- [x] 34.1 新增 `packages/github-kit/src/provision-buyer-repo.ts`，呼叫 GitHub「Generate repository from template」API（以 `GITHUB_KIT_TEMPLATE_REPO` 為模板），在 org 下建立 `org/kit-<orderId>` 私有倉庫，驗證：33.1、33.4 轉綠燈
+- [x] 34.2 修改 `packages/github-kit/src/claim.ts`，改為呼叫 34.1 的 provision 函式取代原有的共用 repo collaborator 邀請邏輯（該邏輯原本實作已移除的 Requirement「Invite is read-only on an organization repository」），邀請買家帳號時授予 `write` 權限，滿足取代它的 Requirement「Paid buyers receive a dedicated writable repository generated from the StartKiter template」與「Invite grants write access on a dedicated per-buyer organization repository」，驗證：33.2、33.3 轉綠燈
+- [x] 34.3 修改 `packages/github-kit/src/config.ts`，新增 `GITHUB_KIT_TEMPLATE_REPO` 環境變數讀取（`.trim()`、缺值時 fail-closed），比照既有 `GITHUB_KIT_ORG`/`GITHUB_KIT_REPO` 讀取慣例
 
 ### 35. 紅燈測試：既有撤銷邏輯適配專屬倉庫
 
-- [ ] 35.1 [P] 撰寫測試驗證 spec github-kit-fulfillment「Refund revokes existing collaborator access」在新拓樸下的行為——退款時系統對買家專屬倉庫（非共用倉庫）呼叫移除 collaborator 或取消邀請的 GitHub API
+- [x] 35.1 [P] 撰寫測試驗證 spec github-kit-fulfillment「Refund revokes existing collaborator access」在新拓樸下的行為——退款時系統對買家專屬倉庫（非共用倉庫）呼叫移除 collaborator 或取消邀請的 GitHub API
 
 ### 36. 實作：撤銷邏輯適配專屬倉庫
 
-- [ ] 36.1 修改 `packages/github-kit/src/revoke.ts`，撤銷操作的目標 repo 改讀取該筆 github_kit_grants 記錄的專屬 repo 欄位，而非固定的共用 repo 常數，驗證：35.1 轉綠燈
+- [x] 36.1 修改 `packages/github-kit/src/revoke.ts`，撤銷操作的目標 repo 改讀取該筆 github_kit_grants 記錄的專屬 repo 欄位，而非固定的共用 repo 常數，驗證：35.1 轉綠燈
 
 ### 37. 紅燈測試：版本比對 API
 
-- [ ] 37.1 [P] 撰寫測試驗證 spec buyer-repo-upstream-sync「Buyer repository is up to date」——買家倉庫與模板倉庫 `STARTKITER_VERSION` 內容相同時回傳 `upToDate: true`
-- [ ] 37.2 [P] 撰寫測試驗證同一 Requirement 群組「Buyer repository is behind」——內容不同時回傳 `upToDate: false` 且 `syncPromptHint` 非空字串
-- [ ] 37.3 [P] 撰寫測試驗證「Missing version file on either side returns an indeterminate result」——任一端讀取失敗回傳 `upToDate: null`，不得回傳 `true`
-- [ ] 37.4 [P] 撰寫測試驗證「Unauthenticated request is denied」——無 session 呼叫 GET /api/repo-version 回 401
+- [x] 37.1 [P] 撰寫測試驗證 spec buyer-repo-upstream-sync「Buyer repository is up to date」——買家倉庫與模板倉庫 `STARTKITER_VERSION` 內容相同時回傳 `upToDate: true`
+- [x] 37.2 [P] 撰寫測試驗證同一 Requirement 群組「Buyer repository is behind」——內容不同時回傳 `upToDate: false` 且 `syncPromptHint` 非空字串
+- [x] 37.3 [P] 撰寫測試驗證「Missing version file on either side returns an indeterminate result」——任一端讀取失敗回傳 `upToDate: null`，不得回傳 `true`
+- [x] 37.4 [P] 撰寫測試驗證「Unauthenticated request is denied」——無 session 呼叫 GET /api/repo-version 回 401
 
 ### 38. 實作：版本比對 API
 
-- [ ] 38.1 新增 `apps/saas/app/api/repo-version/route.ts`，實作 Requirement「Version comparison API reports whether the buyer's repository is behind the template」：讀取買家專屬倉庫與 `GITHUB_KIT_TEMPLATE_REPO` 各自的 `STARTKITER_VERSION` 檔案內容並比較，回傳 `{ buyerVersion, latestVersion, upToDate, syncPromptHint }`，驗證：37.1、37.2、37.3、37.4 轉綠燈
+- [x] 38.1 新增 `apps/saas/app/api/repo-version/route.ts`，實作 Requirement「Version comparison API reports whether the buyer's repository is behind the template」：讀取買家專屬倉庫與 `GITHUB_KIT_TEMPLATE_REPO` 各自的 `STARTKITER_VERSION` 檔案內容並比較，回傳 `{ buyerVersion, latestVersion, upToDate, syncPromptHint }`，驗證：37.1、37.2、37.3、37.4 轉綠燈
 
 ### 39. 紅燈測試：Marketplace 版本區塊
 
@@ -243,3 +243,43 @@
 ### 42. 待老闆裁決：既有買家遷移排程（非阻塞，記錄於 design.md Open Questions）
 
 - [ ] 42.1 待老闆裁決既有已用舊共用 pull-only 模式完成履約的買家的一次性遷移排程（是否提前通知、遷移期限）後，補寫遷移批次任務的具體 task 內容；裁決前不執行任何既有買家的權限變更
+
+## Phase 9：後台 Shell 視覺風格定案落地——WordPress Admin 語彙、側邊欄分組持久化排序、重用全域用戶管理（依 design.md 2026-08-21 決策）
+
+### 43. 紅燈測試：側邊欄分組持久化 API
+
+- [ ] 43.1 [P] 撰寫測試驗證 GET /api/sidebar-layout 回傳 `{ groups, items }`，未登入請求回 401
+- [ ] 43.2 [P] 撰寫測試驗證 PUT /api/sidebar-layout——operator 可成功寫入分組與排序，非 operator 呼叫回 403
+- [ ] 43.3 [P] 撰寫測試驗證 PUT /api/sidebar-layout 對不存在於 MOUNT_POINTS 的 `menuItemId` 拒絕該筆寫入回 400，其餘合法項目正常寫入不受影響
+- [ ] 43.4 [P] 撰寫測試驗證 SidebarGroup 表為空（未初始化）時 GET /api/sidebar-layout 回傳空陣列
+
+### 44. 實作：SidebarGroup / SidebarGroupItem 資料表與 API
+
+- [ ] 44.1 新增 Prisma migration 建立 `SidebarGroup`、`SidebarGroupItem` 兩張表（design.md DB DDL），驗證：43.4 轉綠燈
+- [ ] 44.2 新增 `apps/saas/app/api/sidebar-layout/route.ts`，實作 GET/PUT，驗證：43.1、43.2、43.3 轉綠燈
+
+### 45. 紅燈測試：側邊欄 WordPress 視覺與拖曳互動
+
+- [ ] 45.1 [P] 撰寫測試驗證側邊欄呈現 32px admin bar 與 WP 配色 token（`#2271b1` active、`#1d2327` 側欄背景）
+- [ ] 45.2 [P] 撰寫測試驗證側邊欄可收折至 56px（僅 icon），且單一分組可獨立收折，兩層狀態互不影響
+- [ ] 45.3 [P] 撰寫測試驗證拖曳選單項目到不同分組後呼叫 PUT /api/sidebar-layout，畫面即時反映新分組歸屬
+- [ ] 45.4 [P] 撰寫測試驗證 < 768px 時 admin bar 顯示 hamburger 按鈕，點擊觸發側邊欄滑出 + 遮罩
+
+### 46. 實作：NavBar / sidebar-context 改造為 WordPress 視覺 + 可拖曳分組
+
+- [ ] 46.1 修改 NavBar 樣式套用 WP token（admin bar、側欄配色、收折動畫），驗證：45.1、45.2 轉綠燈
+- [ ] 46.2 側邊欄新增分組管理 UI（新增分組／改名／跨分組拖曳排序），互動結果呼叫 44.2 的 API 儲存；`SidebarGroup` 為空時 fallback 使用 `MOUNT_POINTS` 預設順序渲染，驗證：45.3 轉綠燈
+- [ ] 46.3 確認既有 hamburger + 遮罩邏輯（task 9.x）與新 admin bar 樣式相容，驗證：45.4 轉綠燈
+
+### 47. 實作：重用 supastarter 全域用戶管理
+
+- [ ] 47.1 確認 `apps/saas/app/(authenticated)/(main)/(account)/admin/` 路由與 `modules/admin/component/users/UserList.tsx` 已從 supastarter（`/Users/fishtv/Development/supastarter-nextjs`）抽取；尚未抽取則比照既有 buyer-extension-convention 抽取慣例補抽
+- [ ] 47.2 於 `MOUNT_POINTS` 新增用戶管理 manifest（`mount.route.path: "/admin/users"`、`mount.menu: { label: "用戶", icon: "fa-users", requiresOperator: true }`），不新增 `/admin/organizations` 對應 manifest
+- [ ] 47.3 確認 `packages/auth/config.ts` 的 `organizations.enabled` 維持 `false`
+
+### 48. Phase 9 Review 與驗收
+
+- [ ] 48.1 對 Phase 9 全部變更跑 correctness / security / performance code review，Critical 為零
+- [ ] 48.2 用 Chrome MCP 對側邊欄拖曳互動與 admin bar 視覺截圖，比對 `docs/demo/course-admin-studio-demo.html` 確認一致
+- [ ] 48.3 `curl /api/sidebar-layout` 驗證持久化——拖曳後重新 GET 順序與分組歸屬正確
+- [ ] 48.4 `pnpm build` 與 `pnpm test` 通過

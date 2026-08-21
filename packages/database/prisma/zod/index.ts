@@ -136,6 +136,18 @@ export const LessonProgressScalarFieldEnumSchema = z.enum(['id', 'userId', 'less
 
 export type LessonProgressScalarFieldEnum = z.infer<typeof LessonProgressScalarFieldEnumSchema>;
 
+// File: PluginContentScalarFieldEnum.schema.ts
+
+export const PluginContentScalarFieldEnumSchema = z.enum(['id', 'pluginId', 'type', 'title', 'body', 'authorId', 'createdAt', 'updatedAt'])
+
+export type PluginContentScalarFieldEnum = z.infer<typeof PluginContentScalarFieldEnumSchema>;
+
+// File: McpConnectionScalarFieldEnum.schema.ts
+
+export const McpConnectionScalarFieldEnumSchema = z.enum(['id', 'userId', 'clientName', 'authorizedAt', 'lastUsedAt', 'revokedAt'])
+
+export type McpConnectionScalarFieldEnum = z.infer<typeof McpConnectionScalarFieldEnumSchema>;
+
 // File: StudioFolderScalarFieldEnum.schema.ts
 
 export const StudioFolderScalarFieldEnumSchema = z.enum(['id', 'name', 'order', 'isCollapsed', 'createdAt', 'updatedAt'])
@@ -615,6 +627,36 @@ export const LessonProgressSchema = z.object({
 });
 
 export type LessonProgressType = z.infer<typeof LessonProgressSchema>;
+
+
+// File: PluginContent.schema.ts
+
+export const PluginContentSchema = z.object({
+  id: z.string(),
+  pluginId: z.string(),
+  type: z.string(),
+  title: z.string(),
+  body: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10"),
+  authorId: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type PluginContentType = z.infer<typeof PluginContentSchema>;
+
+
+// File: McpConnection.schema.ts
+
+export const McpConnectionSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  clientName: z.string(),
+  authorizedAt: z.date(),
+  lastUsedAt: z.date().nullish(),
+  revokedAt: z.date().nullish(),
+});
+
+export type McpConnectionType = z.infer<typeof McpConnectionSchema>;
 
 
 // File: StudioFolder.schema.ts

@@ -45,6 +45,8 @@ model User {
   buyerDeployments         BuyerDeployment[]
   supportTickets           SupportTicket[]
   lessonProgresses         LessonProgress[]
+  pluginContents           PluginContent[]
+  mcpConnections           McpConnection[]
 
   @@unique([email])
   @@map("user")
@@ -469,6 +471,36 @@ model LessonProgress {
   @@index([userId])
   @@index([lessonId])
   @@map("lesson_progress")
+}
+
+model PluginContent {
+  id        String   @id @default(cuid())
+  pluginId  String
+  type      String
+  title     String
+  body      Json
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([pluginId, type])
+  @@index([authorId])
+}
+
+model McpConnection {
+  id           String    @id @default(cuid())
+  userId       String
+  clientName   String
+  authorizedAt DateTime  @default(now())
+  lastUsedAt   DateTime?
+  revokedAt    DateTime?
+
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("mcp_connection")
 }
 
 model StudioFolder {

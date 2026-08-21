@@ -22,6 +22,14 @@ v1 既有硬邊界（openspec/config.yaml context）維持不變：不做 Organi
 
 2026-08-20 補充背景：已封存的 `github-kit-fulfillment` 定義買家倉庫拓樸為「全買家 pull-only 進同一個 `org/startkiter-private-kit`」。但本 change 既有決策「買家用 AI 工具改自己倉庫代碼 → AI 幫他 commit + push main → Coolify/Vercel 自動重建部署」的前提是買家有自己一份可寫的倉庫，兩者互斥。老闆確認：買家倉庫拓樸改為「per-buyer 專屬可寫倉庫」，且要求買家倉庫要能比照 StartKiter 自己追蹤 supastarter 官方更新的方式（`docs/reference/supastarter-nextjs-docs/codebase/update.mdx`：`git remote add upstream` + `git pull upstream main`）追蹤 StartKiter 官方模板倉庫的後續更新。
 
+2026-08-21 補充背景：老闆看過 `docs/demo/course-admin-studio-demo.html`（WordPress 風格後台視覺 demo）並定案三件事：
+
+1. Shell 視覺風格確認採 WordPress Admin 介面語彙（頂列 admin bar + 分組可拖曳側邊欄），適用於 Core Shell 本身，不是單一模版的樣式
+2. 側邊欄分組/排序管理（demo 中的新增分組、改名、拖曳排序）v1 要做成真的可持久化功能，不是純前端展示
+3. 課程管理後台編輯器（章節/單元 CRUD、拖曳排序、影片網址自動辨識、雙欄講義編輯器）與 Posts/Pages 內容 CMS 兩塊範圍太大，都拆成獨立 change，不併入這張
+
+老闆同時確認全域用戶管理（保全室：看名單、封鎖/解封帳號）沿用 supastarter 既有的 Admin UI（`/Users/fishtv/Development/supastarter-nextjs/apps/saas/app/(authenticated)/(main)/(account)/admin/`，路由 `/admin/users`、`/admin/organizations`），不新寫。這跟「不做 Organizations 多租戶」是兩件事：Admin UI 的用戶封鎖功能兩種蓋法都能裝，跟要不要開放買家站內建多租戶組織無關——後者維持既有 Non-Goal，`organizations.enabled` 保持 `false`，因此只重用 `/admin/users`，不掛載 `/admin/organizations`（該頁在組織功能關閉時內容恆為空，掛了也沒用）。
+
 ## Goals / Non-Goals
 
 **Goals:**
@@ -34,11 +42,17 @@ v1 既有硬邊界（openspec/config.yaml context）維持不變：不做 Organi
 - 買家 UI 模版選擇：提供 2-3 個內建模版，買家選完後 AI 工具自動套用
 - 明確聲明 Core 邊界
 - 每位買家在付款履約後取得一份專屬、可寫的私有倉庫，並能透過 AI 工具追蹤 StartKiter 官方模板倉庫的後續更新（新模組/新 Plugin/修補）
+- 後台 Shell 視覺定案為 WordPress Admin 介面語彙（頂列 admin bar + 分組可拖曳側邊欄），依 `docs/demo/course-admin-studio-demo.html` 確認
+- 側邊欄分組與項目排序可由 operator 自訂並持久化（新增分組、改名、拖曳排序）
+- 全域用戶管理（用戶列表、封鎖/解封）重用 supastarter 既有 `/admin/users` Admin UI，掛進 Mount Points
 
 **Non-Goals:**
 
 - 不建客製打包工具、不建 MCP 推送安裝包功能、不建伺服器端自動 build/deploy 觸發（全部改走 git-push-auto-deploy）
 - 不做「一鍵裝/解」的 Marketplace 操作介面
+- 不做 Organizations 多租戶（owner/admin/member 組織架構）——`organizations.enabled` 維持 `false`；買家一個站台只有一套帳號體系，不分子組織/子租戶。全域用戶管理（封鎖/解封帳號）是獨立於 Organizations 之外的功能，不受此限
+- 不在這張 change 做課程管理後台編輯器（章節/單元 CRUD、拖曳排序、影片網址自動辨識、雙欄講義編輯器）——拆成獨立 change，理由：現有 `course-module`/`course-media-playback` spec 只涵蓋學員端播放，管理員編輯是全新範圍
+- 不在這張 change 做 Posts/Pages 內容 CMS 後台——`platform-core-boundary` 已宣告 page-editing system 是 Core 固定能力，但具體實作拆成獨立 change 處理，這張只維持既有的 Core 邊界宣告文字，不新增實作
 - 不做 zip 上傳安裝流程、block editor、shortcode 解析器、交易型 Plugin migration 工具鏈
 - 不整合 refero.design MCP（v1 僅內建模版）
 - 不做 Agent 管理 Plugin；AI 反向連線客戶伺服器的機制不在此 change 定義，見 `coolify-managed-deployment`
@@ -78,9 +92,48 @@ Alternatives Considered:
 
 新增 `packages/platform/src/mount-points.ts`，匯出 `MOUNT_POINTS: PluginManifest[]` 靜態陣列。NavBar 的選單渲染改為 `.map()` 這份清單。架構意圖與原 design 一致，只是實作路徑對齊新結構。
 
+`MOUNT_POINTS` 本身（有哪些 Plugin、每個 Plugin 提供哪個路由/選單項目）維持靜態陣列不變——這是「有什麼」。但每個選單項目被分到哪個側邊欄分組、分組內順序如何，是「怎麼排」，這層排版資訊改為 DB 持久化（見下方「側邊欄分組與排序」決策），兩者是不同層次，不互相取代。
+
 Alternatives Considered:
 - 資料庫驅動 — 否決：v1 沒有動態安裝機制，資料庫驅動空轉
 - 檔案系統掃描 — 否決：v1 只有課程一個示範 Plugin，複雜度不需要
+
+### 後台 Shell 視覺風格定案：WordPress Admin 介面語彙
+
+依 `docs/demo/course-admin-studio-demo.html` 確認，NavBar/sidebar-context 擴充需落實以下視覺與互動規格（適用整個 Core Shell，不分模版）：
+
+- 頂列 admin bar：固定 32px 高，深色（`#1d2327` 系），左側站名 + 產品切換下拉（官網首頁/銷售頁/學員教室），右側使用者頭像
+- 側邊欄：預設寬度 208px（`w-52`），可收折至 56px（`w-14`）只顯示 icon；螢幕 < 768px 改為 hamburger + 全螢幕遮罩（backdrop）觸發滑出
+- 側邊欄選單分三個固定分組起步：核心控制 CORE / 產品業務 PRODUCTS / 系統管理 SYSTEM，每組可再由 operator 自訂增減（見下方分組持久化決策）
+- 每個分組可獨立收折（點分組標題的 chevron），與整個側邊欄的收折是兩層獨立狀態
+- 配色沿用 WP 既有語彙：active 選單項目 `#2271b1`、側欄背景 `#1d2327`、內容區背景 `#f0f0f1`，作為 Shell 的固定樣式 token，不隨模版變動（模版變動的是內容區排版，不是 Shell 外殼配色）
+
+Alternatives Considered:
+- 沿用重建後 NavBar 現有的極簡樣式，不改視覺 — 否決：老闆看過 demo 明確要這個方向，且 WP 介面語彙對目標客群（不懂技術的小白）有現成的心智模型可以借
+- 把 WP 視覺做成模版層的 `styleTokenOverrides`，不同模版可以有不同 Shell 外觀 — 否決：Shell 外殼是 operator 管理介面，不是買家對外門面，統一一種好維護即可；模版差異化只需要作用在內容區（Dashboard 排版、前台頁面），不需要連後台外殼一起換膚，增加不必要的複雜度
+
+### 側邊欄分組與排序 v1 真實可持久化，新增 `SidebarGroup`／`SidebarGroupItem` 資料表
+
+demo 裡的「新增分組、改名、拖曳排序」在 v1 要做成真的存檔功能，不是純前端展示。新增兩張表：
+
+- `SidebarGroup`：儲存分組本身（標題、順序、是否收折）
+- `SidebarGroupItem`：儲存每個選單項目被分到哪個分組、組內順序，`menuItemId` 對應 `MOUNT_POINTS` 裡某個 Plugin 的 `mount.menu` 項目 key
+
+v1 範圍限定單一 operator 視角（無 Organizations，見 Non-Goals），不需要 `userId`/`organizationId` 欄位分租戶——一個買家站台只有一份側邊欄佈局設定。
+
+Alternatives Considered:
+- v1 先不做持久化，拖曳只是 demo 展示、重新整理就還原 — 否決：老闆明確要求真的做，展示功能卻不能用會讓買家困惑
+- 排序資訊塞進既有的某張表（例如塞進 User 或 Site 設定 JSON 欄位）— 否決：分組與項目是一對多的結構化資料，用獨立表 + 正確索引比塞進單一 JSON blob 更好查詢與維護，且未來若真的開放多 operator，`SidebarGroup` 加一個 `operatorId` 欄位就能擴充，不用整個重構
+
+### 全域用戶管理重用 supastarter 既有 Admin UI，Organizations 維持不啟用
+
+supastarter 內建「Admin」角色與 UI（`/admin/users` 瀏覽用戶清單、封鎖/解封帳號含理由與到期時間），與「Organizations 多租戶」是彼此獨立的兩套機制——前者管「這個帳號能不能登入」，後者管「站內能不能分子組織」。
+
+v1 只掛 `/admin/users` 進 Mount Points（`requiresOperator: true`），不掛 `/admin/organizations`：因為 `organizations.enabled` 維持 `false`（既有 Non-Goal），組織功能關閉時該頁內容恆為空，掛載沒有意義。用戶管理頁完全重用 supastarter 現成元件（`modules/admin/component/users/UserList.tsx`），不新寫。
+
+Alternatives Considered:
+- 順便啟用 Organizations，讓 `/admin/organizations` 也一起掛上 — 否決：這是範圍變更，會牽動 buyer-repo/github-kit 履約模型（一個買家一份專屬倉庫的前提是單一帳號體系），不是這張 change 的討論範圍，維持既有 Non-Goal
+- 自己重寫一套簡化版用戶管理 UI — 否決：supastarter 現成元件已經滿足需求（列表 + 封鎖/解封），重造是浪費（L084 reuse-first）
 
 ### 買家 UI 模版選擇：v1 內建 2-3 個靜態模版，不整合外部設計參考庫
 
@@ -163,6 +216,9 @@ Alternatives Considered:
 - 買家用 AI 工具依照 buyer-extension-convention 改代碼 → AI commit + push → Coolify/Vercel 自動重建部署
 - 付款履約後，買家取得一份專屬（非共用）GitHub 私有倉庫，帳號權限為 write
 - Marketplace 頁面新增「版本」區塊，顯示買家倉庫版本 vs StartKiter 模板倉庫最新版本；不同步時顯示可貼給 AI 工具的同步 prompt
+- 側邊欄呈現 WordPress Admin 視覺語彙：頂列 32px admin bar、可收折側邊欄（208px ↔ 56px）、< 768px 改 hamburger + 遮罩滑出
+- operator 可在側邊欄新增分組、改名、拖曳排序選單項目（含跨分組拖曳），重新整理頁面後排序維持（已持久化）
+- operator 訪問 `/admin/users` 看到 supastarter 既有用戶清單與封鎖/解封操作；`/admin/organizations` 不掛載於選單
 
 **Interface / data shape:**
 
@@ -190,6 +246,21 @@ type SiteTemplate = {
   styleTokenOverrides: Record<string, string>;
   aiPromptHint: string;
 };
+
+// packages/platform/src/sidebar/types.ts
+type SidebarGroup = {
+  id: string;
+  title: string;
+  order: number;
+  isCollapsed: boolean;
+};
+
+type SidebarGroupItem = {
+  id: string;
+  groupId: string;
+  menuItemId: string; // 對應 MOUNT_POINTS 中某個 Plugin 的 mount.menu 項目 key
+  order: number;
+};
 ```
 
 - `GET /api/plugins` → 回傳 `PluginManifest[]`，含 `enabled: boolean` 欄位
@@ -198,6 +269,8 @@ type SiteTemplate = {
 - `GET /api/mcp/connections` → 回傳 `McpConnection[]`
 - `DELETE /api/mcp/connections/:id` → 撤銷指定連線
 - `GET /api/repo-version` → 回傳 `{ buyerVersion: string, latestVersion: string, upToDate: boolean | null, syncPromptHint: string }`，需有效 session；`upToDate` 為 `null` 表示任一端版本檔缺失，無法判斷
+- `GET /api/sidebar-layout` → 回傳 `{ groups: SidebarGroup[], items: SidebarGroupItem[] }`，需有效 session
+- `PUT /api/sidebar-layout` → 更新分組與排序（新增分組、改名、拖曳結果），需 operator 權限，整批覆寫 groups + items
 
 DB DDL（PostgreSQL，對應 Prisma model）：
 
@@ -224,6 +297,26 @@ CREATE TABLE "McpConnection" (
   "revokedAt" TIMESTAMP
 );
 CREATE INDEX "McpConnection_userId_idx" ON "McpConnection"("userId");
+
+CREATE TABLE "SidebarGroup" (
+  "id" TEXT PRIMARY KEY,
+  "title" TEXT NOT NULL,
+  "order" INTEGER NOT NULL,
+  "isCollapsed" BOOLEAN NOT NULL DEFAULT false,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+  "updatedAt" TIMESTAMP NOT NULL
+);
+
+CREATE TABLE "SidebarGroupItem" (
+  "id" TEXT PRIMARY KEY,
+  "groupId" TEXT NOT NULL REFERENCES "SidebarGroup"("id") ON DELETE CASCADE,
+  "menuItemId" TEXT NOT NULL,
+  "order" INTEGER NOT NULL,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT now(),
+  "updatedAt" TIMESTAMP NOT NULL
+);
+CREATE INDEX "SidebarGroupItem_groupId_idx" ON "SidebarGroupItem"("groupId");
+CREATE UNIQUE INDEX "SidebarGroupItem_menuItemId_key" ON "SidebarGroupItem"("menuItemId");
 ```
 
 **Failure modes:**
@@ -236,6 +329,9 @@ CREATE INDEX "McpConnection_userId_idx" ON "McpConnection"("userId");
 - GitHub「Generate repository from template」API 呼叫失敗 → 履約流程回報錯誤，不建立部分完成的 grant 記錄（比照既有 github-kit-fulfillment fail-closed 慣例）
 - `STARTKITER_VERSION` 檔案在買家倉庫或模板倉庫任一端不存在 → `/api/repo-version` 回傳 `upToDate: null`，不誤報「已是最新」
 - `GITHUB_KIT_TEMPLATE_REPO` 未設定 → 履約流程回傳 503，比照既有 `GITHUB_APP_ID`/`GITHUB_KIT_ORG`/`GITHUB_KIT_REPO` 缺失時的 fail-closed 慣例
+- `PUT /api/sidebar-layout` 的 `menuItemId` 不存在於當前 `MOUNT_POINTS` → 該筆項目拒絕寫入，回傳 400，不影響其他合法項目
+- `PUT /api/sidebar-layout` 由非 operator 呼叫 → 回傳 403
+- `SidebarGroup` 為空（尚未初始化）時，`GET /api/sidebar-layout` 回傳空陣列，前端 fallback 為 `MOUNT_POINTS` 的預設順序（不因為排序表是空的就不渲染選單）
 
 **Acceptance criteria:**
 
@@ -248,11 +344,14 @@ CREATE INDEX "McpConnection_userId_idx" ON "McpConnection"("userId");
 - 每個模版的靜態 HTML demo 經老闆確認後才寫真代碼
 - 付款履約後，買家倉庫是專屬（非共用）私有倉庫，買家帳號權限為 write
 - `curl /api/repo-version` 回傳格式含 buyerVersion/latestVersion/upToDate/syncPromptHint
+- 側邊欄 admin bar 與可收折分組樣式符合 demo（`docs/demo/course-admin-studio-demo.html`）視覺規格，Chrome MCP 截圖比對確認
+- 拖曳選單項目到不同分組後重新整理頁面，順序與分組歸屬維持（`curl /api/sidebar-layout` 驗證持久化）
+- `/admin/users` 可從側邊欄 SYSTEM 分組進入，`/admin/organizations` 不出現在任何選單
 
 **Scope boundaries:**
 
-- In scope: 後台 Shell 統一（對照新結構）、PluginManifest 型別與靜態掛載點清單、課程示範 Plugin manifest、Marketplace 展示頁 + 模版選擇、MCP Gateway 唯讀操作、PluginContent/McpConnection 兩張新表、2-3 個內建模版定義 + HTML demo、買家專屬可寫倉庫 provision（取代共用 pull-only）、版本比對 API、同步 prompt 提示
-- Out of scope: 客製打包工具、MCP 推送安裝包、伺服器端自動 build/deploy 觸發、zip 上傳安裝流程、block editor/shortcode 解析器、refero.design MCP 整合、交易型 Plugin migration 工具鏈、自動背景同步、自動 merge conflict 解決、即時 webhook 版本通知
+- In scope: 後台 Shell 統一（對照新結構）＋ WordPress Admin 視覺定案、PluginManifest 型別與靜態掛載點清單、SidebarGroup/SidebarGroupItem 持久化排序、課程示範 Plugin manifest、Marketplace 展示頁 + 模版選擇、MCP Gateway 唯讀操作、PluginContent/McpConnection 兩張新表、2-3 個內建模版定義 + HTML demo、買家專屬可寫倉庫 provision（取代共用 pull-only）、版本比對 API、同步 prompt 提示、重用 supastarter `/admin/users` 掛進 Mount Points
+- Out of scope: 客製打包工具、MCP 推送安裝包、伺服器端自動 build/deploy 觸發、zip 上傳安裝流程、block editor/shortcode 解析器、refero.design MCP 整合、交易型 Plugin migration 工具鏈、自動背景同步、自動 merge conflict 解決、即時 webhook 版本通知、Organizations 多租戶（`organizations.enabled` 維持 false）、課程管理後台編輯器（另開 change）、Posts/Pages CMS（另開 change）
 
 ## Risks / Trade-offs
 
@@ -282,7 +381,9 @@ CREATE INDEX "McpConnection_userId_idx" ON "McpConnection"("userId");
 
 ## Open Questions
 
-- 內建模版的具體視覺風格需要老闆看 HTML demo 才能定案——這張 change 先定義模版的資料結構與接合方式，視覺設計留給 Demo-first 流程
+- ~~內建模版的具體視覺風格需要老闆看 HTML demo 才能定案~~ — 已解決（2026-08-21）：Shell 本身視覺已依 `docs/demo/course-admin-studio-demo.html` 定案（見 Decisions「後台 Shell 視覺風格定案」）。「課程教學站」模版的內容區排版仍待各模版各自的 Demo-first 流程確認，其餘 2 個模版（服務型 SaaS、作品集展示）視覺仍未定案
+- 課程管理後台編輯器（章節/單元 CRUD、拖曳、影片網址自動辨識、雙欄講義編輯器）已拆分為獨立 change，待 propose——`docs/demo/course-admin-studio-demo.html` 的課程管理頁部分即為該獨立 change 的視覺參考
+- Posts/Pages 內容 CMS 後台已拆分為獨立 change，待 propose——`platform-core-boundary` 已宣告的「page-editing system 是 Core」承諾在該 change 落地為具體實作
 - refero.design MCP 整合的價值確認——是否值得讓買家的 AI 工具能查真實產品介面當設計參考，或者內建模版 + 自由修改已經足夠。v1 先不做，收集使用回饋再議
 - Coolify VPS 的具體建置（常駐 Node、固定 IP、PAYUNi webhook 穩定性、三層客群主機模式）已另開 `coolify-managed-deployment` change 處理，不在這張 change 範圍內
 - Marketplace 的模版選擇與 buyer-extension-convention 的 AI prompt 引導如何串接——模版定義檔的 `aiPromptHint` 欄位可以給 AI 工具直接使用，但具體的 prompt 品質需要實測調整
