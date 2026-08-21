@@ -77,7 +77,7 @@ MVP extract 佇列已清空：`extract-site-agent`、`extract-line-learner-commu
 
 台灣金流／訂單：`/Users/fishtv/Development/THE-TU-Project/dev/thetu` 的 PAYUNi／訂單抽象 → `packages/payments`（含 Order 模型欄位契約）
 
-課程 UI 當模組留下：從舊售出包（thetu）抽觀看與權限畫面 → `packages/course`。不抽整套學院營運。已封存。
+課程 UI 當模組留下：從舊售出包（thetu）抽觀看與權限畫面 → `packages/course`。原「不抽整套學院營運」的範圍限制已封存作廢——2026-08-21 老闆定案：`dev/thetu` 全套內容/行銷/金流模組（courses、bundles、coupons、subscriptions、newsletters、course-invites、assignment、lesson-comments/private-messages、invoice）開放抽取，當成 StartKiter 的「核心基本模組」，各自拆成獨立 `packages/<name>/`（依 `docs/buyer-extension-convention.md` 慣例），實際拆解規劃走新開的 Spectra change，尚未 propose。
 
 LINE 登入契約：`/Users/fishtv/Development/8-外掛/line-hub`（網頁 OAuth 決策；PHP／LIFF／Bot 不搬）
 
@@ -87,13 +87,13 @@ GitHub kit 邀請已封存（GitHub App + 站內 OAuth）。本刀不做 kit 履
 
 不准拷任何 libon.me 代碼、帳號、網域。libon.me 只當可看的案例網址。
 
-不准抽 `THE-TU-Project/code` 或 `realms-course-platform-v1.8.0`。
+不准抽 `THE-TU-Project/code`（舊版凍結產線代碼，跟目前抽取來源 `THE-TU-Project/dev/thetu` 是不同目錄）或 `realms-course-platform-v1.8.0`。
 
-THE-TU 只抽觀看／金流。不准抽電子報、優惠券、作業、NextAuth、Apple、課程邀請、賣課 onboarding skill。
+~~THE-TU 只抽觀看／金流。不准抽電子報、優惠券、作業、NextAuth、Apple、課程邀請、賣課 onboarding skill。~~ 2026-08-21 老闆定案作廢：電子報、優惠券、訂閱、bundles、作業、課程邀請、金流/發票（含 Shopline/Stripe 收款路徑）全部開放抽取，見上方「課程 UI 當模組留下」段落新決策。NextAuth／Apple 登入方式**不隨此決定開放**——StartKiter 登入機制維持既有 Better Auth 決策不變，只抽這些模組的業務邏輯與資料模型，不抽 THE-TU 的登入層。
 
 不准抽 supastarter 的 marketing／docs、Lemon／Polar／Dodo／Creem、Passkey／2FA、Organization 多租戶。
 
-不准抽 Shopline／Stripe 可收款路徑、不准抽發票。站內 agent 只掛唯讀兩工具（已落地）。
+站內 agent 只掛唯讀兩工具（已落地）。
 
 【v1 硬規則】
 

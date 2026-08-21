@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE-TU 核心基本模組整合架構與 UI/UX 示意</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap');
+  body { font-family: 'Inter', 'Noto Sans TC', sans-serif; }
+  .wp-bar { background:#1d2327; color:#c3c4c7; }
+  .wp-active { background:#2271b1 !important; color:#fff !important; font-weight:600; }
+  .box { border:1px solid #d0d5dd; border-radius:10px; background:#fff; }
+  .arrow-down { position:relative; height:28px; }
+  .arrow-down::after {
+    content:"";
+    position:absolute; left:50%; top:0; transform:translateX(-50%);
+    border-left:2px dashed #94a3b8; height:100%;
+  }
+  .arrow-down .tip { position:absolute; left:50%; bottom:-1px; transform:translateX(-50%); color:#94a3b8; }
+</style>
+</head>
+<body class="bg-[#f0f0f1] text-[#1d2327] antialiased">
+
+  <div class="max-w-6xl mx-auto px-6 py-10 space-y-14">
+
+    <header class="space-y-2">
+      <div class="text-xs font-bold text-[#2271b1] tracking-wide">2026-08-21 討論稿 · 尚未寫入 SR</div>
+      <h1 class="text-2xl md:text-3xl font-black">THE-TU 核心基本模組整合架構</h1>
+      <p class="text-sm text-slate-600 max-w-3xl">
+        THE-TU（<code class="text-xs bg-slate-100 px-1 rounded">dev/thetu</code>）是一個「課程＋金流＋行銷」全部合在一起的完整平台。
+        這份稿子畫出：這些模組要怎麼拆進 StartKiter，並且<strong>沿用現有架構，不另開一套新系統</strong>。
+      </p>
+    </header>
+
+    <!-- ===================== 架構總覽 ===================== -->
+    <section class="space-y-4">
+      <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-diagram-project text-[#2271b1]"></i> 架構總覽：一條線接到底，不分岔</h2>
+
+      <div class="box p-5 space-y-0">
+        <div class="text-center box bg-slate-50 py-3 px-4 font-bold">
+          <div class="text-xs text-slate-400 font-normal mb-0.5">第 1 層 · 地基</div>
+          supastarter 殼 — auth／database／api／ui 共用零件（既有，不動）
+        </div>
+        <div class="arrow-down"><i class="fa-solid fa-chevron-down tip"></i></div>
+
+        <div class="text-center box bg-slate-50 py-3 px-4 font-bold">
+          <div class="text-xs text-slate-400 font-normal mb-0.5">第 2 層 · StartKiter 自己的模組規則（既有，不動）</div>
+          每個功能 = 一個獨立 <code class="text-xs bg-white px-1 rounded border">packages/&lt;名字&gt;/</code> 小包
+          <div class="text-xs text-slate-500 font-normal mt-1">現在已經有：course、payments、github-kit — 新模組照同一套規則蓋</div>
+        </div>
+        <div class="arrow-down"><i class="fa-solid fa-chevron-down tip"></i></div>
+
+        <div class="text-center box bg-blue-50 border-[#2271b1] py-3 px-4 font-bold text-[#135e96]">
+          <div class="text-xs text-blue-400 font-normal mb-0.5">第 3 層 · Mount Points（platform-shell-plugin-architecture 這張圖在做的）</div>
+          每個模組登記「我有選單／我有頁面／我有資料表」→ 自動出現在側邊欄與 Marketplace
+        </div>
+        <div class="arrow-down"><i class="fa-solid fa-chevron-down tip"></i></div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pt-1">
+          <div class="box bg-white p-3 text-center text-xs font-bold">📰<br>newsletter<br><span class="font-normal text-slate-400">電子報</span></div>
+          <div class="box bg-white p-3 text-center text-xs font-bold">🎟️<br>coupons<br><span class="font-normal text-slate-400">優惠券</span></div>
+          <div class="box bg-white p-3 text-center text-xs font-bold">🔁<br>subscriptions<br><span class="font-normal text-slate-400">訂閱</span></div>
+          <div class="box bg-white p-3 text-center text-xs font-bold">📦<br>bundles<br><span class="font-normal text-slate-400">課程綁定包</span></div>
+          <div class="box bg-white p-3 text-center text-xs font-bold">📝<br>assignment<br><span class="font-normal text-slate-400">作業</span></div>
+          <div class="box bg-white p-3 text-center text-xs font-bold">✉️<br>course-invites<br><span class="font-normal text-slate-400">課程邀請</span></div>
+          <div class="box bg-white p-3 text-center text-xs font-bold">🧾<br>invoice<br><span class="font-normal text-slate-400">發票</span></div>
+          <div class="box bg-white p-3 text-center text-xs font-bold text-slate-400">💬<br>lesson-comments<br><span class="font-normal">留言/私訊</span></div>
+        </div>
+      </div>
+
+      <div class="box bg-amber-50 border-amber-300 p-4 text-xs text-amber-800 flex gap-2">
+        <i class="fa-solid fa-triangle-exclamation mt-0.5"></i>
+        <div>
+          <strong>沒開放的部分</strong>：THE-TU 的登入層（NextAuth）跟 Apple 登入不隨這次決定抽取——StartKiter 登入維持既有 Better Auth，
+          只抽這些模組的「業務邏輯＋資料模型」，不抽它的登入機制。
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 後台側邊欄示意 ===================== -->
+    <section class="space-y-4">
+      <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-table-columns text-[#2271b1]"></i> 後台側邊欄長怎樣（示意，非最終稿）</h2>
+      <p class="text-xs text-slate-500">沿用 <code class="bg-slate-100 px-1 rounded">course-admin-studio-demo.html</code> 定案的 WordPress 視覺骨架，新模組全部長在同一個側邊欄裡。</p>
+
+      <div class="box overflow-hidden shadow-sm">
+        <div class="wp-bar h-8 flex items-center px-3 text-[11px] font-bold">
+          <span class="text-white">Ⓢ StartKiter</span>
+          <span class="ml-3 text-slate-300">Fish 老魚 開站包</span>
+        </div>
+        <div class="flex" style="min-height:360px">
+          <aside class="w-52 wp-bar flex-shrink-0 text-xs py-2">
+            <div class="px-3 pt-1 pb-1 text-[10px] font-bold text-slate-400 uppercase">核心控制 CORE</div>
+            <div class="px-3.5 py-2 flex items-center gap-2 wp-active"><i class="fa-solid fa-gauge w-4"></i> 控制台</div>
+
+            <div class="px-3 pt-3 pb-1 text-[10px] font-bold text-slate-400 uppercase">產品業務 PRODUCTS</div>
+            <div class="px-3.5 py-2 flex items-center gap-2 text-slate-300"><i class="fa-solid fa-graduation-cap w-4"></i> 課程</div>
+            <div class="px-3.5 py-2 flex items-center gap-2 text-slate-300"><i class="fa-solid fa-box-archive w-4"></i> 課程綁定包 <span class="ml-auto text-[9px] bg-emerald-600 px-1 rounded">新</span></div>
+            <div class="px-3.5 py-2 flex items-center gap-2 text-slate-300"><i class="fa-solid fa-ticket w-4"></i> 優惠券 <span class="ml-auto text-[9px] bg-emerald-600 px-1 rounded">新</span></div>
+            <div class="px-3.5 py-2 flex items-center gap-2 text-slate-300"><i class="fa-solid fa-arrows-rotate w-4"></i> 訂閱管理 <span class="ml-auto text-[9px] bg-emerald-600 px-1 rounded">新</span></div>
+            <div class="px-3.5 py-2 flex items-center gap-2 text-slate-300"><i class="fa-solid fa-envelope-open-text w-4"></i> 電子報 <span class="ml-auto text-[9px] bg-emerald-600 px-1 rounded">新</span></div>
+            <div class="px-3.5 py-2 flex items-center gap-2 text-slate-300"><i class="fa-solid fa-file-invoice-dollar w-4"></i> 發票 <span class="ml-auto text-[9px] bg-emerald-600 px-1 rounded">新</span></div>
+            <div class="px-3.5 py-2 flex items-center gap-2 text-slate-300"><i class="fa-solid fa-file-pen w-4"></i> 作業繳交 <span class="ml-auto text-[9px] bg-emerald-600 px-1 rounded">新</span></div>
+            <div class="px-3.5 py-2 flex items-center gap-2 text-slate-300"><i class="fa-solid fa-headset w-4"></i> 客服</div>
+
+            <div class="px-3 pt-3 pb-1 text-[10px] font-bold text-slate-400 uppercase">系統管理 SYSTEM</div>
+            <div class="px-3.5 py-2 flex items-center gap-2 text-slate-300"><i class="fa-solid fa-plug w-4"></i> 外掛</div>
+            <div class="px-3.5 py-2 flex items-center gap-2 text-slate-300"><i class="fa-solid fa-users w-4"></i> 用戶</div>
+          </aside>
+          <main class="flex-1 bg-[#f0f0f1] p-5 text-xs text-slate-500">
+            <i class="fa-solid fa-arrow-left mr-1"></i> 點側邊欄任一新模組，右側內容區照該模組的清單/編輯頁切換（見下方各模組 wireframe）
+          </main>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 各模組 wireframe ===================== -->
+    <section class="space-y-6">
+      <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-swatchbook text-[#2271b1]"></i> 各模組頁面示意（wireframe，先看骨架不看細節）</h2>
+
+      <!-- 電子報 -->
+      <div class="box p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="font-bold flex items-center gap-2"><i class="fa-solid fa-envelope-open-text text-[#2271b1]"></i> 電子報 Newsletter</div>
+          <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded font-mono">THE-TU: app/(admin)/admin/newsletters</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-[10px]">
+          <div class="box bg-slate-50 p-2">
+            <div class="font-bold mb-1">左：訂閱名單</div>
+            <div class="h-16 bg-white border rounded"></div>
+          </div>
+          <div class="box bg-slate-50 p-2 col-span-2">
+            <div class="font-bold mb-1">右：發報編輯 + 排程 + 寄送紀錄</div>
+            <div class="h-16 bg-white border rounded"></div>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-500">v1 範圍建議：只做「單封發送 + 訂閱/退訂」，不搬 THE-TU 的行銷自動化排程（cron/newsletter-automation-dispatch）。</p>
+      </div>
+
+      <!-- 優惠券 + 綁定包 -->
+      <div class="box p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="font-bold flex items-center gap-2"><i class="fa-solid fa-ticket text-[#2271b1]"></i> 優惠券 Coupons ＋ 課程綁定包 Bundles</div>
+          <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded font-mono">THE-TU: admin/coupons, admin/bundles</span>
+        </div>
+        <div class="grid grid-cols-4 gap-2 text-[10px]">
+          <div class="box bg-slate-50 p-2 text-center">代碼<br><div class="h-8 bg-white border rounded mt-1"></div></div>
+          <div class="box bg-slate-50 p-2 text-center">折扣方式<br><div class="h-8 bg-white border rounded mt-1"></div></div>
+          <div class="box bg-slate-50 p-2 text-center">綁定課程組合<br><div class="h-8 bg-white border rounded mt-1"></div></div>
+          <div class="box bg-slate-50 p-2 text-center">有效期限<br><div class="h-8 bg-white border rounded mt-1"></div></div>
+        </div>
+        <p class="text-[11px] text-slate-500">這塊直接解答「多堂課要不要分開賣」——bundles 就是答案：可以把多個課程模組組成一個組合價，不必每個模組各自對接一次金流。</p>
+      </div>
+
+      <!-- 訂閱 -->
+      <div class="box p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="font-bold flex items-center gap-2"><i class="fa-solid fa-arrows-rotate text-[#2271b1]"></i> 訂閱 Subscriptions</div>
+          <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded font-mono">THE-TU: admin/subscriptions, api/payment/period-*</span>
+        </div>
+        <div class="h-16 box bg-slate-50"></div>
+        <p class="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
+          ⚠️ 跟現有硬規則衝突：v1 目前寫死「主金流 PAYUNi，一次買斷」。要開放訂閱制，這條規則要一起改，還沒討論定案。
+        </p>
+      </div>
+
+      <!-- 發票 -->
+      <div class="box p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="font-bold flex items-center gap-2"><i class="fa-solid fa-file-invoice-dollar text-[#2271b1]"></i> 發票 Invoice</div>
+          <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded font-mono">THE-TU: api/invoice/ecpay</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-[10px]">
+          <div class="box bg-slate-50 p-2 text-center">買家發票資訊<br><div class="h-10 bg-white border rounded mt-1"></div></div>
+          <div class="box bg-slate-50 p-2 text-center">開立狀態<br><div class="h-10 bg-white border rounded mt-1"></div></div>
+          <div class="box bg-slate-50 p-2 text-center">下載/補開<br><div class="h-10 bg-white border rounded mt-1"></div></div>
+        </div>
+        <p class="text-[11px] text-slate-500">THE-TU 用 ECPay 電子發票 API；StartKiter 主金流是 PAYUNi，發票這塊要另外接 ECPay 或找 PAYUNi 是否有發票服務，屬於實作細節，SR 階段要查清楚。</p>
+      </div>
+
+      <!-- 作業 + 課程邀請 -->
+      <div class="box p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="font-bold flex items-center gap-2"><i class="fa-solid fa-file-pen text-[#2271b1]"></i> 作業 Assignment ＋ 課程邀請 Course-Invites</div>
+          <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded font-mono">THE-TU: api/assignment, api/course-invites</span>
+        </div>
+        <div class="h-14 box bg-slate-50"></div>
+        <p class="text-[11px] text-slate-500">作業＝學員上傳檔案給老師批改；課程邀請＝老師產生連結讓別人免費/優惠加入特定課程，兩個都相對獨立、風險低。</p>
+      </div>
+    </section>
+
+    <!-- ===================== supastarter 與 THE-TU 重複模組 ===================== -->
+    <section class="space-y-4">
+      <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-code-compare text-[#2271b1]"></i> supastarter 跟 THE-TU 重複的地方：訂閱機制</h2>
+
+      <div class="box p-4 space-y-3">
+        <p class="text-xs text-slate-600">
+          <strong>不用從 THE-TU 搬「訂閱模組」過來。</strong>supastarter 自己的 <code class="bg-slate-100 px-1 rounded">packages/payments/config.ts</code>
+          本來就內建「方案（Plans）」機制，一個商品可以同時掛「一次性」跟「訂閱」兩種收費方式，不是二選一——這剛好就是老闆要的效果。
+        </p>
+        <div class="grid grid-cols-2 gap-3 text-[10px]">
+          <div class="box bg-slate-50 p-3">
+            <div class="font-bold mb-1">現在的狀態</div>
+            這份設定檔還是 supastarter 原廠的展示假資料（USD、Stripe 價格代號），從沒被換成 StartKiter 真正的商品（8800 TWD 開站包）。
+          </div>
+          <div class="box bg-amber-50 border-amber-300 p-3">
+            <div class="font-bold mb-1 text-amber-800">真正缺的東西</div>
+            PAYUNi 金流的程式碼裡，完全沒有「定期扣款／訂閱」相關功能——要做訂閱制，這塊要新開發，不是設定檔改一改就有。
+          </div>
+        </div>
+        <div class="box bg-blue-50 border-[#2271b1] p-3 text-[11px] text-[#135e96]">
+          <strong>合併結論</strong>：不新建「packages/subscriptions」。改為 (1) 把 payments/config.ts 換成 StartKiter 真實方案（一次性 8800 + 未來可能的訂閱方案），
+          (2) 幫 PAYUNi provider 補上定期扣款支援。THE-TU 的 subscriptions/period-notify 邏輯當「PAYUNi 定期扣款怎麼做」的參考範例，不是整包搬過來。
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== 已確認決定 ===================== -->
+    <section class="box bg-emerald-50 border-emerald-300 p-5 space-y-2">
+      <h2 class="text-sm font-bold flex items-center gap-2 text-emerald-800"><i class="fa-solid fa-circle-check"></i> 已確認（2026-08-21 討論定案）</h2>
+      <ul class="text-xs text-emerald-900 space-y-1.5 list-disc pl-4">
+        <li><strong>收費方式</strong>：一次性買斷跟訂閱制都要能設定，不是只能選一種——沿用 supastarter 內建 Plans 機制的既有能力，PAYUNi 要補開發定期扣款支援</li>
+        <li><strong>發票</strong>：ECPay 跟 PAYUNi 內建發票服務兩個都要接，發票模組本身要做成可以切換/並存兩個供應商</li>
+      </ul>
+    </section>
+
+    <!-- ===================== 落地順序表（2026-08-21 discuss 收斂） ===================== -->
+    <section class="space-y-3">
+      <h2 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-route text-[#2271b1]"></i> 落地順序（spectra-discuss 收斂結論，已確認）</h2>
+      <div class="box overflow-x-auto">
+        <table class="w-full text-xs">
+          <thead class="bg-slate-50 text-slate-500">
+            <tr>
+              <th class="text-left p-2.5 font-bold">順序</th>
+              <th class="text-left p-2.5 font-bold">Change 名稱</th>
+              <th class="text-left p-2.5 font-bold">抽取來源</th>
+              <th class="text-left p-2.5 font-bold">內容</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr class="bg-emerald-50">
+              <td class="p-2.5 font-bold">1</td>
+              <td class="p-2.5 font-mono">core-module-bundles-coupons</td>
+              <td class="p-2.5">THE-TU</td>
+              <td class="p-2.5">bundles + coupons（解「多課程怎麼賣」）</td>
+            </tr>
+            <tr>
+              <td class="p-2.5 font-bold">2</td>
+              <td class="p-2.5 font-mono">payuni-recurring-billing</td>
+              <td class="p-2.5">woomin</td>
+              <td class="p-2.5">PAYUNi 定期扣款（訂閱制地基，packages/payments 技術債）</td>
+            </tr>
+            <tr>
+              <td class="p-2.5 font-bold">3</td>
+              <td class="p-2.5 font-mono">core-module-subscriptions-invoice</td>
+              <td class="p-2.5">woomin + THE-TU</td>
+              <td class="p-2.5">訂閱 + 發票（ECPay/PAYUNi 雙軌），依賴 #2</td>
+            </tr>
+            <tr>
+              <td class="p-2.5 font-bold">4</td>
+              <td class="p-2.5 font-mono">core-module-newsletter</td>
+              <td class="p-2.5">THE-TU</td>
+              <td class="p-2.5">電子報（蓋在既有 packages/mail 上）</td>
+            </tr>
+            <tr>
+              <td class="p-2.5 font-bold">5</td>
+              <td class="p-2.5 font-mono">core-module-assignment-course-invites</td>
+              <td class="p-2.5">THE-TU</td>
+              <td class="p-2.5">作業 + 課程邀請</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-[11px] text-slate-500">PAYUNi 站內付款（嵌入式表單）已知缺口，不排進以上 5 張，待另行裁決。</p>
+    </section>
+
+  </div>
+
+</body>
+</html>
