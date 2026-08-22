@@ -248,15 +248,15 @@
 
 ### 43. 紅燈測試：側邊欄分組持久化 API
 
-- [ ] 43.1 [P] 撰寫測試驗證 GET /api/sidebar-layout 回傳 `{ groups, items }`，未登入請求回 401
-- [ ] 43.2 [P] 撰寫測試驗證 PUT /api/sidebar-layout——operator 可成功寫入分組與排序，非 operator 呼叫回 403
-- [ ] 43.3 [P] 撰寫測試驗證 PUT /api/sidebar-layout 對不存在於 MOUNT_POINTS 的 `menuItemId` 拒絕該筆寫入回 400，其餘合法項目正常寫入不受影響
-- [ ] 43.4 [P] 撰寫測試驗證 SidebarGroup 表為空（未初始化）時 GET /api/sidebar-layout 回傳空陣列
+- [x] 43.1 [P] 撰寫測試驗證 GET /api/sidebar-layout 回傳 `{ groups, items }`，未登入請求回 401
+- [x] 43.2 [P] 撰寫測試驗證 PUT /api/sidebar-layout——operator 可成功寫入分組與排序，非 operator 呼叫回 403
+- [x] 43.3 [P] 撰寫測試驗證 PUT /api/sidebar-layout 對不存在於 MOUNT_POINTS 的 `menuItemId` 拒絕該筆寫入回 400，其餘合法項目正常寫入不受影響
+- [x] 43.4 [P] 撰寫測試驗證 SidebarGroup 表為空（未初始化）時 GET /api/sidebar-layout 回傳空陣列
 
 ### 44. 實作：SidebarGroup / SidebarGroupItem 資料表與 API
 
-- [ ] 44.1 新增 Prisma migration 建立 `SidebarGroup`、`SidebarGroupItem` 兩張表（design.md DB DDL），驗證：43.4 轉綠燈
-- [ ] 44.2 新增 `apps/saas/app/api/sidebar-layout/route.ts`，實作 GET/PUT，驗證：43.1、43.2、43.3 轉綠燈
+- [x] 44.1 新增 Prisma migration 建立 `SidebarGroup`、`SidebarGroupItem` 兩張表（design.md DB DDL），驗證：43.4 轉綠燈（migration `20260822105711_add_sidebar_group`，DDL 與 design.md 完全一致）
+- [x] 44.2 新增 `apps/saas/app/api/sidebar-layout/route.ts`，實作 GET/PUT，驗證：43.1、43.2、43.3 轉綠燈
 
 ### 45. 紅燈測試：側邊欄 WordPress 視覺與拖曳互動
 

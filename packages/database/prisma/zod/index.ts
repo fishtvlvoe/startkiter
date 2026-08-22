@@ -136,6 +136,18 @@ export const LessonProgressScalarFieldEnumSchema = z.enum(['id', 'userId', 'less
 
 export type LessonProgressScalarFieldEnum = z.infer<typeof LessonProgressScalarFieldEnumSchema>;
 
+// File: SidebarGroupScalarFieldEnum.schema.ts
+
+export const SidebarGroupScalarFieldEnumSchema = z.enum(['id', 'title', 'order', 'isCollapsed', 'createdAt', 'updatedAt'])
+
+export type SidebarGroupScalarFieldEnum = z.infer<typeof SidebarGroupScalarFieldEnumSchema>;
+
+// File: SidebarGroupItemScalarFieldEnum.schema.ts
+
+export const SidebarGroupItemScalarFieldEnumSchema = z.enum(['id', 'groupId', 'menuItemId', 'order', 'createdAt', 'updatedAt'])
+
+export type SidebarGroupItemScalarFieldEnum = z.infer<typeof SidebarGroupItemScalarFieldEnumSchema>;
+
 // File: PluginContentScalarFieldEnum.schema.ts
 
 export const PluginContentScalarFieldEnumSchema = z.enum(['id', 'pluginId', 'type', 'title', 'body', 'authorId', 'createdAt', 'updatedAt'])
@@ -645,6 +657,34 @@ export const LessonProgressSchema = z.object({
 });
 
 export type LessonProgressType = z.infer<typeof LessonProgressSchema>;
+
+
+// File: SidebarGroup.schema.ts
+
+export const SidebarGroupSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  order: z.number().int(),
+  isCollapsed: z.boolean(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type SidebarGroupType = z.infer<typeof SidebarGroupSchema>;
+
+
+// File: SidebarGroupItem.schema.ts
+
+export const SidebarGroupItemSchema = z.object({
+  id: z.string(),
+  groupId: z.string(),
+  menuItemId: z.string(),
+  order: z.number().int(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type SidebarGroupItemType = z.infer<typeof SidebarGroupItemSchema>;
 
 
 // File: PluginContent.schema.ts

@@ -473,6 +473,31 @@ model LessonProgress {
   @@map("lesson_progress")
 }
 
+model SidebarGroup {
+  id          String   @id @default(cuid())
+  title       String
+  order       Int
+  isCollapsed Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items       SidebarGroupItem[]
+}
+
+model SidebarGroupItem {
+  id         String   @id @default(cuid())
+  groupId    String
+  menuItemId String
+  order      Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  group      SidebarGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([menuItemId])
+  @@index([groupId])
+}
+
 model PluginContent {
   id        String   @id @default(cuid())
   pluginId  String
