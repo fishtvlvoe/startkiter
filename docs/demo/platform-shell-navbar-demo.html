@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StartKiter 後台 Shell - WordPress 視覺改版 Demo（真實選單資料，非通用範例）</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap');
+    body { font-family: 'Inter', 'Noto Sans TC', sans-serif; }
+    .wp-admin-bar { background-color: #1d2327; color: #c3c4c7; }
+    .wp-sidebar { background-color: #1d2327; color: #c3c4c7; transition: width 0.25s ease; }
+    .wp-sidebar-item:hover { background-color: #13171a; color: #72aee6; }
+    .wp-sidebar-active { background-color: #2271b1 !important; color: #ffffff !important; font-weight: 600; }
+    .dragging-nav { opacity: 0.4; transform: scale(0.96); background-color: #3b82f6 !important; }
+    .drag-over-nav { border-top: 2px solid #60a5fa !important; }
+  </style>
+</head>
+<body class="bg-[#f0f0f1] text-[#2c3338] min-h-screen flex flex-col antialiased">
+
+  <!-- 標註：這是「改版後」demo，內容用 apps/saas 真實 MOUNT_POINTS 選單資料，
+       不是通用範例，確保跟 46.x 實作出來的畫面不會有落差。 -->
+  <div class="bg-amber-100 text-amber-900 text-xs px-4 py-1.5 text-center border-b border-amber-200">
+    Demo：真實選單資料（來自 <code>packages/platform/src/mount-points.ts</code>），非通用範例 — 確認樣式後才會動手改 <code>NavBar.tsx</code>
+  </div>
+
+  <!-- 1. 頂列 admin bar：固定 32px（h-8），#1d2327 深色 -->
+  <div data-testid="admin-bar" class="wp-admin-bar h-8 px-3 flex items-center justify-between z-50 sticky top-0 border-b border-black/40 select-none text-[11px]">
+    <div class="flex items-center space-x-2 md:space-x-3">
+      <button data-testid="admin-bar-hamburger" onclick="toggleMobileSidebar()" class="md:hidden p-1 text-slate-300 hover:text-white">
+        <i class="fa-solid fa-bars text-xs"></i>
+      </button>
+
+      <div class="font-black text-xs text-white">Ⓢ StartKiter</div>
+
+      <div class="relative group cursor-pointer py-1 px-1.5 md:px-2 hover:bg-[#2c3338] hover:text-white transition rounded-sm flex items-center gap-1.5">
+        <i class="fa-solid fa-house text-[10px]"></i>
+        <span class="font-bold text-white hidden sm:inline">Fish 老魚 開站包</span>
+        <div class="absolute left-0 top-full mt-0 w-48 bg-[#2c3338] border border-black/30 shadow-2xl py-1 hidden group-hover:block text-xs z-50">
+          <a href="#" class="px-3 py-2 hover:bg-[#2271b1] hover:text-white flex items-center gap-2 text-slate-200">
+            <i class="fa-solid fa-globe text-[10px]"></i> <span>官網首頁</span>
+          </a>
+          <a href="#" class="px-3 py-2 hover:bg-[#2271b1] hover:text-white flex items-center gap-2 text-slate-200">
+            <i class="fa-solid fa-file-invoice text-[10px]"></i> <span>銷售頁</span>
+          </a>
+          <a href="#" class="px-3 py-2 hover:bg-[#2271b1] hover:text-white flex items-center gap-2 text-slate-200">
+            <i class="fa-solid fa-play text-[10px]"></i> <span>學員教室</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-1.5 text-slate-200 font-medium">
+      <span class="hidden sm:inline">Fish 老魚</span>
+      <div class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold">F</div>
+    </div>
+  </div>
+
+  <!-- 2. 雙欄佈局 -->
+  <div class="flex-1 flex overflow-hidden relative">
+    <aside id="app-sidebar" data-collapsed="false" class="w-52 wp-sidebar flex flex-col flex-shrink-0 select-none border-r border-black/30 absolute md:static inset-y-0 left-0 z-40 transform -translate-x-full md:translate-x-0">
+      <div class="px-3 py-2 text-[10px] text-slate-400 border-b border-white/5 flex items-center justify-between">
+        <span class="nav-text">選單分組（可拖曳／收折）</span>
+        <button onclick="addNewGroup()" class="text-[#72aee6] hover:text-white font-bold flex items-center gap-1">
+          <i class="fa-solid fa-plus text-[9px]"></i> <span class="nav-text">新增</span>
+        </button>
+      </div>
+
+      <nav class="flex-1 py-2 space-y-2 text-xs overflow-y-auto" id="sidebar-nav-container"></nav>
+
+      <div onclick="toggleCollapseSidebar()" data-testid="sidebar-collapse-toggle" class="hidden md:flex p-3 border-t border-white/5 text-[11px] text-slate-400 hover:text-white cursor-pointer items-center gap-2.5 transition">
+        <i id="collapse-icon" class="fa-solid fa-circle-chevron-left w-4 text-center text-xs"></i>
+        <span class="nav-text whitespace-nowrap">收合選單</span>
+      </div>
+    </aside>
+
+    <div id="mobile-backdrop" data-testid="sidebar-mobile-backdrop" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden"></div>
+
+    <main class="flex-1 p-6 overflow-y-auto">
+      <h1 class="text-lg font-bold text-[#1d2327] mb-2">目前頁面：<span id="current-view-label">開始</span></h1>
+      <p class="text-sm text-slate-500">這裡是內容區（背景 #f0f0f1），這張改版只動 Shell 外殼——側邊欄配色、admin bar、分組拖曳，內容區本身不動。</p>
+    </main>
+  </div>
+
+  <script>
+    let draggedNavItem = null;
+    let isCollapsed = false;
+    let isMobileOpen = false;
+    let currentView = 'start';
+
+    // 真實資料：packages/platform/src/mount-points.ts 的 MOUNT_POINTS，
+    // 依 design.md 分成「一般」與「系統管理 SYSTEM」兩組（示範分組，非最終定案）
+    let navGroups = [
+      {
+        id: 'general',
+        title: '一般 GENERAL',
+        isFolderCollapsed: false,
+        items: [
+          { id: 'start', label: '開始', icon: 'fa-house' },
+          { id: 'course', label: '課程', icon: 'fa-book-open' },
+          { id: 'chatbot', label: '客服', icon: 'fa-robot' },
+          { id: 'settings', label: '帳號設定', icon: 'fa-gear' },
+        ],
+      },
+      {
+        id: 'system',
+        title: '系統管理 SYSTEM',
+        isFolderCollapsed: false,
+        items: [
+          { id: 'admin', label: '後台設定', icon: 'fa-shield-halved' },
+          { id: 'bundles', label: '課程綁定包', icon: 'fa-box' },
+        ],
+      },
+    ];
+
+    function renderSidebar() {
+      const container = document.getElementById('sidebar-nav-container');
+      container.innerHTML = navGroups.map((group, gIdx) => `
+        <div class="nav-group-section" data-testid="sidebar-group-${group.id}" data-sidebar-group-collapsed="${group.isFolderCollapsed}" data-gidx="${gIdx}">
+          <div class="px-3 pt-1.5 pb-1 text-[10px] font-bold text-slate-400 flex items-center justify-between group-header group/gh hover:text-slate-200 transition select-none">
+            <div class="flex items-center gap-1.5 cursor-pointer flex-1 overflow-hidden" onclick="toggleFolderCollapse(${gIdx})">
+              <i class="fa-solid ${group.isFolderCollapsed ? 'fa-chevron-right text-[8px]' : 'fa-chevron-down text-[8px]'} text-slate-500 transition w-3"></i>
+              <span class="nav-text uppercase tracking-wider truncate font-semibold">${group.title}</span>
+            </div>
+            <button onclick="renameGroup(${gIdx})" class="nav-text text-slate-400 hover:text-white p-0.5 opacity-0 group-hover/gh:opacity-100 transition" title="改名">
+              <i class="fa-solid fa-pen text-[9px]"></i>
+            </button>
+          </div>
+
+          <div class="space-y-0.5 ${group.isFolderCollapsed ? 'hidden' : ''}">
+            ${group.items.map((item, iIdx) => `
+              <a href="#" data-testid="sidebar-group-item-${item.id}" onclick="switchView('${item.id}', '${item.label}')"
+                 class="${currentView === item.id ? 'wp-sidebar-active' : 'wp-sidebar-item'} flex items-center gap-3 px-3.5 py-2 transition relative group draggable-nav-item cursor-grab"
+                 draggable="true" data-gidx="${gIdx}" data-iidx="${iIdx}" title="${item.label}">
+                <i class="fa-solid ${item.icon} text-slate-400 w-4 text-center ${currentView === item.id ? 'text-white' : ''}"></i>
+                <span class="nav-text whitespace-nowrap">${item.label}</span>
+                <i class="fa-solid fa-grip-vertical text-white/20 hover:text-white ml-auto text-[10px] hidden group-hover:inline"></i>
+              </a>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      attachNavDragEvents();
+    }
+
+    function toggleFolderCollapse(gIdx) {
+      navGroups[gIdx].isFolderCollapsed = !navGroups[gIdx].isFolderCollapsed;
+      renderSidebar();
+    }
+
+    function renameGroup(gIdx) {
+      const currentName = navGroups[gIdx].title;
+      const newName = prompt('修改分組名稱：', currentName);
+      if (newName && newName.trim()) {
+        navGroups[gIdx].title = newName.trim();
+        renderSidebar();
+      }
+    }
+
+    function addNewGroup() {
+      const groupName = prompt('輸入新分組名稱：', '新分組');
+      if (groupName && groupName.trim()) {
+        navGroups.push({ id: 'g-' + Date.now(), title: groupName.trim().toUpperCase(), isFolderCollapsed: false, items: [] });
+        renderSidebar();
+      }
+    }
+
+    function attachNavDragEvents() {
+      document.querySelectorAll('.draggable-nav-item').forEach((item) => {
+        item.addEventListener('dragstart', (e) => {
+          draggedNavItem = item;
+          item.classList.add('dragging-nav');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+        item.addEventListener('dragend', () => {
+          if (draggedNavItem) draggedNavItem.classList.remove('dragging-nav');
+          draggedNavItem = null;
+          document.querySelectorAll('.draggable-nav-item').forEach((el) => el.classList.remove('drag-over-nav'));
+        });
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          item.classList.add('drag-over-nav');
+        });
+        item.addEventListener('dragleave', () => item.classList.remove('drag-over-nav'));
+        item.addEventListener('drop', (e) => {
+          e.preventDefault();
+          item.classList.remove('drag-over-nav');
+          if (draggedNavItem && draggedNavItem !== item) {
+            const fromGIdx = parseInt(draggedNavItem.getAttribute('data-gidx'));
+            const fromIIdx = parseInt(draggedNavItem.getAttribute('data-iidx'));
+            const toGIdx = parseInt(item.getAttribute('data-gidx'));
+            const toIIdx = parseInt(item.getAttribute('data-iidx'));
+            const movingItem = navGroups[fromGIdx].items.splice(fromIIdx, 1)[0];
+            navGroups[toGIdx].items.splice(toIIdx, 0, movingItem);
+            renderSidebar();
+          }
+        });
+      });
+    }
+
+    function toggleCollapseSidebar() {
+      const sidebar = document.getElementById('app-sidebar');
+      const icon = document.getElementById('collapse-icon');
+      const navTexts = document.querySelectorAll('.nav-text');
+      const groupHeaders = document.querySelectorAll('.group-header');
+
+      isCollapsed = !isCollapsed;
+      sidebar.setAttribute('data-collapsed', String(isCollapsed));
+
+      if (isCollapsed) {
+        sidebar.className = 'w-14 wp-sidebar flex flex-col flex-shrink-0 select-none border-r border-black/30 absolute md:static inset-y-0 left-0 z-40';
+        icon.className = 'fa-solid fa-circle-chevron-right w-4 text-center text-xs';
+        navTexts.forEach((el) => el.classList.add('hidden'));
+        groupHeaders.forEach((el) => el.classList.add('hidden'));
+      } else {
+        sidebar.className = 'w-52 wp-sidebar flex flex-col flex-shrink-0 select-none border-r border-black/30 absolute md:static inset-y-0 left-0 z-40';
+        icon.className = 'fa-solid fa-circle-chevron-left w-4 text-center text-xs';
+        navTexts.forEach((el) => el.classList.remove('hidden'));
+        groupHeaders.forEach((el) => el.classList.remove('hidden'));
+      }
+    }
+
+    function toggleMobileSidebar() {
+      const sidebar = document.getElementById('app-sidebar');
+      const backdrop = document.getElementById('mobile-backdrop');
+      isMobileOpen = !isMobileOpen;
+      if (isMobileOpen) {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+    }
+
+    function switchView(view, label) {
+      currentView = view;
+      document.getElementById('current-view-label').textContent = label;
+      renderSidebar();
+    }
+
+    renderSidebar();
+  </script>
+</body>
+</html>
