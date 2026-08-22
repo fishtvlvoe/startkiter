@@ -2,16 +2,16 @@
 
 ### Requirement: Webhook signature verification
 
-The system SHALL verify the authenticity of every inbound Chatwoot webhook request before processing it.
+The system SHALL verify the authenticity of every inbound Chatwoot webhook request before processing it. Since self-hosted Chatwoot's webhook configuration does not support custom headers or HMAC signing, verification SHALL be performed via a shared-secret token embedded in the webhook URL's query string (`?token=<CHATWOOT_WEBHOOK_SECRET>`), compared using a timing-safe equality check.
 
-#### Scenario: Valid webhook signature
+#### Scenario: Valid webhook token
 
-- **WHEN** `POST /support/webhook/chatwoot` receives a request with a valid HMAC signature matching the configured Chatwoot webhook secret
+- **WHEN** `POST /support/webhook/chatwoot` receives a request whose `token` query parameter matches the configured `CHATWOOT_WEBHOOK_SECRET`
 - **THEN** the endpoint SHALL process the event and return `200`
 
-#### Scenario: Invalid or missing webhook signature
+#### Scenario: Invalid or missing webhook token
 
-- **WHEN** `POST /support/webhook/chatwoot` receives a request with a missing or invalid signature
+- **WHEN** `POST /support/webhook/chatwoot` receives a request with a missing or mismatching `token` query parameter
 - **THEN** the endpoint SHALL return `401` and SHALL NOT process the event or modify any `SupportTicket`
 
 ### Requirement: AI auto-reply on new ticket messages

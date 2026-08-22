@@ -46,6 +46,7 @@ export const app = new Hono()
 		const context = {
 			headers: c.req.raw.headers,
 			rawBody,
+			url: c.req.raw.url,
 		};
 
 		const isRpc = c.req.path.includes("/rpc/");

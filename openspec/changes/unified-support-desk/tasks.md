@@ -20,6 +20,7 @@ TDD：每個功能群組先列紅燈測試 task，再列實作 task。
 - [~] 3.1（2026-08-22 部分完成，但違反設計決策，需要 Fish 裁決）Chatwoot 已透過 Coolify 一鍵安裝服務部署並可正常運作（`https://support.startkiter.dev` 回 200，Let's Encrypt 憑證已簽發，admin 帳號 fish@aiver.me 已建立，API token 已取得存入 `.env`）。**但部署位置裝在 `startkiter-managed-fleet-01`（買家 managed fleet 現有機器），不是設計決策要求的「獨立 VPS」**（design.md 第 38-43 行明文：「這是內部客服系統，不是買家資源，混在一起會讓權限模型混亂」）。目前該機器資源尚有餘裕（3.3GB 記憶體用不到 1GB、磁碟用 20%），Chatwoot 4 個容器運作正常，不影響現有 startkiter-test 服務。**卡在**：要嘛依原決策買一台新 VPS 搬過去（多一筆月費成本），要嘛正式推翻決策改成「共用機器，用 Docker 資源隔離」——這是成本/架構取捨，需要 Fish 決定，不是我能單方面決定的事，已停手等裁決
 - [ ] 3.2 設定 Cloudflare DNS 記錄為「僅 DNS」灰雲朵模式並確認 SSL 簽發成功——**已完成但用的是共用機器的 IP**（`support.startkiter.dev` A 記錄已指向 `startkiter-managed-fleet-01` 的 45.76.187.247，SSL 簽發成功），若 3.1 決定搬新 VPS，這條 DNS 記錄需要跟著改
 - [ ] 3.3 在 Chatwoot 後台建立 1-5 個客服帳號，驗證方式為登入 Chatwoot 後台確認帳號清單與人數符合團隊規模——尚未建立其他客服帳號，目前只有 admin 一人
+- [ ] 3.4（2026-08-22 新增，依賴 6.15 完成後才能做）在 Chatwoot 後台（Settings → Integrations → Webhooks）填入帶 `token` query 參數的 webhook URL（`https://startkiter.dev/api/support/webhook/chatwoot?token=<CHATWOOT_WEBHOOK_SECRET>`），訂閱 `conversation_created`、`message_created` 事件，驗證方式為在 Chatwoot 後台觸發一則測試訊息，確認伺服器端收到請求並回傳 200
 
 ## 4. 進線管道整合（對應設計決策「進線管道：網站 + LINE + Telegram 三個核心管道，IG/FB 等留待未來」）
 
@@ -45,19 +46,22 @@ TDD：每個功能群組先列紅燈測試 task，再列實作 task。
 
 ## 6. AI Webhook 消費者（對應設計決策「AI 介入 Coolify 只到「唯讀 + 建議修復步驟」，不做自動修復」）
 
-- [x] 6.1 撰寫紅燈測試：`POST /support/webhook/chatwoot` 缺少或簽章錯誤時回傳 401 且不處理事件，對應 Requirement「Webhook signature verification」Scenario「Invalid or missing webhook signature」，驗證方式為 API 測試斷言狀態碼與無副作用
+- [x] 6.1（**2026-08-22 作廢，見 6.13-6.15**）撰寫紅燈測試：`POST /support/webhook/chatwoot` 缺少或簽章錯誤時回傳 401 且不處理事件，對應 Requirement「Webhook signature verification」Scenario「Invalid or missing webhook signature」，驗證方式為 API 測試斷言狀態碼與無副作用——**實測發現自架 Chatwoot 無法送出 HMAC header，此測試驗證的方案不成立，改走 query token 方案，見 design.md「Chatwoot webhook 驗證機制改為 URL query token」決策**
 - [x] 6.2 撰寫紅燈測試：AI 模型呼叫失敗或逾時時，`SupportTicket.status` 維持不變且標記轉真人，對應 Requirement「AI auto-reply on new ticket messages」Scenario「AI model call fails or times out」，驗證方式為 mock AI 呼叫失敗情境斷言資料庫狀態未變
 - [x] 6.3 撰寫紅燈測試：Coolify API 呼叫失敗時，internal note 顯示「暫時無法取得」而非誤報健康或壞掉，對應 Requirement「Read-only Coolify deployment context」Scenario「Coolify API unreachable」，驗證方式為 mock Coolify 客戶端失敗情境斷言 note 內容
 - [x] 6.4 撰寫紅燈測試：AI 生成的修復建議只寫入 internal note，不出現在任何發送給買家的訊息內容中，對應 Requirement「AI-generated remediation suggestions are advisory only」Scenario「Suggestion never sent to buyer automatically」，驗證方式為斷言外發訊息內容不含建議文字
 - [x] 6.5 撰寫紅燈測試：任何 AI 流程嘗試直接把 `status` 設成 `RESOLVED`（略過買家確認/逾時）會被拒絕，對應 Requirement「Ticket status transition triggers」Scenario「AI does not have authority to fully resolve」，驗證方式為單元測試直接呼叫該路徑斷言拋出錯誤或被忽略
 - [x] 6.5b（2026-08-19 新增）撰寫紅燈測試：`SupportTicket.buyerDeploymentId` 為 null 時，AI 不呼叫 Coolify API，internal note 直接寫「無部署資料，人工直接處理」，對應 Requirement「Read-only Coolify deployment context」Scenario「Ticket has no linked deployment」，驗證方式為 mock 情境斷言 Coolify 客戶端未被呼叫且 note 文字符合預期
-- [x] 6.6 實作 `POST /support/webhook/chatwoot` 簽章驗證，使第 6.1 節測試轉綠燈，對應 Requirement「Webhook signature verification」Scenario「Valid webhook signature」，驗證方式為 `pnpm test` 全綠
+- [x] 6.6（**2026-08-22 作廢，見 6.13-6.15**）實作 `POST /support/webhook/chatwoot` 簽章驗證，使第 6.1 節測試轉綠燈，對應 Requirement「Webhook signature verification」Scenario「Valid webhook signature」，驗證方式為 `pnpm test` 全綠——**HMAC header 方案不成立，改走 query token 方案**
 - [x] 6.7 實作 AI 自動回覆/轉真人判斷邏輯，使第 6.2 節測試轉綠燈，對應 Requirement「AI auto-reply on new ticket messages」Scenario「AI answers with sufficient confidence」與「AI cannot answer confidently」，驗證方式為 `pnpm test` 全綠
 - [x] 6.8 串接既有 `packages/platform/src/deployment/coolify-client.ts` 唯讀查詢，將部署狀態/log 摘要寫入 Chatwoot internal note，使第 6.3 節測試轉綠燈，對應 Requirement「Read-only Coolify deployment context」Scenario「Coolify status pulled successfully」，驗證方式為 `pnpm test` 全綠
 - [x] 6.9 實作 AI 建議修復步驟生成並寫入 internal note（標記「AI 建議、未經驗證」），使第 6.4 節測試轉綠燈，驗證方式為 `pnpm test` 全綠 + 手動檢查 internal note 格式
 - [x] 6.10 實作狀態轉換權限守門（僅買家確認端點與逾時排程可設 `RESOLVED`），使第 6.5 節測試轉綠燈，驗證方式為 `pnpm test` 全綠
 - [x] 6.11 實作 AI 判斷「像是解決了」時把 `status` 設為 `AI_SUGGESTED_RESOLVED` 並在對話中貼出確認提示，對應 Requirement「Ticket status transition triggers」Scenario「AI suggests resolution」，驗證方式為 `pnpm test` 全綠 + 手動測試對話出現確認提示文字
 - [x] 6.12（2026-08-19 新增）實作無部署資料分支：`buyerDeploymentId` 為 null 時跳過 Coolify 查詢，直接寫入「無部署資料，人工直接處理」internal note，使第 6.5b 節測試轉綠燈，驗證方式為 `pnpm test` 全綠
+- [x] 6.13（2026-08-22 新增，取代 6.1）撰寫紅燈測試：`POST /support/webhook/chatwoot?token=<secret>` 缺少 `token` 或 `token` 不符 `CHATWOOT_WEBHOOK_SECRET` 時回傳 401 且不處理事件、不修改任何 `SupportTicket`，對應 Requirement「Webhook signature verification」Scenario「Invalid or missing webhook token」，驗證方式為 API 測試斷言狀態碼與資料庫無異動
+- [x] 6.14（2026-08-22 新增，取代 6.1）撰寫紅燈測試：`POST /support/webhook/chatwoot?token=<secret>` 的 `token` 與 `CHATWOOT_WEBHOOK_SECRET` 相符時正常處理事件並回傳 200，對應 Requirement「Webhook signature verification」Scenario「Valid webhook token」，驗證方式為 API 測試斷言狀態碼與事件確實被處理
+- [x] 6.15（2026-08-22 新增，取代 6.6，對應設計決策「Chatwoot webhook 驗證機制改為 URL query token，取代原訂 HMAC header 簽章」）改寫 `packages/support/src/chatwoot-signature.ts`：移除 `rawBody`+`timestamp` 的 HMAC 驗證邏輯，改為匯出比對 query token 與 `CHATWOOT_WEBHOOK_SECRET`（`timingSafeEqual`）的函式；同步改寫 `packages/api/modules/support/procedures/chatwoot-webhook.ts` 的 `processChatwootWebhook`，從請求 URL query string 讀取 `token` 取代讀取 `x-chatwoot-signature`/`x-chatwoot-timestamp` header，使第 6.13、6.14 節測試轉綠燈，驗證方式為 `pnpm test` 全綠
 
 ## 7. 前端入口（對應設計決策「客服入口：全站浮動客服框 + `/deployment` 頁面快捷按鈕」）
 

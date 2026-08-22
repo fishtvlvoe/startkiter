@@ -7,6 +7,7 @@ import { permix } from "./permix";
 export const publicProcedure = os.$context<{
 	headers: Headers;
 	rawBody?: string;
+	url?: string;
 }>();
 
 export const protectedProcedure = publicProcedure.use(async ({ context, next }) => {

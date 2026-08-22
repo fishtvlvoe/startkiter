@@ -95,6 +95,16 @@ Chatwoot 官方 widget 注入全站 layout，`/deployment` 頁面另外加一顆
 - **只改 `config.yaml`，不動 `AGENTS.md`/`README.md`**：否決。三份文件目前文字一致，只改一處會讓其他文件跟現狀矛盾，之後任何 Agent 讀到哪一份都可能依照過期規則行動。
 - **保留舊文字、另外加註解說明例外**：否決。既有專案慣例是「已廢」段落明講取代關係，不是在原句旁加註解，維持一致的文件維護模式。
 
+### Chatwoot webhook 驗證機制改為 URL query token，取代原訂 HMAC header 簽章
+
+**2026-08-22 實測更正**：propose 階段設計的 `POST /support/webhook/chatwoot` 簽章驗證方式，原本比照 LINE/Telegram 的做法，假設 Chatwoot 會送出 `x-chatwoot-signature`（`sha256=` + HMAC-SHA256(`timestamp.rawBody`)）與 `x-chatwoot-timestamp` 兩個自訂 header。實際裝機測試發現：自架 Chatwoot 的 Webhook 設定（Settings → Integrations → Webhooks）只能填目標 URL，沒有自訂 header 或簽章密鑰欄位，官方送出的請求不帶這兩個 header，屬於設計時對 Chatwoot 能力的錯誤假設，不是尚未串接的問題。
+
+改為：webhook 註冊 URL 內嵌密鑰查詢參數，例如 `https://startkiter.dev/api/support/webhook/chatwoot?token=<CHATWOOT_WEBHOOK_SECRET>`；伺服器端從 query string 取出 `token`，用 `crypto.timingSafeEqual` 比對是否等於環境變數 `CHATWOOT_WEBHOOK_SECRET`，比對失敗回傳 `401` 且不處理事件、不寫入 `SupportTicket`。這是自架 Chatwoot 常見的標準變通做法。
+
+**Alternatives considered：**
+- **IP allowlist（只信任 Coolify 伺服器對外 IP，不驗證內容，選項 B）**：否決。零改動 Chatwoot 端設定，但完全不驗證請求內容真偽，且伺服器 IP 未來換機或走 CDN/Proxy 時會失效，安全邊界比 query token 弱。
+- **自建中介層幫 Chatwoot 補簽章（選項 C）**：否決。多一個服務要維運，Coolify 上的 Chatwoot 是官方一鍵安裝模板，額外插層會讓之後升版更新變複雜，殺雞用牛刀。
+
 ## Implementation Contract
 
 **Behavior（可觀察行為）：**
@@ -174,7 +184,7 @@ CREATE INDEX "SupportTicket_aiSuggestedResolvedAt_idx" ON "SupportTicket"("aiSug
 
 - oRPC 模組 `packages/api/modules/support/`（比照 `packages/api/modules/deployment/` 慣例）：
   - `POST /support/tickets`（`protectedProcedure`）：買家從網站介面開單，帶 `buyerDeploymentId`（可選，未帶時若帳號只有一個部署自動帶入）+ 訊息內容，代理呼叫 Chatwoot API 建立 conversation，寫入 `SupportTicket`
-  - `POST /support/webhook/chatwoot`（`publicProcedure` + signature 驗證）：Chatwoot Webhook 進線，驅動 AI 判斷邏輯與狀態轉換
+  - `POST /support/webhook/chatwoot`（`publicProcedure` + query token 驗證，見上方「Chatwoot webhook 驗證機制改為 URL query token」決策）：Chatwoot Webhook 進線，驅動 AI 判斷邏輯與狀態轉換
   - `POST /support/tickets/:id/confirm-resolved`（`protectedProcedure`）：買家按確認已解決
 - Chatwoot Webhook payload 形狀依 Chatwoot 官方文件（`conversation_created`、`message_created`、`conversation_status_changed` 事件），這裡不重寫，實作時讀官方文件確認欄位名稱
 

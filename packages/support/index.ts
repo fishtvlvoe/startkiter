@@ -1,8 +1,6 @@
 export {
-	CHATWOOT_SIGNATURE_HEADER,
-	CHATWOOT_TIMESTAMP_HEADER,
-	createChatwootWebhookSignature,
-	verifyChatwootWebhookSignature,
+	CHATWOOT_WEBHOOK_TOKEN_PARAM,
+	verifyChatwootWebhookToken,
 } from "./src/chatwoot-signature";
 export { parseChatwootWebhookPayload } from "./src/chatwoot-payload";
 export type { ChatwootContactHints, SupportTicketChannel } from "./src/chatwoot-payload";

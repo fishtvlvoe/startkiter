@@ -3,12 +3,10 @@ import { db } from "@startkiter/database";
 import { fetchCoolifyAppLogs, fetchCoolifyAppStatus } from "@startkiter/platform";
 import {
 	applyTicketStatusTransition,
-	CHATWOOT_SIGNATURE_HEADER,
-	CHATWOOT_TIMESTAMP_HEADER,
 	defaultGenerateDiagnosis,
 	parseChatwootWebhookPayload,
 	runCopilot,
-	verifyChatwootWebhookSignature,
+	verifyChatwootWebhookToken,
 	type ChatwootContactHints,
 	type CopilotDeployment,
 	type GenerateDiagnosis,
@@ -40,10 +38,6 @@ type TicketRow = {
 	status: "OPEN" | "AI_SUGGESTED_RESOLVED" | "RESOLVED" | "ESCALATED";
 	aiSuggestedResolvedAt: Date | null;
 };
-
-function header(headers: Headers, name: string): string | null {
-	return headers.get(name) ?? headers.get(name.toLowerCase());
-}
 
 async function resolveDeployment(
 	userId: string,
@@ -117,17 +111,15 @@ async function upsertTicket(hints: ChatwootContactHints): Promise<TicketRow | nu
 }
 
 export async function processChatwootWebhook(args: {
-	headers: Headers;
+	url: string | undefined;
 	rawBody: string | undefined;
 	payload: unknown;
 	secret?: string;
 	deps?: Partial<ChatwootWebhookDeps>;
 }): Promise<{ ok: true; ticketId: string | null }> {
 	const secret = args.secret ?? process.env.CHATWOOT_WEBHOOK_SECRET;
-	const verified = verifyChatwootWebhookSignature({
-		rawBody: args.rawBody ?? "",
-		timestamp: header(args.headers, CHATWOOT_TIMESTAMP_HEADER),
-		signatureHeader: header(args.headers, CHATWOOT_SIGNATURE_HEADER),
+	const verified = verifyChatwootWebhookToken({
+		url: args.url,
 		secret,
 	});
 
@@ -217,7 +209,7 @@ export const chatwootWebhook = publicProcedure
 	)
 	.handler(async ({ input, context }) => {
 		return processChatwootWebhook({
-			headers: context.headers,
+			url: context.url,
 			rawBody: context.rawBody,
 			payload: input,
 		});

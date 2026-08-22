@@ -47,12 +47,10 @@ vi.mock("@startkiter/platform", () => ({
 }));
 
 import { db } from "@startkiter/database";
-import { createChatwootWebhookSignature } from "@startkiter/support";
 
 import { chatwootWebhook, processChatwootWebhook } from "./chatwoot-webhook";
 
 const SECRET = "chatwoot-webhook-secret";
-const TIMESTAMP = "1710000000";
 
 const ticket = {
 	id: "tkt_1",
@@ -75,18 +73,13 @@ const deployment = {
 	coolifyAppId: "app_1",
 };
 
+function webhookUrl(token: string): string {
+	return `https://startkiter.dev/api/support/webhook/chatwoot?token=${encodeURIComponent(token)}`;
+}
+
 function signedCall(payload: Record<string, unknown>) {
 	const rawBody = JSON.stringify(payload);
-	const signature = createChatwootWebhookSignature({
-		rawBody,
-		timestamp: TIMESTAMP,
-		secret: SECRET,
-	});
-	const headers = new Headers({
-		"x-chatwoot-signature": signature,
-		"x-chatwoot-timestamp": TIMESTAMP,
-	});
-	return { rawBody, headers, payload };
+	return { rawBody, url: webhookUrl(SECRET), payload };
 }
 
 describe("POST /support/webhook/chatwoot", () => {
@@ -102,12 +95,18 @@ describe("POST /support/webhook/chatwoot", () => {
 		vi.mocked(db.buyerDeployment.findFirst).mockResolvedValue(deployment as never);
 	});
 
-	it("returns 401 and does not touch tickets when the signature is missing", async () => {
+	it("returns 401 and does not touch tickets when the token query param is missing", async () => {
 		await expect(
 			call(
 				chatwootWebhook,
 				{ event: "message_created", content: "hi" },
-				{ context: { headers: new Headers(), rawBody: "{}" } },
+				{
+					context: {
+						headers: new Headers(),
+						url: "https://startkiter.dev/api/support/webhook/chatwoot",
+						rawBody: "{}",
+					},
+				},
 			),
 		).rejects.toMatchObject({ code: "UNAUTHORIZED" });
 
@@ -115,15 +114,13 @@ describe("POST /support/webhook/chatwoot", () => {
 		expect(db.supportTicket.update).not.toHaveBeenCalled();
 	});
 
-	it("returns 401 and does not touch tickets when the signature is invalid", async () => {
+	it("returns 401 and does not touch tickets when the token query param does not match", async () => {
 		const payload = { event: "message_created", content: "hi" };
 		await expect(
 			call(chatwootWebhook, payload, {
 				context: {
-					headers: new Headers({
-						"x-chatwoot-signature": "sha256=deadbeef",
-						"x-chatwoot-timestamp": TIMESTAMP,
-					}),
+					headers: new Headers(),
+					url: webhookUrl("wrong-secret"),
 					rawBody: JSON.stringify(payload),
 				},
 			}),
@@ -144,7 +141,7 @@ describe("POST /support/webhook/chatwoot", () => {
 
 		await expect(
 			call(chatwootWebhook, payload, {
-				context: { headers: signed.headers, rawBody: signed.rawBody },
+				context: { headers: new Headers(), url: signed.url, rawBody: signed.rawBody },
 			}),
 		).resolves.toEqual({ ok: true, ticketId: "tkt_1" });
 
@@ -176,7 +173,7 @@ describe("POST /support/webhook/chatwoot", () => {
 		};
 
 		await processChatwootWebhook({
-			headers: signed.headers,
+			url: signed.url,
 			rawBody: signed.rawBody,
 			payload,
 			deps: {
@@ -220,7 +217,7 @@ describe("POST /support/webhook/chatwoot", () => {
 		};
 
 		await processChatwootWebhook({
-			headers: signed.headers,
+			url: signed.url,
 			rawBody: signed.rawBody,
 			payload,
 			deps: {
@@ -256,7 +253,7 @@ describe("POST /support/webhook/chatwoot", () => {
 		};
 
 		await processChatwootWebhook({
-			headers: signed.headers,
+			url: signed.url,
 			rawBody: signed.rawBody,
 			payload,
 			deps: {
@@ -296,7 +293,7 @@ describe("POST /support/webhook/chatwoot", () => {
 		};
 
 		await processChatwootWebhook({
-			headers: signed.headers,
+			url: signed.url,
 			rawBody: signed.rawBody,
 			payload,
 			deps: {
@@ -322,7 +319,7 @@ describe("POST /support/webhook/chatwoot", () => {
 		const signed = signedCall(payload);
 
 		await processChatwootWebhook({
-			headers: signed.headers,
+			url: signed.url,
 			rawBody: signed.rawBody,
 			payload,
 			deps: {

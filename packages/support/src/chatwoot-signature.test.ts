@@ -1,89 +1,42 @@
-import { createHmac } from "node:crypto";
-
 import { describe, expect, it } from "vitest";
 
-import {
-	createChatwootWebhookSignature,
-	verifyChatwootWebhookSignature,
-} from "./chatwoot-signature";
+import { verifyChatwootWebhookToken } from "./chatwoot-signature";
 
 const SECRET = "chatwoot-webhook-secret";
-const BODY = JSON.stringify({ event: "message_created", id: 1 });
-const TIMESTAMP = "1710000000";
+const URL_WITH_TOKEN = `https://startkiter.dev/api/support/webhook/chatwoot?token=${SECRET}`;
 
-describe("verifyChatwootWebhookSignature", () => {
-	it("accepts a matching Chatwoot HMAC", () => {
-		const signature = createChatwootWebhookSignature({
-			rawBody: BODY,
-			timestamp: TIMESTAMP,
-			secret: SECRET,
-		});
-
-		expect(
-			verifyChatwootWebhookSignature({
-				rawBody: BODY,
-				timestamp: TIMESTAMP,
-				signatureHeader: signature,
-				secret: SECRET,
-			}),
-		).toBe(true);
+describe("verifyChatwootWebhookToken", () => {
+	it("accepts a matching token in the query string", () => {
+		expect(verifyChatwootWebhookToken({ url: URL_WITH_TOKEN, secret: SECRET })).toBe(true);
 	});
 
-	it("rejects a missing signature", () => {
+	it("rejects a missing token", () => {
 		expect(
-			verifyChatwootWebhookSignature({
-				rawBody: BODY,
-				timestamp: TIMESTAMP,
-				signatureHeader: null,
+			verifyChatwootWebhookToken({
+				url: "https://startkiter.dev/api/support/webhook/chatwoot",
+				secret: SECRET,
+			}),
+		).toBe(false);
+	});
+
+	it("rejects a mismatching token", () => {
+		expect(
+			verifyChatwootWebhookToken({
+				url: "https://startkiter.dev/api/support/webhook/chatwoot?token=wrong",
 				secret: SECRET,
 			}),
 		).toBe(false);
 	});
 
 	it("rejects an empty secret fail-closed", () => {
-		const signature = createChatwootWebhookSignature({
-			rawBody: BODY,
-			timestamp: TIMESTAMP,
-			secret: SECRET,
-		});
-
-		expect(
-			verifyChatwootWebhookSignature({
-				rawBody: BODY,
-				timestamp: TIMESTAMP,
-				signatureHeader: signature,
-				secret: "   ",
-			}),
-		).toBe(false);
+		expect(verifyChatwootWebhookToken({ url: URL_WITH_TOKEN, secret: "   " })).toBe(false);
 	});
 
-	it("rejects a tampered body", () => {
-		const signature = createChatwootWebhookSignature({
-			rawBody: BODY,
-			timestamp: TIMESTAMP,
-			secret: SECRET,
-		});
-
-		expect(
-			verifyChatwootWebhookSignature({
-				rawBody: JSON.stringify({ event: "message_created", id: 2 }),
-				timestamp: TIMESTAMP,
-				signatureHeader: signature,
-				secret: SECRET,
-			}),
-		).toBe(false);
+	it("rejects a missing url", () => {
+		expect(verifyChatwootWebhookToken({ url: undefined, secret: SECRET })).toBe(false);
 	});
 
-	it("matches Chatwoot's timestamp.body HMAC construction", () => {
-		const hex = createHmac("sha256", SECRET).update(`${TIMESTAMP}.${BODY}`).digest("hex");
-
-		expect(
-			verifyChatwootWebhookSignature({
-				rawBody: BODY,
-				timestamp: TIMESTAMP,
-				signatureHeader: `sha256=${hex}`,
-				secret: SECRET,
-			}),
-		).toBe(true);
+	it("rejects a malformed url", () => {
+		expect(verifyChatwootWebhookToken({ url: "not-a-url", secret: SECRET })).toBe(false);
 	});
 });

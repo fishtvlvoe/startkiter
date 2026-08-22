@@ -19,7 +19,6 @@ vi.mock("../lib/chatwoot-client", () => ({
 
 import { db } from "@startkiter/database";
 import { auth } from "@startkiter/auth";
-import { createChatwootWebhookSignature } from "@startkiter/support";
 import { createSupportTicket } from "../procedures/create-ticket";
 import { confirmResolved } from "../procedures/confirm-resolved";
 import { processTimedOutSupportTickets } from "../procedures/resolve-timeouts";
@@ -101,12 +100,8 @@ describe("support ticket API", () => {
 		};
 		const rawBody = JSON.stringify(payload);
 
-		const timestamp = "1710000000";
 		await processChatwootWebhook({
-			headers: new Headers({
-				"x-chatwoot-signature": createChatwootWebhookSignature({ rawBody, timestamp, secret: "test-secret" }),
-				"x-chatwoot-timestamp": timestamp,
-			}),
+			url: "https://startkiter.dev/api/support/webhook/chatwoot?token=test-secret",
 			rawBody,
 			payload,
 			secret: "test-secret",
