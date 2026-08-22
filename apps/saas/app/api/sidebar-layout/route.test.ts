@@ -13,6 +13,7 @@ const dbMock = vi.hoisted(() => {
 		sidebarGroup: {
 			findMany: vi.fn(),
 			create: vi.fn(),
+			createMany: vi.fn(),
 			deleteMany: vi.fn(),
 		},
 		sidebarGroupItem: {

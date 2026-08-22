@@ -1,4 +1,6 @@
+import { toastError } from "@startkiter/ui/components/toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 
 export interface SidebarGroup {
 	id: string;
@@ -53,13 +55,30 @@ async function putSidebarLayout(layout: SidebarLayout): Promise<void> {
 	}
 }
 
+/**
+ * Takes an updater instead of a fixed layout so rapid consecutive edits (e.g. two
+ * quick drags) each compute their diff off the latest known cache, not a stale
+ * render closure — otherwise the second write silently clobbers the first.
+ */
 export function useSaveSidebarLayout() {
 	const queryClient = useQueryClient();
+	const t = useTranslations();
 
 	return useMutation({
-		mutationFn: putSidebarLayout,
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: sidebarLayoutQueryKey });
+		mutationFn: async (updater: (current: SidebarLayout) => SidebarLayout) => {
+			const current = queryClient.getQueryData<SidebarLayout>(sidebarLayoutQueryKey) ?? {
+				groups: [],
+				items: [],
+			};
+			const next = updater(current);
+			await putSidebarLayout(next);
+			return next;
+		},
+		onSuccess: (next) => {
+			queryClient.setQueryData(sidebarLayoutQueryKey, next);
+		},
+		onError: () => {
+			toastError(t("app.menu.saveSidebarLayoutError"));
 		},
 	});
 }

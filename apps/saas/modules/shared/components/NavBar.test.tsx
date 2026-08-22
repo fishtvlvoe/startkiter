@@ -8,6 +8,7 @@ let mockPathname = "/";
 let mockIsCollapsed = false;
 let mockIsMobile = false;
 let mockSidebarGroups: Array<{ id: string; title: string; order: number; isCollapsed: boolean }> = [];
+let mockCanAccessAdmin = false;
 
 vi.mock("next/navigation", () => ({
 	usePathname: () => mockPathname,
@@ -31,7 +32,7 @@ vi.mock("@organizations/hooks/use-active-organization", () => ({
 
 vi.mock("@shared/components/PermixProvider", () => ({
 	usePermissions: () => ({
-		check: () => false,
+		check: (perm: string) => (perm === "admin.access" ? mockCanAccessAdmin : false),
 	}),
 }));
 
@@ -48,7 +49,7 @@ vi.mock("../hooks/use-media-query", () => ({
 
 vi.mock("../lib/sidebar-layout", () => ({
 	useSidebarLayout: () => ({ groups: mockSidebarGroups, items: [], isLoading: false }),
-	useSaveSidebarLayout: () => ({ mutate: () => {} }),
+	useSaveSidebarLayout: () => ({ mutate: () => {}, isPending: false }),
 }));
 
 vi.mock("@startkiter/auth/config", () => ({
@@ -159,6 +160,7 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 		mockIsCollapsed = false;
 		mockSidebarGroups = [];
 		mockPathname = "/";
+		mockCanAccessAdmin = false;
 	});
 
 	it("45.1 頂列 admin bar 固定 32px（h-8）並使用 WP 配色 token（#1d2327 深色背景、#2271b1 active）", () => {
@@ -181,6 +183,7 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 
 	it("45.2b 單一分組可獨立收折，跟整體側邊欄收折狀態互不影響", () => {
 		mockIsCollapsed = false;
+		mockCanAccessAdmin = true;
 		mockSidebarGroups = [
 			{ id: "g1", title: "SYSTEM", order: 0, isCollapsed: true },
 			{ id: "g2", title: "GENERAL", order: 1, isCollapsed: false },

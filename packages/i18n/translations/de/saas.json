@@ -115,7 +115,9 @@
       "start": "Start",
       "addGroup": "Gruppe hinzufügen",
       "renameGroupPrompt": "Gruppe umbenennen",
-      "newGroupPrompt": "Neuen Gruppennamen eingeben"
+      "newGroupPrompt": "Neuen Gruppennamen eingeben",
+      "unassignedGroup": "Nicht zugeordnet",
+      "saveSidebarLayoutError": "Speichern des Seitenleisten-Layouts fehlgeschlagen, bitte erneut versuchen"
     },
     "userMenu": {
       "accountSettings": "Kontoeinstellungen",

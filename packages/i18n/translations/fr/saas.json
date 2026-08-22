@@ -115,7 +115,9 @@
       "start": "Démarrage",
       "addGroup": "Ajouter un groupe",
       "renameGroupPrompt": "Renommer le groupe",
-      "newGroupPrompt": "Saisir le nom du nouveau groupe"
+      "newGroupPrompt": "Saisir le nom du nouveau groupe",
+      "unassignedGroup": "Non attribué",
+      "saveSidebarLayoutError": "Échec de l'enregistrement de la disposition de la barre latérale, veuillez réessayer"
     },
     "userMenu": {
       "accountSettings": "Paramètres du compte",

@@ -56,7 +56,7 @@ vi.mock("@shared/components/PermixProvider", () => ({
 
 vi.mock("../lib/sidebar-layout", () => ({
 	useSidebarLayout: () => ({ groups: [], items: [], isLoading: false }),
-	useSaveSidebarLayout: () => ({ mutate: () => {} }),
+	useSaveSidebarLayout: () => ({ mutate: () => {}, isPending: false }),
 }));
 
 vi.mock("../hooks/use-media-query", () => ({

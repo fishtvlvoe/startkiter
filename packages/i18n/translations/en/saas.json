@@ -115,7 +115,9 @@
       "start": "Start",
       "addGroup": "Add group",
       "renameGroupPrompt": "Rename group",
-      "newGroupPrompt": "Enter new group name"
+      "newGroupPrompt": "Enter new group name",
+      "unassignedGroup": "Unassigned",
+      "saveSidebarLayoutError": "Failed to save sidebar layout, please try again"
     },
     "userMenu": {
       "accountSettings": "Account settings",

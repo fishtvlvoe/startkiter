@@ -77,7 +77,7 @@ vi.mock("@startkiter/github-kit", () => ({
 
 vi.mock("../../../../modules/shared/lib/sidebar-layout", () => ({
 	useSidebarLayout: () => ({ groups: [], items: [], isLoading: false }),
-	useSaveSidebarLayout: () => ({ mutate: () => {} }),
+	useSaveSidebarLayout: () => ({ mutate: () => {}, isPending: false }),
 }));
 
 vi.mock("../../../../lib/github-kit", () => ({

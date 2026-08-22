@@ -418,18 +418,55 @@ function MobileTabBar({ fixedItems, moreItem }: MobileTabBarProps) {
 interface SidebarGroupedNavProps {
 	groups: SidebarGroup[];
 	itemsByGroupId: Map<string, NavMenuItem[]>;
+	unassignedItems: NavMenuItem[];
 	onToggleGroupCollapse: (groupId: string) => void;
-	onDropItem: (menuItemId: string, targetGroupId: string) => void;
+	onDropItem: (menuItemId: string, targetGroupId: string | null) => void;
 	onRenameGroup: (groupId: string, nextTitle: string) => void;
 	onAddGroup: (title: string) => void;
 	addGroupLabel: string;
 	renameGroupPromptLabel: string;
 	newGroupPromptLabel: string;
+	unassignedLabel: string;
+	isSaving: boolean;
+}
+
+function SidebarGroupedNavItem({
+	menuItem,
+	isSaving,
+}: {
+	menuItem: NavMenuItem;
+	isSaving: boolean;
+}) {
+	return (
+		<li
+			draggable={!isSaving}
+			data-testid={`sidebar-group-item-${menuItem.id}`}
+			onDragStart={(event: DragEvent<HTMLLIElement>) =>
+				event.dataTransfer.setData("text/plain", menuItem.id)
+			}
+		>
+			<Link
+				href={menuItem.href}
+				aria-disabled={isSaving}
+				className={cn(
+					"gap-3 px-3 py-2 text-sm flex w-full items-center rounded-lg whitespace-nowrap transition-colors cursor-grab",
+					menuItem.isActive ? "bg-[#2271b1] font-semibold text-white" : "hover:bg-white/5",
+					isSaving && "pointer-events-none opacity-60",
+				)}
+			>
+				<menuItem.icon
+					className={cn("size-5 shrink-0", menuItem.isActive ? "text-white" : "text-[#c3c4c7]/60")}
+				/>
+				<span className={menuItem.isActive ? "text-white" : "text-[#c3c4c7]"}>{menuItem.label}</span>
+			</Link>
+		</li>
+	);
 }
 
 function SidebarGroupedNav({
 	groups,
 	itemsByGroupId,
+	unassignedItems,
 	onToggleGroupCollapse,
 	onDropItem,
 	onRenameGroup,
@@ -437,6 +474,8 @@ function SidebarGroupedNav({
 	addGroupLabel,
 	renameGroupPromptLabel,
 	newGroupPromptLabel,
+	unassignedLabel,
+	isSaving,
 }: SidebarGroupedNavProps) {
 	const sortedGroups = useMemo(() => [...groups].sort((a, b) => a.order - b.order), [groups]);
 
@@ -444,13 +483,14 @@ function SidebarGroupedNav({
 		<div className="gap-2 flex flex-col">
 			<button
 				type="button"
+				disabled={isSaving}
 				onClick={() => {
 					const title = window.prompt(newGroupPromptLabel);
 					if (title?.trim()) {
 						onAddGroup(title.trim());
 					}
 				}}
-				className="gap-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 hover:text-foreground flex items-center"
+				className="gap-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 hover:text-foreground disabled:opacity-50 flex items-center"
 			>
 				+ {addGroupLabel}
 			</button>
@@ -466,6 +506,9 @@ function SidebarGroupedNav({
 						onDragOver={(event: DragEvent<HTMLDivElement>) => event.preventDefault()}
 						onDrop={(event: DragEvent<HTMLDivElement>) => {
 							event.preventDefault();
+							if (isSaving) {
+								return;
+							}
 							const menuItemId = event.dataTransfer.getData("text/plain");
 							if (menuItemId) {
 								onDropItem(menuItemId, group.id);
@@ -476,7 +519,8 @@ function SidebarGroupedNav({
 							<button
 								type="button"
 								onClick={() => onToggleGroupCollapse(group.id)}
-								className="gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 flex flex-1 items-center overflow-hidden"
+								disabled={isSaving}
+								className="gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 flex flex-1 items-center overflow-hidden disabled:opacity-50"
 							>
 								<ChevronRightIcon
 									className={cn("size-3 shrink-0 transition-transform", !group.isCollapsed && "rotate-90")}
@@ -485,13 +529,14 @@ function SidebarGroupedNav({
 							</button>
 							<button
 								type="button"
+								disabled={isSaving}
 								onClick={() => {
 									const nextTitle = window.prompt(renameGroupPromptLabel, group.title);
 									if (nextTitle?.trim()) {
 										onRenameGroup(group.id, nextTitle.trim());
 									}
 								}}
-								className="opacity-0 text-muted-foreground/70 group-hover/header:opacity-100 hover:text-foreground transition"
+								className="opacity-0 text-muted-foreground/70 group-hover/header:opacity-100 hover:text-foreground disabled:opacity-50 transition"
 							>
 								<PenIcon className="size-3" />
 							</button>
@@ -499,40 +544,39 @@ function SidebarGroupedNav({
 						{!group.isCollapsed && (
 							<ul className="gap-0.5 flex list-none flex-col">
 								{groupItems.map((menuItem) => (
-									<li
-										key={menuItem.id}
-										draggable
-										data-testid={`sidebar-group-item-${menuItem.id}`}
-										onDragStart={(event: DragEvent<HTMLLIElement>) =>
-											event.dataTransfer.setData("text/plain", menuItem.id)
-										}
-									>
-										<Link
-											href={menuItem.href}
-											className={cn(
-												"gap-3 px-3 py-2 text-sm flex w-full items-center rounded-lg whitespace-nowrap transition-colors cursor-grab",
-												menuItem.isActive
-													? "bg-[#2271b1] font-semibold text-white"
-													: "hover:bg-white/5",
-											)}
-										>
-											<menuItem.icon
-												className={cn(
-													"size-5 shrink-0",
-													menuItem.isActive ? "text-white" : "text-[#c3c4c7]/60",
-												)}
-											/>
-											<span className={menuItem.isActive ? "text-white" : "text-[#c3c4c7]"}>
-												{menuItem.label}
-											</span>
-										</Link>
-									</li>
+									<SidebarGroupedNavItem key={menuItem.id} menuItem={menuItem} isSaving={isSaving} />
 								))}
 							</ul>
 						)}
 					</div>
 				);
 			})}
+			{unassignedItems.length > 0 && (
+				// biome-ignore lint/a11y/noStaticElementInteractions: 拖曳分組容器不是互動控制項本身，鍵盤操作走各選單連結
+				<div
+					data-testid="sidebar-group-unassigned"
+					onDragOver={(event: DragEvent<HTMLDivElement>) => event.preventDefault()}
+					onDrop={(event: DragEvent<HTMLDivElement>) => {
+						event.preventDefault();
+						if (isSaving) {
+							return;
+						}
+						const menuItemId = event.dataTransfer.getData("text/plain");
+						if (menuItemId) {
+							onDropItem(menuItemId, null);
+						}
+					}}
+				>
+					<div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+						{unassignedLabel}
+					</div>
+					<ul className="gap-0.5 flex list-none flex-col">
+						{unassignedItems.map((menuItem) => (
+							<SidebarGroupedNavItem key={menuItem.id} menuItem={menuItem} isSaving={isSaving} />
+						))}
+					</ul>
+				</div>
+			)}
 		</div>
 	);
 }
@@ -662,8 +706,9 @@ export function NavBar() {
 
 	const menuItemsById = useMemo(() => new Map(menuItems.map((item) => [item.id, item])), [menuItems]);
 
-	const itemsByGroupId = useMemo(() => {
+	const { itemsByGroupId, unassignedItems } = useMemo(() => {
 		const map = new Map<string, NavMenuItem[]>();
+		const assignedMenuItemIds = new Set(persistedItems.map((item) => item.menuItemId));
 		for (const group of groups) {
 			const groupItems = persistedItems
 				.filter((item) => item.groupId === group.id)
@@ -672,42 +717,67 @@ export function NavBar() {
 				.filter((item): item is NavMenuItem => Boolean(item));
 			map.set(group.id, groupItems);
 		}
-		return map;
-	}, [groups, persistedItems, menuItemsById]);
+		return {
+			itemsByGroupId: map,
+			unassignedItems: menuItems.filter((item) => !assignedMenuItemIds.has(item.id)),
+		};
+	}, [groups, persistedItems, menuItemsById, menuItems]);
 
 	function handleToggleGroupCollapse(groupId: string) {
-		const nextGroups = groups.map((group) =>
-			group.id === groupId ? { ...group, isCollapsed: !group.isCollapsed } : group,
-		);
-		saveSidebarLayout.mutate({ groups: nextGroups, items: persistedItems });
+		saveSidebarLayout.mutate((current) => ({
+			groups: current.groups.map((group) =>
+				group.id === groupId ? { ...group, isCollapsed: !group.isCollapsed } : group,
+			),
+			items: current.items,
+		}));
 	}
 
-	function handleDropItem(menuItemId: string, targetGroupId: string) {
-		const nextItems = persistedItems.filter((item) => item.menuItemId !== menuItemId);
-		const targetGroupItemCount = nextItems.filter((item) => item.groupId === targetGroupId).length;
-		const existing = persistedItems.find((item) => item.menuItemId === menuItemId);
-		nextItems.push({
-			id: existing?.id ?? `sidebar-group-item-${menuItemId}`,
-			groupId: targetGroupId,
-			menuItemId,
-			order: targetGroupItemCount,
+	/** targetGroupId of `null` unassigns the item (removes its SidebarGroupItem row). */
+	function handleDropItem(menuItemId: string, targetGroupId: string | null) {
+		saveSidebarLayout.mutate((current) => {
+			const existing = current.items.find((item) => item.menuItemId === menuItemId);
+			if (existing?.groupId === targetGroupId) {
+				// Dropped back into its own group — no-op, avoids recomputing an order
+				// that collides with a sibling already occupying that slot.
+				return current;
+			}
+
+			const remaining = current.items.filter((item) => item.menuItemId !== menuItemId);
+			if (targetGroupId === null) {
+				return { groups: current.groups, items: remaining };
+			}
+
+			const targetGroupItems = remaining.filter((item) => item.groupId === targetGroupId);
+			const nextOrder = targetGroupItems.length
+				? Math.max(...targetGroupItems.map((item) => item.order)) + 1
+				: 0;
+			remaining.push({
+				id: existing?.id ?? `sidebar-group-item-${menuItemId}`,
+				groupId: targetGroupId,
+				menuItemId,
+				order: nextOrder,
+			});
+			return { groups: current.groups, items: remaining };
 		});
-		saveSidebarLayout.mutate({ groups, items: nextItems });
 	}
 
 	function handleRenameGroup(groupId: string, nextTitle: string) {
-		const nextGroups = groups.map((group) =>
-			group.id === groupId ? { ...group, title: nextTitle } : group,
-		);
-		saveSidebarLayout.mutate({ groups: nextGroups, items: persistedItems });
+		saveSidebarLayout.mutate((current) => ({
+			groups: current.groups.map((group) =>
+				group.id === groupId ? { ...group, title: nextTitle } : group,
+			),
+			items: current.items,
+		}));
 	}
 
 	function handleAddGroup(title: string) {
-		const nextGroups: SidebarGroup[] = [
-			...groups,
-			{ id: `sidebar-group-${crypto.randomUUID()}`, title, order: groups.length, isCollapsed: false },
-		];
-		saveSidebarLayout.mutate({ groups: nextGroups, items: persistedItems });
+		saveSidebarLayout.mutate((current) => ({
+			groups: [
+				...current.groups,
+				{ id: `sidebar-group-${crypto.randomUUID()}`, title, order: current.groups.length, isCollapsed: false },
+			],
+			items: current.items,
+		}));
 	}
 
 	const tabBarFixedItems = useMemo(
@@ -862,11 +932,12 @@ export function NavBar() {
 					</div>
 
 					<div className="min-h-0 md:flex hidden flex-1 flex-col overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]">
-						{groups.length > 0 && !isCollapsedEffective ? (
+						{canAccessAdmin && groups.length > 0 && !isCollapsedEffective ? (
 							<div className="md:mx-0 md:mt-3 md:mb-6">
 								<SidebarGroupedNav
 									groups={groups}
 									itemsByGroupId={itemsByGroupId}
+									unassignedItems={unassignedItems}
 									onToggleGroupCollapse={handleToggleGroupCollapse}
 									onDropItem={handleDropItem}
 									onRenameGroup={handleRenameGroup}
@@ -874,6 +945,8 @@ export function NavBar() {
 									addGroupLabel={t("app.menu.addGroup")}
 									renameGroupPromptLabel={t("app.menu.renameGroupPrompt")}
 									newGroupPromptLabel={t("app.menu.newGroupPrompt")}
+									unassignedLabel={t("app.menu.unassignedGroup")}
+									isSaving={saveSidebarLayout.isPending}
 								/>
 							</div>
 						) : (

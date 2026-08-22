@@ -79,16 +79,14 @@ export async function PUT(request: Request) {
 		await tx.sidebarGroup.deleteMany({});
 
 		if (groups.length > 0) {
-			for (const group of groups) {
-				await tx.sidebarGroup.create({
-					data: {
-						id: group.id,
-						title: group.title,
-						order: group.order,
-						isCollapsed: group.isCollapsed,
-					},
-				});
-			}
+			await tx.sidebarGroup.createMany({
+				data: groups.map((group) => ({
+					id: group.id,
+					title: group.title,
+					order: group.order,
+					isCollapsed: group.isCollapsed,
+				})),
+			});
 		}
 
 		if (validItems.length > 0) {

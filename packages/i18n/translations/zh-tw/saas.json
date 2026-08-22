@@ -115,7 +115,9 @@
       "start": "首頁",
       "addGroup": "新增分組",
       "renameGroupPrompt": "修改分組名稱",
-      "newGroupPrompt": "輸入新分組名稱"
+      "newGroupPrompt": "輸入新分組名稱",
+      "unassignedGroup": "未分組",
+      "saveSidebarLayoutError": "儲存側邊欄排序失敗，請重試"
     },
     "userMenu": {
       "accountSettings": "帳號設定",

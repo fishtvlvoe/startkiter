@@ -115,7 +115,9 @@
       "start": "Inicio",
       "addGroup": "Añadir grupo",
       "renameGroupPrompt": "Renombrar grupo",
-      "newGroupPrompt": "Introduce el nombre del nuevo grupo"
+      "newGroupPrompt": "Introduce el nombre del nuevo grupo",
+      "unassignedGroup": "Sin asignar",
+      "saveSidebarLayoutError": "Error al guardar el diseño de la barra lateral, inténtalo de nuevo"
     },
     "userMenu": {
       "accountSettings": "Configuración de cuenta",
