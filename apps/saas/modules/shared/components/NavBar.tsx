@@ -932,7 +932,7 @@ export function NavBar() {
 					</div>
 
 					<div className="min-h-0 md:flex hidden flex-1 flex-col overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]">
-						{canAccessAdmin && groups.length > 0 && !isCollapsedEffective ? (
+						{canAccessAdmin && !isCollapsedEffective ? (
 							<div className="md:mx-0 md:mt-3 md:mb-6">
 								<SidebarGroupedNav
 									groups={groups}
