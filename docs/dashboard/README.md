@@ -1,12 +1,14 @@
 # StartKiter 專案儀表板 SOP
 
-固定位置的進度儀表板，取代「每次對話重新對焦一次」。任何 Claude Code / Codex / Cursor session 接手這個專案時，先看這份 SOP，再看目前發布的網址。
+**新系統（2026-08-22 起）**：固定網址、永不到期、自動鎖機制、完整歷史紀錄。
+
+> 舊系統（orca artifacts，30 天到期）已停用。新系統詳見 `~/.claude/reference/dev-dashboard-sop.md`。
 
 ## 目前發布網址
 
-- **https://share.onorca.dev/a/3CEeYhHiSGfP**
-- 平台：orca artifacts share（30 天到期，到期要重新發布拿新網址，見下方「到期怎麼辦」）
-- 本地檔案：`docs/dashboard/status.html`（這是唯一真本，網址只是這個檔案發布出去的結果）
+- **https://startkiter-dashboard.pages.dev/**
+- 平台：Cloudflare Pages（永久固定網址，無到期機制）
+- 本系統架構：Awesome-Dyson `dev-project-dashboard-system` change
 
 ## 什麼時候要更新
 
@@ -15,45 +17,55 @@
 - 有新的待老闆確認事項，或舊的確認事項有了答案
 - 老闆明確要求「更新一下現況」
 
-## 更新步驟
+## 快速更新步驟
 
-1. **收集現況**（不要憑記憶猜，實際查）：
-   - `for d in openspec/changes/*/; do echo $d; grep -c '^- \[' "$d/tasks.md"; grep -c '^- \[x\]' "$d/tasks.md"; done` 拿到每張進行中 change 的真實打勾數
-   - 讀最新一份 `docs/discuss/*.md` 看有沒有新的決策或待確認事項
-   - 讀 `AGENTS.md` 確認產品定位、抽取來源等有沒有變
-2. **改 `docs/dashboard/status.html`**：用 Edit 工具改內容，不要整份重寫。保留現有的 CSS/版面結構，只動內容（進度數字、卡片文字、新增/移除區塊）。
-3. **發布**（注意：orca artifacts 認的是「第一次 share 時的本機路徑」，不是 repo 路徑，兩者要同步）：
+1. **編輯本機狀態**（StartKiter 的專屬複本，不是 Awesome-Dyson 共用範本）：
    ```bash
-   cp /Users/fishtv/Development/products/startkiter/docs/dashboard/status.html /tmp/startkiter-status.html
-   orca artifacts update /tmp/startkiter-status.html --json
+   vim ~/.local/share/dev-dashboards/startkiter/state.json
+
+   # 或新增歷史紀錄
+   /Users/fishtv/Development/Awesome-Dyson/scripts/dashboard-add-entry.sh \
+     startkiter ~/.local/share/dev-dashboards/startkiter \
+     "2026-08-22" "更新描述" "工作摘要"
    ```
-   第一次發布用 `orca artifacts share <path>`，之後都對**同一個本機路徑**（目前是 `/tmp/startkiter-status.html`）用 `update`，網址才不會變。repo 裡的 `docs/dashboard/status.html` 是版本留痕的真本，每次先改這份，再 `cp` 到 `/tmp` 那個發布路徑，不要搞反或只改一邊。
-4. **驗證**（不要只憑工具回傳 `ok:true` 就當完成）：
+
+2. **部署到 Cloudflare Pages**：
    ```bash
-   curl -sS -o /dev/null -w "%{http_code}\n" https://share.onorca.dev/a/3CEeYhHiSGfP
+   /Users/fishtv/Development/Awesome-Dyson/scripts/dashboard-deploy.sh startkiter ~/.local/share/dev-dashboards/startkiter
    ```
-   要是 200 才算真的發布成功。
-5. **commit `docs/dashboard/status.html` 到 git**（版本留痕，之後要回溯改了什麼看 git log 就好）。
 
-## 到期怎麼辦（30 天）
+   > 腳本實際位置在 Awesome-Dyson repo 裡（`~/.claude/scripts/` 底下沒有這些腳本），不要改到 `/Users/fishtv/Development/Awesome-Dyson/public/`——那是共用範本，改了會污染之後其他專案要用的範本內容。
 
-`orca artifacts update` 失敗、或 curl 不是 200 且確認過不是網路問題時，代表舊連結失效了：
+3. **驗證**：
+   ```bash
+   curl https://startkiter-dashboard.pages.dev/ | grep "<title>"
+   ```
 
-1. 用 `orca artifacts share docs/dashboard/status.html --json` 重新發布，拿到新的 `shareUrl`
-2. 更新這份 README 最上面「目前發布網址」那一行
-3. 主動告訴老闆新網址（不要等他發現舊的打不開才講）
+## 詳細 SOP
 
-## 什麼可以放進儀表板
+見 `~/.claude/reference/dev-dashboard-sop.md`，涵蓋：
+- 初始化（已完成，startkiter-dashboard 已建立）
+- 編輯 state.json（現況快照）
+- 記錄 entry（工作階段歷史）
+- 鎖機制（同時寫入保護）
+- 本機目錄結構
+- 部署工作流
+- 常見問題
 
-- 進度數字、卡片文字（純文字更新，隨時做）
-- 截圖：需要展示「這個頁面長怎樣」時，用 `ego-browser` 的 `captureScreenshot`（或 `snapshotText` 描述後手動畫示意）拿到圖，轉成 base64 內嵌進 `<img src="data:image/png;base64,...">`——**不要用外部圖片連結**，Artifact 的 CSP 只允許自包在單一 HTML 檔裡的東西
-- 連結：直接用 `<a href="...">`，正常超連結，不用特別處理
+## 新系統特點
 
-## 為什麼不做成一個獨立 Agent
+- **永久網址**：不再有 30 天到期、無須重新發布拿新網址
+- **機器可讀**：state.json + entries/ 為純 JSON，AI Agent 能直接解析，不用渲染 HTML
+- **歷史追蹤**：entries/ 自動記錄每次工作階段，互不覆蓋
+- **無後端**：純靜態 Cloudflare Pages，無 Worker、無資料庫，無須維護伺服器
+- **鎖機制**：多 Agent 同時更新時自動排隊，避免衝突
 
-這個流程是「讀狀態 → 套進既有 HTML → 發布 → curl 驗證」，一個人（一個 session）就能做完，不需要獨立 context、不需要平行跑多個子任務。開 Agent 是為了處理需要脫離主線 context 的複雜工作，這個不算。真的需要固定排程自動更新（例如每天早上自動跑一次）可以考慮 `CronCreate`／`superset-automate`，但目前是「有變化才更新」，人工觸發就夠。
+## 舊系統棄用
 
-## 相關硬規則（跟這個 SOP 有關的，不要違反）
+- orca artifacts 連結 `https://share.onorca.dev/a/3CEeYhHiSGfP` 已停用
+- `docs/dashboard/status.html`（舊的 HTML 檔）保留作版本紀錄，但不再發布
+- 後續所有更新改用新系統
 
-- 所有網頁瀏覽器操作只用 `/ego-browser`，不用 mirasim gui_task / peekaboo browser 等其他工具（見 `~/.agent-guardrails/deny-list.md`）
-- 有 API（Cloudflare、Coolify 之後也會有）就直接打 API/CLI，不要為了走「正規流程」硬去開瀏覽器；ego-browser 只留給真的沒有 API 的操作（建 LINE Channel、第一次建 Cloudflare Token 之類）
+## 相關硬規則
+
+見 `~/.agent-guardrails/deny-list.md` 與 `~/.claude/reference/dev-dashboard-sop.md`
