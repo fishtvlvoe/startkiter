@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
 	getAvailableSupportChannels,
@@ -7,6 +7,17 @@ import {
 } from "./channel-config";
 
 describe("Support Channel Configuration", () => {
+	// 隔離 process.env：本機 .env 可能已填入真的 LINE/Telegram token，
+	// 若不隔離會汙染「未傳 env 時 fallback 讀 process.env」的測試斷言。
+	beforeEach(() => {
+		vi.stubEnv("LINE_MESSAGING_CHANNEL_ACCESS_TOKEN", "");
+		vi.stubEnv("TELEGRAM_BOT_TOKEN", "");
+	});
+
+	afterEach(() => {
+		vi.unstubAllEnvs();
+	});
+
 	describe("LINE Channel Configuration (Task 4.1)", () => {
 		it("returns false when LINE_MESSAGING_CHANNEL_ACCESS_TOKEN is unset", () => {
 			expect(
