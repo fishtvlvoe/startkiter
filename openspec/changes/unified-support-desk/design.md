@@ -35,13 +35,15 @@
 - **從零自建工單系統**：否決。Chatwoot 已經做好多管道路由（LINE/Telegram/Web Widget 統一變成 conversation）、conversation 狀態機、Webhook 事件系統，自建等於重造一遍這些基礎設施，成本遠高於自架一套開源方案。
 - **Zendesk / Freshdesk 等商用 SaaS**：否決。月費更高、黑盒 SaaS 難跟 Coolify 唯讀查詢整合進同一個 AI 判斷流程，且多數方案的 API 存取也要較高方案才開放。
 
-### 獨立 VPS，不跟買家的 managed fleet 共用主機
+### ~~獨立 VPS，不跟買家的 managed fleet 共用主機~~（**2026-08-22 已由 Fish 正式推翻**）
 
-Chatwoot 架在 Coolify Cloud 帳號下**新增一台獨立 VPS**，跟買家部署用的 managed fleet 分開。
+~~Chatwoot 架在 Coolify Cloud 帳號下**新增一台獨立 VPS**，跟買家部署用的 managed fleet 分開。~~
 
-**Alternatives considered：**
-- **塞進既有 buyer-managed fleet 的某台機器**：否決。這是內部客服系統，不是買家資源，混在一起會讓「哪些資源屬於買家、哪些屬於公司內部」的權限模型混亂，未來稽核或买家資料保護要求時難以切割。
-- **用 Vercel serverless 或其他 serverless 平台跑 Chatwoot**：否決。Chatwoot 是常駐 Rails + Redis + PostgreSQL 應用，官方本身建議跑在常駐容器/VM，不是為 serverless 冷啟動設計；跟這個專案「部署走常駐 Node/服務」的既有 Tech Stack 慣例一致，不要為了這張 change 另開一種部署形態。
+**2026-08-22 裁決更正**：propose 階段的決策實際 apply 時發現與成本現實衝突——裝機當下才注意到共用機器（`startkiter-managed-fleet-01`）資源仍有大量餘裕（3.3GB 記憶體用不到 1GB、磁碟用 20%），另開一台 VPS 只為隔離「哪些資源屬於買家、哪些屬於公司內部」這個權限模型考量，不值得多付一筆月費。Fish 已裁決：**Chatwoot 就留在共用機器上**，等真的觀察到資源競爭或稽核需求逼近才重新評估搬遷。原本否決「塞進既有 buyer-managed fleet 的某台機器」的理由（權限模型混亂、稽核難切割）仍然成立，只是排序在「值不值得現在多付錢」之後——這是成本/架構的權衡取捨，不是推翻原本的風險判斷。
+
+**Alternatives considered（propose 階段原始記錄，保留供追溯）：**
+- **塞進既有 buyer-managed fleet 的某台機器**：propose 階段否決，apply 階段被 Fish 推翻採用。理由如上。
+- **用 Vercel serverless 或其他 serverless 平台跑 Chatwoot**：仍然否決。Chatwoot 是常駐 Rails + Redis + PostgreSQL 應用，官方本身建議跑在常駐容器/VM，不是為 serverless 冷啟動設計；跟這個專案「部署走常駐 Node/服務」的既有 Tech Stack 慣例一致，不要為了這張 change 另開一種部署形態。
 
 ### `SupportTicket` 關聯 `BuyerDeployment`（優先強關聯，允許 null 因應無部署買家）
 

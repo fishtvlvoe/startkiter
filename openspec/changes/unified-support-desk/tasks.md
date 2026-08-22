@@ -17,10 +17,10 @@ TDD：每個功能群組先列紅燈測試 task，再列實作 task。
 
 ## 3. Chatwoot 基礎設施（對應設計決策「客服系統選 Chatwoot 自架，不用 Chatwoot Cloud 或另建工單系統」「獨立 VPS，不跟買家的 managed fleet 共用主機」）
 
-- [~] 3.1（2026-08-22 部分完成，但違反設計決策，需要 Fish 裁決）Chatwoot 已透過 Coolify 一鍵安裝服務部署並可正常運作（`https://support.startkiter.dev` 回 200，Let's Encrypt 憑證已簽發，admin 帳號 fish@aiver.me 已建立，API token 已取得存入 `.env`）。**但部署位置裝在 `startkiter-managed-fleet-01`（買家 managed fleet 現有機器），不是設計決策要求的「獨立 VPS」**（design.md 第 38-43 行明文：「這是內部客服系統，不是買家資源，混在一起會讓權限模型混亂」）。目前該機器資源尚有餘裕（3.3GB 記憶體用不到 1GB、磁碟用 20%），Chatwoot 4 個容器運作正常，不影響現有 startkiter-test 服務。**卡在**：要嘛依原決策買一台新 VPS 搬過去（多一筆月費成本），要嘛正式推翻決策改成「共用機器，用 Docker 資源隔離」——這是成本/架構取捨，需要 Fish 決定，不是我能單方面決定的事，已停手等裁決
-- [ ] 3.2 設定 Cloudflare DNS 記錄為「僅 DNS」灰雲朵模式並確認 SSL 簽發成功——**已完成但用的是共用機器的 IP**（`support.startkiter.dev` A 記錄已指向 `startkiter-managed-fleet-01` 的 45.76.187.247，SSL 簽發成功），若 3.1 決定搬新 VPS，這條 DNS 記錄需要跟著改
-- [ ] 3.3 在 Chatwoot 後台建立 1-5 個客服帳號，驗證方式為登入 Chatwoot 後台確認帳號清單與人數符合團隊規模——尚未建立其他客服帳號，目前只有 admin 一人
-- [ ] 3.4（2026-08-22 新增，依賴 6.15 完成後才能做）在 Chatwoot 後台（Settings → Integrations → Webhooks）填入帶 `token` query 參數的 webhook URL（`https://startkiter.dev/api/support/webhook/chatwoot?token=<CHATWOOT_WEBHOOK_SECRET>`），訂閱 `conversation_created`、`message_created` 事件，驗證方式為在 Chatwoot 後台觸發一則測試訊息，確認伺服器端收到請求並回傳 200
+- [x] 3.1（**2026-08-22 Fish 裁決：正式推翻「獨立 VPS」決策，改用共用機器**）Chatwoot 已透過 Coolify 一鍵安裝服務部署並可正常運作（`https://support.startkiter.dev` 回 200，Let's Encrypt 憑證已簽發，admin 帳號 fish@aiver.me 已建立，API token 已取得存入 `.env`）。部署位置維持在 `startkiter-managed-fleet-01`（買家 managed fleet 現有機器），不搬新 VPS——機器資源有餘裕（3.3GB 記憶體用不到 1GB、磁碟用 20%），多一筆 VPS 月費不划算，等真的觀察到資源競爭再搬。design.md「~~獨立 VPS，不跟買家的 managed fleet 共用主機~~（**2026-08-22 已由 Fish 正式推翻**）」決策段落已同步標記
+- [x] 3.2 設定 Cloudflare DNS 記錄為「僅 DNS」灰雲朵模式並確認 SSL 簽發成功——`support.startkiter.dev` A 記錄指向 `startkiter-managed-fleet-01` 的 45.76.187.247，SSL 簽發成功，因 3.1 裁決維持共用機器，這條記錄不需要再改
+- [x] 3.3（2026-08-22 確認）Chatwoot 客服帳號不用額外建立——核流目前一人公司，admin 帳號 fish@aiver.me 已足夠回應工單；「多租戶」（未來買家各自部署一套 StartKiter）跟 Chatwoot 客服帳號數量是兩件事，架構已用 `SupportTicket.buyerDeploymentId` 做買家隔離，不需要靠多開 Chatwoot 帳號因應
+- [ ] 3.4（2026-08-22 新增，依賴 6.15 完成後才能做）在 Chatwoot 後台（Settings → Integrations → Webhooks）填入帶 `token` query 參數的 webhook URL（`https://startkiter.aiver.me/api/support/webhook/chatwoot?token=<CHATWOOT_WEBHOOK_SECRET>`），訂閱 `conversation_created`、`message_created` 事件，驗證方式為在 Chatwoot 後台觸發一則測試訊息，確認伺服器端收到請求並回傳 200
 
 ## 4. 進線管道整合（對應設計決策「進線管道：網站 + LINE + Telegram 三個核心管道，IG/FB 等留待未來」）
 
