@@ -65,11 +65,21 @@ Changes can be parked（暫存）— temporarily moved out of `openspec/changes/
 
 課 + 終身代碼包。對外課名可用「開站包」。
 
+## 目前優先順序（2026-08-23 定，每次 session 開始先看這裡）
+
+同時有 3 張 change 在動，順序：
+
+1. **`core-module-bundles-coupons`（55/56）**：剩最後一項已裁決本輪不做（等買家播放頁做出來才接），這張視同完成，不用再動，等播放頁那張新 SR 立案後才回頭接。
+2. **`platform-shell-plugin-architecture`（124/129）**：工程量最大，優先做完。剩：41.3（GitHub App 憑證已修好，還沒真的跑一次 claim/revoke E2E）、42.1（舊買家遷移裁決，待老闆決定或先查資料庫買家數）、48.2/48.3（畫面截圖比對＋拖曳存檔驗收）、`organizations.enable=true` 連帶讓首頁跳出未翻譯的「Your organizations」區塊，待老闆決定要不要先隱藏。
+3. **`unified-support-desk`（51/55）**：Chatwoot 真實 webhook 送達不穩定的疑難雜症已擱置（老闆裁決優先度排最後）；LINE/Telegram 帳號申請不卡人，隨時可做。
+
+**每次做完事，回頭更新 `docs/dashboard`（見下方「專案儀表板」段）的 state.json，不要只在對話裡口頭報告——這是本檔案能被下一個 session 讀到的正式進度來源，對話記錄會斷。**
+
 **產品定位（2026-08-22 補寫，之前遺漏）：StartKiter 要做成類似 WordPress 的平台，不是單一固定功能的 SaaS。** 買家拿到的不是一個寫死功能清單的網站，而是一個殼（platform shell）＋可掛載的模組（plugin）架構：後台掛載點、Marketplace 展示頁、模組各自獨立 `packages/<name>/`，買家或第三方可以像裝 WordPress 外掛一樣加裝功能。這個定位對應 `openspec/changes/platform-shell-plugin-architecture/`（Mount Points、PluginContent、Marketplace、MCP Gateway 唯讀連線），不是事後補的功能，是產品第一性——之前的對焦摘要漏講這段，只講了「一次買斷拿到 SaaS 骨架」，沒講「這骨架長成什麼架構」。
 
 產品現行邊界以 `openspec/specs/` 為準（由已封存的 `mvp-test-scope` 灌入）。`extract-shell-auth`、`extract-payuni-checkout`、`extract-course-module`、`test-to-clean-package-promotion` 已封存。兩倉＋晉升規則見 `openspec/specs/test-clean-package-promotion/` 與 `docs/deploy-and-public-url.md`。
 
-MVP extract 佇列已清空：`extract-site-agent`、`extract-line-learner-community`、`extract-github-kit-fulfillment` 皆已封存。`bootstrap-test-startkiter` 已封存：TEST=`https://github.com/fishtvlvoe/test-startkiter`。mvp-sell-flow-usable 已封存。仍卡老闆：GITHUB_KIT_ORG／REPO／完整 PEM、LINE_COMMUNITY_INVITE_URL、Google／LINE OAuth callback。
+MVP extract 佇列已清空：`extract-site-agent`、`extract-line-learner-community`、`extract-github-kit-fulfillment` 皆已封存。`bootstrap-test-startkiter` 已封存：TEST=`https://github.com/fishtvlvoe/test-startkiter`。mvp-sell-flow-usable 已封存。GITHUB_KIT_ORG／REPO／完整 PEM 已於 2026-08-23 確認在根目錄 `.env` 早就設好，只是沒同步到 `apps/saas/.env`，已修（見上方優先順序第 2 點）。仍卡老闆：LINE_COMMUNITY_INVITE_URL、Google／LINE OAuth callback。
 
 **部署方向轉彎（2026-08-22 老闆定案）：不再用 Vercel，全部搬到 Coolify + VPS**（`https://test-startkiter.vercel.app` 部署已停止更新，該站最後一次真正部署是 2026-08-15，之後 6+ 天的 commit 都沒反映上去，過去查 webhook 404 才發現）。現有唯一一台 Coolify 伺服器 `startkiter-managed-fleet-01`（Vultr，Ubuntu 26.04、2 vCPU/3.3GB、Docker 29.7.2，2026-08-18 建立，IP `45.76.187.247`，DNS `coolify-test.startkiter.dev` 已指過去）目前只跑兩個測試用 resource（nginx demo image、一個 git-deploy 測試），還沒正式扛過主站。細節與遷移步驟待寫成新 Spectra change，尚未 propose。`startkiter.dev` 這個網域已在 Cloudflare 買好、zone 已啟用（zone id `631be2a55e0c1b0a15038ad244b7665d`），新建了一個只管這個 zone 的 DNS 編輯 API Token 存在 `.env` 的 `CLOUDFLARE_API_TOKEN`。
 
