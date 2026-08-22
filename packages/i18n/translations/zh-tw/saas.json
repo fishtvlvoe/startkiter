@@ -112,7 +112,10 @@
       "navigationTitle": "選單",
       "openNavigation": "開啟導覽",
       "organizationSettings": "組織設定",
-      "start": "首頁"
+      "start": "首頁",
+      "addGroup": "新增分組",
+      "renameGroupPrompt": "修改分組名稱",
+      "newGroupPrompt": "輸入新分組名稱"
     },
     "userMenu": {
       "accountSettings": "帳號設定",

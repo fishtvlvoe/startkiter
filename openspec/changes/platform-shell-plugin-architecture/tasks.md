@@ -267,9 +267,9 @@
 
 ### 46. 實作：NavBar / sidebar-context 改造為 WordPress 視覺 + 可拖曳分組
 
-- [ ] 46.1 修改 NavBar 樣式套用 WP token（admin bar、側欄配色、收折動畫），驗證：45.1、45.2 轉綠燈
-- [ ] 46.2 側邊欄新增分組管理 UI（新增分組／改名／跨分組拖曳排序），互動結果呼叫 44.2 的 API 儲存；`SidebarGroup` 為空時 fallback 使用 `MOUNT_POINTS` 預設順序渲染，驗證：45.3 轉綠燈
-- [ ] 46.3 確認既有 hamburger + 遮罩邏輯（task 9.x）與新 admin bar 樣式相容，驗證：45.4 轉綠燈
+- [x] 46.1 修改 NavBar 樣式套用 WP token（admin bar、側欄配色、收折動畫），驗證：45.1、45.2 轉綠燈——實跑 vitest 128/128 全綠，`pnpm tsc --noEmit`／`pnpm build` 皆過。改版依 Fish 確認過的 `docs/demo/platform-shell-navbar-demo.html`。已知落差：expanded 寬度保留既有 280px（`w-[280px]`），design.md 寫 208px（`w-52`）但既有測試（9.3）鎖定 280px，改動範圍只涵蓋 45.x 要求的收折寬度（56px）與配色，未動 expanded 寬度，避免破壞既有驗收
+- [x] 46.2 側邊欄新增分組管理 UI（新增分組／改名／跨分組拖曳排序），互動結果呼叫 44.2 的 API 儲存；`SidebarGroup` 為空時 fallback 使用 `MOUNT_POINTS` 預設順序渲染（`groups.length === 0` 時走原本 `NavMenuList`），驗證：45.3 轉綠燈——原生 HTML5 drag（無新依賴），新增/改名用 `window.prompt`（比照 demo）。e2e 45.3 本機仍因缺 `E2E_TEST_EMAIL`/`PASSWORD` skip，未跑出真正綠燈，待 Fish 提供憑證
+- [x] 46.3 確認既有 hamburger + 遮罩邏輯（task 9.x）與新 admin bar 樣式相容，驗證：45.4 轉綠燈——hamburger 移到新 admin-bar（`data-testid="admin-bar-hamburger"`），沿用既有 Sheet/SheetContent 元件不變，`pnpm build` 確認编譯通過；e2e 45.4 同樣待憑證才能實際跑出綠燈
 
 ### 47. 實作：重用 supastarter 全域用戶管理
 

@@ -112,7 +112,10 @@
       "navigationTitle": "菜单",
       "openNavigation": "打开导航",
       "organizationSettings": "组织设置",
-      "start": "首页"
+      "start": "首页",
+      "addGroup": "新增分组",
+      "renameGroupPrompt": "修改分组名称",
+      "newGroupPrompt": "输入新分组名称"
     },
     "userMenu": {
       "accountSettings": "账户设置",

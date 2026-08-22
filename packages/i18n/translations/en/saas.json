@@ -112,7 +112,10 @@
       "navigationTitle": "Menu",
       "openNavigation": "Open navigation",
       "organizationSettings": "Organization settings",
-      "start": "Start"
+      "start": "Start",
+      "addGroup": "Add group",
+      "renameGroupPrompt": "Rename group",
+      "newGroupPrompt": "Enter new group name"
     },
     "userMenu": {
       "accountSettings": "Account settings",

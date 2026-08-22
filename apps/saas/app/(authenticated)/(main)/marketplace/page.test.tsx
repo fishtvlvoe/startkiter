@@ -75,6 +75,11 @@ vi.mock("@startkiter/github-kit", () => ({
 	getRepoVersion: (...args: unknown[]) => getRepoVersionMock(...args),
 }));
 
+vi.mock("../../../../modules/shared/lib/sidebar-layout", () => ({
+	useSidebarLayout: () => ({ groups: [], items: [], isLoading: false }),
+	useSaveSidebarLayout: () => ({ mutate: () => {} }),
+}));
+
 vi.mock("../../../../lib/github-kit", () => ({
 	loadGithubKitRuntime: () => ({ config: {}, oauthConfigured: true }),
 	createPrismaGrantStore: () => ({}),

@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MOUNT_POINTS } from "@startkiter/platform";
 import { iconMap, NavBar, resolveIcon } from "./NavBar";
 
-const mockPathname = "/";
+let mockPathname = "/";
 let mockIsCollapsed = false;
 let mockIsMobile = false;
 let mockSidebarGroups: Array<{ id: string; title: string; order: number; isCollapsed: boolean }> = [];
@@ -48,6 +48,7 @@ vi.mock("../hooks/use-media-query", () => ({
 
 vi.mock("../lib/sidebar-layout", () => ({
 	useSidebarLayout: () => ({ groups: mockSidebarGroups, items: [], isLoading: false }),
+	useSaveSidebarLayout: () => ({ mutate: () => {} }),
 }));
 
 vi.mock("@startkiter/auth/config", () => ({
@@ -122,7 +123,7 @@ describe("NavBar shell layout (Phase 2)", () => {
 		const html = renderToStaticMarkup(<NavBar />);
 
 		// Desktop sidebar nav structure is present
-		expect(html).toContain("md:fixed md:top-0 md:left-0 md:h-full md:w-[280px]");
+		expect(html).toContain("md:fixed md:top-8 md:left-0 md:h-[calc(100%-2rem)] md:w-[280px]");
 		expect(html).toContain("sidebar-user-area");
 
 		// Mobile tab bar has md:hidden class to prevent display on wide viewports (1280px)
@@ -157,9 +158,11 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 	afterEach(() => {
 		mockIsCollapsed = false;
 		mockSidebarGroups = [];
+		mockPathname = "/";
 	});
 
 	it("45.1 頂列 admin bar 固定 32px（h-8）並使用 WP 配色 token（#1d2327 深色背景、#2271b1 active）", () => {
+		mockPathname = "/app";
 		const html = renderToStaticMarkup(<NavBar />);
 
 		expect(html).toContain('data-testid="admin-bar"');

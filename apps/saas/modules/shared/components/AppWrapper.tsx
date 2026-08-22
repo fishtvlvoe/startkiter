@@ -10,15 +10,15 @@ function AppContent({ children }: PropsWithChildren) {
 	const { isCollapsed } = useSidebar();
 
 	return (
-		<div className="md:h-screen md:overflow-hidden bg-background">
+		<div className="pt-8 md:h-screen md:overflow-hidden bg-background">
 			<NavBar />
 			<div
-				className={cn("flex h-screen", {
+				className={cn("flex h-[calc(100vh-2rem)] md:h-[calc(100vh-2rem)]", {
 					"md:ml-[280px]": !isCollapsed,
-					"md:ml-[80px]": isCollapsed,
+					"md:ml-14": isCollapsed,
 				})}
 			>
-				<main className="md:border-l md:border-t-0 md:overflow-y-auto py-4 h-full w-full border-t">
+				<main className="md:border-l md:border-t-0 md:overflow-y-auto py-4 h-full w-full border-t bg-[#f0f0f1] dark:bg-background">
 					<div className="container">{children}</div>
 				</main>
 			</div>

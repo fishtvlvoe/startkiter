@@ -40,6 +40,7 @@ import {
 	HomeIcon,
 	MenuIcon,
 	PackageIcon,
+	PenIcon,
 	SettingsIcon,
 	ShieldUserIcon,
 	UserCogIcon,
@@ -47,12 +48,14 @@ import {
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { type MouseEvent, type PointerEvent, useMemo, useRef, useState } from "react";
+import { type DragEvent, type MouseEvent, type PointerEvent, useMemo, useRef, useState } from "react";
 
 import { OrganzationSelect } from "../../organizations/components/OrganizationSelect";
 import { useIsMobile } from "../hooks/use-media-query";
 import { getMountMenuItems, getTabBarItems } from "../lib/nav-menu-items";
 import { useSidebar } from "../lib/sidebar-context";
+import type { SidebarGroup } from "../lib/sidebar-layout";
+import { useSaveSidebarLayout, useSidebarLayout } from "../lib/sidebar-layout";
 
 interface NavSubItem {
 	label: string;
@@ -117,8 +120,8 @@ function NavMenuList({
 					const parentClasses = cn(
 						"gap-3 px-3 py-2 text-sm flex w-full items-center rounded-lg whitespace-nowrap transition-colors",
 						{
-							"font-semibold bg-touch/10": menuItem.isActive,
-							"hover:bg-accent/50": !menuItem.isActive,
+							"font-semibold bg-[#2271b1] text-white": menuItem.isActive,
+							"hover:bg-white/5": !menuItem.isActive,
 							"md:justify-center md:px-2": isCollapsedEffective,
 						},
 					);
@@ -127,7 +130,7 @@ function NavMenuList({
 						<menuItem.icon
 							className={cn(
 								"size-5 shrink-0",
-								menuItem.isActive ? "text-touch" : "text-muted-foreground opacity-60",
+								menuItem.isActive ? "text-white" : "text-[#c3c4c7]/60",
 							)}
 						/>
 					);
@@ -225,8 +228,8 @@ function NavMenuList({
 									{parentIcon}
 									<span
 										className={cn({
-											"text-foreground": menuItem.isActive,
-											"text-muted-foreground": !menuItem.isActive,
+											"text-white": menuItem.isActive,
+											"text-[#c3c4c7]": !menuItem.isActive,
 										})}
 									>
 										{menuItem.label}
@@ -248,8 +251,8 @@ function NavMenuList({
 															href={subItem.href}
 															onClick={onLinkClick}
 															className={cn(
-																"py-1.5 pl-2 pr-3 text-sm flex w-full items-center rounded-md text-muted-foreground transition-colors hover:bg-accent/50",
-																subActive && "font-semibold text-foreground",
+																"py-1.5 pl-2 pr-3 text-sm flex w-full items-center rounded-md text-[#c3c4c7] transition-colors hover:bg-white/5",
+																subActive && "font-semibold text-white",
 															)}
 															prefetch
 														>
@@ -271,8 +274,8 @@ function NavMenuList({
 								{!isCollapsedEffective && (
 									<span
 										className={cn({
-											"text-foreground": menuItem.isActive,
-											"text-muted-foreground": !menuItem.isActive,
+											"text-white": menuItem.isActive,
+											"text-[#c3c4c7]": !menuItem.isActive,
 										})}
 									>
 										{menuItem.label}
@@ -412,6 +415,128 @@ function MobileTabBar({ fixedItems, moreItem }: MobileTabBarProps) {
 	);
 }
 
+interface SidebarGroupedNavProps {
+	groups: SidebarGroup[];
+	itemsByGroupId: Map<string, NavMenuItem[]>;
+	onToggleGroupCollapse: (groupId: string) => void;
+	onDropItem: (menuItemId: string, targetGroupId: string) => void;
+	onRenameGroup: (groupId: string, nextTitle: string) => void;
+	onAddGroup: (title: string) => void;
+	addGroupLabel: string;
+	renameGroupPromptLabel: string;
+	newGroupPromptLabel: string;
+}
+
+function SidebarGroupedNav({
+	groups,
+	itemsByGroupId,
+	onToggleGroupCollapse,
+	onDropItem,
+	onRenameGroup,
+	onAddGroup,
+	addGroupLabel,
+	renameGroupPromptLabel,
+	newGroupPromptLabel,
+}: SidebarGroupedNavProps) {
+	const sortedGroups = useMemo(() => [...groups].sort((a, b) => a.order - b.order), [groups]);
+
+	return (
+		<div className="gap-2 flex flex-col">
+			<button
+				type="button"
+				onClick={() => {
+					const title = window.prompt(newGroupPromptLabel);
+					if (title?.trim()) {
+						onAddGroup(title.trim());
+					}
+				}}
+				className="gap-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 hover:text-foreground flex items-center"
+			>
+				+ {addGroupLabel}
+			</button>
+			{sortedGroups.map((group) => {
+				const groupItems = itemsByGroupId.get(group.id) ?? [];
+
+				return (
+					// biome-ignore lint/a11y/noStaticElementInteractions: 拖曳分組容器不是互動控制項本身，鍵盤操作走各選單連結
+					<div
+						key={group.id}
+						data-testid={`sidebar-group-${group.id}`}
+						data-sidebar-group-collapsed={group.isCollapsed}
+						onDragOver={(event: DragEvent<HTMLDivElement>) => event.preventDefault()}
+						onDrop={(event: DragEvent<HTMLDivElement>) => {
+							event.preventDefault();
+							const menuItemId = event.dataTransfer.getData("text/plain");
+							if (menuItemId) {
+								onDropItem(menuItemId, group.id);
+							}
+						}}
+					>
+						<div className="px-3 py-1 flex items-center justify-between group/header">
+							<button
+								type="button"
+								onClick={() => onToggleGroupCollapse(group.id)}
+								className="gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 flex flex-1 items-center overflow-hidden"
+							>
+								<ChevronRightIcon
+									className={cn("size-3 shrink-0 transition-transform", !group.isCollapsed && "rotate-90")}
+								/>
+								<span className="truncate">{group.title}</span>
+							</button>
+							<button
+								type="button"
+								onClick={() => {
+									const nextTitle = window.prompt(renameGroupPromptLabel, group.title);
+									if (nextTitle?.trim()) {
+										onRenameGroup(group.id, nextTitle.trim());
+									}
+								}}
+								className="opacity-0 text-muted-foreground/70 group-hover/header:opacity-100 hover:text-foreground transition"
+							>
+								<PenIcon className="size-3" />
+							</button>
+						</div>
+						{!group.isCollapsed && (
+							<ul className="gap-0.5 flex list-none flex-col">
+								{groupItems.map((menuItem) => (
+									<li
+										key={menuItem.id}
+										draggable
+										data-testid={`sidebar-group-item-${menuItem.id}`}
+										onDragStart={(event: DragEvent<HTMLLIElement>) =>
+											event.dataTransfer.setData("text/plain", menuItem.id)
+										}
+									>
+										<Link
+											href={menuItem.href}
+											className={cn(
+												"gap-3 px-3 py-2 text-sm flex w-full items-center rounded-lg whitespace-nowrap transition-colors cursor-grab",
+												menuItem.isActive
+													? "bg-[#2271b1] font-semibold text-white"
+													: "hover:bg-white/5",
+											)}
+										>
+											<menuItem.icon
+												className={cn(
+													"size-5 shrink-0",
+													menuItem.isActive ? "text-white" : "text-[#c3c4c7]/60",
+												)}
+											/>
+											<span className={menuItem.isActive ? "text-white" : "text-[#c3c4c7]"}>
+												{menuItem.label}
+											</span>
+										</Link>
+									</li>
+								))}
+							</ul>
+						)}
+					</div>
+				);
+			})}
+		</div>
+	);
+}
+
 export function NavBar() {
 	const t = useTranslations();
 	const pathname = usePathname();
@@ -532,6 +657,59 @@ export function NavBar() {
 		t,
 	]);
 
+	const { groups, items: persistedItems } = useSidebarLayout();
+	const saveSidebarLayout = useSaveSidebarLayout();
+
+	const menuItemsById = useMemo(() => new Map(menuItems.map((item) => [item.id, item])), [menuItems]);
+
+	const itemsByGroupId = useMemo(() => {
+		const map = new Map<string, NavMenuItem[]>();
+		for (const group of groups) {
+			const groupItems = persistedItems
+				.filter((item) => item.groupId === group.id)
+				.sort((a, b) => a.order - b.order)
+				.map((item) => menuItemsById.get(item.menuItemId))
+				.filter((item): item is NavMenuItem => Boolean(item));
+			map.set(group.id, groupItems);
+		}
+		return map;
+	}, [groups, persistedItems, menuItemsById]);
+
+	function handleToggleGroupCollapse(groupId: string) {
+		const nextGroups = groups.map((group) =>
+			group.id === groupId ? { ...group, isCollapsed: !group.isCollapsed } : group,
+		);
+		saveSidebarLayout.mutate({ groups: nextGroups, items: persistedItems });
+	}
+
+	function handleDropItem(menuItemId: string, targetGroupId: string) {
+		const nextItems = persistedItems.filter((item) => item.menuItemId !== menuItemId);
+		const targetGroupItemCount = nextItems.filter((item) => item.groupId === targetGroupId).length;
+		const existing = persistedItems.find((item) => item.menuItemId === menuItemId);
+		nextItems.push({
+			id: existing?.id ?? `sidebar-group-item-${menuItemId}`,
+			groupId: targetGroupId,
+			menuItemId,
+			order: targetGroupItemCount,
+		});
+		saveSidebarLayout.mutate({ groups, items: nextItems });
+	}
+
+	function handleRenameGroup(groupId: string, nextTitle: string) {
+		const nextGroups = groups.map((group) =>
+			group.id === groupId ? { ...group, title: nextTitle } : group,
+		);
+		saveSidebarLayout.mutate({ groups: nextGroups, items: persistedItems });
+	}
+
+	function handleAddGroup(title: string) {
+		const nextGroups: SidebarGroup[] = [
+			...groups,
+			{ id: `sidebar-group-${crypto.randomUUID()}`, title, order: groups.length, isCollapsed: false },
+		];
+		saveSidebarLayout.mutate({ groups: nextGroups, items: persistedItems });
+	}
+
 	const tabBarFixedItems = useMemo(
 		() =>
 			tabBarFixed.map((item) => ({
@@ -554,10 +732,58 @@ export function NavBar() {
 
 	return (
 		<>
+			<div
+				data-testid="admin-bar"
+				className="h-8 px-2 flex fixed inset-x-0 top-0 z-[60] items-center justify-between bg-[#1d2327] text-[#c3c4c7] text-xs"
+			>
+				<div className="gap-2 flex items-center">
+					<Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+						<SheetTrigger
+							render={
+								<Button
+									variant="ghost"
+									size="icon"
+									data-testid="admin-bar-hamburger"
+									className="md:hidden size-6 text-[#c3c4c7] hover:bg-white/10 hover:text-white"
+									aria-label={t("app.menu.openNavigation")}
+									type="button"
+								>
+									<MenuIcon className="size-4" />
+								</Button>
+							}
+						/>
+						<SheetContent
+							data-testid="sidebar-mobile-backdrop"
+							side="left"
+							className="p-0 pt-14 sm:max-w-[280px] flex h-full w-[min(100vw,280px)] flex-col overflow-hidden border-r"
+						>
+							<SheetHeader className="sr-only">
+								<SheetTitle>{t("app.menu.navigationTitle")}</SheetTitle>
+							</SheetHeader>
+							<div className="min-h-0 px-4 pb-4 flex flex-1 flex-col">
+								<div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]">
+									<NavMenuList
+										menuItems={menuItems}
+										isCollapsedEffective={false}
+										listClassName="flex list-none flex-col flex-nowrap items-stretch gap-1 px-0"
+										onLinkClick={() => setMobileMenuOpen(false)}
+									/>
+								</div>
+							</div>
+						</SheetContent>
+					</Sheet>
+					<Link href="/" className="gap-1.5 font-bold text-white flex items-center">
+						<Logo withLabel={false} />
+						<span className="hidden sm:inline">StartKiter</span>
+					</Link>
+				</div>
+			</div>
 			<nav
+				id="app-sidebar"
+				data-collapsed={isCollapsedEffective}
 				className={cn(
-					"md:fixed md:top-0 md:left-0 md:h-full md:w-[280px] w-full",
-					isCollapsedEffective && "md:w-[80px]",
+					"md:fixed md:top-8 md:left-0 md:h-[calc(100%-2rem)] md:w-[280px] w-full bg-[#1d2327]",
+					isCollapsedEffective && "md:w-14",
 				)}
 			>
 				<div className="max-w-6xl py-4 md:min-h-0 md:flex md:h-full md:flex-col md:px-4 md:pb-0 container">
@@ -576,40 +802,7 @@ export function NavBar() {
 										: "md:flex-row md:justify-between justify-center",
 								)}
 							>
-								<div className="gap-2 flex shrink-0 items-center justify-center">
-									<Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-										<SheetTrigger
-											render={
-												<Button
-													variant="ghost"
-													size="icon"
-													className="md:hidden -ml-1.5 mr-1.5 shrink-0"
-													aria-label={t("app.menu.openNavigation")}
-													type="button"
-												>
-													<MenuIcon className="size-5" />
-												</Button>
-											}
-										/>
-										<SheetContent
-											side="left"
-											className="p-0 pt-14 sm:max-w-[280px] flex h-full w-[min(100vw,280px)] flex-col overflow-hidden border-r"
-										>
-											<SheetHeader className="sr-only">
-												<SheetTitle>{t("app.menu.navigationTitle")}</SheetTitle>
-											</SheetHeader>
-											<div className="min-h-0 px-4 pb-4 flex flex-1 flex-col">
-												<div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]">
-													<NavMenuList
-														menuItems={menuItems}
-														isCollapsedEffective={false}
-														listClassName="flex list-none flex-col flex-nowrap items-stretch gap-1 px-0"
-														onLinkClick={() => setMobileMenuOpen(false)}
-													/>
-												</div>
-											</div>
-										</SheetContent>
-									</Sheet>
+								<div className="gap-2 md:flex hidden shrink-0 items-center justify-center">
 									<Link href="/" className="block shrink-0">
 										<Logo withLabel={false} />
 									</Link>
@@ -669,14 +862,30 @@ export function NavBar() {
 					</div>
 
 					<div className="min-h-0 md:flex hidden flex-1 flex-col overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]">
-						<NavMenuList
-							menuItems={menuItems}
-							isCollapsedEffective={isCollapsedEffective}
-							listClassName={cn(
-								"md:mx-0 md:mt-3 md:mb-6 md:flex md:flex-col md:flex-nowrap md:items-stretch md:gap-1 md:px-0 md:overflow-visible hidden list-none",
-								isCollapsedEffective && "md:items-center",
-							)}
-						/>
+						{groups.length > 0 && !isCollapsedEffective ? (
+							<div className="md:mx-0 md:mt-3 md:mb-6">
+								<SidebarGroupedNav
+									groups={groups}
+									itemsByGroupId={itemsByGroupId}
+									onToggleGroupCollapse={handleToggleGroupCollapse}
+									onDropItem={handleDropItem}
+									onRenameGroup={handleRenameGroup}
+									onAddGroup={handleAddGroup}
+									addGroupLabel={t("app.menu.addGroup")}
+									renameGroupPromptLabel={t("app.menu.renameGroupPrompt")}
+									newGroupPromptLabel={t("app.menu.newGroupPrompt")}
+								/>
+							</div>
+						) : (
+							<NavMenuList
+								menuItems={menuItems}
+								isCollapsedEffective={isCollapsedEffective}
+								listClassName={cn(
+									"md:mx-0 md:mt-3 md:mb-6 md:flex md:flex-col md:flex-nowrap md:items-stretch md:gap-1 md:px-0 md:overflow-visible hidden list-none",
+									isCollapsedEffective && "md:items-center",
+								)}
+							/>
+						)}
 					</div>
 
 					<div
