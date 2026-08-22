@@ -10,6 +10,7 @@ import { orpcClient } from "@shared/lib/orpc-client";
 import {
 	ArrowUpIcon,
 	CodeIcon,
+	DownloadIcon,
 	EllipsisIcon,
 	LightbulbIcon,
 	MailIcon,
@@ -42,6 +43,67 @@ const PROMPT_SUGGESTIONS = [
 		prompt: "Summarize the latest AI trends",
 	},
 ] as const;
+
+type SpreadsheetToolOutput =
+	| { error: string }
+	| { format: "html"; html: string }
+	| { format: "xlsx"; filename: string; contentType: string; data: string };
+
+interface SpreadsheetToolPart {
+	state: string;
+	output?: unknown;
+	errorText?: string;
+}
+
+/** 渲染 generateSpreadsheet 工具的結果：xlsx 給下載連結，html 給 iframe 預覽。 */
+function SpreadsheetToolResult({ part }: { part: SpreadsheetToolPart }) {
+	if (part.state === "input-streaming" || part.state === "input-available") {
+		return (
+			<div className="max-w-2xl px-4 py-2 text-sm text-muted-foreground">正在產生報表…</div>
+		);
+	}
+
+	if (part.state === "output-error") {
+		return (
+			<div className="max-w-2xl rounded-lg bg-destructive/10 px-4 py-2 text-sm text-destructive">
+				報表產生失敗：{part.errorText || "未知錯誤"}
+			</div>
+		);
+	}
+
+	const output = part.output as SpreadsheetToolOutput | undefined;
+	if (!output) return null;
+
+	if ("error" in output) {
+		return (
+			<div className="max-w-2xl rounded-lg bg-destructive/10 px-4 py-2 text-sm text-destructive">
+				{output.error}
+			</div>
+		);
+	}
+
+	if (output.format === "html") {
+		return (
+			<iframe
+				title="報表預覽"
+				srcDoc={output.html}
+				className="h-96 w-full max-w-2xl rounded-lg border bg-white"
+			/>
+		);
+	}
+
+	const href = `data:${output.contentType};base64,${output.data}`;
+	return (
+		<a
+			href={href}
+			download={output.filename}
+			className="inline-flex items-center gap-2 rounded-lg border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
+		>
+			<DownloadIcon className="size-4" />
+			下載這份 Excel（{output.filename}）
+		</a>
+	);
+}
 
 export function AiChat() {
 	const [input, setInput] = useState("");
@@ -164,6 +226,12 @@ export function AiChat() {
 								) : null,
 							)}
 						</div>
+
+						{message.parts?.map((part, index) =>
+							part.type === "tool-generateSpreadsheet" ? (
+								<SpreadsheetToolResult key={index} part={part} />
+							) : null,
+						)}
 					</div>
 				))}
 

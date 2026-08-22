@@ -5,16 +5,22 @@
 	"types": "./**/.tsx",
 	"scripts": {
 		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"test": "vitest run",
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
 		"@ai-sdk/openai": "catalog:",
 		"@ai-sdk/react": "catalog:",
-		"ai": "catalog:"
+		"@startkiter/database": "workspace:*",
+		"@startkiter/permissions": "workspace:*",
+		"@startkiter/sheets": "workspace:*",
+		"ai": "catalog:",
+		"zod": "catalog:"
 	},
 	"devDependencies": {
 		"@startkiter/tsconfig": "workspace:*",
 		"@types/react": "catalog:",
-		"typescript": "catalog:"
+		"typescript": "catalog:",
+		"vitest": "catalog:"
 	}
 }

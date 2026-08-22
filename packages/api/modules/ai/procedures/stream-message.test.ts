@@ -10,6 +10,13 @@ vi.mock("@startkiter/auth", () => ({
 	},
 }));
 
+// stream-message imports @startkiter/ai, which registers the generateSpreadsheet
+// tool, which imports @startkiter/database — mock it so this suite doesn't need
+// a real DATABASE_URL just to load the module graph.
+vi.mock("@startkiter/database", () => ({
+	db: { order: { findMany: vi.fn() } },
+}));
+
 import { auth } from "@startkiter/auth";
 
 import { streamMessage } from "./stream-message";

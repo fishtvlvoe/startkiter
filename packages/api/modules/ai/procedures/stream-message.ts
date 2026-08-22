@@ -2,6 +2,7 @@ import { streamToEventIterator } from "@orpc/client";
 import { eventIterator, ORPCError } from "@orpc/server";
 import {
 	convertToModelMessages,
+	createGenerateSpreadsheetTool,
 	safeValidateUIMessages,
 	streamText,
 	textModel,
@@ -37,7 +38,7 @@ export const streamMessage = protectedProcedure
 			}),
 		),
 	)
-	.handler(async ({ input }) => {
+	.handler(async ({ input, context }) => {
 		const validatedMessages = await safeValidateUIMessages({
 			messages: input.messages,
 		});
@@ -51,6 +52,9 @@ export const streamMessage = protectedProcedure
 		const response = streamText({
 			model: textModel,
 			messages: await convertToModelMessages(validatedMessages.data),
+			tools: {
+				generateSpreadsheet: createGenerateSpreadsheetTool(context.user),
+			},
 		});
 
 		return streamToEventIterator(response.toUIMessageStream());

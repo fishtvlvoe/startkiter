@@ -592,9 +592,21 @@ importers:
       '@ai-sdk/react':
         specifier: 'catalog:'
         version: 4.0.69(react@19.2.8)(zod@4.4.3)
+      '@startkiter/database':
+        specifier: workspace:*
+        version: link:../database
+      '@startkiter/permissions':
+        specifier: workspace:*
+        version: link:../permissions
+      '@startkiter/sheets':
+        specifier: workspace:*
+        version: link:../sheets
       ai:
         specifier: 'catalog:'
         version: 7.0.66(zod@4.4.3)
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
     devDependencies:
       '@startkiter/tsconfig':
         specifier: workspace:*
@@ -605,6 +617,9 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 7.0.2
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(jsdom@26.1.0(supports-color@7.2.0))(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.12)(yaml@2.9.0))
 
   packages/api:
     dependencies:

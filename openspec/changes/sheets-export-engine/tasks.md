@@ -27,5 +27,5 @@
 
 ## Phase 4: AI 代理人產表整合（AI Agent & MCP Integration）
 
-- [ ] 在 `@startkiter/ai` 註冊試算表生成 Tool，允許 Agent 依據 Prompt 產生 TSX Workbook
-- [ ] 支援在對話式後台即時產出 `.xlsx` 下載連結或 HTML 即時預覽
+- [x] 在 `@startkiter/ai` 註冊試算表生成 Tool，允許 Agent 依據 Prompt 產生 TSX Workbook
+- [x] 支援在對話式後台即時產出 `.xlsx` 下載連結或 HTML 即時預覽
