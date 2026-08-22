@@ -273,9 +273,9 @@
 
 ### 47. 實作：重用 supastarter 全域用戶管理
 
-- [ ] 47.1 確認 `apps/saas/app/(authenticated)/(main)/(account)/admin/` 路由與 `modules/admin/component/users/UserList.tsx` 已從 supastarter（`/Users/fishtv/Development/supastarter-nextjs`）抽取；尚未抽取則比照既有 buyer-extension-convention 抽取慣例補抽
-- [ ] 47.2 於 `MOUNT_POINTS` 新增用戶管理 manifest（`mount.route.path: "/admin/users"`、`mount.menu: { label: "用戶", icon: "fa-users", requiresOperator: true }`），不新增 `/admin/organizations` 對應 manifest
-- [ ] 47.3 確認 `packages/auth/config.ts` 的 `organizations.enabled` 維持 `false`
+- [x] 47.1 確認 `apps/saas/app/(authenticated)/(main)/(account)/admin/` 路由與 `modules/admin/component/users/UserList.tsx` 已從 supastarter 抽取——`apps/saas/modules/admin/component/users/UserList.tsx`、`BanUserDialog.tsx` 已存在，`admin/users/page.tsx` 路由已掛
+- [x] 47.2 於 `MOUNT_POINTS` 確認用戶管理相關 manifest 已存在（`packages/platform/src/mount-points.ts` 的 `id: "admin"`，`mount.route.path: "/admin/users"`、`requiresOperator: true`），未新增 `/admin/organizations` 對應 manifest；現有 label 為「後台設定」而非 design.md 建議的「用戶」，功能等價（皆導向 `/admin/users`），非 Critical，如需精確對齊文案可後續小改
+- [ ] 47.3 確認 `packages/auth/config.ts` 的 `organizations.enabled` 維持 `false`——**發現不一致，未執行**：目前 `packages/auth/config.ts` 實際是 `organizations.enable: true`（`enableUsersToCreateOrganizations: true`），與 design.md「全域用戶管理重用 supastarter 既有 admin ui，organizations 維持不啟用」決策矛盾。`organizations.enable` 是牽動 NavBar 組織子選單、`basePath`、bundles/coupons 等既有已上線功能的全域開關，不屬於可低風險逕行修改的範圍，需要 Fish 裁決是否要真的關閉（會影響其他已完成 Phase 的既有行為）後才能執行，先如實記錄不擅自改動
 
 ### 48. Phase 9 Review 與驗收
 
