@@ -117,6 +117,9 @@ export async function processChatwootWebhook(args: {
 	secret?: string;
 	deps?: Partial<ChatwootWebhookDeps>;
 }): Promise<{ ok: true; ticketId: string | null }> {
+	if (process.env.CHATWOOT_WEBHOOK_DEBUG === "1") {
+		console.log("[chatwoot-webhook-debug] url=", args.url, "rawBody=", args.rawBody);
+	}
 	const secret = args.secret ?? process.env.CHATWOOT_WEBHOOK_SECRET;
 	const verified = verifyChatwootWebhookToken({
 		url: args.url,
