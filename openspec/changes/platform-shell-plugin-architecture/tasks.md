@@ -180,13 +180,13 @@
 
 ### 31. 更新既有測試
 
-- [ ] 31.1 搜尋既有測試中引用舊元件名稱（AppShell、SiteNav、MobileTabBar）的選擇器，更新為對應新結構（NavBar + sidebar-context），確保 Shell 統一後既有測試不誤判
+- [x] 31.1 搜尋既有測試中引用舊元件名稱（AppShell、SiteNav、MobileTabBar）的選擇器，更新為對應新結構（NavBar + sidebar-context），確保 Shell 統一後既有測試不誤判（`grep -rln "AppShell\|SiteNav\|MobileTabBar"` 全專案 apps/packages 無殘留匹配，Shell 重建已徹底取代舊命名，無需修改）
 
 ### 32. 全面驗收
 
-- [ ] 32.1 `pnpm build` 與 `pnpm test` 全專案通過
-- [ ] 32.2 用 Chrome MCP 跑完所有已登入路由（/app, /course, /agent, /admin/settings, /marketplace），截圖確認 Shell 一致性與功能正確
-- [ ] 32.3 `spectra validate platform-shell-plugin-architecture` 通過，0 warnings
+- [x] 32.1 `pnpm build` 與 `pnpm test` 全專案通過
+- [x] 32.2 用 `/ego-browser`（唯一瀏覽器工具）跑完所有已登入路由（/app, /course, /agent, /admin/settings, /marketplace），截圖確認 Shell 一致性與功能正確——五個路由皆正確渲染統一側欄結構，無 404/500
+- [x] 32.3 `spectra validate platform-shell-plugin-architecture` 通過，0 warnings（`spectra validate platform-shell-plugin-architecture --strict` → `✓ valid`）
 
 ## Phase 8：買家倉庫拓樸從「共用 pull-only」改為「per-buyer 專屬可寫」，並提供買家倉庫追蹤 StartKiter 官方模板倉庫更新（upstream sync）機制
 
@@ -295,7 +295,7 @@
 
 - [x] 50.1 確認 task 6.2（`sidebar-context.tsx` 狀態涵蓋 `/app`、`/course`、`/agent`、`/admin/settings` 全部路由）是否已完成，未完成則補上
 - [x] 50.2 補寫 task 5.1、5.2、9.3 的紅燈測試（目前未寫）
-- [ ] 50.3 執行 task 11.1-11.3（Review、Chrome MCP 或 `/ego-browser` 截圖、`pnpm build` + `pnpm test` 全綠），未做則補做
+- [x] 50.3 執行 task 11.1-11.3（Review、Chrome MCP 或 `/ego-browser` 截圖、`pnpm build` + `pnpm test` 全綠），未做則補做
 - [x] 50.4 修 `modules/shared/lib/nav-menu-items.test.ts` 6/7 測試失敗（2026-08-21 跑 `pnpm --filter @startkiter/saas test` 時發現，非本次 bundles-coupons 改動造成——`git status` 確認 `nav-menu-items.ts`／`.test.ts` 皆非本輪 diff）：`adminItem`／`courseItem` 找不到對應 route path（`/admin/users` 解析成 undefined）、`getTabBarItems` 回傳的 fixed/overflow 分組數量與測試預期（fixed 3／overflow 1）不符，研判是 commit `c7755156` 補進來的 Phase 2 WIP 本身就帶著失敗測試，需重新對照 task 9.1-9.3 spec 排查
 - [x] 50.5（2026-08-21 發現＋當場修復，PM 親自跑真實 e2e 才抓到）`nav-menu-items.ts` import 整個 `@startkiter/platform` barrel，barrel re-export 了會拉進 Prisma/`pg` 的 server-only `deployment/db.ts`，被 `"use client"` 的 NavBar 引用後把 server-only 依賴帶進瀏覽器端 bundle，導致 `pnpm build` 失敗、`(authenticated)` 底下所有路由（`admin/bundles`、`settings/security`、`course` 等）dev/prod 皆 500。改成只 import `@startkiter/platform/src/mount-points`／`@startkiter/platform/src/types` 子路徑，不經過完整 barrel（commit `3f5a6963`）。**教訓**：派工任務的驗收清單只跑了 `pnpm test`／`type-check`，沒跑 `pnpm build`，才沒抓到這種 server/client boundary 問題——之後任何改 `"use client"` 元件的 import 都要補跑一次 `pnpm build` 才算過關
 - [ ] 50.6（2026-08-21 e2e 順帶發現，不修，先記）`/admin` 後台頁首（Administration / Manage your application. / Users / Organizations 等字樣）未翻譯，是既有缺口非本輪改動造成，需要另外排進 i18n 相關 task 處理
