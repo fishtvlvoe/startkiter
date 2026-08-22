@@ -55,9 +55,9 @@
 
 ### 11. Phase 2 Review 與驗收
 
-- [ ] 11.1 對 Phase 2 變更（`modules/shared/components/NavBar.tsx`、`modules/lib/sidebar-context.tsx`、相關 layout）跑 correctness / security / performance code review，Critical 為零
-- [ ] 11.2 用 Chrome MCP 對 /app、/agent、/admin/settings 截圖驗證 Shell 結構一致性，375px 與 1280px 各截一次確認 tab bar / 側欄切換正確
-- [ ] 11.3 `pnpm build` 與 `pnpm test` 通過
+- [x] 11.1 對 Phase 2 變更（`modules/shared/components/NavBar.tsx`、`modules/lib/sidebar-context.tsx`、相關 layout）跑 correctness / security / performance code review，Critical 為零（唯一發現：`sidebar-collapsed` cookie 未設 Secure/SameSite，因無敏感資料非 Critical）
+- [x] 11.2 用 `/ego-browser`（唯一瀏覽器工具）對 /app、/agent、/admin/settings 截圖驗證 Shell 結構一致性，375px 與 1280px 各截一次確認 tab bar / 側欄切換正確。過程中發現並修復真實 Bug：`next.config.ts` 的 `/:organizationSlug/settings` 重導向規則會把 `/admin/settings` 誤判為 organizationSlug="admin"，導致 308 重導向到不存在的 `/admin/settings/general`（404）。改用排除 "admin" 的正則 `/:organizationSlug((?!admin(?:\/|$))[^\/]+)/settings` 修復，修復後截圖確認 375px/1280px 皆正確渲染統一 Shell
+- [x] 11.3 `pnpm build` 與 `pnpm test` 通過（含 next.config.ts 修復後重驗）
 
 ## Phase 3：內容型 Plugin 共用 PluginContent 表維持不變
 

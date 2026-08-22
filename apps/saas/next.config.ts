@@ -36,7 +36,10 @@ const nextConfig: NextConfig = {
 				permanent: true,
 			},
 			{
-				source: "/:organizationSlug/settings",
+				// 排除 organizationSlug === "admin"：避免與靜態路由 /admin/settings 衝突
+				// （Bug：舊規則會把 /admin/settings 誤判成 org slug "admin"，導致
+				// redirect 到不存在的 /admin/settings/general 而 404，於 Phase 2 驗收發現並修復）
+				source: "/:organizationSlug((?!admin(?:\\/|$))[^\\/]+)/settings",
 				destination: "/:organizationSlug/settings/general",
 				permanent: true,
 			},
