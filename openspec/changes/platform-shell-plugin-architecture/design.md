@@ -28,7 +28,9 @@ v1 既有硬邊界（openspec/config.yaml context）維持不變：不做 Organi
 2. 側邊欄分組/排序管理（demo 中的新增分組、改名、拖曳排序）v1 要做成真的可持久化功能，不是純前端展示
 3. 課程管理後台編輯器（章節/單元 CRUD、拖曳排序、影片網址自動辨識、雙欄講義編輯器）與 Posts/Pages 內容 CMS 兩塊範圍太大，都拆成獨立 change，不併入這張
 
-老闆同時確認全域用戶管理（保全室：看名單、封鎖/解封帳號）沿用 supastarter 既有的 Admin UI（`/Users/fishtv/Development/supastarter-nextjs/apps/saas/app/(authenticated)/(main)/(account)/admin/`，路由 `/admin/users`、`/admin/organizations`），不新寫。這跟「不做 Organizations 多租戶」是兩件事：Admin UI 的用戶封鎖功能兩種蓋法都能裝，跟要不要開放買家站內建多租戶組織無關——後者維持既有 Non-Goal，`organizations.enabled` 保持 `false`，因此只重用 `/admin/users`，不掛載 `/admin/organizations`（該頁在組織功能關閉時內容恆為空，掛了也沒用）。
+老闆同時確認全域用戶管理（保全室：看名單、封鎖/解封帳號）沿用 supastarter 既有的 Admin UI（`/Users/fishtv/Development/supastarter-nextjs/apps/saas/app/(authenticated)/(main)/(account)/admin/`，路由 `/admin/users`、`/admin/organizations`），不新寫。這跟「不做 Organizations 多租戶」是兩件事：Admin UI 的用戶封鎖功能兩種蓋法都能裝，跟要不要開放買家站內建多租戶組織無關。
+
+2026-08-22 裁決更新：實作階段發現 `packages/auth/config.ts` 的 `organizations.enable` 實際是 `true`（原文件寫維持 `false` 是誤判，未真的去改）。老闆裁決：**保留 `true`，未來會用到**，不追溯關閉。v1 仍只掛 `/admin/users` 進選單，不掛 `/admin/organizations`——這是「選單要不要露出」的獨立決定，跟底層開關開著與否無關。
 
 ## Goals / Non-Goals
 
@@ -50,7 +52,7 @@ v1 既有硬邊界（openspec/config.yaml context）維持不變：不做 Organi
 
 - 不建客製打包工具、不建 MCP 推送安裝包功能、不建伺服器端自動 build/deploy 觸發（全部改走 git-push-auto-deploy）
 - 不做「一鍵裝/解」的 Marketplace 操作介面
-- 不做 Organizations 多租戶（owner/admin/member 組織架構）——`organizations.enabled` 維持 `false`；買家一個站台只有一套帳號體系，不分子組織/子租戶。全域用戶管理（封鎖/解封帳號）是獨立於 Organizations 之外的功能，不受此限
+- 不做 Organizations 多租戶 UI（owner/admin/member 組織架構、`/admin/organizations` 選單）——底層 `organizations.enable` 開關維持 `true`（2026-08-22 裁決：未來會用到，不追溯關閉），但 v1 買家一個站台仍只有一套帳號體系，不掛載組織管理選單、不開放子組織/子租戶操作介面。全域用戶管理（封鎖/解封帳號）是獨立於 Organizations 之外的功能，不受此限
 - 不在這張 change 做課程管理後台編輯器（章節/單元 CRUD、拖曳排序、影片網址自動辨識、雙欄講義編輯器）——拆成獨立 change，理由：現有 `course-module`/`course-media-playback` spec 只涵蓋學員端播放，管理員編輯是全新範圍
 - 不在這張 change 做 Posts/Pages 內容 CMS 後台——`platform-core-boundary` 已宣告 page-editing system 是 Core 固定能力，但具體實作拆成獨立 change 處理，這張只維持既有的 Core 邊界宣告文字，不新增實作
 - 不做 zip 上傳安裝流程、block editor、shortcode 解析器、交易型 Plugin migration 工具鏈
@@ -125,14 +127,15 @@ Alternatives Considered:
 - v1 先不做持久化，拖曳只是 demo 展示、重新整理就還原 — 否決：老闆明確要求真的做，展示功能卻不能用會讓買家困惑
 - 排序資訊塞進既有的某張表（例如塞進 User 或 Site 設定 JSON 欄位）— 否決：分組與項目是一對多的結構化資料，用獨立表 + 正確索引比塞進單一 JSON blob 更好查詢與維護，且未來若真的開放多 operator，`SidebarGroup` 加一個 `operatorId` 欄位就能擴充，不用整個重構
 
-### 全域用戶管理重用 supastarter 既有 Admin UI，Organizations 維持不啟用
+### 全域用戶管理重用 supastarter 既有 Admin UI，Organizations 底層開關保留開啟但不掛 UI
 
 supastarter 內建「Admin」角色與 UI（`/admin/users` 瀏覽用戶清單、封鎖/解封帳號含理由與到期時間），與「Organizations 多租戶」是彼此獨立的兩套機制——前者管「這個帳號能不能登入」，後者管「站內能不能分子組織」。
 
-v1 只掛 `/admin/users` 進 Mount Points（`requiresOperator: true`），不掛 `/admin/organizations`：因為 `organizations.enabled` 維持 `false`（既有 Non-Goal），組織功能關閉時該頁內容恆為空，掛載沒有意義。用戶管理頁完全重用 supastarter 現成元件（`modules/admin/component/users/UserList.tsx`），不新寫。
+v1 只掛 `/admin/users` 進 Mount Points（`requiresOperator: true`），不掛 `/admin/organizations`。`organizations.enable`（`packages/auth/config.ts`）2026-08-22 裁決保留 `true`（未來會用到），但這只是底層開關開著，不代表 v1 要做組織管理 UI 或改變買家單一帳號體系的履約模型——維持不掛選單、不開放操作介面。用戶管理頁完全重用 supastarter 現成元件（`modules/admin/component/users/UserList.tsx`），不新寫。
 
 Alternatives Considered:
-- 順便啟用 Organizations，讓 `/admin/organizations` 也一起掛上 — 否決：這是範圍變更，會牽動 buyer-repo/github-kit 履約模型（一個買家一份專屬倉庫的前提是單一帳號體系），不是這張 change 的討論範圍，維持既有 Non-Goal
+- 順便啟用 Organizations UI，讓 `/admin/organizations` 也一起掛上 — 否決：這是範圍變更，會牽動 buyer-repo/github-kit 履約模型（一個買家一份專屬倉庫的前提是單一帳號體系），不是這張 change 的討論範圍，維持既有 Non-Goal；底層開關可以開著留給未來用，但 UI 掛載是另一件事
+- 把 `organizations.enable` 追溯關回 `false` — 否決：會牽動 NavBar 組織子選單、basePath、bundles/coupons 等已上線功能的既有行為，屬於高風險改動；老闆裁決未來會用到，直接保留開啟
 - 自己重寫一套簡化版用戶管理 UI — 否決：supastarter 現成元件已經滿足需求（列表 + 封鎖/解封），重造是浪費（L084 reuse-first）
 
 ### 買家 UI 模版選擇：v1 內建 2-3 個靜態模版，不整合外部設計參考庫
@@ -351,7 +354,7 @@ CREATE UNIQUE INDEX "SidebarGroupItem_menuItemId_key" ON "SidebarGroupItem"("men
 **Scope boundaries:**
 
 - In scope: 後台 Shell 統一（對照新結構）＋ WordPress Admin 視覺定案、PluginManifest 型別與靜態掛載點清單、SidebarGroup/SidebarGroupItem 持久化排序、課程示範 Plugin manifest、Marketplace 展示頁 + 模版選擇、MCP Gateway 唯讀操作、PluginContent/McpConnection 兩張新表、2-3 個內建模版定義 + HTML demo、買家專屬可寫倉庫 provision（取代共用 pull-only）、版本比對 API、同步 prompt 提示、重用 supastarter `/admin/users` 掛進 Mount Points
-- Out of scope: 客製打包工具、MCP 推送安裝包、伺服器端自動 build/deploy 觸發、zip 上傳安裝流程、block editor/shortcode 解析器、refero.design MCP 整合、交易型 Plugin migration 工具鏈、自動背景同步、自動 merge conflict 解決、即時 webhook 版本通知、Organizations 多租戶（`organizations.enabled` 維持 false）、課程管理後台編輯器（另開 change）、Posts/Pages CMS（另開 change）
+- Out of scope: 客製打包工具、MCP 推送安裝包、伺服器端自動 build/deploy 觸發、zip 上傳安裝流程、block editor/shortcode 解析器、refero.design MCP 整合、交易型 Plugin migration 工具鏈、自動背景同步、自動 merge conflict 解決、即時 webhook 版本通知、Organizations 多租戶 UI（底層 `organizations.enable` 開關保留 `true`，2026-08-22 裁決未來會用到，但不掛 UI）、課程管理後台編輯器（另開 change）、Posts/Pages CMS（另開 change）
 
 ## Risks / Trade-offs
 
