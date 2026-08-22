@@ -279,10 +279,10 @@
 
 ### 48. Phase 9 Review 與驗收
 
-- [ ] 48.1 對 Phase 9 全部變更跑 correctness / security / performance code review，Critical 為零
+- [x] 48.1 對 Phase 9 全部變更跑 correctness / security / performance code review，Critical 為零——3 個子代理平行審查，發現後已修：(1) correctness：`handleDropItem` 拖回原分組會撞號、建分組後未分配項目消失、race condition 無 optimistic 更新；(2) security：`SidebarGroupedNav` 未依 `canAccessAdmin` 隱藏、`useSaveSidebarLayout` 無 `onError`；(3) performance：groups 寫入逐筆 insert 應改批次 `createMany`。全部修完，無 Critical 殘留（security 稽核師確認 menuItemId 竄改防護、XSS、ID 注入皆無漏洞）
 - [ ] 48.2 用 Chrome MCP 對側邊欄拖曳互動與 admin bar 視覺截圖，比對 `docs/demo/course-admin-studio-demo.html` 確認一致
 - [ ] 48.3 `curl /api/sidebar-layout` 驗證持久化——拖曳後重新 GET 順序與分組歸屬正確
-- [ ] 48.4 `pnpm build` 與 `pnpm test` 通過
+- [x] 48.4 `pnpm build` 與 `pnpm test` 通過——vitest 128/128、`tsc --noEmit` 無錯、`pnpm build` 成功
 
 ## 待處理發現清單（2026-08-21，老闆真人點過每個頁面後發現，先列清單再修，依 SOP `docs/startkiter-development-sop.md` 第 5 節）
 
