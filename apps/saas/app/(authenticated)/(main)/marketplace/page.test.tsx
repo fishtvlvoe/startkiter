@@ -68,6 +68,18 @@ vi.mock("@startkiter/database", () => ({
 	},
 }));
 
+const getRepoVersionMock = vi.fn();
+
+vi.mock("@startkiter/github-kit", () => ({
+	createGithubVersionFileReader: () => ({ readStartkiterVersion: async () => null }),
+	getRepoVersion: (...args: unknown[]) => getRepoVersionMock(...args),
+}));
+
+vi.mock("../../../../lib/github-kit", () => ({
+	loadGithubKitRuntime: () => ({ config: {}, oauthConfigured: true }),
+	createPrismaGrantStore: () => ({}),
+}));
+
 vi.mock("@i18n/lib/update-locale", () => ({
 	updateLocale: async () => {},
 }));
@@ -94,6 +106,10 @@ describe("Marketplace page (Phase 4 Tasks 21.1–21.4)", () => {
 		getSessionMock.mockResolvedValue({
 			user: { id: "u1", name: "Test User", email: "learner@example.com" },
 			session: { id: "s1", activeOrganizationId: null },
+		});
+		getRepoVersionMock.mockResolvedValue({
+			ok: true,
+			body: { buyerVersion: "1.0.0", latestVersion: "1.0.0", upToDate: true, syncPromptHint: "" },
 		});
 	});
 
@@ -135,5 +151,37 @@ describe("Marketplace page (Phase 4 Tasks 21.1–21.4)", () => {
 		expect(html).toContain("service-saas");
 		const previewCardCount = (html.match(/data-testid="template-preview-card"/g) ?? []).length;
 		expect(previewCardCount).toBeGreaterThanOrEqual(2);
+	});
+
+	it("39.1 version section hidden sync prompt when repository is up to date", async () => {
+		getRepoVersionMock.mockResolvedValue({
+			ok: true,
+			body: { buyerVersion: "1.0.0", latestVersion: "1.0.0", upToDate: true, syncPromptHint: "" },
+		});
+
+		const content = await MarketplacePage();
+		const html = renderToStaticMarkup(content);
+
+		expect(html).toMatch(/已是最新|up to date/i);
+		expect(html).not.toContain('data-testid="sync-prompt-hint"');
+	});
+
+	it("39.2 version section shows copyable sync prompt when repository is behind", async () => {
+		getRepoVersionMock.mockResolvedValue({
+			ok: true,
+			body: {
+				buyerVersion: "1.0.0",
+				latestVersion: "1.1.0",
+				upToDate: false,
+				syncPromptHint: "git remote add startkiter-upstream https://github.com/org/kit-template.git",
+			},
+		});
+
+		const content = await MarketplacePage();
+		const html = renderToStaticMarkup(content);
+
+		expect(html).toMatch(/落後|behind/i);
+		expect(html).toContain('data-testid="sync-prompt-hint"');
+		expect(html).toContain("git remote add startkiter-upstream");
 	});
 });

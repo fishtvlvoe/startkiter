@@ -19,14 +19,23 @@ import type { SiteTemplate } from "@startkiter/platform/src/templates/types";
 
 export type MarketplacePlugin = PluginManifest & { enabled: boolean };
 
+export type RepoVersionSectionData = {
+	buyerVersion: string;
+	latestVersion: string;
+	upToDate: boolean | null;
+	syncPromptHint: string;
+};
+
 type MarketplaceClientProps = {
 	initialPlugins: MarketplacePlugin[];
 	initialTemplates: SiteTemplate[];
+	initialVersion: RepoVersionSectionData;
 };
 
 export function MarketplaceClient({
 	initialPlugins,
 	initialTemplates,
+	initialVersion,
 }: MarketplaceClientProps) {
 	const [plugins, setPlugins] = useState(initialPlugins);
 	const [templates, setTemplates] = useState(initialTemplates);
@@ -72,6 +81,34 @@ export function MarketplaceClient({
 					檢視已啟用模組與站點模版。模組變更請用 AI 工具改 repo，此頁不提供安裝或移除操作。
 				</p>
 			</div>
+
+			<Card data-testid="repo-version-section">
+				<CardHeader>
+					<CardTitle className="text-base">倉庫版本</CardTitle>
+					{initialVersion.upToDate === true ? (
+						<CardDescription>已是最新版本（{initialVersion.buyerVersion}）。</CardDescription>
+					) : initialVersion.upToDate === false ? (
+						<CardDescription>
+							你的倉庫版本落後最新版本（{initialVersion.buyerVersion} → {initialVersion.latestVersion}）。
+						</CardDescription>
+					) : (
+						<CardDescription>暫時無法比對版本，請確認 GitHub 授權設定。</CardDescription>
+					)}
+				</CardHeader>
+				{initialVersion.upToDate === false && initialVersion.syncPromptHint ? (
+					<CardContent className="space-y-2 text-sm">
+						<p className="text-muted-foreground">
+							把下面指令貼給你的 AI 工具，在你的專屬倉庫內執行即可同步（系統不會主動推送或合併）。
+						</p>
+						<pre
+							data-testid="sync-prompt-hint"
+							className="bg-muted overflow-x-auto rounded-md border border-border p-3 text-xs whitespace-pre-wrap"
+						>
+							{initialVersion.syncPromptHint}
+						</pre>
+					</CardContent>
+				) : null}
+			</Card>
 
 			<div data-testid="marketplace-root">
 			<Tabs defaultValue="plugins">

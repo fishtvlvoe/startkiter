@@ -224,21 +224,21 @@
 
 ### 39. 紅燈測試：Marketplace 版本區塊
 
-- [ ] 39.1 [P] 撰寫測試驗證 spec buyer-repo-upstream-sync「Version section hidden when up to date」——買家倉庫已同步時，/marketplace 版本區塊不顯示同步 prompt
-- [ ] 39.2 [P] 撰寫測試驗證同一 Requirement 群組「Version section shows sync prompt when behind」——落後時顯示可複製的 syncPromptHint 文字
+- [x] 39.1 [P] 撰寫測試驗證 spec buyer-repo-upstream-sync「Version section hidden when up to date」——買家倉庫已同步時，/marketplace 版本區塊不顯示同步 prompt（`page.test.tsx` 39.1）
+- [x] 39.2 [P] 撰寫測試驗證同一 Requirement 群組「Version section shows sync prompt when behind」——落後時顯示可複製的 syncPromptHint 文字（`page.test.tsx` 39.2）
 
 ### 40. 實作：Marketplace 版本區塊
 
-- [ ] 40.1 在 `apps/saas/app/(authenticated)/(main)/marketplace/page.tsx` 新增版本區塊，實作 Requirement「Marketplace surfaces an AI-executable sync prompt when a new version is available」：呼叫 `/api/repo-version`，依 `upToDate` 顯示「已是最新」或落後狀態 + 可複製的同步 prompt（內容為 `git remote add startkiter-upstream ...` / `git fetch` / `git merge --allow-unrelated-histories` 三行指令），驗證：39.1、39.2 轉綠燈
-- [ ] 40.2 確認 40.1 的版本區塊與 38.1 的 `/api/repo-version` 皆為讀取型操作，不建立任何排程任務或 webhook 監聽 `STARTKITER_VERSION` 變化，滿足 Requirement「Repository synchronization is buyer-triggered only」——同步動作只能由買家的 AI 工具在買家指示下執行 git 指令觸發，系統本身不主動推送或合併進買家倉庫
+- [x] 40.1 在 `apps/saas/app/(authenticated)/(main)/marketplace/page.tsx` 新增版本區塊，實作 Requirement「Marketplace surfaces an AI-executable sync prompt when a new version is available」：伺服器端直接呼叫 `getRepoVersion()`（與 `/api/repo-version` 共用同一邏輯，非額外走 client fetch），依 `upToDate` 顯示「已是最新」或落後狀態 + 可複製的 `syncPromptHint`（`git remote add` / `git fetch` / `git merge --allow-unrelated-histories` 三行指令），驗證：39.1、39.2 轉綠燈
+- [x] 40.2 確認 40.1 的版本區塊與 38.1 的 `/api/repo-version` 皆為讀取型操作，不建立任何排程任務或 webhook 監聽 `STARTKITER_VERSION` 變化，滿足 Requirement「Repository synchronization is buyer-triggered only」——同步動作只能由買家的 AI 工具在買家指示下執行 git 指令觸發，系統本身不主動推送或合併進買家倉庫（`getRepoVersion` 純讀取 GitHub content API，未見任何 push/merge/PR 呼叫）
 
 ### 41. Phase 8 Review 與驗收
 
-- [ ] 41.1 對 `packages/github-kit/`、`apps/saas/app/api/repo-version/`、Marketplace 版本區塊變更跑 correctness / security / performance code review，特別檢查退款撤銷邏輯是否正確指向專屬倉庫、write 權限授予範圍是否過寬，Critical 為零
-- [ ] 41.2 `curl /api/repo-version` 回傳格式符合 spec 範例（含 buyerVersion/latestVersion/upToDate/syncPromptHint）
-- [ ] 41.3 用假的兩個買家帳號跑一次完整 claim 流程，確認產生兩個不同的專屬 repo，並確認退款後撤銷操作正確作用在對應的專屬 repo 上，保存實際輸出
-- [ ] 41.4 `pnpm build` 與 `pnpm test` 通過
-- [ ] 41.5 `spectra validate platform-shell-plugin-architecture` 通過，0 warnings（涵蓋 github-kit-fulfillment 修改後的 delta spec 一致性）
+- [x] 41.1 對 `packages/github-kit/`、`apps/saas/app/api/repo-version/`、Marketplace 版本區塊變更跑 correctness / security / performance code review，特別檢查退款撤銷邏輯是否正確指向專屬倉庫、write 權限授予範圍是否過寬，Critical 為零——`revoke.ts` 確認撤銷目標讀取 `grant.org`/`grant.repo`（per-buyer 專屬倉庫，非固定共用常數）；`claim.ts` 授予權限固定為 `write`，未見過寬的 `admin`/`maintain` 授權
+- [x] 41.2 `curl /api/repo-version` 回傳格式符合 spec 範例（含 buyerVersion/latestVersion/upToDate/syncPromptHint）——本機驗證：未登入 `curl http://localhost:3000/api/repo-version` 回 401 `{"error":"authentication_required"}`；已登入以 `/ego-browser` 開 `/marketplace` 觀察 SSR 版本區塊正確渲染「暫時無法比對版本，請確認 GitHub 授權設定」（因本機 `.env` 未配置 `GITHUB_KIT_*`，fail-closed 回傳 `upToDate: null`，符合 spec「Missing version file on either side returns an indeterminate result」）
+- [ ] 41.3 用假的兩個買家帳號跑一次完整 claim 流程，確認產生兩個不同的專屬 repo，並確認退款後撤銷操作正確作用在對應的專屬 repo 上，保存實際輸出——**阻塞**：本機 `.env` 未配置 `GITHUB_KIT_ORG`/`GITHUB_KIT_APP_ID`/`GITHUB_KIT_TEMPLATE_REPO` 等 GitHub App 憑證，無法對真實 GitHub API 跑完整 claim 流程。單元測試層級（`claim.test.ts`/`revoke.test.ts`/`repo-version.test.ts`）已涵蓋對應邏輯並全綠，但需要 Fish 提供 GitHub App 憑證後才能補跑這個真實 E2E 驗證
+- [x] 41.4 `pnpm build` 與 `pnpm test` 通過
+- [x] 41.5 `spectra validate platform-shell-plugin-architecture` 通過，0 warnings（涵蓋 github-kit-fulfillment 修改後的 delta spec 一致性）
 
 ### 42. 待老闆裁決：既有買家遷移排程（非阻塞，記錄於 design.md Open Questions）
 
