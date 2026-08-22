@@ -1,12 +1,13 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MOUNT_POINTS } from "@startkiter/platform";
 import { iconMap, NavBar, resolveIcon } from "./NavBar";
 
 const mockPathname = "/";
-const mockIsCollapsed = false;
+let mockIsCollapsed = false;
 let mockIsMobile = false;
+let mockSidebarGroups: Array<{ id: string; title: string; order: number; isCollapsed: boolean }> = [];
 
 vi.mock("next/navigation", () => ({
 	usePathname: () => mockPathname,
@@ -45,6 +46,10 @@ vi.mock("../hooks/use-media-query", () => ({
 	useIsMobile: () => mockIsMobile,
 }));
 
+vi.mock("../lib/sidebar-layout", () => ({
+	useSidebarLayout: () => ({ groups: mockSidebarGroups, items: [], isLoading: false }),
+}));
+
 vi.mock("@startkiter/auth/config", () => ({
 	config: {
 		organizations: { enable: false, hideOrganization: true },
@@ -80,6 +85,11 @@ describe("NavBar shell layout (Phase 2)", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mockIsMobile = false;
+	});
+
+	afterEach(() => {
+		mockIsCollapsed = false;
+		mockSidebarGroups = [];
 	});
 
 	it("7.1 renders LocaleSwitch in the sidebar user area", () => {
@@ -135,6 +145,49 @@ describe("NavBar shell layout (Phase 2)", () => {
 		expect(html).toContain("group-focus-visible:opacity-100");
 		// Must not use group-focus-within which causes the handle to stay stuck visible after pointer interaction
 		expect(html).not.toContain("group-focus-within:opacity-100");
+	});
+});
+
+describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		mockIsMobile = false;
+	});
+
+	afterEach(() => {
+		mockIsCollapsed = false;
+		mockSidebarGroups = [];
+	});
+
+	it("45.1 頂列 admin bar 固定 32px（h-8）並使用 WP 配色 token（#1d2327 深色背景、#2271b1 active）", () => {
+		const html = renderToStaticMarkup(<NavBar />);
+
+		expect(html).toContain('data-testid="admin-bar"');
+		expect(html).toContain("h-8");
+		expect(html).toContain("#1d2327");
+		expect(html).toContain("#2271b1");
+	});
+
+	it("45.2a 側邊欄收折後寬度為 56px（md:w-14），不是舊的 80px", () => {
+		mockIsCollapsed = true;
+		const html = renderToStaticMarkup(<NavBar />);
+
+		expect(html).toContain("md:w-14");
+		expect(html).not.toContain("md:w-[80px]");
+	});
+
+	it("45.2b 單一分組可獨立收折，跟整體側邊欄收折狀態互不影響", () => {
+		mockIsCollapsed = false;
+		mockSidebarGroups = [
+			{ id: "g1", title: "SYSTEM", order: 0, isCollapsed: true },
+			{ id: "g2", title: "GENERAL", order: 1, isCollapsed: false },
+		];
+		const html = renderToStaticMarkup(<NavBar />);
+
+		expect(html).toContain('data-testid="sidebar-group-g1"');
+		expect(html).toContain('data-sidebar-group-collapsed="true"');
+		expect(html).toContain('data-testid="sidebar-group-g2"');
+		expect(html).toContain('data-sidebar-group-collapsed="false"');
 	});
 });
 

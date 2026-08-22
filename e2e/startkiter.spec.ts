@@ -103,3 +103,49 @@ test("11.4 後台側邊欄可收合與展開", async ({ page }) => {
 	await toggle.click();
 	await expect(sidebar).toHaveAttribute("data-collapsed", "false");
 });
+
+async function loginAndGoToApp(page: Page) {
+	await page.goto("/login");
+	await page.locator('input[name="email"]').fill(process.env.E2E_TEST_EMAIL!);
+	await page.locator('input[name="password"]').fill(process.env.E2E_TEST_PASSWORD!);
+	await page.locator('button[type="submit"]').click();
+	await expect(page).toHaveURL(/\/app(?:\?|$)/);
+}
+
+test("45.3 拖曳側邊欄選單項目到不同分組會呼叫 PUT /api/sidebar-layout 並即時反映新分組歸屬", async ({ page }) => {
+	test.skip(
+		!process.env.E2E_TEST_EMAIL || !process.env.E2E_TEST_PASSWORD,
+		"需要 E2E_TEST_EMAIL 與 E2E_TEST_PASSWORD 才能驗證登入後拖曳分組",
+	);
+
+	await loginAndGoToApp(page);
+
+	const item = getTestId(page, "sidebar-group-item-course");
+	const targetGroup = getTestId(page, "sidebar-group-system");
+	const putRequest = page.waitForRequest(
+		(request) => request.url().includes("/api/sidebar-layout") && request.method() === "PUT",
+	);
+
+	await item.dragTo(targetGroup);
+
+	await putRequest;
+	await expect(targetGroup).toContainText(await item.textContent());
+});
+
+test("45.4 < 768px 時 admin bar 顯示 hamburger，點擊觸發側邊欄滑出並顯示遮罩", async ({ page }) => {
+	test.skip(
+		!process.env.E2E_TEST_EMAIL || !process.env.E2E_TEST_PASSWORD,
+		"需要 E2E_TEST_EMAIL 與 E2E_TEST_PASSWORD 才能驗證登入後行動版側欄",
+	);
+
+	await page.setViewportSize({ width: 375, height: 800 });
+	await loginAndGoToApp(page);
+
+	const hamburger = getTestId(page, "admin-bar-hamburger");
+	await expect(hamburger).toBeVisible();
+
+	await hamburger.click();
+
+	await expect(getTestId(page, "sidebar-mobile-backdrop")).toBeVisible();
+	await expect(page.locator("#app-sidebar")).toBeVisible();
+});

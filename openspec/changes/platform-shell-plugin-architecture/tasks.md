@@ -260,10 +260,10 @@
 
 ### 45. 紅燈測試：側邊欄 WordPress 視覺與拖曳互動
 
-- [ ] 45.1 [P] 撰寫測試驗證側邊欄呈現 32px admin bar 與 WP 配色 token（`#2271b1` active、`#1d2327` 側欄背景）
-- [ ] 45.2 [P] 撰寫測試驗證側邊欄可收折至 56px（僅 icon），且單一分組可獨立收折，兩層狀態互不影響
-- [ ] 45.3 [P] 撰寫測試驗證拖曳選單項目到不同分組後呼叫 PUT /api/sidebar-layout，畫面即時反映新分組歸屬
-- [ ] 45.4 [P] 撰寫測試驗證 < 768px 時 admin bar 顯示 hamburger 按鈕，點擊觸發側邊欄滑出 + 遮罩
+- [x] 45.1 [P] 撰寫測試驗證側邊欄呈現 32px admin bar 與 WP 配色 token（`#2271b1` active、`#1d2327` 側欄背景）——`NavBar.test.tsx`，實跑確認紅燈：expected 不含 `data-testid="admin-bar"`
+- [x] 45.2 [P] 撰寫測試驗證側邊欄可收折至 56px（僅 icon），且單一分組可獨立收折，兩層狀態互不影響——`NavBar.test.tsx` 45.2a/45.2b，實跑確認紅燈：仍是舊的 `md:w-[80px]`、無 `sidebar-group-*` testid，同時新增 `useSidebarLayout`（`../lib/sidebar-layout`，尚未實作）作為 46.x 要提供的資料契約
+- [x] 45.3 [P] 撰寫測試驗證拖曳選單項目到不同分組後呼叫 PUT /api/sidebar-layout，畫面即時反映新分組歸屬——`e2e/startkiter.spec.ts`（原生 HTML5 drag，不引入新依賴），需登入操作故用 Playwright e2e 而非 vitest 單元測試，沿用既有 `E2E_TEST_EMAIL`/`E2E_TEST_PASSWORD` skip-gate 慣例（本機未配置憑證，目前 skip；語法已用 `playwright test --list` 確認可被收錄）
+- [x] 45.4 [P] 撰寫測試驗證 < 768px 時 admin bar 顯示 hamburger 按鈕，點擊觸發側邊欄滑出 + 遮罩——`e2e/startkiter.spec.ts`，同上用 e2e、同樣 skip-gate
 
 ### 46. 實作：NavBar / sidebar-context 改造為 WordPress 視覺 + 可拖曳分組
 
