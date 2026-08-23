@@ -168,10 +168,7 @@ export async function POST(request: Request) {
 			if (typeof content === "string") {
 				const inspection = inspectMdxSource(content);
 				if (!inspection.ok) {
-					return NextResponse.json(
-						{ error: "INVALID_CONTENT", details: inspection.error },
-						{ status: 400 },
-					);
+					return NextResponse.json({ error: "INVALID_MDX_CONTENT", details: inspection.error }, { status: 400 });
 				}
 			}
 			let videoProvider: VideoProvider | undefined = undefined;

@@ -30,7 +30,7 @@ import { db } from "@startkiter/database";
 import { inspectMdxSource } from "@startkiter/course";
 import { POST } from "./route";
 
-	describe("Course Studio API", () => {
+describe("Course Studio API", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		process.env.ADMIN_EMAIL = "operator@example.com";
@@ -61,13 +61,31 @@ import { POST } from "./route";
 		expect(inspectMdxSource).toHaveBeenCalledWith(content);
 		expect(db.lesson.update).toHaveBeenCalledWith(
 			expect.objectContaining({
-			where: { id: "lesson-01" },
-			data: expect.objectContaining({ content }),
-		}),
+				where: { id: "lesson-01" },
+				data: expect.objectContaining({ content }),
+			}),
 		);
 	});
 
+	it("允許純文字講義並持久化", async () => {
+		const content = "# 標題\n\n一般講義內容。";
+		const response = await POST(
+			new Request("http://localhost/api/course/studio", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					action: "update_lesson",
+					payload: { id: "lesson-01", title: "單元", content },
+				}),
+			}),
+		);
+
+		expect(response.status).toBe(200);
+		expect(db.lesson.update).toHaveBeenCalledTimes(1);
+	});
+
 	it.each([
+		["<UnauthorizedBlock />", "講義內容含有未授權元件：UnauthorizedBlock"],
 		["<EvilWidget />", "講義內容含有未授權元件：EvilWidget"],
 		["<script>alert(1)</script>", "講義內容含有不允許的 HTML。"],
 	])("拒絕不安全的 MDX：%s", async (content, error) => {
@@ -85,6 +103,8 @@ import { POST } from "./route";
 		);
 
 		expect(response.status).toBe(400);
+		const body = await response.json();
+		expect(body.error).toBe("INVALID_MDX_CONTENT");
 		expect(db.lesson.update).not.toHaveBeenCalled();
 	});
 });
