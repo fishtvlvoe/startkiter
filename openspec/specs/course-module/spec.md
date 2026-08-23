@@ -1247,7 +1247,7 @@ tests:
 ---
 ### Requirement: Course Studio 僅供 operator 管理且變更可持久化
 
-Course Studio 必須沿用既有 `ADMIN_EMAIL` operator 判定。operator 可以管理 Course、Chapter、Lesson、資料夾、模組排列、`isFreePreview`、發布狀態、allowlisted MDX、AI context 與影音設定；章節與單元必須支援確定排序與跨章節移動。所有 mutation 必須由伺服器 session 推導 actor，使用 transaction 保證排序完整性。
+Course Studio 必須沿用既有 `ADMIN_EMAIL` operator 判定。operator 可以管理 Course、Chapter、Lesson、資料夾、模組排列、`isFreePreview`、發布狀態、allowlisted MDX、AI context 與影音設定；章節與單元必須支援確定排序與跨章節移動。所有 mutation 必須由伺服器 session 推導 actor，使用 transaction 保證排序完整性。Studio UI 必須提供可直接拖曳的排序控制（不能只有底層 API 支援排序而 UI 無對應互動）。
 
 #### Scenario: 非 operator 無法讀寫 Studio 資料
 
@@ -1259,6 +1259,11 @@ Course Studio 必須沿用既有 `ADMIN_EMAIL` operator 判定。operator 可以
 - **WHEN** 一般已購買學員請求相同 Studio reader 或 mutation
 - **THEN** 系統必須回 403，且不改變任何課綱、排序或發布狀態
 
+#### Scenario: Studio UI 提供跨章節拖曳排序的互動控制
+
+- **WHEN** operator 在 Studio 畫面用滑鼠把某個單元從其所屬章節拖到另一個章節的特定位置
+- **THEN** UI 必須即時反映新的排序位置，並呼叫既有的 `reorder_lessons` mutation 持久化變更，不需要重新整理頁面才看到結果
+
 ##### Example: operator 跨章節拖曳後重新載入仍一致
 
 - operator 把 `lesson-03` 從 `chapter-01` 拖到 `chapter-02` 的 position 1
@@ -1267,182 +1272,51 @@ Course Studio 必須沿用既有 `ADMIN_EMAIL` operator 判定。operator 可以
 
 
 <!-- @trace
-source: interactive-learning-system
-updated: 2026-08-21
+source: course-studio-upgrade
+updated: 2026-08-23
 code:
-  - docs/startkiter-development-sop.md
-  - packages/support/index.ts
-  - docs/tutorials/puter-serverless-mvp/presentation-kimi-prompt.md
-  - docs/dispatch-board.md
-  - config/modules.ts
-  - docs/discuss/2026-08-17-supastarter-gap-risk-report.md
-  - packages/api/modules/deployment/router.ts
-  - apps/saas/app/(authenticated)/(main)/(account)/admin/course/page.tsx
-  - apps/saas/tsconfig.json
-  - packages/api/index.ts
-  - packages/platform/src/deployment/coolify-client.ts
-  - packages/platform/src/deployment/status.ts
-  - packages/support/src/chatwoot-signature.ts
-  - apps/saas/modules/shared/components/AuthWrapper.tsx
-  - apps/saas/modules/deployment/components/ReportIssueButton.tsx
-  - packages/course/package.json
-  - apps/saas/modules/shared/components/NavBar.tsx
-  - apps/marketing/modules/course/components/CourseBuyCta.tsx
-  - packages/database/prisma/seed-course.ts
-  - packages/support/src/copilot.ts
   - packages/course/index.ts
-  - apps/saas/modules/shared/components/UserMenu.tsx
-  - docs/demo/course-demo-2-manual.html
-  - apps/saas/vitest.config.ts
-  - docs/coolify-vps-setup-runbook.md
-  - docs/discuss/2026-08-17-supastarter-source-correction.md
-  - packages/course/src/mdx/LessonMdx.tsx
-  - packages/api/package.json
-  - packages/database/package.json
-  - apps/saas/AGENTS.md
-  - apps/marketing/modules/course/lib/public-curriculum.ts
-  - packages/platform/src/deployment/credentials.ts
-  - docs/discuss/2026-08-17-landing-signup-visual-feedback.md
-  - packages/platform/src/deployment/types.ts
-  - packages/platform/vitest.config.ts
-  - apps/saas/app/api/course/studio/route.ts
-  - packages/platform/src/mount-points.ts
-  - packages/course/src/config/modules.ts
-  - packages/github-kit/index.ts
-  - packages/github-kit/provision-buyer-repo.ts
-  - packages/api/modules/course/router.ts
-  - apps/saas/package.json
-  - apps/marketing/app/[locale]/course/preview/[lessonId]/page.tsx
-  - docs/gaishen-workflow-demo.html
-  - apps/saas/modules/deployment/constants.ts
-  - packages/api/modules/deployment/procedures/provision-server.ts
-  - packages/platform/tsconfig.json
-  - docs/demo/course-sales-page-powercourse.html
-  - packages/github-kit/repo-version.ts
-  - packages/github-kit/types.ts
-  - docs/tutorials/puter-serverless-mvp/README.md
-  - docs/为什么叫QQ – 你的AI编程总是翻车？因为你少做了一步：设计隔离  拆解 Grill-me，Superpowers，Openspec 的第一步.md
-  - packages/github-kit/revoke.ts
-  - packages/support/src/chatwoot-payload.ts
-  - docs/discuss/2026-08-21-buyer-dev-onboarding-guide-idea.md
-  - docs/discuss/2026-08-21-thetu-core-modules-architecture.html
-  - README.md
-  - docs/gaishen-orca-workflow.md
-  - packages/support/src/ticket-status.ts
-  - apps/saas/lib/operator.ts
-  - packages/api/modules/support/lib/chatwoot-client.ts
-  - packages/course/src/components/interactive/WorkflowSorter.tsx
-  - packages/course/src/mdx/extract-lesson-block-ids.ts
-  - packages/support/package.json
-  - docs/discuss/2026-08-17-wp-frontend-mount-research.md
-  - packages/support/src/generate-diagnosis.ts
-  - apps/saas/app/api/mcp/lib/config.ts
-  - packages/api/modules/support/procedures/chatwoot-webhook.ts
-  - .spectra.yaml
-  - packages/github-kit/github-app-client.ts
-  - apps/saas/modules/deployment/components/ManagedVpsGuide.tsx
-  - packages/course/src/components/interactive/MicroSandbox.tsx
-  - packages/platform/package.json
-  - packages/api/modules/support/router.ts
-  - apps/saas/app/api/mcp/connections/[id]/route.ts
-  - packages/support/vitest.config.ts
-  - apps/saas/app/api/mcp/connections/route.ts
-  - apps/saas/app/api/mcp/lib/handler.ts
-  - packages/course/src/components/interactive/TimelineSync.tsx
-  - packages/database/prisma/migrations/20260819120000_add_studio_folder_collapse_state/migration.sql
-  - apps/saas/app/api/repo-version/route.ts
-  - docs/demo/course-frontend-landing-demo.html
-  - packages/platform/src/deployment/db.ts
-  - apps/saas/app/api/github/claim/route.ts
-  - AGENTS.md
-  - apps/saas/app/api/mcp/lib/guard.ts
-  - apps/saas/app/api/course/ai/route.ts
-  - apps/saas/CLAUDE.md
-  - packages/platform/src/deployment/fleet.ts
-  - packages/platform/src/deployment/tiers.ts
-  - packages/course/src/components/interactive/DialogueWindow.tsx
-  - packages/github-kit/config.ts
-  - docs/demo/course-admin-studio-demo.html
-  - packages/course/src/components/interactive/ConceptCompare.tsx
-  - packages/database/prisma/zod/index.ts
-  - docs/dispatch-board.html
-  - docs/deploy-and-public-url.md
-  - packages/course/src/player/FluentPlayer.tsx
-  - docs/demo/course-demo-3-supastarter-ai.html
-  - apps/saas/modules/deployment/components/DeploymentStatusPanel.tsx
-  - packages/course/src/components/interactive/InstantQuiz.tsx
-  - apps/saas/lib/github-kit.ts
-  - apps/saas/modules/shared/lib/nav-menu-items.ts
-  - packages/course/vitest.config.ts
-  - packages/platform/src/types.ts
-  - apps/marketing/modules/course/lib/duration.ts
-  - docs/tutorials/puter-serverless-mvp/demo/index.html
-  - packages/course/src/components/interactive/TeacherAvatar.tsx
-  - packages/api/orpc/router.ts
-  - packages/course/src/hooks/use-time-sync.ts
-  - docs/demo/course-demo-1-split.html
-  - packages/api/modules/deployment/procedures/get-status.ts
-  - docs/demo/StartKiter-成果儀表板.html
-  - packages/database/prisma/schema.prisma
-  - apps/saas/modules/deployment/components/TierSelector.tsx
-  - packages/course/src/mdx/allowed-components.ts
-  - packages/database/prisma/index.ts
-  - packages/platform/index.ts
-  - docs/demo/course-demo-3-workspace.html
-  - docs/demo/buyer-status-panel-demo.html
-  - packages/database/prisma/migrations/20260820032747_add_plugin_content/migration.sql
-  - docs/startkiter開發討論.md
-  - packages/database/prisma/migrations/20260820033416_add_mcp_connection/migration.sql
-  - packages/api/modules/course/lib/video-resolver.ts
-  - packages/course/tsconfig.json
-  - apps/saas/app/api/mcp/route.ts
-  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/page.tsx
-  - docs/discuss/2026-08-17-hyperagent-reference.md
-  - apps/marketing/app/[locale]/course/page.tsx
-  - packages/support/tsconfig.json
-  - packages/api/modules/deployment/procedures/submit-credential.ts
   - packages/course/src/components/interactive/index.ts
-  - packages/database/prisma/migrations/migration_lock.toml
-  - apps/saas/app/(authenticated)/ChatwootScript.tsx
+  - docs/assets/course-engine/genre_simulation_lab_1787451430314.jpg
+  - docs/assets/course-engine/negotiation_roleplay_sandbox_1787451270712.jpg
+  - packages/course/src/components/interactive/WebContainerSandbox.tsx
+  - docs/assets/course-engine/teacher_ai_curriculum_1787451125134.jpg
+  - docs/assets/course-engine/course_mod_map_editor_1787451707912.jpg
+  - packages/course/package.json
+  - packages/course/src/mdx/block-registry.ts
+  - docs/assets/course-engine-v2/learning-game-feel-case.png
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/course/page.tsx
+  - docs/assets/course-engine/student_game_sandbox_1787451061663.jpg
+  - packages/course/src/mdx/allowed-components.ts
+  - docs/assets/course-engine/octalysis_gamification_ui_1787451993600.jpg
+  - docs/assets/course-engine/music_interactive_classroom_1787451251703.jpg
   - packages/course/src/mdx/inspect-mdx-source.ts
-  - apps/saas/app/(authenticated)/layout.tsx
-  - apps/saas/app/(authenticated)/(main)/(account)/deployment/page.tsx
-  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/classroom-client.tsx
-  - packages/api/orpc/procedures.ts
-  - docs/demo/puter-todo-app.html
-  - packages/github-kit/claim.ts
+  - docs/assets/course-engine/ai_anime_dynamic_render_1787451690674.jpg
+  - packages/course/src/mdx/LessonMdx.tsx
+  - apps/saas/next.config.ts
+  - docs/assets/course-engine/teacher_block_studio_1787451106228.jpg
+  - docs/startkiter-course-engine-research.md
+  - docs/course-engine-architecture-gameplay-spec.md
+  - apps/saas/modules/shared/components/CourseStudioContentPreview.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/course/reorder-lessons.ts
+  - docs/assets/course-engine-v2/teacher-ai-co-creation.png
+  - docs/assets/course-engine/genre_visual_novel_1787451409914.jpg
+  - docs/assets/course-engine/student_hint_ladder_1787451091148.jpg
+  - packages/course/src/webcontainer/sandbox-runtime.ts
+  - docs/assets/course-engine/student_pass_celebration_1787451076193.jpg
+  - docs/course-engine-experiential-layer-research.md
+  - docs/startkiter-course-engine-visual-report-v2.html
+  - apps/saas/app/api/course/studio/route.ts
+  - docs/assets/course-engine-v2/open-world-course-engine.png
 tests:
-  - packages/api/modules/course/toggle-lesson-progress.test.ts
-  - packages/database/src/plugin-content/plugin-content.test.ts
-  - packages/platform/src/types.test.ts
-  - packages/support/src/copilot.test.ts
-  - packages/api/modules/course/course.test.ts
-  - apps/saas/modules/deployment/deployment-status.test.ts
-  - packages/platform/src/deployment/tiers.test.ts
-  - packages/api/modules/support/procedures/chatwoot-webhook.test.ts
-  - apps/saas/modules/shared/lib/nav-menu-items.test.ts
-  - packages/platform/src/deployment/fleet.test.ts
-  - packages/platform/src/deployment/status.test.ts
-  - packages/course/src/mdx/extract-lesson-block-ids.test.ts
-  - packages/platform/src/deployment/coolify-client.test.ts
-  - apps/saas/modules/deployment/chatwoot-script.test.ts
-  - packages/support/src/chatwoot-signature.test.ts
-  - apps/marketing/modules/course/lib/duration.test.ts
-  - packages/api/modules/deployment/procedures/deployment-procedures.test.ts
-  - packages/support/src/ticket-status.test.ts
-  - apps/saas/modules/shared/components/NavBar.test.tsx
-  - packages/course/src/config/modules.test.ts
-  - packages/course/src/components/interactive/interactive.test.tsx
-  - packages/github-kit/config.test.ts
-  - packages/github-kit/claim.test.ts
-  - apps/saas/modules/deployment/report-issue-button.test.tsx
-  - packages/database/src/support/ticket.test.ts
-  - packages/platform/src/deployment/credentials.test.ts
-  - packages/github-kit/repo-version.test.ts
-  - packages/platform/src/mount-points.test.ts
+  - packages/course/src/mdx/LessonMdx.test.tsx
+  - apps/saas/modules/shared/components/CourseStudioContentPreview.test.tsx
+  - packages/course/src/components/interactive/WebContainerSandbox.test.tsx
+  - apps/saas/app/api/course/studio/route.test.ts
   - packages/course/src/mdx/inspect-mdx-source.test.ts
-  - apps/saas/app/api/mcp/route.test.ts
-  - packages/github-kit/revoke.test.ts
+  - packages/course/src/webcontainer/sandbox-runtime.test.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/course/reorder-lessons.test.ts
+  - packages/course/src/mdx/block-registry.test.ts
 -->
 
 ---
@@ -3368,4 +3242,79 @@ tests:
   - packages/support/src/line-signature.test.ts
   - packages/course/src/line-invite.test.ts
   - apps/saas/lib/auth-providers.test.ts
+-->
+
+---
+### Requirement: Course Studio 內容編輯提供即時預覽
+
+operator 在 Course Studio 編輯 Lesson 的 MDX 內容時，系統必須在同一畫面提供即時預覽面板，使用學員端渲染時採用的同一個 renderer 呈現目前輸入內容，並套用與存檔時相同的積木 allowlist 檢查。預覽必須在 operator 停止輸入後的短暫延遲內更新，不需要另外觸發或切換頁面。
+
+#### Scenario: 即時預覽反映目前輸入內容
+
+- **WHEN** operator 在內容編輯欄位輸入合法的 MDX 內容
+- **THEN** 預覽面板必須在短暫延遲後顯示渲染後的結果，且渲染結果必須跟學員實際看到的畫面一致
+
+##### Example: 輸入合法 InstantQuiz 後預覽即時更新
+
+- **GIVEN** operator 正在編輯 `lesson-05`，內容編輯欄位目前是空白
+- **WHEN** operator 輸入 `<InstantQuiz question="1+1=?" options={["1","2","3"]} answerIndex={1} />` 後停止輸入
+- **THEN** 300ms 內預覽面板必須顯示題目「1+1=?」與三個選項，渲染結果與學員開啟 `lesson-05` 時看到的畫面一致
+
+#### Scenario: 即時預覽顯示未授權積木的錯誤
+
+- **WHEN** operator 在內容編輯欄位輸入含未授權積木名稱或 raw HTML 的內容
+- **THEN** 預覽面板必須顯示跟存檔時會出現的相同驗證錯誤訊息，且不得靜默忽略錯誤或顯示空白畫面
+
+##### Example: 輸入未註冊積木名稱時預覽顯示錯誤
+
+- **GIVEN** operator 正在編輯 `lesson-05`
+- **WHEN** operator 輸入 `<UnregisteredWidget foo="bar" />`
+- **THEN** 預覽面板必須顯示「講義內容含有未授權元件：UnregisteredWidget」，而不是空白畫面或靜默略過該段內容
+
+<!-- @trace
+source: course-studio-upgrade
+updated: 2026-08-23
+code:
+  - packages/course/index.ts
+  - packages/course/src/components/interactive/index.ts
+  - docs/assets/course-engine/genre_simulation_lab_1787451430314.jpg
+  - docs/assets/course-engine/negotiation_roleplay_sandbox_1787451270712.jpg
+  - packages/course/src/components/interactive/WebContainerSandbox.tsx
+  - docs/assets/course-engine/teacher_ai_curriculum_1787451125134.jpg
+  - docs/assets/course-engine/course_mod_map_editor_1787451707912.jpg
+  - packages/course/package.json
+  - packages/course/src/mdx/block-registry.ts
+  - docs/assets/course-engine-v2/learning-game-feel-case.png
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/course/page.tsx
+  - docs/assets/course-engine/student_game_sandbox_1787451061663.jpg
+  - packages/course/src/mdx/allowed-components.ts
+  - docs/assets/course-engine/octalysis_gamification_ui_1787451993600.jpg
+  - docs/assets/course-engine/music_interactive_classroom_1787451251703.jpg
+  - packages/course/src/mdx/inspect-mdx-source.ts
+  - docs/assets/course-engine/ai_anime_dynamic_render_1787451690674.jpg
+  - packages/course/src/mdx/LessonMdx.tsx
+  - apps/saas/next.config.ts
+  - docs/assets/course-engine/teacher_block_studio_1787451106228.jpg
+  - docs/startkiter-course-engine-research.md
+  - docs/course-engine-architecture-gameplay-spec.md
+  - apps/saas/modules/shared/components/CourseStudioContentPreview.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/course/reorder-lessons.ts
+  - docs/assets/course-engine-v2/teacher-ai-co-creation.png
+  - docs/assets/course-engine/genre_visual_novel_1787451409914.jpg
+  - docs/assets/course-engine/student_hint_ladder_1787451091148.jpg
+  - packages/course/src/webcontainer/sandbox-runtime.ts
+  - docs/assets/course-engine/student_pass_celebration_1787451076193.jpg
+  - docs/course-engine-experiential-layer-research.md
+  - docs/startkiter-course-engine-visual-report-v2.html
+  - apps/saas/app/api/course/studio/route.ts
+  - docs/assets/course-engine-v2/open-world-course-engine.png
+tests:
+  - packages/course/src/mdx/LessonMdx.test.tsx
+  - apps/saas/modules/shared/components/CourseStudioContentPreview.test.tsx
+  - packages/course/src/components/interactive/WebContainerSandbox.test.tsx
+  - apps/saas/app/api/course/studio/route.test.ts
+  - packages/course/src/mdx/inspect-mdx-source.test.ts
+  - packages/course/src/webcontainer/sandbox-runtime.test.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/course/reorder-lessons.test.ts
+  - packages/course/src/mdx/block-registry.test.ts
 -->
