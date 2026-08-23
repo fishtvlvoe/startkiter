@@ -10,6 +10,19 @@ export const publicProcedure = os.$context<{
 	url?: string;
 }>();
 
+export const publicProcedureWithSession = publicProcedure.use(async ({ context, next }) => {
+	const session = await auth.api.getSession({
+		headers: context.headers,
+	});
+
+	return await next({
+		context: {
+			session: session?.session || null,
+			user: session?.user || null,
+		},
+	});
+});
+
 export const protectedProcedure = publicProcedure.use(async ({ context, next }) => {
 	const session = await auth.api.getSession({
 		headers: context.headers,

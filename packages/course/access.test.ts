@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { MVP_SKU } from "@startkiter/payments/constants";
 
 import {
 	type BundleCourseAccessReader,
@@ -55,6 +56,25 @@ describe("canAccessCourse", () => {
 });
 
 describe("canAccessCourseId (Requirement: Bundle purchase grants access to all included courses)", () => {
+	it("preserves the platform-wide MVP entitlement for any course", async () => {
+		const reader = bundleReaderWith({
+			grantedSkus: [MVP_SKU],
+			bundleCourseIdsBySku: {},
+		});
+
+		await expect(canAccessCourseId("user_mvp_buyer", "course_from_any_bundle", reader)).resolves.toBe(
+			true,
+		);
+	});
+
+	it("does not restore a refunded MVP entitlement when courseAccess clears its sku", async () => {
+		const reader = bundleReaderWith({ grantedSkus: [], bundleCourseIdsBySku: {} });
+
+		await expect(canAccessCourseId("user_refunded_mvp", "course_from_any_bundle", reader)).resolves.toBe(
+			false,
+		);
+	});
+
 	it("grants access to a course when the buyer's granted sku is a bundle containing that courseId", async () => {
 		const reader = bundleReaderWith({
 			grantedSkus: ["bundle_combo_a"],

@@ -1,5 +1,6 @@
 import { generateText, textModel } from "../../../../../../packages/ai";
 import { auth } from "@startkiter/auth";
+import { userCanAccessCourseId } from "@startkiter/api/modules/course/lib/course-access";
 import { db } from "@startkiter/database";
 import { NextResponse } from "next/server";
 
@@ -55,6 +56,7 @@ export async function POST(request: Request) {
 
 		const lesson = await db.lesson.findUnique({
 			where: { id: lessonId },
+			include: { chapter: true },
 		});
 
 		if (!lesson || lesson.status !== "PUBLISHED") {
@@ -74,15 +76,8 @@ export async function POST(request: Request) {
 				);
 			}
 
-			const order = await db.order.findFirst({
-				where: {
-					userId: session.user.id,
-					courseAccess: true,
-					status: "paid",
-				},
-			});
-
-			if (!order) {
+			const allowed = await userCanAccessCourseId(session.user.id, lesson.chapter.courseId);
+			if (!allowed) {
 				return NextResponse.json(
 					{ error: "forbidden", message: "沒有觀看這個單元的權限" },
 					{ status: 403 },

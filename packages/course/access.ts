@@ -48,6 +48,10 @@ export async function canAccessCourseId(
 	}
 	const grantedSkus = await reader.findGrantedSkusForUser(userId);
 	for (const sku of grantedSkus) {
+		if (sku === MVP_SKU) {
+			return true;
+		}
+
 		const bundleCourseIds = await reader.findBundleCourseIds(sku);
 		if (bundleCourseIds?.includes(courseId)) {
 			return true;

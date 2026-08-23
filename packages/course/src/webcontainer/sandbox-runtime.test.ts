@@ -56,7 +56,21 @@ describe("sandbox-runtime", () => {
 			"--no-audit",
 			"--no-fund",
 		]);
-		expect(spawn).toHaveBeenNthCalledWith(2, "node", ["test.js"]);
+		 expect(spawn).toHaveBeenNthCalledWith(2, "node", ["test.js"]);
+	});
+
+	it("接受帶完整路徑的允許測試執行檔", async () => {
+		const spawn = vi.fn().mockResolvedValue(processWith(0, "passed"));
+		const webcontainer = {
+			mount: vi.fn().mockResolvedValue(undefined),
+			spawn,
+		} as never;
+
+		await expect(runSandboxTests(webcontainer, {}, "/usr/local/bin/node test.js")).resolves.toEqual({
+			status: "pass",
+			testOutput: "passed",
+		});
+		expect(spawn).toHaveBeenCalledWith("/usr/local/bin/node", ["test.js"]);
 	});
 
 	it("拒絕超過檔案數與總大小限制的輸入", () => {

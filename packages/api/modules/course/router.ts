@@ -2,8 +2,14 @@ import { ORPCError } from "@orpc/server";
 import { extractLessonBlockIds } from "../../../course/src/mdx/extract-lesson-block-ids";
 import { db, VideoProvider } from "@startkiter/database";
 import { z } from "zod";
-import { adminProcedure, protectedProcedure, publicProcedure } from "../../orpc/procedures";
+import {
+	adminProcedure,
+	protectedProcedure,
+	publicProcedure,
+	publicProcedureWithSession,
+} from "../../orpc/procedures";
 import { isCourseOperator } from "./lib/course-operator";
+import { userCanAccessCourseId } from "./lib/course-access";
 import { updateLesson } from "./lib/update-lesson";
 import { resolveVideoSource } from "./lib/video-resolver";
 
@@ -106,9 +112,9 @@ export const courseRouter = publicProcedure.router({
 	}),
 
 	// 3. 取得單元詳情與媒體內容 (Protected / Public preview)
-	getLessonDetail: publicProcedure
+	getLessonDetail: publicProcedureWithSession
 		.input(z.object({ lessonId: z.string() }))
-		.handler(async ({ input, context }) => {
+		.handler(async ({ input, context: { user } }) => {
 			const lesson = await db.lesson.findUnique({
 				where: { id: input.lessonId },
 				include: { chapter: true },
@@ -120,21 +126,12 @@ export const courseRouter = publicProcedure.router({
 
 			// 若非免費試看，必須驗證已登入且具備權限
 			if (!lesson.isFreePreview) {
-				// @ts-expect-error optional user in context
-				const userId = context?.user?.id;
-				if (!userId) {
+				if (!user?.id) {
 					throw new ORPCError("UNAUTHORIZED");
 				}
 
-				const order = await db.order.findFirst({
-					where: {
-						userId,
-						courseAccess: true,
-						status: "paid",
-					},
-				});
-
-				if (!order) {
+				const allowed = await userCanAccessCourseId(user.id, lesson.chapter.courseId);
+				if (!allowed) {
 					throw new ORPCError("FORBIDDEN");
 				}
 			}

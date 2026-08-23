@@ -95,7 +95,7 @@ function commandParts(command: string): [string, string[]] {
 }
 
 function validateTestCommand(command: string, args: string[]) {
-	const executable = command.split("/").at(-1) ?? "";
+	const executable = command.split("/").pop() ?? "";
 	if (!ALLOWED_TEST_COMMANDS.has(executable)) {
 		throw new Error("沙盒只允許執行 Node.js 測試命令。");
 	}

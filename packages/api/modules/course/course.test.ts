@@ -1,5 +1,47 @@
-import { describe, expect, it } from "vitest";
+import { call } from "@orpc/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("@startkiter/auth", () => ({
+	auth: {
+		api: {
+			getSession: vi.fn(),
+		},
+	},
+}));
+
+vi.mock("@startkiter/database", () => ({
+	VideoProvider: {},
+	db: {
+		bundle: { findUnique: vi.fn() },
+		course: { findFirst: vi.fn(), findMany: vi.fn() },
+		lesson: { findUnique: vi.fn() },
+		lessonProgress: { findMany: vi.fn(), findUnique: vi.fn(), create: vi.fn() },
+		order: { findFirst: vi.fn(), findMany: vi.fn() },
+		studioFolder: { findMany: vi.fn() },
+	},
+}));
+
+vi.mock("@startkiter/course", () => ({
+	canAccessCourseId: vi.fn(async (userId: string, courseId: string, reader: {
+		findGrantedSkusForUser: (id: string) => Promise<string[]>;
+		findBundleCourseIds: (sku: string) => Promise<string[] | null>;
+	}) => {
+		const skus = await reader.findGrantedSkusForUser(userId);
+		for (const sku of skus) {
+			const courseIds = await reader.findBundleCourseIds(sku);
+			if (courseIds?.includes(courseId)) return true;
+		}
+		return false;
+	}),
+	inspectMdxSource: vi.fn(),
+}));
+
+import { auth } from "@startkiter/auth";
+import { db } from "@startkiter/database";
+
+import { createPrismaBundleCourseAccessReader } from "./lib/course-access";
 import { resolveVideoSource } from "./lib/video-resolver";
+import { courseRouter } from "./router";
 
 describe("Course Video Resolver (Fluent Player)", () => {
 	it("correctly identifies Bunny Stream URLs", () => {
@@ -43,5 +85,103 @@ describe("Course Video Resolver (Fluent Player)", () => {
 
 		const unknownRes = resolveVideoSource("https://unsupported-site.com/watch");
 		expect(unknownRes.ok).toBe(false);
+	});
+});
+
+const authenticatedSession = {
+	session: { id: "session-1", userId: "buyer-a" },
+	user: { id: "buyer-a", email: "buyer-a@example.com", role: "user" },
+};
+
+function paidLesson(courseId: string) {
+	return {
+		id: "lesson-paid",
+		status: "PUBLISHED",
+		isFreePreview: false,
+		content: "# paid lesson",
+		chapter: { courseId },
+	};
+}
+
+describe("getLessonDetail bundle-aware access", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		vi.mocked(auth.api.getSession).mockResolvedValue(authenticatedSession as never);
+		vi.mocked(db.lesson.findUnique).mockResolvedValue(paidLesson("course-a") as never);
+		vi.mocked(db.order.findFirst).mockResolvedValue({ id: "legacy-paid-order" } as never);
+	});
+
+	it("returns full lesson content for a course included in the buyer's bundle", async () => {
+		vi.mocked(db.order.findMany).mockResolvedValue([{ sku: "bundle-a" }] as never);
+		vi.mocked(db.bundle.findUnique).mockResolvedValue({ courses: [{ courseId: "course-a" }] } as never);
+
+		const result = await call(
+			courseRouter.getLessonDetail,
+			{ lessonId: "lesson-paid" },
+			{ context: { headers: new Headers(), user: authenticatedSession.user } as never },
+		);
+
+		expect(result.lesson.content).toBe("# paid lesson");
+	});
+
+	it("rejects a paid lesson outside the buyer's bundle", async () => {
+		vi.mocked(db.order.findMany).mockResolvedValue([{ sku: "bundle-a" }] as never);
+		vi.mocked(db.bundle.findUnique).mockResolvedValue({ courses: [{ courseId: "course-b" }] } as never);
+
+		await expect(
+			call(
+				courseRouter.getLessonDetail,
+				{ lessonId: "lesson-paid" },
+				{ context: { headers: new Headers(), user: authenticatedSession.user } as never },
+			),
+		).rejects.toMatchObject({ code: "FORBIDDEN" });
+	});
+
+	it("rejects an unauthenticated request for a non-preview lesson", async () => {
+		vi.mocked(auth.api.getSession).mockResolvedValue(null);
+
+		await expect(
+			call(
+				courseRouter.getLessonDetail,
+				{ lessonId: "lesson-paid" },
+				{ context: { headers: new Headers() } },
+			),
+		).rejects.toMatchObject({ code: "UNAUTHORIZED" });
+	});
+
+	it("allows an unauthenticated request for a free-preview lesson without bundle lookup", async () => {
+		vi.mocked(auth.api.getSession).mockResolvedValue(null);
+		vi.mocked(db.lesson.findUnique).mockResolvedValue({
+			...paidLesson("course-a"),
+			isFreePreview: true,
+		} as never);
+
+		const result = await call(
+			courseRouter.getLessonDetail,
+			{ lessonId: "lesson-preview" },
+			{ context: { headers: new Headers() } },
+		);
+
+		expect(result.lesson.isFreePreview).toBe(true);
+		expect(db.order.findMany).not.toHaveBeenCalled();
+		expect(db.bundle.findUnique).not.toHaveBeenCalled();
+	});
+
+	it("uses the buyer-scoped order and bundle query shape", async () => {
+		vi.mocked(db.order.findMany).mockResolvedValue([{ sku: "bundle-a" }] as never);
+		vi.mocked(db.bundle.findUnique).mockResolvedValue({ courses: [{ courseId: "course-a" }] } as never);
+
+		const reader = createPrismaBundleCourseAccessReader();
+
+		await expect(reader.findGrantedSkusForUser("buyer-a")).resolves.toEqual(["bundle-a"]);
+		await expect(reader.findBundleCourseIds("bundle-a")).resolves.toEqual(["course-a"]);
+		expect(db.order.findMany).toHaveBeenCalledWith({
+			where: { userId: "buyer-a", courseAccess: true },
+			select: { sku: true },
+		});
+		expect(db.bundle.findUnique).toHaveBeenCalledWith({
+			where: { id: "bundle-a" },
+			include: { courses: true },
+		});
 	});
 });

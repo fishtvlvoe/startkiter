@@ -11,11 +11,31 @@ vi.mock("@startkiter/auth", () => ({
 
 import { auth } from "@startkiter/auth";
 
-import { adminProcedure, protectedProcedure, publicProcedure } from "./procedures";
+import {
+	adminProcedure,
+	protectedProcedure,
+	publicProcedure,
+	publicProcedureWithSession,
+} from "./procedures";
 
 describe("publicProcedure", () => {
 	it("is defined", () => {
 		expect(publicProcedure).toBeDefined();
+	});
+});
+
+describe("publicProcedureWithSession", () => {
+	it("passes null user and session to unauthenticated handlers", async () => {
+		vi.mocked(auth.api.getSession).mockResolvedValueOnce(null);
+		let capturedContext: unknown;
+		const testProcedure = publicProcedureWithSession.handler(async ({ context }) => {
+			capturedContext = context;
+			return { success: true };
+		});
+
+		await call(testProcedure, undefined, { context: { headers: new Headers() } });
+
+		expect(capturedContext).toMatchObject({ user: null, session: null });
 	});
 });
 
