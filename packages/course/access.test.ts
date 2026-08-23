@@ -17,10 +17,12 @@ function readerWith(rows: { sku: string; courseAccess: boolean }[]): CourseAcces
 function bundleReaderWith(args: {
 	grantedSkus: string[];
 	bundleCourseIdsBySku: Record<string, string[]>;
+	hasActiveSubscription?: boolean;
 }): BundleCourseAccessReader {
 	return {
 		findGrantedSkusForUser: async () => args.grantedSkus,
 		findBundleCourseIds: async (sku) => args.bundleCourseIdsBySku[sku] ?? null,
+		hasActiveSubscription: async () => args.hasActiveSubscription ?? false,
 	};
 }
 
@@ -116,5 +118,35 @@ describe("canAccessCourseId (Requirement: Bundle purchase grants access to all i
 
 		await expect(canAccessCourseId("", "course_lesson_01", reader)).resolves.toBe(false);
 		await expect(canAccessCourseId("user_bundle_buyer", "", reader)).resolves.toBe(false);
+	});
+
+	it("allows a buyer with an active subscription for the requested course", async () => {
+		const reader = bundleReaderWith({
+			grantedSkus: [],
+			bundleCourseIdsBySku: {},
+			hasActiveSubscription: true,
+		});
+
+		await expect(canAccessCourseId("user_subscriber", "course-a", reader)).resolves.toBe(true);
+	});
+
+	it("does not allow a canceled subscription without another entitlement", async () => {
+		const reader = bundleReaderWith({
+			grantedSkus: [],
+			bundleCourseIdsBySku: {},
+			hasActiveSubscription: false,
+		});
+
+		await expect(canAccessCourseId("user_canceled", "course-a", reader)).resolves.toBe(false);
+	});
+
+	it("keeps one-time and subscription entitlements composable", async () => {
+		const reader = bundleReaderWith({
+			grantedSkus: [MVP_SKU],
+			bundleCourseIdsBySku: {},
+			hasActiveSubscription: true,
+		});
+
+		await expect(canAccessCourseId("user_both", "course-a", reader)).resolves.toBe(true);
 	});
 });

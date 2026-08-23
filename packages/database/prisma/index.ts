@@ -2,8 +2,11 @@ export * from "./client";
 export type { Prisma } from "./generated/client";
 export {
 	NotificationTarget,
-	NotificationType,
-	PublishStatus,
+  NotificationType,
+  CourseSubscriptionStatus,
+  PaymentWebhookEventStatus,
+  PublishStatus,
+  SubscriptionInterval,
 	SupportTicketChannel,
 	SupportTicketResolvedBy,
 	SupportTicketStatus,

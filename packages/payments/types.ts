@@ -113,6 +113,41 @@ export type SetSubscriptionSeats = (params: { id: string; seats: number }) => Pr
 
 export type CancelSubscription = (id: string) => Promise<void>;
 
+export type SubscriptionInterval = "MONTH" | "YEAR";
+
+export type SubscriptionSessionResult = {
+	type: "form_post";
+	formData: {
+		apiUrl: string;
+		MerID: string;
+		Version: string;
+		EncryptInfo: string;
+		HashInfo: string;
+	};
+	gatewaySessionId: string;
+};
+
+/** Provider-neutral contract for recurring billing. */
+export interface SubscriptionGateway {
+	createSubscriptionSession(params: {
+		subscriptionId: string;
+		gatewayTradeNo: string;
+		pricePerPeriod: number;
+		interval: SubscriptionInterval;
+		courseTitle: string;
+		baseUrl: string;
+		payerEmail?: string;
+	}): Promise<SubscriptionSessionResult>;
+	cancelSubscription(params: {
+		gatewaySubscriptionId: string;
+	}): Promise<{ success: boolean; error?: string }>;
+	queryPeriod(gatewaySubscriptionId: string): Promise<{
+		status: string;
+		totalTimes: number;
+		alreadyTimes: number;
+	}>;
+}
+
 export type WebhookHandler = (req: Request) => Promise<Response>;
 
 export type PaymentProvider = {

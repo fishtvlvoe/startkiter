@@ -16,7 +16,8 @@ vi.mock("@startkiter/database", () => ({
 		course: { findFirst: vi.fn(), findMany: vi.fn() },
 		lesson: { findUnique: vi.fn() },
 		lessonProgress: { findMany: vi.fn(), findUnique: vi.fn(), create: vi.fn() },
-		order: { findFirst: vi.fn(), findMany: vi.fn() },
+	order: { findFirst: vi.fn(), findMany: vi.fn() },
+		courseSubscription: { findFirst: vi.fn() },
 		studioFolder: { findMany: vi.fn() },
 	},
 }));
@@ -182,6 +183,17 @@ describe("getLessonDetail bundle-aware access", () => {
 		expect(db.bundle.findUnique).toHaveBeenCalledWith({
 			where: { id: "bundle-a" },
 			include: { courses: true },
+		});
+	});
+
+	it("reads only ACTIVE subscriptions for the requested course", async () => {
+		vi.mocked(db.courseSubscription.findFirst).mockResolvedValue({ id: "subscription-1" } as never);
+		const reader = createPrismaBundleCourseAccessReader();
+
+		await expect(reader.hasActiveSubscription("buyer-a", "course-a")).resolves.toBe(true);
+		expect(db.courseSubscription.findFirst).toHaveBeenCalledWith({
+			where: { userId: "buyer-a", courseId: "course-a", status: "ACTIVE" },
+			select: { id: true },
 		});
 	});
 });

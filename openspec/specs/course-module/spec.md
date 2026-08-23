@@ -326,7 +326,7 @@ tests:
 ---
 ### Requirement: Playback entitlement reads Order.courseAccess
 
-Lesson playback authorization SHALL require a Better Auth session whose user owns at least one Order with sku startkiter-mvp and courseAccess true. Client-supplied user ids MUST NOT grant access.
+Lesson playback authorization SHALL require a Better Auth session whose user has course access to the lesson's course through at least one of: (1) an Order with sku startkiter-mvp and courseAccess true, (2) a paid Bundle order whose bundle includes the lesson's course, or (3) an ACTIVE CourseSubscription referencing the lesson's course. Client-supplied user ids MUST NOT grant access.
 
 #### Scenario: Paid learner with courseAccess can open a lesson
 
@@ -340,12 +340,12 @@ Lesson playback authorization SHALL require a Better Auth session whose user own
 
 #### Scenario: Unpaid or refunded learner is denied
 
-- **WHEN** a signed-in user with no Order.courseAccess true for sku startkiter-mvp requests lesson playback
+- **WHEN** a signed-in user with no Order.courseAccess true for sku startkiter-mvp, no bundle membership covering the course, and no ACTIVE CourseSubscription for the course requests lesson playback
 - **THEN** the response MUST be HTTP 403 and MUST NOT include the lesson media body or media URL
 
 ##### Example: 退款後再播遭拒
 
-- userId=user_refunded 的 Order status=refunded、courseAccess=false
+- userId=user_refunded 的 Order status=refunded、courseAccess=false，且無 bundle 或訂閱來源
 - 請求 lessonId=lesson-01 回 HTTP 403，且回應不含媒體 URL
 
 #### Scenario: Unauthenticated playback is rejected
@@ -353,111 +353,55 @@ Lesson playback authorization SHALL require a Better Auth session whose user own
 - **WHEN** a request without a valid session asks for lesson playback
 - **THEN** the server MUST deny the request (HTTP 401 or redirect to sign-in) and MUST NOT stream the lesson body
 
+#### Scenario: Buyer with an ACTIVE subscription can open a lesson in the subscribed course
+
+- **WHEN** a signed-in user with an ACTIVE CourseSubscription referencing the lesson's course, and no one-time Order or bundle covering that course, requests an existing lesson
+- **THEN** the server MUST allow playback and MUST return the lesson payload needed for in-site play
+
+##### Example: 訂閱買家可播 lesson-02
+
+- userId=user_subscriber 有 CourseSubscription status=ACTIVE，courseId 對應該堂課
+- 請求 lessonId=lesson-02 成功，回應含該單元播放所需資料
+
+#### Scenario: Canceled subscriber without other access sources is denied
+
+- **WHEN** a signed-in user whose only relevant access source is a CANCELED CourseSubscription for the lesson's course requests lesson playback
+- **THEN** the response MUST be HTTP 403 and MUST NOT include the lesson media body or media URL
+
 
 <!-- @trace
-source: extract-course-module
-updated: 2026-08-15
+source: payuni-recurring-billing
+updated: 2026-08-23
 code:
-  - packages/database/prisma/migrations/20260814160938_init/migration.sql
-  - apps/saas/app/course/demo-grant-button.tsx
-  - apps/saas/next.config.ts
-  - docs/discuss/2026-08-14-thetu-source.md
-  - packages/i18n/tsconfig.json
-  - packages/payments/src/memory-store.ts
-  - packages/auth/package.json
-  - apps/saas/app/api/payuni/notify/route.ts
-  - docs/discuss/architecture-draft.md
-  - docs/discuss/v1-boundary.md
-  - apps/saas/app/api/course/lessons/route.ts
-  - apps/saas/app/checkout/payuni/page.tsx
-  - packages/course/src/playback.ts
-  - packages/payments/src/constants.ts
-  - apps/saas/app/checkout/page.tsx
-  - apps/saas/.env.example
-  - apps/saas/app/checkout/result/page.tsx
-  - apps/saas/app/signup/page.tsx
-  - packages/i18n/src/index.ts
-  - packages/utils/tsconfig.json
-  - packages/course/src/access.ts
-  - tsconfig.json
-  - packages/database/prisma/migrations/migration_lock.toml
-  - apps/saas/tsconfig.json
-  - apps/saas/next-env.d.ts
-  - docs/discuss/payment-and-deploy.md
-  - apps/saas/package.json
-  - package.json
-  - packages/auth/src/providers.ts
-  - packages/database/src/index.ts
-  - apps/saas/app/checkout/checkout-button.tsx
-  - docs/discuss/extract-map.md
-  - packages/auth/src/index.ts
-  - packages/payments/src/checkout.ts
-  - apps/saas/app/api/checkout/route.ts
-  - packages/utils/src/index.ts
-  - apps/saas/app/login/login-form.tsx
-  - apps/saas/app/api/orders/refund/route.ts
-  - apps/saas/app/page.tsx
-  - packages/payments/src/index.ts
-  - packages/payments/src/refund.ts
-  - packages/course/tsconfig.json
-  - packages/payments/package.json
-  - packages/course/src/index.ts
-  - packages/payments/src/order.ts
-  - docs/discuss/README.md
-  - turbo.json
-  - packages/payments/src/provider/payuni/gateway.ts
-  - apps/saas/app/course/[lessonId]/page.tsx
-  - apps/saas/app/api/auth/[...all]/route.ts
-  - packages/payments/src/factory.ts
-  - packages/payments/src/credentials.ts
-  - apps/saas/app/login/page.tsx
-  - packages/database/package.json
   - packages/database/prisma/schema.prisma
-  - packages/auth/src/auth.ts
-  - apps/saas/app/globals.css
-  - vitest.config.ts
-  - packages/utils/package.json
-  - apps/saas/app/not-found.tsx
-  - apps/saas/app/api/payuni/return/route.ts
-  - packages/payments/src/notify.ts
-  - README.md
-  - apps/saas/lib/orders.ts
-  - tooling/typescript/package.json
-  - pnpm-workspace.yaml
-  - apps/saas/app/app/sign-out-button.tsx
-  - packages/i18n/package.json
-  - packages/database/prisma/migrations/20260815010000_add_order/migration.sql
-  - packages/auth/src/test-auth.ts
-  - packages/database/tsconfig.json
-  - AGENTS.md
-  - packages/auth/tsconfig.json
-  - packages/course/package.json
-  - apps/saas/app/api/demo/grant-course/route.ts
-  - apps/saas/app/course/page.tsx
-  - packages/course/src/catalog.ts
-  - packages/ui/src/index.tsx
-  - packages/payments/src/provider/payuni/crypto.ts
-  - tooling/typescript/base.json
-  - apps/saas/app/app/page.tsx
-  - packages/ui/package.json
-  - apps/saas/app/layout.tsx
-  - apps/saas/lib/demo-grant.ts
-  - docs/discuss/2026-08-14-alignment.md
-  - packages/ui/tsconfig.json
-  - apps/saas/lib/course-access.ts
+  - packages/payments/subscription-factory.ts
+  - packages/payments/index.ts
+  - packages/api/modules/course/lib/course-access.ts
+  - packages/payments/provider/payuni/crypto.ts
+  - packages/database/prisma/zod/index.ts
+  - apps/saas/app/(authenticated)/checkout/payuni-subscription/page.tsx
+  - packages/database/prisma/index.ts
+  - packages/payments/types.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/settings/billing/page.tsx
+  - packages/api/modules/course/procedures/create-subscription-checkout.ts
+  - packages/api/modules/course/lib/subscription-gateway.ts
+  - apps/saas/modules/payments/components/SubscriptionCheckoutForm.tsx
+  - packages/api/modules/course/router.ts
+  - packages/course/access.ts
+  - packages/api/modules/course/lib/webhook-events.ts
+  - packages/api/modules/course/procedures/cancel-course-subscription.ts
+  - packages/payments/provider/payuni/period-gateway.ts
+  - apps/saas/app/api/payuni/period-notify/route.ts
+  - packages/database/prisma/migrations/20260823170000_add_payuni_recurring_billing/migration.sql
+  - apps/saas/modules/payments/components/SubscriptionCancellationList.tsx
 tests:
-  - packages/course/src/playback.test.ts
-  - packages/payments/src/checkout.test.ts
-  - packages/payments/src/refund.test.ts
-  - packages/payments/src/notify.test.ts
-  - packages/payments/src/session-failclosed.test.ts
-  - packages/payments/src/order.test.ts
-  - packages/course/src/access.test.ts
-  - packages/payments/src/crypto.test.ts
-  - packages/payments/src/credentials.test.ts
-  - packages/payments/src/factory.test.ts
-  - packages/course/src/catalog.test.ts
-  - packages/auth/src/auth.test.ts
+  - packages/api/modules/course/lib/webhook-events.test.ts
+  - apps/saas/app/api/payuni/period-notify/route.test.ts
+  - packages/api/modules/course/course.test.ts
+  - packages/payments/provider/payuni/period-gateway.test.ts
+  - packages/database/src/subscriptions/subscription-schema.test.ts
+  - packages/course/access.test.ts
+  - packages/api/modules/course/procedures/subscription-procedures.test.ts
 -->
 
 ---

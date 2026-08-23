@@ -1,4 +1,6 @@
 import { getSession } from "@auth/lib/server";
+import { SubscriptionCancellationList } from "@payments/components/SubscriptionCancellationList";
+import { db } from "@startkiter/database";
 import { ActivePlan } from "@payments/components/ActivePlan";
 import { ChangePlan } from "@payments/components/ChangePlan";
 import { listPurchases } from "@payments/lib/server";
@@ -20,6 +22,13 @@ export async function generateMetadata() {
 export default async function BillingSettingsPage() {
 	const session = await getSession();
 	const purchases = await listPurchases();
+	const subscriptions = session
+		? await db.courseSubscription.findMany({
+				where: { userId: session.user.id },
+				include: { course: { select: { title: true } }, plan: { select: { label: true } } },
+				orderBy: { createdAt: "desc" },
+			})
+		: [];
 
 	const queryClient = getServerQueryClient();
 
@@ -40,6 +49,16 @@ export default async function BillingSettingsPage() {
 
 			<SettingsList>
 				{activePlan && <ActivePlan />}
+				<SubscriptionCancellationList
+					subscriptions={subscriptions.map((subscription) => ({
+						id: subscription.id,
+						courseTitle: subscription.course.title,
+						label: subscription.plan.label,
+						interval: subscription.interval,
+						price: subscription.pricePerPeriod,
+						status: subscription.status,
+					}))}
+				/>
 				<ChangePlan userId={session?.user.id} activePlanId={activePlan?.id} />
 			</SettingsList>
 		</>

@@ -16,3 +16,10 @@ export type { PayUniEnv, PaymentSettingsReader, ResolvedPayUniCredentials } from
 export { createMvpCheckoutGateway } from "./factory";
 export { PayUniService } from "./provider/payuni/crypto";
 export { PayUniOneTimeGateway } from "./provider/payuni/gateway";
+export { PayUniPeriodGateway } from "./provider/payuni/period-gateway";
+export { createPayUniSubscriptionGateway } from "./subscription-factory";
+export type {
+	SubscriptionGateway,
+	SubscriptionInterval,
+	SubscriptionSessionResult,
+} from "./types";

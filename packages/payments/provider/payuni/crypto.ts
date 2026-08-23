@@ -24,6 +24,41 @@ export type PayUniResponse = {
 	[key: string]: unknown;
 };
 
+type PayUniApiEnvelope =
+	| { kind: "encrypted"; encryptInfo: string; hashInfo: string }
+	| { kind: "error"; status: string; message: string };
+
+function parsePayUniApiEnvelope(text: string): PayUniApiEnvelope {
+	let parsed: unknown;
+	try {
+		parsed = JSON.parse(text);
+	} catch {
+		throw new Error("PAYUNi API response is not valid JSON");
+	}
+
+	if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+		throw new Error("PAYUNi API response has an invalid shape");
+	}
+
+	const record = parsed as Record<string, unknown>;
+	const status = typeof record.Status === "string" ? record.Status : "";
+	const message = typeof record.Message === "string" ? record.Message : "";
+	if (status === "ERROR" || (!record.EncryptInfo && status && status !== "SUCCESS")) {
+		return { kind: "error", status: status || "ERROR", message: message || "PAYUNi rejected the request" };
+	}
+
+	if (
+		typeof record.EncryptInfo !== "string" ||
+		typeof record.HashInfo !== "string" ||
+		!record.EncryptInfo ||
+		!record.HashInfo
+	) {
+		throw new Error("PAYUNi API response is missing EncryptInfo or HashInfo");
+	}
+
+	return { kind: "encrypted", encryptInfo: record.EncryptInfo, hashInfo: record.HashInfo };
+}
+
 /** 改寫抽自 thetu payuni-crypto；保留 AES-256-GCM 與簽章契約。 */
 export class PayUniService {
 	private config: PayUniConfig;
@@ -119,5 +154,52 @@ export class PayUniService {
 
 	isTradeSuccess(status: string): boolean {
 		return status === "SUCCESS";
+	}
+
+	async requestApi(
+		apiUrl: string,
+		tradeData: Record<string, unknown>,
+		options: { timeoutMs?: number; version?: string } = {},
+	): Promise<PayUniResponse> {
+		const form = this.createFormData(tradeData);
+		const body = new URLSearchParams({
+			MerID: form.MerID,
+			Version: options.version ?? form.Version,
+			EncryptInfo: form.EncryptInfo,
+			HashInfo: form.HashInfo,
+		}).toString();
+		const controller = new AbortController();
+		const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? 15_000);
+
+		let response: Response;
+		try {
+			response = await fetch(apiUrl, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+					Accept: "application/json",
+					"User-Agent": "payuni",
+				},
+				body,
+				signal: controller.signal,
+			});
+		} catch (error) {
+			if (controller.signal.aborted) {
+				throw new Error("PAYUNi API request timed out");
+			}
+			throw error;
+		} finally {
+			clearTimeout(timeout);
+		}
+
+		if (!response.ok) {
+			throw new Error(`PAYUNi API returned HTTP ${response.status}`);
+		}
+
+		const envelope = parsePayUniApiEnvelope(await response.text());
+		if (envelope.kind === "error") {
+			return { Status: envelope.status, Message: envelope.message };
+		}
+		return this.verifyAndDecrypt(envelope.encryptInfo, envelope.hashInfo);
 	}
 }

@@ -18,6 +18,13 @@ export function createPrismaBundleCourseAccessReader(): BundleCourseAccessReader
 			if (!bundle) return null;
 			return bundle.courses.map((course) => course.courseId);
 		},
+		hasActiveSubscription: async (userId: string, courseId: string) => {
+			const subscription = await db.courseSubscription.findFirst({
+				where: { userId, courseId, status: "ACTIVE" },
+				select: { id: true },
+			});
+			return subscription != null;
+		},
 	};
 }
 

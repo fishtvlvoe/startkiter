@@ -45,6 +45,7 @@ model User {
   buyerDeployments         BuyerDeployment[]
   supportTickets           SupportTicket[]
   lessonProgresses         LessonProgress[]
+  courseSubscriptions      CourseSubscription[]
   pluginContents           PluginContent[]
   mcpConnections           McpConnection[]
 
@@ -403,6 +404,23 @@ enum PublishStatus {
   ARCHIVED
 }
 
+enum SubscriptionInterval {
+  MONTH
+  YEAR
+}
+
+enum CourseSubscriptionStatus {
+  PENDING
+  ACTIVE
+  CANCELED
+}
+
+enum PaymentWebhookEventStatus {
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
 model Course {
   id          String        @id @default(cuid())
   slug        String        @unique
@@ -413,8 +431,74 @@ model Course {
   updatedAt   DateTime      @updatedAt
 
   chapters    Chapter[]
+  subscriptionPlans CourseSubscriptionPlan[]
+  subscriptions CourseSubscription[]
 
   @@map("course")
+}
+
+model CourseSubscriptionPlan {
+  id        String               @id @default(cuid())
+  courseId  String
+  course    Course               @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  label     String
+  interval  SubscriptionInterval
+  price     Int
+  sku       String               @unique
+  enabled   Boolean              @default(true)
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+
+  subscriptions CourseSubscription[]
+
+  @@index([courseId])
+  @@map("course_subscription_plan")
+}
+
+model CourseSubscription {
+  id                    String                   @id @default(cuid())
+  userId                String
+  user                  User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId              String
+  course                Course                   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  planId                String
+  plan                  CourseSubscriptionPlan  @relation(fields: [planId], references: [id], onDelete: Restrict)
+  status                CourseSubscriptionStatus @default(PENDING)
+  gatewayTradeNo        String                   @unique
+  gatewaySubscriptionId String?
+  interval              SubscriptionInterval
+  pricePerPeriod        Int
+  paidPeriods           Int                      @default(0)
+  currentPeriodEnd      DateTime?
+  lastPaymentAt         DateTime?
+  canceledAt            DateTime?
+  invoiceType           String?
+  invoiceCarrierType    String?
+  invoiceCarrierId      String?
+  invoiceTaxId          String?
+  invoiceTitle          String?
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+
+  @@index([userId])
+  @@index([courseId])
+  @@index([userId, courseId])
+  @@map("course_subscription")
+}
+
+model PaymentWebhookEvent {
+  id        String                    @id @default(cuid())
+  gateway   String
+  eventId   String
+  eventType String
+  status    PaymentWebhookEventStatus @default(PROCESSING)
+  payload   Json
+  error     String?
+  createdAt DateTime                  @default(now())
+  updatedAt DateTime                  @updatedAt
+
+  @@unique([gateway, eventId])
+  @@map("payment_webhook_event")
 }
 
 model Chapter {
@@ -613,4 +697,3 @@ model Coupon {
 
   @@index([active])
 }
-

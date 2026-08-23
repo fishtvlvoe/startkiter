@@ -32,6 +32,8 @@ export type BundleCourseAccessReader = {
 	findGrantedSkusForUser: (userId: string) => Promise<string[]>;
 	/** 查詢某個 sku 是否對應一個 bundle；是的話回傳該 bundle 內的 courseId 清單，不是則回傳 null。 */
 	findBundleCourseIds: (sku: string) => Promise<string[] | null>;
+	/** 查詢指定使用者對指定課程是否有 ACTIVE 訂閱。 */
+	hasActiveSubscription: (userId: string, courseId: string) => Promise<boolean>;
 };
 
 /**
@@ -57,5 +59,5 @@ export async function canAccessCourseId(
 			return true;
 		}
 	}
-	return false;
+	return reader.hasActiveSubscription(userId, courseId);
 }
