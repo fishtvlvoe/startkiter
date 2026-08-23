@@ -17,13 +17,53 @@ interface LessonItem {
 	provider?: ProviderType;
 	content: string;
 	aiContext: string;
+	/** API／資料庫位置；有值時採 0-based，第一個單元是 0。 */
+	order?: number;
 }
 
 interface ChapterItem {
 	id: string;
 	title: string;
 	lessons: LessonItem[];
+	/** API／資料庫位置；有值時採 0-based，第一個章節是 0。 */
+	order?: number;
 }
+
+interface StudioFolderResponse {
+	id: string;
+	name: string;
+	order: number;
+	isCollapsed: boolean;
+}
+
+interface StudioChapterResponse {
+	id: string;
+	courseId: string;
+	title: string;
+	/** 章節 order 儲存為 0-based 位置。 */
+	order: number;
+}
+
+interface StudioLessonResponse {
+	id: string;
+	chapterId: string;
+	slug: string;
+	title: string;
+	content: string | null;
+	isFreePreview: boolean;
+	/** 單元 order 儲存為 0-based 位置。 */
+	order: number;
+	videoProvider: ProviderType | null;
+	videoUrl: string | null;
+	videoDuration: string | null;
+	aiContext: string | null;
+}
+
+type StudioResponse = CourseStudioErrorResponse & {
+	folder?: StudioFolderResponse | null;
+	chapter?: StudioChapterResponse | null;
+	lesson?: StudioLessonResponse | null;
+};
 
 interface StudioMessage {
 	type: "success" | "error";
@@ -83,7 +123,7 @@ export default function CourseAdminStudioPage() {
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ action, payload }),
 		});
-		const data = (await res.json().catch(() => ({}))) as CourseStudioErrorResponse & Record<string, unknown>;
+		const data = (await res.json().catch(() => ({}))) as StudioResponse;
 		if (!res.ok) {
 			return {
 				ok: false as const,
