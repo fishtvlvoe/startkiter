@@ -20,13 +20,13 @@ async function main() {
 		data: {
 			courseId: course.id,
 			title: "第 1 章：代碼庫架構與基礎",
-			order: 1,
+			order: 0,
 			lessons: {
 				create: [
 					{
 						slug: "1-1-architecture-overview",
 						title: "1-1 商業與產品架構總覽 (電馭學院)",
-						order: 1,
+						order: 0,
 						status: PublishStatus.PUBLISHED,
 						isFreePreview: true,
 						videoProvider: VideoProvider.BUNNY,
@@ -42,7 +42,7 @@ async function main() {
 					{
 						slug: "1-2-deployment-domains",
 						title: "1-2 部署與網域綁定",
-						order: 2,
+						order: 1,
 						status: PublishStatus.PUBLISHED,
 						isFreePreview: false,
 						videoProvider: VideoProvider.YOUTUBE,
@@ -63,13 +63,13 @@ async function main() {
 		data: {
 			courseId: course.id,
 			title: "第 2 章：金流與會員權限",
-			order: 2,
+			order: 1,
 			lessons: {
 				create: [
 					{
 						slug: "2-1-payuni-checkout",
 						title: "2-1 PAYUNi 台灣金流全解析",
-						order: 1,
+						order: 0,
 						status: PublishStatus.PUBLISHED,
 						isFreePreview: false,
 						videoProvider: VideoProvider.VIMEO,

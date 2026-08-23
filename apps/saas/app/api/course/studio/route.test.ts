@@ -26,6 +26,7 @@ vi.mock("@startkiter/course", () => ({
 }));
 
 import { auth } from "@startkiter/auth";
+import { COURSE_STUDIO_ERROR_CODES } from "@startkiter/api/modules/course/errors";
 import { db } from "@startkiter/database";
 import { inspectMdxSource } from "@startkiter/course";
 import { POST } from "./route";
@@ -104,7 +105,8 @@ describe("Course Studio API", () => {
 
 		expect(response.status).toBe(400);
 		const body = await response.json();
-		expect(body.error).toBe("INVALID_MDX_CONTENT");
+			expect(body.error).toBe(COURSE_STUDIO_ERROR_CODES.INVALID_MDX_CONTENT);
+			expect(body.details).toBe(error);
 		expect(db.lesson.update).not.toHaveBeenCalled();
 	});
 });

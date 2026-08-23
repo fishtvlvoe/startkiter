@@ -11,6 +11,7 @@ vi.mock("@webcontainer/api", () => ({
 }));
 
 import { WebContainer } from "@webcontainer/api";
+import { resetWebContainerCache } from "../../webcontainer/client";
 import { WebContainerSandbox } from "./WebContainerSandbox";
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT =
@@ -52,6 +53,7 @@ afterEach(() => {
 	}
 	roots.clear();
 	document.body.replaceChildren();
+	resetWebContainerCache();
 	vi.clearAllMocks();
 });
 
@@ -121,5 +123,50 @@ describe("WebContainerSandbox", () => {
 
 		expect(container.textContent).toContain("此瀏覽器不支援程式碼沙盒");
 		expect(WebContainer.boot).not.toHaveBeenCalled();
+	});
+
+	it("同一個 block 重複執行只 boot 一次，但每次重新 mount 檔案", async () => {
+		const mount = vi.fn().mockResolvedValue(undefined);
+		const spawn = vi.fn().mockResolvedValue(createProcess(0));
+		vi.mocked(WebContainer.boot).mockResolvedValue({ mount, spawn } as never);
+		const container = await render(
+			<WebContainerSandbox blockId="repeat-01" files={{ "index.js": "console.log(1)" }} hints={[]} />,
+		);
+
+		await act(async () => {
+			container.querySelector<HTMLButtonElement>("button")?.click();
+			await Promise.resolve();
+		});
+		await new Promise((resolve) => setTimeout(resolve, 160));
+		await act(async () => {
+			container.querySelector<HTMLButtonElement>("button")?.click();
+			await Promise.resolve();
+		});
+
+		expect(WebContainer.boot).toHaveBeenCalledTimes(1);
+		expect(mount).toHaveBeenCalledTimes(2);
+		expect(spawn).toHaveBeenCalledTimes(2);
+	});
+
+	it("兩個 sandbox 並行執行時共用同一個 WebContainer instance", async () => {
+		const mount = vi.fn().mockResolvedValue(undefined);
+		const spawn = vi.fn().mockResolvedValue(createProcess(0));
+		vi.mocked(WebContainer.boot).mockResolvedValue({ mount, spawn } as never);
+		const container = await render(
+			<>
+				<WebContainerSandbox blockId="parallel-01" files={{}} hints={[]} />
+				<WebContainerSandbox blockId="parallel-02" files={{}} hints={[]} />
+			</>,
+		);
+
+		await act(async () => {
+			for (const button of container.querySelectorAll<HTMLButtonElement>("button")) {
+				button.click();
+			}
+			await Promise.resolve();
+		});
+
+		expect(WebContainer.boot).toHaveBeenCalledTimes(1);
+		expect(mount).toHaveBeenCalledTimes(2);
 	});
 });

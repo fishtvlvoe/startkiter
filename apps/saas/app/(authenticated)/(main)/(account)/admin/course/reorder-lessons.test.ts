@@ -37,9 +37,42 @@ describe("Course Studio lesson reorder", () => {
 			],
 		});
 		expect(nextChapters[1]?.lessons.map((lesson) => lesson.id)).toEqual([
-			"lesson-03",
-			"lesson-02",
-			"lesson-04",
+				"lesson-03",
+				"lesson-02",
+				"lesson-04",
 		]);
+	});
+
+	it.each([
+		["第一項", 0, ["lesson-02", "lesson-03", "lesson-04"]],
+		["最後一項", 3, ["lesson-03", "lesson-04", "lesson-02"]],
+		["中間項", 1, ["lesson-03", "lesson-02", "lesson-04"]],
+	])("以 0-based index 把單元移到%s", async (_label, targetIndex, expectedIds) => {
+		const persist = vi.fn().mockResolvedValue({ ok: true });
+		const chapters = [
+			{
+				id: "chapter-01",
+				lessons: [{ id: "lesson-01" }],
+			},
+			{
+				id: "chapter-02",
+				lessons: [
+					{ id: "lesson-02" },
+					{ id: "lesson-03" },
+					{ id: "lesson-04" },
+				],
+			},
+		];
+
+		const nextChapters = await reorderLesson(
+			chapters,
+			"lesson-02",
+			"chapter-02",
+			targetIndex,
+			persist,
+		);
+
+		expect(nextChapters[1]?.lessons.map((lesson) => lesson.id)).toEqual(expectedIds);
+		expect(persist).toHaveBeenCalled();
 	});
 });

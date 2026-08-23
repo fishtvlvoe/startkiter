@@ -4,6 +4,7 @@ import { useEffect, useState, type DragEvent } from "react";
 import { Button, Card, Input, Label, Textarea } from "@startkiter/ui";
 import { CourseStudioContentPreview } from "@shared/components/CourseStudioContentPreview";
 import { reorderLesson } from "./reorder-lessons";
+import { getCourseStudioErrorMessage, type CourseStudioErrorResponse } from "./studio-error-message";
 
 type ProviderType = "BUNNY" | "YOUTUBE" | "VIMEO" | "CUSTOM_MP4" | "HLS";
 
@@ -82,9 +83,13 @@ export default function CourseAdminStudioPage() {
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ action, payload }),
 		});
-		const data: any = await res.json().catch(() => ({}));
+		const data = (await res.json().catch(() => ({}))) as CourseStudioErrorResponse & Record<string, unknown>;
 		if (!res.ok) {
-			return { ok: false as const, data, error: data.error || `HTTP ${res.status}` };
+			return {
+				ok: false as const,
+				data,
+				error: typeof data.error === "string" ? data.error : `HTTP ${res.status}`,
+			};
 		}
 		return { ok: true as const, data, error: null };
 	}
@@ -326,9 +331,9 @@ export default function CourseAdminStudioPage() {
 					})),
 				);
 				showMessage("success", "單元變更已成功持久化至 PostgreSQL 資料庫");
-			} else {
-				showMessage("error", "儲存失敗，請檢查權限與連線");
-			}
+				} else {
+					showMessage("error", getCourseStudioErrorMessage(result.data));
+				}
 		} catch (e) {
 			showMessage("error", "儲存發生錯誤: " + String(e));
 		}
