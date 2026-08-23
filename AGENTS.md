@@ -71,7 +71,9 @@ Changes can be parked（暫存）— temporarily moved out of `openspec/changes/
 2. **`core-module-bundles-coupons`（55/56）**：剩最後一項已裁決本輪不做（等買家播放頁做出來才接），這張視同完成，不用再動，等播放頁那張新 SR 立案後才回頭接。
 3. **`unified-support-desk`（51/55）**：Chatwoot 真實 webhook 送達不穩定的疑難雜症已擱置（老闆裁決優先度排最後）；LINE/Telegram 帳號申請不卡人，隨時可做。
 
-下一步該做的：確認要不要為「課程管理後台編輯器」（章節/單元 CRUD、講義編輯器）開新 SR——目前完全沒做，也還沒 propose；或推進 `unified-support-desk` 剩的項目。
+4. **`course-studio-upgrade`（已 propose 並 park，2026-08-23）**：積木架構升級 Zod Schema Registry＋新增真的 WebContainer 沙盒積木＋Studio 即時預覽與拖曳排序，共 3 個 capability spec（新增 `course-code-sandbox`，修改 `interactive-learning-blocks`／`course-module`）、11 組任務。`spectra validate` 通過、`spectra analyze` 無 Critical/Warning。準備好隨時 `/spectra-apply course-studio-upgrade` 開工（會自動 unpark）。
+
+下一步該做的：`course-studio-upgrade` 排隊等 apply；或推進 `unified-support-desk` 剩的項目。
 
 **課程引擎（課神，暫稱）方向（2026-08-23 定案，先驗證再拆 SR）**：課程系統的長期方向從「單一功能」改成「通用課程引擎」，但**先驗證假說，不直接動工大規模建設**。
 
