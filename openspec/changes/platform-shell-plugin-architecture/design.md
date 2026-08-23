@@ -102,7 +102,7 @@ Alternatives Considered:
 
 ### 後台 Shell 視覺風格定案：WordPress Admin 介面語彙
 
-依 `docs/demo/course-admin-studio-demo.html` 確認，NavBar/sidebar-context 擴充需落實以下視覺與互動規格（適用整個 Core Shell，不分模版）：
+對應 tasks.md task 45.1、45.2、46.1、46.3。依 `docs/demo/course-admin-studio-demo.html` 確認，NavBar/sidebar-context 擴充需落實以下視覺與互動規格（適用整個 Core Shell，不分模版）：
 
 - 頂列 admin bar：固定 32px 高，深色（`#1d2327` 系），左側站名 + 產品切換下拉（官網首頁/銷售頁/學員教室），右側使用者頭像
 - 側邊欄：預設寬度 208px（`w-52`），可收折至 56px（`w-14`）只顯示 icon；螢幕 < 768px 改為 hamburger + 全螢幕遮罩（backdrop）觸發滑出
@@ -116,7 +116,7 @@ Alternatives Considered:
 
 ### 側邊欄分組與排序 v1 真實可持久化，新增 `SidebarGroup`／`SidebarGroupItem` 資料表
 
-demo 裡的「新增分組、改名、拖曳排序」在 v1 要做成真的存檔功能，不是純前端展示。新增兩張表：
+對應 tasks.md task 43、44、45.3、46.2。demo 裡的「新增分組、改名、拖曳排序」在 v1 要做成真的存檔功能，不是純前端展示。新增兩張表：
 
 - `SidebarGroup`：儲存分組本身（標題、順序、是否收折）
 - `SidebarGroupItem`：儲存每個選單項目被分到哪個分組、組內順序，`menuItemId` 對應 `MOUNT_POINTS` 裡某個 Plugin 的 `mount.menu` 項目 key
@@ -129,7 +129,7 @@ Alternatives Considered:
 
 ### 全域用戶管理重用 supastarter 既有 Admin UI，Organizations 底層開關保留開啟但不掛 UI
 
-supastarter 內建「Admin」角色與 UI（`/admin/users` 瀏覽用戶清單、封鎖/解封帳號含理由與到期時間），與「Organizations 多租戶」是彼此獨立的兩套機制——前者管「這個帳號能不能登入」，後者管「站內能不能分子組織」。
+對應 tasks.md task 47.1、47.2、47.3。supastarter 內建「Admin」角色與 UI（`/admin/users` 瀏覽用戶清單、封鎖/解封帳號含理由與到期時間），與「Organizations 多租戶」是彼此獨立的兩套機制——前者管「這個帳號能不能登入」，後者管「站內能不能分子組織」。
 
 v1 只掛 `/admin/users` 進 Mount Points（`requiresOperator: true`），不掛 `/admin/organizations`。`organizations.enable`（`packages/auth/config.ts`）2026-08-22 裁決保留 `true`（未來會用到），但這只是底層開關開著，不代表 v1 要做組織管理 UI 或改變買家單一帳號體系的履約模型——維持不掛選單、不開放操作介面。用戶管理頁完全重用 supastarter 現成元件（`modules/admin/component/users/UserList.tsx`），不新寫。
 
