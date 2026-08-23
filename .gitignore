@@ -48,3 +48,4 @@ code/
 
 # 官方 supastarter-nextjs 私有倉庫唯讀 clone（gh 認證 pull），不進版控
 vendor/
+.secrets/
