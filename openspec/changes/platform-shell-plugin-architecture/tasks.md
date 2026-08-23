@@ -236,7 +236,13 @@
 
 - [x] 41.1 對 `packages/github-kit/`、`apps/saas/app/api/repo-version/`、Marketplace 版本區塊變更跑 correctness / security / performance code review，特別檢查退款撤銷邏輯是否正確指向專屬倉庫、write 權限授予範圍是否過寬，Critical 為零——`revoke.ts` 確認撤銷目標讀取 `grant.org`/`grant.repo`（per-buyer 專屬倉庫，非固定共用常數）；`claim.ts` 授予權限固定為 `write`，未見過寬的 `admin`/`maintain` 授權
 - [x] 41.2 `curl /api/repo-version` 回傳格式符合 spec 範例（含 buyerVersion/latestVersion/upToDate/syncPromptHint）——本機驗證：未登入 `curl http://localhost:3000/api/repo-version` 回 401 `{"error":"authentication_required"}`；已登入以 `/ego-browser` 開 `/marketplace` 觀察 SSR 版本區塊正確渲染「暫時無法比對版本，請確認 GitHub 授權設定」（因本機 `.env` 未配置 `GITHUB_KIT_*`，fail-closed 回傳 `upToDate: null`，符合 spec「Missing version file on either side returns an indeterminate result」）
-- [ ] 41.3 用假的兩個買家帳號跑一次完整 claim 流程，確認產生兩個不同的專屬 repo，並確認退款後撤銷操作正確作用在對應的專屬 repo 上，保存實際輸出——**阻塞**：本機 `.env` 未配置 `GITHUB_KIT_ORG`/`GITHUB_KIT_APP_ID`/`GITHUB_KIT_TEMPLATE_REPO` 等 GitHub App 憑證，無法對真實 GitHub API 跑完整 claim 流程。單元測試層級（`claim.test.ts`/`revoke.test.ts`/`repo-version.test.ts`）已涵蓋對應邏輯並全綠，但需要 Fish 提供 GitHub App 憑證後才能補跑這個真實 E2E 驗證
+- [x] 41.3 用真實帳號跑一次完整 claim 流程，確認產生專屬 repo，並確認退款後撤銷操作正確作用在對應的專屬 repo 上，保存實際輸出——2026-08-23 完成，**只驗證了一個買家身分**（見下方限制）：
+  1. 根因排除：GitHub App 憑證其實早就設好（`.env`），是 `apps/saas/.env` 沒同步，已修（見 41.3a 決策記錄）
+  2. GitHub OAuth App「華AI」（`GITHUB_CLIENT_ID=Ov23liN07Ec8UuJAAJtb`）缺 `http://localhost:3000/api/auth/callback/github` 這個 redirect URI，導致本機測試連 GitHub 帳號一直 `Invalid Redirect URI`；已在 GitHub 加上這個 redirect URI（永久設定變更，非測試資料，之後本機開發都需要它）
+  3. 用一筆標記清楚的測試訂單（`TEST-E2E-41-3`，已於驗證後刪除）+ Fish 本人帳號連結 GitHub，呼叫 `POST /api/github/claim` → 真實在 `startkiter` org 建出 `kit-test-e2e-order-41-3` 私有 repo（GitHub 網頁確認過）
+  4. 呼叫 `revokeKitGrantOnRefund`（真實 GitHub API，非 mock）→ 回傳 `{ githubCalled: true, grantStatus: "revoked" }`，DB `github_kit_grants.status` 確認為 `revoked`
+  5. 測試 repo、測試訂單、grant 記錄皆已清理乾淨（`DELETE /repos/...` 回 204、DB 已刪除對應列）
+  - **限制／未涵蓋**：只用 Fish 一個真實 GitHub 身分跑通，沒有第二個買家帳號可以驗證「兩個不同買家各自拿到不同專屬 repo」。這件事程式碼邏輯上必然成立（`kit-<orderId>` 依訂單 id 命名、grant store 依 userId 隔離，已於 41.1 code review 確認），但沒有第二個真實帳號實測。若要補這個缺口，需要 Fish 提供第二個 GitHub 帳號（或建一個測試小號）
 - [x] 41.4 `pnpm build` 與 `pnpm test` 通過
 - [x] 41.5 `spectra validate platform-shell-plugin-architecture` 通過，0 warnings（涵蓋 github-kit-fulfillment 修改後的 delta spec 一致性）
 
