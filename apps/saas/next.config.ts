@@ -14,6 +14,19 @@ const nextConfig: NextConfig = {
 	// 重新 bundle（會撞到動態 require 與 .node 原生檔解析失敗）。
 	serverExternalPackages: ["@open-sheet/core", "vite", "lightningcss"],
 	transpilePackages: ["@startkiter/api", "@startkiter/auth", "@startkiter/database", "@startkiter/ui"],
+	async headers() {
+		return [
+			{
+				source: "/(.*)",
+				headers: [
+					{ key: "X-Frame-Options", value: "SAMEORIGIN" },
+					{ key: "X-Content-Type-Options", value: "nosniff" },
+					{ key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+					{ key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
+				],
+			},
+		];
+	},
 	images: {
 		remotePatterns: [
 			{

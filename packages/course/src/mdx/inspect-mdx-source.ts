@@ -3,7 +3,7 @@ import { mdxFromMarkdown } from "mdast-util-mdx";
 import { mdxjs } from "micromark-extension-mdxjs";
 import { EXIT, visit } from "unist-util-visit";
 
-import { LESSON_MDX_COMPONENT_SET } from "./allowed-components";
+import { BLOCK_REGISTRY, isRegisteredBlockName } from "./block-registry";
 
 export type MdxInspectResult =
 	| { ok: true }
@@ -53,6 +53,7 @@ type EstreeNode = {
 	operator?: string;
 	properties?: EstreeNode[];
 	value?: EstreeNode;
+	quasis?: Array<{ value?: { cooked?: string; raw?: string } }>;
 };
 
 function isSafeDataEstree(node: EstreeNode | null | undefined): boolean {
@@ -60,7 +61,7 @@ function isSafeDataEstree(node: EstreeNode | null | undefined): boolean {
 		return false;
 	}
 
-	switch (node.type) {
+		switch (node.type) {
 		case "Program":
 			return Array.isArray(node.body) && node.body.length === 1 && isSafeDataEstree(node.body[0]);
 
@@ -68,7 +69,12 @@ function isSafeDataEstree(node: EstreeNode | null | undefined): boolean {
 			return isSafeDataEstree(node.expression);
 
 		case "Literal":
-			return true;
+			return (
+				node.value === null ||
+				typeof node.value === "string" ||
+				typeof node.value === "number" ||
+				typeof node.value === "boolean"
+			);
 
 		case "TemplateLiteral":
 			return Array.isArray(node.expressions) && node.expressions.length === 0;
@@ -93,6 +99,47 @@ function isSafeDataEstree(node: EstreeNode | null | undefined): boolean {
 
 		default:
 			return false;
+	}
+}
+
+function estreeToJson(node: EstreeNode): unknown {
+	switch (node.type) {
+		case "Program":
+			return Array.isArray(node.body) && node.body[0] ? estreeToJson(node.body[0]) : undefined;
+
+		case "ExpressionStatement":
+			return node.expression ? estreeToJson(node.expression) : undefined;
+
+		case "Literal":
+			return node.value;
+
+		case "TemplateLiteral":
+			return node.quasis?.[0]?.value?.cooked ?? node.quasis?.[0]?.value?.raw ?? "";
+
+		case "UnaryExpression": {
+			const value = estreeToJson(node.argument as EstreeNode);
+			return node.operator === "-" && typeof value === "number" ? -value : value;
+		}
+
+		case "ArrayExpression":
+			return (node.elements ?? []).map((element) => (element ? estreeToJson(element) : null));
+
+		case "ObjectExpression": {
+			const result: Record<string, unknown> = {};
+			for (const property of node.properties ?? []) {
+				if (property.type !== "Property" || !property.value) {
+					continue;
+				}
+				const key = property.key?.name ?? estreeToJson(property.key as EstreeNode);
+				if (typeof key === "string") {
+					result[key] = estreeToJson(property.value);
+				}
+			}
+			return result;
+		}
+
+		default:
+			return undefined;
 	}
 }
 
@@ -155,6 +202,56 @@ function inspectJsxAttributes(attributes: unknown): MdxInspectResult | null {
 	return null;
 }
 
+function validateJsxAttributes(name: string, attributes: unknown): MdxInspectResult | null {
+	const definition = BLOCK_REGISTRY.find((block) => block.name === name);
+	if (!definition || !Array.isArray(attributes)) {
+		return null;
+	}
+
+	const props: Record<string, unknown> = {};
+	for (const attribute of attributes) {
+		if (!attribute || typeof attribute !== "object" || !("type" in attribute)) {
+			continue;
+		}
+		if (attribute.type !== "mdxJsxAttribute") {
+			continue;
+		}
+
+		const attributeName = "name" in attribute && typeof attribute.name === "string" ? attribute.name : "";
+		const value = "value" in attribute ? attribute.value : null;
+		if (!attributeName) {
+			continue;
+		}
+		if (!value) {
+			props[attributeName] = true;
+			continue;
+		}
+		if (typeof value === "string") {
+			props[attributeName] = value;
+			continue;
+		}
+		if (
+			typeof value === "object" &&
+			"type" in value &&
+			value.type === "mdxJsxAttributeValueExpression" &&
+			"data" in value &&
+			value.data &&
+			typeof value.data === "object" &&
+			"estree" in value.data &&
+			value.data.estree &&
+			isSafeDataEstree(value.data.estree as EstreeNode)
+		) {
+			props[attributeName] = estreeToJson(value.data.estree as EstreeNode);
+		}
+	}
+
+	if (!definition.propsSchema.safeParse(props).success) {
+		return { ok: false, error: `講義內容積木參數不符合規格：${name}` };
+	}
+
+	return null;
+}
+
 function inspectJsxTagName(name: string | null | undefined): MdxInspectResult | null {
 	if (name == null) {
 		return null;
@@ -170,7 +267,7 @@ function inspectJsxTagName(name: string | null | undefined): MdxInspectResult | 
 		return { ok: false, error: "講義內容不允許原始 HTML。" };
 	}
 
-	if (!LESSON_MDX_COMPONENT_SET.has(name)) {
+	if (!isRegisteredBlockName(name)) {
 		return { ok: false, error: `講義內容含有未授權元件：${name}` };
 	}
 
@@ -197,7 +294,7 @@ function inspectRegexFallback(source: string): MdxInspectResult | null {
 	while (match) {
 		const name = match[1];
 
-		if (!name || !LESSON_MDX_COMPONENT_SET.has(name)) {
+		if (!name || !isRegisteredBlockName(name)) {
 			return { ok: false, error: `講義內容含有未授權元件：${name ?? "unknown"}` };
 		}
 
@@ -270,6 +367,13 @@ export function inspectMdxSource(source: string): MdxInspectResult {
 
 			if (attributeResult) {
 				astResult = attributeResult;
+
+				return EXIT;
+			}
+
+			const propsResult = validateJsxAttributes(name ?? "", "attributes" in node ? node.attributes : undefined);
+			if (propsResult) {
+				astResult = propsResult;
 
 				return EXIT;
 			}

@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type DragEvent } from "react";
 import { Button, Card, Input, Label, Textarea } from "@startkiter/ui";
+import { CourseStudioContentPreview } from "@shared/components/CourseStudioContentPreview";
+import { reorderLesson } from "./reorder-lessons";
 
 type ProviderType = "BUNNY" | "YOUTUBE" | "VIMEO" | "CUSTOM_MP4" | "HLS";
 
@@ -59,6 +61,7 @@ export default function CourseAdminStudioPage() {
 	const [courseId, setCourseId] = useState<string | null>(null);
 	const [chapters, setChapters] = useState<ChapterItem[]>([]);
 	const [selectedLesson, setSelectedLesson] = useState<LessonItem | null>(null);
+	const [draggedLessonId, setDraggedLessonId] = useState<string | null>(null);
 	const [videoInputUrl, setVideoInputUrl] = useState("");
 	const [resolvedCard, setResolvedCard] = useState<{
 		provider: ProviderType;
@@ -252,6 +255,48 @@ export default function CourseAdminStudioPage() {
 		}
 	};
 
+	const handleLessonDragStart = (event: DragEvent<HTMLDivElement>, lessonId: string) => {
+		setDraggedLessonId(lessonId);
+		event.dataTransfer.effectAllowed = "move";
+		event.dataTransfer.setData("text/plain", lessonId);
+	};
+
+	const handleLessonDragOver = (event: DragEvent<HTMLDivElement>) => {
+		event.preventDefault();
+		event.dataTransfer.dropEffect = "move";
+	};
+
+	const handleLessonDrop = async (
+		event: DragEvent<HTMLDivElement>,
+		targetChapterId: string,
+		targetIndex: number,
+	) => {
+		event.preventDefault();
+		event.stopPropagation();
+		const lessonId = event.dataTransfer.getData("text/plain") || draggedLessonId;
+		if (!lessonId) return;
+
+		try {
+			const nextChapters = await reorderLesson(
+				chapters,
+				lessonId,
+				targetChapterId,
+				targetIndex,
+				(payload) => callStudio("reorder_lessons", payload),
+			);
+			setChapters(nextChapters);
+			setSelectedLesson((current) => {
+				if (!current) return current;
+				return nextChapters.flatMap((chapter) => chapter.lessons).find((lesson) => lesson.id === current.id) ?? current;
+			});
+			showMessage("success", "單元排序已儲存");
+		} catch {
+			showMessage("error", "單元排序儲存失敗");
+		} finally {
+			setDraggedLessonId(null);
+		}
+	};
+
 	// 儲存單元至真實資料庫
 	const handleSaveLesson = async () => {
 		if (!selectedLesson) return;
@@ -427,11 +472,20 @@ export default function CourseAdminStudioPage() {
 								</div>
 
 								{/* 單元列表 */}
-								<div className="space-y-1 pl-2">
+								<div
+									className="space-y-1 pl-2"
+									onDragOver={handleLessonDragOver}
+									onDrop={(event) => handleLessonDrop(event, ch.id, ch.lessons.length)}
+								>
 									{ch.lessons.map((lesson) => (
 										<div
+										draggable
 											key={lesson.id}
-											onClick={() => {
+										onDragStart={(event) => handleLessonDragStart(event, lesson.id)}
+										onDragOver={handleLessonDragOver}
+										onDrop={(event) => handleLessonDrop(event, ch.id, ch.lessons.indexOf(lesson))}
+										data-lesson-id={lesson.id}
+										onClick={() => {
 												setSelectedLesson(lesson);
 												setVideoInputUrl(lesson.videoUrl);
 												handleVideoUrlChange(lesson.videoUrl);
@@ -637,7 +691,7 @@ export default function CourseAdminStudioPage() {
 							{/* MDX 講義內容與 AI Context */}
 							<div className="grid grid-cols-2 gap-4">
 								<Card className="space-y-2 p-4">
-									<Label>MDX 講義內容 (支援 7 款純向量 SVG 互動積木)</Label>
+									<Label>MDX 講義內容 (支援 8 款純向量 SVG 互動積木)</Label>
 									<Textarea
 										value={selectedLesson.content}
 										onChange={(e) => setSelectedLesson({ ...selectedLesson, content: e.target.value })}
@@ -647,6 +701,11 @@ export default function CourseAdminStudioPage() {
 								</Card>
 
 								<Card className="space-y-2 p-4">
+									<Label>內容即時預覽</Label>
+									<CourseStudioContentPreview source={selectedLesson.content} />
+								</Card>
+
+								<Card className="col-span-2 space-y-2 p-4">
 									<Label>隨課文字 AI 助教 Context (僅本單元有效)</Label>
 									<Textarea
 										value={selectedLesson.aiContext}

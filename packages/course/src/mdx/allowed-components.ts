@@ -1,12 +1,6 @@
-export const LESSON_MDX_COMPONENTS = [
-	"TimelineSync",
-	"ConceptCompare",
-	"MicroSandbox",
-	"WorkflowSorter",
-	"InstantQuiz",
-	"TeacherAvatar",
-	"DialogueWindow",
-] as const;
+import { BLOCK_REGISTRY } from "./block-registry";
+
+export const LESSON_MDX_COMPONENTS = BLOCK_REGISTRY.map((block) => block.name) as readonly string[];
 
 export type LessonMdxComponentName = (typeof LESSON_MDX_COMPONENTS)[number];
 

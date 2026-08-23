@@ -4,18 +4,8 @@ import { evaluate } from "@mdx-js/mdx";
 import { useEffect, useMemo, useState, type ComponentType } from "react";
 import * as runtime from "react/jsx-runtime";
 
-import {
-	ConceptCompare,
-	DialogueWindow,
-	InstantQuiz,
-	type InstantQuizProps,
-	MicroSandbox,
-	TeacherAvatar,
-	TimelineSync,
-	type TimelineSyncProps,
-	WorkflowSorter,
-	type WorkflowSorterProps,
-} from "../components/interactive";
+import type { InstantQuizProps, TimelineSyncProps, WorkflowSorterProps } from "../components/interactive";
+import { BLOCK_REGISTRY } from "./block-registry";
 import { inspectMdxSource } from "./inspect-mdx-source";
 
 type MdxContent = ComponentType<{ components?: Record<string, ComponentType<never>> }>;
@@ -31,15 +21,21 @@ export function LessonMdx({ source, onInteractiveComplete, currentTime }: Lesson
 	const [error, setError] = useState<string | null>(null);
 
 	const components = useMemo(
-		() =>
-			({
+		() => {
+			const registryComponents = Object.fromEntries(
+				BLOCK_REGISTRY.map(({ name, component }) => [name, component]),
+			) as Record<string, ComponentType<any>>;
+			const TimelineSyncComponent = registryComponents.TimelineSync as ComponentType<TimelineSyncProps>;
+			const WorkflowSorterComponent = registryComponents.WorkflowSorter as ComponentType<WorkflowSorterProps>;
+			const InstantQuizComponent = registryComponents.InstantQuiz as ComponentType<InstantQuizProps>;
+
+			return {
+				...registryComponents,
 				TimelineSync: (props: TimelineSyncProps) => (
-					<TimelineSync currentTime={currentTime} {...props} />
+					<TimelineSyncComponent currentTime={currentTime} {...props} />
 				),
-				ConceptCompare,
-				MicroSandbox,
 				WorkflowSorter: (props: WorkflowSorterProps) => (
-					<WorkflowSorter
+					<WorkflowSorterComponent
 						{...props}
 						onComplete={() => {
 							if (props.blockId) {
@@ -49,7 +45,7 @@ export function LessonMdx({ source, onInteractiveComplete, currentTime }: Lesson
 					/>
 				),
 				InstantQuiz: (props: InstantQuizProps) => (
-					<InstantQuiz
+					<InstantQuizComponent
 						{...props}
 						onComplete={(result) => {
 							if (result.correct && props.blockId) {
@@ -58,9 +54,8 @@ export function LessonMdx({ source, onInteractiveComplete, currentTime }: Lesson
 						}}
 					/>
 				),
-				TeacherAvatar,
-				DialogueWindow,
-			}) as Record<string, ComponentType<never>>,
+			} as Record<string, ComponentType<never>>;
+		},
 		[currentTime, onInteractiveComplete],
 	);
 

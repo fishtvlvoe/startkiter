@@ -1,4 +1,5 @@
 import { auth } from "@startkiter/auth";
+import { inspectMdxSource } from "@startkiter/course";
 import { db, VideoProvider } from "@startkiter/database";
 import { NextResponse } from "next/server";
 import { resolveVideoSource } from "@startkiter/api/modules/course/lib/video-resolver";
@@ -164,6 +165,15 @@ export async function POST(request: Request) {
 
 		if (action === "update_lesson") {
 			const { id, title, videoUrl, videoDuration, isFreePreview, content, aiContext } = payload;
+			if (typeof content === "string") {
+				const inspection = inspectMdxSource(content);
+				if (!inspection.ok) {
+					return NextResponse.json(
+						{ error: "INVALID_CONTENT", details: inspection.error },
+						{ status: 400 },
+					);
+				}
+			}
 			let videoProvider: VideoProvider | undefined = undefined;
 
 			if (videoUrl) {

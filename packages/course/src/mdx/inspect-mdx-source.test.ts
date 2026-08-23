@@ -28,6 +28,12 @@ describe("inspectMdxSource", () => {
 		});
 	});
 
+	it("allows a component registered by the block registry", () => {
+		expect(inspectMdxSource('<WebContainerSandbox blockId="demo" files={{}} hints={[]} />')).toEqual({
+			ok: true,
+		});
+	});
+
 	it("rejects import statements", () => {
 		expect(inspectMdxSource('import x from "y"\n\n# hi')).toMatchObject({ ok: false });
 	});
