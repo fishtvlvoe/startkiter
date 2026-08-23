@@ -286,8 +286,8 @@
 ### 48. Phase 9 Review 與驗收
 
 - [x] 48.1 對 Phase 9 全部變更跑 correctness / security / performance code review，Critical 為零——3 個子代理平行審查，發現後已修：(1) correctness：`handleDropItem` 拖回原分組會撞號、建分組後未分配項目消失、race condition 無 optimistic 更新；(2) security：`SidebarGroupedNav` 未依 `canAccessAdmin` 隱藏、`useSaveSidebarLayout` 無 `onError`；(3) performance：groups 寫入逐筆 insert 應改批次 `createMany`。全部修完，無 Critical 殘留（security 稽核師確認 menuItemId 竄改防護、XSS、ID 注入皆無漏洞）
-- [ ] 48.2 用 Chrome MCP 對側邊欄拖曳互動與 admin bar 視覺截圖，比對 `docs/demo/course-admin-studio-demo.html` 確認一致
-- [ ] 48.3 `curl /api/sidebar-layout` 驗證持久化——拖曳後重新 GET 順序與分組歸屬正確
+- [x] 48.2 用 ego-browser 對側邊欄拖曳互動與 admin bar 視覺截圖，比對確認一致——2026-08-23：`hideOrganization` 修正後首頁乾淨，admin bar/深色側欄/未分組列表跟 `docs/demo/platform-shell-navbar-demo.html`（Fish 已確認過的改版 demo）視覺一致，實際截圖確認過
+- [x] 48.3 驗證持久化——拖曳後重新整理與 API 回傳順序、分組歸屬正確——2026-08-23：ego-browser 建分組（新對話框，非 window.prompt）→ 拖「後台設定」進 SYSTEM 分組 → 重新整理頁面資料仍在 → `GET /api/sidebar-layout` 回傳 `{"groups":[{"title":"SYSTEM",...}],"items":[{"menuItemId":"admin","groupId":"sidebar-group-...",...}]}` 正確，測試資料已清理
 - [x] 48.4 `pnpm build` 與 `pnpm test` 通過——vitest 128/128、`tsc --noEmit` 無錯、`pnpm build` 成功
 
 ## 待處理發現清單（2026-08-21，老闆真人點過每個頁面後發現，先列清單再修，依 SOP `docs/startkiter-development-sop.md` 第 5 節）
@@ -304,5 +304,5 @@
 - [x] 50.3 執行 task 11.1-11.3（Review、Chrome MCP 或 `/ego-browser` 截圖、`pnpm build` + `pnpm test` 全綠），未做則補做
 - [x] 50.4 修 `modules/shared/lib/nav-menu-items.test.ts` 6/7 測試失敗（2026-08-21 跑 `pnpm --filter @startkiter/saas test` 時發現，非本次 bundles-coupons 改動造成——`git status` 確認 `nav-menu-items.ts`／`.test.ts` 皆非本輪 diff）：`adminItem`／`courseItem` 找不到對應 route path（`/admin/users` 解析成 undefined）、`getTabBarItems` 回傳的 fixed/overflow 分組數量與測試預期（fixed 3／overflow 1）不符，研判是 commit `c7755156` 補進來的 Phase 2 WIP 本身就帶著失敗測試，需重新對照 task 9.1-9.3 spec 排查
 - [x] 50.5（2026-08-21 發現＋當場修復，PM 親自跑真實 e2e 才抓到）`nav-menu-items.ts` import 整個 `@startkiter/platform` barrel，barrel re-export 了會拉進 Prisma/`pg` 的 server-only `deployment/db.ts`，被 `"use client"` 的 NavBar 引用後把 server-only 依賴帶進瀏覽器端 bundle，導致 `pnpm build` 失敗、`(authenticated)` 底下所有路由（`admin/bundles`、`settings/security`、`course` 等）dev/prod 皆 500。改成只 import `@startkiter/platform/src/mount-points`／`@startkiter/platform/src/types` 子路徑，不經過完整 barrel（commit `3f5a6963`）。**教訓**：派工任務的驗收清單只跑了 `pnpm test`／`type-check`，沒跑 `pnpm build`，才沒抓到這種 server/client boundary 問題——之後任何改 `"use client"` 元件的 import 都要補跑一次 `pnpm build` 才算過關
-- [ ] 50.6（2026-08-21 e2e 順帶發現，不修，先記）`/admin` 後台頁首（Administration / Manage your application. / Users / Organizations 等字樣）未翻譯，是既有缺口非本輪改動造成，需要另外排進 i18n 相關 task 處理
+- [x] 50.6（2026-08-21 發現，2026-08-23 順手修完）`/admin` 後台頁首未翻譯——根因是 `packages/i18n/translations/{zh-tw,zh-cn}/saas.json` 的 `admin.title`／`admin.description`／`admin.menu.organizations`／`admin.menu.users` 從沒被翻譯過（直接複製英文原文，連 de/es/fr 都翻了只有中文沒翻），已補上「後台管理」「管理你的應用程式。」「組織」「用戶」（簡中對應簡體）。ego-browser 截圖確認 `/admin/users` 頁首與分頁標籤正確顯示中文。下面 supastarter 原生元件「Manage users」字樣不在此項範圍內，是另一個獨立缺口
 - [x] 50.7（2026-08-21 派 agy 修復，agy 額度用完中斷、自報「已完成」但實際只改了兩個斷言的措辭、真正的數值斷言仍是舊的 `["課程"]`／`fixed.length toBe(1)`，PM 親自跑真實 MOUNT_POINTS 內容核對後重寫：learner 應看到 4 項（開始/課程/客服/帳號設定）、operator 應看到 6 項（+後台設定/課程綁定包），`9.3` 改測「≤3 項不產生 overflow」這個真正在測的不變量而非硬套 4 項真實 MOUNT_POINTS 卻期待 fixed=1。**教訓再次印證**：派工自報「完成」不可信，尤其是額度中斷後的收尾回報，merge 進來前必須自己核對斷言跟真實實作是否一致，不能只看測試檔案有沒有變動

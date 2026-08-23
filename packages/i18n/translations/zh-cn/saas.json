@@ -1,8 +1,8 @@
 {
   "admin": {
     "menu": {
-      "organizations": "Organizations",
-      "users": "Users"
+      "organizations": "组织",
+      "users": "用户"
     },
     "organizations": {
       "backToList": "Back to organizations",
@@ -34,7 +34,7 @@
       "search": "Search for an organization...",
       "title": "Manage organizations"
     },
-    "title": "Administration",
+    "title": "后台管理",
     "users": {
       "ban": {
         "actions": {
@@ -100,7 +100,7 @@
       "assignAdminRole": "Assign admin role",
       "removeAdminRole": "Remove admin role"
     },
-    "description": "Manage your application."
+    "description": "管理你的应用程序。"
   },
   "app": {
     "menu": {
