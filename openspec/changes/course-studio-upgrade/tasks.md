@@ -54,5 +54,5 @@
 
 - [x] 11.1 跑 `pnpm --filter @startkiter/course test` 與 `pnpm --filter saas test` 全部測試套件，確認無回歸，附測試通過數字 # course 12 files／62 tests；saas 26 files／131 tests
 - [x] 11.2 跑 `pnpm --filter saas build`（或 `tsc --noEmit`）確認無 TypeScript 型別錯誤 # PM 已用真實 DATABASE_URL 重跑 build 成功（非 mock 值）
-- [x] 11.3 手動端到端驗證：啟動 dev server，以學員帳號進入一個含 `WebContainerSandbox` 積木的單元，實際觸發一次測試通過與一次測試失敗，確認 hit-stop 停頓、獎勵回饋、敘事化提示分別正確顯示，截圖存證 # PM 已用 ego-browser 實測 pass 路徑：真實開瀏覽器登入、點擊執行、~8-10 秒後顯示「挑戰完成！」，截圖存證。fail 路徑僅靠自動化元件測試覆蓋，未另外手動實測
+- [x] 11.3 手動端到端驗證：啟動 dev server，以學員帳號進入一個含 `WebContainerSandbox` 積木的單元，實際觸發一次測試通過與一次測試失敗，確認 hit-stop 停頓、獎勵回饋、敘事化提示分別正確顯示，截圖存證 # PM 已用 ego-browser 實測兩種路徑：pass（真實執行 `console.log(1+1)`，~8-10 秒後顯示「挑戰完成！」）與 fail（真實執行 `throw new Error("boom")`，顯示「通用鼓勵文字：再試一次，先觀察程式每一步的結果。」＋教師設定的提示文字，未洩漏原始 stack trace），兩者皆截圖存證
 - [x] 11.4 Code Review：確認 `block-registry.ts` 仍為程式碼層靜態陣列、未接受資料庫或使用者輸入註冊新積木（對應 design 決策「積木註冊改成 Zod Schema Registry」的風險緩解措施），並確認 `inspect-mdx-source.ts` 既有安全檢查（raw HTML／JS expression／event handler 全部禁止）未被放寬 # 靜態檢查完成
