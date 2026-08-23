@@ -40,4 +40,34 @@ describe("BLOCK_REGISTRY", () => {
 			}).success,
 		).toBe(false);
 	});
+
+	it("拒絕未知 props、物件型 React child 與越界答案 index", () => {
+		const instantQuiz = BLOCK_REGISTRY.find((block) => block.name === "InstantQuiz");
+		const webContainer = BLOCK_REGISTRY.find((block) => block.name === "WebContainerSandbox");
+
+		expect(
+			webContainer?.propsSchema.safeParse({
+				blockId: "sandbox-01",
+				files: {},
+				hints: [],
+				unknown: true,
+			}).success,
+		).toBe(false);
+		expect(
+			instantQuiz?.propsSchema.safeParse({
+				question: { unsafe: true },
+				options: ["A", "B"],
+				answerIndex: 0,
+				explanation: "E",
+			}).success,
+		).toBe(false);
+		expect(
+			instantQuiz?.propsSchema.safeParse({
+				question: "Q",
+				options: ["A", "B"],
+				answerIndex: 2,
+				explanation: "E",
+			}).success,
+		).toBe(false);
+	});
 });

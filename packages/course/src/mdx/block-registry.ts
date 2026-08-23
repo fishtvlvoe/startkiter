@@ -19,96 +19,124 @@ export type BlockDefinition<T extends Record<string, unknown> = Record<string, u
 };
 
 const classNameSchema = z.string().optional();
-const reactNodeSchema = z.unknown();
+const renderableValueSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
 
 const timelineSyncPropsSchema = z
 	.object({
 		at: z.union([z.string(), z.number()]),
 		end: z.union([z.string(), z.number()]).optional(),
-		title: reactNodeSchema.optional(),
+		title: renderableValueSchema.optional(),
 		currentTime: z.number().optional(),
 		autoScroll: z.boolean().optional(),
-		children: reactNodeSchema.optional(),
+		children: renderableValueSchema.optional(),
 		className: classNameSchema,
 	})
-	.passthrough();
+	.strict();
 
 const conceptComparePropsSchema = z
 	.object({
 		tabs: z.array(
-			z.object({
-				title: reactNodeSchema,
-				description: reactNodeSchema.optional(),
-				code: z.string().optional(),
-				visual: reactNodeSchema.optional(),
-			}),
+			z
+				.object({
+					title: renderableValueSchema,
+					description: renderableValueSchema.optional(),
+					code: z.string().optional(),
+					visual: renderableValueSchema.optional(),
+				})
+				.strict(),
 		),
 		defaultIndex: z.number().optional(),
 		className: classNameSchema,
 	})
-	.passthrough();
+	.strict();
 
 const microSandboxPropsSchema = z
 	.object({
 		template: z.string().optional(),
 		initialProps: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
 		controls: z.array(
-			z.object({
+			z
+				.object({
 				name: z.string(),
-				label: reactNodeSchema.optional(),
+				label: renderableValueSchema.optional(),
 				type: z.enum(["slider", "select", "text"]),
 				default: z.union([z.string(), z.number()]),
 				min: z.number().optional(),
 				max: z.number().optional(),
 				step: z.number().optional(),
 				options: z
-					.array(z.union([z.string(), z.object({ value: z.string(), label: z.string() })]))
+					.array(
+						z.union([
+							z.string(),
+							z.object({ value: z.string(), label: z.string() }).strict(),
+						]),
+					)
 					.optional(),
-			}),
+				})
+				.strict(),
 		),
 		className: classNameSchema,
 	})
-	.passthrough();
+	.strict();
 
 const workflowSorterPropsSchema = z
 	.object({
 		blockId: z.string().optional(),
-		items: z.array(z.union([z.string(), z.object({ id: z.string(), label: reactNodeSchema })])),
+		items: z.array(
+			z.union([z.string(), z.object({ id: z.string(), label: renderableValueSchema }).strict()]),
+		),
 		correctOrder: z.array(z.string()),
-		explanation: reactNodeSchema.optional(),
+		explanation: renderableValueSchema.optional(),
 		className: classNameSchema,
 	})
-	.passthrough();
+	.strict();
 
 const instantQuizPropsSchema = z
 	.object({
 		blockId: z.string().optional(),
-		question: reactNodeSchema,
-		options: z.array(reactNodeSchema),
-		answerIndex: z.union([z.number(), z.array(z.number())]),
-		explanation: reactNodeSchema,
+		question: renderableValueSchema,
+		options: z.array(renderableValueSchema).min(1),
+		answerIndex: z.union([
+			z.number().int().nonnegative(),
+			z.array(z.number().int().nonnegative()).min(1),
+		]),
+		explanation: renderableValueSchema,
 		multiple: z.boolean().optional(),
 		className: classNameSchema,
 	})
-	.passthrough();
+	.strict()
+	.superRefine((props, context) => {
+		const answerIndices = typeof props.answerIndex === "number" ? [props.answerIndex] : props.answerIndex;
+		if (answerIndices.some((index) => index >= props.options.length)) {
+			context.addIssue({
+				code: "custom",
+				path: ["answerIndex"],
+				message: "answerIndex 必須對應現有選項。",
+			});
+		}
+	});
 
 const teacherAvatarPropsSchema = z
 	.object({
 		mood: z.enum(["explaining", "encouraging", "thinking"]),
-		caption: reactNodeSchema,
+		caption: renderableValueSchema,
 		at: z.union([z.string(), z.number()]).optional(),
 		className: classNameSchema,
 	})
-	.passthrough();
+	.strict();
 
 const dialogueWindowPropsSchema = z
 	.object({
-		prompts: z.array(z.object({ question: reactNodeSchema, response: reactNodeSchema })),
+		prompts: z.array(
+			z
+				.object({ question: renderableValueSchema, response: renderableValueSchema })
+				.strict(),
+		),
 		avatar: z.boolean().optional(),
 		initialIndex: z.number().optional(),
 		className: classNameSchema,
 	})
-	.passthrough();
+	.strict();
 
 export const webContainerSandboxPropsSchema = z
 	.object({
@@ -118,7 +146,7 @@ export const webContainerSandboxPropsSchema = z
 		hints: z.array(z.string()),
 		milestone: z.boolean().optional(),
 	})
-	.passthrough();
+	.strict();
 
 export const BLOCK_REGISTRY: BlockDefinition<any>[] = [
 	{ name: "TimelineSync", propsSchema: timelineSyncPropsSchema, component: TimelineSync },

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { getWebContainer } from "../../webcontainer/client";
 import { narrativeHintForOutput, runSandboxTests } from "../../webcontainer/sandbox-runtime";
 
 export type WebContainerSandboxProps = {
@@ -48,6 +49,14 @@ export function WebContainerSandbox({
 	const [isSupported, setIsSupported] = useState<boolean | null>(null);
 	const [status, setStatus] = useState<SandboxStatus>("idle");
 	const [failureHint, setFailureHint] = useState<string | null>(null);
+	const [editableFiles, setEditableFiles] = useState<Record<string, string>>(() => ({ ...files }));
+	const fileSignature = JSON.stringify(files);
+
+	useEffect(() => {
+		setEditableFiles(JSON.parse(fileSignature) as Record<string, string>);
+		setStatus("idle");
+		setFailureHint(null);
+	}, [blockId, fileSignature]);
 
 	useEffect(() => {
 		setIsSupported(Boolean(window.crossOriginIsolated));
@@ -78,9 +87,8 @@ export function WebContainerSandbox({
 		setStatus("running");
 
 		try {
-			const { WebContainer } = await import("@webcontainer/api");
-			const webcontainer = await WebContainer.boot();
-			const result = await runSandboxTests(webcontainer, files, testCommand);
+			const webcontainer = await getWebContainer();
+			const result = await runSandboxTests(webcontainer, editableFiles, testCommand);
 
 			if (result.status === "fail") {
 				setFailureHint(narrativeHintForOutput(result.testOutput));
@@ -107,11 +115,25 @@ export function WebContainerSandbox({
 			data-status={status}
 		>
 			<div className="rounded-lg border border-neutral-700 bg-neutral-950 p-4">
-				<pre aria-label="程式碼檔案" className="overflow-x-auto text-xs text-neutral-300">
-					{Object.entries(files)
-						.map(([filePath, contents]) => `// ${filePath}\n${contents}`)
-						.join("\n\n")}
-				</pre>
+				<div aria-label="程式碼編輯區" className="space-y-3">
+					{Object.entries(editableFiles).map(([filePath, contents]) => (
+						<label className="block" key={filePath}>
+							<span className="mb-1 block text-xs text-neutral-400">{filePath}</span>
+							<textarea
+								aria-label={`編輯檔案 ${filePath}`}
+								className="min-h-32 w-full rounded border border-neutral-700 bg-neutral-900 p-2 font-mono text-xs text-neutral-200"
+								disabled={status === "running" || status === "hit-stop"}
+								onChange={(event) =>
+									setEditableFiles((current) => ({ ...current, [filePath]: event.target.value }))
+								}
+								value={contents}
+							/>
+						</label>
+					))}
+					{Object.keys(editableFiles).length === 0 ? (
+						<p className="text-xs text-neutral-500">尚未提供可編輯檔案。</p>
+					) : null}
+				</div>
 				<button disabled={status === "running" || status === "hit-stop"} onClick={run} type="button">
 					{status === "running" ? "執行中" : "執行"}
 				</button>

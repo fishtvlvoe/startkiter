@@ -1,9 +1,22 @@
 "use client";
 
 import { useEffect, useState, type DragEvent } from "react";
-import { Button, Card, Input, Label, Textarea } from "@startkiter/ui";
+import {
+	Button,
+	Card,
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	Input,
+	Label,
+	Textarea,
+} from "@startkiter/ui";
 import { CourseStudioContentPreview } from "@shared/components/CourseStudioContentPreview";
 import { reorderLesson } from "./reorder-lessons";
+import { getCourseStudioErrorMessage, type CourseStudioErrorResponse } from "./studio-error-message";
 
 type ProviderType = "BUNNY" | "YOUTUBE" | "VIMEO" | "CUSTOM_MP4" | "HLS";
 
@@ -16,13 +29,53 @@ interface LessonItem {
 	provider?: ProviderType;
 	content: string;
 	aiContext: string;
+	/** API／資料庫位置；有值時採 0-based，第一個單元是 0。 */
+	order?: number;
 }
 
 interface ChapterItem {
 	id: string;
 	title: string;
 	lessons: LessonItem[];
+	/** API／資料庫位置；有值時採 0-based，第一個章節是 0。 */
+	order?: number;
 }
+
+interface StudioFolderResponse {
+	id: string;
+	name: string;
+	order: number;
+	isCollapsed: boolean;
+}
+
+interface StudioChapterResponse {
+	id: string;
+	courseId: string;
+	title: string;
+	/** 章節 order 儲存為 0-based 位置。 */
+	order: number;
+}
+
+interface StudioLessonResponse {
+	id: string;
+	chapterId: string;
+	slug: string;
+	title: string;
+	content: string | null;
+	isFreePreview: boolean;
+	/** 單元 order 儲存為 0-based 位置。 */
+	order: number;
+	videoProvider: ProviderType | null;
+	videoUrl: string | null;
+	videoDuration: string | null;
+	aiContext: string | null;
+}
+
+type StudioResponse = CourseStudioErrorResponse & {
+	folder?: StudioFolderResponse | null;
+	chapter?: StudioChapterResponse | null;
+	lesson?: StudioLessonResponse | null;
+};
 
 interface StudioMessage {
 	type: "success" | "error";
@@ -57,6 +110,19 @@ export default function CourseAdminStudioPage() {
 	const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
 	const [editingFolderName, setEditingFolderName] = useState("");
 
+	// 資料夾建立 Dialog 狀態
+	const [showCreateFolderDialog, setShowCreateFolderDialog] = useState(false);
+	const [folderName, setFolderName] = useState("");
+
+	// 章節建立 Dialog 狀態
+	const [showCreateChapterDialog, setShowCreateChapterDialog] = useState(false);
+	const [chapterTitle, setChapterTitle] = useState("");
+
+	// 單元建立 Dialog 狀態
+	const [showCreateLessonDialog, setShowCreateLessonDialog] = useState(false);
+	const [lessonTitle, setLessonTitle] = useState("");
+	const [createLessonChapterId, setCreateLessonChapterId] = useState<string | null>(null);
+
 	// 課綱狀態
 	const [courseId, setCourseId] = useState<string | null>(null);
 	const [chapters, setChapters] = useState<ChapterItem[]>([]);
@@ -82,9 +148,13 @@ export default function CourseAdminStudioPage() {
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ action, payload }),
 		});
-		const data: any = await res.json().catch(() => ({}));
+		const data = (await res.json().catch(() => ({}))) as StudioResponse;
 		if (!res.ok) {
-			return { ok: false as const, data, error: data.error || `HTTP ${res.status}` };
+			return {
+				ok: false as const,
+				data,
+				error: typeof data.error === "string" ? data.error : `HTTP ${res.status}`,
+			};
 		}
 		return { ok: true as const, data, error: null };
 	}
@@ -153,13 +223,23 @@ export default function CourseAdminStudioPage() {
 	};
 
 	// 新增資料夾
-	const handleCreateFolder = async () => {
-		const name = prompt("請輸入新資料夾名稱：");
-		if (!name) return;
-		const result = await callStudio("create_folder", { name });
+	const handleCreateFolder = () => {
+		setFolderName("");
+		setShowCreateFolderDialog(true);
+	};
+
+	// 提交新增資料夾
+	const handleConfirmCreateFolder = async () => {
+		if (!folderName.trim()) {
+			showMessage("error", "資料夾名稱不能為空");
+			return;
+		}
+		const result = await callStudio("create_folder", { name: folderName });
 		if (result.ok && result.data.folder) {
 			setFolders([...folders, result.data.folder]);
 			showMessage("success", "資料夾新增成功");
+			setShowCreateFolderDialog(false);
+			setFolderName("");
 		} else {
 			showMessage("error", "資料夾新增失敗");
 		}
@@ -191,27 +271,46 @@ export default function CourseAdminStudioPage() {
 	};
 
 	// 新增章節
-	const handleCreateChapter = async () => {
+	const handleCreateChapter = () => {
 		if (!courseId) {
 			showMessage("error", "尚未載入課程資料");
 			return;
 		}
-		const title = prompt("請輸入章節名稱：");
-		if (!title) return;
-		const result = await callStudio("create_chapter", { courseId, title });
+		setChapterTitle("");
+		setShowCreateChapterDialog(true);
+	};
+
+	// 提交新增章節
+	const handleConfirmCreateChapter = async () => {
+		if (!chapterTitle.trim()) {
+			showMessage("error", "章節名稱不能為空");
+			return;
+		}
+		const result = await callStudio("create_chapter", { courseId, title: chapterTitle });
 		if (result.ok && result.data.chapter) {
 			setChapters([...chapters, { ...result.data.chapter, lessons: [] }]);
 			showMessage("success", "章節新增成功");
+			setShowCreateChapterDialog(false);
+			setChapterTitle("");
 		} else {
 			showMessage("error", "章節新增失敗");
 		}
 	};
 
 	// 新增單元
-	const handleCreateLesson = async (chapterId: string) => {
-		const title = prompt("請輸入單元名稱：");
-		if (!title) return;
-		const result = await callStudio("create_lesson", { chapterId, title });
+	const handleCreateLesson = (chapterId: string) => {
+		setLessonTitle("");
+		setCreateLessonChapterId(chapterId);
+		setShowCreateLessonDialog(true);
+	};
+
+	// 提交新增單元
+	const handleConfirmCreateLesson = async () => {
+		if (!lessonTitle.trim() || !createLessonChapterId) {
+			showMessage("error", "單元名稱不能為空");
+			return;
+		}
+		const result = await callStudio("create_lesson", { chapterId: createLessonChapterId, title: lessonTitle });
 		if (result.ok && result.data.lesson) {
 			const newL: LessonItem = {
 				id: result.data.lesson.id,
@@ -225,13 +324,16 @@ export default function CourseAdminStudioPage() {
 			};
 			setChapters(
 				chapters.map((c) =>
-					c.id === chapterId ? { ...c, lessons: [...c.lessons, newL] } : c,
+					c.id === createLessonChapterId ? { ...c, lessons: [...c.lessons, newL] } : c,
 				),
 			);
 			setSelectedLesson(newL);
 			setVideoInputUrl("");
 			setResolvedCard(null);
 			showMessage("success", "單元新增成功");
+			setShowCreateLessonDialog(false);
+			setLessonTitle("");
+			setCreateLessonChapterId(null);
 		} else {
 			showMessage("error", "單元新增失敗");
 		}
@@ -326,9 +428,9 @@ export default function CourseAdminStudioPage() {
 					})),
 				);
 				showMessage("success", "單元變更已成功持久化至 PostgreSQL 資料庫");
-			} else {
-				showMessage("error", "儲存失敗，請檢查權限與連線");
-			}
+				} else {
+					showMessage("error", getCourseStudioErrorMessage(result.data));
+				}
 		} catch (e) {
 			showMessage("error", "儲存發生錯誤: " + String(e));
 		}
@@ -726,6 +828,87 @@ export default function CourseAdminStudioPage() {
 					)}
 				</div>
 			</div>
+
+				{/* 新增資料夾 Dialog */}
+				<Dialog open={showCreateFolderDialog} onOpenChange={setShowCreateFolderDialog}>
+					<DialogContent>
+						<DialogHeader>
+							<DialogTitle>新增資料夾</DialogTitle>
+							<DialogDescription>輸入新資料夾的名稱</DialogDescription>
+						</DialogHeader>
+						<div className="space-y-4">
+							<Input
+								placeholder="請輸入新資料夾名稱"
+								value={folderName}
+								onChange={(e) => setFolderName(e.target.value)}
+								onKeyDown={(e) => {
+									if (e.key === "Enter") handleConfirmCreateFolder();
+								}}
+								autoFocus
+							/>
+						</div>
+						<DialogFooter>
+							<Button variant="outline" onClick={() => setShowCreateFolderDialog(false)}>
+								取消
+							</Button>
+							<Button onClick={handleConfirmCreateFolder}>確認</Button>
+						</DialogFooter>
+					</DialogContent>
+				</Dialog>
+
+				{/* 新增章節 Dialog */}
+				<Dialog open={showCreateChapterDialog} onOpenChange={setShowCreateChapterDialog}>
+					<DialogContent>
+						<DialogHeader>
+							<DialogTitle>新增章節</DialogTitle>
+							<DialogDescription>輸入新章節的名稱</DialogDescription>
+						</DialogHeader>
+						<div className="space-y-4">
+							<Input
+								placeholder="請輸入章節名稱"
+								value={chapterTitle}
+								onChange={(e) => setChapterTitle(e.target.value)}
+								onKeyDown={(e) => {
+									if (e.key === "Enter") handleConfirmCreateChapter();
+								}}
+								autoFocus
+							/>
+						</div>
+						<DialogFooter>
+							<Button variant="outline" onClick={() => setShowCreateChapterDialog(false)}>
+								取消
+							</Button>
+							<Button onClick={handleConfirmCreateChapter}>確認</Button>
+						</DialogFooter>
+					</DialogContent>
+				</Dialog>
+
+				{/* 新增單元 Dialog */}
+				<Dialog open={showCreateLessonDialog} onOpenChange={setShowCreateLessonDialog}>
+					<DialogContent>
+						<DialogHeader>
+							<DialogTitle>新增單元</DialogTitle>
+							<DialogDescription>輸入新單元的名稱</DialogDescription>
+						</DialogHeader>
+						<div className="space-y-4">
+							<Input
+								placeholder="請輸入單元名稱"
+								value={lessonTitle}
+								onChange={(e) => setLessonTitle(e.target.value)}
+								onKeyDown={(e) => {
+									if (e.key === "Enter") handleConfirmCreateLesson();
+								}}
+								autoFocus
+							/>
+						</div>
+						<DialogFooter>
+							<Button variant="outline" onClick={() => setShowCreateLessonDialog(false)}>
+								取消
+							</Button>
+							<Button onClick={handleConfirmCreateLesson}>確認</Button>
+						</DialogFooter>
+					</DialogContent>
+				</Dialog>
 		</div>
 	);
 }

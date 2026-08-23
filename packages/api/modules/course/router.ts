@@ -3,7 +3,17 @@ import { extractLessonBlockIds } from "../../../course/src/mdx/extract-lesson-bl
 import { db, VideoProvider } from "@startkiter/database";
 import { z } from "zod";
 import { adminProcedure, protectedProcedure, publicProcedure } from "../../orpc/procedures";
+import { isCourseOperator } from "./lib/course-operator";
+import { updateLesson } from "./lib/update-lesson";
 import { resolveVideoSource } from "./lib/video-resolver";
+
+const courseOperatorProcedure = protectedProcedure.use(async ({ context, next }) => {
+	if (!isCourseOperator(context.user.email, process.env.ADMIN_EMAIL)) {
+		throw new ORPCError("FORBIDDEN");
+	}
+
+	return await next();
+});
 
 export const courseRouter = publicProcedure.router({
 	// 1. 公開/試看課綱大綱 (Public)
@@ -193,7 +203,7 @@ export const courseRouter = publicProcedure.router({
 		}),
 
 	// 6. Course Studio 總數據 (Admin)
-	getStudioData: adminProcedure.handler(async () => {
+	getStudioData: courseOperatorProcedure.handler(async () => {
 		const courses = await db.course.findMany({
 			include: {
 				chapters: {
@@ -220,7 +230,7 @@ export const courseRouter = publicProcedure.router({
 	}),
 
 	// 7. 更新單元 (Admin)
-	updateLesson: adminProcedure
+	updateLesson: courseOperatorProcedure
 		.input(
 			z.object({
 				id: z.string(),
@@ -234,25 +244,14 @@ export const courseRouter = publicProcedure.router({
 			}),
 		)
 		.handler(async ({ input }) => {
-			const { id, ...data } = input;
-			let videoProvider: VideoProvider | undefined = undefined;
-
-			if (data.videoUrl) {
-				const resolved = resolveVideoSource(data.videoUrl);
-				if (resolved.ok) {
-					videoProvider = resolved.provider as VideoProvider;
-				}
+			const result = await updateLesson(input);
+			if (!result.ok) {
+				throw new ORPCError("BAD_REQUEST", {
+					message: result.details,
+					data: { code: result.error, details: result.details },
+				});
 			}
 
-			const updated = await db.lesson.update({
-				where: { id },
-				data: {
-					...data,
-					...(videoProvider ? { videoProvider } : {}),
-				},
-			});
-
-			return { lesson: updated };
+			return { lesson: result.lesson };
 		}),
 });
-

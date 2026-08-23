@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { isValidElement, useMemo, useState, type ReactNode } from "react";
 
 export type InstantQuizResult = {
 	correct: boolean;
@@ -26,6 +26,20 @@ function sameAnswerSet(selectedIndices: readonly number[], correctIndices: reado
 	return selectedIndices.every((index) => correct.has(index));
 }
 
+function safeReactChild(value: ReactNode): ReactNode {
+	if (
+		value === null ||
+		typeof value === "string" ||
+		typeof value === "number" ||
+		typeof value === "boolean" ||
+		isValidElement(value)
+	) {
+		return value;
+	}
+
+	return null;
+}
+
 export function InstantQuiz({
 	blockId,
 	question,
@@ -36,10 +50,17 @@ export function InstantQuiz({
 	onComplete,
 	className,
 }: InstantQuizProps) {
-	const correctIndices = useMemo(
-		() => (typeof answerIndex === "number" ? [answerIndex] : [...answerIndex]),
-		[answerIndex],
-	);
+	const { correctIndices, hasInvalidAnswerIndex } = useMemo(() => {
+		const indices = typeof answerIndex === "number" ? [answerIndex] : [...answerIndex];
+		return {
+			correctIndices: indices.filter(
+				(index) => Number.isInteger(index) && index >= 0 && index < options.length,
+			),
+			hasInvalidAnswerIndex: indices.some(
+				(index) => !Number.isInteger(index) || index < 0 || index >= options.length,
+			),
+		};
+	}, [answerIndex, options.length]);
 	const isMultiple = multiple ?? correctIndices.length > 1;
 	const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
 	const [result, setResult] = useState<InstantQuizResult | null>(null);
@@ -84,10 +105,13 @@ export function InstantQuiz({
 			data-block-id={blockId}
 			data-component="instant-quiz"
 			data-submitted={String(result !== null)}
-		>
-			<h3>{question}</h3>
+			>
+			{hasInvalidAnswerIndex ? (
+				<p role="alert">測驗設定無效，請聯絡課程管理員。</p>
+			) : null}
+			<h3>{safeReactChild(question)}</h3>
 			<div role="group" aria-label="測驗選項">
-				{options.map((option, index) => {
+					{options.map((option, index) => {
 					const isCorrectOption = result !== null && correctSet.has(index);
 					const isIncorrectSelection =
 						result !== null && selectedSet.has(index) && !isCorrectOption;
@@ -112,7 +136,7 @@ export function InstantQuiz({
 									onChange={() => handleOptionClick(index)}
 									type="checkbox"
 								/>
-								<span>{option}</span>
+									<span>{safeReactChild(option)}</span>
 							</label>
 						);
 					}
@@ -127,7 +151,7 @@ export function InstantQuiz({
 							onClick={() => handleOptionClick(index)}
 							type="button"
 						>
-							{option}
+								{safeReactChild(option)}
 						</button>
 					);
 				})}
@@ -156,7 +180,7 @@ export function InstantQuiz({
 					role="status"
 				>
 					<strong>{result.correct ? "答對了" : "再想想"}</strong>
-					<div>{explanation}</div>
+						<div>{safeReactChild(explanation)}</div>
 				</div>
 			) : null}
 		</section>

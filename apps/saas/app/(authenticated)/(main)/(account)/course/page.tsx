@@ -64,7 +64,7 @@ export default async function CoursePage() {
 								className="hover:bg-muted block rounded-md px-3 py-2 text-sm"
 								aria-disabled={!entitled}
 							>
-								{lesson.order}. {lesson.title}
+									{lesson.order + 1}. {lesson.title}
 							</Link>
 						))}
 					</nav>

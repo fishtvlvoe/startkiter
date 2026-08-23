@@ -1,12 +1,16 @@
 import { auth } from "@startkiter/auth";
-import { inspectMdxSource } from "@startkiter/course";
-import { db, VideoProvider } from "@startkiter/database";
+import { db } from "@startkiter/database";
 import { NextResponse } from "next/server";
-import { resolveVideoSource } from "@startkiter/api/modules/course/lib/video-resolver";
-import { operatorHttpStatus, type OperatorSession } from "../../../../lib/operator";
+import { COURSE_STUDIO_ERROR_CODES } from "@startkiter/api/modules/course/errors";
+import { isCourseOperator } from "@startkiter/api/modules/course/lib/course-operator";
+import { updateLesson } from "@startkiter/api/modules/course/lib/update-lesson";
+import type { OperatorSession } from "../../../../lib/operator";
 
 function getOperatorStatus(session: OperatorSession) {
-	return operatorHttpStatus(session, process.env.ADMIN_EMAIL);
+	if (!session?.user?.id) {
+		return 401;
+	}
+	return isCourseOperator(session.user.email, process.env.ADMIN_EMAIL) ? null : 403;
 }
 
 function generateSlug(prefix: string) {
@@ -18,15 +22,15 @@ export async function GET(request: Request) {
 	const session = await auth.api.getSession({ headers: request.headers });
 	const status = getOperatorStatus(session);
 	if (status === 401) {
-		return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+		return NextResponse.json({ error: COURSE_STUDIO_ERROR_CODES.UNAUTHORIZED }, { status: 401 });
 	}
 	if (status === 403) {
-		return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+		return NextResponse.json({ error: COURSE_STUDIO_ERROR_CODES.FORBIDDEN }, { status: 403 });
 	}
 
 	const userId = session?.user.id;
 	if (!userId) {
-		return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+		return NextResponse.json({ error: COURSE_STUDIO_ERROR_CODES.UNAUTHORIZED }, { status: 401 });
 	}
 
 	const courses = await db.course.findMany({
@@ -64,15 +68,15 @@ export async function POST(request: Request) {
 	const session = await auth.api.getSession({ headers: request.headers });
 	const status = getOperatorStatus(session);
 	if (status === 401) {
-		return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+		return NextResponse.json({ error: COURSE_STUDIO_ERROR_CODES.UNAUTHORIZED }, { status: 401 });
 	}
 	if (status === 403) {
-		return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+		return NextResponse.json({ error: COURSE_STUDIO_ERROR_CODES.FORBIDDEN }, { status: 403 });
 	}
 
 	const userId = session?.user.id;
 	if (!userId) {
-		return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+		return NextResponse.json({ error: COURSE_STUDIO_ERROR_CODES.UNAUTHORIZED }, { status: 401 });
 	}
 
 	try {
@@ -122,7 +126,7 @@ export async function POST(request: Request) {
 			const { courseId, title, order } = payload;
 			const nextOrder =
 				order ??
-				((await db.chapter.count({ where: { courseId } })) + 1);
+				(await db.chapter.count({ where: { courseId } }));
 			const chapter = await db.chapter.create({
 				data: { courseId, title, order: nextOrder },
 			});
@@ -149,7 +153,7 @@ export async function POST(request: Request) {
 			const { chapterId, title, order, isFreePreview } = payload;
 			const nextOrder =
 				order ??
-				((await db.lesson.count({ where: { chapterId } })) + 1);
+				(await db.lesson.count({ where: { chapterId } }));
 			const lesson = await db.lesson.create({
 				data: {
 					chapterId,
@@ -165,35 +169,23 @@ export async function POST(request: Request) {
 
 		if (action === "update_lesson") {
 			const { id, title, videoUrl, videoDuration, isFreePreview, content, aiContext } = payload;
-			if (typeof content === "string") {
-				const inspection = inspectMdxSource(content);
-				if (!inspection.ok) {
-					return NextResponse.json({ error: "INVALID_MDX_CONTENT", details: inspection.error }, { status: 400 });
-				}
-			}
-			let videoProvider: VideoProvider | undefined = undefined;
-
-			if (videoUrl) {
-				const resolved = resolveVideoSource(videoUrl);
-				if (resolved.ok) {
-					videoProvider = resolved.provider as VideoProvider;
-				}
-			}
-
-			const updated = await db.lesson.update({
-				where: { id },
-				data: {
-					title,
-					videoUrl,
-					videoDuration,
-					isFreePreview,
-					content,
-					aiContext,
-					...(videoProvider ? { videoProvider } : {}),
-				},
+			const result = await updateLesson({
+				id,
+				title,
+				videoUrl,
+				videoDuration,
+				isFreePreview,
+				content,
+				aiContext,
 			});
+			if (!result.ok) {
+				return NextResponse.json(
+					{ error: result.error, details: result.details },
+					{ status: 400 },
+				);
+			}
 
-			return NextResponse.json({ success: true, lesson: updated });
+			return NextResponse.json({ success: true, lesson: result.lesson });
 		}
 
 		if (action === "delete_lesson") {
@@ -263,8 +255,11 @@ export async function POST(request: Request) {
 			return NextResponse.json({ success: true });
 		}
 
-		return NextResponse.json({ error: "UNKNOWN_ACTION" }, { status: 400 });
+		return NextResponse.json({ error: COURSE_STUDIO_ERROR_CODES.UNKNOWN_ACTION }, { status: 400 });
 	} catch (error) {
-		return NextResponse.json({ error: "INTERNAL_ERROR", details: String(error) }, { status: 500 });
+		return NextResponse.json(
+			{ error: COURSE_STUDIO_ERROR_CODES.INTERNAL_ERROR, details: String(error) },
+			{ status: 500 },
+		);
 	}
 }
