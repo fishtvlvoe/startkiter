@@ -10,6 +10,7 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@webcontainer/api": "1.6.4",
 		"@mdx-js/mdx": "catalog:",
 		"@startkiter/payments": "workspace:*",
 		"mdast-util-from-markdown": "2.0.3",
@@ -17,7 +18,8 @@
 		"micromark-extension-mdxjs": "3.0.0",
 		"react": "catalog:",
 		"react-dom": "catalog:",
-		"unist-util-visit": "5.1.0"
+		"unist-util-visit": "5.1.0",
+		"zod": "catalog:"
 	},
 	"devDependencies": {
 		"@startkiter/tsconfig": "workspace:*",

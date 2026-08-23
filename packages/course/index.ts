@@ -24,6 +24,7 @@ export {
 	MicroSandbox,
 	TeacherAvatar,
 	TimelineSync,
+	WebContainerSandbox,
 	WorkflowSorter,
 	isWorkflowOrderCorrect,
 	moveWorkflowItem,
@@ -43,6 +44,7 @@ export type {
 	TeacherAvatarProps,
 	TeacherMood,
 	TimelineSyncProps,
+	WebContainerSandboxProps,
 	WorkflowItem,
 	WorkflowSorterProps,
 	WorkflowSortResult,
@@ -52,6 +54,7 @@ export type { Timecode, TimeSyncOptions, TimeSyncState } from "./src/hooks/use-t
 export { LessonMdx } from "./src/mdx/LessonMdx";
 export type { LessonMdxProps } from "./src/mdx/LessonMdx";
 export { inspectMdxSource } from "./src/mdx/inspect-mdx-source";
+export type { MdxInspectResult } from "./src/mdx/inspect-mdx-source";
 export { extractLessonBlockIds } from "./src/mdx/extract-lesson-block-ids";
 export { FluentPlayer } from "./src/player/FluentPlayer";
 export type { FluentPlayerSource } from "./src/player/FluentPlayer";

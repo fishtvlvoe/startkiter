@@ -18,3 +18,5 @@ export { TimelineSync } from "./TimelineSync";
 export type { TimelineSyncProps } from "./TimelineSync";
 export { WorkflowSorter, isWorkflowOrderCorrect, moveWorkflowItem } from "./WorkflowSorter";
 export type { WorkflowItem, WorkflowSorterProps, WorkflowSortResult } from "./WorkflowSorter";
+export { WebContainerSandbox } from "./WebContainerSandbox";
+export type { WebContainerSandboxProps } from "./WebContainerSandbox";

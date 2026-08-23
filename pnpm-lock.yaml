@@ -810,6 +810,9 @@ importers:
       '@startkiter/payments':
         specifier: workspace:*
         version: link:../payments
+      '@webcontainer/api':
+        specifier: 1.6.4
+        version: 1.6.4
       mdast-util-from-markdown:
         specifier: 2.0.3
         version: 2.0.3(supports-color@7.2.0)
@@ -828,6 +831,9 @@ importers:
       unist-util-visit:
         specifier: 5.1.0
         version: 5.1.0
+      zod:
+        specifier: 'catalog:'
+        version: 4.4.3
     devDependencies:
       '@startkiter/tsconfig':
         specifier: workspace:*
@@ -3891,6 +3897,9 @@ packages:
 
   '@vitest/utils@4.1.10':
     resolution: {integrity: sha512-fy9am/HWxbaGt/Sawrp90vt6Y6jQwf1RX77cz3uwoJwJVMli/e1IEwRPnMNJ7vKfPTwo0diXifkpPvwH9v7nGA==}
+
+  '@webcontainer/api@1.6.4':
+    resolution: {integrity: sha512-r9sHCXg1FcC1AMgppGwAc0vYWaQhqvg282cnsuPbJEzYnWifAdCVvg+8ngJUEHyHcomhJJp+/zuytite4ITHLw==}
 
   '@workflow/serde@4.1.0':
     resolution: {integrity: sha512-pav4F2BoirECWR7Nf1TKt+2eETcBj7jj4cBefQ8VXQCA6NPkaKeLfj/zMgi+3zYV5ZIBT4GuUiphsj0/b9hPQQ==}
@@ -9860,6 +9869,8 @@ snapshots:
       '@vitest/pretty-format': 4.1.10
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.1
+
+  '@webcontainer/api@1.6.4': {}
 
   '@workflow/serde@4.1.0': {}
 
