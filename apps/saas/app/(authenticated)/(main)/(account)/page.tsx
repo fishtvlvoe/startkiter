@@ -42,7 +42,7 @@ export default async function AppStartPage() {
 			<PageHeader title={t("welcome", { name: session?.user.name })} subtitle={t("subtitle")} />
 
 			<div>
-				{config.organizations.enable && <OrganizationsGrid />}
+				{config.organizations.enable && !config.organizations.hideOrganization && <OrganizationsGrid />}
 
 				<Card className="mt-6">
 					<div className="h-64 p-8 flex items-center justify-center text-foreground/60">

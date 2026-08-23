@@ -8,6 +8,11 @@ import {
 	cn,
 	ColorModeToggle,
 	mergeTriggerProps,
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuGroup,
@@ -21,6 +26,7 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@startkiter/ui";
+import { Input } from "@startkiter/ui/components/input";
 import {
 	Tooltip,
 	TooltipContent,
@@ -421,11 +427,9 @@ interface SidebarGroupedNavProps {
 	unassignedItems: NavMenuItem[];
 	onToggleGroupCollapse: (groupId: string) => void;
 	onDropItem: (menuItemId: string, targetGroupId: string | null) => void;
-	onRenameGroup: (groupId: string, nextTitle: string) => void;
-	onAddGroup: (title: string) => void;
+	onRequestRenameGroup: (groupId: string, currentTitle: string) => void;
+	onRequestAddGroup: () => void;
 	addGroupLabel: string;
-	renameGroupPromptLabel: string;
-	newGroupPromptLabel: string;
 	unassignedLabel: string;
 	isSaving: boolean;
 }
@@ -469,11 +473,9 @@ function SidebarGroupedNav({
 	unassignedItems,
 	onToggleGroupCollapse,
 	onDropItem,
-	onRenameGroup,
-	onAddGroup,
+	onRequestRenameGroup,
+	onRequestAddGroup,
 	addGroupLabel,
-	renameGroupPromptLabel,
-	newGroupPromptLabel,
 	unassignedLabel,
 	isSaving,
 }: SidebarGroupedNavProps) {
@@ -484,13 +486,8 @@ function SidebarGroupedNav({
 			<button
 				type="button"
 				disabled={isSaving}
-				onClick={() => {
-					const title = window.prompt(newGroupPromptLabel);
-					if (title?.trim()) {
-						onAddGroup(title.trim());
-					}
-				}}
-				className="gap-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 hover:text-foreground disabled:opacity-50 flex items-center"
+				onClick={onRequestAddGroup}
+				className="gap-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-[#c3c4c7]/70 hover:text-white disabled:opacity-50 flex items-center"
 			>
 				+ {addGroupLabel}
 			</button>
@@ -520,7 +517,7 @@ function SidebarGroupedNav({
 								type="button"
 								onClick={() => onToggleGroupCollapse(group.id)}
 								disabled={isSaving}
-								className="gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70 flex flex-1 items-center overflow-hidden disabled:opacity-50"
+								className="gap-1 text-[10px] font-semibold uppercase tracking-wider text-[#c3c4c7]/70 flex flex-1 items-center overflow-hidden disabled:opacity-50"
 							>
 								<ChevronRightIcon
 									className={cn("size-3 shrink-0 transition-transform", !group.isCollapsed && "rotate-90")}
@@ -530,13 +527,8 @@ function SidebarGroupedNav({
 							<button
 								type="button"
 								disabled={isSaving}
-								onClick={() => {
-									const nextTitle = window.prompt(renameGroupPromptLabel, group.title);
-									if (nextTitle?.trim()) {
-										onRenameGroup(group.id, nextTitle.trim());
-									}
-								}}
-								className="opacity-0 text-muted-foreground/70 group-hover/header:opacity-100 hover:text-foreground disabled:opacity-50 transition"
+								onClick={() => onRequestRenameGroup(group.id, group.title)}
+								className="opacity-0 text-[#c3c4c7]/70 group-hover/header:opacity-100 hover:text-white disabled:opacity-50 transition"
 							>
 								<PenIcon className="size-3" />
 							</button>
@@ -567,7 +559,7 @@ function SidebarGroupedNav({
 						}
 					}}
 				>
-					<div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+					<div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#c3c4c7]/70">
 						{unassignedLabel}
 					</div>
 					<ul className="gap-0.5 flex list-none flex-col">
@@ -780,6 +772,25 @@ export function NavBar() {
 		}));
 	}
 
+	const [groupNamePrompt, setGroupNamePrompt] = useState<
+		{ mode: "add" } | { mode: "rename"; groupId: string } | null
+	>(null);
+	const [groupNamePromptValue, setGroupNamePromptValue] = useState("");
+
+	function submitGroupNamePrompt() {
+		const title = groupNamePromptValue.trim();
+		if (!title || !groupNamePrompt) {
+			setGroupNamePrompt(null);
+			return;
+		}
+		if (groupNamePrompt.mode === "add") {
+			handleAddGroup(title);
+		} else {
+			handleRenameGroup(groupNamePrompt.groupId, title);
+		}
+		setGroupNamePrompt(null);
+	}
+
 	const tabBarFixedItems = useMemo(
 		() =>
 			tabBarFixed.map((item) => ({
@@ -940,11 +951,16 @@ export function NavBar() {
 									unassignedItems={unassignedItems}
 									onToggleGroupCollapse={handleToggleGroupCollapse}
 									onDropItem={handleDropItem}
-									onRenameGroup={handleRenameGroup}
-									onAddGroup={handleAddGroup}
+									onRequestRenameGroup={(groupId) => {
+										const group = groups.find((g) => g.id === groupId);
+										setGroupNamePromptValue(group?.title ?? "");
+										setGroupNamePrompt({ mode: "rename", groupId });
+									}}
+									onRequestAddGroup={() => {
+										setGroupNamePromptValue("");
+										setGroupNamePrompt({ mode: "add" });
+									}}
 									addGroupLabel={t("app.menu.addGroup")}
-									renameGroupPromptLabel={t("app.menu.renameGroupPrompt")}
-									newGroupPromptLabel={t("app.menu.newGroupPrompt")}
 									unassignedLabel={t("app.menu.unassignedGroup")}
 									isSaving={saveSidebarLayout.isPending}
 								/>
@@ -1031,6 +1047,34 @@ export function NavBar() {
 			</nav>
 
 			<MobileTabBar fixedItems={tabBarFixedItems} moreItem={tabBarMoreItem} />
+
+			<Dialog open={groupNamePrompt !== null} onOpenChange={(open) => !open && setGroupNamePrompt(null)}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>
+							{groupNamePrompt?.mode === "add"
+								? t("app.menu.newGroupPrompt")
+								: t("app.menu.renameGroupPrompt")}
+						</DialogTitle>
+					</DialogHeader>
+					<Input
+						autoFocus
+						value={groupNamePromptValue}
+						onChange={(event) => setGroupNamePromptValue(event.target.value)}
+						onKeyDown={(event) => {
+							if (event.key === "Enter") {
+								submitGroupNamePrompt();
+							}
+						}}
+					/>
+					<DialogFooter>
+						<Button variant="outline" onClick={() => setGroupNamePrompt(null)}>
+							{t("common.confirmation.cancel")}
+						</Button>
+						<Button onClick={submitGroupNamePrompt}>{t("common.confirmation.confirm")}</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 		</>
 	);
 }
