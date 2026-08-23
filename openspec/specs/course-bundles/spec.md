@@ -1,39 +1,29 @@
-# mvp-offer Specification
+# course-bundles Specification
 
 ## Purpose
 
-TBD - created by archiving change 'mvp-test-scope'. Update Purpose after archive.
+TBD - created by archiving change 'core-module-bundles-coupons'. Update Purpose after archive.
 
 ## Requirements
 
-### Requirement: Single MVP SKU price
+### Requirement: Courses can be grouped into a priced bundle
 
-The MVP product SHALL be one SKU that includes the course and lifetime private-kit updates, priced at 8800 TWD. The product catalog MAY also include additional Bundle products (see course-bundles capability) each with their own independently configured price. Checkout for the MVP SKU specifically MUST always charge 8800 TWD and MUST NOT offer a second paid tier for that SKU. The server MUST ignore client-supplied amounts for any product and MUST derive the charged amount from the server-side product catalog (the MVP SKU's fixed 8800, or a Bundle's configured price), never from a client-supplied amount field.
+An operator SHALL be able to create a Bundle that groups multiple existing courses under a single sellable product with its own price in TWD. The Bundle MUST reference course ids that already exist in the platform's course catalog. A Bundle with a status other than "published" MUST NOT appear on the public bundle sales page or be purchasable.
 
-#### Scenario: Checkout amount is 8800 TWD for the MVP SKU
+#### Scenario: Operator creates a published bundle
 
-- **WHEN** a signed-in buyer starts checkout for the MVP SKU (no productId supplied, or productId "startkiter-mvp")
-- **THEN** the order amount MUST be 8800 and the currency MUST be TWD
+- **WHEN** an operator submits a bundle with title, price, and two valid existing course ids, and sets status to "published"
+- **THEN** the Bundle is persisted and the public bundle page for its slug returns HTTP 200
 
-#### Scenario: Checkout amount for a bundle product uses the bundle's configured price
+#### Scenario: Bundle referencing a nonexistent course is rejected
 
-- **WHEN** a signed-in buyer starts checkout with productId set to a published Bundle's id
-- **THEN** the order amount MUST equal that Bundle's configured priceTwd, not 8800
+- **WHEN** an operator submits a bundle whose courseIds array contains an id with no matching course
+- **THEN** the server MUST reject the request with HTTP 400 and MUST NOT create the Bundle
 
-#### Scenario: Empty or zero price is rejected
+#### Scenario: Draft bundle is not publicly visible
 
-- **WHEN** checkout order-building logic receives amount 0 or a missing amount
-- **THEN** the request MUST fail closed and MUST NOT create a paid order
-
-##### Example: 內部建單拒絕 amount 0
-
-- 呼叫建單輔助函式時傳入 amount=0 或省略 amount
-- 函式失敗且資料庫不出現 paid 狀態的 Order
-
-#### Scenario: Client-supplied alternate amount is ignored
-
-- **WHEN** a signed-in buyer posts POST /api/checkout with a body amount other than the product's server-side catalog price
-- **THEN** the created Order amount MUST still equal the server-side catalog price for the requested product, and currency MUST be TWD
+- **WHEN** a bundle has status "draft"
+- **THEN** GET requests to the public bundle sales page for that bundle's slug MUST return HTTP 404
 
 
 <!-- @trace
@@ -317,139 +307,25 @@ tests:
 -->
 
 ---
-### Requirement: Course and kit are the same purchase
+### Requirement: Bundle purchase grants access to all included courses
 
-Payment of the MVP SKU SHALL grant course access and kit-claim eligibility together as boolean flags on the paid Order. The system MUST NOT sell the kit without the course or the course without kit eligibility. This change MUST set both flags true on paid and MUST NOT implement course playback or GitHub invitation APIs.
+Payment of a Bundle's product SHALL grant course access to every course id listed in that Bundle's course list, using the same access-grant mechanism as a single-course purchase. Refund of a Bundle purchase MUST revoke access to every course in that Bundle.
 
-#### Scenario: Paid user receives both entitlement flags
+#### Scenario: Paid bundle grants access to all its courses
 
-- **WHEN** PAYUNi marks the MVP order paid
-- **THEN** the order MUST have courseAccess true and kitClaimEligible true
+- **WHEN** PAYUNi marks a Bundle order paid
+- **THEN** the buyer gains course access to every course id in that Bundle's course list
 
-##### Example: PAYUNi 通知付款完成後同時開通兩項旗標
+##### Example: 兩堂課的 bundle 付款後兩堂都能看
 
-- PAYUNi webhook 通知 orderNo 對應的 pending 訂單變為 paid
-- 該 Order 的 courseAccess 與 kitClaimEligible 皆為 true
+- **GIVEN** Bundle `combo-a` 包含 course id `lesson-01` 與 `lesson-02`
+- **WHEN** 買家完成 `combo-a` 的 PAYUNi 付款
+- **THEN** 該買家對 `lesson-01` 與 `lesson-02` 皆取得存取權
 
-#### Scenario: Partial entitlement is forbidden
+#### Scenario: Refunded bundle revokes access to all its courses
 
-- **WHEN** an MVP order is marked paid
-- **THEN** the system MUST NOT leave exactly one of courseAccess or kitClaimEligible true
-
-##### Example: paid 不得只開一旗標
-
-- notify 將 orderNo=SK-8800-003 標為 paid
-- 資料列不得出現 (courseAccess=true, kitClaimEligible=false) 或相反組合；兩旗標皆必須為 true
-
-
-<!-- @trace
-source: extract-payuni-checkout
-updated: 2026-08-15
-code:
-  - packages/ui/tsconfig.json
-  - packages/database/tsconfig.json
-  - packages/payments/src/provider/payuni/crypto.ts
-  - packages/payments/src/order.ts
-  - apps/saas/app/checkout/result/page.tsx
-  - docs/discuss/architecture-draft.md
-  - packages/payments/src/refund.ts
-  - apps/saas/.env.example
-  - packages/auth/src/auth.ts
-  - docs/discuss/2026-08-14-alignment.md
-  - apps/saas/app/api/auth/[...all]/route.ts
-  - apps/saas/app/checkout/page.tsx
-  - packages/payments/src/memory-store.ts
-  - packages/database/package.json
-  - apps/saas/tsconfig.json
-  - apps/saas/next.config.ts
-  - packages/database/prisma/migrations/20260815010000_add_order/migration.sql
-  - package.json
-  - packages/i18n/package.json
-  - tsconfig.json
-  - apps/saas/app/globals.css
-  - packages/auth/package.json
-  - docs/discuss/README.md
-  - packages/database/src/index.ts
-  - packages/database/prisma/migrations/migration_lock.toml
-  - packages/database/prisma/schema.prisma
-  - docs/discuss/payment-and-deploy.md
-  - apps/saas/app/signup/page.tsx
-  - packages/utils/package.json
-  - apps/saas/app/layout.tsx
-  - packages/payments/src/credentials.ts
-  - docs/discuss/v1-boundary.md
-  - apps/saas/app/checkout/checkout-button.tsx
-  - packages/ui/package.json
-  - apps/saas/next-env.d.ts
-  - packages/payments/src/checkout.ts
-  - apps/saas/app/not-found.tsx
-  - docs/discuss/2026-08-14-thetu-source.md
-  - README.md
-  - docs/discuss/extract-map.md
-  - apps/saas/app/api/payuni/return/route.ts
-  - packages/i18n/src/index.ts
-  - packages/payments/src/notify.ts
-  - packages/i18n/tsconfig.json
-  - pnpm-workspace.yaml
-  - apps/saas/app/page.tsx
-  - apps/saas/lib/orders.ts
-  - apps/saas/app/login/login-form.tsx
-  - apps/saas/app/api/checkout/route.ts
-  - packages/payments/src/factory.ts
-  - packages/payments/src/index.ts
-  - packages/auth/src/index.ts
-  - turbo.json
-  - apps/saas/app/app/page.tsx
-  - packages/utils/src/index.ts
-  - packages/utils/tsconfig.json
-  - packages/auth/src/providers.ts
-  - packages/auth/tsconfig.json
-  - apps/saas/app/checkout/payuni/page.tsx
-  - packages/payments/src/provider/payuni/gateway.ts
-  - packages/database/prisma/migrations/20260814160938_init/migration.sql
-  - AGENTS.md
-  - apps/saas/app/login/page.tsx
-  - apps/saas/package.json
-  - tooling/typescript/base.json
-  - tooling/typescript/package.json
-  - apps/saas/app/api/orders/refund/route.ts
-  - packages/payments/package.json
-  - packages/auth/src/test-auth.ts
-  - packages/payments/src/constants.ts
-  - packages/ui/src/index.tsx
-  - vitest.config.ts
-  - apps/saas/app/api/payuni/notify/route.ts
-tests:
-  - packages/payments/src/credentials.test.ts
-  - packages/payments/src/factory.test.ts
-  - packages/payments/src/crypto.test.ts
-  - packages/payments/src/notify.test.ts
-  - packages/payments/src/order.test.ts
-  - packages/payments/src/refund.test.ts
-  - packages/payments/src/session-failclosed.test.ts
-  - packages/payments/src/checkout.test.ts
-  - packages/auth/src/auth.test.ts
--->
-
----
-### Requirement: MVP SKU constant is startkiter-mvp
-
-The MVP SKU string SHALL remain the string startkiter-mvp when no other productId is supplied. Checkout and Order persistence MUST store this exact value for MVP SKU purchases. Bundle purchases (see course-bundles capability) MUST store the Bundle's own id as the Order's productId while the sku field continues to reflect the underlying product family.
-
-#### Scenario: Created order stores canonical sku for the MVP SKU
-
-- **WHEN** checkout succeeds for the MVP product (no productId, or productId "startkiter-mvp")
-- **THEN** the Order.sku MUST equal startkiter-mvp
-
-##### Example: 成功結帳寫入 canonical sku
-
-- 已登入使用者對 POST /api/checkout 送出 sku=startkiter-mvp 且金鑰已設定
-- 建立的 Order.sku 等於 startkiter-mvp
-
-#### Scenario: Created order for a bundle stores the bundle's own product id
-
-- **WHEN** checkout succeeds for a Bundle product
-- **THEN** the Order's productId MUST equal that Bundle's id
+- **WHEN** an operator refunds a paid Bundle order
+- **THEN** the buyer's course access MUST be revoked for every course id in that Bundle's course list
 
 
 <!-- @trace
@@ -733,34 +609,291 @@ tests:
 -->
 
 ---
-### Requirement: Home page offers the MVP purchase path
-The home page SHALL offer a clear path to purchase the MVP SKU (NT$8800) and to enter the course after authentication. The primary call to action in the first viewport MUST lead toward purchase or account creation required for purchase.
+### Requirement: Bundle listing API returns published bundles only
 
-#### Scenario: Primary CTA leads to purchase path
-- **WHEN** a visitor opens the home page
-- **THEN** the primary CTA MUST navigate to checkout or signup that continues toward checkout
+GET /api/bundles SHALL return the array of Bundles with status "published". This endpoint MUST NOT require authentication.
+
+#### Scenario: Public request returns published bundles
+
+- **WHEN** an unauthenticated client calls GET /api/bundles
+- **THEN** the response is HTTP 200 with a JSON array containing only bundles whose status is "published"
 
 <!-- @trace
-source: mvp-sell-flow-usable
-updated: 2026-08-15
+source: core-module-bundles-coupons
+updated: 2026-08-23
 code:
-  - apps/saas/app/agent/agent-chat-client.tsx
-  - apps/saas/app/checkout/page.tsx
-  - apps/saas/app/page.tsx
-  - apps/saas/app/agent/page.tsx
-  - packages/i18n/src/index.ts
-  - apps/saas/app/course/page.tsx
+  - apps/saas/modules/ai/components/AiChat.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/app/page.tsx
+  - docs/assets/course-engine/course_mod_map_editor_1787451707912.jpg
+  - packages/api/modules/support/procedures/create-ticket.ts
+  - packages/bundles/src/types.ts
+  - packages/api/modules/course/lib/course-operator.ts
+  - packages/course/src/webcontainer/sandbox-runtime.ts
+  - packages/database/prisma/zod/index.ts
+  - docs/course-engine-architecture-gameplay-spec.md
+  - docs/design-system-demo/templates/screenshots/service-saas-dark.png
+  - apps/saas/modules/lib/sidebar-context.tsx
+  - docs/dashboard/README.md
+  - apps/saas/app/(main)/bundles/[slug]/page.tsx
+  - packages/coupons/src/types.ts
+  - packages/github-kit/vitest.config.ts
+  - packages/payments/notify.ts
+  - packages/sheets/tsconfig.json
+  - packages/api/modules/course/router.ts
+  - packages/api/modules/support/procedures/chatwoot-webhook.ts
+  - packages/api/modules/support/procedures/resolve-timeouts.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/course/reorder-lessons.ts
+  - packages/logs/vitest.config.ts
+  - packages/sheets/src/templates/orders.tsx
+  - packages/bundles/tsconfig.json
+  - packages/support/src/channel-config.ts
+  - apps/saas/modules/deployment/components/SupportWidget.tsx
+  - packages/notifications/vitest.config.ts
+  - packages/coupons/src/validate.ts
+  - docs/assets/course-engine/negotiation_roleplay_sandbox_1787451270712.jpg
+  - packages/platform/src/templates/index.ts
+  - packages/utils/vitest.config.ts
+  - packages/ui/vitest.config.ts
+  - apps/saas/app/api/repo-version/route.ts
+  - packages/platform/src/templates/types.ts
+  - packages/api/modules/ai/procedures/stream-message.ts
+  - docs/demo/course-sales-page-powercourse.html
+  - apps/saas/app/(authenticated)/(main)/(account)/settings/layout.tsx
+  - packages/database/prisma/schema.prisma
+  - packages/github-kit/provision-buyer-repo.ts
+  - apps/saas/lib/rate-limit.ts
+  - packages/github-kit/config.ts
+  - packages/api/modules/support/procedures/telegram-webhook.ts
+  - docs/design-system-demo/templates/portfolio.html
+  - apps/saas/modules/shared/components/AuthWrapper.tsx
+  - packages/payments/package.json
+  - apps/saas/app/api/plugins/route.ts
+  - docs/design-system-demo/templates/screenshots/portfolio-light.png
+  - apps/saas/app/api/github/claim/route.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/agent/page.tsx
+  - docs/design-system-demo/templates/service-saas.html
+  - apps/saas/app/(authenticated)/(main)/(account)/page.tsx
+  - docs/startkiter-development-sop.md
+  - docs/dispatch-board.md
+  - docs/design-system-demo/templates/screenshots/course-site-light.png
+  - packages/database/prisma/migrations/20260823150000_normalize_course_order_zero_based/migration.sql
+  - docs/course-engine-experiential-layer-research.md
+  - packages/course/src/webcontainer/client.ts
+  - packages/github-kit/github-app-client.ts
+  - packages/github-kit/index.ts
+  - apps/saas/modules/shared/components/NavBar.tsx
+  - apps/saas/app/(authenticated)/(main)/marketplace/marketplace-client.tsx
+  - apps/saas/modules/shared/components/AppWrapper.tsx
+  - docs/assets/course-engine/genre_simulation_lab_1787451430314.jpg
+  - packages/course/access.ts
+  - docs/design-canvas/bundle-sales-page/canvas.json
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/orders/page.tsx
+  - docs/design-system-demo/templates/course-site.html
+  - packages/github-kit/repo-version.ts
+  - docs/discuss/2026-08-22-platform-positioning-infra-alignment.md
+  - docs/design-system-demo/bundle-sales-page-demo.html
+  - packages/sheets/src/exporter.ts
+  - packages/storage/vitest.config.ts
+  - packages/bundles/src/catalog.ts
+  - docs/design-system-demo/templates/screenshots/portfolio-dark.png
+  - apps/saas/app/(authenticated)/(main)/marketplace/page.tsx
+  - docs/assets/course-engine/music_interactive_classroom_1787451251703.jpg
+  - docs/dispatch-board.html
+  - packages/sheets/package.json
+  - .spectra.yaml
+  - apps/saas/modules/shared/components/CourseStudioContentPreview.tsx
+  - docs/design-system-demo/templates/marketplace-page-fixture-templates.html
+  - packages/platform/src/deployment/db.ts
+  - packages/course/src/mdx/allowed-components.ts
+  - packages/i18n/translations/de/saas.json
+  - packages/ai/vitest.config.ts
+  - packages/platform/index.ts
+  - packages/course/src/mdx/LessonMdx.tsx
+  - packages/auth/config.ts
+  - packages/api/modules/support/router.ts
+  - apps/saas/modules/shared/lib/sidebar-layout.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/bundles/page.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/settings/page.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/deployment/page.tsx
+  - docs/demo/course-admin-studio-demo.html
+  - apps/saas/app/api/course/studio/route.ts
+  - docs/assets/course-engine/teacher_ai_curriculum_1787451125134.jpg
+  - docs/demo/course-demo-2-manual.html
+  - docs/startkiter-course-engine-visual-report-v2.html
+  - packages/api/modules/support/procedures/confirm-resolved.ts
+  - docs/design-system-demo/templates/screenshots/marketplace-tab-templates.png
+  - packages/course/src/components/interactive/index.ts
+  - docs/design-system-demo/templates/marketplace-page-fixture.html
+  - packages/coupons/src/index.ts
+  - apps/saas/app/api/sidebar-layout/route.ts
+  - packages/api/modules/support/lib/chatwoot-client.ts
+  - packages/support/src/chatwoot-signature.ts
+  - packages/database/prisma/migrations/20260821034520_add_bundle_bundle_course_coupon/migration.sql
+  - packages/payments/catalog.ts
+  - packages/platform/src/mount-points.ts
+  - packages/api/modules/course/errors.ts
+  - packages/coupons/vitest.config.ts
+  - apps/saas/app/(authenticated)/ChatwootScript.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/layout.tsx
+  - apps/saas/app/(authenticated)/layout.tsx
+  - packages/github-kit/revoke.ts
+  - packages/i18n/translations/zh-cn/saas.json
+  - packages/course/catalog.ts
+  - packages/payments/vitest.config.ts
+  - packages/course/src/mdx/block-registry.ts
+  - packages/bundles/src/index.ts
+  - apps/saas/app/api/templates/route.ts
+  - packages/api/modules/admin/procedures/export-revenue-spreadsheet.ts
+  - docs/assets/course-engine/ai_anime_dynamic_render_1787451690674.jpg
+  - packages/sheets/src/index.ts
+  - apps/saas/vitest.config.ts
+  - apps/saas/app/api/bundles/admin/route.ts
+  - docs/assets/course-engine-v2/open-world-course-engine.png
+  - docs/course-studio-api.md
+  - packages/course/src/components/interactive/WebContainerSandbox.tsx
+  - packages/i18n/translations/fr/saas.json
+  - packages/auth/vitest.config.ts
+  - pnpm-workspace.yaml
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/course/studio-error-message.ts
+  - packages/database/prisma/seed-course.ts
+  - apps/saas/app/api/export/revenue/route.ts
+  - apps/saas/lib/github-kit.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/revenue/page.tsx
+  - docs/design-system-demo/bundle-admin-demo.html
+  - docs/demo/StartKiter-成果儀表板.html
+  - apps/saas/app/api/bundles/route.ts
+  - packages/api/modules/support/procedures/get-channels.ts
+  - apps/saas/next.config.ts
+  - docs/assets/course-engine/student_pass_celebration_1787451076193.jpg
+  - packages/api/modules/course/lib/update-lesson.ts
+  - packages/mail/vitest.config.ts
+  - packages/i18n/translations/es/saas.json
+  - packages/support/index.ts
+  - docs/assets/course-engine/student_game_sandbox_1787451061663.jpg
+  - packages/api/modules/admin/procedures/export-orders-spreadsheet.ts
+  - docs/assets/course-engine-v2/learning-game-feel-case.png
+  - docs/design-canvas/bundle-sales-page/Dark.dc.html
+  - docs/demo/course-demo-1-split.html
+  - packages/support/src/line-signature.ts
+  - docs/assets/course-engine/octalysis_gamification_ui_1787451993600.jpg
+  - packages/api/modules/support/procedures/line-webhook.ts
+  - packages/bundles/vitest.config.ts
+  - docs/demo/course-frontend-landing-demo.html
+  - docs/design-system-demo/templates/screenshots/marketplace-tab-plugins.png
+  - packages/sheets/src/templates/bundles.tsx
+  - docs/assets/course-engine/genre_visual_novel_1787451409914.jpg
+  - docs/startkiter-course-engine-research.md
+  - packages/coupons/package.json
+  - packages/i18n/translations/en/saas.json
+  - packages/api/package.json
+  - packages/bundles/package.json
+  - apps/saas/modules/shared/lib/nav-menu-items.ts
+  - docs/design-canvas/bundle-sales-page/Main.dc.html
+  - packages/coupons/tsconfig.json
+  - packages/database/vitest.config.ts
+  - packages/ai/lib/tools/generate-spreadsheet.ts
+  - README.md
+  - packages/github-kit/claim.ts
+  - packages/sheets/src/templates/revenue.tsx
+  - packages/sheets/vitest.config.ts
+  - packages/ai/package.json
+  - docs/demo/puter-todo-app.html
+  - docs/buyer-extension-convention.md
+  - packages/payments/index.ts
+  - packages/api/orpc/procedures.ts
+  - apps/saas/modules/shared/components/UserMenu.tsx
+  - packages/i18n/vitest.config.ts
+  - docs/demo/course-demo-3-supastarter-ai.html
+  - docs/design-system-demo/templates/screenshots/course-site-dark.png
+  - packages/api/modules/admin/router.ts
+  - packages/i18n/translations/zh-tw/saas.json
+  - docs/assets/course-engine/teacher_block_studio_1787451106228.jpg
+  - docs/discuss/2026-08-21-thetu-core-modules-architecture.html
+  - apps/saas/app/api/coupons/validate/route.ts
+  - packages/payments/order.ts
+  - packages/database/prisma/migrations/20260822105711_add_sidebar_group/migration.sql
+  - docs/discuss/2026-08-21-buyer-dev-onboarding-guide-idea.md
+  - docs/demo/course-demo-3-workspace.html
+  - docs/design-system-demo/templates/screenshots/service-saas-light.png
+  - apps/saas/lib/orders.ts
+  - docs/core-boundary-and-extension-guide.md
+  - apps/saas/app/(authenticated)/(main)/(account)/course/page.tsx
+  - packages/sheets/src/templates/coupons.tsx
+  - packages/support/src/telegram-signature.ts
+  - docs/demo/platform-shell-navbar-demo.html
+  - packages/course/index.ts
+  - apps/saas/package.json
+  - docs/assets/course-engine-v2/teacher-ai-co-creation.png
+  - packages/course/src/mdx/inspect-mdx-source.ts
+  - packages/github-kit/types.ts
+  - apps/saas/vitest.integration.config.ts
+  - docs/dashboard/status.html
+  - packages/course/package.json
+  - packages/course/src/components/interactive/InstantQuiz.tsx
+  - packages/api/index.ts
+  - apps/saas/app/api/bundles/[id]/route.ts
   - AGENTS.md
-  - apps/saas/app/course/kit-claim-panel.tsx
-  - apps/saas/app/checkout/checkout-button.tsx
-  - apps/saas/app/course/[lessonId]/page.tsx
-  - apps/saas/app/app/page.tsx
-  - apps/saas/app/globals.css
-  - apps/saas/app/signup/page.tsx
-  - apps/saas/app/components/site-nav.tsx
-  - apps/saas/app/layout.tsx
-  - apps/saas/app/login/page.tsx
-  - docs/deploy-and-public-url.md
-  - apps/saas/app/login/login-form.tsx
-  - apps/saas/app/course/line-community-panel.tsx
+  - apps/saas/app/api/checkout/route.ts
+  - apps/saas/app/api/export/orders/route.ts
+  - docs/assets/course-engine/student_hint_ladder_1787451091148.jpg
+  - packages/ai/lib/index.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/course/page.tsx
+  - apps/saas/modules/admin/component/ExportSpreadsheetButton.tsx
+tests:
+  - apps/saas/lib/rate-limit.test.ts
+  - apps/saas/modules/shared/components/NavBar.test.tsx
+  - packages/course/src/mdx/LessonMdx.test.tsx
+  - packages/api/modules/support/procedures/telegram-webhook.test.ts
+  - packages/payments/order.test.ts
+  - packages/payments/catalog.test.ts
+  - packages/api/modules/support/procedures/chatwoot-webhook.test.ts
+  - packages/api/modules/support/procedures/get-channels.test.ts
+  - apps/saas/app/api/sidebar-layout/route.test.ts
+  - apps/saas/app/api/course/studio/route.test.ts
+  - apps/saas/app/api/templates/route.test.ts
+  - apps/saas/modules/shared/lib/sidebar-context.test.tsx
+  - packages/api/modules/course/update-lesson.test.ts
+  - packages/api/modules/ai/procedures/stream-message.test.ts
+  - packages/support/src/chatwoot-signature.test.ts
+  - apps/saas/modules/deployment/chatwoot-script.test.ts
+  - packages/platform/src/mount-points.test.ts
+  - apps/saas/tests/integration/bundle-course-access.test.ts
+  - packages/api/modules/admin/procedures/export-revenue-spreadsheet.test.ts
+  - packages/platform/src/templates/types.test.ts
+  - packages/course/src/components/interactive/WebContainerSandbox.test.tsx
+  - apps/saas/app/api/checkout/route.test.ts
+  - packages/api/modules/support/procedures/line-webhook.test.ts
+  - apps/saas/app/api/export/revenue/route.test.ts
+  - packages/api/modules/support/__tests__/ticket-api.test.ts
+  - packages/course/src/mdx/block-registry.test.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/course/reorder-lessons.test.ts
+  - packages/course/src/mdx/inspect-mdx-source.test.ts
+  - packages/github-kit/config.test.ts
+  - packages/sheets/src/exporter.test.ts
+  - packages/github-kit/repo-version.test.ts
+  - apps/saas/app/(authenticated)/(main)/marketplace/page.test.tsx
+  - apps/saas/modules/shared/lib/nav-menu-items.test.ts
+  - packages/coupons/src/validate.test.ts
+  - packages/github-kit/claim.test.ts
+  - packages/database/src/bundle/bundle.test.ts
+  - apps/saas/modules/admin/component/ExportSpreadsheetButton.test.tsx
+  - packages/platform/src/core-boundary.test.ts
+  - apps/saas/app/api/export/orders/route.test.ts
+  - apps/saas/app/api/coupons/validate/route.test.ts
+  - apps/saas/app/api/plugins/route.test.ts
+  - apps/saas/app/api/bundles/route.test.ts
+  - packages/github-kit/revoke.test.ts
+  - apps/saas/modules/shared/components/CourseStudioContentPreview.test.tsx
+  - apps/saas/modules/deployment/support-widget.test.tsx
+  - packages/course/access.test.ts
+  - packages/payments/notify.test.ts
+  - packages/support/src/line-signature.test.ts
+  - packages/bundles/src/catalog.test.ts
+  - packages/support/src/channel-config.test.ts
+  - apps/saas/modules/shared/components/UnifiedShell.test.tsx
+  - e2e/startkiter.spec.ts
+  - packages/support/src/telegram-signature.test.ts
+  - packages/course/src/webcontainer/sandbox-runtime.test.ts
+  - packages/ai/lib/tools/generate-spreadsheet.test.ts
+  - packages/api/modules/admin/procedures/export-orders-spreadsheet.test.ts
 -->
