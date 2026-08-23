@@ -76,7 +76,7 @@ Changes can be parked（暫存）— temporarily moved out of `openspec/changes/
 **課程引擎（課神，暫稱）方向（2026-08-23 定案，先驗證再拆 SR）**：課程系統的長期方向從「單一功能」改成「通用課程引擎」，但**先驗證假說，不直接動工大規模建設**。
 
 - **現有已實作、非半成品**：`packages/course/` 的 MDX + 7 積木架構（TimelineSync/ConceptCompare/MicroSandbox/WorkflowSorter/InstantQuiz/TeacherAvatar/DialogueWindow）已完整實作（2026-08-21 `interactive-learning-system` change 43/43 完成），積木刻意寫死不可擴充（防 XSS 安全邊界）。`admin/course/page.tsx`（672 行）Course/Chapter/Lesson CRUD 已有，但內容編輯只是純 textarea，拖曳排序沒接（`order` 欄位有）。
-- **第一步（現在）**：先玩過 AFC Loop（Action-Feedback-Consequence）驗證原型——https://share.onorca.dev/a/xCSxh5HajjAK （虛構逐字稿，驗證「判斷→看後果→修正」是否比看示範影片更好學），驗證完再決定要不要立 SR。
+- **第一步（已驗證，2026-08-23）**：AFC Loop（Action-Feedback-Consequence）原型 https://share.onorca.dev/a/xCSxh5HajjAK 老闆親自玩過，回饋「最少可以知道我是不是真的懂」——判斷→看後果→修正這個機制對學習者有實際價值，通過驗證。原型本身是寫死單一練習的 demo（沒有 Mission schema／Evaluator／Block Registry 這層通用抽象），拿來證明機制有感，不是引擎本體。
 - **驗證通過後，可以做（成本可控，跟現有方向一致）**：
   1. 積木架構升級成 Zod Schema Registry（可動態擴充積木，取代現在寫死的 allowlist）
   2. 補一款真的用 WebContainer 的程式沙盒積木（取代假的 `MicroSandbox`），加打擊感回饋（hit-stop、里程碑慶祝）
