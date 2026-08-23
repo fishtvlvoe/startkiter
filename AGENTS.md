@@ -73,6 +73,19 @@ Changes can be parked（暫存）— temporarily moved out of `openspec/changes/
 
 下一步該做的：確認要不要為「課程管理後台編輯器」（章節/單元 CRUD、講義編輯器）開新 SR——目前完全沒做，也還沒 propose；或推進 `unified-support-desk` 剩的項目。
 
+**課程引擎（課神，暫稱）方向（2026-08-23 定案，先驗證再拆 SR）**：課程系統的長期方向從「單一功能」改成「通用課程引擎」，但**先驗證假說，不直接動工大規模建設**。
+
+- **現有已實作、非半成品**：`packages/course/` 的 MDX + 7 積木架構（TimelineSync/ConceptCompare/MicroSandbox/WorkflowSorter/InstantQuiz/TeacherAvatar/DialogueWindow）已完整實作（2026-08-21 `interactive-learning-system` change 43/43 完成），積木刻意寫死不可擴充（防 XSS 安全邊界）。`admin/course/page.tsx`（672 行）Course/Chapter/Lesson CRUD 已有，但內容編輯只是純 textarea，拖曳排序沒接（`order` 欄位有）。
+- **第一步（現在）**：先玩過 AFC Loop（Action-Feedback-Consequence）驗證原型——https://share.onorca.dev/a/xCSxh5HajjAK （虛構逐字稿，驗證「判斷→看後果→修正」是否比看示範影片更好學），驗證完再決定要不要立 SR。
+- **驗證通過後，可以做（成本可控，跟現有方向一致）**：
+  1. 積木架構升級成 Zod Schema Registry（可動態擴充積木，取代現在寫死的 allowlist）
+  2. 補一款真的用 WebContainer 的程式沙盒積木（取代假的 `MicroSandbox`），加打擊感回饋（hit-stop、里程碑慶祝）
+  3. SR-A（後台拖曳排序＋內容編輯器升級）併進來一起做
+- **先寫起來、明確不做**（怕忘記，不是待辦，需求沒驗證前不排時間）：
+  - AI 自動生成動漫短片補課（需串 SeaArt/可靈 Kling AI，每次學員卡關就要打一次外部影片生成 API，成本會滾，且未驗證是否真的有效）
+  - 學生自製關卡的 MOD 地圖編輯器／社群工坊（UGC 審核機制是完全獨立的產品規模，不是課程系統附加功能）
+  - 這兩項來自一份「課程引擎產品戰略規格書 v2.0」（`~/Downloads/course-engine-architecture-gameplay-spec.md`），該文件自稱「Approved for SR Decomposition」，但尚未經過驗證步驟，不採信其核准狀態，仍走「先驗證再擴張」原則。
+
 **每次做完事，回頭更新 `docs/dashboard`（見下方「專案儀表板」段）的 state.json，不要只在對話裡口頭報告——這是本檔案能被下一個 session 讀到的正式進度來源，對話記錄會斷。**
 
 **產品定位（2026-08-22 補寫，之前遺漏）：StartKiter 要做成類似 WordPress 的平台，不是單一固定功能的 SaaS。** 買家拿到的不是一個寫死功能清單的網站，而是一個殼（platform shell）＋可掛載的模組（plugin）架構：後台掛載點、Marketplace 展示頁、模組各自獨立 `packages/<name>/`，買家或第三方可以像裝 WordPress 外掛一樣加裝功能。這個定位對應 `openspec/changes/platform-shell-plugin-architecture/`（Mount Points、PluginContent、Marketplace、MCP Gateway 唯讀連線），不是事後補的功能，是產品第一性——之前的對焦摘要漏講這段，只講了「一次買斷拿到 SaaS 骨架」，沒講「這骨架長成什麼架構」。
