@@ -53,12 +53,20 @@ Fish 只需要做的事：依序把下面的 change 丟給 Codex 執行 `/spectr
 ### packages/storage 組（#12 → #14 → #15）
 三張都改 `StorageBucketNamesConfig`（`packages/storage/types.ts`）與 `config.ts` 的 `bucketNames`。目前只有 `avatars` 一個欄位。三張依序各自新增一個欄位（`assignments`／`lessonMessages`／`media`），每張 apply 前確認前一張已經合併，避免同時編輯同一個 interface 產生衝突。
 
-## 驗收方式（每張 apply 完成後）
+## 驗收方式（每張 apply 完成後，硬性關卡，不可跳過任一項）
 
-1. 跑該 change 的 tasks.md 全部項目，確認每個「驗證目標」都有實際輸出（測試綠燈、`spectra analyze`/`validate` 通過、ego-browser e2e 截圖）
-2. `git status` 乾淨、已 commit
-3. `spectra archive <name>`
-4. 進下一張前，若這張是衝突組成員，先 `grep` 確認共用檔案的最新狀態符合這份計畫的預期（見上方「衝突組細節」）
+每張 tasks.md 的「Review 與驗證」章節都固定包含三種驗證，缺一項就不算這張完成，不能進下一張：
+
+1. **Code Review（CR）**：對照 tasks.md 裡「派 Codex 或等效工具對本次全部 diff 做 Code Review（correctness／security／performance 三角度）」那一項，確認 CR 報告 Critical 數量為 0。有任何 Critical 發現 → 先修，重新 CR，Critical 清零才能繼續，不可帶著已知 Critical 進下一張
+2. **e2e 行為驗證**：對照 tasks.md 裡的 ego-browser e2e 項，確認截圖/終端機輸出證據齊全，每一步驟都實際跑過，不是「應該會過」的推測
+3. **一致性/測試/建置**：`spectra analyze`／`validate` 通過、`pnpm test`／`pnpm type-check`／`pnpm build` 全數 exit code 0
+
+三項都過，才做：
+4. `git status` 乾淨、已 commit
+5. `spectra archive <name>`
+6. 進下一張前，若這張是衝突組成員，先 `grep` 確認共用檔案的最新狀態符合這份計畫的預期（見上方「衝突組細節」）
+
+我（Claude）做最終驗收時，會逐張核對這三項證據是否真的存在，不會只看 Codex 回報「完成」就簽核。
 
 ## 已盤點但本次不做（待 Fish 裁決，不在這 15 張範圍內）
 
