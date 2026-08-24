@@ -2,24 +2,13 @@ import { createHash, randomBytes } from "node:crypto";
 
 import { ORPCError } from "@orpc/server";
 import { db } from "@startkiter/database";
+import { getBaseUrl } from "@startkiter/utils";
 import { z } from "zod";
 
 import { courseInviteOperatorProcedure, normalizeInviteEmail } from "../lib/course-invite-auth";
 
 export function hashCourseInviteToken(token: string): string {
 	return createHash("sha256").update(token, "utf8").digest("hex");
-}
-
-function resolveInviteBaseUrl(requestUrl?: string): string {
-	if (requestUrl) {
-		try {
-			return new URL(requestUrl).origin;
-		} catch {
-			// Fall through to the configured URL for malformed or relative test URLs.
-		}
-	}
-
-	return process.env.NEXT_PUBLIC_APP_URL ?? process.env.APP_URL ?? "http://localhost:3000";
 }
 
 const createCourseInviteInput = z.object({
@@ -65,7 +54,7 @@ export const createCourseInvite = courseInviteOperatorProcedure
 				createdAt: invite.createdAt,
 			},
 			token,
-			inviteUrl: `${resolveInviteBaseUrl(context.url)}/invite/${token}`,
+			inviteUrl: `${getBaseUrl(process.env.NEXT_PUBLIC_SAAS_URL, 3000)}/invite/${token}`,
 		};
 	});
 
@@ -95,5 +84,9 @@ export const deactivateCourseInvite = courseInviteOperatorProcedure
 	.handler(async ({ input }) => {
 		const invite = await db.courseInvite.findUnique({ where: { id: input.inviteId }, select: { id: true } });
 		if (!invite) throw new ORPCError("NOT_FOUND", { message: "找不到指定邀請。" });
-		return db.courseInvite.update({ where: { id: input.inviteId }, data: { active: false } });
+		return db.courseInvite.update({
+			where: { id: input.inviteId },
+			data: { active: false },
+			select: { id: true, active: true },
+		});
 	});

@@ -1,15 +1,4 @@
-import { ORPCError } from "@orpc/server";
-
-import { protectedProcedure } from "../../../orpc/procedures";
-import { isCourseOperator } from "./course-operator";
-
-export const courseInviteOperatorProcedure = protectedProcedure.use(async ({ context, next }) => {
-	if (!isCourseOperator(context.user.email, process.env.ADMIN_EMAIL)) {
-		throw new ORPCError("FORBIDDEN");
-	}
-
-	return next();
-});
+export { courseOperatorProcedure as courseInviteOperatorProcedure } from "./course-operator";
 
 export function normalizeInviteEmail(email: string): string {
 	return email.trim().toLowerCase();

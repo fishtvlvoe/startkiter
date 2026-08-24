@@ -8,7 +8,7 @@ import {
 	publicProcedure,
 	publicProcedureWithSession,
 } from "../../orpc/procedures";
-import { isCourseOperator } from "./lib/course-operator";
+import { courseOperatorProcedure } from "./lib/course-operator";
 import { userCanAccessCourseId } from "./lib/course-access";
 import { updateLesson } from "./lib/update-lesson";
 import { resolveVideoSource } from "./lib/video-resolver";
@@ -22,14 +22,6 @@ import {
 	listCourseInvites,
 } from "./procedures/create-course-invite";
 import { redeemCourseInvite } from "./procedures/redeem-course-invite";
-
-const courseOperatorProcedure = protectedProcedure.use(async ({ context, next }) => {
-	if (!isCourseOperator(context.user.email, process.env.ADMIN_EMAIL)) {
-		throw new ORPCError("FORBIDDEN");
-	}
-
-	return await next();
-});
 
 export const courseRouter = publicProcedure.router({
 	// 1. 公開/試看課綱大綱 (Public)
