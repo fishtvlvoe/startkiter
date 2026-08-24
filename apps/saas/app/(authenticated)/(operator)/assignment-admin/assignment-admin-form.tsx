@@ -114,7 +114,7 @@ export function AssignmentAdminForm({ lessons, existingAssignments }: { lessons:
 					{existingAssignments.map((assignment) => (
 						<div key={assignment.id} className="flex flex-wrap items-center justify-between gap-3 text-sm">
 							<a className="underline" href={`/assignment/${assignment.id}`}>{assignment.title}</a>
-							<Button type="button" variant="outline" onClick={() => { submissionRequestVersion.current += 1; setCreatedId(assignment.id); setSubmissions([]); setNextCursor(null); setFeedback({}); setScores({}); setMessage(null); setError(null); }}>查看提交</Button>
+							<Button type="button" variant="outline" onClick={() => { submissionRequestVersion.current += 1; setIsLoadingSubmissions(false); setCreatedId(assignment.id); setSubmissions([]); setNextCursor(null); setFeedback({}); setScores({}); setMessage(null); setError(null); }}>查看提交</Button>
 						</div>
 					))}
 				</section>

@@ -26,6 +26,7 @@ import {
 	decodeAssignmentSubmissionCursor,
 	encodeAssignmentSubmissionCursor,
 } from "./assignment-lifecycle";
+import { shouldApplyAssignmentDraftRevision } from "./assignment-draft";
 
 const contentSchema = z.string().max(200_000).nullable().optional();
 const attachmentSchema = z.object({
@@ -87,7 +88,12 @@ export const assignmentRouter = {
 			const definition = await getAccessibleAssignment(input.pluginContentId, context.user.id);
 			const draft = await db.assignmentDraft.findUnique({
 				where: { pluginContentId_userId: { pluginContentId: definition.id, userId: context.user.id } },
-				select: { id: true, content: true, contentFormat: true, updatedAt: true },
+				select: { id: true, content: true, contentFormat: true, revision: true, updatedAt: true },
+			});
+			const pendingUpload = await db.assignmentUploadIntent.findFirst({
+				where: { pluginContentId: definition.id, userId: context.user.id, status: { in: ["PENDING", "UPLOADED"] }, expiresAt: { gt: new Date() } },
+				orderBy: { createdAt: "desc" },
+				select: { id: true, submissionId: true, filename: true, mimeType: true, size: true, storageKey: true },
 			});
 			const result = await db.assignmentSubmission.findFirst({
 				where: { pluginContentId: definition.id, userId: context.user.id, status: "REVIEWED" },
@@ -99,6 +105,7 @@ export const assignmentRouter = {
 				title: definition.title,
 				body: definition.body,
 				draft,
+				pendingUpload: pendingUpload ? { attachmentId: pendingUpload.id, submissionId: pendingUpload.submissionId, filename: pendingUpload.filename, mimeType: pendingUpload.mimeType, size: pendingUpload.size, storageKey: pendingUpload.storageKey } : null,
 				result: result
 					? { ...result, reviews: result.reviews.map((review) => ({ ...review, feedback: review.feedback ? sanitizeAssignmentContent(review.feedback) : null })) }
 					: null,
@@ -110,15 +117,23 @@ export const assignmentRouter = {
 			pluginContentId: z.string().min(1),
 			content: contentSchema,
 			contentFormat: z.enum(["PLAIN_TEXT", "RICH_TEXT"]),
+			revision: z.number().int().min(1).max(1_000_000),
 		}))
 		.handler(async ({ input, context }) => {
 			await getAccessibleAssignment(input.pluginContentId, context.user.id);
 			const content = input.content == null ? null : sanitizeAssignmentContent(input.content);
-			return db.assignmentDraft.upsert({
-				where: { pluginContentId_userId: { pluginContentId: input.pluginContentId, userId: context.user.id } },
-				create: { pluginContentId: input.pluginContentId, userId: context.user.id, content, contentFormat: input.contentFormat },
-				update: { content, contentFormat: input.contentFormat },
-			});
+			const where = { pluginContentId_userId: { pluginContentId: input.pluginContentId, userId: context.user.id } };
+			const existing = await db.assignmentDraft.findUnique({ where, select: { revision: true } });
+			if (existing && !shouldApplyAssignmentDraftRevision(existing.revision, input.revision)) return db.assignmentDraft.findUniqueOrThrow({ where });
+			if (!existing) {
+				try {
+					return await db.assignmentDraft.create({ data: { pluginContentId: input.pluginContentId, userId: context.user.id, content, contentFormat: input.contentFormat, revision: input.revision } });
+				} catch (error) {
+					if (!isUniqueConstraintError(error)) throw error;
+				}
+			}
+			await db.assignmentDraft.updateMany({ where: { ...where, revision: { lt: input.revision } }, data: { content, contentFormat: input.contentFormat, revision: input.revision } });
+			return db.assignmentDraft.findUniqueOrThrow({ where });
 		}),
 
 	createUploadUrl: protectedProcedure

@@ -240,7 +240,7 @@ export type AssignmentReviewScalarFieldEnum = z.infer<typeof AssignmentReviewSca
 
 // File: AssignmentDraftScalarFieldEnum.schema.ts
 
-export const AssignmentDraftScalarFieldEnumSchema = z.enum(['id', 'pluginContentId', 'userId', 'content', 'contentFormat', 'createdAt', 'updatedAt'])
+export const AssignmentDraftScalarFieldEnumSchema = z.enum(['id', 'pluginContentId', 'userId', 'content', 'contentFormat', 'revision', 'createdAt', 'updatedAt'])
 
 export type AssignmentDraftScalarFieldEnum = z.infer<typeof AssignmentDraftScalarFieldEnumSchema>;
 
@@ -1124,6 +1124,7 @@ export const AssignmentDraftSchema = z.object({
   userId: z.string(),
   content: z.string().nullish(),
   contentFormat: z.string().nullish(),
+  revision: z.number().int(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });

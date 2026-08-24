@@ -3,7 +3,7 @@
 import type { AssignmentDefinitionBody } from "@startkiter/course-assignment";
 import { Button, Card, Input, Label } from "@startkiter/ui";
 import { orpcClient } from "@shared/lib/orpc-client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 	type AssignmentResult = { status: string; reviews: { score: number | null; letterGrade: string | null; feedback: string | null }[] };
 	type Assignment = { id: string; title: string; body: AssignmentDefinitionBody };
@@ -19,12 +19,19 @@ export function AssignmentLearner({ assignment }: { assignment: Assignment }) {
 	const [error, setError] = useState<string | null>(null);
 	const [isWorking, setIsWorking] = useState(false);
 	const [hasLoadedDraft, setHasLoadedDraft] = useState(false);
+	const draftRevision = useRef(0);
 
 	useEffect(() => {
 		let cancelled = false;
 		orpcClient.assignment.get({ pluginContentId: assignment.id }).then((value) => {
 			if (cancelled) return;
 			setContent(value.draft?.content ?? "");
+			draftRevision.current = value.draft?.revision ?? 0;
+			if (value.pendingUpload) {
+				setPendingAttachment(value.pendingUpload);
+				setPendingSubmissionId(value.pendingUpload.submissionId);
+				setSubmissionId(value.pendingUpload.submissionId);
+			}
 			setResult(value.result as AssignmentResult | null);
 			setHasLoadedDraft(true);
 		}).catch(() => {
@@ -36,18 +43,21 @@ export function AssignmentLearner({ assignment }: { assignment: Assignment }) {
 	useEffect(() => {
 		if (!hasLoadedDraft) return;
 		const timer = window.setTimeout(() => {
+			draftRevision.current += 1;
+			const revision = draftRevision.current;
 			void orpcClient.assignment.saveDraft({
 				pluginContentId: assignment.id,
 				content,
 				contentFormat: assignment.body.editorMode,
+				revision,
 			}).catch(() => undefined);
 		}, 800);
 		return () => window.clearTimeout(timer);
 	}, [assignment.body.editorMode, assignment.id, content, hasLoadedDraft]);
 
 	async function uploadSelectedFile(): Promise<{ attachment: NonNullable<typeof pendingAttachment>; submissionId: string } | null> {
-		if (!file) return null;
 		if (pendingAttachment && pendingSubmissionId) return { attachment: pendingAttachment, submissionId: pendingSubmissionId };
+		if (!file) return null;
 		const upload = await orpcClient.assignment.createUploadUrl({ pluginContentId: assignment.id, filename: file.name, mimeType: file.type || "application/octet-stream", size: file.size });
 		const response = await fetch(upload.signedUploadUrl, { method: "PUT", headers: { "Content-Type": file.type || "application/octet-stream" }, body: file });
 		if (!response.ok) throw new Error("upload failed");
@@ -65,7 +75,7 @@ export function AssignmentLearner({ assignment }: { assignment: Assignment }) {
 		setIsWorking(true);
 		try {
 			await uploadSelectedFile();
-			await orpcClient.assignment.saveDraft({ pluginContentId: assignment.id, content, contentFormat: assignment.body.editorMode });
+			await orpcClient.assignment.saveDraft({ pluginContentId: assignment.id, content, contentFormat: assignment.body.editorMode, revision: ++draftRevision.current });
 			setMessage("草稿已儲存。");
 		} catch {
 			setError("草稿儲存失敗，請確認附件格式與大小。");
@@ -80,7 +90,7 @@ export function AssignmentLearner({ assignment }: { assignment: Assignment }) {
 		setIsWorking(true);
 		try {
 			const uploaded = await uploadSelectedFile();
-			await orpcClient.assignment.saveDraft({ pluginContentId: assignment.id, content, contentFormat: assignment.body.editorMode });
+			await orpcClient.assignment.saveDraft({ pluginContentId: assignment.id, content, contentFormat: assignment.body.editorMode, revision: ++draftRevision.current });
 			await orpcClient.assignment.submit({ pluginContentId: assignment.id, submissionId: uploaded?.submissionId ?? submissionId, content, contentFormat: assignment.body.editorMode, attachments: uploaded ? [uploaded.attachment] : [] });
 			setMessage("作業已送出，等待批改。");
 		} catch {
