@@ -62,6 +62,9 @@ export async function PUT(request: Request) {
 		data: { status: "UPLOADED" },
 	});
 	if (updated.count !== 1) return Response.json({ error: "Upload intent is no longer active." }, { status: 409 });
-	recordLocalAssignmentUpload({ storageKey: upload.storageKey, contentType: upload.contentType, contentLength, body: body.subarray(0, contentLength) });
+	// Copy the exact payload before retaining it; a subarray would keep the full
+	// intent-sized backing buffer alive while the cache accounts only for bytes uploaded.
+	const storedBody = Buffer.from(body.subarray(0, contentLength));
+	recordLocalAssignmentUpload({ storageKey: upload.storageKey, contentType: upload.contentType, contentLength, body: storedBody });
 	return Response.json({ ok: true, storageKey: upload.storageKey });
 }
