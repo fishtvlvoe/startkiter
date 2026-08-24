@@ -20,6 +20,12 @@
 Alternatives Considered:
 - 私訊不支援附件，只做純文字 → 否決：woomin 原版支援附件（例如學員傳截圖問問題），拿掉這個功能會降低實用性，且附件上傳邏輯已經在 `course-assignment-plugin` 驗證過可行，複用成本低
 
+### Decision: 附件採 staged upload intent，再以一次性 finalize 建立訊息
+
+學員先呼叫 prepare procedure 建立短效 `PENDING` intent，再使用 signed URL（S3 使用 `If-None-Match: *`）上傳物件；API 只有在驗證 token、使用者／單元、Content-Type、size 與實際物件存在後，才在同一個 transaction 將 intent 原子轉為 `FINALIZED` 並建立 `LessonPrivateMessage`。因此附件驗證失敗或 token 重播不會建立訊息。
+
+未完成的 intent 由 cleanup procedure 以五分鐘 grace period 和 `CLEANING` claim 狀態清除，避免 upload race；已完成 intent 保留七天後清理。production cleanup route 缺少 shared secret 時 fail-closed。transaction commit 後若下載網址簽署暫時失敗，不刪除已提交的物件，交由 finalized retention 清理，避免訊息已存在但附件被誤刪。
+
 ## Implementation Contract
 
 **Behavior:**
