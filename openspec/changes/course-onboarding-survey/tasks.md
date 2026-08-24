@@ -1,0 +1,18 @@
+## 1. 紅燈測試（TDD）
+
+- [x] 1.1 為 `submit-onboarding-survey.ts` 寫紅燈測試，涵蓋 Requirement「A learner submits at most one onboarding survey per course」與「Only learners with course access can submit the survey」：正常送出成功、重複送出被拒絕、無存取權送出被拒絕。驗證目標：`pnpm --filter @startkiter/api test submit-onboarding-survey.test.ts` FAIL。證據：實作前因 `./submit-onboarding-survey` 不存在而 exit 1；實作後同一命令 3 tests passed。
+
+## 2. Database schema 與 procedure
+
+- [x] 2.1 在 `packages/database/prisma/schema.prisma` 新增 `CourseOnboardingSurveyResponse` model（DDL 見 design.md），產生 migration；依 design.md Decision: 問卷彈出時機讀取既有 canAccessCourseId 結果，不新增授權判斷邏輯，實作 `submitOnboardingSurvey` procedure（呼叫既有 `userCanAccessCourseId` 驗證權限）。驗證目標：task 1.1 全數轉綠燈。證據：migration `20260824103241_add_course_onboarding_survey` apply exit 0、Prisma generate exit 0；procedure focused test 3 tests passed；schema unique key 與 user cascade foreign key 已由 migration 實際建立。
+
+## 3. 頁面
+
+- [x] 3.1 新增 `apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/onboarding-survey-modal.tsx`（首次進入課程彈窗，可跳過）與 `apps/saas/app/(authenticated)/(main)/(account)/admin/onboarding-surveys/page.tsx`（operator 查詢頁，比照既有 `admin/bundles`、`admin/users` 頁面慣例放在同一層）；在 `packages/platform/src/mount-points.ts` 的 `MOUNT_POINTS` 新增一筆 entry（`id: "onboarding-surveys"`、`route.path: "/admin/onboarding-surveys"`、`menu: { label: "新生問卷", icon: 依現有 icon 集挑選, order: 依現有最大 order 遞增, requiresOperator: true }`），否則 operator 在側邊選單完全看不到入口。驗證目標：手動驗證彈窗只在未填答時顯示，填答後不再顯示；operator 登入後側邊選單看得到「新生問卷」入口。證據：ego-browser 實測 `/course/cmt73qgvg0002toz7tz7dmiha` 首次顯示 modal、送出後 modal 消失、重新進入 `modal_present_after_reload=false`；DB 讀回 1 筆且 `courseId` 與當前課程一致；operator magic-link 登入 `/admin/onboarding-surveys` 實測側欄顯示「新生問卷」、頁面顯示「新生問卷 E2E 課程」與 1 份回應。截圖：`/tmp/startkiter-onboarding-survey-modal.png`、`/tmp/startkiter-onboarding-survey-submitted.png`、`/tmp/startkiter-onboarding-survey-admin.png`。
+
+## 4. Review 與驗證
+
+- [ ] 4.1 派 Codex 或等效工具對本次全部 diff（task 1-3）做 Code Review（correctness／security／performance 三角度）：correctness 確認 `@@unique([userId, courseId])` 唯一鍵真的擋下重複送出；security 確認無存取權的使用者呼叫 `submitOnboardingSurvey` 被拒絕、operator 查詢頁只有 operator 能存取；performance 確認查詢頁列表沒有 N+1。驗證方式：CR 報告 Critical 數量為 0（PM 覆核）
+- [ ] 4.2 用 ego-browser skill 跑一次完整 e2e：以一個已取得課程存取權的學員帳號首次進入課程 → 確認問卷彈窗顯示 → 填寫並送出 → 重新進入課程確認不再彈出 → operator 在 `/admin/onboarding-surveys` 查詢頁看到該筆回應。驗證目標：截圖記錄關鍵畫面，任何一步失敗即視為本 task 未完成
+- [ ] 4.3 跑 `spectra analyze course-onboarding-survey --json` 與 `spectra validate course-onboarding-survey`，確認 Coverage／Consistency／Ambiguity／Gaps 四個維度皆為 Clean 或僅有 Suggestion。驗證目標：無 Critical／Warning，且 0 warnings／0 errors
+- [ ] 4.4 逐項核對 design.md Implementation Contract 的 Acceptance criteria 是否全部滿足：跑 `pnpm --filter @startkiter/api test`／`pnpm type-check`／`pnpm build`，確認全數綠燈。驗證目標：所有指令 exit code 為 0

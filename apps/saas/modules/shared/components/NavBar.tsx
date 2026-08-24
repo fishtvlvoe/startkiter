@@ -40,6 +40,7 @@ import { UserMenu } from "@shared/components/UserMenu";
 import {
 	BotMessageSquareIcon,
 	BookOpenIcon,
+	ClipboardListIcon,
 	ChevronLeftIcon,
 	ChevronRightIcon,
 	EllipsisIcon,
@@ -95,6 +96,7 @@ export const iconMap: Record<string, React.ComponentType<{ className?: string }>
 	settings: SettingsIcon,
 	"list-checks": ListChecksIcon,
 	"message-square": MessageSquareIcon,
+	"clipboard-list": ClipboardListIcon,
 	"shield-user": ShieldUserIcon,
 	"user-cog": UserCogIcon,
 	ellipsis: EllipsisIcon,

@@ -208,6 +208,12 @@ export const CourseReviewScalarFieldEnumSchema = z.enum(['id', 'courseId', 'user
 
 export type CourseReviewScalarFieldEnum = z.infer<typeof CourseReviewScalarFieldEnumSchema>;
 
+// File: CourseOnboardingSurveyResponseScalarFieldEnum.schema.ts
+
+export const CourseOnboardingSurveyResponseScalarFieldEnumSchema = z.enum(['id', 'userId', 'courseId', 'goals', 'purchaseFactors', 'hesitation', 'alternatives', 'discoverySource', 'discoverySourceOther', 'createdAt', 'updatedAt'])
+
+export type CourseOnboardingSurveyResponseScalarFieldEnum = z.infer<typeof CourseOnboardingSurveyResponseScalarFieldEnumSchema>;
+
 // File: ReviewHelpfulScalarFieldEnum.schema.ts
 
 export const ReviewHelpfulScalarFieldEnumSchema = z.enum(['id', 'reviewId', 'userId', 'createdAt'])
@@ -979,6 +985,25 @@ export const CourseReviewSchema = z.object({
 });
 
 export type CourseReviewType = z.infer<typeof CourseReviewSchema>;
+
+
+// File: CourseOnboardingSurveyResponse.schema.ts
+
+export const CourseOnboardingSurveyResponseSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  courseId: z.string(),
+  goals: z.array(z.string()),
+  purchaseFactors: z.array(z.string()),
+  hesitation: z.string().nullish(),
+  alternatives: z.string().nullish(),
+  discoverySource: z.string().nullish(),
+  discoverySourceOther: z.string().nullish(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type CourseOnboardingSurveyResponseType = z.infer<typeof CourseOnboardingSurveyResponseSchema>;
 
 
 // File: ReviewHelpful.schema.ts

@@ -83,4 +83,14 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		},
 		dataSpec: "none",
 	},
+	{
+		id: "onboarding-surveys",
+		name: "新生問卷",
+		version: "0.1.0",
+		mount: {
+			route: { path: "/admin/onboarding-surveys" },
+			menu: { label: "新生問卷", icon: "clipboard-list", order: 16, requiresOperator: true },
+		},
+		dataSpec: "none",
+	},
 ];

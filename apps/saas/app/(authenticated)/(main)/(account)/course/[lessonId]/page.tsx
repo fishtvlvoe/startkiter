@@ -1,10 +1,12 @@
 import { auth } from "@startkiter/auth";
+import { userCanAccessCourseId } from "@startkiter/api/modules/course/lib/course-access";
 import { db } from "@startkiter/database";
 import { createProcedureClient, ORPCError } from "@orpc/server";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { courseRouter } from "@startkiter/api/modules/course/router";
 import { AcademyClassroomClient } from "./classroom-client";
+import { OnboardingSurveyModal } from "./onboarding-survey-modal";
 
 type LessonPageProps = {
 	params: Promise<{ lessonId: string }>;
@@ -108,5 +110,29 @@ export default async function LessonPage({ params }: LessonPageProps) {
 		notFound();
 	}
 
-	return <AcademyClassroomClient initialLesson={currentLesson} curriculum={curriculum} />;
+	const courseId = chaptersFromDb.find((chapter) =>
+		chapter.lessons.some((lesson) => lesson.id === lessonId),
+	)?.courseId;
+	let showOnboardingSurvey = false;
+	if (session?.user?.id && courseId) {
+		const hasCourseAccess = await userCanAccessCourseId(session.user.id, courseId);
+		if (hasCourseAccess) {
+			const existingSurvey = await db.courseOnboardingSurveyResponse.findUnique({
+				where: {
+					userId_courseId: { userId: session.user.id, courseId },
+				},
+				select: { id: true },
+			});
+			showOnboardingSurvey = !existingSurvey;
+		}
+	}
+
+	return (
+		<>
+			<AcademyClassroomClient initialLesson={currentLesson} curriculum={curriculum} />
+			{courseId && (
+				<OnboardingSurveyModal courseId={courseId} open={showOnboardingSurvey} />
+			)}
+		</>
+	);
 }

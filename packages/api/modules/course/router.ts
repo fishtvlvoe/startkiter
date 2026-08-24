@@ -22,6 +22,7 @@ import {
 	listCourseInvites,
 } from "./procedures/create-course-invite";
 import { redeemCourseInvite } from "./procedures/redeem-course-invite";
+import { submitOnboardingSurvey } from "./procedures/submit-onboarding-survey";
 
 export const courseRouter = publicProcedure.router({
 	// 1. 公開/試看課綱大綱 (Public)
@@ -263,4 +264,5 @@ export const courseRouter = publicProcedure.router({
 	listCourseInvites,
 	deactivateCourseInvite,
 	redeemCourseInvite,
+	submitOnboardingSurvey,
 });
