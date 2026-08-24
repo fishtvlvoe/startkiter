@@ -5,13 +5,13 @@ import { Button, Card, Input, Label } from "@startkiter/ui";
 import { orpcClient } from "@shared/lib/orpc-client";
 import { useEffect, useState } from "react";
 
-type AssignmentResult = { status: string; reviews: { score: number | null; letterGrade: string | null; feedback: string | null }[] };
-type Assignment = { id: string; title: string; body: AssignmentDefinitionBody };
+	type AssignmentResult = { status: string; reviews: { score: number | null; letterGrade: string | null; feedback: string | null }[] };
+	type Assignment = { id: string; title: string; body: AssignmentDefinitionBody };
 
 export function AssignmentLearner({ assignment }: { assignment: Assignment }) {
 	const [content, setContent] = useState("");
 	const [file, setFile] = useState<File | null>(null);
-	const [pendingAttachment, setPendingAttachment] = useState<{ filename: string; mimeType: string; size: number; storageKey: string } | null>(null);
+	const [pendingAttachment, setPendingAttachment] = useState<{ attachmentId: string; filename: string; mimeType: string; size: number; storageKey: string } | null>(null);
 	const [submissionId, setSubmissionId] = useState<string | null>(null);
 	const [result, setResult] = useState<AssignmentResult | null>(null);
 	const [message, setMessage] = useState<string | null>(null);
@@ -50,7 +50,7 @@ export function AssignmentLearner({ assignment }: { assignment: Assignment }) {
 		const upload = await orpcClient.assignment.createUploadUrl({ pluginContentId: assignment.id, filename: file.name, mimeType: file.type || "application/octet-stream", size: file.size });
 		const response = await fetch(upload.signedUploadUrl, { method: "PUT", headers: { "Content-Type": file.type || "application/octet-stream" }, body: file });
 		if (!response.ok) throw new Error("upload failed");
-		const attachment = { filename: file.name, mimeType: file.type || "application/octet-stream", size: file.size, storageKey: upload.storageKey };
+		const attachment = { attachmentId: upload.attachmentId, filename: file.name, mimeType: file.type || "application/octet-stream", size: file.size, storageKey: upload.storageKey };
 		setSubmissionId(upload.submissionId);
 		setPendingAttachment(attachment);
 		return attachment;

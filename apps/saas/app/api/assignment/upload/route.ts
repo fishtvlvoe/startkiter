@@ -19,7 +19,7 @@ export async function PUT(request: Request) {
 	const body = await request.arrayBuffer();
 	const declaredLength = request.headers.get("content-length");
 	const contentLength = declaredLength ? Number(declaredLength) : body.byteLength;
-	if (!Number.isFinite(contentLength) || contentLength < 1 || contentLength > 100_000_000 || body.byteLength > 100_000_000) {
+	if (!Number.isFinite(contentLength) || contentLength < 1 || contentLength > upload.maxSize || body.byteLength !== contentLength) {
 		return Response.json({ error: "Invalid upload size." }, { status: 413 });
 	}
 	return Response.json({ ok: true, storageKey: upload.storageKey });

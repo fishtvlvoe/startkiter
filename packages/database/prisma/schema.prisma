@@ -49,6 +49,7 @@ model User {
   pluginContents           PluginContent[]
   quizAttempts             QuizAttempt[]
   assignmentSubmissions    AssignmentSubmission[] @relation("AssignmentSubmissionUser")
+  assignmentUploadIntents  AssignmentUploadIntent[] @relation("AssignmentUploadIntentUser")
   assignmentReviews        AssignmentReview[] @relation("AssignmentReviewReviewer")
   assignmentDrafts         AssignmentDraft[] @relation("AssignmentDraftUser")
   courseReviews            CourseReview[]
@@ -774,11 +775,34 @@ model AssignmentSubmission {
 
   user            User                  @relation("AssignmentSubmissionUser", fields: [userId], references: [id], onDelete: Cascade)
   attachments     AssignmentAttachment[]
+  uploadIntents   AssignmentUploadIntent[]
   reviews         AssignmentReview[]
 
   @@index([pluginContentId, userId])
+  @@index([pluginContentId, status, submittedAt])
   @@index([userId, createdAt])
   @@map("assignment_submission")
+}
+
+model AssignmentUploadIntent {
+  id              String   @id
+  pluginContentId String
+  submissionId    String
+  userId          String
+  filename        String
+  mimeType        String
+  size            Int
+  storageKey      String   @unique
+  status          String   @default("PENDING")
+  expiresAt       DateTime
+  createdAt       DateTime @default(now())
+
+  user       User                 @relation("AssignmentUploadIntentUser", fields: [userId], references: [id], onDelete: Cascade)
+  submission AssignmentSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId, status])
+  @@index([userId, pluginContentId, status])
+  @@map("assignment_upload_intent")
 }
 
 model AssignmentAttachment {

@@ -26,6 +26,7 @@ export type GetSignedUploadUrlHandler = (
 	options: {
 		bucket: keyof StorageBucketNamesConfig;
 		contentType?: string;
+		contentLength?: number;
 	},
 ) => Promise<string>;
 

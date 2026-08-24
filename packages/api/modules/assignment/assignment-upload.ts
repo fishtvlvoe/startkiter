@@ -30,13 +30,15 @@ function signLocalToken(payload: string): string {
 export function createLocalAssignmentUploadToken(input: {
 	storageKey: string;
 	contentType: string;
+	maxSize: number;
 	expiresAt: number;
 }): string {
 	const payload = Buffer.from(JSON.stringify({
 		v: LOCAL_TOKEN_VERSION,
-		storageKey: input.storageKey,
-		contentType: input.contentType,
-		expiresAt: input.expiresAt,
+			storageKey: input.storageKey,
+			contentType: input.contentType,
+			maxSize: input.maxSize,
+			expiresAt: input.expiresAt,
 		nonce: randomUUID(),
 	}), "utf8").toString("base64url");
 	return `${payload}.${signLocalToken(payload)}`;
@@ -45,6 +47,7 @@ export function createLocalAssignmentUploadToken(input: {
 export function verifyLocalAssignmentUploadToken(token: string): {
 	storageKey: string;
 	contentType: string;
+	maxSize: number;
 	expiresAt: number;
 } | null {
 	const [payload, signature] = token.split(".");
@@ -60,17 +63,21 @@ export function verifyLocalAssignmentUploadToken(token: string): {
 			v?: string;
 			storageKey?: string;
 			contentType?: string;
+			maxSize?: number;
 			expiresAt?: number;
 		};
 		if (
 			parsed.v !== LOCAL_TOKEN_VERSION ||
 			typeof parsed.storageKey !== "string" ||
 			!/^[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+\.[a-z0-9]+$/.test(parsed.storageKey) ||
-			typeof parsed.contentType !== "string" ||
-			typeof parsed.expiresAt !== "number" ||
+				typeof parsed.contentType !== "string" ||
+				typeof parsed.maxSize !== "number" ||
+				!Number.isSafeInteger(parsed.maxSize) ||
+				parsed.maxSize < 1 ||
+				typeof parsed.expiresAt !== "number" ||
 			parsed.expiresAt < Date.now()
 		) return null;
-		return { storageKey: parsed.storageKey, contentType: parsed.contentType, expiresAt: parsed.expiresAt };
+			return { storageKey: parsed.storageKey, contentType: parsed.contentType, maxSize: parsed.maxSize, expiresAt: parsed.expiresAt };
 	} catch {
 		return null;
 	}
@@ -79,6 +86,8 @@ export function verifyLocalAssignmentUploadToken(token: string): {
 export async function getAssignmentSignedUploadUrl(input: {
 	storageKey: string;
 	contentType: string;
+	maxSize: number;
+	size: number;
 }): Promise<{ signedUploadUrl: string; localDevelopment: boolean }> {
 	const hasS3Configuration = Boolean(
 		process.env.S3_ENDPOINT && process.env.S3_ACCESS_KEY_ID && process.env.S3_SECRET_ACCESS_KEY,
@@ -89,6 +98,7 @@ export async function getAssignmentSignedUploadUrl(input: {
 		const token = createLocalAssignmentUploadToken({
 			storageKey: input.storageKey,
 			contentType: input.contentType,
+			maxSize: input.maxSize,
 			expiresAt: Date.now() + 60_000,
 		});
 		const baseUrl = process.env.BETTER_AUTH_URL?.startsWith("http://localhost")
@@ -104,6 +114,7 @@ export async function getAssignmentSignedUploadUrl(input: {
 		signedUploadUrl: await getSignedUploadUrl(input.storageKey, {
 			bucket: "assignments",
 			contentType: input.contentType,
+			contentLength: input.size,
 		}),
 		localDevelopment: false,
 	};

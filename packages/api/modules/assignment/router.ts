@@ -22,6 +22,7 @@ import {
 
 const contentSchema = z.string().max(200_000).nullable().optional();
 const attachmentSchema = z.object({
+	attachmentId: z.string().uuid(),
 	filename: z.string().trim().min(1).max(255),
 	mimeType: z.string().trim().min(1).max(120),
 	size: z.number().int().min(1).max(100_000_000),
@@ -53,7 +54,7 @@ function getDefinitionDueAt(definition: Awaited<ReturnType<typeof getAssignmentD
 }
 
 function validateAttachments(
-	attachments: z.infer<typeof attachmentSchema>,
+	{ attachmentId: _attachmentId, ...attachments }: z.infer<typeof attachmentSchema>,
 	) {
 	return attachments;
 }
@@ -129,14 +130,38 @@ export const assignmentRouter = {
 				where: { pluginContentId: definition.id, userId: context.user.id, status: "DRAFT" },
 				orderBy: { createdAt: "desc" },
 				select: { id: true },
-			}) ?? await db.assignmentSubmission.create({
-				data: { pluginContentId: definition.id, userId: context.user.id, status: "DRAFT", revisionNumber: 1 },
+			});
+			const previousSubmission = draftSubmission ? null : await db.assignmentSubmission.findFirst({
+				where: { pluginContentId: definition.id, userId: context.user.id },
+				orderBy: { revisionNumber: "desc" },
+				select: { revisionNumber: true },
+			});
+			const submission = draftSubmission ?? await db.assignmentSubmission.create({
+				data: {
+					pluginContentId: definition.id,
+					userId: context.user.id,
+					status: "DRAFT",
+					revisionNumber: previousSubmission ? incrementRevisionNumber(previousSubmission.revisionNumber) : 1,
+				},
 				select: { id: true },
 			});
 			const attachmentId = randomUUID();
-			const storageKey = buildAssignmentAttachmentStorageKey({ submissionId: draftSubmission.id, attachmentId, filename: input.filename });
-			const upload = await getAssignmentSignedUploadUrl({ storageKey, contentType: input.mimeType });
-			return { ...upload, submissionId: draftSubmission.id, attachmentId, storageKey };
+			const storageKey = buildAssignmentAttachmentStorageKey({ submissionId: submission.id, attachmentId, filename: input.filename });
+			await db.assignmentUploadIntent.create({
+				data: {
+					id: attachmentId,
+					pluginContentId: definition.id,
+					submissionId: submission.id,
+					userId: context.user.id,
+					filename: input.filename,
+					mimeType: input.mimeType,
+					size: input.size,
+					storageKey,
+					expiresAt: new Date(Date.now() + 60_000),
+				},
+			});
+			const upload = await getAssignmentSignedUploadUrl({ storageKey, contentType: input.mimeType, maxSize: definition.body.maxFileSize, size: input.size });
+			return { ...upload, submissionId: submission.id, attachmentId, storageKey };
 		}),
 
 	submit: protectedProcedure
@@ -186,12 +211,35 @@ export const assignmentRouter = {
 					? await tx.assignmentSubmission.update({
 						where: { id: draft.id },
 						data: { content, contentFormat: input.contentFormat, wordCount: countAssignmentWords(content), status: "SUBMITTED", revisionNumber, isLate: rules.isLate, submittedAt: new Date() },
-					})
+						})
 					: await tx.assignmentSubmission.create({
 						data: { pluginContentId: definition.id, userId: context.user.id, content, contentFormat: input.contentFormat, wordCount: countAssignmentWords(content), status: "SUBMITTED", revisionNumber, isLate: rules.isLate, submittedAt: new Date() },
-					});
-				if (input.attachments.length) {
-					await tx.assignmentAttachment.createMany({ data: input.attachments.map((attachment) => ({ ...validateAttachments(attachment), submissionId: submission.id })) });
+						});
+					if (input.attachments.length) {
+						if (!submission.id || !input.submissionId) throw new ORPCError("BAD_REQUEST", { message: "附件上傳工作階段已失效，請重新上傳。" });
+						const intentIds = input.attachments.map((attachment) => attachment.attachmentId);
+						const intents = await tx.assignmentUploadIntent.findMany({
+							where: {
+								id: { in: intentIds },
+								pluginContentId: definition.id,
+								submissionId: submission.id,
+								userId: context.user.id,
+								status: "PENDING",
+								expiresAt: { gt: new Date() },
+							},
+						});
+						if (intents.length !== input.attachments.length) throw new ORPCError("BAD_REQUEST", { message: "附件上傳工作階段已失效，請重新上傳。" });
+						const intentById = new Map(intents.map((intent) => [intent.id, intent]));
+						for (const attachment of input.attachments) {
+							const intent = intentById.get(attachment.attachmentId);
+							if (!intent || intent.filename !== attachment.filename || intent.mimeType !== attachment.mimeType || intent.size !== attachment.size || intent.storageKey !== attachment.storageKey) {
+								throw new ORPCError("BAD_REQUEST", { message: "附件上傳資料不一致。" });
+							}
+						}
+						await tx.assignmentUploadIntent.updateMany({ where: { id: { in: intentIds }, status: "PENDING" }, data: { status: "USED" } });
+					}
+					if (input.attachments.length) {
+						await tx.assignmentAttachment.createMany({ data: input.attachments.map((attachment) => ({ id: attachment.attachmentId, ...validateAttachments(attachment), submissionId: submission.id })) });
 				}
 				return submission;
 			});

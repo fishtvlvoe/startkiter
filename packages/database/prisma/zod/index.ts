@@ -220,6 +220,12 @@ export const AssignmentSubmissionScalarFieldEnumSchema = z.enum(['id', 'pluginCo
 
 export type AssignmentSubmissionScalarFieldEnum = z.infer<typeof AssignmentSubmissionScalarFieldEnumSchema>;
 
+// File: AssignmentUploadIntentScalarFieldEnum.schema.ts
+
+export const AssignmentUploadIntentScalarFieldEnumSchema = z.enum(['id', 'pluginContentId', 'submissionId', 'userId', 'filename', 'mimeType', 'size', 'storageKey', 'status', 'expiresAt', 'createdAt'])
+
+export type AssignmentUploadIntentScalarFieldEnum = z.infer<typeof AssignmentUploadIntentScalarFieldEnumSchema>;
+
 // File: AssignmentAttachmentScalarFieldEnum.schema.ts
 
 export const AssignmentAttachmentScalarFieldEnumSchema = z.enum(['id', 'submissionId', 'filename', 'mimeType', 'size', 'storageKey', 'createdAt'])
@@ -1057,6 +1063,25 @@ export const AssignmentSubmissionSchema = z.object({
 });
 
 export type AssignmentSubmissionType = z.infer<typeof AssignmentSubmissionSchema>;
+
+
+// File: AssignmentUploadIntent.schema.ts
+
+export const AssignmentUploadIntentSchema = z.object({
+  id: z.string(),
+  pluginContentId: z.string(),
+  submissionId: z.string(),
+  userId: z.string(),
+  filename: z.string(),
+  mimeType: z.string(),
+  size: z.number().int(),
+  storageKey: z.string(),
+  status: z.string().default("PENDING"),
+  expiresAt: z.date(),
+  createdAt: z.date(),
+});
+
+export type AssignmentUploadIntentType = z.infer<typeof AssignmentUploadIntentSchema>;
 
 
 // File: AssignmentAttachment.schema.ts

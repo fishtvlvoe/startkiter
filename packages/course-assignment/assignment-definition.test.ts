@@ -44,7 +44,15 @@ describe.sequential("Assignment definitions use shared PluginContent", () => {
 
 		expect(created.pluginId).toBe("assignment");
 		expect(created.type).toBe("assignment-definition");
-		expect(await getAssignmentDefinition(created.id)).toMatchObject({ id: created.id, title: "第一次作業" });
+		await db.pluginContent.update({
+			where: { id: created.id },
+			data: { body: { ...created.body, description: '<p>安全文字</p><script>alert("xss")</script>' } },
+		});
+		expect(await getAssignmentDefinition(created.id)).toMatchObject({
+			id: created.id,
+			title: "第一次作業",
+			body: { description: "<p>安全文字</p>" },
+		});
 	});
 
 	afterEach(async () => {

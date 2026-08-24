@@ -62,9 +62,13 @@ export async function getAssignmentDefinition(pluginContentId: string) {
 
 	if (!record) return null;
 
+	const parsedBody = assignmentDefinitionBodySchema.parse(record.body);
 	return {
 		...record,
-		body: assignmentDefinitionBodySchema.parse(record.body),
+		body: assignmentDefinitionBodySchema.parse({
+			...parsedBody,
+			description: sanitizeAssignmentContent(parsedBody.description),
+		}),
 	};
 }
 
@@ -77,7 +81,13 @@ export async function getAssignmentDefinitionByLessonId(lessonId: string) {
 	for (const record of records) {
 		const body = assignmentDefinitionBodySchema.safeParse(record.body);
 		if (body.success && body.data.lessonId === lessonId) {
-			return { ...record, body: body.data };
+			return {
+				...record,
+				body: assignmentDefinitionBodySchema.parse({
+					...body.data,
+					description: sanitizeAssignmentContent(body.data.description),
+				}),
+			};
 		}
 	}
 
