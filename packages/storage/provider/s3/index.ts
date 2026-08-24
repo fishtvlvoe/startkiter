@@ -67,7 +67,7 @@ export const getSignedUploadUrl: GetSignedUploadUrlHandler = async (path, { buck
 	}
 };
 
-export const getSignedUrl: GetSignedUrlHander = async (path, { bucket, expiresIn }) => {
+export const getSignedUrl: GetSignedUrlHander = async (path, { bucket, expiresIn, contentType, contentDisposition }) => {
 	const bucketName = config.bucketNames[bucket as keyof typeof config.bucketNames];
 
 	if (!bucketName) {
@@ -76,7 +76,12 @@ export const getSignedUrl: GetSignedUrlHander = async (path, { bucket, expiresIn
 
 	const s3Client = getS3Client();
 	try {
-		return getS3SignedUrl(s3Client, new GetObjectCommand({ Bucket: bucketName, Key: path }), {
+		return getS3SignedUrl(s3Client, new GetObjectCommand({
+			Bucket: bucketName,
+			Key: path,
+			ResponseContentType: contentType,
+			ResponseContentDisposition: contentDisposition,
+		}), {
 			expiresIn,
 		});
 	} catch (e) {

@@ -36,5 +36,7 @@ export type GetSignedUrlHander = (
 	options: {
 		bucket: keyof StorageBucketNamesConfig;
 		expiresIn?: number;
+		contentType?: string;
+		contentDisposition?: string;
 	},
 ) => Promise<string>;

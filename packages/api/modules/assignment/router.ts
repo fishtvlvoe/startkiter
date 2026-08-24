@@ -22,6 +22,7 @@ import {
 	getAssignmentSignedDownloadUrl,
 	getAssignmentSignedUploadUrl,
 	isAssignmentStorageConfigured,
+	MAX_LOCAL_ASSIGNMENT_UPLOAD_SIZE,
 } from "./assignment-upload";
 import {
 	cleanupExpiredAssignmentUploadIntents,
@@ -92,14 +93,21 @@ export const assignmentRouter = {
 				where: { pluginContentId_userId: { pluginContentId: definition.id, userId: context.user.id } },
 				select: { id: true, content: true, contentFormat: true, revision: true, updatedAt: true },
 			});
-			let pendingUpload = await db.assignmentUploadIntent.findFirst({
+			let pendingUploads = await db.assignmentUploadIntent.findMany({
 				where: { pluginContentId: definition.id, userId: context.user.id, status: { in: ["PENDING", "UPLOADED"] }, expiresAt: { gt: new Date() }, submission: { status: "DRAFT" } },
-				orderBy: { createdAt: "desc" },
+				orderBy: { createdAt: "asc" },
 				select: { id: true, submissionId: true, filename: true, mimeType: true, size: true, storageKey: true },
 			});
-			if (pendingUpload && !isAssignmentStorageConfigured() && !(await assignmentUploadObjectMatches({ storageKey: pendingUpload.storageKey, contentType: pendingUpload.mimeType, size: pendingUpload.size }))) {
-				await db.assignmentUploadIntent.updateMany({ where: { id: pendingUpload.id, status: { in: ["PENDING", "UPLOADED"] } }, data: { status: "CANCELLED" } });
-				pendingUpload = null;
+			if (!isAssignmentStorageConfigured()) {
+				const validPendingUploads = [];
+				for (const pendingUpload of pendingUploads) {
+					if (await assignmentUploadObjectMatches({ storageKey: pendingUpload.storageKey, contentType: pendingUpload.mimeType, size: pendingUpload.size })) {
+						validPendingUploads.push(pendingUpload);
+					} else {
+						await db.assignmentUploadIntent.updateMany({ where: { id: pendingUpload.id, status: { in: ["PENDING", "UPLOADED"] } }, data: { status: "CANCELLED" } });
+					}
+				}
+				pendingUploads = validPendingUploads;
 			}
 			const result = await db.assignmentSubmission.findFirst({
 				where: { pluginContentId: definition.id, userId: context.user.id, status: "REVIEWED" },
@@ -111,7 +119,8 @@ export const assignmentRouter = {
 				title: definition.title,
 				body: definition.body,
 				draft,
-				pendingUpload: pendingUpload ? { attachmentId: pendingUpload.id, submissionId: pendingUpload.submissionId, filename: pendingUpload.filename, mimeType: pendingUpload.mimeType, size: pendingUpload.size, storageKey: pendingUpload.storageKey } : null,
+				pendingUploads: pendingUploads.map((pendingUpload) => ({ attachmentId: pendingUpload.id, submissionId: pendingUpload.submissionId, filename: pendingUpload.filename, mimeType: pendingUpload.mimeType, size: pendingUpload.size, storageKey: pendingUpload.storageKey })),
+				pendingUpload: pendingUploads[0] ? { attachmentId: pendingUploads[0].id, submissionId: pendingUploads[0].submissionId, filename: pendingUploads[0].filename, mimeType: pendingUploads[0].mimeType, size: pendingUploads[0].size, storageKey: pendingUploads[0].storageKey } : null,
 				result: result
 					? { ...result, reviews: result.reviews.map((review) => ({ ...review, feedback: review.feedback ? sanitizeAssignmentContent(review.feedback) : null })) }
 					: null,
@@ -156,6 +165,7 @@ export const assignmentRouter = {
 			const allowed = new Set(definition.body.allowedExtensions.map((value) => value.toLowerCase().replace(/^\./, "")));
 			if (allowed.size === 0 || !allowed.has(extension)) throw new ORPCError("BAD_REQUEST", { message: "不支援的檔案格式。" });
 			if (input.size > definition.body.maxFileSize) throw new ORPCError("BAD_REQUEST", { message: "檔案超過大小限制。" });
+			if (!isAssignmentStorageConfigured() && input.size > MAX_LOCAL_ASSIGNMENT_UPLOAD_SIZE) throw new ORPCError("BAD_REQUEST", { message: "本機開發上傳檔案上限為 10 MB，正式環境使用物件儲存。" });
 			if (definition.body.maxFiles < 1) throw new ORPCError("BAD_REQUEST", { message: "這份作業不接受檔案。" });
 			const attachmentId = randomUUID();
 			await cleanupExpiredAssignmentUploadIntents({ pluginContentId: definition.id, userId: context.user.id });
@@ -239,7 +249,7 @@ export const assignmentRouter = {
 			if (!attachment) throw new ORPCError("NOT_FOUND");
 			const definition = await getAssignmentDefinition(attachment.submission.pluginContentId);
 			if (!definition) throw new ORPCError("NOT_FOUND");
-			const downloadUrl = await getAssignmentSignedDownloadUrl({ storageKey: attachment.storageKey, contentType: attachment.mimeType });
+			const downloadUrl = await getAssignmentSignedDownloadUrl({ storageKey: attachment.storageKey, filename: attachment.filename });
 			if (!downloadUrl) throw new ORPCError("NOT_FOUND", { message: "附件物件已失效，請請學員重新上傳。" });
 			return { attachmentId: attachment.id, filename: attachment.filename, downloadUrl };
 		}),

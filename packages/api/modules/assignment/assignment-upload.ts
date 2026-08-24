@@ -4,7 +4,9 @@ import { deleteObject, getSignedUrl, getSignedUploadUrl, headObject } from "@sta
 const LOCAL_TOKEN_VERSION = "assignment-upload-v1";
 const LOCAL_OBJECT_TTL_MS = 10 * 60_000;
 const MAX_LOCAL_OBJECTS = 1_000;
-const MAX_LOCAL_BYTES = 100 * 1024 * 1024;
+const MAX_LOCAL_BYTES = 20 * 1024 * 1024;
+export const MAX_LOCAL_ASSIGNMENT_UPLOAD_SIZE = 10_000_000;
+export const MAX_LOCAL_ASSIGNMENT_UPLOAD_TOKEN_LENGTH = 4_096;
 const MAX_ASSIGNMENT_UPLOAD_SIZE = 100_000_000;
 const localUploadedObjects = new Map<string, { contentLength: number; contentType: string; body?: Buffer; expiresAt: number }>();
 
@@ -86,8 +88,11 @@ export function verifyLocalAssignmentUploadToken(token: string): {
 	size: number;
 	expiresAt: number;
 } | null {
-	const [payload, signature] = token.split(".");
-	if (!payload || !signature) return null;
+	if (token.length > MAX_LOCAL_ASSIGNMENT_UPLOAD_TOKEN_LENGTH) return null;
+	const segments = token.split(".");
+	if (segments.length !== 2) return null;
+	const [payload, signature] = segments;
+	if (!payload || !signature || signature.length !== 43 || !/^[A-Za-z0-9_-]+$/.test(signature)) return null;
 
 	const expected = signLocalToken(payload);
 	const actualBuffer = Buffer.from(signature);
@@ -133,10 +138,12 @@ export async function getAssignmentSignedUploadUrl(input: {
 }): Promise<{ signedUploadUrl: string; localDevelopment: boolean }> {
 	if (!isAssignmentStorageConfigured()) {
 		if (process.env.NODE_ENV === "production") throw new Error("Assignment storage is not configured");
+		const maxSize = Math.min(input.maxSize, MAX_LOCAL_ASSIGNMENT_UPLOAD_SIZE);
+		if (input.size > maxSize) throw new Error("Local assignment upload exceeds the development size limit");
 		const token = createLocalAssignmentUploadToken({
 			storageKey: input.storageKey,
 			contentType: input.contentType,
-			maxSize: input.maxSize,
+			maxSize,
 			size: input.size,
 			expiresAt: Date.now() + 60_000,
 		});
@@ -181,13 +188,20 @@ export function getLocalAssignmentUploadBody(storageKey: string): Buffer | null 
 	return body ? Buffer.from(body) : null;
 }
 
-export async function getAssignmentSignedDownloadUrl(input: { storageKey: string; contentType: string }): Promise<string | null> {
+export async function getAssignmentSignedDownloadUrl(input: { storageKey: string; filename: string }): Promise<string | null> {
+	const safeFilename = input.filename.replace(/[\r\n"]/g, "_").slice(0, 255) || "attachment";
+	const contentDisposition = `attachment; filename*=UTF-8''${encodeURIComponent(safeFilename)}`;
 	if (!isAssignmentStorageConfigured()) {
 		const body = getLocalAssignmentUploadBody(input.storageKey);
 		if (!body) return null;
-		return `data:${input.contentType};base64,${body.toString("base64")}`;
+		return `data:application/octet-stream;base64,${body.toString("base64")}`;
 	}
-	return getSignedUrl(input.storageKey, { bucket: "assignments", expiresIn: 300 });
+	return getSignedUrl(input.storageKey, {
+		bucket: "assignments",
+		expiresIn: 300,
+		contentType: "application/octet-stream",
+		contentDisposition,
+	});
 }
 
 export async function assignmentUploadObjectMatches(input: {

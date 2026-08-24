@@ -28,6 +28,7 @@ export function decodeAssignmentSubmissionCursor(value: string): AssignmentSubmi
 
 type CleanupScope = { pluginContentId?: string; userId?: string };
 const cleanupClaimLeaseMs = 5 * 60_000;
+const cleanupUploadGraceMs = 5 * 60_000;
 
 export async function cleanupExpiredAssignmentUploadIntents(
 	scope: CleanupScope = {},
@@ -35,7 +36,9 @@ export async function cleanupExpiredAssignmentUploadIntents(
 ): Promise<{ removed: number; failed: number; inspected: number }> {
 	const claimableBefore = new Date(Date.now() - cleanupClaimLeaseMs);
 	const where: Prisma.AssignmentUploadIntentWhereInput = {
-		expiresAt: { lte: new Date() },
+		// Keep expired intents for a grace period so a signed S3 PUT that started
+		// before expiry cannot be deleted while the object store is still writing.
+		expiresAt: { lte: new Date(Date.now() - cleanupUploadGraceMs) },
 		OR: [
 			{ status: { in: ["PENDING", "UPLOADED", "CANCELLED"] }, OR: [{ cleanupClaimedAt: null }, { cleanupClaimedAt: { lt: claimableBefore } }] },
 			{ status: "CLEANING", OR: [{ cleanupClaimedAt: null }, { cleanupClaimedAt: { lt: claimableBefore } }] },

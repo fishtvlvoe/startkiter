@@ -1,5 +1,6 @@
 import {
 	canAcceptLocalAssignmentUpload,
+	MAX_LOCAL_ASSIGNMENT_UPLOAD_TOKEN_LENGTH,
 	recordLocalAssignmentUpload,
 	verifyLocalAssignmentUploadToken,
 } from "@startkiter/api/modules/assignment/assignment-upload";
@@ -12,6 +13,7 @@ export async function PUT(request: Request) {
 
 	const token = new URL(request.url).searchParams.get("token");
 	if (!token) return Response.json({ error: "Missing upload token." }, { status: 400 });
+	if (token.length > MAX_LOCAL_ASSIGNMENT_UPLOAD_TOKEN_LENGTH) return Response.json({ error: "Invalid upload token." }, { status: 403 });
 
 	const upload = verifyLocalAssignmentUploadToken(token);
 	if (!upload) return Response.json({ error: "Invalid or expired upload token." }, { status: 403 });
@@ -37,17 +39,17 @@ export async function PUT(request: Request) {
 	const reader = request.body?.getReader();
 	if (!reader) return Response.json({ error: "Missing upload body." }, { status: 400 });
 	let contentLength = 0;
-	const chunks: Uint8Array[] = [];
+	const body = Buffer.allocUnsafe(intent.size);
 	try {
 		while (true) {
 			const chunk = await reader.read();
 			if (chunk.done) break;
-			contentLength += chunk.value.byteLength;
-			chunks.push(chunk.value);
-			if (contentLength > intent.size) {
+			if (contentLength + chunk.value.byteLength > intent.size) {
 				await reader.cancel();
 				return Response.json({ error: "Invalid upload size." }, { status: 413 });
 			}
+			body.set(chunk.value, contentLength);
+			contentLength += chunk.value.byteLength;
 		}
 	} finally {
 		reader.releaseLock();
@@ -60,6 +62,6 @@ export async function PUT(request: Request) {
 		data: { status: "UPLOADED" },
 	});
 	if (updated.count !== 1) return Response.json({ error: "Upload intent is no longer active." }, { status: 409 });
-	recordLocalAssignmentUpload({ storageKey: upload.storageKey, contentType: upload.contentType, contentLength, body: Buffer.concat(chunks) });
+	recordLocalAssignmentUpload({ storageKey: upload.storageKey, contentType: upload.contentType, contentLength, body: body.subarray(0, contentLength) });
 	return Response.json({ ok: true, storageKey: upload.storageKey });
 }
