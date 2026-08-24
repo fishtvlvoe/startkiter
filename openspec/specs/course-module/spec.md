@@ -326,7 +326,7 @@ tests:
 ---
 ### Requirement: Playback entitlement reads Order.courseAccess
 
-Lesson playback authorization SHALL require a Better Auth session whose user has course access to the lesson's course through at least one of: (1) an Order with sku startkiter-mvp and courseAccess true, (2) a paid Bundle order whose bundle includes the lesson's course, or (3) an ACTIVE CourseSubscription referencing the lesson's course. Client-supplied user ids MUST NOT grant access.
+Lesson playback authorization SHALL require a Better Auth session whose user has course access to the lesson's course through at least one of: (1) an Order with sku startkiter-mvp and courseAccess true, (2) a paid Bundle order whose bundle includes the lesson's course, (3) an ACTIVE CourseSubscription referencing the lesson's course, or (4) a redeemed CourseInvite for the lesson's course (a CourseInviteRedemption row exists for the user and course). Client-supplied user ids MUST NOT grant access.
 
 #### Scenario: Paid learner with courseAccess can open a lesson
 
@@ -340,12 +340,12 @@ Lesson playback authorization SHALL require a Better Auth session whose user has
 
 #### Scenario: Unpaid or refunded learner is denied
 
-- **WHEN** a signed-in user with no Order.courseAccess true for sku startkiter-mvp, no bundle membership covering the course, and no ACTIVE CourseSubscription for the course requests lesson playback
+- **WHEN** a signed-in user with no Order.courseAccess true for sku startkiter-mvp, no bundle membership covering the course, no ACTIVE CourseSubscription for the course, and no redeemed CourseInvite for the course requests lesson playback
 - **THEN** the response MUST be HTTP 403 and MUST NOT include the lesson media body or media URL
 
 ##### Example: 退款後再播遭拒
 
-- userId=user_refunded 的 Order status=refunded、courseAccess=false，且無 bundle 或訂閱來源
+- userId=user_refunded 的 Order status=refunded、courseAccess=false，且無 bundle、訂閱或邀請來源
 - 請求 lessonId=lesson-01 回 HTTP 403，且回應不含媒體 URL
 
 #### Scenario: Unauthenticated playback is rejected
@@ -368,40 +368,168 @@ Lesson playback authorization SHALL require a Better Auth session whose user has
 - **WHEN** a signed-in user whose only relevant access source is a CANCELED CourseSubscription for the lesson's course requests lesson playback
 - **THEN** the response MUST be HTTP 403 and MUST NOT include the lesson media body or media URL
 
+#### Scenario: Learner with a redeemed invite can open a lesson in the invited course
+
+- **WHEN** a signed-in user with a `CourseInviteRedemption` row for the lesson's course, and no other access source, requests an existing lesson
+- **THEN** the server MUST allow playback and MUST return the lesson payload needed for in-site play
+
+##### Example: 邀請兌換學員可播 lesson-03
+
+- userId=user_invited 有 CourseInviteRedemption，courseId 對應該堂課
+- 請求 lessonId=lesson-03 成功，回應含該單元播放所需資料
+
 
 <!-- @trace
-source: payuni-recurring-billing
-updated: 2026-08-23
+source: course-invite-access
+updated: 2026-08-24
 code:
-  - packages/database/prisma/schema.prisma
-  - packages/payments/subscription-factory.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-06-next-step.png
+  - docs/discuss/2026-08-19-handoff-coolify-implementation-and-line-support.md
+  - packages/api/modules/course/procedures/refund-order.ts
+  - packages/api/modules/course/procedures/invoice-operations.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/settings/einvoice/page.tsx
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-05-phased-proposal.png
+  - apps/saas/app/(authenticated)/(operator)/review-admin/page.tsx
+  - docs/cr-report-extract-supastarter-design-system.md
+  - docs/verification/course-quiz-plugin/6.3-passed.png
+  - packages/api/modules/course/router.ts
+  - apps/saas/app/api/payuni/notify/route.ts
+  - apps/saas/app/(authenticated)/checkout/payuni/page.tsx
+  - packages/api/modules/course/lib/invoice-events.ts
+  - docs/assets/god-manual-prototype/anson-infinite-canvas-workflow.png
+  - apps/saas/app/(authenticated)/quiz/[pluginContentId]/quiz-taking.tsx
+  - apps/saas/modules/admin/component/OrderRefundButton.tsx
+  - packages/course-quiz/vitest.config.ts
+  - packages/database/prisma/migrations/20260824142000_add_quiz_attempt/migration.sql
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-04-real-need.png
+  - packages/payments/provider/ezpay/invoice-provider.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-03-anson-guidance.png
+  - packages/database/prisma/migrations/20260824080400_add_course_review_rating_constraint/migration.sql
+  - packages/course-review/tsconfig.json
+  - docs/assets/god-manual-prototype/storyboard-seedance/anson-storyboard-overview-2x3.png
+  - packages/api/modules/course/lib/order-refunds.ts
+  - packages/course-review/index.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-01-vague-need.png
+  - packages/api/modules/course/lib/invoice-settings.ts
+  - docs/verification/course-quiz-plugin/6.3-admin-form.png
+  - packages/payments/provider/ecpay/invoice-provider.ts
+  - apps/saas/app/(authenticated)/quiz/[pluginContentId]/page.tsx
+  - packages/api/modules/course/lib/course-operator.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/classroom-client.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/orders/page.tsx
+  - docs/discuss/2026-08-17-handoff-to-startkiter-session.md
+  - packages/platform/src/mount-points.ts
+  - packages/payments/types.ts
+  - docs/assets/god-manual-prototype/anson-infinite-canvas-brand.png
+  - docs/assets/god-manual-prototype/anson-manual-hero.png
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-04-real-need.png
+  - docs/assets/god-manual-prototype/storyboard-seedance/anson-storyboard-production-board.svg
+  - packages/database/prisma/migrations/20260824080326_add_course_review_plugin/migration.sql
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-05-phased-proposal.png
+  - apps/saas/app/(authenticated)/checkout/checkout-button.tsx
+  - apps/saas/package.json
+  - packages/database/prisma/migrations/20260824090022_add_course_invites/migration.sql
+  - packages/api/modules/quiz/router.ts
+  - apps/saas/modules/shared/components/NavBar.tsx
+  - packages/course/access.ts
+  - packages/course-quiz/quiz-session.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/anson-storyboard-model-reference-4k.png
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/layout.tsx
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-02-price-resistance.png
+  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/lesson-comments-panel.tsx
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-06-next-step.png
+  - packages/api/modules/course/lib/invoice-operations.ts
+  - docs/dashboard/status.html
+  - packages/api/modules/course/procedures/redeem-course-invite.ts
+  - apps/saas/app/api/checkout/route.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/course/course-review-panel.tsx
+  - packages/api/modules/course/procedures/create-course-invite.ts
+  - packages/api/modules/review/router.ts
+  - apps/saas/lib/invoice-settings.ts
+  - docs/verification/course-quiz-plugin/6.1-architecture-review.md
+  - docs/discuss/2026-08-18-handoff-coolify-plugin-architecture.md
+  - docs/verification/course-quiz-plugin/6.3-hidden-answers-final.png
+  - packages/database/prisma/migrations/20260824120000_add_einvoice/migration.sql
+  - docs/design-canvas/anson-seedance-2.5-storyboard.md
+  - apps/saas/app/api/payuni/period-notify/route.ts
+  - packages/course-review/review-summary.ts
+  - apps/saas/app/invite/[token]/page.tsx
+  - docs/verification/course-quiz-plugin/6.3-passed-final.png
+  - apps/saas/modules/payments/components/InvoicePreferenceFields.tsx
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-03-anson-guidance.png
+  - apps/saas/app/invite/[token]/invite-redeem-panel.tsx
+  - packages/course-quiz/tsconfig.json
+  - packages/database/prisma/zod/index.ts
+  - packages/api/orpc/router.ts
+  - packages/api/package.json
+  - apps/saas/app/(authenticated)/checkout/payuni-subscription/page.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/course/page.tsx
+  - docs/assets/god-manual-prototype/anson-handoff-case.png
+  - packages/payments/lib/invoice-issue-input.ts
+  - packages/course-quiz/index.ts
+  - docs/verification/course-quiz-plugin/6.2-code-review.md
+  - packages/payments/lib/invoice-preference.ts
   - packages/payments/index.ts
   - packages/api/modules/course/lib/course-access.ts
-  - packages/payments/provider/payuni/crypto.ts
-  - packages/database/prisma/zod/index.ts
-  - apps/saas/app/(authenticated)/checkout/payuni-subscription/page.tsx
-  - packages/database/prisma/index.ts
-  - packages/payments/types.ts
-  - apps/saas/app/(authenticated)/(main)/(account)/settings/billing/page.tsx
-  - packages/api/modules/course/procedures/create-subscription-checkout.ts
-  - packages/api/modules/course/lib/subscription-gateway.ts
-  - apps/saas/modules/payments/components/SubscriptionCheckoutForm.tsx
-  - packages/api/modules/course/router.ts
-  - packages/course/access.ts
-  - packages/api/modules/course/lib/webhook-events.ts
   - packages/api/modules/course/procedures/cancel-course-subscription.ts
-  - packages/payments/provider/payuni/period-gateway.ts
-  - apps/saas/app/api/payuni/period-notify/route.ts
-  - packages/database/prisma/migrations/20260823170000_add_payuni_recurring_billing/migration.sql
-  - apps/saas/modules/payments/components/SubscriptionCancellationList.tsx
+  - apps/saas/lib/orders.ts
+  - AGENTS.md
+  - apps/saas/app/(authenticated)/(operator)/course-invites/course-invites-panel.tsx
+  - apps/saas/app/(authenticated)/(operator)/course-invites/page.tsx
+  - apps/saas/lib/schedule-after.ts
+  - packages/course-quiz/quiz-definition.ts
+  - packages/payments/package.json
+  - packages/api/modules/review/lesson-comment.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/anson-storyboard-production-board-4k.png
+  - docs/verification/course-quiz-plugin/6.3-hidden-answers.png
+  - packages/database/prisma/schema.prisma
+  - docs/buyer-extension-convention.md
+  - packages/api/modules/course/procedures/create-subscription-checkout.ts
+  - docs/discuss/2026-08-21-buyer-dev-onboarding-guide-idea.md
+  - packages/course-review/package.json
+  - docs/discuss/2026-08-22-platform-positioning-infra-alignment.md
+  - packages/course-quiz/quiz-grading.ts
+  - apps/saas/app/(authenticated)/(operator)/quiz-admin/quiz-admin-form.tsx
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-01-vague-need.png
+  - docs/verification/course-quiz-plugin/6.3-e2e.md
+  - apps/saas/modules/admin/component/InvoiceOperationsButtons.tsx
+  - apps/saas/modules/payments/components/SubscriptionCheckoutForm.tsx
+  - docs/woomin-integration-master-plan.md
+  - packages/course-quiz/package.json
+  - packages/api/modules/course/lib/course-invite-auth.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-02-price-resistance.png
+  - packages/api/modules/course/lib/taiwan-billing-month.ts
+  - docs/design-canvas/anson-manual-redesign-direction.html
+  - apps/saas/app/(authenticated)/(operator)/quiz-admin/page.tsx
+  - apps/saas/app/(authenticated)/(operator)/review-admin/review-admin-panel.tsx
 tests:
-  - packages/api/modules/course/lib/webhook-events.test.ts
+  - packages/payments/lib/invoice-issue-input.test.ts
+  - packages/api/modules/course/lib/invoice-events.test.ts
+  - packages/api/modules/course/lib/refund-invoice.test.ts
+  - packages/api/modules/review/lesson-comment.test.ts
   - apps/saas/app/api/payuni/period-notify/route.test.ts
-  - packages/api/modules/course/course.test.ts
-  - packages/payments/provider/payuni/period-gateway.test.ts
-  - packages/database/src/subscriptions/subscription-schema.test.ts
   - packages/course/access.test.ts
   - packages/api/modules/course/procedures/subscription-procedures.test.ts
+  - packages/course-quiz/quiz-grading.test.ts
+  - packages/api/modules/course/lib/invoice-settings.test.ts
+  - packages/course-review/review-summary.test.ts
+  - apps/saas/tests/integration/bundle-course-access.test.ts
+  - packages/api/modules/course/procedures/refund-order.test.ts
+  - packages/database/src/invoice/invoice-schema.test.ts
+  - packages/api/modules/review/router.test.ts
+  - packages/api/modules/course/course.test.ts
+  - packages/course-quiz/quiz-attempt.test.ts
+  - packages/course-quiz/quiz-definition.test.ts
+  - packages/course-quiz/quiz-session.test.ts
+  - packages/database/src/course-review/course-review.test.ts
+  - apps/saas/app/(authenticated)/quiz/[pluginContentId]/page.test.tsx
+  - apps/saas/modules/shared/lib/nav-menu-items.test.ts
+  - packages/api/modules/course/procedures/redeem-course-invite.test.ts
+  - packages/api/modules/course/lib/order-refunds.test.ts
+  - packages/api/modules/course/lib/invoice-operations.test.ts
+  - apps/saas/app/api/payuni/notify/route.test.ts
+  - packages/api/modules/course/procedures/create-course-invite.test.ts
+  - packages/payments/invoice-provider.test.ts
 -->
 
 ---
