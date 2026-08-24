@@ -15,6 +15,7 @@ import { resolveVideoSource } from "@startkiter/api/modules/course/lib/video-res
 import { orpc } from "@shared/lib/orpc-query-utils";
 
 import { LessonCommentsPanel } from "./lesson-comments-panel";
+import { LessonMessagesPanel } from "./lesson-messages-panel";
 
 interface LessonData {
 	id: string;
@@ -311,6 +312,7 @@ export function AcademyClassroomClient({
 							</div>
 						</div>
 						<LessonCommentsPanel lessonId={currentLesson.id} />
+						<LessonMessagesPanel lessonId={currentLesson.id} />
 					</div>
 				</div>
 

@@ -202,6 +202,12 @@ export const WatchTimeLogScalarFieldEnumSchema = z.enum(['id', 'userId', 'lesson
 
 export type WatchTimeLogScalarFieldEnum = z.infer<typeof WatchTimeLogScalarFieldEnumSchema>;
 
+// File: LessonPrivateMessageScalarFieldEnum.schema.ts
+
+export const LessonPrivateMessageScalarFieldEnumSchema = z.enum(['id', 'lessonId', 'userId', 'content', 'attachmentStorageKey', 'attachmentName', 'attachmentMimeType', 'attachmentSize', 'isFromTeacher', 'readByTeacher', 'createdAt'])
+
+export type LessonPrivateMessageScalarFieldEnum = z.infer<typeof LessonPrivateMessageScalarFieldEnumSchema>;
+
 // File: SidebarGroupScalarFieldEnum.schema.ts
 
 export const SidebarGroupScalarFieldEnumSchema = z.enum(['id', 'title', 'order', 'isCollapsed', 'createdAt', 'updatedAt'])
@@ -1018,6 +1024,25 @@ export const WatchTimeLogSchema = z.object({
 });
 
 export type WatchTimeLogType = z.infer<typeof WatchTimeLogSchema>;
+
+
+// File: LessonPrivateMessage.schema.ts
+
+export const LessonPrivateMessageSchema = z.object({
+  id: z.string(),
+  lessonId: z.string(),
+  userId: z.string(),
+  content: z.string(),
+  attachmentStorageKey: z.string().nullish(),
+  attachmentName: z.string().nullish(),
+  attachmentMimeType: z.string().nullish(),
+  attachmentSize: z.number().int().nullish(),
+  isFromTeacher: z.boolean(),
+  readByTeacher: z.boolean(),
+  createdAt: z.date(),
+});
+
+export type LessonPrivateMessageType = z.infer<typeof LessonPrivateMessageSchema>;
 
 
 // File: SidebarGroup.schema.ts

@@ -5,6 +5,8 @@ export interface StorageBucketNamesConfig {
 	avatars: string;
 	/** Bucket used for course assignment attachments. */
 	assignments: string;
+	/** Bucket used for private lesson message attachments. */
+	lessonMessages: string;
 }
 
 export interface StorageConfig {

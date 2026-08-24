@@ -57,6 +57,7 @@ model User {
   reviewHelpfulVotes       ReviewHelpful[]
   reviewReports            ReviewReport[]
   lessonComments           LessonComment[]
+  lessonPrivateMessages    LessonPrivateMessage[]
   courseInviteRedemptions  CourseInviteRedemption[]
   onboardingSurveyResponses CourseOnboardingSurveyResponse[]
   courseInstructorAssignments CourseInstructor[] @relation("CourseInstructorUser")
@@ -698,6 +699,7 @@ model Lesson {
   chapter         Chapter        @relation(fields: [chapterId], references: [id], onDelete: Cascade)
   progresses      LessonProgress[]
   watchTimeLogs   WatchTimeLog[]
+  privateMessages  LessonPrivateMessage[]
 
   @@index([chapterId])
   @@map("lesson")
@@ -733,6 +735,27 @@ model WatchTimeLog {
   @@unique([userId, lessonId])
   @@index([lessonId])
   @@map("watch_time_log")
+}
+
+model LessonPrivateMessage {
+  id                    String   @id @default(cuid())
+  lessonId              String
+  userId                String
+  content               String   @db.Text
+  attachmentStorageKey  String?
+  attachmentName        String?
+  attachmentMimeType    String?
+  attachmentSize        Int?
+  isFromTeacher         Boolean  @default(false)
+  readByTeacher         Boolean  @default(false)
+  createdAt             DateTime @default(now())
+
+  lesson                Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId, userId, createdAt])
+  @@index([readByTeacher, createdAt])
+  @@map("lesson_private_message")
 }
 
 model SidebarGroup {

@@ -27,6 +27,12 @@ import { assignCourseInstructor } from "./procedures/assign-course-instructor";
 import { removeCourseInstructor } from "./procedures/remove-course-instructor";
 import { listManageableCourses } from "./procedures/list-manageable-courses";
 import { recordWatchTime } from "./procedures/record-watch-time";
+import {
+	listLessonMessages,
+	markLessonMessageRead,
+	operatorListLessonMessages,
+	sendLessonMessage,
+} from "./procedures/send-lesson-message";
 
 export const courseRouter = publicProcedure.router({
 	// 1. 公開/試看課綱大綱 (Public)
@@ -197,6 +203,10 @@ export const courseRouter = publicProcedure.router({
 
 	// 5. 累計單元觀看秒數（與 LessonProgress 完成狀態分離）
 	recordWatchTime,
+	sendLessonMessage,
+	listLessonMessages,
+	operatorListLessonMessages,
+	markLessonMessageRead,
 
 	// 6. 智慧影音來源解析 (Admin)
 	resolveVideo: adminProcedure
