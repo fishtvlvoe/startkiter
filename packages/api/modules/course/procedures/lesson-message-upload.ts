@@ -1,8 +1,10 @@
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 
 import { getSignedUploadUrl, getSignedUrl } from "@startkiter/storage";
+import { headObject } from "@startkiter/storage/provider/s3";
 
 const TOKEN_VERSION = "lesson-message-upload-v1";
+const FINALIZE_TOKEN_VERSION = "lesson-message-upload-finalize-v1";
 const MAX_TOKEN_LENGTH = 4096;
 const LOCAL_OBJECT_TTL_MS = 10 * 60_000;
 const MAX_LOCAL_OBJECTS = 100;
@@ -49,6 +51,69 @@ export function isLessonMessageStorageConfigured(): boolean {
 export function buildLessonMessageStorageKey(lessonId: string, filename: string): string {
 	const extension = filename.toLowerCase().match(/\.([a-z0-9]{1,12})$/)?.[1] ?? "bin";
 	return `${lessonId}/${randomUUID()}.${extension}`;
+}
+
+export function createLessonMessageUploadToken(input: {
+	lessonId: string;
+	userId: string;
+	storageKey: string;
+	contentType: string;
+	size: number;
+	expiresAt: number;
+}): string {
+	const payload = Buffer.from(JSON.stringify({
+		v: FINALIZE_TOKEN_VERSION,
+		lessonId: input.lessonId,
+		userId: input.userId,
+		storageKey: input.storageKey,
+		contentType: input.contentType,
+		size: input.size,
+		expiresAt: input.expiresAt,
+		nonce: randomUUID(),
+	}), "utf8").toString("base64url");
+	return `${payload}.${sign(payload)}`;
+}
+
+export function verifyLessonMessageUploadToken(token: string): {
+	lessonId: string;
+	userId: string;
+	storageKey: string;
+	contentType: string;
+	size: number;
+	expiresAt: number;
+} | null {
+	if (token.length > MAX_TOKEN_LENGTH) return null;
+	const [payload, signature] = token.split(".");
+	if (!payload || !signature || signature.length !== 43 || !/^[A-Za-z0-9_-]+$/.test(signature)) return null;
+	const actual = Buffer.from(signature);
+	const expected = Buffer.from(sign(payload));
+	if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) return null;
+	try {
+		const parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as Record<string, unknown>;
+		if (
+			parsed.v !== FINALIZE_TOKEN_VERSION ||
+			typeof parsed.lessonId !== "string" ||
+			typeof parsed.userId !== "string" ||
+			typeof parsed.storageKey !== "string" ||
+			!parsed.storageKey.startsWith(`${parsed.lessonId}/`) ||
+			typeof parsed.contentType !== "string" ||
+			typeof parsed.size !== "number" ||
+			!Number.isSafeInteger(parsed.size) ||
+			parsed.size < 1 ||
+			typeof parsed.expiresAt !== "number" ||
+			parsed.expiresAt < Date.now()
+		) return null;
+		return {
+			lessonId: parsed.lessonId,
+			userId: parsed.userId,
+			storageKey: parsed.storageKey,
+			contentType: parsed.contentType,
+			size: parsed.size,
+			expiresAt: parsed.expiresAt,
+		};
+	} catch {
+		return null;
+	}
 }
 
 export function createLocalLessonMessageUploadToken(input: {
@@ -128,6 +193,20 @@ export async function getLessonMessageSignedUploadUrl(input: {
 	const token = createLocalLessonMessageUploadToken({ ...input, expiresAt: Date.now() + 60_000 });
 	const baseUrl = process.env.BETTER_AUTH_URL?.startsWith("http://localhost") ? process.env.BETTER_AUTH_URL : "http://localhost:3000";
 	return { signedUploadUrl: `${baseUrl}/api/course/lesson-messages/upload?token=${encodeURIComponent(token)}`, localDevelopment: true };
+}
+
+export async function lessonMessageUploadMatches(input: {
+	storageKey: string;
+	contentType: string;
+	size: number;
+}): Promise<boolean> {
+	if (isLessonMessageStorageConfigured()) {
+		const object = await headObject(input.storageKey, "lessonMessages");
+		return object?.contentLength === input.size && object.contentType === input.contentType;
+	}
+	pruneLocalObjects();
+	const object = localObjects.get(input.storageKey);
+	return object?.body.byteLength === input.size && object.contentType === input.contentType;
 }
 
 export function canAcceptLocalLessonMessageUpload(storageKey: string): boolean {

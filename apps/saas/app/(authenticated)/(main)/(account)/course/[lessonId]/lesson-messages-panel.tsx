@@ -31,19 +31,23 @@ export function LessonMessagesPanel({ lessonId }: { lessonId: string }) {
 		event.preventDefault();
 		if (!content.trim() || (file && file.size > 10_000_000)) return;
 		try {
-			const result = await orpcClient.course.sendLessonMessage({
-				lessonId,
-				content: content.trim(),
-				...(file ? { attachment: { filename: file.name, mimeType: file.type || "application/octet-stream", size: file.size } } : {}),
-			});
-			if (file && result.signedUploadUrl) {
-				const upload = await fetch(result.signedUploadUrl, {
+			let attachmentUploadToken: string | undefined;
+			if (file) {
+				const attachment = { filename: file.name, mimeType: file.type || "application/octet-stream", size: file.size };
+				const uploadPreparation = await orpcClient.course.prepareLessonMessageAttachment({ lessonId, attachment });
+				const upload = await fetch(uploadPreparation.signedUploadUrl, {
 					method: "PUT",
-					headers: { "Content-Type": file.type || "application/octet-stream" },
+					headers: { "Content-Type": attachment.mimeType, "If-None-Match": "*" },
 					body: file,
 				});
 				if (!upload.ok) throw new Error("upload failed");
+				attachmentUploadToken = uploadPreparation.attachmentUploadToken;
 			}
+			await orpcClient.course.sendLessonMessage({
+				lessonId,
+				content: content.trim(),
+				...(file ? { attachment: { filename: file.name, mimeType: file.type || "application/octet-stream", size: file.size }, attachmentUploadToken } : {}),
+			});
 			setContent("");
 			setFile(null);
 			setMessage("私訊已送出。 ");

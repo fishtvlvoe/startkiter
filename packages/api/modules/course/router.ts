@@ -31,6 +31,7 @@ import {
 	listLessonMessages,
 	markLessonMessageRead,
 	operatorListLessonMessages,
+	prepareLessonMessageAttachment,
 	sendLessonMessage,
 } from "./procedures/send-lesson-message";
 
@@ -203,6 +204,7 @@ export const courseRouter = publicProcedure.router({
 
 	// 5. 累計單元觀看秒數（與 LessonProgress 完成狀態分離）
 	recordWatchTime,
+	prepareLessonMessageAttachment,
 	sendLessonMessage,
 	listLessonMessages,
 	operatorListLessonMessages,

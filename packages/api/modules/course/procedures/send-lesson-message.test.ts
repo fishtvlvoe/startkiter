@@ -21,6 +21,10 @@ vi.mock("@startkiter/storage", () => ({
 	getSignedUploadUrl: vi.fn(),
 }));
 
+vi.mock("@startkiter/storage/provider/s3", () => ({
+	headObject: vi.fn(),
+}));
+
 vi.mock("../lib/course-access", () => ({
 	userCanAccessCourseId: vi.fn(),
 }));
@@ -28,9 +32,10 @@ vi.mock("../lib/course-access", () => ({
 import { auth } from "@startkiter/auth";
 import { db } from "@startkiter/database";
 import { getSignedUploadUrl } from "@startkiter/storage";
+import { headObject } from "@startkiter/storage/provider/s3";
 
 import { userCanAccessCourseId } from "../lib/course-access";
-import { markLessonMessageRead, sendLessonMessage } from "./send-lesson-message";
+import { markLessonMessageRead, prepareLessonMessageAttachment, sendLessonMessage } from "./send-lesson-message";
 
 const learnerSession = {
 	session: { id: "session-1", userId: "learner-1" },
@@ -60,6 +65,7 @@ describe("course lesson private messages", () => {
 			readByTeacher: false,
 		} as never);
 		vi.mocked(getSignedUploadUrl).mockResolvedValue("https://storage.example/upload" as never);
+		vi.mocked(headObject).mockResolvedValue({ contentLength: 128, contentType: "image/png" });
 	});
 
 	it("allows a learner to send a lesson message", async () => {
@@ -114,7 +120,24 @@ describe("course lesson private messages", () => {
 		});
 	});
 
-	it("generates an opaque attachment key and returns a signed upload URL", async () => {
+	it("does not persist an attachment message before upload verification", async () => {
+		await expect(
+			call(
+				sendLessonMessage,
+				{ lessonId: "lesson-1", content: "附上截圖", attachment: { filename: "screenshot.png", mimeType: "image/png", size: 128 } },
+				{ context: { headers: new Headers() } },
+			),
+		).rejects.toMatchObject({ code: "BAD_REQUEST" });
+		expect(db.lessonPrivateMessage.create).not.toHaveBeenCalled();
+	});
+
+	it("generates an opaque attachment key and persists only after upload verification", async () => {
+		const preparation = await call(
+			prepareLessonMessageAttachment,
+			{ lessonId: "lesson-1", attachment: { filename: "../../原始檔名.png", mimeType: "image/png", size: 128 } },
+			{ context: { headers: new Headers() } },
+		);
+
 		await expect(
 			call(
 				sendLessonMessage,
@@ -122,15 +145,17 @@ describe("course lesson private messages", () => {
 					lessonId: "lesson-1",
 					content: "附上截圖",
 					attachment: { filename: "../../原始檔名.png", mimeType: "image/png", size: 128 },
+					attachmentUploadToken: preparation.attachmentUploadToken,
 				},
 				{ context: { headers: new Headers() } },
 			),
-		).resolves.toMatchObject({ signedUploadUrl: "https://storage.example/upload" });
+		).resolves.toMatchObject({ signedUploadUrl: null });
 
 		const createCall = vi.mocked(db.lessonPrivateMessage.create).mock.calls[0]?.[0];
 		const attachmentStorageKey = (createCall?.data as { attachmentStorageKey?: string }).attachmentStorageKey;
 		expect(attachmentStorageKey).toMatch(/^lesson-1\/[a-f0-9-]+\.png$/);
 		expect(attachmentStorageKey).not.toContain("原始檔名");
 		expect(getSignedUploadUrl).toHaveBeenCalledWith(attachmentStorageKey, expect.objectContaining({ bucket: "lessonMessages", contentType: "image/png", contentLength: 128 }));
+		expect(headObject).toHaveBeenCalledWith(attachmentStorageKey, "lessonMessages");
 	});
 });

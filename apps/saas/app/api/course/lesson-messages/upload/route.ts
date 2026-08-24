@@ -4,7 +4,6 @@ import {
 	recordLocalLessonMessageUpload,
 	verifyLocalLessonMessageUploadToken,
 } from "@startkiter/api/modules/course/procedures/lesson-message-upload";
-import { db } from "@startkiter/database";
 
 export async function PUT(request: Request) {
 	if (process.env.NODE_ENV === "production") {
@@ -17,14 +16,6 @@ export async function PUT(request: Request) {
 	const upload = verifyLocalLessonMessageUploadToken(token);
 	if (!upload) return Response.json({ error: "Invalid or expired upload token." }, { status: 403 });
 	if (!canAcceptLocalLessonMessageUpload(upload.storageKey)) return Response.json({ error: "Upload object already exists." }, { status: 412 });
-
-	const message = await db.lessonPrivateMessage.findFirst({
-		where: { attachmentStorageKey: upload.storageKey },
-		select: { attachmentMimeType: true, attachmentSize: true },
-	});
-	if (!message || message.attachmentMimeType !== upload.contentType || message.attachmentSize !== upload.size) {
-		return Response.json({ error: "Upload intent is no longer active." }, { status: 409 });
-	}
 
 	const contentType = request.headers.get("content-type") ?? "application/octet-stream";
 	if (contentType !== upload.contentType) return Response.json({ error: "Content type mismatch." }, { status: 415 });

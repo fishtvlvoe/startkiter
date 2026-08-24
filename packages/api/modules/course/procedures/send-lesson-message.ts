@@ -7,9 +7,12 @@ import { userCanAccessCourseId } from "../lib/course-access";
 import { courseOperatorProcedure, isCourseOperator } from "../lib/course-operator";
 import {
 	buildLessonMessageStorageKey,
+	createLessonMessageUploadToken,
 	getLessonMessageSignedDownloadUrl,
 	getLessonMessageSignedUploadUrl,
+	lessonMessageUploadMatches,
 	MAX_LESSON_MESSAGE_ATTACHMENT_SIZE,
+	verifyLessonMessageUploadToken,
 } from "./lesson-message-upload";
 
 const attachmentSchema = z.object({
@@ -24,6 +27,7 @@ const messageInput = z.object({
 	isFromTeacher: z.boolean().default(false),
 	threadUserId: z.string().trim().min(1).max(200).optional(),
 	attachment: attachmentSchema.optional(),
+	attachmentUploadToken: z.string().trim().min(1).max(4096).optional(),
 });
 
 async function requireLessonAccess(lessonId: string, userId: string): Promise<{ courseId: string }> {
@@ -64,15 +68,28 @@ export const sendLessonMessage = protectedProcedure
 			await requireLessonAccess(input.lessonId, context.user.id);
 		}
 
-		const attachmentStorageKey = input.attachment ? buildLessonMessageStorageKey(input.lessonId, input.attachment.filename) : null;
-		const signedUploadUrl = input.attachment && attachmentStorageKey
-			? (await getLessonMessageSignedUploadUrl({
-				storageKey: attachmentStorageKey,
-				contentType: input.attachment.mimeType,
-				size: input.attachment.size,
-				maxSize: MAX_LESSON_MESSAGE_ATTACHMENT_SIZE,
-			})).signedUploadUrl
-			: null;
+		if (input.attachment && !input.attachmentUploadToken) {
+			throw new ORPCError("BAD_REQUEST", { message: "附件尚未完成上傳。" });
+		}
+		if (!input.attachment && input.attachmentUploadToken) {
+			throw new ORPCError("BAD_REQUEST", { message: "附件資料不完整。" });
+		}
+
+		let attachmentStorageKey: string | null = null;
+		if (input.attachment && input.attachmentUploadToken) {
+			const upload = verifyLessonMessageUploadToken(input.attachmentUploadToken);
+			if (
+				!upload ||
+				upload.lessonId !== input.lessonId ||
+				upload.userId !== context.user.id ||
+				upload.contentType !== input.attachment.mimeType ||
+				upload.size !== input.attachment.size ||
+				!(await lessonMessageUploadMatches(upload))
+			) {
+				throw new ORPCError("BAD_REQUEST", { message: "附件尚未完成上傳。" });
+			}
+			attachmentStorageKey = upload.storageKey;
+		}
 		const message = await db.lessonPrivateMessage.create({
 			data: {
 				lessonId: input.lessonId,
@@ -86,7 +103,33 @@ export const sendLessonMessage = protectedProcedure
 				readByTeacher: input.isFromTeacher,
 			},
 		});
-		return { ...(await withAttachmentUrl(message)), signedUploadUrl };
+		return { ...(await withAttachmentUrl(message)), signedUploadUrl: null };
+	});
+
+export const prepareLessonMessageAttachment = protectedProcedure
+	.route({ method: "POST", path: "/course/lesson-messages/attachment", tags: ["Course messages"], summary: "Prepare a private lesson message attachment upload" })
+	.input(z.object({ lessonId: z.string().trim().min(1).max(200), attachment: attachmentSchema }))
+	.handler(async ({ input, context }) => {
+		await requireLessonAccess(input.lessonId, context.user.id);
+		const storageKey = buildLessonMessageStorageKey(input.lessonId, input.attachment.filename);
+		const upload = await getLessonMessageSignedUploadUrl({
+			storageKey,
+			contentType: input.attachment.mimeType,
+			size: input.attachment.size,
+			maxSize: MAX_LESSON_MESSAGE_ATTACHMENT_SIZE,
+		});
+		return {
+			signedUploadUrl: upload.signedUploadUrl,
+			localDevelopment: upload.localDevelopment,
+			attachmentUploadToken: createLessonMessageUploadToken({
+				lessonId: input.lessonId,
+				userId: context.user.id,
+				storageKey,
+				contentType: input.attachment.mimeType,
+				size: input.attachment.size,
+				expiresAt: Date.now() + 60_000,
+			}),
+		};
 	});
 
 export const listLessonMessages = protectedProcedure

@@ -22,12 +22,14 @@ export function LessonMessagesOperatorPanel({ initialMessages }: { initialMessag
 	const [messages, setMessages] = useState(initialMessages);
 	const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
 	const [status, setStatus] = useState<string | null>(null);
+	const replyDraftKey = (message: OperatorMessage) => `${message.lessonId}:${message.userId}`;
 
 	async function replyTo(message: OperatorMessage) {
-		const content = replyDrafts[message.userId]?.trim();
+		const draftKey = replyDraftKey(message);
+		const content = replyDrafts[draftKey]?.trim();
 		if (!content) return;
 		await orpcClient.course.sendLessonMessage({ lessonId: message.lessonId, content, isFromTeacher: true, threadUserId: message.userId });
-		setReplyDrafts((current) => ({ ...current, [message.userId]: "" }));
+		setReplyDrafts((current) => ({ ...current, [draftKey]: "" }));
 		setStatus("老師回覆已送出。 ");
 	}
 
@@ -49,7 +51,7 @@ export function LessonMessagesOperatorPanel({ initialMessages }: { initialMessag
 					<p className="whitespace-pre-wrap text-sm">{message.content}</p>
 					{message.attachmentUrl && <a className="text-sm text-primary underline" href={message.attachmentUrl} target="_blank" rel="noreferrer">查看附件：{message.attachmentName}</a>}
 					<p className="text-xs text-muted-foreground">{message.isFromTeacher ? "老師回覆" : message.readByTeacher ? "已讀" : "未讀"}</p>
-					<div className="flex gap-2"><textarea className="min-h-16 flex-1 rounded-md border p-2 text-sm" value={replyDrafts[message.userId] ?? ""} onChange={(event) => setReplyDrafts((current) => ({ ...current, [message.userId]: event.target.value }))} placeholder="回覆這位學員" /><Button type="button" size="sm" onClick={() => void replyTo(message)}>回覆</Button>{!message.isFromTeacher && !message.readByTeacher && <Button type="button" variant="outline" size="sm" onClick={() => void markRead(message.id)}>標記已讀</Button>}</div>
+					<div className="flex gap-2"><textarea className="min-h-16 flex-1 rounded-md border p-2 text-sm" value={replyDrafts[replyDraftKey(message)] ?? ""} onChange={(event) => setReplyDrafts((current) => ({ ...current, [replyDraftKey(message)]: event.target.value }))} placeholder="回覆這位學員" /><Button type="button" size="sm" onClick={() => void replyTo(message)}>回覆</Button>{!message.isFromTeacher && !message.readByTeacher && <Button type="button" variant="outline" size="sm" onClick={() => void markRead(message.id)}>標記已讀</Button>}</div>
 				</article>)}
 			</Card>
 		</div>
