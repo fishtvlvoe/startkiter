@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BookOpenIcon, LightbulbIcon, XIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { Button, Card, Input } from "@startkiter/ui";
 import {
@@ -68,6 +68,13 @@ export function AcademyClassroomClient({
 			});
 		},
 	});
+	const recordWatchTimeMutation = useMutation(orpc.course.recordWatchTime.mutationOptions());
+	const handleWatchTime = useCallback(
+		(watchedSec: number) => {
+			recordWatchTimeMutation.mutate({ lessonId: currentLesson.id, watchedSec });
+		},
+		[currentLesson.id, recordWatchTimeMutation.mutate],
+	);
 
 	const allLessons = curriculum.flatMap((chapter) => chapter.lessons);
 	const totalCount = allLessons.length;
@@ -264,15 +271,16 @@ export function AcademyClassroomClient({
 								<FluentPlayer
 									title={currentLesson.title}
 									resolved={resolvedVideo}
-					watermark={
-						currentLesson.watermarkSetting
-							? {
-									...currentLesson.watermarkSetting,
-									email: viewerEmail,
-									courseTitle: currentLesson.courseTitle,
-								}
-							: undefined
-					}
+									watermark={
+										currentLesson.watermarkSetting
+											? {
+													...currentLesson.watermarkSetting,
+													email: viewerEmail,
+													courseTitle: currentLesson.courseTitle,
+												}
+											: undefined
+									}
+									onWatchTime={handleWatchTime}
 								/>
 							</div>
 						</Card>

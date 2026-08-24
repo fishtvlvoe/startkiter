@@ -26,6 +26,7 @@ import { submitOnboardingSurvey } from "./procedures/submit-onboarding-survey";
 import { assignCourseInstructor } from "./procedures/assign-course-instructor";
 import { removeCourseInstructor } from "./procedures/remove-course-instructor";
 import { listManageableCourses } from "./procedures/list-manageable-courses";
+import { recordWatchTime } from "./procedures/record-watch-time";
 
 export const courseRouter = publicProcedure.router({
 	// 1. 公開/試看課綱大綱 (Public)
@@ -194,7 +195,10 @@ export const courseRouter = publicProcedure.router({
 			return { completed: true };
 		}),
 
-	// 5. 智慧影音來源解析 (Admin)
+	// 5. 累計單元觀看秒數（與 LessonProgress 完成狀態分離）
+	recordWatchTime,
+
+	// 6. 智慧影音來源解析 (Admin)
 	resolveVideo: adminProcedure
 		.input(z.object({ videoUrl: z.string() }))
 		.handler(async ({ input }) => {
@@ -205,7 +209,7 @@ export const courseRouter = publicProcedure.router({
 			return result;
 		}),
 
-	// 6. Course Studio 總數據 (Admin)
+	// 7. Course Studio 總數據 (Admin)
 	getStudioData: courseOperatorProcedure.handler(async () => {
 		const courses = await db.course.findMany({
 			include: {

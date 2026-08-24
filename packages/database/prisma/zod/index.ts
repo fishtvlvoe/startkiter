@@ -196,6 +196,12 @@ export const LessonProgressScalarFieldEnumSchema = z.enum(['id', 'userId', 'less
 
 export type LessonProgressScalarFieldEnum = z.infer<typeof LessonProgressScalarFieldEnumSchema>;
 
+// File: WatchTimeLogScalarFieldEnum.schema.ts
+
+export const WatchTimeLogScalarFieldEnumSchema = z.enum(['id', 'userId', 'lessonId', 'watchedSec', 'lastWatchAt'])
+
+export type WatchTimeLogScalarFieldEnum = z.infer<typeof WatchTimeLogScalarFieldEnumSchema>;
+
 // File: SidebarGroupScalarFieldEnum.schema.ts
 
 export const SidebarGroupScalarFieldEnumSchema = z.enum(['id', 'title', 'order', 'isCollapsed', 'createdAt', 'updatedAt'])
@@ -999,6 +1005,19 @@ export const LessonProgressSchema = z.object({
 });
 
 export type LessonProgressType = z.infer<typeof LessonProgressSchema>;
+
+
+// File: WatchTimeLog.schema.ts
+
+export const WatchTimeLogSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  lessonId: z.string(),
+  watchedSec: z.number().int(),
+  lastWatchAt: z.date(),
+});
+
+export type WatchTimeLogType = z.infer<typeof WatchTimeLogSchema>;
 
 
 // File: SidebarGroup.schema.ts

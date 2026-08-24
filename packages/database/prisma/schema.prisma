@@ -45,6 +45,7 @@ model User {
   buyerDeployments         BuyerDeployment[]
   supportTickets           SupportTicket[]
   lessonProgresses         LessonProgress[]
+  watchTimeLogs            WatchTimeLog[]
   courseSubscriptions      CourseSubscription[]
   pluginContents           PluginContent[]
   quizAttempts             QuizAttempt[]
@@ -696,6 +697,7 @@ model Lesson {
 
   chapter         Chapter        @relation(fields: [chapterId], references: [id], onDelete: Cascade)
   progresses      LessonProgress[]
+  watchTimeLogs   WatchTimeLog[]
 
   @@index([chapterId])
   @@map("lesson")
@@ -716,6 +718,21 @@ model LessonProgress {
   @@index([userId])
   @@index([lessonId])
   @@map("lesson_progress")
+}
+
+model WatchTimeLog {
+  id          String   @id @default(cuid())
+  userId      String
+  lessonId    String
+  watchedSec  Int      @default(0)
+  lastWatchAt DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson      Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@index([lessonId])
+  @@map("watch_time_log")
 }
 
 model SidebarGroup {

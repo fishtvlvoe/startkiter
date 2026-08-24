@@ -14,7 +14,62 @@ export type FluentPlayerSource =
 	| {
 			ok: false;
 			error: string;
-	};
+	  };
+
+type WatchTimeReporter = (watchedSec: number) => void;
+
+function NativeVideo({
+	className,
+	controlsList,
+	src,
+	title,
+	onWatchTime,
+}: {
+	className: string;
+	controlsList?: string;
+	src: string;
+	title: string;
+	onWatchTime?: WatchTimeReporter;
+}) {
+	const videoRef = useRef<HTMLVideoElement>(null);
+	const lastReportedSecRef = useRef(0);
+
+	useEffect(() => {
+		lastReportedSecRef.current = 0;
+	}, [src]);
+
+	useEffect(() => {
+		if (!onWatchTime) return;
+
+		const report = () => {
+			const video = videoRef.current;
+			if (!video || video.paused || !Number.isFinite(video.currentTime)) return;
+
+			const watchedSec = Math.floor(video.currentTime);
+			if (watchedSec < lastReportedSecRef.current + 30) return;
+
+			lastReportedSecRef.current = watchedSec;
+			onWatchTime(watchedSec);
+		};
+
+		const interval = window.setInterval(report, 30_000);
+		return () => window.clearInterval(interval);
+	}, [onWatchTime]);
+
+	return (
+		<video
+			ref={videoRef}
+			className={className}
+			controls
+			controlsList={controlsList}
+			playsInline
+			src={src}
+			title={title}
+		>
+			您的瀏覽器不支援影片播放。
+		</video>
+	);
+}
 
 
 function PlayerFrame({
@@ -119,10 +174,12 @@ export function FluentPlayer({
 	title,
 	resolved,
 	watermark,
+	onWatchTime,
 }: {
 	title: string;
 	resolved: FluentPlayerSource | null;
 	watermark?: WatermarkPlayerSettings;
+	onWatchTime?: WatchTimeReporter;
 }) {
 	if (!resolved || !resolved.ok) {
 		return (
@@ -202,16 +259,13 @@ export function FluentPlayer({
 		return (
 			<PlayerFrame watermark={watermark}>
 				{(usesManagedFullscreen) => (
-					<video
+					<NativeVideo
 						className="h-full w-full"
-						controls
 						controlsList={usesManagedFullscreen ? "nofullscreen" : undefined}
-						playsInline
 						src={resolved.url}
 						title={title}
-					>
-						您的瀏覽器不支援 MP4 播放。
-					</video>
+						onWatchTime={onWatchTime}
+					/>
 				)}
 			</PlayerFrame>
 		);
@@ -221,16 +275,13 @@ export function FluentPlayer({
 		return (
 			<PlayerFrame watermark={watermark}>
 				{(usesManagedFullscreen) => (
-					<video
+					<NativeVideo
 						className="h-full w-full"
-						controls
 						controlsList={usesManagedFullscreen ? "nofullscreen" : undefined}
-						playsInline
 						src={resolved.url}
 						title={title}
-					>
-						您的瀏覽器不支援 HLS 播放。
-					</video>
+						onWatchTime={onWatchTime}
+					/>
 				)}
 			</PlayerFrame>
 		);
