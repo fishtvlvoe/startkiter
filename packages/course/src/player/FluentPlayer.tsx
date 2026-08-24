@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { WatermarkOverlay, type WatermarkPlayerSettings } from "./watermark-overlay";
 
@@ -17,8 +17,20 @@ export type FluentPlayerSource =
 	};
 
 
-function PlayerFrame({ children, watermark }: { children: ReactNode; watermark?: WatermarkPlayerSettings }) {
+function PlayerFrame({
+	children,
+	watermark,
+}: {
+	children: (usesManagedFullscreen: boolean) => ReactNode;
+	watermark?: WatermarkPlayerSettings;
+}) {
 	const frameRef = useRef<HTMLDivElement>(null);
+	const [fullscreenSupported, setFullscreenSupported] = useState(false);
+
+	useEffect(() => {
+		const frame = frameRef.current;
+		setFullscreenSupported(Boolean(frame?.requestFullscreen) && document.fullscreenEnabled !== false);
+	}, []);
 
 	useEffect(() => {
 		if (!watermark?.enabled || !watermark.tamperPauseEnabled) return;
@@ -66,6 +78,7 @@ function PlayerFrame({ children, watermark }: { children: ReactNode; watermark?:
 			window.removeEventListener("blur", pauseWhenWindowBlurs);
 		};
 	}, [watermark?.enabled, watermark?.tamperPauseEnabled]);
+	const usesManagedFullscreen = Boolean(watermark?.enabled && fullscreenSupported);
 
 	const toggleFullscreen = () => {
 		const frame = frameRef.current;
@@ -80,9 +93,9 @@ function PlayerFrame({ children, watermark }: { children: ReactNode; watermark?:
 
 	return (
 		<div ref={frameRef} className="relative h-full w-full bg-black" data-testid="player-frame">
-			{children}
+			{children(usesManagedFullscreen)}
 			{watermark ? <WatermarkOverlay {...watermark} /> : null}
-			{watermark?.enabled ? (
+			{usesManagedFullscreen ? (
 				<button
 					aria-label="影片全螢幕"
 					className="absolute right-3 top-3 z-30 rounded bg-black/70 px-2 py-1 text-xs text-white"
@@ -130,29 +143,35 @@ export function FluentPlayer({
 	}
 
 	if (resolved.provider === "YOUTUBE" && resolved.sourceId) {
+		const sourceId = resolved.sourceId;
 		return (
 			<PlayerFrame watermark={watermark}>
-				<iframe
-					className="h-full w-full"
-					src={`https://www.youtube.com/embed/${encodeURIComponent(resolved.sourceId)}?autoplay=0&enablejsapi=1`}
-					title={title}
-					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-					allowFullScreen={!watermark?.enabled}
-				/>
+				{(usesManagedFullscreen) => (
+					<iframe
+						className="h-full w-full"
+						src={`https://www.youtube.com/embed/${encodeURIComponent(sourceId)}?autoplay=0&enablejsapi=1`}
+						title={title}
+						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+						allowFullScreen={!usesManagedFullscreen}
+					/>
+				)}
 			</PlayerFrame>
 		);
 	}
 
 	if (resolved.provider === "VIMEO" && resolved.sourceId) {
+		const sourceId = resolved.sourceId;
 		return (
 			<PlayerFrame watermark={watermark}>
-				<iframe
-					className="h-full w-full"
-					src={`https://player.vimeo.com/video/${encodeURIComponent(resolved.sourceId)}?api=1`}
-					title={title}
-					allow="autoplay; fullscreen; picture-in-picture"
-					allowFullScreen={!watermark?.enabled}
-				/>
+				{(usesManagedFullscreen) => (
+					<iframe
+						className="h-full w-full"
+						src={`https://player.vimeo.com/video/${encodeURIComponent(sourceId)}?api=1`}
+						title={title}
+						allow="autoplay; fullscreen; picture-in-picture"
+						allowFullScreen={!usesManagedFullscreen}
+					/>
+				)}
 			</PlayerFrame>
 		);
 	}
@@ -160,13 +179,15 @@ export function FluentPlayer({
 	if (resolved.provider === "BUNNY") {
 		return (
 			<PlayerFrame watermark={watermark}>
-				<iframe
-					className="h-full w-full"
-					src={resolved.url}
-					title={title}
-					allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
-					allowFullScreen={!watermark?.enabled}
-				/>
+				{(usesManagedFullscreen) => (
+					<iframe
+						className="h-full w-full"
+						src={resolved.url}
+						title={title}
+						allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+						allowFullScreen={!usesManagedFullscreen}
+					/>
+				)}
 			</PlayerFrame>
 		);
 	}
@@ -174,16 +195,18 @@ export function FluentPlayer({
 	if (resolved.provider === "CUSTOM_MP4") {
 		return (
 			<PlayerFrame watermark={watermark}>
-				<video
-					className="h-full w-full"
-					controls
-					controlsList={watermark?.enabled ? "nofullscreen" : undefined}
-					playsInline
-					src={resolved.url}
-					title={title}
-				>
-					您的瀏覽器不支援 MP4 播放。
-				</video>
+				{(usesManagedFullscreen) => (
+					<video
+						className="h-full w-full"
+						controls
+						controlsList={usesManagedFullscreen ? "nofullscreen" : undefined}
+						playsInline
+						src={resolved.url}
+						title={title}
+					>
+						您的瀏覽器不支援 MP4 播放。
+					</video>
+				)}
 			</PlayerFrame>
 		);
 	}
@@ -191,16 +214,18 @@ export function FluentPlayer({
 	if (resolved.provider === "HLS") {
 		return (
 			<PlayerFrame watermark={watermark}>
-				<video
-					className="h-full w-full"
-					controls
-					controlsList={watermark?.enabled ? "nofullscreen" : undefined}
-					playsInline
-					src={resolved.url}
-					title={title}
-				>
-					您的瀏覽器不支援 HLS 播放。
-				</video>
+				{(usesManagedFullscreen) => (
+					<video
+						className="h-full w-full"
+						controls
+						controlsList={usesManagedFullscreen ? "nofullscreen" : undefined}
+						playsInline
+						src={resolved.url}
+						title={title}
+					>
+						您的瀏覽器不支援 HLS 播放。
+					</video>
+				)}
 			</PlayerFrame>
 		);
 	}
