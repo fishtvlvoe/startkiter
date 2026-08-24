@@ -5,6 +5,8 @@ import { Button } from "@startkiter/ui";
 import { useState } from "react";
 
 import { orpcClient } from "@shared/lib/orpc-client";
+import { InvoicePreferenceFields, DEFAULT_INVOICE_PREFERENCE } from "./InvoicePreferenceFields";
+import type { InvoicePreferenceInput } from "@startkiter/payments";
 
 type SubscriptionPlanOption = {
 	id: string;
@@ -27,8 +29,9 @@ type Payment = {
 export function SubscriptionCheckoutForm({ plans }: { plans: SubscriptionPlanOption[] }) {
 	const [planId, setPlanId] = useState(plans[0]?.id ?? "");
 	const [payment, setPayment] = useState<Payment | null>(null);
+	const [invoicePreference, setInvoicePreference] = useState<InvoicePreferenceInput>(DEFAULT_INVOICE_PREFERENCE);
 	const checkout = useMutation({
-		mutationFn: (selectedPlanId: string) => orpcClient.course.createSubscriptionCheckout({ planId: selectedPlanId }),
+		mutationFn: (input: { planId: string; invoicePreference: InvoicePreferenceInput }) => orpcClient.course.createSubscriptionCheckout(input),
 		onSuccess: (result) => setPayment(result.payment),
 	});
 
@@ -53,9 +56,10 @@ export function SubscriptionCheckoutForm({ plans }: { plans: SubscriptionPlanOpt
 			className="space-y-4"
 			onSubmit={(event) => {
 				event.preventDefault();
-				checkout.mutate(planId);
+				checkout.mutate({ planId, invoicePreference });
 			}}
 		>
+			<InvoicePreferenceFields value={invoicePreference} onChange={setInvoicePreference} />
 			<label className="grid gap-2 text-sm">
 				<span>訂閱方案</span>
 				<select

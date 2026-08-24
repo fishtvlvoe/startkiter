@@ -18,8 +18,15 @@ export { PayUniService } from "./provider/payuni/crypto";
 export { PayUniOneTimeGateway } from "./provider/payuni/gateway";
 export { PayUniPeriodGateway } from "./provider/payuni/period-gateway";
 export { createPayUniSubscriptionGateway } from "./subscription-factory";
+export { buildIssueInput, buildAllowanceInput } from "./lib/invoice-issue-input";
+export { invoicePreferenceSchema, normalizeInvoicePreference } from "./lib/invoice-preference";
+export { createEcpayInvoiceProvider } from "./provider/ecpay/invoice-provider";
+export { createEzpayInvoiceProvider } from "./provider/ezpay/invoice-provider";
 export type {
+	InvoiceProvider,
+	InvoiceProviderConfig,
 	SubscriptionGateway,
 	SubscriptionInterval,
 	SubscriptionSessionResult,
 } from "./types";
+export type { InvoicePreferenceInput } from "./lib/invoice-preference";

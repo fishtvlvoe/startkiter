@@ -14,7 +14,7 @@ export default async function PayuniSubscriptionCheckoutPage() {
 		<Card>
 			<CardHeader>
 				<CardTitle>PAYUNi 訂閱方案</CardTitle>
-				<CardDescription>選擇月繳或年繳，訂閱成功後即可使用對應課程。</CardDescription>
+				<CardDescription>選擇月繳或年繳並填寫發票偏好，訂閱成功後即可使用對應課程。</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<SubscriptionCheckoutForm

@@ -273,9 +273,17 @@ model Order {
   kitClaimEligible Boolean     @default(false)
   paidAt           DateTime?
   refundedAt       DateTime?
+  invoiceType      String?
+  invoiceCarrierType String?
+  invoiceCarrierId String?
+  invoiceTaxId     String?
+  invoiceTitle     String?
+  invoiceAddress   String?
+  invoiceLoveCode  String?
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
   user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invoice          Invoice?
 
   @@index([userId])
   @@map("order")
@@ -477,13 +485,42 @@ model CourseSubscription {
   invoiceCarrierId      String?
   invoiceTaxId          String?
   invoiceTitle          String?
+  invoiceAddress        String?
+  invoiceLoveCode       String?
   createdAt             DateTime                 @default(now())
   updatedAt             DateTime                 @updatedAt
+  invoices              Invoice[]
 
   @@index([userId])
   @@index([courseId])
   @@index([userId, courseId])
   @@map("course_subscription")
+}
+
+model Invoice {
+  id             String             @id @default(cuid())
+  orderId        String?            @unique
+  order          Order?             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  subscriptionId String?
+  subscription   CourseSubscription? @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  periodNumber   Int?
+  provider       String
+  status         String             @default("PENDING")
+  invoiceNumber  String?
+  randomCode     String?
+  invoiceDate    DateTime?
+  amount         Int
+  allowanceTotal Int                @default(0)
+  failReason     String?
+  attentionReason String?
+  rawResponse    Json?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([invoiceNumber])
+  @@index([status])
+	@@index([subscriptionId, periodNumber], map: "invoice_subscription_period_idx")
+  @@map("invoice")
 }
 
 model PaymentWebhookEvent {

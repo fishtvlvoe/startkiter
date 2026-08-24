@@ -19,6 +19,10 @@ vi.mock("@startkiter/api/modules/course/lib/webhook-events", () => ({
 	fingerprintPayUniPeriodEvent: vi.fn(() => "event-1"),
 }));
 
+vi.mock("@startkiter/api/modules/course/lib/invoice-events", () => ({
+	triggerInvoiceForSubscriptionPeriod: vi.fn(),
+}));
+
 import { db } from "@startkiter/database";
 import { PayUniService } from "@startkiter/payments";
 
@@ -28,6 +32,7 @@ import {
 	completeWebhookEvent,
 	failWebhookEvent,
 } from "@startkiter/api/modules/course/lib/webhook-events";
+import { triggerInvoiceForSubscriptionPeriod } from "@startkiter/api/modules/course/lib/invoice-events";
 import { POST } from "./route";
 
 const credentials = {
@@ -66,12 +71,14 @@ describe("PAYUNi period-notify", () => {
 		vi.mocked(claimWebhookEvent).mockResolvedValue("CLAIMED");
 		vi.mocked(completeWebhookEvent).mockResolvedValue(undefined);
 		vi.mocked(failWebhookEvent).mockResolvedValue(undefined);
+		vi.mocked(triggerInvoiceForSubscriptionPeriod).mockResolvedValue(null);
 		vi.mocked(db.courseSubscription.findUnique).mockResolvedValue({
 			id: "subscription-1",
 			status: "PENDING",
 			pricePerPeriod: 390,
 			gatewaySubscriptionId: null,
 			currentPeriodEnd: null,
+			paidPeriods: 0,
 		} as never);
 		vi.mocked(db.courseSubscription.update).mockResolvedValue({ id: "subscription-1" } as never);
 		vi.mocked(db.$transaction).mockImplementation(async (callback) => callback(db as never));
@@ -97,6 +104,16 @@ describe("PAYUNi period-notify", () => {
 				data: { status: "COMPLETED", error: null },
 			}),
 		);
+		expect(triggerInvoiceForSubscriptionPeriod).toHaveBeenCalledWith("subscription-1", 1);
+	});
+
+	it("keeps subscription payment success when invoice issuance fails", async () => {
+		vi.mocked(triggerInvoiceForSubscriptionPeriod).mockRejectedValue(new Error("provider unavailable"));
+
+		const response = await POST(signedRequest());
+
+		expect(response.status).toBe(200);
+		expect(db.courseSubscription.update).toHaveBeenCalled();
 	});
 
 	it("returns OK and skips state changes for a duplicate event", async () => {

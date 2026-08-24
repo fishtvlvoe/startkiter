@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { protectedProcedure } from "../../../orpc/procedures";
 import { getPayUniSubscriptionGateway } from "../lib/subscription-gateway";
+import { handleRefundInvoiceForSubscription } from "../lib/invoice-events";
 
 export const cancelCourseSubscription = protectedProcedure
 	.route({
@@ -45,5 +46,6 @@ export const cancelCourseSubscription = protectedProcedure
 			where: { id: subscription.id },
 			data: { status: "CANCELED", canceledAt: new Date() },
 		});
+		void handleRefundInvoiceForSubscription(subscription.id).catch(() => undefined);
 		return { subscription: updated };
 	});

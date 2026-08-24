@@ -84,7 +84,7 @@ export type UserNotificationPreferenceScalarFieldEnum = z.infer<typeof UserNotif
 
 // File: OrderScalarFieldEnum.schema.ts
 
-export const OrderScalarFieldEnumSchema = z.enum(['id', 'orderNo', 'userId', 'sku', 'amount', 'currency', 'status', 'paymentGateway', 'gatewayTradeNo', 'courseAccess', 'kitClaimEligible', 'paidAt', 'refundedAt', 'createdAt', 'updatedAt'])
+export const OrderScalarFieldEnumSchema = z.enum(['id', 'orderNo', 'userId', 'sku', 'amount', 'currency', 'status', 'paymentGateway', 'gatewayTradeNo', 'courseAccess', 'kitClaimEligible', 'paidAt', 'refundedAt', 'invoiceType', 'invoiceCarrierType', 'invoiceCarrierId', 'invoiceTaxId', 'invoiceTitle', 'invoiceAddress', 'invoiceLoveCode', 'createdAt', 'updatedAt'])
 
 export type OrderScalarFieldEnum = z.infer<typeof OrderScalarFieldEnumSchema>;
 
@@ -126,9 +126,15 @@ export type CourseSubscriptionPlanScalarFieldEnum = z.infer<typeof CourseSubscri
 
 // File: CourseSubscriptionScalarFieldEnum.schema.ts
 
-export const CourseSubscriptionScalarFieldEnumSchema = z.enum(['id', 'userId', 'courseId', 'planId', 'status', 'gatewayTradeNo', 'gatewaySubscriptionId', 'interval', 'pricePerPeriod', 'paidPeriods', 'currentPeriodEnd', 'lastPaymentAt', 'canceledAt', 'invoiceType', 'invoiceCarrierType', 'invoiceCarrierId', 'invoiceTaxId', 'invoiceTitle', 'createdAt', 'updatedAt'])
+export const CourseSubscriptionScalarFieldEnumSchema = z.enum(['id', 'userId', 'courseId', 'planId', 'status', 'gatewayTradeNo', 'gatewaySubscriptionId', 'interval', 'pricePerPeriod', 'paidPeriods', 'currentPeriodEnd', 'lastPaymentAt', 'canceledAt', 'invoiceType', 'invoiceCarrierType', 'invoiceCarrierId', 'invoiceTaxId', 'invoiceTitle', 'invoiceAddress', 'invoiceLoveCode', 'createdAt', 'updatedAt'])
 
 export type CourseSubscriptionScalarFieldEnum = z.infer<typeof CourseSubscriptionScalarFieldEnumSchema>;
+
+// File: InvoiceScalarFieldEnum.schema.ts
+
+export const InvoiceScalarFieldEnumSchema = z.enum(['id', 'orderId', 'subscriptionId', 'periodNumber', 'provider', 'status', 'invoiceNumber', 'randomCode', 'invoiceDate', 'amount', 'allowanceTotal', 'failReason', 'attentionReason', 'rawResponse', 'createdAt', 'updatedAt'])
+
+export type InvoiceScalarFieldEnum = z.infer<typeof InvoiceScalarFieldEnumSchema>;
 
 // File: PaymentWebhookEventScalarFieldEnum.schema.ts
 
@@ -225,6 +231,12 @@ export type SortOrder = z.infer<typeof SortOrderSchema>;
 export const JsonNullValueInputSchema = z.enum(['JsonNull'])
 
 export type JsonNullValueInput = z.infer<typeof JsonNullValueInputSchema>;
+
+// File: NullableJsonNullValueInput.schema.ts
+
+export const NullableJsonNullValueInputSchema = z.enum(['DbNull', 'JsonNull'])
+
+export type NullableJsonNullValueInput = z.infer<typeof NullableJsonNullValueInputSchema>;
 
 // File: QueryMode.schema.ts
 
@@ -551,6 +563,13 @@ export const OrderSchema = z.object({
   kitClaimEligible: z.boolean(),
   paidAt: z.date().nullish(),
   refundedAt: z.date().nullish(),
+  invoiceType: z.string().nullish(),
+  invoiceCarrierType: z.string().nullish(),
+  invoiceCarrierId: z.string().nullish(),
+  invoiceTaxId: z.string().nullish(),
+  invoiceTitle: z.string().nullish(),
+  invoiceAddress: z.string().nullish(),
+  invoiceLoveCode: z.string().nullish(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -682,11 +701,37 @@ export const CourseSubscriptionSchema = z.object({
   invoiceCarrierId: z.string().nullish(),
   invoiceTaxId: z.string().nullish(),
   invoiceTitle: z.string().nullish(),
+  invoiceAddress: z.string().nullish(),
+  invoiceLoveCode: z.string().nullish(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
 
 export type CourseSubscriptionType = z.infer<typeof CourseSubscriptionSchema>;
+
+
+// File: Invoice.schema.ts
+
+export const InvoiceSchema = z.object({
+  id: z.string(),
+  orderId: z.string().nullish(),
+  subscriptionId: z.string().nullish(),
+  periodNumber: z.number().int().nullish(),
+  provider: z.string(),
+  status: z.string().default("PENDING"),
+  invoiceNumber: z.string().nullish(),
+  randomCode: z.string().nullish(),
+  invoiceDate: z.date().nullish(),
+  amount: z.number().int(),
+  allowanceTotal: z.number().int(),
+  failReason: z.string().nullish(),
+  attentionReason: z.string().nullish(),
+  rawResponse: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").nullish(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type InvoiceType = z.infer<typeof InvoiceSchema>;
 
 
 // File: PaymentWebhookEvent.schema.ts

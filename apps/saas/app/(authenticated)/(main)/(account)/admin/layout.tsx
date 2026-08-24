@@ -49,6 +49,11 @@ export default async function AdminLayout({ children }: PropsWithChildren) {
 								href: "/admin/revenue",
 								icon: <BarChart3Icon className="size-4 opacity-50" />,
 							},
+							{
+								title: "台灣統一發票",
+								href: "/admin/settings/einvoice",
+								icon: <ClipboardListIcon className="size-4 opacity-50" />,
+							},
 							...(config.organizations.enable
 								? [
 										{

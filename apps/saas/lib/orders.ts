@@ -1,11 +1,14 @@
 import { db } from "@startkiter/database";
+import { handleRefundInvoice } from "@startkiter/api/modules/course/lib/invoice-events";
 import {
 	MVP_AMOUNT_TWD,
 	MVP_SKU,
 	buildPendingOrderInput,
 	createMvpCheckoutGateway,
 	resolvePayUniCredentials,
+	normalizeInvoicePreference,
 	type OrderRecord,
+	type InvoicePreferenceInput,
 	type PayUniEnv,
 } from "@startkiter/payments";
 
@@ -35,6 +38,7 @@ export async function createPendingOrderForUser(
 	userId: string,
 	amount: number = MVP_AMOUNT_TWD,
 	sku: string = MVP_SKU,
+	invoicePreference?: InvoicePreferenceInput,
 ): Promise<OrderRecord> {
 	const pending = buildPendingOrderInput({
 		userId,
@@ -52,6 +56,20 @@ export async function createPendingOrderForUser(
 			paymentGateway: "payuni",
 			courseAccess: false,
 			kitClaimEligible: false,
+			...(invoicePreference
+				? (() => {
+						const preference = normalizeInvoicePreference(invoicePreference);
+						return {
+							invoiceType: preference.invoiceType,
+							invoiceCarrierType: preference.carrierType,
+							invoiceCarrierId: preference.carrierId || null,
+							invoiceTaxId: preference.taxId || null,
+							invoiceTitle: preference.title || null,
+							invoiceAddress: preference.address || null,
+							invoiceLoveCode: preference.loveCode || null,
+						};
+					})()
+				: {}),
 		},
 	});
 	return {
@@ -108,6 +126,10 @@ export async function markOrderRefundedInDb(orderNo: string) {
 			refundedAt: new Date(),
 		},
 	});
+	if (result.count > 0) {
+		const order = await db.order.findUnique({ where: { orderNo }, select: { id: true } });
+		if (order) void handleRefundInvoice(order.id).catch(() => undefined);
+	}
 	return result.count;
 }
 

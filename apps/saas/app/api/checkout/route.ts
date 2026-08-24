@@ -1,6 +1,6 @@
 import { auth } from "@startkiter/auth";
 import { validateCoupon } from "@startkiter/coupons";
-import { MVP_SKU, createMvpCheckoutGateway, getProduct } from "@startkiter/payments";
+import { MVP_SKU, createMvpCheckoutGateway, getProduct, invoicePreferenceSchema, type InvoicePreferenceInput } from "@startkiter/payments";
 import { NextResponse } from "next/server";
 
 import {
@@ -43,6 +43,15 @@ export async function POST(request: Request) {
 		}
 	}
 
+	let invoicePreference: InvoicePreferenceInput | undefined;
+	if ("invoicePreference" in body) {
+		const parsedPreference = invoicePreferenceSchema.safeParse(body.invoicePreference);
+		if (!parsedPreference.success) {
+			return NextResponse.json({ error: "invalid_invoice_preference" }, { status: 400 });
+		}
+		invoicePreference = parsedPreference.data;
+	}
+
 	// productId 未帶時預設 MVP SKU（既有行為不變）；帶了就查商品目錄（Phase 4：MVP 或已發布 bundle）。
 	// 金額一律從伺服器端目錄取得，不信任客戶端輸入（spec: Client-supplied alternate amount is ignored）。
 	const productId = typeof body.productId === "string" && body.productId ? body.productId : MVP_SKU;
@@ -78,7 +87,9 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: "public_base_url_required" }, { status: 503 });
 	}
 
-	const order = await createPendingOrderForUser(session.user.id, amount, product.sku);
+	const order = invoicePreference
+		? await createPendingOrderForUser(session.user.id, amount, product.sku, invoicePreference)
+		: await createPendingOrderForUser(session.user.id, amount, product.sku);
 	const payment = await buildPayuniSession(order, baseUrl, session.user.email);
 	if (!payment) {
 		return NextResponse.json({ error: "payuni_not_configured" }, { status: 503 });

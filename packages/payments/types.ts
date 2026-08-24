@@ -148,6 +148,31 @@ export interface SubscriptionGateway {
 	}>;
 }
 
+export type InvoiceProviderConfig = {
+	merchantId: string;
+	hashKey: string;
+	hashIV: string;
+	testMode: boolean;
+	timeoutMs?: number;
+};
+
+export interface InvoiceProvider {
+	issue(input: IssueInvoiceInput): Promise<
+		| { invoiceNumber: string; randomCode: string; invoiceDate: Date; raw?: unknown }
+		| { failReason: string }
+	>;
+	void(params: { invoiceNumber: string; reason: string }): Promise<{ success: boolean; error?: string }>;
+	allowance(params: {
+		invoiceNumber: string;
+		amount: number;
+		allowanceId?: string;
+		itemName?: string;
+		originalOrderId?: string;
+		buyerEmail?: string | null;
+		taxExclusive?: boolean;
+	}): Promise<{ success: boolean; allowanceNumber?: string; error?: string }>;
+}
+
 export type WebhookHandler = (req: Request) => Promise<Response>;
 
 export type PaymentProvider = {
@@ -155,3 +180,4 @@ export type PaymentProvider = {
 	createCustomerPortalLink: CreateCustomerPortalLink;
 	webhookHandler: WebhookHandler;
 };
+import type { IssueInvoiceInput } from "@paid-tw/einvoice";

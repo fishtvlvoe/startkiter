@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@startkiter/ui";
 
 type PayuniPayment = {
+	orderNo: string;
 	type: string;
 	formData: {
 		apiUrl: string;
@@ -48,7 +49,7 @@ export default function PayuniCheckoutPage() {
 			<CardHeader>
 				<CardTitle>{payment ? "前往 PAYUNi 付款" : "找不到付款資料"}</CardTitle>
 				<CardDescription>
-					{payment ? "送出後會導向 PAYUNi（form_post）。" : "請回到結帳頁重新建立訂單。"}
+					{payment ? `訂單 ${payment.orderNo} 已保存發票偏好，送出後會導向 PAYUNi（form_post）。` : "請回到結帳頁重新建立訂單。"}
 				</CardDescription>
 			</CardHeader>
 			{payment && (

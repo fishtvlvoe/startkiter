@@ -3,6 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { InvoicePreferenceFields, DEFAULT_INVOICE_PREFERENCE } from "@payments/components/InvoicePreferenceFields";
+import type { InvoicePreferenceInput } from "@startkiter/payments";
+
 function checkoutErrorMessage(status: number, code?: string) {
 	if (code === "public_base_url_required") {
 		return "站台公開網址尚未設定，暫時無法結帳。";
@@ -17,6 +20,7 @@ function checkoutErrorMessage(status: number, code?: string) {
 }
 
 type CheckoutResponse = {
+	orderNo: string;
 	payment: {
 		type: string;
 		formData: {
@@ -33,6 +37,7 @@ export function CheckoutButton() {
 	const router = useRouter();
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
+	const [invoicePreference, setInvoicePreference] = useState<InvoicePreferenceInput>(DEFAULT_INVOICE_PREFERENCE);
 
 	async function startCheckout() {
 		setLoading(true);
@@ -42,7 +47,7 @@ export function CheckoutButton() {
 			const response = await fetch("/api/checkout", {
 				method: "POST",
 				headers: { "content-type": "application/json" },
-				body: JSON.stringify({ sku: "startkiter-mvp" }),
+				body: JSON.stringify({ sku: "startkiter-mvp", invoicePreference }),
 			});
 
 			if (response.status === 401) {
@@ -57,7 +62,7 @@ export function CheckoutButton() {
 			}
 
 			const payload = (await response.json()) as CheckoutResponse;
-			sessionStorage.setItem("payuniCheckout", JSON.stringify(payload.payment));
+			sessionStorage.setItem("payuniCheckout", JSON.stringify({ ...payload.payment, orderNo: payload.orderNo }));
 			router.push("/checkout/payuni");
 		} catch {
 			setError("網路異常，請稍後再試。");
@@ -68,6 +73,7 @@ export function CheckoutButton() {
 
 	return (
 		<div className="space-y-2">
+			<InvoicePreferenceFields value={invoicePreference} onChange={setInvoicePreference} />
 			<button
 				className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-9 items-center justify-center rounded-full px-4 text-sm font-semibold transition-colors disabled:pointer-events-none disabled:opacity-50"
 				type="button"

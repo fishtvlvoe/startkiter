@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { ORPCError } from "@orpc/server";
 import { db } from "@startkiter/database";
+import { invoicePreferenceSchema } from "@startkiter/payments";
 import { z } from "zod";
 
 import { protectedProcedure } from "../../../orpc/procedures";
@@ -21,7 +22,7 @@ export const createSubscriptionCheckout = protectedProcedure
 		tags: ["Course"],
 		summary: "Create a PAYUNi recurring billing checkout",
 	})
-	.input(z.object({ planId: z.string().min(1) }))
+	.input(z.object({ planId: z.string().min(1), invoicePreference: invoicePreferenceSchema.optional() }))
 	.handler(async ({ input, context }) => {
 		const plan = await db.courseSubscriptionPlan.findUnique({
 			where: { id: input.planId },
@@ -64,6 +65,17 @@ export const createSubscriptionCheckout = protectedProcedure
 					gatewayTradeNo,
 					interval: plan.interval,
 					pricePerPeriod: plan.price,
+					...(input.invoicePreference
+						? {
+								invoiceType: input.invoicePreference.invoiceType,
+								invoiceCarrierType: input.invoicePreference.carrierType,
+								invoiceCarrierId: input.invoicePreference.carrierId || null,
+								invoiceTaxId: input.invoicePreference.taxId || null,
+								invoiceTitle: input.invoicePreference.title || null,
+								invoiceAddress: input.invoicePreference.address || null,
+								invoiceLoveCode: input.invoicePreference.loveCode || null,
+							}
+						: {}),
 				},
 			});
 		} catch (error) {

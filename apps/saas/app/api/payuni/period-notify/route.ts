@@ -9,6 +9,7 @@ import {
 	failWebhookEvent,
 	fingerprintPayUniPeriodEvent,
 } from "@startkiter/api/modules/course/lib/webhook-events";
+import { triggerInvoiceForSubscriptionPeriod } from "@startkiter/api/modules/course/lib/invoice-events";
 
 function stringField(value: unknown): string {
 	return typeof value === "string" ? value.trim() : String(value ?? "").trim();
@@ -97,6 +98,7 @@ export async function POST(request: Request) {
 				id: true,
 				status: true,
 				pricePerPeriod: true,
+				paidPeriods: true,
 				gatewaySubscriptionId: true,
 				currentPeriodEnd: true,
 			},
@@ -128,6 +130,7 @@ export async function POST(request: Request) {
 		if (!periodEnd) {
 			throw new Error("Missing valid period end date");
 		}
+		const periodNumber = subscription.paidPeriods + 1;
 		const updateData: Parameters<typeof db.courseSubscription.update>[0]["data"] = {
 			status: subscription.status === "PENDING" ? "ACTIVE" : subscription.status,
 			gatewaySubscriptionId: subscription.gatewaySubscriptionId ?? periodTradeNo,
@@ -151,8 +154,9 @@ export async function POST(request: Request) {
 				where: { gateway_eventId: { gateway: "payuni", eventId } },
 				data: { status: "COMPLETED", error: null },
 			});
-		});
-		claimed = false;
+			});
+			claimed = false;
+		void triggerInvoiceForSubscriptionPeriod(subscription.id, periodNumber).catch(() => undefined);
 		return NextResponse.json({ message: "OK" });
 	} catch (error) {
 		if (claimed) {

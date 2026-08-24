@@ -14,6 +14,7 @@ import { updateLesson } from "./lib/update-lesson";
 import { resolveVideoSource } from "./lib/video-resolver";
 import { cancelCourseSubscription } from "./procedures/cancel-course-subscription";
 import { createSubscriptionCheckout } from "./procedures/create-subscription-checkout";
+import { issueInvoiceAllowance, voidInvoice } from "./procedures/invoice-operations";
 
 const courseOperatorProcedure = protectedProcedure.use(async ({ context, next }) => {
 	if (!isCourseOperator(context.user.email, process.env.ADMIN_EMAIL)) {
@@ -256,4 +257,6 @@ export const courseRouter = publicProcedure.router({
 
 	createSubscriptionCheckout,
 	cancelCourseSubscription,
+	voidInvoice,
+	issueInvoiceAllowance,
 });
