@@ -130,6 +130,18 @@ export const CourseSubscriptionScalarFieldEnumSchema = z.enum(['id', 'userId', '
 
 export type CourseSubscriptionScalarFieldEnum = z.infer<typeof CourseSubscriptionScalarFieldEnumSchema>;
 
+// File: CourseInviteScalarFieldEnum.schema.ts
+
+export const CourseInviteScalarFieldEnumSchema = z.enum(['id', 'courseId', 'tokenHash', 'email', 'maxUses', 'usedCount', 'expiresAt', 'active', 'createdBy', 'createdAt', 'updatedAt'])
+
+export type CourseInviteScalarFieldEnum = z.infer<typeof CourseInviteScalarFieldEnumSchema>;
+
+// File: CourseInviteRedemptionScalarFieldEnum.schema.ts
+
+export const CourseInviteRedemptionScalarFieldEnumSchema = z.enum(['id', 'userId', 'courseId', 'inviteId', 'redeemedAt'])
+
+export type CourseInviteRedemptionScalarFieldEnum = z.infer<typeof CourseInviteRedemptionScalarFieldEnumSchema>;
+
 // File: InvoiceScalarFieldEnum.schema.ts
 
 export const InvoiceScalarFieldEnumSchema = z.enum(['id', 'orderId', 'subscriptionId', 'periodNumber', 'provider', 'status', 'invoiceNumber', 'randomCode', 'invoiceDate', 'amount', 'allowanceTotal', 'failReason', 'attentionReason', 'rawResponse', 'createdAt', 'updatedAt'])
@@ -738,6 +750,38 @@ export const CourseSubscriptionSchema = z.object({
 });
 
 export type CourseSubscriptionType = z.infer<typeof CourseSubscriptionSchema>;
+
+
+// File: CourseInvite.schema.ts
+
+export const CourseInviteSchema = z.object({
+  id: z.string(),
+  courseId: z.string(),
+  tokenHash: z.string(),
+  email: z.string().nullish(),
+  maxUses: z.number().int().nullish(),
+  usedCount: z.number().int(),
+  expiresAt: z.date().nullish(),
+  active: z.boolean().default(true),
+  createdBy: z.string().nullish(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type CourseInviteType = z.infer<typeof CourseInviteSchema>;
+
+
+// File: CourseInviteRedemption.schema.ts
+
+export const CourseInviteRedemptionSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  courseId: z.string(),
+  inviteId: z.string(),
+  redeemedAt: z.date(),
+});
+
+export type CourseInviteRedemptionType = z.infer<typeof CourseInviteRedemptionSchema>;
 
 
 // File: Invoice.schema.ts

@@ -37,6 +37,7 @@ function createDbBundleCourseAccessReader(): BundleCourseAccessReader {
 			return bundle.courses.map((course) => course.courseId);
 		},
 		hasActiveSubscription: async () => false,
+		hasRedeemedInvite: async () => false,
 	};
 }
 

@@ -34,6 +34,8 @@ export type BundleCourseAccessReader = {
 	findBundleCourseIds: (sku: string) => Promise<string[] | null>;
 	/** 查詢指定使用者對指定課程是否有 ACTIVE 訂閱。 */
 	hasActiveSubscription: (userId: string, courseId: string) => Promise<boolean>;
+	/** 查詢指定使用者是否已兌換該課程的邀請連結。 */
+	hasRedeemedInvite: (userId: string, courseId: string) => Promise<boolean>;
 };
 
 /**
@@ -59,5 +61,9 @@ export async function canAccessCourseId(
 			return true;
 		}
 	}
-	return reader.hasActiveSubscription(userId, courseId);
+	if (await reader.hasActiveSubscription(userId, courseId)) {
+		return true;
+	}
+
+	return reader.hasRedeemedInvite(userId, courseId);
 }

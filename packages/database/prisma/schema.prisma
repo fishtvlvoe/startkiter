@@ -52,6 +52,7 @@ model User {
   reviewHelpfulVotes       ReviewHelpful[]
   reviewReports            ReviewReport[]
   lessonComments           LessonComment[]
+  courseInviteRedemptions  CourseInviteRedemption[]
   mcpConnections           McpConnection[]
 
   @@unique([email])
@@ -446,6 +447,8 @@ model Course {
   chapters    Chapter[]
   subscriptionPlans CourseSubscriptionPlan[]
   subscriptions CourseSubscription[]
+  invites      CourseInvite[]
+  inviteRedemptions CourseInviteRedemption[]
 
   @@map("course")
 }
@@ -500,6 +503,43 @@ model CourseSubscription {
   @@index([courseId])
   @@index([userId, courseId])
   @@map("course_subscription")
+}
+
+model CourseInvite {
+  id         String   @id @default(cuid())
+  courseId   String
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  tokenHash  String   @unique
+  email      String?
+  maxUses    Int?
+  usedCount  Int      @default(0)
+  expiresAt  DateTime?
+  active     Boolean  @default(true)
+  createdBy  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  redemptions CourseInviteRedemption[]
+
+  @@index([courseId])
+  @@index([active, expiresAt])
+  @@map("course_invite")
+}
+
+model CourseInviteRedemption {
+  id         String       @id @default(cuid())
+  userId     String
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId   String
+  course     Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  inviteId   String
+  invite     CourseInvite @relation(fields: [inviteId], references: [id], onDelete: Restrict)
+  redeemedAt DateTime     @default(now())
+
+  @@unique([userId, courseId])
+  @@index([courseId])
+  @@index([inviteId])
+  @@map("course_invite_redemption")
 }
 
 model Invoice {

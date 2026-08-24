@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { MVP_SKU } from "@startkiter/payments/constants";
 
 import {
@@ -18,12 +18,14 @@ function bundleReaderWith(args: {
 	grantedSkus: string[];
 	bundleCourseIdsBySku: Record<string, string[]>;
 	hasActiveSubscription?: boolean;
+	hasRedeemedInvite?: boolean;
 }): BundleCourseAccessReader {
 	return {
 		findGrantedSkusForUser: async () => args.grantedSkus,
 		findBundleCourseIds: async (sku) => args.bundleCourseIdsBySku[sku] ?? null,
 		hasActiveSubscription: async () => args.hasActiveSubscription ?? false,
-	};
+		hasRedeemedInvite: vi.fn(async () => args.hasRedeemedInvite ?? false),
+	} as BundleCourseAccessReader;
 }
 
 describe("canAccessCourse", () => {
@@ -148,5 +150,26 @@ describe("canAccessCourseId (Requirement: Bundle purchase grants access to all i
 		});
 
 		await expect(canAccessCourseId("user_both", "course-a", reader)).resolves.toBe(true);
+	});
+
+	it("allows a learner with a redeemed invite for the requested course", async () => {
+		const reader = bundleReaderWith({
+			grantedSkus: [],
+			bundleCourseIdsBySku: {},
+			hasRedeemedInvite: true,
+		});
+
+		await expect(canAccessCourseId("user_invited", "course-a", reader)).resolves.toBe(true);
+		expect(reader.hasRedeemedInvite).toHaveBeenCalledWith("user_invited", "course-a");
+	});
+
+	it("denies a learner without any redeemed invite or other entitlement", async () => {
+		const reader = bundleReaderWith({
+			grantedSkus: [],
+			bundleCourseIdsBySku: {},
+			hasRedeemedInvite: false,
+		});
+
+		await expect(canAccessCourseId("user_not_invited", "course-a", reader)).resolves.toBe(false);
 	});
 });

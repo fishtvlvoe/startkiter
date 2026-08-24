@@ -16,6 +16,12 @@ import { cancelCourseSubscription } from "./procedures/cancel-course-subscriptio
 import { createSubscriptionCheckout } from "./procedures/create-subscription-checkout";
 import { issueInvoiceAllowance, voidInvoice } from "./procedures/invoice-operations";
 import { refundOrder } from "./procedures/refund-order";
+import {
+	createCourseInvite,
+	deactivateCourseInvite,
+	listCourseInvites,
+} from "./procedures/create-course-invite";
+import { redeemCourseInvite } from "./procedures/redeem-course-invite";
 
 const courseOperatorProcedure = protectedProcedure.use(async ({ context, next }) => {
 	if (!isCourseOperator(context.user.email, process.env.ADMIN_EMAIL)) {
@@ -261,4 +267,8 @@ export const courseRouter = publicProcedure.router({
 	voidInvoice,
 	issueInvoiceAllowance,
 	refundOrder,
+	createCourseInvite,
+	listCourseInvites,
+	deactivateCourseInvite,
+	redeemCourseInvite,
 });

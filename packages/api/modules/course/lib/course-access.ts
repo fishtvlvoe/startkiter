@@ -25,6 +25,13 @@ export function createPrismaBundleCourseAccessReader(): BundleCourseAccessReader
 			});
 			return subscription != null;
 		},
+		hasRedeemedInvite: async (userId: string, courseId: string) => {
+			const redemption = await db.courseInviteRedemption.findUnique({
+				where: { userId_courseId: { userId, courseId } },
+				select: { id: true },
+			});
+			return redemption != null;
+		},
 	};
 }
 
