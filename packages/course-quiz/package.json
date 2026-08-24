@@ -1,0 +1,22 @@
+{
+	"name": "@startkiter/course-quiz",
+	"version": "0.0.0",
+	"private": true,
+	"main": "./index.ts",
+	"types": "./**/*.ts",
+	"scripts": {
+		"test": "dotenv -c -e ../../.env -- vitest run",
+		"type-check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@startkiter/database": "workspace:*",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@startkiter/tsconfig": "workspace:*",
+		"@types/node": "catalog:",
+		"dotenv-cli": "catalog:",
+		"typescript": "catalog:",
+		"vitest": "catalog:"
+	}
+}

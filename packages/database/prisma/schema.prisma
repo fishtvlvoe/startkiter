@@ -47,6 +47,7 @@ model User {
   lessonProgresses         LessonProgress[]
   courseSubscriptions      CourseSubscription[]
   pluginContents           PluginContent[]
+  quizAttempts             QuizAttempt[]
   mcpConnections           McpConnection[]
 
   @@unique([email])
@@ -633,6 +634,23 @@ model PluginContent {
 
   @@index([pluginId, type])
   @@index([authorId])
+}
+
+model QuizAttempt {
+  id                String   @id @default(cuid())
+  userId            String
+  pluginContentId   String
+  answers           Json
+  score             Int
+  passed            Boolean
+  timeTakenSeconds  Int?
+  startedAt         DateTime @default(now())
+  submittedAt       DateTime @default(now())
+
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, pluginContentId])
+  @@map("quiz_attempt")
 }
 
 model McpConnection {

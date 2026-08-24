@@ -23,6 +23,17 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		dataSpec: "content",
 	},
 	{
+		id: "quiz",
+		name: "課後測驗",
+		version: "0.1.0",
+		mount: {
+			route: { path: "/quiz-admin" },
+			menu: { label: "測驗管理", icon: "list-checks", order: 5, requiresOperator: true },
+			content: { kind: "auto", boundTo: "/quiz" },
+		},
+		dataSpec: "content",
+	},
+	{
 		id: "chatbot",
 		name: "客服",
 		version: "0.1.0",
@@ -63,4 +74,3 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		dataSpec: "none",
 	},
 ];
-

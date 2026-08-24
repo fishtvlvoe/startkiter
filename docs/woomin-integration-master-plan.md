@@ -14,7 +14,11 @@ Fish 只需要做的事：依序把下面的 change 丟給 Codex 執行 `/spectr
 4. CC 回報任何 Critical／High、驗收 FAIL 或缺證據時，主控先修正，再重新開／派 CC 驗收；未取得 PASS 前不得封存。Critical 數量必須是 0。
 5. CC PASS 後，主控才在主工作樹執行 `spectra archive <change>`，確認 archive 成功、git status 乾淨，再關閉 CC terminal、刪除驗收 worktree，留下完整驗收報告。
 
-本次不主動啟動下一張 change；這段只定義後續每張 SR 完成後的自動化驗收規則。
+2026-08-24 scope decision：第 2 張 `subscriptions-invoice` 的程式實作與本地驗證已完成，但真實付款／訂閱開票 e2e 與正式金鑰設定屬於金流驗收，依 Fish 裁決延後到全部非金流模組完成後再補。第 2 張保持未 archive 的 deferred 狀態，不能勾掉未完成 task，也不能把 deferred 當成 PASS；施工流程可先繼續第 3-8、11-15 張非金流 change。回頭補金流時，先 unpark 第 2 張，完成 tasks.md 的 e2e 與正式設定 gate，取得 CC PASS 後才 archive。
+
+每張 change 除了對照自身 proposal/design/spec/tasks，也必須檢查 `docs/` 下與部署、後台、資料流及 agent routing 有關的文件，確認新模組沒有破壞目前後台耦合、Coolify/VPS 啟動條件、webhook 回路與既有 package contract。這項文件對照要在該張 change 的驗收報告留下實際檔案與驗證證據。
+
+站內付不是現有 `multi-gateway-checkout` 的直接延伸。現有 change 以單一啟用 gateway、hosted redirect/form-post、排除買家支付方式選擇為前提，與新的 embedded checkout 方向不同；後續應另開一張 Spectra change（暫名 `embedded-payment-checkout`），先完成 discuss/propose/validate，再決定是否取代或依賴現有 change。`/Users/fishtv/Development/8-外掛/paygo` 只作 adapter、支付方式策略、return/webhook、退款與設定分層的參考，不直接搬 PHP/WordPress 程式碼，也不在新 SR 核准前修改正式 specs。
 
 ## 總表（15 張，依執行順序）
 

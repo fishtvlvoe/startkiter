@@ -5,6 +5,7 @@ import { aiRouter } from "../modules/ai/router";
 import { courseRouter } from "../modules/course/router";
 import { deploymentRouter } from "../modules/deployment/router";
 import { notificationsRouter } from "../modules/notifications/router";
+import { quizRouter } from "../modules/quiz/router";
 import { organizationsRouter } from "../modules/organizations/router";
 import { paymentsRouter } from "../modules/payments/router";
 import { supportRouter } from "../modules/support/router";
@@ -19,6 +20,7 @@ export const router = publicProcedure.router({
 	course: courseRouter,
 	ai: aiRouter,
 	notifications: notificationsRouter,
+	quiz: quizRouter,
 	deployment: deploymentRouter,
 	support: supportRouter,
 });

@@ -27,6 +27,7 @@
 		"@startkiter/auth": "workspace:*",
 		"@startkiter/bundles": "workspace:*",
 		"@startkiter/course": "workspace:*",
+		"@startkiter/course-quiz": "workspace:*",
 		"@startkiter/coupons": "workspace:*",
 		"@startkiter/database": "workspace:*",
 		"@startkiter/github-kit": "workspace:*",

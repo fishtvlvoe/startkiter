@@ -178,6 +178,12 @@ export const PluginContentScalarFieldEnumSchema = z.enum(['id', 'pluginId', 'typ
 
 export type PluginContentScalarFieldEnum = z.infer<typeof PluginContentScalarFieldEnumSchema>;
 
+// File: QuizAttemptScalarFieldEnum.schema.ts
+
+export const QuizAttemptScalarFieldEnumSchema = z.enum(['id', 'userId', 'pluginContentId', 'answers', 'score', 'passed', 'timeTakenSeconds', 'startedAt', 'submittedAt'])
+
+export type QuizAttemptScalarFieldEnum = z.infer<typeof QuizAttemptScalarFieldEnumSchema>;
+
 // File: McpConnectionScalarFieldEnum.schema.ts
 
 export const McpConnectionScalarFieldEnumSchema = z.enum(['id', 'userId', 'clientName', 'authorizedAt', 'lastUsedAt', 'revokedAt'])
@@ -844,6 +850,23 @@ export const PluginContentSchema = z.object({
 });
 
 export type PluginContentType = z.infer<typeof PluginContentSchema>;
+
+
+// File: QuizAttempt.schema.ts
+
+export const QuizAttemptSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  pluginContentId: z.string(),
+  answers: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10"),
+  score: z.number().int(),
+  passed: z.boolean(),
+  timeTakenSeconds: z.number().int().nullish(),
+  startedAt: z.date(),
+  submittedAt: z.date(),
+});
+
+export type QuizAttemptType = z.infer<typeof QuizAttemptSchema>;
 
 
 // File: McpConnection.schema.ts
