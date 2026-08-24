@@ -5,7 +5,12 @@ import { BookOpenIcon, LightbulbIcon, XIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Button, Card, Input } from "@startkiter/ui";
-import { extractLessonBlockIds, FluentPlayer, LessonMdx } from "@startkiter/course";
+import {
+	extractLessonBlockIds,
+	FluentPlayer,
+	LessonMdx,
+	type WatermarkOverlayProps,
+} from "@startkiter/course";
 import { resolveVideoSource } from "@startkiter/api/modules/course/lib/video-resolver";
 import { orpc } from "@shared/lib/orpc-query-utils";
 
@@ -28,12 +33,20 @@ interface ChapterData {
 	lessons: LessonData[];
 }
 
+type WatermarkSetting = Omit<WatermarkOverlayProps, "email" | "courseTitle">;
+
 export function AcademyClassroomClient({
 	initialLesson,
 	curriculum,
+	courseTitle,
+	viewerEmail,
+	watermarkSetting,
 }: {
 	initialLesson: LessonData;
 	curriculum: ChapterData[];
+	courseTitle: string;
+	viewerEmail: string;
+	watermarkSetting: WatermarkSetting | null;
 }) {
 	const queryClient = useQueryClient();
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -252,7 +265,15 @@ export function AcademyClassroomClient({
 					<div className="mx-auto w-full max-w-4xl p-6 space-y-6">
 						<Card className="overflow-hidden border-neutral-800 bg-black p-0 shadow-2xl">
 							<div className="relative aspect-video w-full bg-neutral-900">
-								<FluentPlayer title={currentLesson.title} resolved={resolvedVideo} />
+								<FluentPlayer
+									title={currentLesson.title}
+									resolved={resolvedVideo}
+									watermark={
+										watermarkSetting
+											? { ...watermarkSetting, email: viewerEmail, courseTitle }
+											: undefined
+									}
+								/>
 							</div>
 						</Card>
 

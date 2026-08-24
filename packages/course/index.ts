@@ -58,6 +58,8 @@ export type { MdxInspectResult } from "./src/mdx/inspect-mdx-source";
 export { extractLessonBlockIds } from "./src/mdx/extract-lesson-block-ids";
 export { FluentPlayer } from "./src/player/FluentPlayer";
 export type { FluentPlayerSource } from "./src/player/FluentPlayer";
+export { WatermarkOverlay, maskEmail } from "./src/player/watermark-overlay";
+export type { WatermarkOverlayProps } from "./src/player/watermark-overlay";
 export { courseModuleDescriptor } from "./src/config/modules";
 export type {
 	ModuleDescriptor,

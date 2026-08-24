@@ -2,6 +2,7 @@ import { auth } from "@startkiter/auth";
 import { db } from "@startkiter/database";
 import { getClientIp, recordAdminAction } from "@startkiter/platform";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { COURSE_STUDIO_ERROR_CODES } from "@startkiter/api/modules/course/errors";
 import { isCourseOperator } from "@startkiter/api/modules/course/lib/course-operator";
 import { canManageCourse } from "@startkiter/api/modules/course/lib/course-instructor-access";
@@ -12,6 +13,20 @@ type StudioAccess = {
 	userId: string;
 	isOperator: boolean;
 };
+
+const watermarkSettingsSchema = z.object({
+	courseId: z.string().trim().min(1),
+	enabled: z.boolean(),
+	showEmail: z.boolean(),
+	showCourseTitle: z.boolean(),
+	showTimestamp: z.boolean(),
+	emailDisplayMode: z.enum(["FULL", "MASKED"]),
+	opacityPercent: z.number().int().min(1).max(100),
+	textSize: z.enum(["SM", "MD", "LG"]),
+	movementMode: z.enum(["STANDARD", "CORNERS"]),
+	moveIntervalSec: z.number().int().min(1).max(3600),
+	tamperPauseEnabled: z.boolean(),
+});
 
 function getAuthenticatedStatus(session: OperatorSession): number | StudioAccess {
 	if (!session?.user?.id) {
@@ -41,6 +56,7 @@ export async function GET(request: Request) {
 		orderBy: { createdAt: "desc" },
 		...(isOperator ? {} : { where: { instructors: { some: { userId } } } }),
 		include: {
+			watermarkSetting: true,
 			chapters: {
 				orderBy: { order: "asc" },
 				include: {
@@ -82,6 +98,11 @@ async function getCourseIdsForAction(
 	payload: Record<string, any>,
 ): Promise<string[] | null> {
 	if (action === "create_chapter") {
+		const courseId = payload.courseId;
+		return typeof courseId === "string" && courseId.length > 0 ? [courseId] : null;
+	}
+
+	if (action === "update_watermark") {
 		const courseId = payload.courseId;
 		return typeof courseId === "string" && courseId.length > 0 ? [courseId] : null;
 	}
@@ -141,7 +162,7 @@ async function isAllowedForCourseAction(
 	payload: Record<string, any>,
 ): Promise<boolean> {
 	if (access.isOperator) return true;
-	if (["create_course", "create_folder", "delete_folder"].includes(action)) return false;
+	if (["create_course", "create_folder", "delete_folder", "update_watermark"].includes(action)) return false;
 	if (action === "update_folder") return payload.name === undefined;
 
 	const courseIds = await getCourseIdsForAction(action, payload);
@@ -215,6 +236,24 @@ export async function POST(request: Request) {
 				data: { status: "PUBLISHED" },
 			});
 			return NextResponse.json({ success: true, course });
+		}
+
+		if (action === "update_watermark") {
+			const parsed = watermarkSettingsSchema.safeParse(payload);
+			if (!parsed.success) {
+				return NextResponse.json(
+					{ error: COURSE_STUDIO_ERROR_CODES.INVALID_WATERMARK_SETTINGS },
+					{ status: 400 },
+				);
+			}
+
+			const { courseId, ...settings } = parsed.data;
+			const watermarkSetting = await db.courseVideoWatermarkSetting.upsert({
+				where: { courseId },
+				update: settings,
+				create: { courseId, ...settings },
+			});
+			return NextResponse.json({ success: true, watermarkSetting });
 		}
 
 		// 章節 CRUD

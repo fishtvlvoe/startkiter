@@ -16,6 +16,7 @@ import {
 } from "@startkiter/ui";
 import { CourseStudioContentPreview } from "@shared/components/CourseStudioContentPreview";
 import { orpcClient } from "@shared/lib/orpc-client";
+import type { WatermarkOverlayProps } from "@startkiter/course";
 import { reorderLesson } from "./reorder-lessons";
 import { getCourseStudioErrorMessage, type CourseStudioErrorResponse } from "./studio-error-message";
 
@@ -78,6 +79,25 @@ interface StudioInstructorResponse {
 	user: { id: string; name: string; email: string };
 }
 
+type StudioWatermarkSetting = Omit<WatermarkOverlayProps, "email" | "courseTitle"> & {
+	id: string;
+	courseId: string;
+	tamperPauseEnabled: boolean;
+};
+
+const DEFAULT_WATERMARK_SETTING: Omit<StudioWatermarkSetting, "id" | "courseId"> = {
+	enabled: false,
+	showEmail: true,
+	showCourseTitle: true,
+	showTimestamp: true,
+	emailDisplayMode: "FULL",
+	opacityPercent: 18,
+	textSize: "MD",
+	movementMode: "STANDARD",
+	moveIntervalSec: 12,
+	tamperPauseEnabled: true,
+};
+
 interface StudioCourseResponse {
 	id: string;
 	title: string;
@@ -86,9 +106,10 @@ interface StudioCourseResponse {
 		courseId: string;
 		title: string;
 		order: number;
-		lessons: StudioLessonResponse[];
+	lessons: StudioLessonResponse[];
 	}>;
 	instructors?: StudioInstructorResponse[];
+	watermarkSetting?: StudioWatermarkSetting | null;
 }
 
 type StudioResponse = CourseStudioErrorResponse & {
@@ -98,6 +119,7 @@ type StudioResponse = CourseStudioErrorResponse & {
 	folder?: StudioFolderResponse | null;
 	chapter?: StudioChapterResponse | null;
 	lesson?: StudioLessonResponse | null;
+	watermarkSetting?: StudioWatermarkSetting | null;
 };
 
 interface StudioMessage {
@@ -165,6 +187,7 @@ export default function CourseAdminStudioPage() {
 	const [selectedInstructorId, setSelectedInstructorId] = useState("");
 	const selectedCourse = courses.find((course) => course.id === courseId);
 	const assignedInstructors = selectedCourse?.instructors ?? [];
+	const [watermarkSetting, setWatermarkSetting] = useState(DEFAULT_WATERMARK_SETTING);
 
 	// 自動清除提示訊息
 	useEffect(() => {
@@ -196,6 +219,7 @@ export default function CourseAdminStudioPage() {
 
 	function selectCourse(course: StudioCourseResponse) {
 		setCourseId(course.id);
+		setWatermarkSetting({ ...DEFAULT_WATERMARK_SETTING, ...(course.watermarkSetting ?? {}) });
 		const mappedChapters: ChapterItem[] = course.chapters.map((ch) => ({
 			id: ch.id,
 			title: ch.title,
@@ -333,6 +357,28 @@ export default function CourseAdminStudioPage() {
 			showMessage("success", "講師已移除");
 		} catch (error) {
 			showMessage("error", "講師移除失敗: " + String(error));
+		}
+	};
+
+	const handleSaveWatermark = async () => {
+		if (!courseId || !isOperator) return;
+
+		const result = await callStudio("update_watermark", {
+			courseId,
+			...watermarkSetting,
+		});
+		if (result.ok && result.data.watermarkSetting) {
+			setWatermarkSetting({ ...DEFAULT_WATERMARK_SETTING, ...result.data.watermarkSetting });
+			setCourses((currentCourses) =>
+				currentCourses.map((course) =>
+					course.id === courseId
+						? { ...course, watermarkSetting: result.data.watermarkSetting ?? null }
+						: course,
+				),
+			);
+			showMessage("success", "浮水印設定已儲存");
+		} else {
+			showMessage("error", "浮水印設定儲存失敗");
 		}
 	};
 
@@ -647,6 +693,134 @@ export default function CourseAdminStudioPage() {
 						</>
 					) : null}
 				</Card>
+
+				{isOperator && courseId ? (
+					<Card className="space-y-4 p-4" data-testid="watermark-settings">
+						<div className="flex items-center justify-between gap-3">
+							<div>
+								<h2 className="text-base font-semibold text-neutral-200">影片浮水印</h2>
+								<p className="text-xs text-neutral-400">播放時顯示目前學員自己的識別資訊，位置會定時移動。</p>
+							</div>
+							<Button variant="outline" onClick={handleSaveWatermark}>
+								儲存浮水印
+							</Button>
+						</div>
+						<div className="grid gap-4 md:grid-cols-3">
+							<label className="flex items-center gap-2 text-sm">
+								<input
+									type="checkbox"
+									aria-label="啟用影片浮水印"
+									checked={watermarkSetting.enabled}
+									onChange={(event) =>
+										setWatermarkSetting((current) => ({ ...current, enabled: event.target.checked }))
+									}
+								/>
+								啟用浮水印
+							</label>
+							<label className="flex items-center gap-2 text-sm">
+								<input
+									type="checkbox"
+									aria-label="顯示學員 Email"
+									checked={watermarkSetting.showEmail}
+									onChange={(event) =>
+										setWatermarkSetting((current) => ({ ...current, showEmail: event.target.checked }))
+									}
+								/>
+								顯示學員 Email
+							</label>
+							<label className="flex items-center gap-2 text-sm">
+								<input
+									type="checkbox"
+									aria-label="顯示課程標題"
+									checked={watermarkSetting.showCourseTitle}
+									onChange={(event) =>
+										setWatermarkSetting((current) => ({ ...current, showCourseTitle: event.target.checked }))
+									}
+								/>
+								顯示課程標題
+							</label>
+						</div>
+						<div className="grid gap-4 md:grid-cols-4">
+							<label className="space-y-1 text-xs text-neutral-400">
+								Email 顯示方式
+								<select
+									aria-label="Email 顯示方式"
+									value={watermarkSetting.emailDisplayMode}
+									onChange={(event) =>
+										setWatermarkSetting((current) => ({
+											...current,
+											emailDisplayMode: event.target.value as "FULL" | "MASKED",
+										}))
+									}
+									className="w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-neutral-200"
+								>
+									<option value="FULL">完整 Email</option>
+									<option value="MASKED">遮蔽 Email</option>
+								</select>
+							</label>
+							<label className="space-y-1 text-xs text-neutral-400">
+								透明度（%）
+								<Input
+									aria-label="浮水印透明度"
+									type="number"
+									min={1}
+									max={100}
+									value={watermarkSetting.opacityPercent}
+									onChange={(event) =>
+										setWatermarkSetting((current) => ({
+											...current,
+											opacityPercent: Number(event.target.value),
+										}))
+									}
+								/>
+							</label>
+							<label className="space-y-1 text-xs text-neutral-400">
+								移動間隔（秒）
+								<Input
+									aria-label="浮水印移動間隔"
+									type="number"
+									min={1}
+									max={3600}
+									value={watermarkSetting.moveIntervalSec}
+									onChange={(event) =>
+										setWatermarkSetting((current) => ({
+											...current,
+											moveIntervalSec: Number(event.target.value),
+										}))
+									}
+								/>
+							</label>
+							<label className="space-y-1 text-xs text-neutral-400">
+								移動模式
+								<select
+									aria-label="浮水印移動模式"
+									value={watermarkSetting.movementMode}
+									onChange={(event) =>
+										setWatermarkSetting((current) => ({
+											...current,
+											movementMode: event.target.value as "STANDARD" | "CORNERS",
+										}))
+									}
+									className="w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-neutral-200"
+								>
+									<option value="STANDARD">標準移動</option>
+									<option value="CORNERS">四角移動</option>
+								</select>
+							</label>
+						</div>
+						<label className="flex items-center gap-2 text-sm">
+							<input
+								type="checkbox"
+								aria-label="顯示時間戳"
+								checked={watermarkSetting.showTimestamp}
+								onChange={(event) =>
+									setWatermarkSetting((current) => ({ ...current, showTimestamp: event.target.checked }))
+								}
+							/>
+							顯示時間戳
+						</label>
+					</Card>
+				) : null}
 
 				{/* 主工作區：三欄式 */}
 			<div className="grid flex-1 grid-cols-12 gap-6 overflow-hidden">

@@ -485,6 +485,7 @@ model Course {
   inviteRedemptions CourseInviteRedemption[]
   onboardingSurveyResponses CourseOnboardingSurveyResponse[]
   instructors CourseInstructor[]
+  watermarkSetting CourseVideoWatermarkSetting?
 
   @@map("course")
 }
@@ -503,6 +504,28 @@ model CourseInstructor {
   @@unique([courseId, userId])
   @@index([userId])
   @@map("course_instructor")
+}
+
+model CourseVideoWatermarkSetting {
+  id                String   @id @default(cuid())
+  courseId          String   @unique
+  enabled           Boolean  @default(false)
+  showEmail         Boolean  @default(true)
+  showCourseTitle   Boolean  @default(true)
+  showTimestamp     Boolean  @default(true)
+  emailDisplayMode  String   @default("FULL")
+  opacityPercent    Int      @default(18)
+  textSize          String   @default("MD")
+  movementMode      String   @default("STANDARD")
+  moveIntervalSec   Int      @default(12)
+  tamperPauseEnabled Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  course            Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([enabled])
+  @@map("course_video_watermark_setting")
 }
 
 model CourseSubscriptionPlan {

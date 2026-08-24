@@ -1,4 +1,5 @@
 import { auth } from "@startkiter/auth";
+import type { WatermarkOverlayProps } from "@startkiter/course";
 import { userCanAccessCourseId } from "@startkiter/api/modules/course/lib/course-access";
 import { db } from "@startkiter/database";
 import { createProcedureClient, ORPCError } from "@orpc/server";
@@ -29,6 +30,35 @@ interface ChapterData {
 	lessons: LessonData[];
 }
 
+type WatermarkSetting = Omit<WatermarkOverlayProps, "email" | "courseTitle">;
+
+function normalizeWatermarkSetting(setting: {
+	enabled: boolean;
+	showEmail: boolean;
+	showCourseTitle: boolean;
+	showTimestamp: boolean;
+	emailDisplayMode: string;
+	opacityPercent: number;
+	textSize: string;
+	movementMode: string;
+	moveIntervalSec: number;
+	tamperPauseEnabled: boolean;
+} | null): WatermarkSetting | null {
+	if (!setting) return null;
+
+	return {
+		enabled: setting.enabled,
+		showEmail: setting.showEmail,
+		showCourseTitle: setting.showCourseTitle,
+		showTimestamp: setting.showTimestamp,
+		emailDisplayMode: setting.emailDisplayMode === "MASKED" ? "MASKED" : "FULL",
+		opacityPercent: Math.min(100, Math.max(1, setting.opacityPercent)),
+		textSize: setting.textSize === "SM" || setting.textSize === "LG" ? setting.textSize : "MD",
+		movementMode: setting.movementMode === "CORNERS" ? "CORNERS" : "STANDARD",
+		moveIntervalSec: Math.min(3600, Math.max(1, setting.moveIntervalSec)),
+	};
+}
+
 function stripSensitiveFields(lesson: LessonData): LessonData {
 	return {
 		...lesson,
@@ -50,6 +80,25 @@ export default async function LessonPage({ params }: LessonPageProps) {
 		},
 		orderBy: { order: "asc" },
 		include: {
+			course: {
+				select: {
+					title: true,
+					watermarkSetting: {
+						select: {
+							enabled: true,
+							showEmail: true,
+							showCourseTitle: true,
+							showTimestamp: true,
+							emailDisplayMode: true,
+							opacityPercent: true,
+							textSize: true,
+							movementMode: true,
+							moveIntervalSec: true,
+							tamperPauseEnabled: true,
+						},
+					},
+				},
+			},
 			lessons: {
 				where: { status: "PUBLISHED" },
 				orderBy: { order: "asc" },
@@ -110,9 +159,12 @@ export default async function LessonPage({ params }: LessonPageProps) {
 		notFound();
 	}
 
-	const courseId = chaptersFromDb.find((chapter) =>
+	const currentChapter = chaptersFromDb.find((chapter) =>
 		chapter.lessons.some((lesson) => lesson.id === lessonId),
-	)?.courseId;
+	);
+	const courseId = currentChapter?.courseId;
+	const courseTitle = currentChapter?.course.title ?? "";
+	const watermarkSetting = normalizeWatermarkSetting(currentChapter?.course.watermarkSetting ?? null);
 	let showOnboardingSurvey = false;
 	if (session?.user?.id && courseId) {
 		const hasCourseAccess = await userCanAccessCourseId(session.user.id, courseId);
@@ -129,7 +181,13 @@ export default async function LessonPage({ params }: LessonPageProps) {
 
 	return (
 		<>
-			<AcademyClassroomClient initialLesson={currentLesson} curriculum={curriculum} />
+			<AcademyClassroomClient
+				initialLesson={currentLesson}
+				curriculum={curriculum}
+				courseTitle={courseTitle}
+				viewerEmail={session?.user?.email ?? ""}
+				watermarkSetting={watermarkSetting}
+			/>
 			{courseId && (
 				<OnboardingSurveyModal courseId={courseId} open={showOnboardingSurvey} />
 			)}

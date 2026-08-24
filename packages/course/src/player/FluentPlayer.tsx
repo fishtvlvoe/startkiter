@@ -1,3 +1,7 @@
+import type { ReactNode } from "react";
+
+import { WatermarkOverlay, type WatermarkOverlayProps } from "./watermark-overlay";
+
 export type FluentPlayerSource =
 	| {
 			ok: true;
@@ -8,14 +12,25 @@ export type FluentPlayerSource =
 	| {
 			ok: false;
 			error: string;
-	  };
+	};
+
+function PlayerFrame({ children, watermark }: { children: ReactNode; watermark?: WatermarkOverlayProps }) {
+	return (
+		<div className="relative h-full w-full">
+			{children}
+			{watermark ? <WatermarkOverlay {...watermark} /> : null}
+		</div>
+	);
+}
 
 export function FluentPlayer({
 	title,
 	resolved,
+	watermark,
 }: {
 	title: string;
 	resolved: FluentPlayerSource | null;
+	watermark?: WatermarkOverlayProps;
 }) {
 	if (!resolved || !resolved.ok) {
 		return (
@@ -43,53 +58,63 @@ export function FluentPlayer({
 
 	if (resolved.provider === "YOUTUBE" && resolved.sourceId) {
 		return (
-			<iframe
-				className="h-full w-full"
-				src={`https://www.youtube.com/embed/${encodeURIComponent(resolved.sourceId)}?autoplay=0`}
-				title={title}
-				allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-				allowFullScreen
-			/>
+			<PlayerFrame watermark={watermark}>
+				<iframe
+					className="h-full w-full"
+					src={`https://www.youtube.com/embed/${encodeURIComponent(resolved.sourceId)}?autoplay=0`}
+					title={title}
+					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+					allowFullScreen
+				/>
+			</PlayerFrame>
 		);
 	}
 
 	if (resolved.provider === "VIMEO" && resolved.sourceId) {
 		return (
-			<iframe
-				className="h-full w-full"
-				src={`https://player.vimeo.com/video/${encodeURIComponent(resolved.sourceId)}`}
-				title={title}
-				allow="autoplay; fullscreen; picture-in-picture"
-				allowFullScreen
-			/>
+			<PlayerFrame watermark={watermark}>
+				<iframe
+					className="h-full w-full"
+					src={`https://player.vimeo.com/video/${encodeURIComponent(resolved.sourceId)}`}
+					title={title}
+					allow="autoplay; fullscreen; picture-in-picture"
+					allowFullScreen
+				/>
+			</PlayerFrame>
 		);
 	}
 
 	if (resolved.provider === "BUNNY") {
 		return (
-			<iframe
-				className="h-full w-full"
-				src={resolved.url}
-				title={title}
-				allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
-				allowFullScreen
-			/>
+			<PlayerFrame watermark={watermark}>
+				<iframe
+					className="h-full w-full"
+					src={resolved.url}
+					title={title}
+					allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+					allowFullScreen
+				/>
+			</PlayerFrame>
 		);
 	}
 
 	if (resolved.provider === "CUSTOM_MP4") {
 		return (
-			<video className="h-full w-full" controls playsInline src={resolved.url} title={title}>
-				您的瀏覽器不支援 MP4 播放。
-			</video>
+			<PlayerFrame watermark={watermark}>
+				<video className="h-full w-full" controls playsInline src={resolved.url} title={title}>
+					您的瀏覽器不支援 MP4 播放。
+				</video>
+			</PlayerFrame>
 		);
 	}
 
 	if (resolved.provider === "HLS") {
 		return (
-			<video className="h-full w-full" controls playsInline src={resolved.url} title={title}>
-				您的瀏覽器不支援 HLS 播放。
-			</video>
+			<PlayerFrame watermark={watermark}>
+				<video className="h-full w-full" controls playsInline src={resolved.url} title={title}>
+					您的瀏覽器不支援 HLS 播放。
+				</video>
+			</PlayerFrame>
 		);
 	}
 

@@ -136,6 +136,12 @@ export const CourseInstructorScalarFieldEnumSchema = z.enum(['id', 'courseId', '
 
 export type CourseInstructorScalarFieldEnum = z.infer<typeof CourseInstructorScalarFieldEnumSchema>;
 
+// File: CourseVideoWatermarkSettingScalarFieldEnum.schema.ts
+
+export const CourseVideoWatermarkSettingScalarFieldEnumSchema = z.enum(['id', 'courseId', 'enabled', 'showEmail', 'showCourseTitle', 'showTimestamp', 'emailDisplayMode', 'opacityPercent', 'textSize', 'movementMode', 'moveIntervalSec', 'tamperPauseEnabled', 'createdAt', 'updatedAt'])
+
+export type CourseVideoWatermarkSettingScalarFieldEnum = z.infer<typeof CourseVideoWatermarkSettingScalarFieldEnumSchema>;
+
 // File: CourseSubscriptionPlanScalarFieldEnum.schema.ts
 
 export const CourseSubscriptionPlanScalarFieldEnumSchema = z.enum(['id', 'courseId', 'label', 'interval', 'price', 'sku', 'enabled', 'createdAt', 'updatedAt'])
@@ -770,6 +776,28 @@ export const CourseInstructorSchema = z.object({
 });
 
 export type CourseInstructorType = z.infer<typeof CourseInstructorSchema>;
+
+
+// File: CourseVideoWatermarkSetting.schema.ts
+
+export const CourseVideoWatermarkSettingSchema = z.object({
+  id: z.string(),
+  courseId: z.string(),
+  enabled: z.boolean(),
+  showEmail: z.boolean().default(true),
+  showCourseTitle: z.boolean().default(true),
+  showTimestamp: z.boolean().default(true),
+  emailDisplayMode: z.string().default("FULL"),
+  opacityPercent: z.number().int().default(18),
+  textSize: z.string().default("MD"),
+  movementMode: z.string().default("STANDARD"),
+  moveIntervalSec: z.number().int().default(12),
+  tamperPauseEnabled: z.boolean().default(true),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type CourseVideoWatermarkSettingType = z.infer<typeof CourseVideoWatermarkSettingSchema>;
 
 
 // File: CourseSubscriptionPlan.schema.ts

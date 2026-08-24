@@ -30,6 +30,9 @@ vi.mock("@startkiter/database", () => ({
 		courseInstructor: {
 			findUnique: vi.fn(),
 		},
+		courseVideoWatermarkSetting: {
+			upsert: vi.fn(),
+		},
 	},
 }));
 
@@ -68,6 +71,11 @@ describe("Course Studio API", () => {
 		} as never);
 		vi.mocked(db.chapter.count).mockResolvedValue(0 as never);
 		vi.mocked(db.chapter.create).mockResolvedValue({ id: "chapter-01", courseId: "course-01" } as never);
+		vi.mocked(db.courseVideoWatermarkSetting.upsert).mockResolvedValue({
+			id: "watermark-01",
+			courseId: "course-01",
+			enabled: true,
+		} as never);
 	});
 
 	it("rejects an instructor after an assignment is removed", async () => {
@@ -140,6 +148,95 @@ describe("Course Studio API", () => {
 
 		expect(response.status).toBe(403);
 		expect(db.course.update).not.toHaveBeenCalled();
+	});
+
+	it("allows the operator to save validated watermark settings", async () => {
+		const response = await POST(
+			new Request("http://localhost/api/course/studio", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					action: "update_watermark",
+					payload: {
+						courseId: "course-01",
+						enabled: true,
+						showEmail: true,
+						showCourseTitle: true,
+						showTimestamp: true,
+						emailDisplayMode: "MASKED",
+						opacityPercent: 18,
+						textSize: "MD",
+						movementMode: "STANDARD",
+						moveIntervalSec: 12,
+						tamperPauseEnabled: true,
+					},
+				}),
+			}),
+		);
+
+		expect(response.status).toBe(200);
+		expect(db.courseVideoWatermarkSetting.upsert).toHaveBeenCalledWith({
+			where: { courseId: "course-01" },
+			update: {
+				enabled: true,
+				showEmail: true,
+				showCourseTitle: true,
+				showTimestamp: true,
+				emailDisplayMode: "MASKED",
+				opacityPercent: 18,
+				textSize: "MD",
+				movementMode: "STANDARD",
+				moveIntervalSec: 12,
+				tamperPauseEnabled: true,
+			},
+			create: {
+				courseId: "course-01",
+				enabled: true,
+				showEmail: true,
+				showCourseTitle: true,
+				showTimestamp: true,
+				emailDisplayMode: "MASKED",
+				opacityPercent: 18,
+				textSize: "MD",
+				movementMode: "STANDARD",
+				moveIntervalSec: 12,
+				tamperPauseEnabled: true,
+			},
+		});
+	});
+
+	it("rejects watermark settings changes from an assigned instructor", async () => {
+		vi.mocked(auth.api.getSession).mockResolvedValue({
+			session: { ipAddress: "203.0.113.16" },
+			user: { id: "instructor-01", email: "instructor@example.com" },
+		} as never);
+		vi.mocked(db.courseInstructor.findUnique).mockResolvedValue({ id: "assignment-01" } as never);
+
+		const response = await POST(
+			new Request("http://localhost/api/course/studio", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					action: "update_watermark",
+					payload: {
+						courseId: "course-01",
+						enabled: true,
+						showEmail: true,
+						showCourseTitle: true,
+						showTimestamp: true,
+						emailDisplayMode: "FULL",
+						opacityPercent: 18,
+						textSize: "MD",
+						movementMode: "STANDARD",
+						moveIntervalSec: 12,
+						tamperPauseEnabled: true,
+					},
+				}),
+			}),
+		);
+
+		expect(response.status).toBe(403);
+		expect(db.courseVideoWatermarkSetting.upsert).not.toHaveBeenCalled();
 	});
 
 	it("records course deletion as an operator audit action", async () => {
