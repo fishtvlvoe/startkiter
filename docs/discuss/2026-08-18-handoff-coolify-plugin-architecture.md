@@ -23,7 +23,7 @@ type: project
 
 用 worktree 派 Claude Code（模式：只寫文件不動代碼）重寫了這張 parked change，因為它原本規劃的檔案（`app-shell.tsx`、`site-nav.tsx`、`mobile-tabbar.tsx`）在 `rebuild-from-official-upstream` 之後已經不存在。
 
-**產出位置**：worktree `/Users/fishtv/orca/workspaces/startkiter/sr-self-service-plugin-pipeline`，分支 `fishtvlvoe/sr-self-service-plugin-pipeline`（base: `feature/self-service-plugin-pipeline`），commit `9681b238`。**還沒 merge 回 main。**
+**產出位置**：worktree `sr-self-service-plugin-pipeline`，分支 `fishtvlvoe/sr-self-service-plugin-pipeline`（base: `feature/self-service-plugin-pipeline`），commit `9681b238`。**還沒 merge 回 main。**
 
 涵蓋 7 個 capability：`platform-mount-points`（新）、`platform-marketplace`（新，改成「展示+選模版」不做一鍵裝解）、`mcp-gateway`（新，唯讀連線不做推送安裝包）、`platform-core-boundary`（新）、`buyer-template-selection`（新，2-3 內建模版）、`saas-shell`（改，對照現在真實的 NavBar/sidebar-context）、`course-module`（改，課程當示範 Plugin）。
 
@@ -50,7 +50,7 @@ type: project
 **背景**：老闆在別的地方（可能是另一個獨立 session，尚未確認）跑了一個 AI，逆向工程了別人的產品「氛圍學院 VibeAcademy」（`https://academy.vibetech.tw`，**確認不是老闆自己的，是別人的競品**），產出了一份 Spectra change 提案 `openspec/changes/interactive-learning-system/`，裡面原本引用了對方的確切品牌色碼、行銷文案原文、影片網址、Analytics 追蹤 ID、課程單元逆向細節。
 
 **已處理**：
-- 逆向工程原始文件（`docs/reference/academy.vibetech.tw/` 四份 md）已經**搬出 git 專案**，現在放在 `/Users/fishtv/Documents/startkiter-private-reference/academy.vibetech.tw/`（不在任何 git repo 裡）。
+- 逆向工程原始文件（`docs/reference/academy.vibetech.tw/` 四份 md）已經**搬出 git 專案**，現在放在 `Documents/startkiter-private-reference/academy.vibetech.tw/`（不在任何 git repo 裡）。
 
 **還沒處理，下一個 session 要接手**：
 - `openspec/changes/interactive-learning-system/proposal.md` 跟 `design.md` **裡面還是寫著「參考來源：https://academy.vibetech.tw」「逆向工程文件」這種措辭**，還沒重寫。要改成只描述**通用 UX 手法概念**，不點名、不綁定任何品牌：
@@ -68,7 +68,7 @@ type: project
 
 ## 環境注意事項
 
-- 目前的 worktree：`sr-self-service-plugin-pipeline`（platform-shell-plugin-architecture 重寫已完成，待 review/merge），路徑 `/Users/fishtv/orca/workspaces/startkiter/sr-self-service-plugin-pipeline`
+- 目前的 worktree：`sr-self-service-plugin-pipeline`（platform-shell-plugin-architecture 重寫已完成，待 review/merge）
 - 主目錄 `products/startkiter` 上還有一批 8/17 的舊 discuss 文件跟一份不相關的筆記檔（`docs/为什么叫QQ...md`）一直是 untracked 狀態，之前討論過要清理但還沒處理，不急，但別誤刪
 - `.turbo/` 沒進 `.gitignore`，一直出現在 `git status`，可以順手補一條規則
 - Coolify Cloud 帳號、`startkiter.dev` 網域的實際存取權限還沒交接，下一個 session 要跟老闆確認進度

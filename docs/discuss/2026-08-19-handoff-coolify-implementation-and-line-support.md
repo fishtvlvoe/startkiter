@@ -55,7 +55,7 @@ StartKiter 教學產品的「買家部署」分**三層客群**：
 
 ## 三、代碼落地進度（Spectra change: `coolify-managed-deployment`）
 
-**worktree 位置：** `/Users/fishtv/orca/workspaces/startkiter/sr-self-service-plugin-pipeline`
+**worktree 位置：** `sr-self-service-plugin-pipeline`
 **分支：** `fishtvlvoe/sr-self-service-plugin-pipeline`
 **這個 worktree 還沒 merge 回 main**，跟另一張較早的 change `platform-shell-plugin-architecture`（7 個 capability，之前規劃過但今天只修正了一句跟今天架構矛盾的措辭）在同一個分支上，兩張 change 都要一起評估要不要 merge。
 

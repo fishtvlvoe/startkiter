@@ -21,14 +21,14 @@
 ### 1. [Warning] 單元測試硬編碼本機絕對路徑 `SOURCE_ROOT` (Correctness / CI 可移植性)
 
 - **檔案與行號**：
-  - [`packages/ui/src/version-gap.test.ts:9`](file:///Users/fishtv/orca/workspaces/startkiter/deploy-agy/packages/ui/src/version-gap.test.ts#L9)
-  - [`apps/saas/lib/design-tokens.test.ts:9`](file:///Users/fishtv/orca/workspaces/startkiter/deploy-agy/apps/saas/lib/design-tokens.test.ts#L9)
+  - [`packages/ui/src/version-gap.test.ts:9`](../packages/ui/src/version-gap.test.ts#L9)
+  - [`apps/saas/lib/design-tokens.test.ts:9`](../apps/saas/lib/design-tokens.test.ts#L9)
 - **問題描述**：
   測試程式碼中寫死了本地開發目錄路徑：
   ```typescript
-  const SOURCE_ROOT = "/Users/fishtv/Development/products/startkiter/code/supastarter-nextjs-main";
+  const SOURCE_ROOT = process.env.SUPASTARTER_SOURCE_PATH;
   ```
-  當在 CI/CD 環境（如 GitHub Actions、Vercel 預覽建置、Docker 容器）或其他協作者的電腦上執行 `pnpm test` 時，因該路徑不存在，測試會拋出 `ENOENT` 或 `expect(existsSync(SOURCE_ROOT)).toBe(true)` 斷言失敗。
+當在 CI/CD 環境（如 GitHub Actions、Vercel 預覽建置、Docker 容器）或其他協作者的電腦上執行 `pnpm test` 時，若沒有設定該環境變數，測試會拋出 `ENOENT` 或 `expect(existsSync(SOURCE_ROOT)).toBe(true)` 斷言失敗。
 - **改善建議**：
   建議改為讀取環境變數（如 `process.env.SUPASTARTER_SOURCE_PATH`），或在路徑不存在時使用 `it.skipIf(!existsSync(SOURCE_ROOT))` 優雅略過該比對測試。
 
@@ -37,7 +37,7 @@
 ### 2. [Warning] `AppShell` 側欄選單未判斷管理員權限且連結至 `/admin/settings` (Correctness / UX)
 
 - **檔案與行號**：
-  - [`apps/saas/app/components/app-shell.tsx:78-83`](file:///Users/fishtv/orca/workspaces/startkiter/deploy-agy/apps/saas/app/components/app-shell.tsx#L78-L83)
+  - [`apps/saas/app/components/app-shell.tsx:78-83`](../apps/saas/app/components/app-shell.tsx#L78-L83)
 - **問題描述**：
   `AppShell` 側邊欄將所有使用者都顯示「⚙ 帳號設定」，但其 `href` 指向 `/admin/settings`（營運者金流設定）：
   ```tsx
@@ -55,9 +55,9 @@
 ### 3. [Info] 課程進度文案為靜態假資料佔位 (Correctness / Scope Boundary)
 
 - **檔案與行號**：
-  - [`apps/saas/app/course/page.tsx:52`](file:///Users/fishtv/orca/workspaces/startkiter/deploy-agy/apps/saas/app/course/page.tsx#L52)
-  - [`apps/saas/app/course/[lessonId]/page.tsx:85`](file:///Users/fishtv/orca/workspaces/startkiter/deploy-agy/apps/saas/app/course/[lessonId]/page.tsx#L85)
-  - [`apps/saas/app/course/course-workspace.tsx:51-56`](file:///Users/fishtv/orca/workspaces/startkiter/deploy-agy/apps/saas/app/course/course-workspace.tsx#L51-L56)
+  - [`apps/saas/app/course/page.tsx:52`](../apps/saas/app/course/page.tsx#L52)
+  - [`apps/saas/app/course/[lessonId]/page.tsx:85`](../apps/saas/app/course/[lessonId]/page.tsx#L85)
+  - [`apps/saas/app/course/course-workspace.tsx:51-56`](../apps/saas/app/course/course-workspace.tsx#L51-L56)
 - **說明**：
   目前頁面中的「進度 1 / 3」、「1 / 3 已看完」為硬編碼字串，符合本次 change 作為 UI 骨架與 Demo-first 移植的階段性目標，後續 change 接上真實進度 API 時需替換。
 
@@ -66,7 +66,7 @@
 ### 4. [Info] 英文語系 catalog 缺少 `home.hero.title`（依設計 fallback） (Correctness)
 
 - **檔案與行號**：
-  - [`packages/i18n/src/translations/en/marketing.json`](file:///Users/fishtv/orca/workspaces/startkiter/deploy-agy/packages/i18n/src/translations/en/marketing.json)
+  - [`packages/i18n/src/translations/en/marketing.json`](../packages/i18n/src/translations/en/marketing.json)
 - **說明**：
   `en/marketing.json` 刻意缺漏 `home.hero.title` 用於驗證 fallback 機制（成功 fallback 至 `zh-tw` 繁中）。若未來需支援純英文完整首頁，需補齊該 key。
 
