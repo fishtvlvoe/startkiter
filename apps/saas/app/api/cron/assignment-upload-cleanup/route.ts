@@ -17,5 +17,3 @@ export async function POST(request: Request) {
 	const result = await cleanupExpiredAssignmentUploadIntents();
 	return Response.json({ ok: true, ...result });
 }
-
-export const GET = POST;

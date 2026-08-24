@@ -4,6 +4,7 @@ import { z } from "zod";
 import { deleteAssignmentUploadObject } from "./assignment-upload";
 
 const assignmentSubmissionCursorSchema = z.object({
+	pluginContentId: z.string().trim().min(1).max(200),
 	id: z.string().trim().min(1).max(200),
 	submittedAt: z.string().datetime(),
 	createdAt: z.string().datetime(),
@@ -26,14 +27,19 @@ export function decodeAssignmentSubmissionCursor(value: string): AssignmentSubmi
 }
 
 type CleanupScope = { pluginContentId?: string; userId?: string };
+const cleanupClaimLeaseMs = 5 * 60_000;
 
 export async function cleanupExpiredAssignmentUploadIntents(
 	scope: CleanupScope = {},
 	limit = 100,
 ): Promise<{ removed: number; failed: number; inspected: number }> {
+	const claimableBefore = new Date(Date.now() - cleanupClaimLeaseMs);
 	const where: Prisma.AssignmentUploadIntentWhereInput = {
-		status: { in: ["PENDING", "UPLOADED", "CLEANING"] },
 		expiresAt: { lte: new Date() },
+		OR: [
+			{ status: { in: ["PENDING", "UPLOADED"] }, OR: [{ cleanupClaimedAt: null }, { cleanupClaimedAt: { lt: claimableBefore } }] },
+			{ status: "CLEANING", OR: [{ cleanupClaimedAt: null }, { cleanupClaimedAt: { lt: claimableBefore } }] },
+		],
 		...(scope.pluginContentId ? { pluginContentId: scope.pluginContentId } : {}),
 		...(scope.userId ? { userId: scope.userId } : {}),
 	};
@@ -41,25 +47,30 @@ export async function cleanupExpiredAssignmentUploadIntents(
 		where,
 		orderBy: { expiresAt: "asc" },
 		take: Math.max(1, Math.min(limit, 500)),
-		select: { id: true, storageKey: true, status: true },
+		select: { id: true, storageKey: true, status: true, cleanupClaimedAt: true },
 	});
 	let removed = 0;
 	let failed = 0;
 
 	for (const intent of expired) {
+		const claimedAt = new Date();
 		const claimed = await db.assignmentUploadIntent.updateMany({
-			where: { id: intent.id, status: intent.status },
-			data: { status: "CLEANING" },
+			where: {
+				id: intent.id,
+				status: intent.status,
+				OR: [{ cleanupClaimedAt: null }, { cleanupClaimedAt: { lt: claimableBefore } }],
+			},
+			data: { status: "CLEANING", cleanupClaimedAt: claimedAt },
 		});
 		if (claimed.count !== 1) continue;
 
 		try {
 			await deleteAssignmentUploadObject(intent.storageKey);
-			const deleted = await db.assignmentUploadIntent.deleteMany({ where: { id: intent.id, status: "CLEANING" } });
+			const deleted = await db.assignmentUploadIntent.deleteMany({ where: { id: intent.id, status: "CLEANING", cleanupClaimedAt: claimedAt } });
 			removed += deleted.count;
 		} catch {
 			failed += 1;
-			await db.assignmentUploadIntent.updateMany({ where: { id: intent.id, status: "CLEANING" }, data: { status: intent.status } });
+			await db.assignmentUploadIntent.updateMany({ where: { id: intent.id, status: "CLEANING", cleanupClaimedAt: claimedAt }, data: { status: intent.status, cleanupClaimedAt: null } });
 		}
 	}
 

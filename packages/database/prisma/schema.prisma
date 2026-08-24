@@ -794,15 +794,17 @@ model AssignmentUploadIntent {
   mimeType        String
   size            Int
   storageKey      String   @unique
-  status          String   @default("PENDING")
-  expiresAt       DateTime
-  createdAt       DateTime @default(now())
+	status          String   @default("PENDING")
+	expiresAt       DateTime
+	cleanupClaimedAt DateTime?
+	createdAt       DateTime @default(now())
 
   user       User                 @relation("AssignmentUploadIntentUser", fields: [userId], references: [id], onDelete: Cascade)
   submission AssignmentSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
 
-  @@index([submissionId, status])
-  @@index([userId, pluginContentId, status])
+	@@index([submissionId, status])
+	@@index([userId, pluginContentId, status])
+	@@index([status, expiresAt, cleanupClaimedAt])
   @@map("assignment_upload_intent")
 }
 

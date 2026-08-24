@@ -306,6 +306,7 @@ export const assignmentRouter = {
 			if (!definition) throw new ORPCError("NOT_FOUND");
 			const cursor = input.cursor ? decodeAssignmentSubmissionCursor(input.cursor) : null;
 			if (input.cursor && !cursor) throw new ORPCError("BAD_REQUEST", { message: "提交清單游標無效。" });
+			if (cursor && cursor.pluginContentId !== definition.id) throw new ORPCError("BAD_REQUEST", { message: "提交清單游標不屬於這份作業。" });
 			const cursorWhere: Prisma.AssignmentSubmissionWhereInput | undefined = cursor
 				? {
 					OR: [
@@ -332,7 +333,7 @@ export const assignmentRouter = {
 				definition,
 				submissions: page,
 				nextCursor: hasNextPage && last?.submittedAt
-					? encodeAssignmentSubmissionCursor({ id: last.id, submittedAt: last.submittedAt.toISOString(), createdAt: last.createdAt.toISOString() })
+					? encodeAssignmentSubmissionCursor({ pluginContentId: definition.id, id: last.id, submittedAt: last.submittedAt.toISOString(), createdAt: last.createdAt.toISOString() })
 					: null,
 			};
 		}),

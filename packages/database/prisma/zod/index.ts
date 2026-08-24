@@ -222,7 +222,7 @@ export type AssignmentSubmissionScalarFieldEnum = z.infer<typeof AssignmentSubmi
 
 // File: AssignmentUploadIntentScalarFieldEnum.schema.ts
 
-export const AssignmentUploadIntentScalarFieldEnumSchema = z.enum(['id', 'pluginContentId', 'submissionId', 'userId', 'filename', 'mimeType', 'size', 'storageKey', 'status', 'expiresAt', 'createdAt'])
+export const AssignmentUploadIntentScalarFieldEnumSchema = z.enum(['id', 'pluginContentId', 'submissionId', 'userId', 'filename', 'mimeType', 'size', 'storageKey', 'status', 'expiresAt', 'cleanupClaimedAt', 'createdAt'])
 
 export type AssignmentUploadIntentScalarFieldEnum = z.infer<typeof AssignmentUploadIntentScalarFieldEnumSchema>;
 
@@ -1078,6 +1078,7 @@ export const AssignmentUploadIntentSchema = z.object({
   storageKey: z.string(),
   status: z.string().default("PENDING"),
   expiresAt: z.date(),
+  cleanupClaimedAt: z.date().nullish(),
   createdAt: z.date(),
 });
 

@@ -2,7 +2,7 @@
 
 import { Button, Card, Input, Label } from "@startkiter/ui";
 import { orpcClient } from "@shared/lib/orpc-client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 type LessonOption = { id: string; title: string; chapterTitle: string; courseTitle: string };
 type Submission = {
@@ -28,6 +28,8 @@ export function AssignmentAdminForm({ lessons, existingAssignments }: { lessons:
 	const [message, setMessage] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [isLoadingSubmissions, setIsLoadingSubmissions] = useState(false);
+	const submissionRequestVersion = useRef(0);
 
 	async function createAssignment(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -66,14 +68,20 @@ export function AssignmentAdminForm({ lessons, existingAssignments }: { lessons:
 	async function loadSubmissions(options: { append?: boolean } = {}) {
 		if (!createdId) return;
 		const append = options.append ?? false;
+		const requestVersion = ++submissionRequestVersion.current;
 		setError(null);
+		setIsLoadingSubmissions(true);
 		try {
 			const result = await orpcClient.assignment.operatorList({ pluginContentId: createdId, cursor: append ? nextCursor ?? undefined : undefined, limit: 50 });
+			if (requestVersion !== submissionRequestVersion.current) return;
 			setSubmissions((current) => append ? [...current, ...(result.submissions as Submission[])] : (result.submissions as Submission[]));
 			setNextCursor(result.nextCursor);
 			setMessage(`已載入 ${append ? "更多 " : ""}${result.submissions.length} 份提交。`);
 		} catch {
+			if (requestVersion !== submissionRequestVersion.current) return;
 			setError("載入提交失敗。");
+		} finally {
+			if (requestVersion === submissionRequestVersion.current) setIsLoadingSubmissions(false);
 		}
 	}
 
@@ -106,7 +114,7 @@ export function AssignmentAdminForm({ lessons, existingAssignments }: { lessons:
 					{existingAssignments.map((assignment) => (
 						<div key={assignment.id} className="flex flex-wrap items-center justify-between gap-3 text-sm">
 							<a className="underline" href={`/assignment/${assignment.id}`}>{assignment.title}</a>
-							<Button type="button" variant="outline" onClick={() => { setCreatedId(assignment.id); setMessage(null); setError(null); }}>查看提交</Button>
+							<Button type="button" variant="outline" onClick={() => { submissionRequestVersion.current += 1; setCreatedId(assignment.id); setSubmissions([]); setNextCursor(null); setFeedback({}); setScores({}); setMessage(null); setError(null); }}>查看提交</Button>
 						</div>
 					))}
 				</section>
@@ -116,7 +124,7 @@ export function AssignmentAdminForm({ lessons, existingAssignments }: { lessons:
 					<p className="text-green-600">作業已建立：{createdId}</p>
 					<div className="flex flex-wrap gap-4">
 						<a className="underline" href={`/assignment/${createdId}`}>開啟學員作業頁</a>
-						<Button type="button" variant="outline" onClick={() => loadSubmissions()}>載入提交</Button>
+							<Button type="button" variant="outline" disabled={isLoadingSubmissions} onClick={() => loadSubmissions()}>載入提交</Button>
 					</div>
 					<div className="space-y-4" data-testid="assignment-submission-list">
 						{submissions.length === 0 && <p className="text-sm text-muted-foreground">目前沒有已送出的作業。</p>}
@@ -130,7 +138,7 @@ export function AssignmentAdminForm({ lessons, existingAssignments }: { lessons:
 								<Button type="button" variant="primary" onClick={() => reviewSubmission(submission.id)}>儲存批改</Button>
 							</article>
 						))}
-						{nextCursor && <Button type="button" variant="outline" onClick={() => loadSubmissions({ append: true })}>載入更多提交</Button>}
+						{nextCursor && <Button type="button" variant="outline" disabled={isLoadingSubmissions} onClick={() => loadSubmissions({ append: true })}>載入更多提交</Button>}
 					</div>
 				</section>
 			) : (
