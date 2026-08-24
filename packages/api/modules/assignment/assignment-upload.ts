@@ -133,6 +133,7 @@ export async function getAssignmentSignedUploadUrl(input: {
 			bucket: "assignments",
 			contentType: input.contentType,
 			contentLength: input.size,
+			ifNoneMatch: true,
 		}),
 		localDevelopment: false,
 	};

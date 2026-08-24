@@ -42,7 +42,7 @@ const getS3Client = () => {
 	return s3Client;
 };
 
-export const getSignedUploadUrl: GetSignedUploadUrlHandler = async (path, { bucket, contentType, contentLength }) => {
+export const getSignedUploadUrl: GetSignedUploadUrlHandler = async (path, { bucket, contentType, contentLength, ifNoneMatch }) => {
 	const bucketName = config.bucketNames[bucket as keyof typeof config.bucketNames];
 
 	const s3Client = getS3Client();
@@ -54,7 +54,7 @@ export const getSignedUploadUrl: GetSignedUploadUrlHandler = async (path, { buck
 				Key: path,
 				ContentType: contentType ?? "image/jpeg",
 				ContentLength: contentLength,
-				IfNoneMatch: "*",
+				IfNoneMatch: ifNoneMatch ? "*" : undefined,
 			}),
 			{
 				expiresIn: 60,

@@ -49,7 +49,7 @@ export async function PUT(request: Request) {
 		return Response.json({ error: "Invalid upload size." }, { status: 413 });
 	}
 	const updated = await db.assignmentUploadIntent.updateMany({
-		where: { storageKey: upload.storageKey, status: "PENDING", mimeType: upload.contentType, size: contentLength, submission: { status: "DRAFT" } },
+		where: { storageKey: upload.storageKey, status: "PENDING", mimeType: upload.contentType, size: contentLength, expiresAt: { gt: new Date() }, submission: { status: "DRAFT" } },
 		data: { status: "UPLOADED" },
 	});
 	if (updated.count !== 1) return Response.json({ error: "Upload intent is no longer active." }, { status: 409 });

@@ -111,7 +111,7 @@ export function AssignmentLearner({ assignment }: { assignment: Assignment }) {
 			</div>
 			<form className="space-y-5" onSubmit={saveDraft} aria-label="assignment-learner-form">
 				<label className="grid gap-1 text-sm"><Label htmlFor="assignment-content">作業內容</Label><textarea id="assignment-content" data-testid="assignment-content" className="min-h-48 rounded-xl border bg-card p-3" value={content} onChange={(event) => setContent(event.target.value)} /></label>
-								<label className="grid gap-1 text-sm"><Label htmlFor="assignment-file">附件（最多 {assignment.body.maxFiles} 個）</Label><Input id="assignment-file" data-testid="assignment-file" type="file" onChange={(event) => { setFile(event.target.files?.[0] ?? null); setPendingAttachment(null); setPendingSubmissionId(null); setSubmissionId(null); }} /></label>
+								<label className="grid gap-1 text-sm"><Label htmlFor="assignment-file">附件（最多 {assignment.body.maxFiles} 個）</Label><Input id="assignment-file" data-testid="assignment-file" type="file" onChange={(event) => { if (pendingAttachment) void orpcClient.assignment.cancelUpload({ pluginContentId: assignment.id, attachmentId: pendingAttachment.attachmentId }); setFile(event.target.files?.[0] ?? null); setPendingAttachment(null); setPendingSubmissionId(null); setSubmissionId(null); }} /></label>
 				<div className="flex flex-wrap gap-3"><Button type="submit" variant="outline" loading={isWorking}>儲存草稿</Button><Button type="button" variant="primary" loading={isWorking} onClick={submitAssignment}>送出作業</Button></div>
 			</form>
 			{message && <p className="text-sm text-green-600" data-testid="assignment-status" role="status">{message}</p>}

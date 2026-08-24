@@ -18,6 +18,7 @@ import { courseOperatorProcedure } from "../course/lib/course-operator";
 import {
 	assignmentUploadObjectMatches,
 	buildAssignmentAttachmentStorageKey,
+	deleteAssignmentUploadObject,
 	getAssignmentSignedUploadUrl,
 	isAssignmentStorageConfigured,
 } from "./assignment-upload";
@@ -204,6 +205,25 @@ export const assignmentRouter = {
 			return { ...upload, submissionId: uploadIntent.submissionId, attachmentId, storageKey };
 		}),
 
+	cancelUpload: protectedProcedure
+		.input(z.object({ pluginContentId: z.string().min(1), attachmentId: z.string().uuid() }))
+		.handler(async ({ input, context }) => {
+			await getAccessibleAssignment(input.pluginContentId, context.user.id);
+			const intent = await db.assignmentUploadIntent.findFirst({
+				where: { id: input.attachmentId, pluginContentId: input.pluginContentId, userId: context.user.id, status: { in: ["PENDING", "UPLOADED"] }, submission: { status: "DRAFT" } },
+				select: { storageKey: true },
+			});
+			if (!intent) return { cancelled: false };
+			const cancelled = await db.assignmentUploadIntent.updateMany({
+				where: { id: input.attachmentId, status: { in: ["PENDING", "UPLOADED"] }, submission: { status: "DRAFT" } },
+				data: { status: "CANCELLED" },
+			});
+			if (cancelled.count === 1) {
+				try { await deleteAssignmentUploadObject(intent.storageKey); } catch { /* cleanup cron retries expired objects */ }
+			}
+			return { cancelled: cancelled.count === 1 };
+		}),
+
 	submit: protectedProcedure
 		.route({ method: "POST", path: "/assignment/{pluginContentId}/submit", tags: ["Assignments"], summary: "Submit an assignment" })
 		.input(z.object({
@@ -251,7 +271,7 @@ export const assignmentRouter = {
 				if (!allowed.has(extension) || attachment.size > definition.body.maxFileSize) {
 					throw new ORPCError("BAD_REQUEST", { message: "附件不符合格式或大小限制。" });
 				}
-				if (isAssignmentStorageConfigured() && !(await assignmentUploadObjectMatches({ storageKey: attachment.storageKey, contentType: attachment.mimeType, size: attachment.size }))) {
+				if (!(await assignmentUploadObjectMatches({ storageKey: attachment.storageKey, contentType: attachment.mimeType, size: attachment.size }))) {
 					throw new ORPCError("BAD_REQUEST", { message: "附件尚未完成上傳，請重新上傳。" });
 				}
 			}
