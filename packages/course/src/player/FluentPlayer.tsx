@@ -109,6 +109,7 @@ function EmbeddedVideo({
 			const playerState = firstFiniteNumber(message.info, info?.playerState);
 			if ((eventName === "infoDelivery" || eventName === "onStateChange") && playerState !== null) {
 				isPlayingRef.current = playerState === 1;
+				if (playerState === 0 || playerState === 2) report(true);
 			}
 			if (eventName === "play" || eventName === "playing" || eventName === "timeupdate") {
 				isPlayingRef.current = true;

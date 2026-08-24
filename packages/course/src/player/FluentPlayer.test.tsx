@@ -121,4 +121,35 @@ describe("FluentPlayer watch-time reporting", () => {
 
 		expect(report).toHaveBeenCalledWith(42);
 	});
+
+	it("flushes YouTube numeric pause state", async () => {
+		const report = vi.fn();
+		const harness = await createRenderHarness();
+		await harness.render(
+			<FluentPlayer
+				onWatchTime={report}
+				resolved={{ ok: true, provider: "YOUTUBE", sourceId: "abc", url: "https://youtube.com/watch?v=abc" }}
+				title="YouTube 影片"
+				watchKey="lesson-youtube"
+			/>,
+		);
+
+		const iframe = harness.container.querySelector("iframe") as HTMLIFrameElement;
+		await act(async () => {
+			window.dispatchEvent(
+				new MessageEvent("message", {
+					data: JSON.stringify({ event: "infoDelivery", info: { currentTime: 42, playerState: 1 } }),
+					source: iframe.contentWindow,
+				}),
+			);
+			window.dispatchEvent(
+				new MessageEvent("message", {
+					data: JSON.stringify({ event: "onStateChange", info: 2 }),
+					source: iframe.contentWindow,
+				}),
+			);
+		});
+
+		expect(report).toHaveBeenCalledWith(42);
+	});
 });
