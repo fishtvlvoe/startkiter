@@ -58,6 +58,7 @@ model User {
   reviewReports            ReviewReport[]
   lessonComments           LessonComment[]
   lessonPrivateMessages    LessonPrivateMessage[]
+  lessonMessageUploadIntents LessonMessageUploadIntent[]
   courseInviteRedemptions  CourseInviteRedemption[]
   onboardingSurveyResponses CourseOnboardingSurveyResponse[]
   courseInstructorAssignments CourseInstructor[] @relation("CourseInstructorUser")
@@ -700,6 +701,7 @@ model Lesson {
   progresses      LessonProgress[]
   watchTimeLogs   WatchTimeLog[]
   privateMessages  LessonPrivateMessage[]
+  privateMessageUploadIntents LessonMessageUploadIntent[]
 
   @@index([chapterId])
   @@map("lesson")
@@ -756,6 +758,30 @@ model LessonPrivateMessage {
   @@index([lessonId, userId, createdAt])
   @@index([readByTeacher, createdAt])
   @@map("lesson_private_message")
+}
+
+enum LessonMessageUploadIntentStatus {
+  PENDING
+  FINALIZED
+}
+
+model LessonMessageUploadIntent {
+  id           String                         @id @default(cuid())
+  lessonId     String
+  userId       String
+  storageKey   String                         @unique
+  filename     String
+  contentType  String
+  size         Int
+  status       LessonMessageUploadIntentStatus @default(PENDING)
+  expiresAt    DateTime
+  createdAt    DateTime                       @default(now())
+
+  lesson       Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, expiresAt])
+  @@map("lesson_message_upload_intent")
 }
 
 model SidebarGroup {

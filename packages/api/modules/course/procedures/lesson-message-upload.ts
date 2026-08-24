@@ -1,7 +1,7 @@
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 
 import { getSignedUploadUrl, getSignedUrl } from "@startkiter/storage";
-import { headObject } from "@startkiter/storage/provider/s3";
+import { deleteObject, headObject } from "@startkiter/storage/provider/s3";
 
 const TOKEN_VERSION = "lesson-message-upload-v1";
 const FINALIZE_TOKEN_VERSION = "lesson-message-upload-finalize-v1";
@@ -54,6 +54,7 @@ export function buildLessonMessageStorageKey(lessonId: string, filename: string)
 }
 
 export function createLessonMessageUploadToken(input: {
+	intentId: string;
 	lessonId: string;
 	userId: string;
 	storageKey: string;
@@ -63,6 +64,7 @@ export function createLessonMessageUploadToken(input: {
 }): string {
 	const payload = Buffer.from(JSON.stringify({
 		v: FINALIZE_TOKEN_VERSION,
+		intentId: input.intentId,
 		lessonId: input.lessonId,
 		userId: input.userId,
 		storageKey: input.storageKey,
@@ -75,6 +77,7 @@ export function createLessonMessageUploadToken(input: {
 }
 
 export function verifyLessonMessageUploadToken(token: string): {
+	intentId: string;
 	lessonId: string;
 	userId: string;
 	storageKey: string;
@@ -92,6 +95,7 @@ export function verifyLessonMessageUploadToken(token: string): {
 		const parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as Record<string, unknown>;
 		if (
 			parsed.v !== FINALIZE_TOKEN_VERSION ||
+			typeof parsed.intentId !== "string" ||
 			typeof parsed.lessonId !== "string" ||
 			typeof parsed.userId !== "string" ||
 			typeof parsed.storageKey !== "string" ||
@@ -104,6 +108,7 @@ export function verifyLessonMessageUploadToken(token: string): {
 			parsed.expiresAt < Date.now()
 		) return null;
 		return {
+			intentId: parsed.intentId,
 			lessonId: parsed.lessonId,
 			userId: parsed.userId,
 			storageKey: parsed.storageKey,
@@ -207,6 +212,14 @@ export async function lessonMessageUploadMatches(input: {
 	pruneLocalObjects();
 	const object = localObjects.get(input.storageKey);
 	return object?.body.byteLength === input.size && object.contentType === input.contentType;
+}
+
+export async function deleteLessonMessageUploadObject(storageKey: string): Promise<void> {
+	if (isLessonMessageStorageConfigured()) {
+		await deleteObject(storageKey, "lessonMessages");
+		return;
+	}
+	localObjects.delete(storageKey);
 }
 
 export function canAcceptLocalLessonMessageUpload(storageKey: string): boolean {

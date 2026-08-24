@@ -208,6 +208,12 @@ export const LessonPrivateMessageScalarFieldEnumSchema = z.enum(['id', 'lessonId
 
 export type LessonPrivateMessageScalarFieldEnum = z.infer<typeof LessonPrivateMessageScalarFieldEnumSchema>;
 
+// File: LessonMessageUploadIntentScalarFieldEnum.schema.ts
+
+export const LessonMessageUploadIntentScalarFieldEnumSchema = z.enum(['id', 'lessonId', 'userId', 'storageKey', 'filename', 'contentType', 'size', 'status', 'expiresAt', 'createdAt'])
+
+export type LessonMessageUploadIntentScalarFieldEnum = z.infer<typeof LessonMessageUploadIntentScalarFieldEnumSchema>;
+
 // File: SidebarGroupScalarFieldEnum.schema.ts
 
 export const SidebarGroupScalarFieldEnumSchema = z.enum(['id', 'title', 'order', 'isCollapsed', 'createdAt', 'updatedAt'])
@@ -459,6 +465,12 @@ export type PaymentWebhookEventStatus = z.infer<typeof PaymentWebhookEventStatus
 export const VideoProviderSchema = z.enum(['BUNNY', 'YOUTUBE', 'VIMEO', 'CUSTOM_MP4', 'HLS'])
 
 export type VideoProvider = z.infer<typeof VideoProviderSchema>;
+
+// File: LessonMessageUploadIntentStatus.schema.ts
+
+export const LessonMessageUploadIntentStatusSchema = z.enum(['PENDING', 'FINALIZED'])
+
+export type LessonMessageUploadIntentStatus = z.infer<typeof LessonMessageUploadIntentStatusSchema>;
 
 // File: User.schema.ts
 
@@ -1043,6 +1055,24 @@ export const LessonPrivateMessageSchema = z.object({
 });
 
 export type LessonPrivateMessageType = z.infer<typeof LessonPrivateMessageSchema>;
+
+
+// File: LessonMessageUploadIntent.schema.ts
+
+export const LessonMessageUploadIntentSchema = z.object({
+  id: z.string(),
+  lessonId: z.string(),
+  userId: z.string(),
+  storageKey: z.string(),
+  filename: z.string(),
+  contentType: z.string(),
+  size: z.number().int(),
+  status: LessonMessageUploadIntentStatusSchema.default("PENDING"),
+  expiresAt: z.date(),
+  createdAt: z.date(),
+});
+
+export type LessonMessageUploadIntentType = z.infer<typeof LessonMessageUploadIntentSchema>;
 
 
 // File: SidebarGroup.schema.ts

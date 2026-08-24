@@ -1,17 +1,26 @@
 import { call } from "@orpc/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const databaseTransaction = vi.hoisted(() => vi.fn());
+
 vi.mock("@startkiter/auth", () => ({
 	auth: { api: { getSession: vi.fn() } },
 }));
 
 vi.mock("@startkiter/database", () => ({
 	db: {
+		$transaction: databaseTransaction,
 		lesson: { findUnique: vi.fn() },
 		lessonPrivateMessage: {
 			create: vi.fn(),
 			findFirst: vi.fn(),
 			findMany: vi.fn(),
+			updateMany: vi.fn(),
+		},
+		lessonMessageUploadIntent: {
+			create: vi.fn(),
+			findMany: vi.fn(),
+			deleteMany: vi.fn(),
 			updateMany: vi.fn(),
 		},
 	},
@@ -64,8 +73,12 @@ describe("course lesson private messages", () => {
 			isFromTeacher: false,
 			readByTeacher: false,
 		} as never);
+		vi.mocked(db.lessonMessageUploadIntent.findMany).mockResolvedValue([] as never);
+		vi.mocked(db.lessonMessageUploadIntent.create).mockResolvedValue({ id: "intent-1" } as never);
+		vi.mocked(db.lessonMessageUploadIntent.updateMany).mockResolvedValue({ count: 1 } as never);
 		vi.mocked(getSignedUploadUrl).mockResolvedValue("https://storage.example/upload" as never);
 		vi.mocked(headObject).mockResolvedValue({ contentLength: 128, contentType: "image/png" });
+		databaseTransaction.mockImplementation(async (callback: (tx: typeof db) => unknown) => callback(db));
 	});
 
 	it("allows a learner to send a lesson message", async () => {
@@ -157,5 +170,19 @@ describe("course lesson private messages", () => {
 		expect(attachmentStorageKey).not.toContain("原始檔名");
 		expect(getSignedUploadUrl).toHaveBeenCalledWith(attachmentStorageKey, expect.objectContaining({ bucket: "lessonMessages", contentType: "image/png", contentLength: 128 }));
 		expect(headObject).toHaveBeenCalledWith(attachmentStorageKey, "lessonMessages");
+
+		vi.mocked(db.lessonMessageUploadIntent.updateMany).mockResolvedValueOnce({ count: 0 } as never);
+		await expect(
+			call(
+				sendLessonMessage,
+				{
+					lessonId: "lesson-1",
+					content: "重播附件",
+					attachment: { filename: "../../原始檔名.png", mimeType: "image/png", size: 128 },
+					attachmentUploadToken: preparation.attachmentUploadToken,
+				},
+				{ context: { headers: new Headers() } },
+			),
+		).rejects.toMatchObject({ code: "BAD_REQUEST" });
 	});
 });
