@@ -1,46 +1,128 @@
 import { db } from "@startkiter/database";
 import { Card, CardContent, CardHeader, CardTitle } from "@startkiter/ui";
 
+import { ExportSpreadsheetButton } from "@admin/component/ExportSpreadsheetButton";
 import { InvoiceOperationsButtons } from "@admin/component/InvoiceOperationsButtons";
 
+function sameTaiwanBillingMonth(a: Date, b: Date): boolean {
+	const monthKey = (date: Date) => {
+		const parts = new Intl.DateTimeFormat("en-CA", {
+			timeZone: "Asia/Taipei",
+			year: "numeric",
+			month: "2-digit",
+		}).formatToParts(date);
+		return `${parts.find((part) => part.type === "year")?.value}-${parts.find((part) => part.type === "month")?.value}`;
+	};
+	return monthKey(a) === monthKey(b);
+}
+
 export default async function AdminOrdersPage() {
-	const invoices = await db.invoice.findMany({
-		orderBy: { createdAt: "desc" },
-		take: 50,
-		include: {
-			order: { select: { orderNo: true, amount: true } },
-			subscription: { select: { gatewayTradeNo: true, pricePerPeriod: true, paidPeriods: true } },
-		},
-	});
+	const [orders, subscriptionInvoices] = await Promise.all([
+		db.order.findMany({
+			orderBy: { createdAt: "desc" },
+			take: 50,
+			include: {
+				invoice: true,
+			},
+		}),
+		db.invoice.findMany({
+			where: { orderId: null },
+			orderBy: { createdAt: "desc" },
+			take: 50,
+			include: {
+				subscription: { select: { gatewayTradeNo: true, pricePerPeriod: true } },
+			},
+		}),
+	]);
 
 	return (
 		<Card>
-			<CardHeader>
-				<CardTitle>訂單與發票</CardTitle>
+			<CardHeader className="flex flex-row items-center justify-between gap-4">
+				<CardTitle>訂單列表</CardTitle>
+				<ExportSpreadsheetButton endpoint="/api/export/orders" />
 			</CardHeader>
-			<CardContent className="space-y-4">
-				{invoices.length === 0 ? (
-					<p className="text-sm text-muted-foreground">目前沒有發票紀錄。</p>
+			<CardContent className="space-y-6">
+				{orders.length === 0 ? (
+					<p className="text-sm text-muted-foreground">目前沒有訂單紀錄。</p>
 				) : (
 					<div className="space-y-3">
-						{invoices.map((invoice) => (
+						{orders.map((order) => {
+							const invoice = order.invoice;
+							const canVoid = Boolean(
+								invoice?.status === "ISSUED" &&
+								invoice.invoiceDate &&
+								sameTaiwanBillingMonth(invoice.invoiceDate, new Date()),
+							);
+
+							return (
+								<div key={order.id} className="rounded-xl border p-4">
+									<div className="flex flex-wrap items-center justify-between gap-2">
+										<div>
+											<p className="font-medium">{order.orderNo}</p>
+											<p className="text-sm text-muted-foreground">
+												{order.status} · {order.sku} · NT$ {order.amount.toLocaleString()}
+											</p>
+										</div>
+										{invoice ? <span className="text-sm">發票：{invoice.status}</span> : <span className="text-sm text-muted-foreground">尚未開票</span>}
+									</div>
+									{invoice && (
+										<div className="mt-3 space-y-2 border-t pt-3">
+											<p className="text-sm">
+												{invoice.invoiceNumber ?? "尚未取得發票號碼"} · {invoice.provider} · NT$ {invoice.amount.toLocaleString()}
+											</p>
+											{invoice.attentionReason && <p className="text-sm text-amber-700">退款但發票待處理：請改用折讓。</p>}
+											<InvoiceOperationsButtons
+												invoice={{
+													id: invoice.id,
+													status: invoice.status,
+													amount: invoice.amount,
+													allowanceTotal: invoice.allowanceTotal,
+													invoiceDate: invoice.invoiceDate,
+													canVoid,
+												}}
+											/>
+										</div>
+									)}
+								</div>
+							);
+						})}
+					</div>
+				)}
+
+				{subscriptionInvoices.length > 0 && (
+					<section className="space-y-3 border-t pt-4">
+						<h2 className="font-medium">訂閱期款發票</h2>
+						{subscriptionInvoices.map((invoice) => (
 							<div key={invoice.id} className="rounded-xl border p-4">
 								<div className="flex flex-wrap items-center justify-between gap-2">
 									<div>
 										<p className="font-medium">{invoice.invoiceNumber ?? "尚未取得發票號碼"}</p>
 										<p className="text-sm text-muted-foreground">
-											{invoice.order?.orderNo ?? invoice.subscription?.gatewayTradeNo ?? invoice.id} · {invoice.provider} · {invoice.status}
+											{invoice.subscription?.gatewayTradeNo ?? invoice.id} · {invoice.provider} · {invoice.status}
 										</p>
 									</div>
 									<span className="text-sm">NT$ {invoice.amount.toLocaleString()}</span>
 								</div>
 								{invoice.attentionReason && <p className="mt-2 text-sm text-amber-700">退款但發票待處理：請改用折讓。</p>}
 								<div className="mt-3">
-									<InvoiceOperationsButtons invoice={{ id: invoice.id, status: invoice.status, amount: invoice.amount, allowanceTotal: invoice.allowanceTotal, invoiceDate: invoice.invoiceDate }} />
+									<InvoiceOperationsButtons
+										invoice={{
+											id: invoice.id,
+											status: invoice.status,
+											amount: invoice.amount,
+											allowanceTotal: invoice.allowanceTotal,
+											invoiceDate: invoice.invoiceDate,
+											canVoid: Boolean(
+												invoice.status === "ISSUED" &&
+												invoice.invoiceDate &&
+												sameTaiwanBillingMonth(invoice.invoiceDate, new Date()),
+											),
+										}}
+									/>
 								</div>
 							</div>
 						))}
-					</div>
+					</section>
 				)}
 			</CardContent>
 		</Card>

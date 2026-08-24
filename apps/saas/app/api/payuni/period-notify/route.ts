@@ -10,6 +10,7 @@ import {
 	fingerprintPayUniPeriodEvent,
 } from "@startkiter/api/modules/course/lib/webhook-events";
 import { triggerInvoiceForSubscriptionPeriod } from "@startkiter/api/modules/course/lib/invoice-events";
+import { scheduleAfterResponse } from "../../../../lib/schedule-after";
 
 function stringField(value: unknown): string {
 	return typeof value === "string" ? value.trim() : String(value ?? "").trim();
@@ -156,7 +157,9 @@ export async function POST(request: Request) {
 			});
 			});
 			claimed = false;
-		void triggerInvoiceForSubscriptionPeriod(subscription.id, periodNumber).catch(() => undefined);
+		scheduleAfterResponse(async () => {
+			await triggerInvoiceForSubscriptionPeriod(subscription.id, periodNumber);
+		});
 		return NextResponse.json({ message: "OK" });
 	} catch (error) {
 		if (claimed) {

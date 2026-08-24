@@ -1,5 +1,6 @@
 import { db } from "@startkiter/database";
 import { handleRefundInvoice } from "@startkiter/api/modules/course/lib/invoice-events";
+import { scheduleAfterResponse } from "./schedule-after";
 import {
 	MVP_AMOUNT_TWD,
 	MVP_SKU,
@@ -128,7 +129,11 @@ export async function markOrderRefundedInDb(orderNo: string) {
 	});
 	if (result.count > 0) {
 		const order = await db.order.findUnique({ where: { orderNo }, select: { id: true } });
-		if (order) void handleRefundInvoice(order.id).catch(() => undefined);
+		if (order) {
+			scheduleAfterResponse(async () => {
+				await handleRefundInvoice(order.id);
+			});
+		}
 	}
 	return result.count;
 }
