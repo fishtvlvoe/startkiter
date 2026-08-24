@@ -1,7 +1,8 @@
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
-import { getSignedUploadUrl } from "@startkiter/storage/provider/s3";
+import { deleteObject, getSignedUploadUrl, headObject } from "@startkiter/storage/provider/s3";
 
 const LOCAL_TOKEN_VERSION = "assignment-upload-v1";
+const localUploadedObjects = new Map<string, { contentLength: number; contentType: string; expiresAt: number }>();
 
 function getExtension(filename: string): string {
 	const match = filename.toLowerCase().match(/\.([a-z0-9]{1,12})$/);
@@ -21,6 +22,10 @@ function getLocalTokenSecret(): string {
 		throw new Error("Missing BETTER_AUTH_SECRET");
 	}
 	return process.env.BETTER_AUTH_SECRET ?? "startkiter-local-assignment-upload-secret";
+}
+
+export function isAssignmentStorageConfigured(): boolean {
+	return Boolean(process.env.S3_ENDPOINT && process.env.S3_ACCESS_KEY_ID && process.env.S3_SECRET_ACCESS_KEY);
 }
 
 function signLocalToken(payload: string): string {
@@ -89,11 +94,7 @@ export async function getAssignmentSignedUploadUrl(input: {
 	maxSize: number;
 	size: number;
 }): Promise<{ signedUploadUrl: string; localDevelopment: boolean }> {
-	const hasS3Configuration = Boolean(
-		process.env.S3_ENDPOINT && process.env.S3_ACCESS_KEY_ID && process.env.S3_SECRET_ACCESS_KEY,
-	);
-
-	if (!hasS3Configuration) {
+	if (!isAssignmentStorageConfigured()) {
 		if (process.env.NODE_ENV === "production") throw new Error("Assignment storage is not configured");
 		const token = createLocalAssignmentUploadToken({
 			storageKey: input.storageKey,
@@ -118,4 +119,38 @@ export async function getAssignmentSignedUploadUrl(input: {
 		}),
 		localDevelopment: false,
 	};
+}
+
+export function recordLocalAssignmentUpload(input: { storageKey: string; contentType: string; contentLength: number }): void {
+	localUploadedObjects.set(input.storageKey, {
+		contentLength: input.contentLength,
+		contentType: input.contentType,
+		expiresAt: Date.now() + 10 * 60_000,
+	});
+}
+
+export async function assignmentUploadObjectMatches(input: {
+	storageKey: string;
+	contentType: string;
+	size: number;
+}): Promise<boolean> {
+	if (!isAssignmentStorageConfigured()) {
+		const localObject = localUploadedObjects.get(input.storageKey);
+		if (!localObject || localObject.expiresAt < Date.now()) {
+			localUploadedObjects.delete(input.storageKey);
+			return false;
+		}
+		return localObject.contentLength === input.size && localObject.contentType === input.contentType;
+	}
+
+	const object = await headObject(input.storageKey, "assignments");
+	return object?.contentLength === input.size;
+}
+
+export async function deleteAssignmentUploadObject(storageKey: string): Promise<void> {
+	if (!isAssignmentStorageConfigured()) {
+		localUploadedObjects.delete(storageKey);
+		return;
+	}
+	await deleteObject(storageKey, "assignments");
 }

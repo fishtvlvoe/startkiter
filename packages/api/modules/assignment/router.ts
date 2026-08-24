@@ -16,8 +16,11 @@ import { protectedProcedure } from "../../orpc/procedures";
 import { userCanAccessCourseId } from "../course/lib/course-access";
 import { courseOperatorProcedure } from "../course/lib/course-operator";
 import {
+	assignmentUploadObjectMatches,
 	buildAssignmentAttachmentStorageKey,
+	deleteAssignmentUploadObject,
 	getAssignmentSignedUploadUrl,
+	isAssignmentStorageConfigured,
 } from "./assignment-upload";
 
 const contentSchema = z.string().max(200_000).nullable().optional();
@@ -57,6 +60,25 @@ function validateAttachments(
 	{ attachmentId: _attachmentId, ...attachments }: z.infer<typeof attachmentSchema>,
 	) {
 	return attachments;
+}
+
+async function cleanupExpiredAssignmentUploadIntents(pluginContentId: string, userId: string): Promise<void> {
+	const expired = await db.assignmentUploadIntent.findMany({
+		where: { pluginContentId, userId, status: { in: ["PENDING", "UPLOADED"] }, expiresAt: { lte: new Date() } },
+		select: { id: true, storageKey: true },
+	});
+	const removableIds: string[] = [];
+	for (const intent of expired) {
+		try {
+			await deleteAssignmentUploadObject(intent.storageKey);
+			removableIds.push(intent.id);
+		} catch {
+			// Keep the intent when object deletion failed so the next cleanup can retry.
+		}
+	}
+	if (removableIds.length) {
+		await db.assignmentUploadIntent.deleteMany({ where: { id: { in: removableIds }, status: { in: ["PENDING", "UPLOADED"] } } });
+	}
 }
 
 export const assignmentRouter = {
@@ -125,6 +147,14 @@ export const assignmentRouter = {
 			if (allowed.size === 0 || !allowed.has(extension)) throw new ORPCError("BAD_REQUEST", { message: "不支援的檔案格式。" });
 			if (input.size > definition.body.maxFileSize) throw new ORPCError("BAD_REQUEST", { message: "檔案超過大小限制。" });
 			if (definition.body.maxFiles < 1) throw new ORPCError("BAD_REQUEST", { message: "這份作業不接受檔案。" });
+			await cleanupExpiredAssignmentUploadIntents(definition.id, context.user.id);
+			const pendingIntentCount = await db.assignmentUploadIntent.count({
+				where: { pluginContentId: definition.id, userId: context.user.id, status: { in: ["PENDING", "UPLOADED"] }, expiresAt: { gt: new Date() } },
+			});
+			const maxPendingIntents = Math.max(definition.body.maxFiles * 2, 2);
+			if (pendingIntentCount >= maxPendingIntents) {
+				throw new ORPCError("BAD_REQUEST", { message: "待上傳附件過多，請完成或重新整理目前的上傳。" });
+			}
 
 			const draftSubmission = await db.assignmentSubmission.findFirst({
 				where: { pluginContentId: definition.id, userId: context.user.id, status: "DRAFT" },
@@ -195,6 +225,9 @@ export const assignmentRouter = {
 				if (!allowed.has(extension) || attachment.size > definition.body.maxFileSize) {
 					throw new ORPCError("BAD_REQUEST", { message: "附件不符合格式或大小限制。" });
 				}
+				if (isAssignmentStorageConfigured() && !(await assignmentUploadObjectMatches({ storageKey: attachment.storageKey, contentType: attachment.mimeType, size: attachment.size }))) {
+					throw new ORPCError("BAD_REQUEST", { message: "附件尚未完成上傳，請重新上傳。" });
+				}
 			}
 
 			return db.$transaction(async (tx) => {
@@ -207,15 +240,20 @@ export const assignmentRouter = {
 					select: { revisionNumber: true },
 				});
 				const revisionNumber = draft?.revisionNumber ?? (previous ? incrementRevisionNumber(previous.revisionNumber) : 1);
-				const submission = draft
-					? await tx.assignmentSubmission.update({
-						where: { id: draft.id },
+				let submission;
+				if (draft) {
+					const updated = await tx.assignmentSubmission.updateMany({
+						where: { id: draft.id, status: "DRAFT" },
 						data: { content, contentFormat: input.contentFormat, wordCount: countAssignmentWords(content), status: "SUBMITTED", revisionNumber, isLate: rules.isLate, submittedAt: new Date() },
-						})
-					: await tx.assignmentSubmission.create({
+					});
+					if (updated.count !== 1) throw new ORPCError("CONFLICT", { message: "這份作業正在送出，請重新整理頁面。" });
+					submission = await tx.assignmentSubmission.findUniqueOrThrow({ where: { id: draft.id } });
+				} else {
+					submission = await tx.assignmentSubmission.create({
 						data: { pluginContentId: definition.id, userId: context.user.id, content, contentFormat: input.contentFormat, wordCount: countAssignmentWords(content), status: "SUBMITTED", revisionNumber, isLate: rules.isLate, submittedAt: new Date() },
-						});
-					if (input.attachments.length) {
+					});
+				}
+				if (input.attachments.length) {
 						if (!submission.id || !input.submissionId) throw new ORPCError("BAD_REQUEST", { message: "附件上傳工作階段已失效，請重新上傳。" });
 						const intentIds = input.attachments.map((attachment) => attachment.attachmentId);
 						const intents = await tx.assignmentUploadIntent.findMany({
@@ -224,7 +262,7 @@ export const assignmentRouter = {
 								pluginContentId: definition.id,
 								submissionId: submission.id,
 								userId: context.user.id,
-								status: "PENDING",
+								status: isAssignmentStorageConfigured() ? "PENDING" : "UPLOADED",
 								expiresAt: { gt: new Date() },
 							},
 						});
@@ -236,7 +274,9 @@ export const assignmentRouter = {
 								throw new ORPCError("BAD_REQUEST", { message: "附件上傳資料不一致。" });
 							}
 						}
-						await tx.assignmentUploadIntent.updateMany({ where: { id: { in: intentIds }, status: "PENDING" }, data: { status: "USED" } });
+						const expectedIntentStatus = isAssignmentStorageConfigured() ? "PENDING" : "UPLOADED";
+						const usedIntents = await tx.assignmentUploadIntent.updateMany({ where: { id: { in: intentIds }, status: expectedIntentStatus }, data: { status: "USED" } });
+						if (usedIntents.count !== input.attachments.length) throw new ORPCError("CONFLICT", { message: "附件上傳工作階段已被使用，請重新上傳。" });
 					}
 					if (input.attachments.length) {
 						await tx.assignmentAttachment.createMany({ data: input.attachments.map((attachment) => ({ id: attachment.attachmentId, ...validateAttachments(attachment), submissionId: submission.id })) });

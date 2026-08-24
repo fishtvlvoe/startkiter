@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { db } from "@startkiter/database";
 import { afterAll, afterEach, describe, expect, it } from "vitest";
 
-import { createAssignmentDefinition, getAssignmentDefinition } from "./assignment-definition";
+import { createAssignmentDefinition, getAssignmentDefinition, type AssignmentDefinitionBody } from "./assignment-definition";
 
 describe.sequential("Assignment definitions use shared PluginContent", () => {
 	const createdContentIds: string[] = [];
@@ -21,24 +21,25 @@ describe.sequential("Assignment definitions use shared PluginContent", () => {
 		});
 		createdUserIds.push(user.id);
 
+		const definitionBody: AssignmentDefinitionBody = {
+			lessonId: "lesson-assignment-1",
+			description: "請完成一段說明。",
+			submissionType: "TEXT_AND_FILES",
+			editorMode: "RICH_TEXT",
+			minWords: 10,
+			maxWords: 500,
+			maxImages: 1,
+			maxImageSize: 2_000_000,
+			maxFiles: 1,
+			maxFileSize: 5_000_000,
+			allowedExtensions: ["pdf", "txt"],
+			gradingType: "SCORE",
+			passingScore: 60,
+		};
 		const created = await createAssignmentDefinition({
 			authorId: user.id,
 			title: "第一次作業",
-			body: {
-				lessonId: "lesson-assignment-1",
-				description: "請完成一段說明。",
-				submissionType: "TEXT_AND_FILES",
-				editorMode: "RICH_TEXT",
-				minWords: 10,
-				maxWords: 500,
-				maxImages: 1,
-				maxImageSize: 2_000_000,
-				maxFiles: 1,
-				maxFileSize: 5_000_000,
-				allowedExtensions: ["pdf", "txt"],
-				gradingType: "SCORE",
-				passingScore: 60,
-			},
+			body: definitionBody,
 		});
 		createdContentIds.push(created.id);
 
@@ -46,7 +47,7 @@ describe.sequential("Assignment definitions use shared PluginContent", () => {
 		expect(created.type).toBe("assignment-definition");
 		await db.pluginContent.update({
 			where: { id: created.id },
-			data: { body: { ...created.body, description: '<p>安全文字</p><script>alert("xss")</script>' } },
+			data: { body: { ...definitionBody, description: '<p>安全文字</p><script>alert("xss")</script>' } },
 		});
 		expect(await getAssignmentDefinition(created.id)).toMatchObject({
 			id: created.id,

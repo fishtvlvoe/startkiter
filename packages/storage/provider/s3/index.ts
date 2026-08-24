@@ -1,4 +1,4 @@
-import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, GetObjectCommand, HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl as getS3SignedUrl } from "@aws-sdk/s3-request-presigner";
 import { logger } from "@startkiter/logs";
 
@@ -83,3 +83,27 @@ export const getSignedUrl: GetSignedUrlHander = async (path, { bucket, expiresIn
 		throw new Error("Could not get signed url");
 	}
 };
+
+export async function headObject(path: string, bucket: keyof typeof config.bucketNames): Promise<{
+	contentLength: number | null;
+	contentType: string | null;
+} | null> {
+	const bucketName = config.bucketNames[bucket];
+	if (!bucketName) throw new Error("Invalid bucket");
+
+	try {
+		const result = await getS3Client().send(new HeadObjectCommand({ Bucket: bucketName, Key: path }));
+		return {
+			contentLength: typeof result.ContentLength === "number" ? result.ContentLength : null,
+			contentType: result.ContentType ?? null,
+		};
+	} catch {
+		return null;
+	}
+}
+
+export async function deleteObject(path: string, bucket: keyof typeof config.bucketNames): Promise<void> {
+	const bucketName = config.bucketNames[bucket];
+	if (!bucketName) throw new Error("Invalid bucket");
+	await getS3Client().send(new DeleteObjectCommand({ Bucket: bucketName, Key: path }));
+}

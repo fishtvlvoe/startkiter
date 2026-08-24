@@ -1,4 +1,8 @@
-import { verifyLocalAssignmentUploadToken } from "@startkiter/api/modules/assignment/assignment-upload";
+import {
+	recordLocalAssignmentUpload,
+	verifyLocalAssignmentUploadToken,
+} from "@startkiter/api/modules/assignment/assignment-upload";
+import { db } from "@startkiter/database";
 
 export async function PUT(request: Request) {
 	if (process.env.NODE_ENV === "production") {
@@ -14,13 +18,38 @@ export async function PUT(request: Request) {
 	const contentType = request.headers.get("content-type") ?? "application/octet-stream";
 	if (contentType !== upload.contentType) return Response.json({ error: "Content type mismatch." }, { status: 415 });
 
-	// Development-only adapter: consume the request to exercise the same browser PUT
-	// flow without silently pretending a production object store exists.
-	const body = await request.arrayBuffer();
 	const declaredLength = request.headers.get("content-length");
-	const contentLength = declaredLength ? Number(declaredLength) : body.byteLength;
-	if (!Number.isFinite(contentLength) || contentLength < 1 || contentLength > upload.maxSize || body.byteLength !== contentLength) {
+	const declaredContentLength = declaredLength ? Number(declaredLength) : null;
+	if (declaredContentLength !== null && (!Number.isSafeInteger(declaredContentLength) || declaredContentLength < 1 || declaredContentLength > upload.maxSize)) {
 		return Response.json({ error: "Invalid upload size." }, { status: 413 });
 	}
+
+	// Development-only adapter: consume the request to exercise the same browser PUT
+	// flow without silently pretending a production object store exists. Read in bounded
+	// chunks so a request without a trustworthy Content-Length cannot allocate unbounded memory.
+	const reader = request.body?.getReader();
+	if (!reader) return Response.json({ error: "Missing upload body." }, { status: 400 });
+	let contentLength = 0;
+	try {
+		while (true) {
+			const chunk = await reader.read();
+			if (chunk.done) break;
+			contentLength += chunk.value.byteLength;
+			if (contentLength > upload.maxSize) {
+				await reader.cancel();
+				return Response.json({ error: "Invalid upload size." }, { status: 413 });
+			}
+		}
+	} finally {
+		reader.releaseLock();
+	}
+	if (contentLength < 1 || (declaredContentLength !== null && contentLength !== declaredContentLength)) {
+		return Response.json({ error: "Invalid upload size." }, { status: 413 });
+	}
+	recordLocalAssignmentUpload({ storageKey: upload.storageKey, contentType: upload.contentType, contentLength });
+	await db.assignmentUploadIntent.updateMany({
+		where: { storageKey: upload.storageKey, status: "PENDING", mimeType: upload.contentType, size: contentLength },
+		data: { status: "UPLOADED" },
+	});
 	return Response.json({ ok: true, storageKey: upload.storageKey });
 }

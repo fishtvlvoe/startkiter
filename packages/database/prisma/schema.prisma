@@ -781,6 +781,7 @@ model AssignmentSubmission {
   @@index([pluginContentId, userId])
   @@index([pluginContentId, status, submittedAt])
   @@index([userId, createdAt])
+  @@unique([pluginContentId, userId, revisionNumber])
   @@map("assignment_submission")
 }
 
