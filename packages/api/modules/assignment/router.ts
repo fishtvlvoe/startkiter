@@ -8,7 +8,7 @@ import {
 	incrementRevisionNumber,
 	sanitizeAssignmentContent,
 } from "@startkiter/course-assignment";
-import { db } from "@startkiter/database";
+import { db, type Prisma } from "@startkiter/database";
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 
@@ -18,10 +18,14 @@ import { courseOperatorProcedure } from "../course/lib/course-operator";
 import {
 	assignmentUploadObjectMatches,
 	buildAssignmentAttachmentStorageKey,
-	deleteAssignmentUploadObject,
 	getAssignmentSignedUploadUrl,
 	isAssignmentStorageConfigured,
 } from "./assignment-upload";
+import {
+	cleanupExpiredAssignmentUploadIntents,
+	decodeAssignmentSubmissionCursor,
+	encodeAssignmentSubmissionCursor,
+} from "./assignment-lifecycle";
 
 const contentSchema = z.string().max(200_000).nullable().optional();
 const attachmentSchema = z.object({
@@ -33,6 +37,10 @@ const attachmentSchema = z.object({
 });
 
 const assignmentOperatorProcedure = courseOperatorProcedure;
+
+function isUniqueConstraintError(error: unknown): boolean {
+	return typeof error === "object" && error !== null && "code" in error && error.code === "P2002";
+}
 
 async function getAccessibleAssignment(pluginContentId: string, userId: string) {
 	const definition = await getAssignmentDefinition(pluginContentId);
@@ -60,25 +68,6 @@ function validateAttachments(
 	{ attachmentId: _attachmentId, ...attachments }: z.infer<typeof attachmentSchema>,
 	) {
 	return attachments;
-}
-
-async function cleanupExpiredAssignmentUploadIntents(pluginContentId: string, userId: string): Promise<void> {
-	const expired = await db.assignmentUploadIntent.findMany({
-		where: { pluginContentId, userId, status: { in: ["PENDING", "UPLOADED"] }, expiresAt: { lte: new Date() } },
-		select: { id: true, storageKey: true },
-	});
-	const removableIds: string[] = [];
-	for (const intent of expired) {
-		try {
-			await deleteAssignmentUploadObject(intent.storageKey);
-			removableIds.push(intent.id);
-		} catch {
-			// Keep the intent when object deletion failed so the next cleanup can retry.
-		}
-	}
-	if (removableIds.length) {
-		await db.assignmentUploadIntent.deleteMany({ where: { id: { in: removableIds }, status: { in: ["PENDING", "UPLOADED"] } } });
-	}
 }
 
 export const assignmentRouter = {
@@ -147,51 +136,57 @@ export const assignmentRouter = {
 			if (allowed.size === 0 || !allowed.has(extension)) throw new ORPCError("BAD_REQUEST", { message: "不支援的檔案格式。" });
 			if (input.size > definition.body.maxFileSize) throw new ORPCError("BAD_REQUEST", { message: "檔案超過大小限制。" });
 			if (definition.body.maxFiles < 1) throw new ORPCError("BAD_REQUEST", { message: "這份作業不接受檔案。" });
-			await cleanupExpiredAssignmentUploadIntents(definition.id, context.user.id);
-			const pendingIntentCount = await db.assignmentUploadIntent.count({
-				where: { pluginContentId: definition.id, userId: context.user.id, status: { in: ["PENDING", "UPLOADED"] }, expiresAt: { gt: new Date() } },
-			});
-			const maxPendingIntents = Math.max(definition.body.maxFiles * 2, 2);
-			if (pendingIntentCount >= maxPendingIntents) {
-				throw new ORPCError("BAD_REQUEST", { message: "待上傳附件過多，請完成或重新整理目前的上傳。" });
-			}
-
-			const draftSubmission = await db.assignmentSubmission.findFirst({
-				where: { pluginContentId: definition.id, userId: context.user.id, status: "DRAFT" },
-				orderBy: { createdAt: "desc" },
-				select: { id: true },
-			});
-			const previousSubmission = draftSubmission ? null : await db.assignmentSubmission.findFirst({
-				where: { pluginContentId: definition.id, userId: context.user.id },
-				orderBy: { revisionNumber: "desc" },
-				select: { revisionNumber: true },
-			});
-			const submission = draftSubmission ?? await db.assignmentSubmission.create({
-				data: {
-					pluginContentId: definition.id,
-					userId: context.user.id,
-					status: "DRAFT",
-					revisionNumber: previousSubmission ? incrementRevisionNumber(previousSubmission.revisionNumber) : 1,
-				},
-				select: { id: true },
-			});
 			const attachmentId = randomUUID();
-			const storageKey = buildAssignmentAttachmentStorageKey({ submissionId: submission.id, attachmentId, filename: input.filename });
-			await db.assignmentUploadIntent.create({
-				data: {
-					id: attachmentId,
-					pluginContentId: definition.id,
-					submissionId: submission.id,
-					userId: context.user.id,
-					filename: input.filename,
-					mimeType: input.mimeType,
-					size: input.size,
-					storageKey,
-					expiresAt: new Date(Date.now() + 60_000),
-				},
+			await cleanupExpiredAssignmentUploadIntents({ pluginContentId: definition.id, userId: context.user.id });
+			const uploadIntent = await db.$transaction(async (tx) => {
+				// Serialize intent quota and revision allocation for this learner/assignment pair.
+				await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`assignment-upload:${definition.id}:${context.user.id}`}, 0))`;
+				const pendingIntentCount = await tx.assignmentUploadIntent.count({
+					where: { pluginContentId: definition.id, userId: context.user.id, status: { in: ["PENDING", "UPLOADED"] }, expiresAt: { gt: new Date() } },
+				});
+				const maxPendingIntents = Math.max(definition.body.maxFiles * 2, 2);
+				if (pendingIntentCount >= maxPendingIntents) {
+					throw new ORPCError("BAD_REQUEST", { message: "待上傳附件過多，請完成或重新整理目前的上傳。" });
+				}
+
+				const draftSubmission = await tx.assignmentSubmission.findFirst({
+					where: { pluginContentId: definition.id, userId: context.user.id, status: "DRAFT" },
+					orderBy: { createdAt: "desc" },
+					select: { id: true },
+				});
+				const previousSubmission = draftSubmission ? null : await tx.assignmentSubmission.findFirst({
+					where: { pluginContentId: definition.id, userId: context.user.id },
+					orderBy: { revisionNumber: "desc" },
+					select: { revisionNumber: true },
+				});
+				const submission = draftSubmission ?? await tx.assignmentSubmission.create({
+					data: {
+						pluginContentId: definition.id,
+						userId: context.user.id,
+						status: "DRAFT",
+						revisionNumber: previousSubmission ? incrementRevisionNumber(previousSubmission.revisionNumber) : 1,
+					},
+					select: { id: true },
+				});
+				const storageKey = buildAssignmentAttachmentStorageKey({ submissionId: submission.id, attachmentId, filename: input.filename });
+				await tx.assignmentUploadIntent.create({
+					data: {
+						id: attachmentId,
+						pluginContentId: definition.id,
+						submissionId: submission.id,
+						userId: context.user.id,
+						filename: input.filename,
+						mimeType: input.mimeType,
+						size: input.size,
+						storageKey,
+						expiresAt: new Date(Date.now() + 60_000),
+					},
+				});
+				return { submissionId: submission.id, storageKey };
 			});
+			const storageKey = uploadIntent.storageKey;
 			const upload = await getAssignmentSignedUploadUrl({ storageKey, contentType: input.mimeType, maxSize: definition.body.maxFileSize, size: input.size });
-			return { ...upload, submissionId: submission.id, attachmentId, storageKey };
+			return { ...upload, submissionId: uploadIntent.submissionId, attachmentId, storageKey };
 		}),
 
 	submit: protectedProcedure
@@ -230,10 +225,12 @@ export const assignmentRouter = {
 				}
 			}
 
-			return db.$transaction(async (tx) => {
+			try {
+				return await db.$transaction(async (tx) => {
 				const draft = input.submissionId
 					? await tx.assignmentSubmission.findFirst({ where: { id: input.submissionId, pluginContentId: definition.id, userId: context.user.id, status: "DRAFT" } })
 					: null;
+				if (input.submissionId && !draft) throw new ORPCError("CONFLICT", { message: "這份作業草稿已不存在或正在送出，請重新整理頁面。" });
 				const previous = await tx.assignmentSubmission.findFirst({
 					where: { pluginContentId: definition.id, userId: context.user.id },
 					orderBy: { revisionNumber: "desc" },
@@ -282,7 +279,11 @@ export const assignmentRouter = {
 						await tx.assignmentAttachment.createMany({ data: input.attachments.map((attachment) => ({ id: attachment.attachmentId, ...validateAttachments(attachment), submissionId: submission.id })) });
 				}
 				return submission;
-			});
+				});
+			} catch (error) {
+				if (isUniqueConstraintError(error)) throw new ORPCError("CONFLICT", { message: "這份作業正在送出，請重新整理頁面。" });
+				throw error;
+			}
 		}),
 
 	getResult: protectedProcedure
@@ -299,20 +300,41 @@ export const assignmentRouter = {
 		}),
 
 	operatorList: assignmentOperatorProcedure
-		.input(z.object({ pluginContentId: z.string().min(1) }))
+		.input(z.object({ pluginContentId: z.string().min(1), limit: z.number().int().min(1).max(100).default(50), cursor: z.string().trim().min(1).max(1000).optional() }))
 		.handler(async ({ input }) => {
 			const definition = await getAssignmentDefinition(input.pluginContentId);
 			if (!definition) throw new ORPCError("NOT_FOUND");
+			const cursor = input.cursor ? decodeAssignmentSubmissionCursor(input.cursor) : null;
+			if (input.cursor && !cursor) throw new ORPCError("BAD_REQUEST", { message: "提交清單游標無效。" });
+			const cursorWhere: Prisma.AssignmentSubmissionWhereInput | undefined = cursor
+				? {
+					OR: [
+						{ submittedAt: { lt: new Date(cursor.submittedAt) } },
+						{ submittedAt: new Date(cursor.submittedAt), createdAt: { lt: new Date(cursor.createdAt) } },
+						{ submittedAt: new Date(cursor.submittedAt), createdAt: new Date(cursor.createdAt), id: { lt: cursor.id } },
+					],
+				}
+				: undefined;
 			const submissions = await db.assignmentSubmission.findMany({
-				where: { pluginContentId: definition.id, status: { in: ["SUBMITTED", "REVIEWED"] } },
-				orderBy: [{ submittedAt: "desc" }, { createdAt: "desc" }],
+				where: { pluginContentId: definition.id, status: { in: ["SUBMITTED", "REVIEWED"] }, submittedAt: { not: null }, ...(cursorWhere ?? {}) },
+				orderBy: [{ submittedAt: "desc" }, { createdAt: "desc" }, { id: "desc" }],
+				take: input.limit + 1,
 				include: {
 					user: { select: { id: true, name: true, email: true } },
 					attachments: true,
 					reviews: { orderBy: { createdAt: "desc" }, take: 1, include: { reviewer: { select: { name: true, email: true } } } },
 				},
 			});
-			return { definition, submissions };
+			const hasNextPage = submissions.length > input.limit;
+			const page = hasNextPage ? submissions.slice(0, input.limit) : submissions;
+			const last = page[page.length - 1];
+			return {
+				definition,
+				submissions: page,
+				nextCursor: hasNextPage && last?.submittedAt
+					? encodeAssignmentSubmissionCursor({ id: last.id, submittedAt: last.submittedAt.toISOString(), createdAt: last.createdAt.toISOString() })
+					: null,
+			};
 		}),
 
 	review: assignmentOperatorProcedure

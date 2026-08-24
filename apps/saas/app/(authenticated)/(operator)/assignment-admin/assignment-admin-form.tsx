@@ -22,6 +22,7 @@ export function AssignmentAdminForm({ lessons, existingAssignments }: { lessons:
 	const [description, setDescription] = useState("請完成這份作業並附上必要檔案。");
 	const [createdId, setCreatedId] = useState<string | null>(null);
 	const [submissions, setSubmissions] = useState<Submission[]>([]);
+	const [nextCursor, setNextCursor] = useState<string | null>(null);
 	const [feedback, setFeedback] = useState<Record<string, string>>({});
 	const [scores, setScores] = useState<Record<string, string>>({});
 	const [message, setMessage] = useState<string | null>(null);
@@ -62,13 +63,15 @@ export function AssignmentAdminForm({ lessons, existingAssignments }: { lessons:
 		}
 	}
 
-	async function loadSubmissions() {
+	async function loadSubmissions(options: { append?: boolean } = {}) {
 		if (!createdId) return;
+		const append = options.append ?? false;
 		setError(null);
 		try {
-			const result = await orpcClient.assignment.operatorList({ pluginContentId: createdId });
-			setSubmissions(result.submissions as Submission[]);
-			setMessage(`已載入 ${result.submissions.length} 份提交。`);
+			const result = await orpcClient.assignment.operatorList({ pluginContentId: createdId, cursor: append ? nextCursor ?? undefined : undefined, limit: 50 });
+			setSubmissions((current) => append ? [...current, ...(result.submissions as Submission[])] : (result.submissions as Submission[]));
+			setNextCursor(result.nextCursor);
+			setMessage(`已載入 ${append ? "更多 " : ""}${result.submissions.length} 份提交。`);
 		} catch {
 			setError("載入提交失敗。");
 		}
@@ -113,7 +116,7 @@ export function AssignmentAdminForm({ lessons, existingAssignments }: { lessons:
 					<p className="text-green-600">作業已建立：{createdId}</p>
 					<div className="flex flex-wrap gap-4">
 						<a className="underline" href={`/assignment/${createdId}`}>開啟學員作業頁</a>
-						<Button type="button" variant="outline" onClick={loadSubmissions}>載入提交</Button>
+						<Button type="button" variant="outline" onClick={() => loadSubmissions()}>載入提交</Button>
 					</div>
 					<div className="space-y-4" data-testid="assignment-submission-list">
 						{submissions.length === 0 && <p className="text-sm text-muted-foreground">目前沒有已送出的作業。</p>}
@@ -127,6 +130,7 @@ export function AssignmentAdminForm({ lessons, existingAssignments }: { lessons:
 								<Button type="button" variant="primary" onClick={() => reviewSubmission(submission.id)}>儲存批改</Button>
 							</article>
 						))}
+						{nextCursor && <Button type="button" variant="outline" onClick={() => loadSubmissions({ append: true })}>載入更多提交</Button>}
 					</div>
 				</section>
 			) : (

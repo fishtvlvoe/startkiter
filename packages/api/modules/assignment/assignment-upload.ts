@@ -2,7 +2,24 @@ import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { deleteObject, getSignedUploadUrl, headObject } from "@startkiter/storage/provider/s3";
 
 const LOCAL_TOKEN_VERSION = "assignment-upload-v1";
+const LOCAL_OBJECT_TTL_MS = 10 * 60_000;
+const MAX_LOCAL_OBJECTS = 1_000;
 const localUploadedObjects = new Map<string, { contentLength: number; contentType: string; expiresAt: number }>();
+
+function pruneLocalAssignmentUploadObjects(): void {
+	const now = Date.now();
+	for (const [storageKey, object] of localUploadedObjects) {
+		if (object.expiresAt <= now) localUploadedObjects.delete(storageKey);
+	}
+	while (localUploadedObjects.size > MAX_LOCAL_OBJECTS) {
+		const oldestKey = localUploadedObjects.keys().next().value;
+		if (!oldestKey) break;
+		localUploadedObjects.delete(oldestKey);
+	}
+}
+
+const localObjectCleanupTimer = setInterval(pruneLocalAssignmentUploadObjects, 60_000);
+localObjectCleanupTimer.unref?.();
 
 function getExtension(filename: string): string {
 	const match = filename.toLowerCase().match(/\.([a-z0-9]{1,12})$/);
@@ -122,10 +139,11 @@ export async function getAssignmentSignedUploadUrl(input: {
 }
 
 export function recordLocalAssignmentUpload(input: { storageKey: string; contentType: string; contentLength: number }): void {
+	pruneLocalAssignmentUploadObjects();
 	localUploadedObjects.set(input.storageKey, {
 		contentLength: input.contentLength,
 		contentType: input.contentType,
-		expiresAt: Date.now() + 10 * 60_000,
+		expiresAt: Date.now() + LOCAL_OBJECT_TTL_MS,
 	});
 }
 
@@ -144,7 +162,7 @@ export async function assignmentUploadObjectMatches(input: {
 	}
 
 	const object = await headObject(input.storageKey, "assignments");
-	return object?.contentLength === input.size;
+	return object?.contentLength === input.size && object.contentType === input.contentType;
 }
 
 export async function deleteAssignmentUploadObject(storageKey: string): Promise<void> {
