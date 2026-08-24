@@ -1,4 +1,5 @@
 import { OrganizationForm } from "@admin/component/organizations/OrganizationForm";
+import { requireGlobalAdmin } from "../../../../../../../lib/admin-access";
 import { getAdminPath } from "@admin/lib/links";
 import { fullOrganizationQueryKey } from "@organizations/lib/api";
 import { auth } from "@startkiter/auth";
@@ -25,6 +26,7 @@ export default async function OrganizationFormPage({
 	params: Promise<{ id: string }>;
 	searchParams: Promise<{ backTo?: string }>;
 }) {
+	await requireGlobalAdmin();
 	const { id } = await params;
 	const { backTo } = await searchParams;
 

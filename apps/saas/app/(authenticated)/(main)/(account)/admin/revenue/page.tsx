@@ -1,7 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@startkiter/ui'
 import { ExportSpreadsheetButton } from '@admin/component/ExportSpreadsheetButton'
+import { requireGlobalAdmin } from '../../../../../../lib/admin-access'
 
-export default function AdminRevenuePage() {
+export default async function AdminRevenuePage() {
+	await requireGlobalAdmin()
 	return (
 		<Card>
 			<CardHeader className="flex flex-row items-center justify-between gap-4">

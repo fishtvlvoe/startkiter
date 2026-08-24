@@ -130,6 +130,12 @@ export const CourseScalarFieldEnumSchema = z.enum(['id', 'slug', 'title', 'descr
 
 export type CourseScalarFieldEnum = z.infer<typeof CourseScalarFieldEnumSchema>;
 
+// File: CourseInstructorScalarFieldEnum.schema.ts
+
+export const CourseInstructorScalarFieldEnumSchema = z.enum(['id', 'courseId', 'userId', 'createdById', 'createdAt'])
+
+export type CourseInstructorScalarFieldEnum = z.infer<typeof CourseInstructorScalarFieldEnumSchema>;
+
 // File: CourseSubscriptionPlanScalarFieldEnum.schema.ts
 
 export const CourseSubscriptionPlanScalarFieldEnumSchema = z.enum(['id', 'courseId', 'label', 'interval', 'price', 'sku', 'enabled', 'createdAt', 'updatedAt'])
@@ -751,6 +757,19 @@ export const CourseSchema = z.object({
 });
 
 export type CourseType = z.infer<typeof CourseSchema>;
+
+
+// File: CourseInstructor.schema.ts
+
+export const CourseInstructorSchema = z.object({
+  id: z.string(),
+  courseId: z.string(),
+  userId: z.string(),
+  createdById: z.string(),
+  createdAt: z.date(),
+});
+
+export type CourseInstructorType = z.infer<typeof CourseInstructorSchema>;
 
 
 // File: CourseSubscriptionPlan.schema.ts

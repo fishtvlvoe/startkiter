@@ -4,14 +4,24 @@ import { getClientIp, recordAdminAction } from "@startkiter/platform";
 import { NextResponse } from "next/server";
 import { COURSE_STUDIO_ERROR_CODES } from "@startkiter/api/modules/course/errors";
 import { isCourseOperator } from "@startkiter/api/modules/course/lib/course-operator";
+import { canManageCourse } from "@startkiter/api/modules/course/lib/course-instructor-access";
 import { updateLesson } from "@startkiter/api/modules/course/lib/update-lesson";
 import type { OperatorSession } from "../../../../lib/operator";
 
-function getOperatorStatus(session: OperatorSession) {
+type StudioAccess = {
+	userId: string;
+	isOperator: boolean;
+};
+
+function getAuthenticatedStatus(session: OperatorSession): number | StudioAccess {
 	if (!session?.user?.id) {
 		return 401;
 	}
-	return isCourseOperator(session.user.email, process.env.ADMIN_EMAIL) ? null : 403;
+
+	return {
+		userId: session.user.id,
+		isOperator: isCourseOperator(session.user.email, process.env.ADMIN_EMAIL),
+	};
 }
 
 function generateSlug(prefix: string) {
@@ -21,20 +31,15 @@ function generateSlug(prefix: string) {
 
 export async function GET(request: Request) {
 	const session = await auth.api.getSession({ headers: request.headers });
-	const status = getOperatorStatus(session);
-	if (status === 401) {
+	const status = getAuthenticatedStatus(session);
+	if (typeof status === "number") {
 		return NextResponse.json({ error: COURSE_STUDIO_ERROR_CODES.UNAUTHORIZED }, { status: 401 });
 	}
-	if (status === 403) {
-		return NextResponse.json({ error: COURSE_STUDIO_ERROR_CODES.FORBIDDEN }, { status: 403 });
-	}
-
-	const userId = session?.user.id;
-	if (!userId) {
-		return NextResponse.json({ error: COURSE_STUDIO_ERROR_CODES.UNAUTHORIZED }, { status: 401 });
-	}
+	const { userId, isOperator } = status;
 
 	const courses = await db.course.findMany({
+		orderBy: { createdAt: "desc" },
+		...(isOperator ? {} : { where: { instructors: { some: { userId } } } }),
 		include: {
 			chapters: {
 				orderBy: { order: "asc" },
@@ -44,6 +49,13 @@ export async function GET(request: Request) {
 					},
 				},
 			},
+			...(isOperator
+				? {
+						instructors: {
+							include: { user: { select: { id: true, name: true, email: true } } },
+						},
+					}
+				: {}),
 		},
 	});
 
@@ -62,27 +74,103 @@ export async function GET(request: Request) {
 		isCollapsed: collapseByFolderId.has(f.id) ? collapseByFolderId.get(f.id)! : f.isCollapsed,
 	}));
 
-	return NextResponse.json({ courses, folders: foldersWithUserCollapse });
+	return NextResponse.json({ courses, folders: foldersWithUserCollapse, isOperator });
+}
+
+async function getCourseIdsForAction(
+	action: string,
+	payload: Record<string, any>,
+): Promise<string[] | null> {
+	if (action === "create_chapter") {
+		const courseId = payload.courseId;
+		return typeof courseId === "string" && courseId.length > 0 ? [courseId] : null;
+	}
+
+	if (action === "update_course" || action === "delete_course" || action === "publish_course") {
+		const courseId = payload.id;
+		return typeof courseId === "string" && courseId.length > 0 ? [courseId] : null;
+	}
+
+	if (action === "update_chapter" || action === "delete_chapter") {
+		const chapter = await db.chapter.findUnique({
+			where: { id: payload.id },
+			select: { courseId: true },
+		});
+		return chapter ? [chapter.courseId] : null;
+	}
+
+	if (action === "create_lesson") {
+		const chapter = await db.chapter.findUnique({
+			where: { id: payload.chapterId },
+			select: { courseId: true },
+		});
+		return chapter ? [chapter.courseId] : null;
+	}
+
+	if (action === "update_lesson" || action === "delete_lesson") {
+		const lesson = await db.lesson.findUnique({
+			where: { id: payload.id },
+			select: { chapter: { select: { courseId: true } } },
+		});
+		return lesson ? [lesson.chapter.courseId] : null;
+	}
+
+	if (action === "reorder_lessons") {
+		const moves = Array.isArray(payload.moves) ? payload.moves : [];
+		const lessonIds = moves.map((move: { lessonId: string }) => move.lessonId);
+		const chapterIds = moves.map((move: { chapterId: string }) => move.chapterId);
+		const [lessons, chapters] = await Promise.all([
+			db.lesson.findMany({
+				where: { id: { in: lessonIds } },
+				select: { chapter: { select: { courseId: true } } },
+			}),
+			db.chapter.findMany({
+				where: { id: { in: chapterIds } },
+				select: { courseId: true },
+			}),
+		]);
+		return [...lessons.map((lesson) => lesson.chapter.courseId), ...chapters.map((chapter) => chapter.courseId)];
+	}
+
+	return [];
+}
+
+async function isAllowedForCourseAction(
+	access: StudioAccess,
+	action: string,
+	payload: Record<string, any>,
+): Promise<boolean> {
+	if (access.isOperator) return true;
+	if (["create_course", "create_folder", "delete_folder"].includes(action)) return false;
+	if (action === "update_folder") return payload.name === undefined;
+
+	const courseIds = await getCourseIdsForAction(action, payload);
+	if (!courseIds || courseIds.length === 0) return false;
+
+	const uniqueCourseIds = [...new Set(courseIds)];
+	const results = await Promise.all(
+		uniqueCourseIds.map((courseId) =>
+			canManageCourse({ userId: access.userId, courseId, isOperator: access.isOperator }),
+		),
+	);
+	return results.every(Boolean);
 }
 
 export async function POST(request: Request) {
 	const session = await auth.api.getSession({ headers: request.headers });
-	const status = getOperatorStatus(session);
-	if (status === 401) {
+	const status = getAuthenticatedStatus(session);
+	if (typeof status === "number") {
 		return NextResponse.json({ error: COURSE_STUDIO_ERROR_CODES.UNAUTHORIZED }, { status: 401 });
 	}
-	if (status === 403) {
-		return NextResponse.json({ error: COURSE_STUDIO_ERROR_CODES.FORBIDDEN }, { status: 403 });
-	}
-
-	const userId = session?.user.id;
-	if (!userId) {
-		return NextResponse.json({ error: COURSE_STUDIO_ERROR_CODES.UNAUTHORIZED }, { status: 401 });
-	}
+	const access = status;
+	const { userId } = access;
 
 	try {
 		const body = await request.json();
 		const { action, payload } = body;
+		if (!(await isAllowedForCourseAction(access, action, payload ?? {}))) {
+			return NextResponse.json({ error: COURSE_STUDIO_ERROR_CODES.FORBIDDEN }, { status: 403 });
+		}
 
 		// 課程 CRUD
 		if (action === "create_course") {
@@ -115,7 +203,7 @@ export async function POST(request: Request) {
 				"DELETE_COURSE",
 				{ type: "Course", id },
 				undefined,
-				session.session.ipAddress ?? getClientIp(request.headers),
+				session?.session?.ipAddress ?? getClientIp(request.headers),
 			);
 			return NextResponse.json({ success: true });
 		}
@@ -204,7 +292,7 @@ export async function POST(request: Request) {
 				"DELETE_LESSON",
 				{ type: "Lesson", id },
 				undefined,
-				session.session.ipAddress ?? getClientIp(request.headers),
+				session?.session?.ipAddress ?? getClientIp(request.headers),
 			);
 			return NextResponse.json({ success: true });
 		}

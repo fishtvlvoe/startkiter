@@ -5,8 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@startkiter/ui";
 import { ExportSpreadsheetButton } from "@admin/component/ExportSpreadsheetButton";
 import { InvoiceOperationsButtons } from "@admin/component/InvoiceOperationsButtons";
 import { OrderRefundButton } from "@admin/component/OrderRefundButton";
+import { requireGlobalAdmin } from "../../../../../../lib/admin-access";
 
 export default async function AdminOrdersPage() {
+	await requireGlobalAdmin();
 	const [orders, subscriptionInvoices] = await Promise.all([
 		db.order.findMany({
 			orderBy: { createdAt: "desc" },

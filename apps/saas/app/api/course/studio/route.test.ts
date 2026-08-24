@@ -13,10 +13,22 @@ vi.mock("@startkiter/database", () => ({
 	db: {
 		course: {
 			delete: vi.fn(),
+			findMany: vi.fn(),
+			update: vi.fn(),
+		},
+		chapter: {
+			findUnique: vi.fn(),
+			count: vi.fn(),
+			create: vi.fn(),
 		},
 		lesson: {
+			findUnique: vi.fn(),
+			findMany: vi.fn(),
 			update: vi.fn(),
 			delete: vi.fn(),
+		},
+		courseInstructor: {
+			findUnique: vi.fn(),
 		},
 	},
 }));
@@ -54,6 +66,80 @@ describe("Course Studio API", () => {
 			id: "lesson-01",
 			content: "<WebContainerSandbox blockId=\"demo\" files={{}} hints={[]} />",
 		} as never);
+		vi.mocked(db.chapter.count).mockResolvedValue(0 as never);
+		vi.mocked(db.chapter.create).mockResolvedValue({ id: "chapter-01", courseId: "course-01" } as never);
+	});
+
+	it("rejects an instructor after an assignment is removed", async () => {
+		vi.mocked(auth.api.getSession).mockResolvedValue({
+			session: { ipAddress: "203.0.113.13" },
+			user: { id: "instructor-01", email: "instructor@example.com" },
+		} as never);
+		vi.mocked(db.courseInstructor.findUnique).mockResolvedValue(null);
+
+		const response = await POST(
+			new Request("http://localhost/api/course/studio", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					action: "create_chapter",
+					payload: { courseId: "course-01", title: "不應建立" },
+				}),
+			}),
+		);
+
+		expect(response.status).toBe(403);
+		expect(db.chapter.create).not.toHaveBeenCalled();
+	});
+
+	it("allows an instructor to change an assigned course", async () => {
+		vi.mocked(auth.api.getSession).mockResolvedValue({
+			session: { ipAddress: "203.0.113.14" },
+			user: { id: "instructor-01", email: "instructor@example.com" },
+		} as never);
+		vi.mocked(db.courseInstructor.findUnique).mockResolvedValue({ id: "assignment-01" } as never);
+
+		const response = await POST(
+			new Request("http://localhost/api/course/studio", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					action: "create_chapter",
+					payload: { courseId: "course-01", title: "可建立" },
+				}),
+			}),
+		);
+
+		expect(response.status).toBe(200);
+		expect(db.chapter.create).toHaveBeenCalledWith({
+			data: { courseId: "course-01", title: "可建立", order: 0 },
+		});
+	});
+
+	it("rejects mixed authorization and mutation ids", async () => {
+		vi.mocked(auth.api.getSession).mockResolvedValue({
+			session: { ipAddress: "203.0.113.15" },
+			user: { id: "instructor-01", email: "instructor@example.com" },
+		} as never);
+		vi.mocked(db.courseInstructor.findUnique).mockImplementation((args) => {
+			const courseId = args.where?.courseId_userId?.courseId;
+			return (courseId === "course-assigned" ? { id: "assignment-01" } : null) as never;
+		});
+		vi.mocked(db.course.update).mockResolvedValue({ id: "course-other" } as never);
+
+		const response = await POST(
+			new Request("http://localhost/api/course/studio", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					action: "update_course",
+					payload: { courseId: "course-assigned", id: "course-other", title: "不應修改" },
+				}),
+			}),
+		);
+
+		expect(response.status).toBe(403);
+		expect(db.course.update).not.toHaveBeenCalled();
 	});
 
 	it("records course deletion as an operator audit action", async () => {

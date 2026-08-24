@@ -1,4 +1,5 @@
 import { Card } from "@startkiter/ui";
+import { requireGlobalAdmin } from "../../../../../../lib/admin-access";
 import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata() {
@@ -8,6 +9,7 @@ export async function generateMetadata() {
 }
 
 export default async function AdminSettingsPage() {
+	await requireGlobalAdmin();
 	return (
 		<div className="space-y-6">
 			<Card className="p-6">

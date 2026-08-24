@@ -36,9 +36,9 @@ vi.mock("@auth/hooks/use-session", () => ({
 	}),
 }));
 
-vi.mock("@auth/lib/server", () => ({
+	vi.mock("@auth/lib/server", () => ({
 	getSession: async () => ({
-		user: { id: "u1", name: "Test User", email: "learner@example.com" },
+		user: { id: "u1", name: "Test User", email: "learner@example.com", role: "admin" },
 		session: { id: "s1", activeOrganizationId: null },
 	}),
 	getOrganizationList: async () => [],

@@ -1,4 +1,5 @@
 import { UserList } from "@admin/component/users/UserList";
+import { requireGlobalAdmin } from "../../../../../../lib/admin-access";
 import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata() {
@@ -9,7 +10,9 @@ export async function generateMetadata() {
 	};
 }
 
-export default function AdminUserPage() {
+export default async function AdminUserPage() {
+	await requireGlobalAdmin();
+
 	return (
 		<div>
 			<UserList />

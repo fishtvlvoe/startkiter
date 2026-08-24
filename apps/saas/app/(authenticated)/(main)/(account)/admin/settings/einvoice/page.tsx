@@ -1,6 +1,7 @@
 import { getSession } from "@auth/lib/server";
 import { checkPermission } from "@startkiter/permissions";
 import { Card } from "@startkiter/ui";
+import { requireGlobalAdmin } from "../../../../../../../lib/admin-access";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -41,6 +42,7 @@ export default async function EInvoiceSettingsPage({
 }: {
 	searchParams: Promise<{ saved?: string; error?: string }>;
 }) {
+	await requireGlobalAdmin();
 	const settings = await getInvoiceSettings();
 	const params = await searchParams;
 

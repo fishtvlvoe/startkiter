@@ -15,6 +15,7 @@ import {
 	Textarea,
 } from "@startkiter/ui";
 import { CourseStudioContentPreview } from "@shared/components/CourseStudioContentPreview";
+import { orpcClient } from "@shared/lib/orpc-client";
 import { reorderLesson } from "./reorder-lessons";
 import { getCourseStudioErrorMessage, type CourseStudioErrorResponse } from "./studio-error-message";
 
@@ -71,7 +72,29 @@ interface StudioLessonResponse {
 	aiContext: string | null;
 }
 
+interface StudioInstructorResponse {
+	id: string;
+	userId: string;
+	user: { id: string; name: string; email: string };
+}
+
+interface StudioCourseResponse {
+	id: string;
+	title: string;
+	chapters: Array<{
+		id: string;
+		courseId: string;
+		title: string;
+		order: number;
+		lessons: StudioLessonResponse[];
+	}>;
+	instructors?: StudioInstructorResponse[];
+}
+
 type StudioResponse = CourseStudioErrorResponse & {
+	courses?: StudioCourseResponse[];
+	isOperator?: boolean;
+	folders?: StudioFolderResponse[];
 	folder?: StudioFolderResponse | null;
 	chapter?: StudioChapterResponse | null;
 	lesson?: StudioLessonResponse | null;
@@ -122,8 +145,12 @@ export default function CourseAdminStudioPage() {
 	const [showCreateLessonDialog, setShowCreateLessonDialog] = useState(false);
 	const [lessonTitle, setLessonTitle] = useState("");
 	const [createLessonChapterId, setCreateLessonChapterId] = useState<string | null>(null);
+	const [showCreateCourseDialog, setShowCreateCourseDialog] = useState(false);
+	const [courseTitle, setCourseTitle] = useState("");
 
 	// 課綱狀態
+	const [courses, setCourses] = useState<StudioCourseResponse[]>([]);
+	const [isOperator, setIsOperator] = useState(false);
 	const [courseId, setCourseId] = useState<string | null>(null);
 	const [chapters, setChapters] = useState<ChapterItem[]>([]);
 	const [selectedLesson, setSelectedLesson] = useState<LessonItem | null>(null);
@@ -134,6 +161,10 @@ export default function CourseAdminStudioPage() {
 		sourceId?: string;
 		status: "valid" | "invalid";
 	} | null>(null);
+	const [users, setUsers] = useState<Array<{ id: string; name: string; email: string }>>([]);
+	const [selectedInstructorId, setSelectedInstructorId] = useState("");
+	const selectedCourse = courses.find((course) => course.id === courseId);
+	const assignedInstructors = selectedCourse?.instructors ?? [];
 
 	// 自動清除提示訊息
 	useEffect(() => {
@@ -163,42 +194,59 @@ export default function CourseAdminStudioPage() {
 		setMessage({ type, text });
 	}
 
+	function selectCourse(course: StudioCourseResponse) {
+		setCourseId(course.id);
+		const mappedChapters: ChapterItem[] = course.chapters.map((ch) => ({
+			id: ch.id,
+			title: ch.title,
+			order: ch.order,
+			lessons: ch.lessons.map((lesson) => ({
+				id: lesson.id,
+				title: lesson.title,
+				duration: lesson.videoDuration || "10:00",
+				isFreePreview: lesson.isFreePreview,
+				videoUrl: lesson.videoUrl || "",
+				provider: lesson.videoProvider || undefined,
+				content: lesson.content || "",
+				aiContext: lesson.aiContext || "",
+				order: lesson.order,
+			})),
+		}));
+		setChapters(mappedChapters);
+		const firstLesson = mappedChapters[0]?.lessons[0];
+		setSelectedLesson(firstLesson ?? null);
+		setVideoInputUrl(firstLesson?.videoUrl ?? "");
+		if (firstLesson) handleVideoUrlChange(firstLesson.videoUrl);
+		else setResolvedCard(null);
+	}
+
+	async function loadStudio() {
+		const res = await fetch("/api/course/studio");
+		const data = (await res.json()) as StudioResponse;
+		if (!res.ok) throw new Error(typeof data.error === "string" ? data.error : "載入後台資料失敗");
+
+		setIsOperator(data.isOperator === true);
+		setCourses(data.courses ?? []);
+		if (data.courses?.length) selectCourse(data.courses[0]);
+		if (data.folders) setFolders(data.folders);
+	}
+
 	// 載入真實資料庫課綱與資料夾
 	useEffect(() => {
-		fetch("/api/course/studio")
-			.then((res) => res.json())
-			.then((data) => {
-				if (data.courses && data.courses.length > 0) {
-					const firstCourse = data.courses[0];
-					setCourseId(firstCourse.id);
-					const mappedChapters: ChapterItem[] = firstCourse.chapters.map((ch: any) => ({
-						id: ch.id,
-						title: ch.title,
-						lessons: ch.lessons.map((l: any) => ({
-							id: l.id,
-							title: l.title,
-							duration: l.videoDuration || "10:00",
-							isFreePreview: l.isFreePreview,
-							videoUrl: l.videoUrl || "",
-							provider: l.videoProvider || undefined,
-							content: l.content || "",
-							aiContext: l.aiContext || "",
-						})),
-					}));
-					setChapters(mappedChapters);
-					if (mappedChapters[0]?.lessons[0]) {
-						const firstL = mappedChapters[0].lessons[0];
-						setSelectedLesson(firstL);
-						setVideoInputUrl(firstL.videoUrl);
-						handleVideoUrlChange(firstL.videoUrl);
-					}
-				}
-				if (data.folders && data.folders.length > 0) {
-					setFolders(data.folders);
-				}
-			})
-			.catch((e) => showMessage("error", "載入後台資料失敗: " + String(e)));
+		loadStudio().catch((e) => showMessage("error", String(e)));
 	}, []);
+
+	useEffect(() => {
+		if (!isOperator) return;
+		orpcClient.admin.users
+			.list({ query: "", limit: 100, offset: 0 })
+			.then(({ users: listedUsers }) => setUsers(listedUsers.map((user) => ({
+				id: user.id,
+				name: user.name,
+				email: user.email,
+			}))))
+			.catch((error) => showMessage("error", "載入使用者清單失敗: " + String(error)));
+	}, [isOperator]);
 
 	// 貼上影片網址時的智慧解析
 	const handleVideoUrlChange = (url: string) => {
@@ -242,6 +290,49 @@ export default function CourseAdminStudioPage() {
 			setFolderName("");
 		} else {
 			showMessage("error", "資料夾新增失敗");
+		}
+	};
+
+	const handleConfirmCreateCourse = async () => {
+		if (!courseTitle.trim()) {
+			showMessage("error", "課程名稱不能為空");
+			return;
+		}
+
+		const result = await callStudio("create_course", { title: courseTitle.trim() });
+		if (!result.ok) {
+			showMessage("error", "課程新增失敗");
+			return;
+		}
+
+		setShowCreateCourseDialog(false);
+		setCourseTitle("");
+		await loadStudio();
+		showMessage("success", "課程新增成功");
+	};
+
+	const handleAssignInstructor = async () => {
+		if (!courseId || !selectedInstructorId) return;
+
+		try {
+			await orpcClient.course.assignCourseInstructor({ courseId, userId: selectedInstructorId });
+			setSelectedInstructorId("");
+			await loadStudio();
+			showMessage("success", "講師指派成功");
+		} catch (error) {
+			showMessage("error", "講師指派失敗: " + String(error));
+		}
+	};
+
+	const handleRemoveInstructor = async (userId: string) => {
+		if (!courseId) return;
+
+		try {
+			await orpcClient.course.removeCourseInstructor({ courseId, userId });
+			await loadStudio();
+			showMessage("success", "講師已移除");
+		} catch (error) {
+			showMessage("error", "講師移除失敗: " + String(error));
 		}
 	};
 
@@ -480,10 +571,84 @@ export default function CourseAdminStudioPage() {
 						</svg>
 						發布變更
 					</Button>
+					</div>
 				</div>
-			</div>
 
-			{/* 主工作區：三欄式 */}
+				{/* 課程選擇與講師指派 */}
+				<Card className="flex flex-wrap items-end gap-4 p-4">
+					<div className="min-w-64 flex-1 space-y-1">
+						<Label htmlFor="course-selector">管理中的課程</Label>
+						<select
+							id="course-selector"
+							aria-label="管理中的課程"
+							value={courseId ?? ""}
+							onChange={(event) => {
+								const nextCourse = courses.find((course) => course.id === event.target.value);
+								if (nextCourse) selectCourse(nextCourse);
+							}}
+							className="w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm"
+						>
+							{courses.length === 0 ? <option value="">目前沒有可管理的課程</option> : null}
+							{courses.map((course) => (
+								<option key={course.id} value={course.id}>
+									{course.title}
+								</option>
+							))}
+						</select>
+					</div>
+
+					{isOperator ? (
+						<>
+							<Button variant="outline" onClick={() => setShowCreateCourseDialog(true)}>
+								新增課程
+							</Button>
+							<div className="min-w-72 space-y-1">
+								<Label htmlFor="instructor-selector">管理講師</Label>
+								<div className="flex gap-2">
+									<select
+										id="instructor-selector"
+										aria-label="選擇講師"
+										value={selectedInstructorId}
+										onChange={(event) => setSelectedInstructorId(event.target.value)}
+										className="min-w-0 flex-1 rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm"
+									>
+										<option value="">選擇既有使用者</option>
+										{users
+											.filter((user) => !assignedInstructors.some((instructor) => instructor.userId === user.id))
+											.map((user) => (
+												<option key={user.id} value={user.id}>
+													{user.name} · {user.email}
+												</option>
+											))}
+									</select>
+									<Button onClick={handleAssignInstructor} disabled={!courseId || !selectedInstructorId}>
+										指派
+									</Button>
+								</div>
+							</div>
+							{assignedInstructors.length > 0 ? (
+								<div className="w-full basis-full border-t border-neutral-800 pt-3 text-xs">
+									<span className="mr-3 text-neutral-400">目前講師</span>
+									{assignedInstructors.map((instructor) => (
+										<span key={instructor.id} className="mr-2 inline-flex items-center gap-1 rounded bg-neutral-800 px-2 py-1">
+											{instructor.user.name} · {instructor.user.email}
+											<button
+												type="button"
+												className="text-rose-300 hover:text-rose-100"
+												onClick={() => handleRemoveInstructor(instructor.userId)}
+												aria-label={`移除 ${instructor.user.email}`}
+											>
+												×
+											</button>
+										</span>
+									))}
+								</div>
+							) : null}
+						</>
+					) : null}
+				</Card>
+
+				{/* 主工作區：三欄式 */}
 			<div className="grid flex-1 grid-cols-12 gap-6 overflow-hidden">
 				{/* 1. 左側：資料夾與章節單元樹 */}
 				<div className="col-span-4 flex flex-col gap-4 overflow-y-auto border-r pr-4">
@@ -491,9 +656,11 @@ export default function CourseAdminStudioPage() {
 					<div className="space-y-2">
 						<div className="flex items-center justify-between">
 							<span className="text-xs font-semibold uppercase text-neutral-400">功能群組 / 資料夾</span>
-							<button onClick={handleCreateFolder} className="text-xs text-primary hover:underline">
-								+ 新增分組
-							</button>
+								{isOperator ? (
+									<button onClick={handleCreateFolder} className="text-xs text-primary hover:underline">
+										+ 新增分組
+									</button>
+								) : null}
 						</div>
 
 						{folders.map((f) => (
@@ -529,23 +696,25 @@ export default function CourseAdminStudioPage() {
 									</div>
 									<div className="flex items-center gap-1">
 										{/* 改名 SVG */}
-										<button
-											onClick={() => {
-												setEditingFolderId(f.id);
-												setEditingFolderName(f.name);
-											}}
-											className="p-1 hover:text-primary"
-											title="改名"
-										>
-											<svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-												<path
-													strokeLinecap="round"
-													strokeLinejoin="round"
-													strokeWidth={2}
-													d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-												/>
-											</svg>
-										</button>
+										{isOperator ? (
+											<button
+												onClick={() => {
+													setEditingFolderId(f.id);
+													setEditingFolderName(f.name);
+												}}
+												className="p-1 hover:text-primary"
+												title="改名"
+											>
+												<svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+													<path
+														strokeLinecap="round"
+														strokeLinejoin="round"
+														strokeWidth={2}
+														d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+													/>
+												</svg>
+											</button>
+										) : null}
 									</div>
 								</div>
 							</div>
@@ -827,7 +996,36 @@ export default function CourseAdminStudioPage() {
 						</div>
 					)}
 				</div>
-			</div>
+				</div>
+
+				{/* 新增課程 Dialog */}
+				<Dialog open={showCreateCourseDialog} onOpenChange={setShowCreateCourseDialog}>
+					<DialogContent>
+						<DialogHeader>
+							<DialogTitle>新增課程</DialogTitle>
+							<DialogDescription>建立一門新的草稿課程</DialogDescription>
+						</DialogHeader>
+						<div className="space-y-4">
+							<Label htmlFor="new-course-title">課程名稱</Label>
+							<Input
+								id="new-course-title"
+								placeholder="請輸入課程名稱"
+								value={courseTitle}
+								onChange={(event) => setCourseTitle(event.target.value)}
+								onKeyDown={(event) => {
+									if (event.key === "Enter") void handleConfirmCreateCourse();
+								}}
+								autoFocus
+							/>
+						</div>
+						<DialogFooter>
+							<Button variant="outline" onClick={() => setShowCreateCourseDialog(false)}>
+								取消
+							</Button>
+							<Button onClick={handleConfirmCreateCourse}>建立課程</Button>
+						</DialogFooter>
+					</DialogContent>
+				</Dialog>
 
 				{/* 新增資料夾 Dialog */}
 				<Dialog open={showCreateFolderDialog} onOpenChange={setShowCreateFolderDialog}>

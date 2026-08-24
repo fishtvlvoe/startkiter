@@ -54,6 +54,8 @@ model User {
   lessonComments           LessonComment[]
   courseInviteRedemptions  CourseInviteRedemption[]
   onboardingSurveyResponses CourseOnboardingSurveyResponse[]
+  courseInstructorAssignments CourseInstructor[] @relation("CourseInstructorUser")
+  createdCourseInstructorAssignments CourseInstructor[] @relation("CourseInstructorCreator")
   adminLogs                AdminLog[]              @relation("AdminLogAdmin")
   mcpConnections           McpConnection[]
 
@@ -482,8 +484,25 @@ model Course {
   invites      CourseInvite[]
   inviteRedemptions CourseInviteRedemption[]
   onboardingSurveyResponses CourseOnboardingSurveyResponse[]
+  instructors CourseInstructor[]
 
   @@map("course")
+}
+
+model CourseInstructor {
+  id          String   @id @default(cuid())
+  courseId    String
+  userId      String
+  createdById String
+  createdAt   DateTime @default(now())
+
+  course    Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user      User   @relation("CourseInstructorUser", fields: [userId], references: [id], onDelete: Cascade)
+  createdBy User   @relation("CourseInstructorCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@unique([courseId, userId])
+  @@index([userId])
+  @@map("course_instructor")
 }
 
 model CourseSubscriptionPlan {
