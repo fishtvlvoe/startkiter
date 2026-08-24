@@ -23,7 +23,7 @@
 ## 6. Review 與驗證
 
 - [x] 6.1 grep `BundleCourseAccessReader`／`canAccessCourseId` 所有既有引用點，確認本次新增分支未破壞既有 MVP／bundle／訂閱三種授權來源的既有測試斷言。驗證目標：既有測試（不含本次新增案例）全數維持綠燈，無回歸
-- [ ] 6.2 派 Codex 或等效工具對本次全部 diff（task 1-5）做 Code Review（correctness／security／performance 三角度）：correctness 確認 `hasRedeemedInvite` 與既有三種授權來源正確 OR 組合、`maxUses`/`expiresAt` 邊界判斷正確；security 確認 token 用足夠高熵的隨機來源產生、資料庫只存 hash（`tokenHash`）、未登入使用者點擊邀請連結會先導向登入而非直接暴露課程資訊；performance 確認 `usedCount` 遞增與兌換記錄建立在同一 transaction 內，避免併發兌換超賣。驗證方式：CR 報告 Critical 數量為 0（PM 覆核）
+- [x] 6.2 派 Codex 或等效工具對本次全部 diff（task 1-5）做 Code Review（correctness／security／performance 三角度）：correctness 確認 `hasRedeemedInvite` 與既有三種授權來源正確 OR 組合、`maxUses`/`expiresAt` 邊界判斷正確；security 確認 token 用足夠高熵的隨機來源產生、資料庫只存 hash（`tokenHash`）、未登入使用者點擊邀請連結會先導向登入而非直接暴露課程資訊；performance 確認 `usedCount` 遞增與兌換記錄建立在同一 transaction 內，避免併發兌換超賣。驗證方式：第二輪 CC CR PASS，Critical 0／High 0／Medium 0／Low 0；第一輪發現的兩個 Medium 已修正並重新確認
 - [x] 6.3 用 ego-browser skill 跑一次完整 e2e：operator 建立一個限 1 次使用的邀請連結 → 以一個新學員帳號點擊連結完成兌換 → 確認能播放對應課程單元 → 再次用同一連結嘗試兌換 → 確認顯示已達使用上限。驗證目標：截圖記錄關鍵畫面，任何一步失敗即視為本 task 未完成
-- [ ] 6.4 跑 `spectra analyze course-invite-access --json` 與 `spectra validate course-invite-access`，確認 Coverage／Consistency／Ambiguity／Gaps 四個維度皆為 Clean 或僅有 Suggestion。驗證目標：無 Critical／Warning，且 0 warnings／0 errors
-- [ ] 6.5 逐項核對 design.md Implementation Contract 的 Acceptance criteria 是否全部滿足：跑 `pnpm --filter @startkiter/api test`／`pnpm type-check`／`pnpm build`，確認全數綠燈。驗證目標：所有指令 exit code 為 0
+- [x] 6.4 跑 `spectra analyze course-invite-access --json` 與 `spectra validate course-invite-access`，確認 Coverage／Consistency／Ambiguity／Gaps 四個維度皆為 Clean 或僅有 Suggestion。驗證目標：無 Critical／Warning，且 0 warnings／0 errors；analyze 四維度 Clean，validate valid，皆 exit 0
+- [x] 6.5 逐項核對 design.md Implementation Contract 的 Acceptance criteria 是否全部滿足：跑 `pnpm --filter @startkiter/api test`／`pnpm type-check`／`pnpm build`，確認全數綠燈。驗證目標：所有指令 exit code 為 0；根目錄 `pnpm test`、`pnpm type-check`、`pnpm build` 皆 exit 0
