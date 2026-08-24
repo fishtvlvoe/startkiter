@@ -34,9 +34,9 @@ Fish 看了一份現況圖解（https://share.onorca.dev/a/3CEeYhHiSGfP）後指
 
 - `startkiter.dev` 這個 zone 已經在同一個 Cloudflare 帳號（`Fishandy1213@gmail.com's Account`，account id `6bbd30e22e41dd355b12126c69d38116`，跟 bni 專案用的是同一個帳號）下啟用，狀態「使用中」
 - 目前只有 1 筆 DNS 記錄：`coolify-test.startkiter.dev` → A `45.76.187.247`（僅 DNS，灰雲朵），沒有指到正式站的記錄
-- 原本 `.env` 裡的 `CLOUDFLARE_API_TOKEN`（來自 `products/AIRE/.env`）只管得到 `opcos.me` 這個 zone，管不到 `startkiter.dev`
-- 已用 ego-browser 新建一個限定 `startkiter.dev`（zone id `631be2a55e0c1b0a15038ad244b7665d`）、只有 DNS:編輯權限的專用 API Token，存進本專案 `.env` 的 `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ZONE_ID`（跟 AIRE 那個 token 分開，各管各的 zone）
-- 沒有設定 Cloudflare MCP server（`~/.claude.json` 的 `mcpServers` 只有 `agentmemory`、`codegraph`），wrangler 的 OAuth token 也不能直接拿來打 REST API（會回 `Invalid access token`）——以後要碰 Cloudflare API 就用這個新 token
+- 歷史上曾把不同用途的 Cloudflare token 混放在 `.env` 的通用名稱 `CLOUDFLARE_API_TOKEN`，會讓 Wrangler 把 DNS token 誤當成 Pages token；這個命名已淘汰。
+- 現行憑證唯一來源是 `~/.cloudflared/api-tokens.json`：`cloudflare.tokens.startkiter_dns` 只管 `startkiter.dev` DNS，`cloudflare.tokens.pages_deploy` 只供 Pages 部署，`cloudflare.tokens.worker_kv_deploy` 供 Worker KV；`cloudflare.account_id` 與 `cloudflare.zones.startkiter.dev.zone_id` 是非機密識別資料。
+- Wrangler OAuth 只作 CLI 登入狀態；需要 REST API 時使用上述用途專用 API token，不把 OAuth 憑證內容複製到專案 `.env`。
 
 ### Coolify（唯一一台伺服器，還是測試機規格）
 
