@@ -2,7 +2,19 @@
 
 給 Codex（或其他外部代理）接力執行 `/spectra-apply` 用的路線圖。每張 change 已完成 proposal/design/specs/tasks 並通過 `spectra validate`，全部處於 `park` 狀態。這份文件只負責「誰先誰後、誰跟誰衝突」，不重複各 change 內部的設計細節。
 
-Fish 只需要做的事：依序把下面的 change 丟給 Codex 執行 `/spectra-apply <name>`，每張跑完後我（Claude）做驗收（跑 `spectra analyze`／測試／ego-browser e2e），驗收過才進下一張。除了「總表」列出的執行順序，不需要中途裁決任何東西——所有需要外部帳號/金鑰的功能（Bunny/Cloudflare 直傳、電子報群發等）都已經在各張 change 的 Non-Goals 排除，不在這批範圍內。
+Fish 只需要做的事：依序把下面的 change 丟給 Codex 執行 `/spectra-apply <name>`。每張 change 完成實作後，先由自動化流程開一個隔離 worktree 派 Claude Code（CC）做最終驗收；CC 明確 PASS、Critical 數量為 0，且三類驗證證據齊全後，才允許 `spectra archive <name>`，驗收未過不得封存或進下一張。除了「總表」列出的執行順序，不需要中途裁決任何東西——所有需要外部帳號/金鑰的功能（Bunny/Cloudflare 直傳、電子報群發等）都已經在各張 change 的 Non-Goals 排除，不在這批範圍內。
+
+## 每張 SR 的自動 CC 驗收流程（所有功能模組共用）
+
+這是每張 SR 的固定 gate，不限本次 15 張；之後新增的功能模組也必須套用：
+
+1. Codex／主控完成該 change 的 tasks，先寫紅燈測試、完成實作、跑完 tasks.md 要求的本地驗證，並提交與該 change 有關的 commit；此時**不准先 archive**。
+2. 自動化建立 `task-<change>-cc-acceptance` 隔離 worktree，從該 change 的最新 commit 啟動 Claude Code。CC 只讀驗收，不修改檔案、不 commit、不 push、不 archive。
+3. CC 對本次完整 diff 做 correctness／security／performance 三角度 Code Review，並核對 `spectra analyze`／`validate`、`pnpm test`／`type-check`／`build` 與 tasks.md 指定的 ego-browser e2e 實跑證據。
+4. CC 回報任何 Critical／High、驗收 FAIL 或缺證據時，主控先修正，再重新開／派 CC 驗收；未取得 PASS 前不得封存。Critical 數量必須是 0。
+5. CC PASS 後，主控才在主工作樹執行 `spectra archive <change>`，確認 archive 成功、git status 乾淨，再關閉 CC terminal、刪除驗收 worktree，留下完整驗收報告。
+
+本次不主動啟動下一張 change；這段只定義後續每張 SR 完成後的自動化驗收規則。
 
 ## 總表（15 張，依執行順序）
 
