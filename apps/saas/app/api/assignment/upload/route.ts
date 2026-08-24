@@ -1,4 +1,5 @@
 import {
+	canAcceptLocalAssignmentUpload,
 	recordLocalAssignmentUpload,
 	verifyLocalAssignmentUploadToken,
 } from "@startkiter/api/modules/assignment/assignment-upload";
@@ -14,6 +15,7 @@ export async function PUT(request: Request) {
 
 	const upload = verifyLocalAssignmentUploadToken(token);
 	if (!upload) return Response.json({ error: "Invalid or expired upload token." }, { status: 403 });
+	if (!canAcceptLocalAssignmentUpload(upload.storageKey)) return Response.json({ error: "Upload object already exists." }, { status: 412 });
 
 	const contentType = request.headers.get("content-type") ?? "application/octet-stream";
 	if (contentType !== upload.contentType) return Response.json({ error: "Content type mismatch." }, { status: 415 });
@@ -46,10 +48,11 @@ export async function PUT(request: Request) {
 	if (contentLength < 1 || (declaredContentLength !== null && contentLength !== declaredContentLength)) {
 		return Response.json({ error: "Invalid upload size." }, { status: 413 });
 	}
-	recordLocalAssignmentUpload({ storageKey: upload.storageKey, contentType: upload.contentType, contentLength });
-	await db.assignmentUploadIntent.updateMany({
-		where: { storageKey: upload.storageKey, status: "PENDING", mimeType: upload.contentType, size: contentLength },
+	const updated = await db.assignmentUploadIntent.updateMany({
+		where: { storageKey: upload.storageKey, status: "PENDING", mimeType: upload.contentType, size: contentLength, submission: { status: "DRAFT" } },
 		data: { status: "UPLOADED" },
 	});
+	if (updated.count !== 1) return Response.json({ error: "Upload intent is no longer active." }, { status: 409 });
+	recordLocalAssignmentUpload({ storageKey: upload.storageKey, contentType: upload.contentType, contentLength });
 	return Response.json({ ok: true, storageKey: upload.storageKey });
 }

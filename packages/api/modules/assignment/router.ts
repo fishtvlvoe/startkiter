@@ -157,7 +157,7 @@ export const assignmentRouter = {
 				// Serialize intent quota and revision allocation for this learner/assignment pair.
 				await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`assignment-upload:${definition.id}:${context.user.id}`}, 0))`;
 				const pendingIntentCount = await tx.assignmentUploadIntent.count({
-					where: { pluginContentId: definition.id, userId: context.user.id, status: { in: ["PENDING", "UPLOADED"] }, expiresAt: { gt: new Date() } },
+					where: { pluginContentId: definition.id, userId: context.user.id, status: { in: ["PENDING", "UPLOADED"] }, expiresAt: { gt: new Date() }, submission: { status: "DRAFT" } },
 				});
 				const maxPendingIntents = Math.max(definition.body.maxFiles * 2, 2);
 				if (pendingIntentCount >= maxPendingIntents) {
@@ -258,9 +258,10 @@ export const assignmentRouter = {
 
 			try {
 				return await db.$transaction(async (tx) => {
-				const draft = input.submissionId
-					? await tx.assignmentSubmission.findFirst({ where: { id: input.submissionId, pluginContentId: definition.id, userId: context.user.id, status: "DRAFT" } })
-					: null;
+				const draft = await tx.assignmentSubmission.findFirst({
+					where: { ...(input.submissionId ? { id: input.submissionId } : {}), pluginContentId: definition.id, userId: context.user.id, status: "DRAFT" },
+					orderBy: { createdAt: "desc" },
+				});
 				if (input.submissionId && !draft) throw new ORPCError("CONFLICT", { message: "這份作業草稿已不存在或正在送出，請重新整理頁面。" });
 				const previous = await tx.assignmentSubmission.findFirst({
 					where: { pluginContentId: definition.id, userId: context.user.id },
@@ -308,7 +309,9 @@ export const assignmentRouter = {
 					}
 					if (input.attachments.length) {
 						await tx.assignmentAttachment.createMany({ data: input.attachments.map((attachment) => ({ id: attachment.attachmentId, ...validateAttachments(attachment), submissionId: submission.id })) });
-				}
+					} else {
+						await tx.assignmentUploadIntent.updateMany({ where: { submissionId: submission.id, status: { in: ["PENDING", "UPLOADED"] } }, data: { status: "CANCELLED" } });
+					}
 				return submission;
 				});
 			} catch (error) {

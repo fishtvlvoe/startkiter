@@ -54,6 +54,7 @@ export const getSignedUploadUrl: GetSignedUploadUrlHandler = async (path, { buck
 				Key: path,
 				ContentType: contentType ?? "image/jpeg",
 				ContentLength: contentLength,
+				IfNoneMatch: "*",
 			}),
 			{
 				expiresIn: 60,

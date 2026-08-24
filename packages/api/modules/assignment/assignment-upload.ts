@@ -147,6 +147,11 @@ export function recordLocalAssignmentUpload(input: { storageKey: string; content
 	});
 }
 
+export function canAcceptLocalAssignmentUpload(storageKey: string): boolean {
+	pruneLocalAssignmentUploadObjects();
+	return !localUploadedObjects.has(storageKey);
+}
+
 export async function assignmentUploadObjectMatches(input: {
 	storageKey: string;
 	contentType: string;

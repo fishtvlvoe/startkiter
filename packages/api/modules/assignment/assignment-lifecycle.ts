@@ -37,7 +37,7 @@ export async function cleanupExpiredAssignmentUploadIntents(
 	const where: Prisma.AssignmentUploadIntentWhereInput = {
 		expiresAt: { lte: new Date() },
 		OR: [
-			{ status: { in: ["PENDING", "UPLOADED"] }, OR: [{ cleanupClaimedAt: null }, { cleanupClaimedAt: { lt: claimableBefore } }] },
+			{ status: { in: ["PENDING", "UPLOADED", "CANCELLED"] }, OR: [{ cleanupClaimedAt: null }, { cleanupClaimedAt: { lt: claimableBefore } }] },
 			{ status: "CLEANING", OR: [{ cleanupClaimedAt: null }, { cleanupClaimedAt: { lt: claimableBefore } }] },
 		],
 		...(scope.pluginContentId ? { pluginContentId: scope.pluginContentId } : {}),

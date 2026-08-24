@@ -59,7 +59,7 @@ export function AssignmentLearner({ assignment }: { assignment: Assignment }) {
 		if (pendingAttachment && pendingSubmissionId) return { attachment: pendingAttachment, submissionId: pendingSubmissionId };
 		if (!file) return null;
 		const upload = await orpcClient.assignment.createUploadUrl({ pluginContentId: assignment.id, filename: file.name, mimeType: file.type || "application/octet-stream", size: file.size });
-		const response = await fetch(upload.signedUploadUrl, { method: "PUT", headers: { "Content-Type": file.type || "application/octet-stream" }, body: file });
+		const response = await fetch(upload.signedUploadUrl, { method: "PUT", headers: { "Content-Type": file.type || "application/octet-stream", "If-None-Match": "*" }, body: file });
 		if (!response.ok) throw new Error("upload failed");
 		const attachment = { attachmentId: upload.attachmentId, filename: file.name, mimeType: file.type || "application/octet-stream", size: file.size, storageKey: upload.storageKey };
 		setPendingSubmissionId(upload.submissionId);
@@ -111,7 +111,7 @@ export function AssignmentLearner({ assignment }: { assignment: Assignment }) {
 			</div>
 			<form className="space-y-5" onSubmit={saveDraft} aria-label="assignment-learner-form">
 				<label className="grid gap-1 text-sm"><Label htmlFor="assignment-content">作業內容</Label><textarea id="assignment-content" data-testid="assignment-content" className="min-h-48 rounded-xl border bg-card p-3" value={content} onChange={(event) => setContent(event.target.value)} /></label>
-								<label className="grid gap-1 text-sm"><Label htmlFor="assignment-file">附件（最多 {assignment.body.maxFiles} 個）</Label><Input id="assignment-file" data-testid="assignment-file" type="file" onChange={(event) => { setFile(event.target.files?.[0] ?? null); setPendingAttachment(null); setPendingSubmissionId(null); }} /></label>
+								<label className="grid gap-1 text-sm"><Label htmlFor="assignment-file">附件（最多 {assignment.body.maxFiles} 個）</Label><Input id="assignment-file" data-testid="assignment-file" type="file" onChange={(event) => { setFile(event.target.files?.[0] ?? null); setPendingAttachment(null); setPendingSubmissionId(null); setSubmissionId(null); }} /></label>
 				<div className="flex flex-wrap gap-3"><Button type="submit" variant="outline" loading={isWorking}>儲存草稿</Button><Button type="button" variant="primary" loading={isWorking} onClick={submitAssignment}>送出作業</Button></div>
 			</form>
 			{message && <p className="text-sm text-green-600" data-testid="assignment-status" role="status">{message}</p>}
