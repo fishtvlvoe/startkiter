@@ -138,7 +138,7 @@ export const assignmentRouter = {
 					if (!isUniqueConstraintError(error)) throw error;
 				}
 			}
-			await db.assignmentDraft.updateMany({ where: { ...where, revision: { lt: input.revision } }, data: { content, contentFormat: input.contentFormat, revision: input.revision } });
+			await db.assignmentDraft.updateMany({ where: { pluginContentId: input.pluginContentId, userId: context.user.id, revision: { lt: input.revision } }, data: { content, contentFormat: input.contentFormat, revision: input.revision } });
 			return db.assignmentDraft.findUniqueOrThrow({ where });
 		}),
 
