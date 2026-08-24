@@ -77,6 +77,27 @@ describe("Course Studio API", () => {
 		);
 	});
 
+	it("records lesson deletion as an operator audit action", async () => {
+		vi.mocked(db.lesson.delete).mockResolvedValue({ id: "lesson-01" } as never);
+
+		const response = await POST(
+			new Request("http://localhost/api/course/studio", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ action: "delete_lesson", payload: { id: "lesson-01" } }),
+			}),
+		);
+
+		expect(response.status).toBe(200);
+		expect(recordAdminAction).toHaveBeenCalledWith(
+			"operator-01",
+			"DELETE_LESSON",
+			{ type: "Lesson", id: "lesson-01" },
+			undefined,
+			"203.0.113.12",
+		);
+	});
+
 	it("接受含 WebContainerSandbox 的合法 MDX 並持久化", async () => {
 		const content = '<WebContainerSandbox blockId="demo" files={{}} hints={[]} />';
 		const response = await POST(
