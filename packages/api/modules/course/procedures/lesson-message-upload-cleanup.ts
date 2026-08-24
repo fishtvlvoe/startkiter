@@ -40,7 +40,17 @@ export async function cleanupExpiredLessonMessageUploadIntents(limit = 100): Pro
 			},
 			data: { cleanupClaimedAt: claimTime },
 		});
-		if (reclaimed.count !== 1) continue;
+		if (reclaimed.count !== 1) {
+			const current = await db.lessonMessageUploadIntent.findUnique({ where: { id: intent.id }, select: { status: true } }).catch(() => null);
+			if (!current) {
+				try {
+					await deleteLessonMessageUploadObject(intent.storageKey);
+				} catch {
+					failed += 1;
+				}
+			}
+			continue;
+		}
 		try {
 			await deleteLessonMessageUploadObject(intent.storageKey);
 			const deleted = await db.lessonMessageUploadIntent.deleteMany({ where: { id: intent.id, status: "CLEANING", cleanupClaimedAt: claimTime } });

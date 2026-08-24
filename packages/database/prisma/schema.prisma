@@ -783,6 +783,7 @@ model LessonMessageUploadIntent {
   user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([status, expiresAt, cleanupClaimedAt])
+  @@index([status, createdAt])
   @@map("lesson_message_upload_intent")
 }
 
