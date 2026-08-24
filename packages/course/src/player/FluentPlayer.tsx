@@ -61,14 +61,19 @@ function PlayerFrame({
 			frameRef.current?.querySelectorAll("video").forEach((video) => video.pause());
 			pauseEmbeddedPlayers();
 		};
+		let blurTimer: ReturnType<typeof setTimeout> | undefined;
 		const pauseWhenHidden = () => {
 			if (document.visibilityState === "hidden") pausePlayers();
 		};
 		const pauseWhenWindowBlurs = () => {
-			const activeElement = document.activeElement;
-			const focusRemainsInPlayer =
-				document.hasFocus() && activeElement instanceof HTMLIFrameElement && frameRef.current?.contains(activeElement);
-			if (!focusRemainsInPlayer) pausePlayers();
+			if (blurTimer !== undefined) clearTimeout(blurTimer);
+			blurTimer = setTimeout(() => {
+				blurTimer = undefined;
+				const activeElement = document.activeElement;
+				const focusRemainsInPlayer =
+					document.hasFocus() && activeElement instanceof HTMLIFrameElement && frameRef.current?.contains(activeElement);
+				if (!focusRemainsInPlayer) pausePlayers();
+			}, 0);
 		};
 
 		document.addEventListener("visibilitychange", pauseWhenHidden);
@@ -76,6 +81,7 @@ function PlayerFrame({
 		return () => {
 			document.removeEventListener("visibilitychange", pauseWhenHidden);
 			window.removeEventListener("blur", pauseWhenWindowBlurs);
+			if (blurTimer !== undefined) clearTimeout(blurTimer);
 		};
 	}, [watermark?.enabled, watermark?.tamperPauseEnabled]);
 	const usesManagedFullscreen = Boolean(watermark?.enabled && fullscreenSupported);
@@ -168,7 +174,7 @@ export function FluentPlayer({
 						className="h-full w-full"
 						src={`https://player.vimeo.com/video/${encodeURIComponent(sourceId)}?api=1`}
 						title={title}
-						allow="autoplay; fullscreen; picture-in-picture"
+						allow={usesManagedFullscreen ? "autoplay; picture-in-picture" : "autoplay; fullscreen; picture-in-picture"}
 						allowFullScreen={!usesManagedFullscreen}
 					/>
 				)}
