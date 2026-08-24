@@ -15,6 +15,7 @@ import { resolveVideoSource } from "./lib/video-resolver";
 import { cancelCourseSubscription } from "./procedures/cancel-course-subscription";
 import { createSubscriptionCheckout } from "./procedures/create-subscription-checkout";
 import { issueInvoiceAllowance, voidInvoice } from "./procedures/invoice-operations";
+import { refundOrder } from "./procedures/refund-order";
 
 const courseOperatorProcedure = protectedProcedure.use(async ({ context, next }) => {
 	if (!isCourseOperator(context.user.email, process.env.ADMIN_EMAIL)) {
@@ -259,4 +260,5 @@ export const courseRouter = publicProcedure.router({
 	cancelCourseSubscription,
 	voidInvoice,
 	issueInvoiceAllowance,
+	refundOrder,
 });

@@ -46,6 +46,7 @@ export const cancelCourseSubscription = protectedProcedure
 			where: { id: subscription.id },
 			data: { status: "CANCELED", canceledAt: new Date() },
 		});
-		void handleRefundInvoiceForSubscription(subscription.id).catch(() => undefined);
+		// 取消不是 webhook；等待退款發票處理完成，避免 detached promise 在 response 後被執行環境中止。
+		await handleRefundInvoiceForSubscription(subscription.id).catch(() => undefined);
 		return { subscription: updated };
 	});

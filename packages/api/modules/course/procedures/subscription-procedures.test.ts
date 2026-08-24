@@ -29,10 +29,15 @@ vi.mock("../lib/subscription-gateway", () => ({
 	resolveSubscriptionBaseUrl: vi.fn(() => "https://startkiter.example"),
 }));
 
+vi.mock("../lib/invoice-events", () => ({
+	handleRefundInvoiceForSubscription: vi.fn(),
+}));
+
 import { auth } from "@startkiter/auth";
 import { db } from "@startkiter/database";
 
 import { getPayUniSubscriptionGateway } from "../lib/subscription-gateway";
+import { handleRefundInvoiceForSubscription } from "../lib/invoice-events";
 import { cancelCourseSubscription } from "./cancel-course-subscription";
 import { createSubscriptionCheckout } from "./create-subscription-checkout";
 
@@ -156,12 +161,25 @@ describe("subscription procedures", () => {
 		} as never);
 		gateway.cancelSubscription.mockResolvedValue({ success: true });
 		vi.mocked(db.courseSubscription.update).mockResolvedValue({ id: "subscription-1", status: "CANCELED" } as never);
+		let finishRefund!: () => void;
+		const refundFinished = new Promise<void>((resolve) => {
+			finishRefund = resolve;
+		});
+		vi.mocked(handleRefundInvoiceForSubscription).mockReturnValue(refundFinished as never);
 
-		await call(
+		let settled = false;
+		const cancellation = call(
 			cancelCourseSubscription,
 			{ subscriptionId: "subscription-1" },
 			{ context: { headers: new Headers() } as never },
-		);
+		).then(() => {
+			settled = true;
+		});
+		await vi.waitFor(() => expect(handleRefundInvoiceForSubscription).toHaveBeenCalledWith("subscription-1"));
+		expect(settled).toBe(false);
+		finishRefund();
+		await cancellation;
+		expect(settled).toBe(true);
 
 		expect(gateway.cancelSubscription).toHaveBeenCalledWith({ gatewaySubscriptionId: "PERIOD-1" });
 		expect(db.courseSubscription.update).toHaveBeenCalledWith(

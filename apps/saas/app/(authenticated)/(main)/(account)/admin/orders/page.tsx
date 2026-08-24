@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@startkiter/ui";
 
 import { ExportSpreadsheetButton } from "@admin/component/ExportSpreadsheetButton";
 import { InvoiceOperationsButtons } from "@admin/component/InvoiceOperationsButtons";
+import { OrderRefundButton } from "@admin/component/OrderRefundButton";
 
 function sameTaiwanBillingMonth(a: Date, b: Date): boolean {
 	const monthKey = (date: Date) => {
@@ -63,7 +64,10 @@ export default async function AdminOrdersPage() {
 												{order.status} · {order.sku} · NT$ {order.amount.toLocaleString()}
 											</p>
 										</div>
-										{invoice ? <span className="text-sm">發票：{invoice.status}</span> : <span className="text-sm text-muted-foreground">尚未開票</span>}
+										<div className="flex flex-wrap items-center gap-2">
+											{invoice ? <span className="text-sm">發票：{invoice.status}</span> : <span className="text-sm text-muted-foreground">尚未開票</span>}
+											{order.status === "paid" && <OrderRefundButton orderId={order.id} />}
+										</div>
 									</div>
 									{invoice && (
 										<div className="mt-3 space-y-2 border-t pt-3">

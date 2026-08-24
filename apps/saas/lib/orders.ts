@@ -1,5 +1,6 @@
 import { db } from "@startkiter/database";
 import { handleRefundInvoice } from "@startkiter/api/modules/course/lib/invoice-events";
+import { markOrderRefundedByOrderNo } from "@startkiter/api/modules/course/lib/order-refunds";
 import { scheduleAfterResponse } from "./schedule-after";
 import {
 	MVP_AMOUNT_TWD,
@@ -118,16 +119,8 @@ export async function findOrderByNo(orderNo: string) {
  * bundle 訂單寫專屬的撤銷邏輯（驗證見 `packages/bundles/src/access-integration.test.ts`）。
  */
 export async function markOrderRefundedInDb(orderNo: string) {
-	const result = await db.order.updateMany({
-		where: { orderNo, status: { in: ["pending", "paid"] } },
-		data: {
-			status: "refunded",
-			courseAccess: false,
-			kitClaimEligible: false,
-			refundedAt: new Date(),
-		},
-	});
-	if (result.count > 0) {
+	const count = await markOrderRefundedByOrderNo(orderNo);
+	if (count > 0) {
 		const order = await db.order.findUnique({ where: { orderNo }, select: { id: true } });
 		if (order) {
 			scheduleAfterResponse(async () => {
@@ -135,7 +128,7 @@ export async function markOrderRefundedInDb(orderNo: string) {
 			});
 		}
 	}
-	return result.count;
+	return count;
 }
 
 export async function buildPayuniSession(order: OrderRecord, baseUrl: string, email?: string) {
