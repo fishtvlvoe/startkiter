@@ -52,12 +52,18 @@ function PlayerFrame({ children, watermark }: { children: ReactNode; watermark?:
 		const pauseWhenHidden = () => {
 			if (document.visibilityState === "hidden") pausePlayers();
 		};
+		const pauseWhenWindowBlurs = () => {
+			const activeElement = document.activeElement;
+			const focusRemainsInPlayer =
+				document.hasFocus() && activeElement instanceof HTMLIFrameElement && frameRef.current?.contains(activeElement);
+			if (!focusRemainsInPlayer) pausePlayers();
+		};
 
 		document.addEventListener("visibilitychange", pauseWhenHidden);
-		window.addEventListener("blur", pausePlayers);
+		window.addEventListener("blur", pauseWhenWindowBlurs);
 		return () => {
 			document.removeEventListener("visibilitychange", pauseWhenHidden);
-			window.removeEventListener("blur", pausePlayers);
+			window.removeEventListener("blur", pauseWhenWindowBlurs);
 		};
 	}, [watermark?.enabled, watermark?.tamperPauseEnabled]);
 
