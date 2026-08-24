@@ -59,6 +59,20 @@ describe("refund invoice handling", () => {
 		}));
 	});
 
+	it("marks a refund for manual handling when the provider throws", async () => {
+		const providerError = new Error("provider timeout");
+		vi.mocked(getInvoiceProvider).mockResolvedValue({
+			void: vi.fn().mockRejectedValue(providerError),
+		} as never);
+
+		await handleRefundInvoice("order-1", new Date("2026-08-24T00:00:00.000Z"));
+
+		expect(db.invoice.update).toHaveBeenCalledWith(expect.objectContaining({
+			where: { id: "invoice-1" },
+			data: { attentionReason: "REFUND_NEEDS_ALLOWANCE", failReason: "provider timeout" },
+		}));
+	});
+
 	it("uses the latest issued subscription-period invoice when a subscription is canceled", async () => {
 		vi.mocked(db.invoice.findFirst).mockResolvedValue({ ...invoice, orderId: null, subscriptionId: "subscription-1", periodNumber: 2 } as never);
 

@@ -2,6 +2,7 @@ import { buildIssueInput, type InvoiceProvider } from "@startkiter/payments";
 import { db, type Prisma } from "@startkiter/database";
 
 import { getInvoiceProvider, getInvoiceSettings } from "./invoice-settings";
+import { sameTaiwanBillingMonth } from "./taiwan-billing-month";
 
 type InvoiceRecord = Prisma.InvoiceGetPayload<{}>;
 
@@ -192,14 +193,6 @@ export async function triggerInvoiceForSubscriptionPeriod(
 	}
 }
 
-function sameTaiwanBillingMonth(a: Date, b: Date): boolean {
-	const parts = (date: Date) => {
-		const values = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Taipei", year: "numeric", month: "2-digit" }).formatToParts(date);
-		return `${values.find((part) => part.type === "year")?.value}-${values.find((part) => part.type === "month")?.value}`;
-	};
-	return parts(a) === parts(b);
-}
-
 async function refundInvoice(invoice: InvoiceRecord, provider: InvoiceProvider | null, now: Date) {
 	if (invoice.status !== "ISSUED" || !invoice.invoiceNumber) return invoice;
 	if (!provider || !invoice.invoiceDate || !sameTaiwanBillingMonth(invoice.invoiceDate, now)) {
@@ -208,10 +201,17 @@ async function refundInvoice(invoice: InvoiceRecord, provider: InvoiceProvider |
 			data: { attentionReason: "REFUND_NEEDS_ALLOWANCE" },
 		});
 	}
-	const result = await provider.void({ invoiceNumber: invoice.invoiceNumber, reason: "退款" });
-	return result.success
-		? db.invoice.update({ where: { id: invoice.id }, data: { status: "VOIDED", attentionReason: null } })
-		: db.invoice.update({ where: { id: invoice.id }, data: { attentionReason: "REFUND_NEEDS_ALLOWANCE", failReason: result.error } });
+	try {
+		const result = await provider.void({ invoiceNumber: invoice.invoiceNumber, reason: "退款" });
+		return result.success
+			? db.invoice.update({ where: { id: invoice.id }, data: { status: "VOIDED", attentionReason: null } })
+			: db.invoice.update({ where: { id: invoice.id }, data: { attentionReason: "REFUND_NEEDS_ALLOWANCE", failReason: result.error } });
+	} catch (error) {
+		return db.invoice.update({
+			where: { id: invoice.id },
+			data: { attentionReason: "REFUND_NEEDS_ALLOWANCE", failReason: errorMessage(error) },
+		});
+	}
 }
 
 export async function handleRefundInvoice(orderId: string, now = new Date()): Promise<InvoiceRecord | null> {

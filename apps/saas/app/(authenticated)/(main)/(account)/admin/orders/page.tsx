@@ -1,21 +1,10 @@
 import { db } from "@startkiter/database";
+import { sameTaiwanBillingMonth } from "@startkiter/api/modules/course/lib/taiwan-billing-month";
 import { Card, CardContent, CardHeader, CardTitle } from "@startkiter/ui";
 
 import { ExportSpreadsheetButton } from "@admin/component/ExportSpreadsheetButton";
 import { InvoiceOperationsButtons } from "@admin/component/InvoiceOperationsButtons";
 import { OrderRefundButton } from "@admin/component/OrderRefundButton";
-
-function sameTaiwanBillingMonth(a: Date, b: Date): boolean {
-	const monthKey = (date: Date) => {
-		const parts = new Intl.DateTimeFormat("en-CA", {
-			timeZone: "Asia/Taipei",
-			year: "numeric",
-			month: "2-digit",
-		}).formatToParts(date);
-		return `${parts.find((part) => part.type === "year")?.value}-${parts.find((part) => part.type === "month")?.value}`;
-	};
-	return monthKey(a) === monthKey(b);
-}
 
 export default async function AdminOrdersPage() {
 	const [orders, subscriptionInvoices] = await Promise.all([
