@@ -64,14 +64,16 @@ export function createLocalAssignmentUploadToken(input: {
 	storageKey: string;
 	contentType: string;
 	maxSize: number;
+	size: number;
 	expiresAt: number;
 }): string {
 	const payload = Buffer.from(JSON.stringify({
 		v: LOCAL_TOKEN_VERSION,
-			storageKey: input.storageKey,
-			contentType: input.contentType,
-			maxSize: input.maxSize,
-			expiresAt: input.expiresAt,
+		storageKey: input.storageKey,
+		contentType: input.contentType,
+		maxSize: input.maxSize,
+		size: input.size,
+		expiresAt: input.expiresAt,
 		nonce: randomUUID(),
 	}), "utf8").toString("base64url");
 	return `${payload}.${signLocalToken(payload)}`;
@@ -81,6 +83,7 @@ export function verifyLocalAssignmentUploadToken(token: string): {
 	storageKey: string;
 	contentType: string;
 	maxSize: number;
+	size: number;
 	expiresAt: number;
 } | null {
 	const [payload, signature] = token.split(".");
@@ -97,6 +100,7 @@ export function verifyLocalAssignmentUploadToken(token: string): {
 			storageKey?: string;
 			contentType?: string;
 			maxSize?: number;
+			size?: number;
 			expiresAt?: number;
 		};
 		if (
@@ -105,13 +109,17 @@ export function verifyLocalAssignmentUploadToken(token: string): {
 			!/^[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+\.[a-z0-9]+$/.test(parsed.storageKey) ||
 				typeof parsed.contentType !== "string" ||
 				typeof parsed.maxSize !== "number" ||
-			!Number.isSafeInteger(parsed.maxSize) ||
-			parsed.maxSize < 1 ||
-			parsed.maxSize > MAX_ASSIGNMENT_UPLOAD_SIZE ||
+				!Number.isSafeInteger(parsed.maxSize) ||
+				parsed.maxSize < 1 ||
+				parsed.maxSize > MAX_ASSIGNMENT_UPLOAD_SIZE ||
+				typeof parsed.size !== "number" ||
+				!Number.isSafeInteger(parsed.size) ||
+				parsed.size < 1 ||
+				parsed.size > parsed.maxSize ||
 				typeof parsed.expiresAt !== "number" ||
 			parsed.expiresAt < Date.now()
 		) return null;
-			return { storageKey: parsed.storageKey, contentType: parsed.contentType, maxSize: parsed.maxSize, expiresAt: parsed.expiresAt };
+		return { storageKey: parsed.storageKey, contentType: parsed.contentType, maxSize: parsed.maxSize, size: parsed.size, expiresAt: parsed.expiresAt };
 	} catch {
 		return null;
 	}
@@ -129,6 +137,7 @@ export async function getAssignmentSignedUploadUrl(input: {
 			storageKey: input.storageKey,
 			contentType: input.contentType,
 			maxSize: input.maxSize,
+			size: input.size,
 			expiresAt: Date.now() + 60_000,
 		});
 		const baseUrl = process.env.BETTER_AUTH_URL?.startsWith("http://localhost")

@@ -20,7 +20,7 @@ export async function PUT(request: Request) {
 		where: { storageKey: upload.storageKey, status: "PENDING", expiresAt: { gt: new Date() }, submission: { status: "DRAFT" } },
 		select: { mimeType: true, size: true },
 	});
-	if (!intent || intent.mimeType !== upload.contentType || intent.size !== upload.maxSize) return Response.json({ error: "Upload intent is no longer active." }, { status: 409 });
+	if (!intent || intent.mimeType !== upload.contentType || intent.size !== upload.size || upload.size > upload.maxSize) return Response.json({ error: "Upload intent is no longer active." }, { status: 409 });
 
 	const contentType = request.headers.get("content-type") ?? "application/octet-stream";
 	if (contentType !== upload.contentType) return Response.json({ error: "Content type mismatch." }, { status: 415 });

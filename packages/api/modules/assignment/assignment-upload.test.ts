@@ -19,10 +19,11 @@ describe("assignment attachment storage keys", () => {
 			storageKey: "submission-1/attachment-1.pdf",
 			contentType: "application/pdf",
 			maxSize: 4096,
+			size: 2048,
 			expiresAt: Date.now() + 60_000,
 		});
 
-		expect(verifyLocalAssignmentUploadToken(token)).toMatchObject({ maxSize: 4096 });
+		expect(verifyLocalAssignmentUploadToken(token)).toMatchObject({ maxSize: 4096, size: 2048 });
 	});
 
 	it("rejects a second local write to the same storage object", () => {
