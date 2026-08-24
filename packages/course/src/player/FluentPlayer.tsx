@@ -23,18 +23,41 @@ function PlayerFrame({ children, watermark }: { children: ReactNode; watermark?:
 	useEffect(() => {
 		if (!watermark?.enabled || !watermark.tamperPauseEnabled) return;
 
-		const pauseNativeVideos = () => {
+		const pauseEmbeddedPlayers = () => {
+			frameRef.current?.querySelectorAll<HTMLIFrameElement>("iframe").forEach((iframe) => {
+				if (!iframe.contentWindow) return;
+
+				try {
+					const origin = new URL(iframe.src, window.location.href).origin;
+					const src = iframe.src.toLowerCase();
+
+					if (src.includes("youtube.com")) {
+						iframe.contentWindow.postMessage(
+							JSON.stringify({ event: "command", func: "pauseVideo", args: [] }),
+							origin,
+						);
+					} else if (src.includes("vimeo.com") || src.includes("mediadelivery.net")) {
+						// Vimeo and Bunny Stream both implement the player.js iframe protocol.
+						iframe.contentWindow.postMessage(JSON.stringify({ method: "pause" }), origin);
+					}
+				} catch {
+					// A malformed or detached iframe must not break native-video pausing.
+				}
+			});
+		};
+		const pausePlayers = () => {
 			frameRef.current?.querySelectorAll("video").forEach((video) => video.pause());
+			pauseEmbeddedPlayers();
 		};
 		const pauseWhenHidden = () => {
-			if (document.visibilityState === "hidden") pauseNativeVideos();
+			if (document.visibilityState === "hidden") pausePlayers();
 		};
 
 		document.addEventListener("visibilitychange", pauseWhenHidden);
-		window.addEventListener("blur", pauseNativeVideos);
+		window.addEventListener("blur", pausePlayers);
 		return () => {
 			document.removeEventListener("visibilitychange", pauseWhenHidden);
-			window.removeEventListener("blur", pauseNativeVideos);
+			window.removeEventListener("blur", pausePlayers);
 		};
 	}, [watermark?.enabled, watermark?.tamperPauseEnabled]);
 
@@ -105,7 +128,7 @@ export function FluentPlayer({
 			<PlayerFrame watermark={watermark}>
 				<iframe
 					className="h-full w-full"
-					src={`https://www.youtube.com/embed/${encodeURIComponent(resolved.sourceId)}?autoplay=0`}
+					src={`https://www.youtube.com/embed/${encodeURIComponent(resolved.sourceId)}?autoplay=0&enablejsapi=1`}
 					title={title}
 					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
 					allowFullScreen={!watermark?.enabled}
@@ -119,7 +142,7 @@ export function FluentPlayer({
 			<PlayerFrame watermark={watermark}>
 				<iframe
 					className="h-full w-full"
-					src={`https://player.vimeo.com/video/${encodeURIComponent(resolved.sourceId)}`}
+					src={`https://player.vimeo.com/video/${encodeURIComponent(resolved.sourceId)}?api=1`}
 					title={title}
 					allow="autoplay; fullscreen; picture-in-picture"
 					allowFullScreen={!watermark?.enabled}
