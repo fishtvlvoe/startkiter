@@ -12,6 +12,9 @@ vi.mock("@startkiter/auth", () => ({
 vi.mock("@startkiter/database", () => ({
 	db: {
 		$executeRaw: vi.fn(() => Promise.resolve(1)),
+		lesson: {
+			findUnique: vi.fn(),
+		},
 		lessonProgress: {
 			update: vi.fn(),
 			upsert: vi.fn(),
@@ -19,14 +22,24 @@ vi.mock("@startkiter/database", () => ({
 	},
 }));
 
+vi.mock("../lib/course-access", () => ({
+	userCanAccessCourseId: vi.fn(),
+}));
+
 import { auth } from "@startkiter/auth";
 import { db } from "@startkiter/database";
 
+import { userCanAccessCourseId } from "../lib/course-access";
 import { recordWatchTime } from "./record-watch-time";
 
 describe("course.recordWatchTime", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		vi.mocked(db.lesson.findUnique).mockResolvedValue({
+			status: "PUBLISHED",
+			isFreePreview: true,
+			chapter: { courseId: "course-1" },
+		} as never);
 		vi.mocked(auth.api.getSession).mockResolvedValue({
 			session: { id: "session-1", userId: "learner-1" },
 			user: { id: "learner-1", email: "learner@example.com", role: "user" },
@@ -62,6 +75,26 @@ describe("course.recordWatchTime", () => {
 			),
 		).rejects.toMatchObject({ code: "UNAUTHORIZED" });
 
+		expect(db.$executeRaw).not.toHaveBeenCalled();
+	});
+
+	it("rejects a report for a lesson the caller cannot access", async () => {
+		vi.mocked(db.lesson.findUnique).mockResolvedValue({
+			status: "PUBLISHED",
+			isFreePreview: false,
+			chapter: { courseId: "private-course" },
+		} as never);
+		vi.mocked(userCanAccessCourseId).mockResolvedValue(false);
+
+		await expect(
+			call(
+				recordWatchTime,
+				{ lessonId: "private-lesson", watchedSec: 30 },
+				{ context: { headers: new Headers() } },
+			),
+		).rejects.toMatchObject({ code: "FORBIDDEN" });
+
+		expect(userCanAccessCourseId).toHaveBeenCalledWith("learner-1", "private-course");
 		expect(db.$executeRaw).not.toHaveBeenCalled();
 	});
 });

@@ -270,6 +270,7 @@ export function AcademyClassroomClient({
 							<div className="relative aspect-video w-full bg-neutral-900">
 								<FluentPlayer
 									title={currentLesson.title}
+									watchKey={currentLesson.id}
 									resolved={resolvedVideo}
 									watermark={
 										currentLesson.watermarkSetting

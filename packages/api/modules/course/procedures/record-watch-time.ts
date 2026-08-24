@@ -1,9 +1,11 @@
 import { randomUUID } from "node:crypto";
 
+import { ORPCError } from "@orpc/server";
 import { db } from "@startkiter/database";
 import { z } from "zod";
 
 import { protectedProcedure } from "../../../orpc/procedures";
+import { userCanAccessCourseId } from "../lib/course-access";
 
 const MAX_WATCHED_SECONDS = 366 * 24 * 60 * 60;
 
@@ -21,6 +23,26 @@ export const recordWatchTime = protectedProcedure
 		}),
 	)
 	.handler(async ({ input, context }) => {
+		const lesson = await db.lesson.findUnique({
+			where: { id: input.lessonId },
+			select: {
+				status: true,
+				isFreePreview: true,
+				chapter: { select: { courseId: true } },
+			},
+		});
+
+		if (!lesson || lesson.status !== "PUBLISHED") {
+			throw new ORPCError("NOT_FOUND", { message: "找不到這個單元。" });
+		}
+
+		if (!lesson.isFreePreview) {
+			const allowed = await userCanAccessCourseId(context.user.id, lesson.chapter.courseId);
+			if (!allowed) {
+				throw new ORPCError("FORBIDDEN", { message: "你沒有這個單元的觀看權限。" });
+			}
+		}
+
 		await db.$executeRaw`
 			INSERT INTO "watch_time_log" ("id", "userId", "lessonId", "watchedSec", "lastWatchAt")
 			VALUES (${randomUUID()}, ${context.user.id}, ${input.lessonId}, ${input.watchedSec}, NOW())

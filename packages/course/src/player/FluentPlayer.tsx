@@ -17,6 +17,152 @@ export type FluentPlayerSource =
 	  };
 
 type WatchTimeReporter = (watchedSec: number) => void;
+type EmbeddedProvider = "BUNNY" | "YOUTUBE" | "VIMEO";
+type EmbeddedWatchMessage = Record<string, unknown>;
+
+function asMessage(data: unknown): EmbeddedWatchMessage | null {
+	if (typeof data !== "string") return null;
+
+	try {
+		const parsed: unknown = JSON.parse(data);
+		return parsed && typeof parsed === "object" ? (parsed as EmbeddedWatchMessage) : null;
+	} catch {
+		return null;
+	}
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+	return value && typeof value === "object" ? (value as Record<string, unknown>) : null;
+}
+
+function firstFiniteNumber(...values: unknown[]) {
+	for (const value of values) {
+		if (typeof value === "number" && Number.isFinite(value)) return value;
+	}
+	return null;
+}
+
+function embeddedEventName(message: EmbeddedWatchMessage) {
+	return typeof message.event === "string"
+		? message.event
+		: typeof message.method === "string"
+			? message.method
+			: null;
+}
+
+function EmbeddedVideo({
+	provider,
+	src,
+	title,
+	onWatchTime,
+	watchKey,
+	allowFullScreen,
+}: {
+	provider: EmbeddedProvider;
+	src: string;
+	title: string;
+	onWatchTime?: WatchTimeReporter;
+	watchKey?: string;
+	allowFullScreen: boolean;
+}) {
+	const iframeRef = useRef<HTMLIFrameElement>(null);
+	const lastReportedSecRef = useRef(0);
+	const latestPositionSecRef = useRef(0);
+	const isPlayingRef = useRef(false);
+
+	useEffect(() => {
+		lastReportedSecRef.current = 0;
+		latestPositionSecRef.current = 0;
+		isPlayingRef.current = false;
+	}, [src, watchKey]);
+
+	useEffect(() => {
+		if (!onWatchTime) return;
+
+		const report = (force: boolean) => {
+			const watchedSec = Math.floor(latestPositionSecRef.current);
+			if (!Number.isFinite(watchedSec) || watchedSec <= lastReportedSecRef.current) return;
+			if (!force && (!isPlayingRef.current || watchedSec < lastReportedSecRef.current + 30)) return;
+
+			lastReportedSecRef.current = watchedSec;
+			onWatchTime(watchedSec);
+		};
+
+		const handleMessage = (event: MessageEvent) => {
+			if (event.source !== iframeRef.current?.contentWindow) return;
+			const message = asMessage(event.data);
+			if (!message) return;
+
+			const data = asRecord(message.data);
+			const info = asRecord(message.info);
+			const value = asRecord(message.value);
+			const watchedSec = firstFiniteNumber(
+				message.currentTime,
+				data?.seconds,
+				data?.currentTime,
+				info?.currentTime,
+				value?.seconds,
+			);
+			if (watchedSec !== null) latestPositionSecRef.current = watchedSec;
+
+			const eventName = embeddedEventName(message);
+			const playerState = firstFiniteNumber(message.info, info?.playerState);
+			if ((eventName === "infoDelivery" || eventName === "onStateChange") && playerState !== null) {
+				isPlayingRef.current = playerState === 1;
+			}
+			if (eventName === "play" || eventName === "playing" || eventName === "timeupdate") {
+				isPlayingRef.current = true;
+			}
+			if (eventName === "pause" || eventName === "ended") {
+				isPlayingRef.current = false;
+				report(true);
+			}
+		};
+
+		const interval = window.setInterval(() => report(false), 30_000);
+		window.addEventListener("message", handleMessage);
+		return () => {
+			report(true);
+			window.clearInterval(interval);
+			window.removeEventListener("message", handleMessage);
+		};
+	}, [onWatchTime]);
+
+	const subscribeToProviderEvents = () => {
+		const iframe = iframeRef.current;
+		if (!iframe?.contentWindow) return;
+
+		try {
+			const targetOrigin = new URL(src, window.location.href).origin;
+			const post = (message: Record<string, unknown>) =>
+				iframe.contentWindow?.postMessage(JSON.stringify(message), targetOrigin);
+
+			if (provider === "YOUTUBE") {
+				post({ event: "listening", id: "startkiter-watch-time", channel: "startkiter" });
+				post({ event: "command", func: "addEventListener", args: ["onStateChange"] });
+				return;
+			}
+
+			for (const eventName of ["timeupdate", "play", "pause", "ended"]) {
+				post({ method: "addEventListener", value: eventName });
+			}
+		} catch {
+			// 無效或已卸載的 iframe 不應讓課程播放器失效。
+		}
+	};
+
+	return (
+		<iframe
+			ref={iframeRef}
+			className="h-full w-full"
+			onLoad={subscribeToProviderEvents}
+			src={src}
+			title={title}
+			allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+			allowFullScreen={allowFullScreen}
+		/>
+	);
+}
 
 function NativeVideo({
 	className,
@@ -24,36 +170,49 @@ function NativeVideo({
 	src,
 	title,
 	onWatchTime,
+	watchKey,
 }: {
 	className: string;
 	controlsList?: string;
 	src: string;
 	title: string;
 	onWatchTime?: WatchTimeReporter;
+	watchKey?: string;
 }) {
 	const videoRef = useRef<HTMLVideoElement>(null);
 	const lastReportedSecRef = useRef(0);
 
 	useEffect(() => {
 		lastReportedSecRef.current = 0;
-	}, [src]);
+	}, [src, watchKey]);
 
 	useEffect(() => {
 		if (!onWatchTime) return;
 
-		const report = () => {
+		const report = (force: boolean) => {
 			const video = videoRef.current;
-			if (!video || video.paused || !Number.isFinite(video.currentTime)) return;
+			if (!video || !Number.isFinite(video.currentTime)) return;
 
 			const watchedSec = Math.floor(video.currentTime);
-			if (watchedSec < lastReportedSecRef.current + 30) return;
+			if (watchedSec <= lastReportedSecRef.current) return;
+			if (!force && (video.paused || watchedSec < lastReportedSecRef.current + 30)) return;
 
 			lastReportedSecRef.current = watchedSec;
 			onWatchTime(watchedSec);
 		};
 
-		const interval = window.setInterval(report, 30_000);
-		return () => window.clearInterval(interval);
+		const onPause = () => report(true);
+		const onEnded = () => report(true);
+		const video = videoRef.current;
+		video?.addEventListener("pause", onPause);
+		video?.addEventListener("ended", onEnded);
+		const interval = window.setInterval(() => report(false), 30_000);
+		return () => {
+			report(true);
+			window.clearInterval(interval);
+			video?.removeEventListener("pause", onPause);
+			video?.removeEventListener("ended", onEnded);
+		};
 	}, [onWatchTime]);
 
 	return (
@@ -70,7 +229,6 @@ function NativeVideo({
 		</video>
 	);
 }
-
 
 function PlayerFrame({
 	children,
@@ -175,11 +333,13 @@ export function FluentPlayer({
 	resolved,
 	watermark,
 	onWatchTime,
+	watchKey,
 }: {
 	title: string;
 	resolved: FluentPlayerSource | null;
 	watermark?: WatermarkPlayerSettings;
 	onWatchTime?: WatchTimeReporter;
+	watchKey?: string;
 }) {
 	if (!resolved || !resolved.ok) {
 		return (
@@ -210,11 +370,12 @@ export function FluentPlayer({
 		return (
 			<PlayerFrame watermark={watermark}>
 				{(usesManagedFullscreen) => (
-					<iframe
-						className="h-full w-full"
+					<EmbeddedVideo
+						provider="YOUTUBE"
 						src={`https://www.youtube.com/embed/${encodeURIComponent(sourceId)}?autoplay=0&enablejsapi=1`}
 						title={title}
-						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+						onWatchTime={onWatchTime}
+						watchKey={watchKey}
 						allowFullScreen={!usesManagedFullscreen}
 					/>
 				)}
@@ -227,11 +388,12 @@ export function FluentPlayer({
 		return (
 			<PlayerFrame watermark={watermark}>
 				{(usesManagedFullscreen) => (
-					<iframe
-						className="h-full w-full"
+					<EmbeddedVideo
+						provider="VIMEO"
 						src={`https://player.vimeo.com/video/${encodeURIComponent(sourceId)}?api=1`}
 						title={title}
-						allow={usesManagedFullscreen ? "autoplay; picture-in-picture" : "autoplay; fullscreen; picture-in-picture"}
+						onWatchTime={onWatchTime}
+						watchKey={watchKey}
 						allowFullScreen={!usesManagedFullscreen}
 					/>
 				)}
@@ -243,11 +405,12 @@ export function FluentPlayer({
 		return (
 			<PlayerFrame watermark={watermark}>
 				{(usesManagedFullscreen) => (
-					<iframe
-						className="h-full w-full"
+					<EmbeddedVideo
+						provider="BUNNY"
 						src={resolved.url}
 						title={title}
-						allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+						onWatchTime={onWatchTime}
+						watchKey={watchKey}
 						allowFullScreen={!usesManagedFullscreen}
 					/>
 				)}
@@ -260,11 +423,13 @@ export function FluentPlayer({
 			<PlayerFrame watermark={watermark}>
 				{(usesManagedFullscreen) => (
 					<NativeVideo
+						key={`${resolved.provider}:${resolved.url}:${watchKey ?? ""}`}
 						className="h-full w-full"
 						controlsList={usesManagedFullscreen ? "nofullscreen" : undefined}
 						src={resolved.url}
 						title={title}
 						onWatchTime={onWatchTime}
+						watchKey={watchKey}
 					/>
 				)}
 			</PlayerFrame>
@@ -276,11 +441,13 @@ export function FluentPlayer({
 			<PlayerFrame watermark={watermark}>
 				{(usesManagedFullscreen) => (
 					<NativeVideo
+						key={`${resolved.provider}:${resolved.url}:${watchKey ?? ""}`}
 						className="h-full w-full"
 						controlsList={usesManagedFullscreen ? "nofullscreen" : undefined}
 						src={resolved.url}
 						title={title}
 						onWatchTime={onWatchTime}
+						watchKey={watchKey}
 					/>
 				)}
 			</PlayerFrame>
