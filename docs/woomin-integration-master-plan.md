@@ -24,9 +24,9 @@ Fish 只需要做的事：依序把下面的 change 丟給 Codex 執行 `/spectr
 
 | # | Change | Task 數 | 前置依賴 | 檔案衝突組 |
 |---|---|---|---|---|
-| 1 | `startkiter-dev-skill` | 6 | 無 | 無 |
+| 1 | `startkiter-dev-skill` | 7 | 無 | 無 |
 | 2 | `subscriptions-invoice` | 22 | 無 | 無 |
-| 3 | `course-quiz-plugin` | 12 | 無 | 無 |
+| 3 | `course-quiz-plugin` | 13 | 無 | 無 |
 | 4 | `course-review-plugin` | 10 | 無 | 無 |
 | 5 | `course-invite-access` | 12 | 無 | 無 |
 | 6 | `login-and-admin-audit-log` | 9 | 無 | 無 |
