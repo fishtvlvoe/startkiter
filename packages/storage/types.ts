@@ -3,6 +3,8 @@ export interface StorageBucketNamesConfig {
 	 * Bucket used for user and organization avatar uploads.
 	 */
 	avatars: string;
+	/** Bucket used for course assignment attachments. */
+	assignments: string;
 }
 
 export interface StorageConfig {
@@ -23,6 +25,7 @@ export type GetSignedUploadUrlHandler = (
 	path: string,
 	options: {
 		bucket: keyof StorageBucketNamesConfig;
+		contentType?: string;
 	},
 ) => Promise<string>;
 

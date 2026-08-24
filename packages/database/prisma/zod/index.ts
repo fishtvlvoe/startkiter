@@ -214,6 +214,30 @@ export const PluginContentScalarFieldEnumSchema = z.enum(['id', 'pluginId', 'typ
 
 export type PluginContentScalarFieldEnum = z.infer<typeof PluginContentScalarFieldEnumSchema>;
 
+// File: AssignmentSubmissionScalarFieldEnum.schema.ts
+
+export const AssignmentSubmissionScalarFieldEnumSchema = z.enum(['id', 'pluginContentId', 'userId', 'content', 'contentFormat', 'wordCount', 'status', 'revisionNumber', 'isLate', 'submittedAt', 'createdAt', 'updatedAt'])
+
+export type AssignmentSubmissionScalarFieldEnum = z.infer<typeof AssignmentSubmissionScalarFieldEnumSchema>;
+
+// File: AssignmentAttachmentScalarFieldEnum.schema.ts
+
+export const AssignmentAttachmentScalarFieldEnumSchema = z.enum(['id', 'submissionId', 'filename', 'mimeType', 'size', 'storageKey', 'createdAt'])
+
+export type AssignmentAttachmentScalarFieldEnum = z.infer<typeof AssignmentAttachmentScalarFieldEnumSchema>;
+
+// File: AssignmentReviewScalarFieldEnum.schema.ts
+
+export const AssignmentReviewScalarFieldEnumSchema = z.enum(['id', 'submissionId', 'reviewerId', 'feedback', 'score', 'letterGrade', 'reviewedAt', 'createdAt'])
+
+export type AssignmentReviewScalarFieldEnum = z.infer<typeof AssignmentReviewScalarFieldEnumSchema>;
+
+// File: AssignmentDraftScalarFieldEnum.schema.ts
+
+export const AssignmentDraftScalarFieldEnumSchema = z.enum(['id', 'pluginContentId', 'userId', 'content', 'contentFormat', 'createdAt', 'updatedAt'])
+
+export type AssignmentDraftScalarFieldEnum = z.infer<typeof AssignmentDraftScalarFieldEnumSchema>;
+
 // File: CourseReviewScalarFieldEnum.schema.ts
 
 export const CourseReviewScalarFieldEnumSchema = z.enum(['id', 'courseId', 'userId', 'rating', 'content', 'isVisible', 'helpfulCount', 'replyContent', 'replyAt', 'createdAt', 'updatedAt'])
@@ -1013,6 +1037,72 @@ export const PluginContentSchema = z.object({
 });
 
 export type PluginContentType = z.infer<typeof PluginContentSchema>;
+
+
+// File: AssignmentSubmission.schema.ts
+
+export const AssignmentSubmissionSchema = z.object({
+  id: z.string(),
+  pluginContentId: z.string(),
+  userId: z.string(),
+  content: z.string().nullish(),
+  contentFormat: z.string().nullish(),
+  wordCount: z.number().int().nullish(),
+  status: z.string().default("DRAFT"),
+  revisionNumber: z.number().int().default(1),
+  isLate: z.boolean(),
+  submittedAt: z.date().nullish(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type AssignmentSubmissionType = z.infer<typeof AssignmentSubmissionSchema>;
+
+
+// File: AssignmentAttachment.schema.ts
+
+export const AssignmentAttachmentSchema = z.object({
+  id: z.string(),
+  submissionId: z.string(),
+  filename: z.string(),
+  mimeType: z.string(),
+  size: z.number().int(),
+  storageKey: z.string(),
+  createdAt: z.date(),
+});
+
+export type AssignmentAttachmentType = z.infer<typeof AssignmentAttachmentSchema>;
+
+
+// File: AssignmentReview.schema.ts
+
+export const AssignmentReviewSchema = z.object({
+  id: z.string(),
+  submissionId: z.string(),
+  reviewerId: z.string(),
+  feedback: z.string().nullish(),
+  score: z.number().int().nullish(),
+  letterGrade: z.string().nullish(),
+  reviewedAt: z.date(),
+  createdAt: z.date(),
+});
+
+export type AssignmentReviewType = z.infer<typeof AssignmentReviewSchema>;
+
+
+// File: AssignmentDraft.schema.ts
+
+export const AssignmentDraftSchema = z.object({
+  id: z.string(),
+  pluginContentId: z.string(),
+  userId: z.string(),
+  content: z.string().nullish(),
+  contentFormat: z.string().nullish(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type AssignmentDraftType = z.infer<typeof AssignmentDraftSchema>;
 
 
 // File: CourseReview.schema.ts

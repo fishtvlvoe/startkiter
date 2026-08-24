@@ -17,6 +17,7 @@
 		"@orpc/zod": "catalog:",
 		"@startkiter/ai": "workspace:*",
 		"@startkiter/auth": "workspace:*",
+		"@startkiter/course-assignment": "workspace:*",
 		"@startkiter/course": "workspace:*",
 		"@startkiter/course-review": "workspace:*",
 		"@startkiter/course-quiz": "workspace:*",

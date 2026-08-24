@@ -48,6 +48,9 @@ model User {
   courseSubscriptions      CourseSubscription[]
   pluginContents           PluginContent[]
   quizAttempts             QuizAttempt[]
+  assignmentSubmissions    AssignmentSubmission[] @relation("AssignmentSubmissionUser")
+  assignmentReviews        AssignmentReview[] @relation("AssignmentReviewReviewer")
+  assignmentDrafts         AssignmentDraft[] @relation("AssignmentDraftUser")
   courseReviews            CourseReview[]
   reviewHelpfulVotes       ReviewHelpful[]
   reviewReports            ReviewReport[]
@@ -753,6 +756,77 @@ model PluginContent {
 
   @@index([pluginId, type])
   @@index([authorId])
+}
+
+model AssignmentSubmission {
+  id              String   @id @default(cuid())
+  pluginContentId String
+  userId          String
+  content         String?  @db.Text
+  contentFormat   String?
+  wordCount       Int?
+  status          String   @default("DRAFT")
+  revisionNumber  Int      @default(1)
+  isLate          Boolean  @default(false)
+  submittedAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User                  @relation("AssignmentSubmissionUser", fields: [userId], references: [id], onDelete: Cascade)
+  attachments     AssignmentAttachment[]
+  reviews         AssignmentReview[]
+
+  @@index([pluginContentId, userId])
+  @@index([userId, createdAt])
+  @@map("assignment_submission")
+}
+
+model AssignmentAttachment {
+  id           String   @id @default(cuid())
+  submissionId String
+  filename     String
+  mimeType     String
+  size         Int
+  storageKey   String
+  createdAt    DateTime @default(now())
+
+  submission   AssignmentSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@map("assignment_attachment")
+}
+
+model AssignmentReview {
+  id           String   @id @default(cuid())
+  submissionId String
+  reviewerId   String
+  feedback     String?  @db.Text
+  score        Int?
+  letterGrade  String?
+  reviewedAt   DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  submission   AssignmentSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  reviewer     User                  @relation("AssignmentReviewReviewer", fields: [reviewerId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+  @@map("assignment_review")
+}
+
+model AssignmentDraft {
+  id              String   @id @default(cuid())
+  pluginContentId String
+  userId          String
+  content         String?  @db.Text
+  contentFormat   String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User     @relation("AssignmentDraftUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([pluginContentId, userId])
+  @@index([userId])
+  @@map("assignment_draft")
 }
 
 model CourseReview {

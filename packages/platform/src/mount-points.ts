@@ -34,6 +34,17 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		dataSpec: "content",
 	},
 	{
+		id: "assignment",
+		name: "課程作業",
+		version: "0.1.0",
+		mount: {
+			route: { path: "/assignment-admin" },
+			menu: { label: "作業管理", icon: "file-pen-line", order: 7, requiresOperator: true },
+			content: { kind: "auto", boundTo: "/assignment" },
+		},
+		dataSpec: "content",
+	},
+	{
 		id: "review",
 		name: "課程評價與留言",
 		version: "0.1.0",

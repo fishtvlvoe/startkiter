@@ -2,6 +2,7 @@ import type { RouterClient } from "@orpc/server";
 
 import { adminRouter } from "../modules/admin/router";
 import { aiRouter } from "../modules/ai/router";
+import { assignmentRouter } from "../modules/assignment/router";
 import { courseRouter } from "../modules/course/router";
 import { deploymentRouter } from "../modules/deployment/router";
 import { notificationsRouter } from "../modules/notifications/router";
@@ -22,6 +23,7 @@ export const router = publicProcedure.router({
 	ai: aiRouter,
 	notifications: notificationsRouter,
 	quiz: quizRouter,
+	assignment: assignmentRouter,
 	review: reviewRouter,
 	deployment: deploymentRouter,
 	support: supportRouter,

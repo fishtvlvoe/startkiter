@@ -21,6 +21,7 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 				"後台設定",
 				"測驗管理",
 				"評價與留言管理",
+				"作業管理",
 				"課程綁定包",
 				"新生問卷",
 			]);
