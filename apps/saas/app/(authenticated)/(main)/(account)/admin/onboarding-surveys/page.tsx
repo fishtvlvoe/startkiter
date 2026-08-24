@@ -15,7 +15,12 @@ export default async function OnboardingSurveysPage() {
 
 	const [courses, responses] = await Promise.all([
 		db.course.findMany({
-			where: { status: "PUBLISHED" },
+			where: {
+				OR: [
+					{ status: "PUBLISHED" },
+					{ onboardingSurveyResponses: { some: {} } },
+				],
+			},
 			orderBy: { title: "asc" },
 			select: { id: true, title: true },
 		}),
