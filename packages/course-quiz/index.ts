@@ -17,6 +17,8 @@ export type {
 } from "./quiz-definition";
 export { gradeQuiz } from "./quiz-grading";
 export type { QuizAnswer, QuizGrade } from "./quiz-grading";
+export { createQuizStartToken, verifyQuizStartToken } from "./quiz-session";
+export type { QuizStartTokenInput } from "./quiz-session";
 
 export type RecordQuizAttemptInput = {
 	userId: string;

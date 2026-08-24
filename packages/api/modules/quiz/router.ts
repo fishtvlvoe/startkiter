@@ -6,6 +6,8 @@ import {
 	recordQuizAttempt,
 	toLearnerQuiz,
 	quizDefinitionBodySchema,
+	createQuizStartToken,
+	verifyQuizStartToken,
 	type QuizAnswer,
 } from "@startkiter/course-quiz";
 import { db } from "@startkiter/database";
@@ -60,20 +62,31 @@ export const quizRouter = {
 			const definition = await getAccessibleQuiz(input.pluginContentId, context.user.id);
 			return toLearnerQuiz(definition);
 		}),
+	start: protectedProcedure
+		.route({ method: "POST", path: "/quiz/{pluginContentId}/start", tags: ["Quiz"], summary: "Start a quiz" })
+		.input(z.object({ pluginContentId: z.string().min(1) }))
+		.handler(async ({ input, context }) => {
+			const definition = await getAccessibleQuiz(input.pluginContentId, context.user.id);
+			return { startToken: createQuizStartToken({ userId: context.user.id, pluginContentId: definition.id }) };
+		}),
 	submit: protectedProcedure
 		.route({ method: "POST", path: "/quiz/{pluginContentId}/attempts", tags: ["Quiz"], summary: "Submit a quiz attempt" })
 		.input(
 			z.object({
 				pluginContentId: z.string().min(1),
 				answers: quizAnswersSchema,
-				startedAt: z.string().datetime(),
+				startToken: z.string().min(1),
 			}),
 		)
 		.handler(async ({ input, context }) => {
 			const definition = await getAccessibleQuiz(input.pluginContentId, context.user.id);
+			const start = verifyQuizStartToken(input.startToken);
+			if (!start || start.userId !== context.user.id || start.pluginContentId !== definition.id) {
+				throw new ORPCError("BAD_REQUEST", { message: "測驗作答工作階段無效，請重新開始。" });
+			}
+
 			const now = Date.now();
-			const submittedStartedAt = new Date(input.startedAt);
-			const startedAt = submittedStartedAt.getTime() > now ? new Date(now) : submittedStartedAt;
+			const startedAt = new Date(start.startedAt);
 			const elapsedSeconds = Math.max(0, Math.floor((now - startedAt.getTime()) / 1000));
 
 			if (definition.body.timeLimitMinutes !== null && elapsedSeconds > definition.body.timeLimitMinutes * 60) {

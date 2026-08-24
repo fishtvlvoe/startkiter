@@ -38,5 +38,13 @@ describe("Quiz grading", () => {
 				60,
 			),
 		).toMatchObject({ score: 100, passed: true });
+
+		expect(
+			gradeQuiz(
+				[{ id: "q1", type: "MULTIPLE_CHOICE", correctAnswer: ["a", "b"], points: 1 }],
+				{ q1: ["a"] },
+				60,
+			),
+		).toMatchObject({ score: 0, passed: false });
 	});
 });

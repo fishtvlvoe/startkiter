@@ -3,7 +3,7 @@
 import type { LearnerQuiz } from "@startkiter/course-quiz";
 import { Button, Card, Input, Label } from "@startkiter/ui";
 import { orpcClient } from "@shared/lib/orpc-client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type QuizResult = {
 	score: number;
@@ -17,7 +17,21 @@ export function QuizTaking({ quiz }: { quiz: LearnerQuiz }) {
 	const [result, setResult] = useState<QuizResult | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [startedAt] = useState(() => new Date().toISOString());
+	const [startToken, setStartToken] = useState<string | null>(null);
+
+	useEffect(() => {
+		let cancelled = false;
+		orpcClient.quiz.start({ pluginContentId: quiz.id })
+			.then(({ startToken: token }) => {
+				if (!cancelled) setStartToken(token);
+			})
+			.catch(() => {
+				if (!cancelled) setError("測驗啟動失敗，請重新整理頁面。");
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, [quiz.id]);
 
 	function setAnswer(questionId: string, answer: string | string[] | boolean) {
 		setAnswers((current) => ({ ...current, [questionId]: answer }));
@@ -37,10 +51,11 @@ export function QuizTaking({ quiz }: { quiz: LearnerQuiz }) {
 		setIsSubmitting(true);
 
 		try {
+			if (!startToken) throw new Error("quiz has not started");
 			const submitted = await orpcClient.quiz.submit({
 				pluginContentId: quiz.id,
 				answers,
-				startedAt,
+				startToken,
 			});
 			setResult(submitted);
 		} catch {
