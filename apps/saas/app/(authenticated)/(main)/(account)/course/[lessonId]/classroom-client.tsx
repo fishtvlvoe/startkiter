@@ -9,7 +9,7 @@ import {
 	extractLessonBlockIds,
 	FluentPlayer,
 	LessonMdx,
-	type WatermarkOverlayProps,
+	type WatermarkPlayerSettings,
 } from "@startkiter/course";
 import { resolveVideoSource } from "@startkiter/api/modules/course/lib/video-resolver";
 import { orpc } from "@shared/lib/orpc-query-utils";
@@ -25,6 +25,8 @@ interface LessonData {
 	provider?: string;
 	content: string;
 	aiContext: string;
+	courseTitle: string;
+	watermarkSetting: Omit<WatermarkPlayerSettings, "email" | "courseTitle"> | null;
 }
 
 interface ChapterData {
@@ -33,20 +35,14 @@ interface ChapterData {
 	lessons: LessonData[];
 }
 
-type WatermarkSetting = Omit<WatermarkOverlayProps, "email" | "courseTitle">;
-
 export function AcademyClassroomClient({
 	initialLesson,
 	curriculum,
-	courseTitle,
 	viewerEmail,
-	watermarkSetting,
 }: {
 	initialLesson: LessonData;
 	curriculum: ChapterData[];
-	courseTitle: string;
 	viewerEmail: string;
-	watermarkSetting: WatermarkSetting | null;
 }) {
 	const queryClient = useQueryClient();
 	const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -268,11 +264,15 @@ export function AcademyClassroomClient({
 								<FluentPlayer
 									title={currentLesson.title}
 									resolved={resolvedVideo}
-									watermark={
-										watermarkSetting
-											? { ...watermarkSetting, email: viewerEmail, courseTitle }
-											: undefined
-									}
+					watermark={
+						currentLesson.watermarkSetting
+							? {
+									...currentLesson.watermarkSetting,
+									email: viewerEmail,
+									courseTitle: currentLesson.courseTitle,
+								}
+							: undefined
+					}
 								/>
 							</div>
 						</Card>

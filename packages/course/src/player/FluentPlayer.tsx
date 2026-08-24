@@ -1,6 +1,8 @@
-import type { ReactNode } from "react";
+"use client";
 
-import { WatermarkOverlay, type WatermarkOverlayProps } from "./watermark-overlay";
+import { useEffect, useRef, type ReactNode } from "react";
+
+import { WatermarkOverlay, type WatermarkPlayerSettings } from "./watermark-overlay";
 
 export type FluentPlayerSource =
 	| {
@@ -14,11 +16,53 @@ export type FluentPlayerSource =
 			error: string;
 	};
 
-function PlayerFrame({ children, watermark }: { children: ReactNode; watermark?: WatermarkOverlayProps }) {
+
+function PlayerFrame({ children, watermark }: { children: ReactNode; watermark?: WatermarkPlayerSettings }) {
+	const frameRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		if (!watermark?.enabled || !watermark.tamperPauseEnabled) return;
+
+		const pauseNativeVideos = () => {
+			frameRef.current?.querySelectorAll("video").forEach((video) => video.pause());
+		};
+		const pauseWhenHidden = () => {
+			if (document.visibilityState === "hidden") pauseNativeVideos();
+		};
+
+		document.addEventListener("visibilitychange", pauseWhenHidden);
+		window.addEventListener("blur", pauseNativeVideos);
+		return () => {
+			document.removeEventListener("visibilitychange", pauseWhenHidden);
+			window.removeEventListener("blur", pauseNativeVideos);
+		};
+	}, [watermark?.enabled, watermark?.tamperPauseEnabled]);
+
+	const toggleFullscreen = () => {
+		const frame = frameRef.current;
+		if (!frame) return;
+		if (document.fullscreenElement === frame) {
+			void document.exitFullscreen?.();
+			return;
+		}
+		const requestFullscreen = frame.requestFullscreen;
+		if (requestFullscreen) void requestFullscreen.call(frame).catch(() => undefined);
+	};
+
 	return (
-		<div className="relative h-full w-full">
+		<div ref={frameRef} className="relative h-full w-full bg-black" data-testid="player-frame">
 			{children}
 			{watermark ? <WatermarkOverlay {...watermark} /> : null}
+			{watermark?.enabled ? (
+				<button
+					aria-label="影片全螢幕"
+					className="absolute right-3 top-3 z-30 rounded bg-black/70 px-2 py-1 text-xs text-white"
+					onClick={toggleFullscreen}
+					type="button"
+				>
+					全螢幕
+				</button>
+			) : null}
 		</div>
 	);
 }
@@ -30,7 +74,7 @@ export function FluentPlayer({
 }: {
 	title: string;
 	resolved: FluentPlayerSource | null;
-	watermark?: WatermarkOverlayProps;
+	watermark?: WatermarkPlayerSettings;
 }) {
 	if (!resolved || !resolved.ok) {
 		return (
@@ -64,7 +108,7 @@ export function FluentPlayer({
 					src={`https://www.youtube.com/embed/${encodeURIComponent(resolved.sourceId)}?autoplay=0`}
 					title={title}
 					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-					allowFullScreen
+					allowFullScreen={!watermark?.enabled}
 				/>
 			</PlayerFrame>
 		);
@@ -78,7 +122,7 @@ export function FluentPlayer({
 					src={`https://player.vimeo.com/video/${encodeURIComponent(resolved.sourceId)}`}
 					title={title}
 					allow="autoplay; fullscreen; picture-in-picture"
-					allowFullScreen
+					allowFullScreen={!watermark?.enabled}
 				/>
 			</PlayerFrame>
 		);
@@ -92,7 +136,7 @@ export function FluentPlayer({
 					src={resolved.url}
 					title={title}
 					allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
-					allowFullScreen
+					allowFullScreen={!watermark?.enabled}
 				/>
 			</PlayerFrame>
 		);
@@ -101,7 +145,14 @@ export function FluentPlayer({
 	if (resolved.provider === "CUSTOM_MP4") {
 		return (
 			<PlayerFrame watermark={watermark}>
-				<video className="h-full w-full" controls playsInline src={resolved.url} title={title}>
+				<video
+					className="h-full w-full"
+					controls
+					controlsList={watermark?.enabled ? "nofullscreen" : undefined}
+					playsInline
+					src={resolved.url}
+					title={title}
+				>
 					您的瀏覽器不支援 MP4 播放。
 				</video>
 			</PlayerFrame>
@@ -111,7 +162,14 @@ export function FluentPlayer({
 	if (resolved.provider === "HLS") {
 		return (
 			<PlayerFrame watermark={watermark}>
-				<video className="h-full w-full" controls playsInline src={resolved.url} title={title}>
+				<video
+					className="h-full w-full"
+					controls
+					controlsList={watermark?.enabled ? "nofullscreen" : undefined}
+					playsInline
+					src={resolved.url}
+					title={title}
+				>
 					您的瀏覽器不支援 HLS 播放。
 				</video>
 			</PlayerFrame>

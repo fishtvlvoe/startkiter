@@ -16,7 +16,7 @@ import {
 } from "@startkiter/ui";
 import { CourseStudioContentPreview } from "@shared/components/CourseStudioContentPreview";
 import { orpcClient } from "@shared/lib/orpc-client";
-import type { WatermarkOverlayProps } from "@startkiter/course";
+import type { WatermarkPlayerSettings } from "@startkiter/course";
 import { reorderLesson } from "./reorder-lessons";
 import { getCourseStudioErrorMessage, type CourseStudioErrorResponse } from "./studio-error-message";
 
@@ -79,7 +79,7 @@ interface StudioInstructorResponse {
 	user: { id: string; name: string; email: string };
 }
 
-type StudioWatermarkSetting = Omit<WatermarkOverlayProps, "email" | "courseTitle"> & {
+type StudioWatermarkSetting = Omit<WatermarkPlayerSettings, "email" | "courseTitle"> & {
 	id: string;
 	courseId: string;
 	tamperPauseEnabled: boolean;

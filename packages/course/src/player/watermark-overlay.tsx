@@ -16,6 +16,10 @@ export type WatermarkOverlayProps = {
 	moveIntervalSec: number;
 };
 
+export type WatermarkPlayerSettings = WatermarkOverlayProps & {
+	tamperPauseEnabled: boolean;
+};
+
 const STANDARD_POSITIONS = [
 	{ left: "18%", top: "18%", transform: "translate(-18%, -18%)" },
 	{ left: "82%", top: "24%", transform: "translate(-82%, -24%)" },

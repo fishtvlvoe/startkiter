@@ -1,5 +1,5 @@
 import { auth } from "@startkiter/auth";
-import type { WatermarkOverlayProps } from "@startkiter/course";
+import type { WatermarkPlayerSettings } from "@startkiter/course";
 import { userCanAccessCourseId } from "@startkiter/api/modules/course/lib/course-access";
 import { db } from "@startkiter/database";
 import { createProcedureClient, ORPCError } from "@orpc/server";
@@ -22,6 +22,8 @@ interface LessonData {
 	provider?: string;
 	content: string;
 	aiContext: string;
+	courseTitle: string;
+	watermarkSetting: Omit<WatermarkPlayerSettings, "email" | "courseTitle"> | null;
 }
 
 interface ChapterData {
@@ -29,8 +31,6 @@ interface ChapterData {
 	title: string;
 	lessons: LessonData[];
 }
-
-type WatermarkSetting = Omit<WatermarkOverlayProps, "email" | "courseTitle">;
 
 function normalizeWatermarkSetting(setting: {
 	enabled: boolean;
@@ -43,7 +43,7 @@ function normalizeWatermarkSetting(setting: {
 	movementMode: string;
 	moveIntervalSec: number;
 	tamperPauseEnabled: boolean;
-} | null): WatermarkSetting | null {
+	} | null): Omit<WatermarkPlayerSettings, "email" | "courseTitle"> | null {
 	if (!setting) return null;
 
 	return {
@@ -56,6 +56,7 @@ function normalizeWatermarkSetting(setting: {
 		textSize: setting.textSize === "SM" || setting.textSize === "LG" ? setting.textSize : "MD",
 		movementMode: setting.movementMode === "CORNERS" ? "CORNERS" : "STANDARD",
 		moveIntervalSec: Math.min(3600, Math.max(1, setting.moveIntervalSec)),
+		tamperPauseEnabled: setting.tamperPauseEnabled,
 	};
 }
 
@@ -131,6 +132,8 @@ export default async function LessonPage({ params }: LessonPageProps) {
 				provider: l.videoProvider || undefined,
 				content: l.content || "",
 				aiContext: l.aiContext || "",
+				courseTitle: ch.course.title,
+				watermarkSetting: normalizeWatermarkSetting(ch.course.watermarkSetting),
 			};
 
 			try {
@@ -163,8 +166,6 @@ export default async function LessonPage({ params }: LessonPageProps) {
 		chapter.lessons.some((lesson) => lesson.id === lessonId),
 	);
 	const courseId = currentChapter?.courseId;
-	const courseTitle = currentChapter?.course.title ?? "";
-	const watermarkSetting = normalizeWatermarkSetting(currentChapter?.course.watermarkSetting ?? null);
 	let showOnboardingSurvey = false;
 	if (session?.user?.id && courseId) {
 		const hasCourseAccess = await userCanAccessCourseId(session.user.id, courseId);
@@ -184,9 +185,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
 			<AcademyClassroomClient
 				initialLesson={currentLesson}
 				curriculum={curriculum}
-				courseTitle={courseTitle}
 				viewerEmail={session?.user?.email ?? ""}
-				watermarkSetting={watermarkSetting}
 			/>
 			{courseId && (
 				<OnboardingSurveyModal courseId={courseId} open={showOnboardingSurvey} />
