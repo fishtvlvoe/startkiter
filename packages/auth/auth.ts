@@ -89,21 +89,31 @@ export const auth = betterAuth({
 	},
 	hooks: {
 		after: createAuthMiddleware(async (ctx) => {
-			if (ctx.path.startsWith("/sign-in")) {
+			if (ctx.path.startsWith("/sign-in") || ctx.path.startsWith("/magic-link/verify")) {
 				const request = ctx.request;
 				if (!request) return;
 				const body = ctx.body as { email?: unknown; loginHint?: unknown } | undefined;
+				const query = ctx.query as { email?: unknown } | undefined;
 				const returned = ctx.context.returned;
+				const loginAuditContext = ctx.context as typeof ctx.context & { loginAttemptEmail?: string };
 				const email =
 					typeof body?.email === "string"
 						? body.email
 						: typeof body?.loginHint === "string"
 							? body.loginHint
-							: "unknown";
+							: typeof query?.email === "string"
+								? query.email
+								: loginAuditContext.loginAttemptEmail ??
+									(typeof returned === "object" && returned !== null && "user" in returned &&
+									 typeof returned.user === "object" && returned.user !== null &&
+									 "email" in returned.user && typeof returned.user.email === "string"
+										? returned.user.email
+										: "unknown");
+				const isRedirectSuccess = isAPIError(returned) && returned.statusCode >= 300 && returned.statusCode < 400;
 				recordLoginAttempt(
 					email,
 					getIp(request, ctx.context.options) ?? "unknown",
-					!isAPIError(returned),
+					!isAPIError(returned) || isRedirectSuccess,
 					request.headers.get("user-agent") ?? undefined,
 				);
 			} else if (ctx.path.startsWith("/organization/accept-invitation")) {
@@ -131,6 +141,23 @@ export const auth = betterAuth({
 			}
 		}),
 		before: createAuthMiddleware(async (ctx) => {
+			if (ctx.path.startsWith("/magic-link/verify")) {
+				const token = (ctx.query as { token?: unknown } | undefined)?.token;
+				if (typeof token === "string") {
+					try {
+						const verification = await ctx.context.internalAdapter.findVerificationValue(token);
+						if (verification?.value) {
+							const value = JSON.parse(verification.value) as { email?: unknown };
+							if (typeof value.email === "string") {
+								(ctx.context as typeof ctx.context & { loginAttemptEmail?: string }).loginAttemptEmail = value.email;
+							}
+						}
+					} catch {
+						// Audit enrichment is best effort; a lookup failure must not block verification.
+					}
+				}
+			}
+
 			if (ctx.path.startsWith("/delete-user") || ctx.path.startsWith("/organization/delete")) {
 				const userId = ctx.context.session?.session.userId;
 				const { organizationId } = ctx.body;
