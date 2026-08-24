@@ -34,6 +34,11 @@ import {
 	prepareLessonMessageAttachment,
 	sendLessonMessage,
 } from "./procedures/send-lesson-message";
+import { registerMedia } from "./procedures/register-media";
+import { listMedia } from "./procedures/list-media";
+import { deleteMedia } from "./procedures/delete-media";
+import { mediaUploadUrl } from "./procedures/media-upload-url";
+import { setCourseCoverMedia } from "./procedures/set-course-cover-media";
 
 export const courseRouter = publicProcedure.router({
 	// 1. 公開/試看課綱大綱 (Public)
@@ -209,6 +214,11 @@ export const courseRouter = publicProcedure.router({
 	listLessonMessages,
 	operatorListLessonMessages,
 	markLessonMessageRead,
+	registerMedia,
+	listMedia,
+	deleteMedia,
+	mediaUploadUrl,
+	setCourseCoverMedia,
 
 	// 6. 智慧影音來源解析 (Admin)
 	resolveVideo: adminProcedure

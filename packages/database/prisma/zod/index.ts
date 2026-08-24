@@ -126,9 +126,15 @@ export type SupportTicketScalarFieldEnum = z.infer<typeof SupportTicketScalarFie
 
 // File: CourseScalarFieldEnum.schema.ts
 
-export const CourseScalarFieldEnumSchema = z.enum(['id', 'slug', 'title', 'description', 'status', 'createdAt', 'updatedAt'])
+export const CourseScalarFieldEnumSchema = z.enum(['id', 'slug', 'title', 'description', 'coverImageUrl', 'status', 'createdAt', 'updatedAt'])
 
 export type CourseScalarFieldEnum = z.infer<typeof CourseScalarFieldEnumSchema>;
+
+// File: MediaScalarFieldEnum.schema.ts
+
+export const MediaScalarFieldEnumSchema = z.enum(['id', 'type', 'provider', 'sourceId', 'url', 'filename', 'mimeType', 'size', 'uploadedBy', 'createdAt', 'usageType', 'usageId'])
+
+export type MediaScalarFieldEnum = z.infer<typeof MediaScalarFieldEnumSchema>;
 
 // File: CourseInstructorScalarFieldEnum.schema.ts
 
@@ -441,6 +447,18 @@ export type SupportTicketResolvedBy = z.infer<typeof SupportTicketResolvedBySche
 export const PublishStatusSchema = z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED'])
 
 export type PublishStatus = z.infer<typeof PublishStatusSchema>;
+
+// File: MediaType.schema.ts
+
+export const MediaTypeSchema = z.enum(['VIDEO', 'IMAGE'])
+
+export type MediaType = z.infer<typeof MediaTypeSchema>;
+
+// File: MediaSourceType.schema.ts
+
+export const MediaSourceTypeSchema = z.enum(['MANUAL', 'LESSON_CONTENT', 'COURSE_COVER'])
+
+export type MediaSourceType = z.infer<typeof MediaSourceTypeSchema>;
 
 // File: SubscriptionInterval.schema.ts
 
@@ -811,6 +829,7 @@ export const CourseSchema = z.object({
   slug: z.string(),
   title: z.string(),
   description: z.string().nullish(),
+  coverImageUrl: z.string().nullish(),
   status: PublishStatusSchema.default("PUBLISHED"),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -818,6 +837,25 @@ export const CourseSchema = z.object({
 
 export type CourseType = z.infer<typeof CourseSchema>;
 
+
+// File: Media.schema.ts
+
+export const MediaSchema = z.object({
+  id: z.string(),
+  type: MediaTypeSchema,
+  provider: z.string().nullish(),
+  sourceId: z.string().nullish(),
+  url: z.string(),
+  filename: z.string().nullish(),
+  mimeType: z.string().nullish(),
+  size: z.number().int().nullish(),
+  uploadedBy: z.string(),
+  createdAt: z.date(),
+  usageType: MediaSourceTypeSchema.default("MANUAL"),
+  usageId: z.string().nullish(),
+});
+
+export type MediaModel = z.infer<typeof MediaSchema>;
 
 // File: CourseInstructor.schema.ts
 

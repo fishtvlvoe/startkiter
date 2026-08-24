@@ -4,13 +4,14 @@ import { NextResponse } from "next/server";
 export const GET = async (_req: Request, { params }: { params: Promise<{ path: string[] }> }) => {
 	const { path } = await params;
 
-	const [bucket, filePath] = path;
+	const [bucket, ...filePathParts] = path;
+	const filePath = filePathParts.join("/");
 
 	if (!(bucket && filePath)) {
 		return new Response("Invalid path", { status: 400 });
 	}
 
-	if (bucket === "avatars") {
+	if (bucket === "avatars" || bucket === "media") {
 		const signedUrl = await getSignedUrl(filePath, {
 			bucket,
 			expiresIn: 60 * 60,

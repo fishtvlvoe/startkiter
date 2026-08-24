@@ -19,6 +19,7 @@ import { orpcClient } from "@shared/lib/orpc-client";
 import type { WatermarkPlayerSettings } from "@startkiter/course";
 import { reorderLesson } from "./reorder-lessons";
 import { getCourseStudioErrorMessage, type CourseStudioErrorResponse } from "./studio-error-message";
+import { MediaPicker, type MediaPickerValue } from "@course/components/MediaPicker";
 
 type ProviderType = "BUNNY" | "YOUTUBE" | "VIMEO" | "CUSTOM_MP4" | "HLS";
 
@@ -101,6 +102,7 @@ const DEFAULT_WATERMARK_SETTING: Omit<StudioWatermarkSetting, "id" | "courseId">
 interface StudioCourseResponse {
 	id: string;
 	title: string;
+	coverImageUrl: string | null;
 	chapters: Array<{
 		id: string;
 		courseId: string;
@@ -293,6 +295,15 @@ export default function CourseAdminStudioPage() {
 			setResolvedCard({ provider: "CUSTOM_MP4", status: "invalid" });
 		}
 	};
+
+	function handleSelectedVideo(media: MediaPickerValue) {
+		setVideoInputUrl(media.url);
+		setResolvedCard({
+			provider: media.provider as ProviderType,
+			sourceId: media.sourceId ?? undefined,
+			status: "valid",
+		});
+	}
 
 	// 新增資料夾
 	const handleCreateFolder = () => {
@@ -695,6 +706,24 @@ export default function CourseAdminStudioPage() {
 				</Card>
 
 				{isOperator && courseId ? (
+					<Card className="space-y-3 p-4" data-testid="course-cover-settings">
+						<div>
+							<h2 className="text-base font-semibold text-neutral-200">課程封面</h2>
+							<p className="text-xs text-neutral-400">上傳或選擇媒體庫圖片，公開課程頁會顯示最新封面。</p>
+						</div>
+						<MediaPicker
+							type="IMAGE"
+							usageType="COURSE_COVER"
+							usageId={courseId}
+							value={selectedCourse?.coverImageUrl}
+							onSelect={(media) => {
+								setCourses((current) => current.map((course) => course.id === courseId ? { ...course, coverImageUrl: media.url } : course));
+							}}
+						/>
+					</Card>
+				) : null}
+
+				{isOperator && courseId ? (
 					<Card className="space-y-4 p-4" data-testid="watermark-settings">
 						<div className="flex items-center justify-between gap-3">
 							<div>
@@ -1078,15 +1107,15 @@ export default function CourseAdminStudioPage() {
 									</span>
 								</div>
 
-								<div>
-									<Label>貼上影片網址 (自動解析)</Label>
-									<Input
+								{selectedLesson ? (
+									<MediaPicker
+										type="VIDEO"
+										usageType="LESSON_CONTENT"
+										usageId={selectedLesson.id}
 										value={videoInputUrl}
-										onChange={(e) => handleVideoUrlChange(e.target.value)}
-										placeholder="https://iframe.mediadelivery.net/... 或 https://www.youtube.com/watch?v=..."
-										className="mt-1 font-mono text-xs"
+										onSelect={handleSelectedVideo}
 									/>
-								</div>
+								) : null}
 
 								{/* 自動解析資訊卡 */}
 								{resolvedCard && (

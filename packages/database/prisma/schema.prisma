@@ -59,6 +59,7 @@ model User {
   lessonComments           LessonComment[]
   lessonPrivateMessages    LessonPrivateMessage[]
   lessonMessageUploadIntents LessonMessageUploadIntent[]
+  media                    Media[]
   courseInviteRedemptions  CourseInviteRedemption[]
   onboardingSurveyResponses CourseOnboardingSurveyResponse[]
   courseInstructorAssignments CourseInstructor[] @relation("CourseInstructorUser")
@@ -453,6 +454,17 @@ enum VideoProvider {
   HLS
 }
 
+enum MediaType {
+  VIDEO
+  IMAGE
+}
+
+enum MediaSourceType {
+  MANUAL
+  LESSON_CONTENT
+  COURSE_COVER
+}
+
 enum PublishStatus {
   DRAFT
   PUBLISHED
@@ -481,6 +493,7 @@ model Course {
   slug        String        @unique
   title       String
   description String?       @db.Text
+  coverImageUrl String?
   status      PublishStatus @default(PUBLISHED)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
@@ -495,6 +508,28 @@ model Course {
   watermarkSetting CourseVideoWatermarkSetting?
 
   @@map("course")
+}
+
+model Media {
+  id          String          @id @default(cuid())
+  type        MediaType
+  provider    String?
+  sourceId    String?
+  url         String
+  filename    String?
+  mimeType    String?
+  size        Int?
+  uploadedBy  String
+  createdAt   DateTime        @default(now())
+  usageType   MediaSourceType @default(MANUAL)
+  usageId     String?
+
+  user        User            @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
+
+  @@index([type])
+  @@index([usageType])
+  @@index([usageId])
+  @@map("media")
 }
 
 model CourseInstructor {

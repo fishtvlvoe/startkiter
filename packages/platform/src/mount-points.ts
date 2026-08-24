@@ -104,4 +104,14 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		},
 		dataSpec: "none",
 	},
+	{
+		id: "media-library",
+		name: "課程媒體庫",
+		version: "0.1.0",
+		mount: {
+			route: { path: "/admin/media" },
+			menu: { label: "媒體庫", icon: "image", order: 17, requiresOperator: true },
+		},
+		dataSpec: "none",
+	},
 ];

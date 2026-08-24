@@ -7,6 +7,8 @@ export interface StorageBucketNamesConfig {
 	assignments: string;
 	/** Bucket used for private lesson message attachments. */
 	lessonMessages: string;
+	/** Bucket used for course media library image uploads. */
+	media: string;
 }
 
 export interface StorageConfig {
