@@ -8,7 +8,6 @@ import { courseOperatorProcedure, isCourseOperator } from "../lib/course-operato
 import {
 	buildLessonMessageStorageKey,
 	createLessonMessageUploadToken,
-	deleteLessonMessageUploadObject,
 	getLessonMessageSignedDownloadUrl,
 	getLessonMessageSignedUploadUrl,
 	lessonMessageUploadMatches,
@@ -92,41 +91,35 @@ export const sendLessonMessage = protectedProcedure
 			) {
 				throw new ORPCError("BAD_REQUEST", { message: "附件尚未完成上傳。" });
 			}
-			let claimed = false;
-			try {
-				const message = await db.$transaction(async (tx) => {
-					const intent = await tx.lessonMessageUploadIntent.updateMany({
-						where: {
-							id: upload.intentId,
-							lessonId: input.lessonId,
-							userId: context.user.id,
-							storageKey: upload.storageKey,
-							status: "PENDING",
-							expiresAt: { gt: new Date() },
-						},
-						data: { status: "FINALIZED" },
-					});
-					if (intent.count !== 1) throw new ORPCError("BAD_REQUEST", { message: "附件上傳驗證已失效或已使用。" });
-					claimed = true;
-					return tx.lessonPrivateMessage.create({
-						data: {
-							lessonId: input.lessonId,
-							userId,
-							content: input.content,
-							attachmentStorageKey: upload.storageKey,
-							attachmentName: attachment.filename,
-							attachmentMimeType: attachment.mimeType,
-							attachmentSize: attachment.size,
-							isFromTeacher: input.isFromTeacher,
-							readByTeacher: input.isFromTeacher,
-						},
-					});
+			const message = await db.$transaction(async (tx) => {
+				const intent = await tx.lessonMessageUploadIntent.updateMany({
+					where: {
+						id: upload.intentId,
+						lessonId: input.lessonId,
+						userId: context.user.id,
+						storageKey: upload.storageKey,
+						status: "PENDING",
+						expiresAt: { gt: new Date() },
+					},
+					data: { status: "FINALIZED", cleanupClaimedAt: null },
 				});
-				return { ...(await withAttachmentUrl(message)), signedUploadUrl: null };
-			} catch (error) {
-				if (claimed) await deleteLessonMessageUploadObject(upload.storageKey).catch(() => undefined);
-				throw error;
-			}
+				if (intent.count !== 1) throw new ORPCError("BAD_REQUEST", { message: "附件上傳驗證已失效或已使用。" });
+				return tx.lessonPrivateMessage.create({
+					data: {
+						lessonId: input.lessonId,
+						userId,
+						content: input.content,
+						attachmentStorageKey: upload.storageKey,
+						attachmentName: attachment.filename,
+						attachmentMimeType: attachment.mimeType,
+						attachmentSize: attachment.size,
+						isFromTeacher: input.isFromTeacher,
+						readByTeacher: input.isFromTeacher,
+					},
+				});
+			});
+			// The transaction has committed. A transient download-signing failure must not delete the committed object.
+			return { ...(await withAttachmentUrl(message)), signedUploadUrl: null };
 		}
 		const message = await db.lessonPrivateMessage.create({
 			data: {

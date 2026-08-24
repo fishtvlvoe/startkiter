@@ -763,6 +763,7 @@ model LessonPrivateMessage {
 enum LessonMessageUploadIntentStatus {
   PENDING
   FINALIZED
+  CLEANING
 }
 
 model LessonMessageUploadIntent {
@@ -775,12 +776,13 @@ model LessonMessageUploadIntent {
   size         Int
   status       LessonMessageUploadIntentStatus @default(PENDING)
   expiresAt    DateTime
+  cleanupClaimedAt DateTime?
   createdAt    DateTime                       @default(now())
 
   lesson       Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([status, expiresAt])
+  @@index([status, expiresAt, cleanupClaimedAt])
   @@map("lesson_message_upload_intent")
 }
 

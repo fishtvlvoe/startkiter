@@ -210,7 +210,7 @@ export type LessonPrivateMessageScalarFieldEnum = z.infer<typeof LessonPrivateMe
 
 // File: LessonMessageUploadIntentScalarFieldEnum.schema.ts
 
-export const LessonMessageUploadIntentScalarFieldEnumSchema = z.enum(['id', 'lessonId', 'userId', 'storageKey', 'filename', 'contentType', 'size', 'status', 'expiresAt', 'createdAt'])
+export const LessonMessageUploadIntentScalarFieldEnumSchema = z.enum(['id', 'lessonId', 'userId', 'storageKey', 'filename', 'contentType', 'size', 'status', 'expiresAt', 'cleanupClaimedAt', 'createdAt'])
 
 export type LessonMessageUploadIntentScalarFieldEnum = z.infer<typeof LessonMessageUploadIntentScalarFieldEnumSchema>;
 
@@ -468,7 +468,7 @@ export type VideoProvider = z.infer<typeof VideoProviderSchema>;
 
 // File: LessonMessageUploadIntentStatus.schema.ts
 
-export const LessonMessageUploadIntentStatusSchema = z.enum(['PENDING', 'FINALIZED'])
+export const LessonMessageUploadIntentStatusSchema = z.enum(['PENDING', 'FINALIZED', 'CLEANING'])
 
 export type LessonMessageUploadIntentStatus = z.infer<typeof LessonMessageUploadIntentStatusSchema>;
 
@@ -1069,6 +1069,7 @@ export const LessonMessageUploadIntentSchema = z.object({
   size: z.number().int(),
   status: LessonMessageUploadIntentStatusSchema.default("PENDING"),
   expiresAt: z.date(),
+  cleanupClaimedAt: z.date().nullish(),
   createdAt: z.date(),
 });
 
