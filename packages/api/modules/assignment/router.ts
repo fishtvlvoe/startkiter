@@ -22,6 +22,7 @@ import {
 	getAssignmentSignedDownloadUrl,
 	getAssignmentSignedUploadUrl,
 	isAssignmentStorageConfigured,
+	MAX_LOCAL_ASSIGNMENT_UPLOAD_BYTES,
 	MAX_LOCAL_ASSIGNMENT_UPLOAD_SIZE,
 } from "./assignment-upload";
 import {
@@ -175,6 +176,15 @@ export const assignmentRouter = {
 				const pendingIntentCount = await tx.assignmentUploadIntent.count({
 					where: { pluginContentId: definition.id, userId: context.user.id, status: { in: ["PENDING", "UPLOADED"] }, expiresAt: { gt: new Date() }, submission: { status: "DRAFT" } },
 				});
+				if (!isAssignmentStorageConfigured()) {
+					const pendingIntentSize = await tx.assignmentUploadIntent.aggregate({
+						where: { pluginContentId: definition.id, userId: context.user.id, status: { in: ["PENDING", "UPLOADED"] }, expiresAt: { gt: new Date() }, submission: { status: "DRAFT" } },
+						_sum: { size: true },
+					});
+					if ((pendingIntentSize._sum.size ?? 0) + input.size > MAX_LOCAL_ASSIGNMENT_UPLOAD_BYTES) {
+						throw new ORPCError("BAD_REQUEST", { message: "本機開發中同一份作業的附件總量上限為 20 MB，請減少檔案數量或大小。" });
+					}
+				}
 				const maxPendingIntents = Math.max(definition.body.maxFiles * 2, 2);
 				if (pendingIntentCount >= maxPendingIntents) {
 					throw new ORPCError("BAD_REQUEST", { message: "待上傳附件過多，請完成或重新整理目前的上傳。" });

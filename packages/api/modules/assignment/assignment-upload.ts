@@ -4,7 +4,8 @@ import { deleteObject, getSignedUrl, getSignedUploadUrl, headObject } from "@sta
 const LOCAL_TOKEN_VERSION = "assignment-upload-v1";
 const LOCAL_OBJECT_TTL_MS = 10 * 60_000;
 const MAX_LOCAL_OBJECTS = 1_000;
-const MAX_LOCAL_BYTES = 20 * 1024 * 1024;
+export const MAX_LOCAL_ASSIGNMENT_UPLOAD_BYTES = 20 * 1024 * 1024;
+const MAX_LOCAL_BYTES = MAX_LOCAL_ASSIGNMENT_UPLOAD_BYTES;
 export const MAX_LOCAL_ASSIGNMENT_UPLOAD_SIZE = 10_000_000;
 export const MAX_LOCAL_ASSIGNMENT_UPLOAD_TOKEN_LENGTH = 4_096;
 const MAX_ASSIGNMENT_UPLOAD_SIZE = 100_000_000;
