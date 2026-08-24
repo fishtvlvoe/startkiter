@@ -46,11 +46,11 @@
 
 ## 11. Review 與回歸驗證
 
-- [ ] 11.1 grep `Order.sku`／`courseAccess`／`kitClaimEligible`／`CourseSubscription.paidPeriods` 所有既有引用點，確認本次新增的 `Invoice` model 與 webhook 觸發路徑未破壞既有一次買斷與訂閱期款的既有測試斷言。驗證目標：`pnpm --filter @startkiter/api test`／`pnpm --filter @startkiter/saas test` 既有測試（不含本次新增案例）全數維持綠燈，無回歸
-- [ ] 11.2 派 Codex 或等效工具對本次全部 diff（task 2-10）做 Code Review（correctness／security／performance 三角度）：correctness 確認 CHECK 約束與唯一鍵行為符合 task 1.1 案例、security 確認電子發票金鑰不會被記錄進任何 log、`SETTINGS_ENCRYPTION_KEY` 解密失敗時 fail-closed（視為未設定，不拋出可能洩漏金鑰片段的錯誤訊息）、未登入或非 operator 呼叫作廢/折讓操作皆被拒絕，performance 確認 `triggerInvoiceForOrder`／`triggerInvoiceForSubscriptionPeriod` 的開票呼叫不會阻塞 webhook 回應（webhook 需在 provider 逾時前完成既有付款成功回應）。驗證方式：CR 報告 Critical 數量為 0（PM 覆核）
+- [x] 11.1 grep `Order.sku`／`courseAccess`／`kitClaimEligible`／`CourseSubscription.paidPeriods` 所有既有引用點，確認本次新增的 `Invoice` model 與 webhook 觸發路徑未破壞既有一次買斷與訂閱期款的既有測試斷言。驗證目標：`pnpm --filter @startkiter/api test`／`pnpm --filter @startkiter/saas test` 既有測試（不含本次新增案例）全數維持綠燈，無回歸
+- [x] 11.2 派 Codex 或等效工具對本次全部 diff（task 2-10）做 Code Review（correctness／security／performance 三角度）：correctness 確認 CHECK 約束與唯一鍵行為符合 task 1.1 案例、security 確認電子發票金鑰不會被記錄進任何 log、`SETTINGS_ENCRYPTION_KEY` 解密失敗時 fail-closed（視為未設定，不拋出可能洩漏金鑰片段的錯誤訊息）、未登入或非 operator 呼叫作廢/折讓操作皆被拒絕，performance 確認 `triggerInvoiceForOrder`／`triggerInvoiceForSubscriptionPeriod` 的開票呼叫不會阻塞 webhook 回應（webhook 需在 provider 逾時前完成既有付款成功回應）。驗證方式：CR 報告 Critical 數量為 0（PM 覆核）
 - [ ] 11.3 用 ego-browser skill 跑一次完整 e2e：登入買家帳號 → 結帳（一次買斷）時選擇公司發票（填統編抬頭）→ 送出訂單 → 以測試金鑰模擬付款成功通知 → 確認訂單頁看到「已開立」發票狀態與正確的發票號碼格式 → 操作員在訂單頁對該筆發票點「作廢」成功 → 再跑一次訂閱結帳流程確認同樣能看到 `Invoice` 建立。驗證目標：截圖記錄每個關鍵畫面（結帳發票選擇、訂單頁發票狀態、作廢後狀態），過程中任何一步失敗即視為本 task 未完成
-- [ ] 11.4 跑 `spectra analyze subscriptions-invoice --json` 與 `spectra validate subscriptions-invoice`，確認 Coverage／Consistency／Ambiguity／Gaps 四個維度皆為 Clean 或僅有 Suggestion。驗證目標：無 Critical／Warning，且 0 warnings／0 errors
-- [ ] 11.5 逐項核對 design.md Implementation Contract 的 Acceptance criteria 與 Scope boundaries 是否全部滿足：跑 `pnpm --filter @startkiter/api test`／`pnpm --filter @startkiter/saas test`／`pnpm type-check`／`pnpm build`，確認全數綠燈；`git diff --stat` 核對改動檔案清單與 Scope boundaries 一致，`packages/payments/factory.ts`／`packages/api/modules/course/lib/subscription-gateway.ts` 未被修改。驗證目標：所有指令 exit code 為 0
+- [x] 11.4 跑 `spectra analyze subscriptions-invoice --json` 與 `spectra validate subscriptions-invoice`，確認 Coverage／Consistency／Ambiguity／Gaps 四個維度皆為 Clean 或僅有 Suggestion。驗證目標：無 Critical／Warning，且 0 warnings／0 errors
+- [x] 11.5 逐項核對 design.md Implementation Contract 的 Acceptance criteria 與 Scope boundaries 是否全部滿足：跑 `pnpm --filter @startkiter/api test`／`pnpm --filter @startkiter/saas test`／`pnpm type-check`／`pnpm build`，確認全數綠燈；`git diff --stat` 核對改動檔案清單與 Scope boundaries 一致，`packages/payments/factory.ts`／`packages/api/modules/course/lib/subscription-gateway.ts` 未被修改。驗證目標：所有指令 exit code 為 0
 
 ## 12. 需要 Fish 親自操作的部分（提前告知，不等最後）
 
