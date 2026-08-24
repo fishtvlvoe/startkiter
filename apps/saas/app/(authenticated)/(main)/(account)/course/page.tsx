@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 
 import { MVP_SKU } from "@startkiter/payments/constants";
 import { localizeLesson } from "@course/lib/localize-lesson";
+import { CourseReviewPanel } from "./course-review-panel";
 
 async function hasCourseAccess(userId: string) {
 	return canAccessCourse(userId, {
@@ -26,6 +27,12 @@ export default async function CoursePage() {
 	}
 
 	const entitled = await hasCourseAccess(session.user.id);
+	const course = entitled
+		? await db.course.findFirst({
+				where: { status: "PUBLISHED", chapters: { some: { lessons: { some: { status: "PUBLISHED" } } } } },
+				select: { id: true },
+			})
+		: null;
 	const t = await getTranslations("course");
 	const rawLessons = listLessons();
 	const lessons = rawLessons.map((lesson) => localizeLesson(lesson, t));
@@ -84,6 +91,8 @@ export default async function CoursePage() {
 					)}
 				</Card>
 			</div>
+
+			{entitled && course && <CourseReviewPanel courseId={course.id} />}
 		</div>
 	);
 }

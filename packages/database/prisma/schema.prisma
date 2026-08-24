@@ -48,6 +48,10 @@ model User {
   courseSubscriptions      CourseSubscription[]
   pluginContents           PluginContent[]
   quizAttempts             QuizAttempt[]
+  courseReviews            CourseReview[]
+  reviewHelpfulVotes       ReviewHelpful[]
+  reviewReports            ReviewReport[]
+  lessonComments           LessonComment[]
   mcpConnections           McpConnection[]
 
   @@unique([email])
@@ -634,6 +638,73 @@ model PluginContent {
 
   @@index([pluginId, type])
   @@index([authorId])
+}
+
+model CourseReview {
+  id           String   @id @default(cuid())
+  courseId     String
+  userId       String
+  rating       Int
+  content      String?  @db.Text
+  isVisible    Boolean  @default(true)
+  helpfulCount Int      @default(0)
+  replyContent String?  @db.Text
+  replyAt      DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  helpfulVotes ReviewHelpful[]
+  reports      ReviewReport[]
+
+  @@unique([userId, courseId])
+  @@index([courseId])
+  @@map("course_review")
+}
+
+model ReviewHelpful {
+  id        String       @id @default(cuid())
+  reviewId  String
+  userId    String
+  createdAt DateTime     @default(now())
+
+  review    CourseReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, reviewId])
+  @@map("review_helpful")
+}
+
+model ReviewReport {
+  id        String       @id @default(cuid())
+  reviewId  String
+  userId    String
+  reason    String       @db.Text
+  createdAt DateTime     @default(now())
+
+  review    CourseReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, reviewId])
+  @@map("review_report")
+}
+
+model LessonComment {
+  id          String    @id @default(cuid())
+  lessonId    String
+  userId      String
+  content     String    @db.Text
+  isAnonymous Boolean   @default(false)
+  isRead      Boolean   @default(false)
+  deletedAt   DateTime?
+  deletedBy   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId, createdAt])
+  @@map("lesson_comment")
 }
 
 model QuizAttempt {

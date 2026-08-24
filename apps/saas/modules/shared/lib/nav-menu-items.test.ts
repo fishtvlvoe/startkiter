@@ -14,14 +14,15 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 
 			// Operator should additionally see the requiresOperator items, sorted by order.
 			expect(operatorItems.map((item) => item.label)).toEqual([
-			"開始",
-			"課程",
-			"客服",
-			"帳號設定",
-			"後台設定",
-			"測驗管理",
-			"課程綁定包",
-		]);
+				"開始",
+				"課程",
+				"客服",
+				"帳號設定",
+				"後台設定",
+				"測驗管理",
+				"評價與留言管理",
+				"課程綁定包",
+			]);
 			for (let i = 1; i < operatorItems.length; i++) {
 				expect(operatorItems[i]!.order).toBeGreaterThan(operatorItems[i - 1]!.order);
 			}

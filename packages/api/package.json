@@ -18,6 +18,7 @@
 		"@startkiter/ai": "workspace:*",
 		"@startkiter/auth": "workspace:*",
 		"@startkiter/course": "workspace:*",
+		"@startkiter/course-review": "workspace:*",
 		"@startkiter/course-quiz": "workspace:*",
 		"@startkiter/database": "workspace:*",
 		"@startkiter/i18n": "workspace:*",

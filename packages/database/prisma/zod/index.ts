@@ -178,6 +178,30 @@ export const PluginContentScalarFieldEnumSchema = z.enum(['id', 'pluginId', 'typ
 
 export type PluginContentScalarFieldEnum = z.infer<typeof PluginContentScalarFieldEnumSchema>;
 
+// File: CourseReviewScalarFieldEnum.schema.ts
+
+export const CourseReviewScalarFieldEnumSchema = z.enum(['id', 'courseId', 'userId', 'rating', 'content', 'isVisible', 'helpfulCount', 'replyContent', 'replyAt', 'createdAt', 'updatedAt'])
+
+export type CourseReviewScalarFieldEnum = z.infer<typeof CourseReviewScalarFieldEnumSchema>;
+
+// File: ReviewHelpfulScalarFieldEnum.schema.ts
+
+export const ReviewHelpfulScalarFieldEnumSchema = z.enum(['id', 'reviewId', 'userId', 'createdAt'])
+
+export type ReviewHelpfulScalarFieldEnum = z.infer<typeof ReviewHelpfulScalarFieldEnumSchema>;
+
+// File: ReviewReportScalarFieldEnum.schema.ts
+
+export const ReviewReportScalarFieldEnumSchema = z.enum(['id', 'reviewId', 'userId', 'reason', 'createdAt'])
+
+export type ReviewReportScalarFieldEnum = z.infer<typeof ReviewReportScalarFieldEnumSchema>;
+
+// File: LessonCommentScalarFieldEnum.schema.ts
+
+export const LessonCommentScalarFieldEnumSchema = z.enum(['id', 'lessonId', 'userId', 'content', 'isAnonymous', 'isRead', 'deletedAt', 'deletedBy', 'createdAt', 'updatedAt'])
+
+export type LessonCommentScalarFieldEnum = z.infer<typeof LessonCommentScalarFieldEnumSchema>;
+
 // File: QuizAttemptScalarFieldEnum.schema.ts
 
 export const QuizAttemptScalarFieldEnumSchema = z.enum(['id', 'userId', 'pluginContentId', 'answers', 'score', 'passed', 'timeTakenSeconds', 'startedAt', 'submittedAt'])
@@ -850,6 +874,68 @@ export const PluginContentSchema = z.object({
 });
 
 export type PluginContentType = z.infer<typeof PluginContentSchema>;
+
+
+// File: CourseReview.schema.ts
+
+export const CourseReviewSchema = z.object({
+  id: z.string(),
+  courseId: z.string(),
+  userId: z.string(),
+  rating: z.number().int(),
+  content: z.string().nullish(),
+  isVisible: z.boolean().default(true),
+  helpfulCount: z.number().int(),
+  replyContent: z.string().nullish(),
+  replyAt: z.date().nullish(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type CourseReviewType = z.infer<typeof CourseReviewSchema>;
+
+
+// File: ReviewHelpful.schema.ts
+
+export const ReviewHelpfulSchema = z.object({
+  id: z.string(),
+  reviewId: z.string(),
+  userId: z.string(),
+  createdAt: z.date(),
+});
+
+export type ReviewHelpfulType = z.infer<typeof ReviewHelpfulSchema>;
+
+
+// File: ReviewReport.schema.ts
+
+export const ReviewReportSchema = z.object({
+  id: z.string(),
+  reviewId: z.string(),
+  userId: z.string(),
+  reason: z.string(),
+  createdAt: z.date(),
+});
+
+export type ReviewReportType = z.infer<typeof ReviewReportSchema>;
+
+
+// File: LessonComment.schema.ts
+
+export const LessonCommentSchema = z.object({
+  id: z.string(),
+  lessonId: z.string(),
+  userId: z.string(),
+  content: z.string(),
+  isAnonymous: z.boolean(),
+  isRead: z.boolean(),
+  deletedAt: z.date().nullish(),
+  deletedBy: z.string().nullish(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type LessonCommentType = z.infer<typeof LessonCommentSchema>;
 
 
 // File: QuizAttempt.schema.ts

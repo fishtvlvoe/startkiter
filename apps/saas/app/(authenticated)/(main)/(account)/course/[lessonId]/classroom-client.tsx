@@ -9,6 +9,8 @@ import { extractLessonBlockIds, FluentPlayer, LessonMdx } from "@startkiter/cour
 import { resolveVideoSource } from "@startkiter/api/modules/course/lib/video-resolver";
 import { orpc } from "@shared/lib/orpc-query-utils";
 
+import { LessonCommentsPanel } from "./lesson-comments-panel";
+
 interface LessonData {
 	id: string;
 	title: string;
@@ -278,6 +280,7 @@ export function AcademyClassroomClient({
 								/>
 							</div>
 						</div>
+						<LessonCommentsPanel lessonId={currentLesson.id} />
 					</div>
 				</div>
 

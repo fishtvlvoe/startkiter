@@ -34,6 +34,16 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		dataSpec: "content",
 	},
 	{
+		id: "review",
+		name: "課程評價與留言",
+		version: "0.1.0",
+		mount: {
+			route: { path: "/review-admin" },
+			menu: { label: "評價與留言管理", icon: "message-square", order: 6, requiresOperator: true },
+		},
+		dataSpec: "none",
+	},
+	{
 		id: "chatbot",
 		name: "客服",
 		version: "0.1.0",
