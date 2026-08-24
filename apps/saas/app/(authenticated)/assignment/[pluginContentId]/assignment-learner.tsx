@@ -50,7 +50,7 @@ export function AssignmentLearner({ assignment }: { assignment: Assignment }) {
 				content,
 				contentFormat: assignment.body.editorMode,
 				revision,
-			}).catch(() => undefined);
+			}).then((saved) => { draftRevision.current = Math.max(draftRevision.current, saved.revision); }).catch(() => undefined);
 		}, 800);
 		return () => window.clearTimeout(timer);
 	}, [assignment.body.editorMode, assignment.id, content, hasLoadedDraft]);
@@ -75,7 +75,8 @@ export function AssignmentLearner({ assignment }: { assignment: Assignment }) {
 		setIsWorking(true);
 		try {
 			await uploadSelectedFile();
-			await orpcClient.assignment.saveDraft({ pluginContentId: assignment.id, content, contentFormat: assignment.body.editorMode, revision: ++draftRevision.current });
+			const saved = await orpcClient.assignment.saveDraft({ pluginContentId: assignment.id, content, contentFormat: assignment.body.editorMode, revision: ++draftRevision.current });
+			draftRevision.current = Math.max(draftRevision.current, saved.revision);
 			setMessage("草稿已儲存。");
 		} catch {
 			setError("草稿儲存失敗，請確認附件格式與大小。");
@@ -90,7 +91,8 @@ export function AssignmentLearner({ assignment }: { assignment: Assignment }) {
 		setIsWorking(true);
 		try {
 			const uploaded = await uploadSelectedFile();
-			await orpcClient.assignment.saveDraft({ pluginContentId: assignment.id, content, contentFormat: assignment.body.editorMode, revision: ++draftRevision.current });
+			const saved = await orpcClient.assignment.saveDraft({ pluginContentId: assignment.id, content, contentFormat: assignment.body.editorMode, revision: ++draftRevision.current });
+			draftRevision.current = Math.max(draftRevision.current, saved.revision);
 			await orpcClient.assignment.submit({ pluginContentId: assignment.id, submissionId: uploaded?.submissionId ?? submissionId, content, contentFormat: assignment.body.editorMode, attachments: uploaded ? [uploaded.attachment] : [] });
 			setMessage("作業已送出，等待批改。");
 		} catch {

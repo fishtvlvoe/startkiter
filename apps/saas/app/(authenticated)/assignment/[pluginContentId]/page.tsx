@@ -22,5 +22,5 @@ export default async function AssignmentPage({ params }: AssignmentPageProps) {
 	if (!lesson || lesson.status !== "PUBLISHED") notFound();
 	if (!lesson.isFreePreview && !(await userCanAccessCourseId(session.user.id, lesson.chapter.courseId))) redirect("/course");
 
-	return <AssignmentLearner assignment={{ id: definition.id, title: definition.title, body: definition.body }} />;
+	return <AssignmentLearner key={definition.id} assignment={{ id: definition.id, title: definition.title, body: definition.body }} />;
 }

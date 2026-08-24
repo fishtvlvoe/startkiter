@@ -76,7 +76,7 @@ export const assignmentRouter = {
 		.route({ method: "POST", path: "/assignment", tags: ["Assignments"], summary: "Create an assignment" })
 		.input(z.object({ title: z.string().trim().min(1).max(200), body: assignmentDefinitionBodySchema }))
 		.handler(async ({ input, context }) => {
-			const lesson = await db.lesson.findUnique({ where: { id: input.body.lessonId }, select: { id: true } });
+			const lesson = await db.lesson.findFirst({ where: { id: input.body.lessonId, status: "PUBLISHED" }, select: { id: true } });
 			if (!lesson) throw new ORPCError("NOT_FOUND", { message: "找不到指定單元。" });
 			return createAssignmentDefinition({ authorId: context.user.id, title: input.title, body: input.body });
 		}),
@@ -91,7 +91,7 @@ export const assignmentRouter = {
 				select: { id: true, content: true, contentFormat: true, revision: true, updatedAt: true },
 			});
 			const pendingUpload = await db.assignmentUploadIntent.findFirst({
-				where: { pluginContentId: definition.id, userId: context.user.id, status: { in: ["PENDING", "UPLOADED"] }, expiresAt: { gt: new Date() } },
+				where: { pluginContentId: definition.id, userId: context.user.id, status: { in: ["PENDING", "UPLOADED"] }, expiresAt: { gt: new Date() }, submission: { status: "DRAFT" } },
 				orderBy: { createdAt: "desc" },
 				select: { id: true, submissionId: true, filename: true, mimeType: true, size: true, storageKey: true },
 			});
@@ -230,6 +230,22 @@ export const assignmentRouter = {
 			if (definition.body.submissionType === "FILES" && !input.attachments.length) throw new ORPCError("BAD_REQUEST", { message: "請上傳至少一個檔案。" });
 
 			const allowed = new Set(definition.body.allowedExtensions.map((value) => value.toLowerCase().replace(/^\./, "")));
+			if (input.attachments.length) {
+				if (!input.submissionId) throw new ORPCError("BAD_REQUEST", { message: "附件上傳工作階段已失效，請重新上傳。" });
+				const expectedIntentStatus = isAssignmentStorageConfigured() ? "PENDING" : "UPLOADED";
+				const intents = await db.assignmentUploadIntent.findMany({
+					where: { id: { in: input.attachments.map((attachment) => attachment.attachmentId) }, pluginContentId: definition.id, submissionId: input.submissionId, userId: context.user.id, status: expectedIntentStatus, expiresAt: { gt: new Date() } },
+					select: { id: true, filename: true, mimeType: true, size: true, storageKey: true },
+				});
+				if (intents.length !== input.attachments.length) throw new ORPCError("BAD_REQUEST", { message: "附件上傳工作階段已失效，請重新上傳。" });
+				const intentById = new Map(intents.map((intent) => [intent.id, intent]));
+				for (const attachment of input.attachments) {
+					const intent = intentById.get(attachment.attachmentId);
+					if (!intent || intent.filename !== attachment.filename || intent.mimeType !== attachment.mimeType || intent.size !== attachment.size || intent.storageKey !== attachment.storageKey) {
+						throw new ORPCError("BAD_REQUEST", { message: "附件上傳資料不一致。" });
+					}
+				}
+			}
 			for (const attachment of input.attachments) {
 				const extension = attachment.filename.toLowerCase().match(/\.([a-z0-9]{1,12})$/)?.[1] ?? "bin";
 				if (!allowed.has(extension) || attachment.size > definition.body.maxFileSize) {
