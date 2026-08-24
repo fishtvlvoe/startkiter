@@ -11,8 +11,12 @@ vi.mock("@startkiter/auth", () => ({
 vi.mock("@startkiter/database", () => ({
 	VideoProvider: {},
 	db: {
+		course: {
+			delete: vi.fn(),
+		},
 		lesson: {
 			update: vi.fn(),
+			delete: vi.fn(),
 		},
 	},
 }));
@@ -25,10 +29,16 @@ vi.mock("@startkiter/course", () => ({
 	inspectMdxSource: vi.fn(),
 }));
 
+vi.mock("@startkiter/platform", () => ({
+	getClientIp: vi.fn(),
+	recordAdminAction: vi.fn(),
+}));
+
 import { auth } from "@startkiter/auth";
 import { COURSE_STUDIO_ERROR_CODES } from "@startkiter/api/modules/course/errors";
 import { db } from "@startkiter/database";
 import { inspectMdxSource } from "@startkiter/course";
+import { recordAdminAction } from "@startkiter/platform";
 import { POST } from "./route";
 
 describe("Course Studio API", () => {
@@ -36,6 +46,7 @@ describe("Course Studio API", () => {
 		vi.clearAllMocks();
 		process.env.ADMIN_EMAIL = "operator@example.com";
 		vi.mocked(auth.api.getSession).mockResolvedValue({
+			session: { ipAddress: "203.0.113.12" },
 			user: { id: "operator-01", email: "operator@example.com" },
 		} as never);
 		vi.mocked(inspectMdxSource).mockReturnValue({ ok: true });
@@ -43,6 +54,27 @@ describe("Course Studio API", () => {
 			id: "lesson-01",
 			content: "<WebContainerSandbox blockId=\"demo\" files={{}} hints={[]} />",
 		} as never);
+	});
+
+	it("records course deletion as an operator audit action", async () => {
+		vi.mocked(db.course.delete).mockResolvedValue({ id: "course-01" } as never);
+
+		const response = await POST(
+			new Request("http://localhost/api/course/studio", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ action: "delete_course", payload: { id: "course-01" } }),
+			}),
+		);
+
+		expect(response.status).toBe(200);
+		expect(recordAdminAction).toHaveBeenCalledWith(
+			"operator-01",
+			"DELETE_COURSE",
+			{ type: "Course", id: "course-01" },
+			undefined,
+			"203.0.113.12",
+		);
 	});
 
 	it("接受含 WebContainerSandbox 的合法 MDX 並持久化", async () => {

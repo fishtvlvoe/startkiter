@@ -1,5 +1,6 @@
 import { ORPCError } from "@orpc/server";
 import { db } from "@startkiter/database";
+import { getClientIp, recordAdminAction } from "@startkiter/platform";
 import { z } from "zod";
 
 import { adminProcedure } from "../../../orpc/procedures";
@@ -9,7 +10,7 @@ import { issueInvoiceAllowance as applyAllowance, voidInvoice as applyVoid } fro
 export const voidInvoice = adminProcedure
 	.route({ method: "POST", path: "/course/invoices/void", tags: ["Course"], summary: "Void an invoice" })
 	.input(z.object({ invoiceId: z.string().min(1) }))
-	.handler(async ({ input }) => {
+	.handler(async ({ input, context }) => {
 		const invoice = await db.invoice.findUnique({ where: { id: input.invoiceId } });
 		if (!invoice) throw new ORPCError("NOT_FOUND");
 		const provider = await getInvoiceProvider();
@@ -17,12 +18,18 @@ export const voidInvoice = adminProcedure
 
 		try {
 			const result = await applyVoid({ invoice, provider });
-			return {
-				invoice: await db.invoice.update({
+			const updatedInvoice = await db.invoice.update({
 					where: { id: invoice.id },
 					data: { status: result.status, attentionReason: null },
-				}),
-			};
+			});
+			await recordAdminAction(
+				context.user.id,
+				"VOID_INVOICE",
+				{ type: "Invoice", id: invoice.id },
+				{ amount: invoice.amount },
+				context.session?.ipAddress ?? getClientIp(context.headers),
+			);
+			return { invoice: updatedInvoice };
 		} catch (error) {
 			throw new ORPCError("BAD_REQUEST", { message: error instanceof Error ? error.message : "作廢發票失敗。" });
 		}
@@ -31,7 +38,7 @@ export const voidInvoice = adminProcedure
 export const issueInvoiceAllowance = adminProcedure
 	.route({ method: "POST", path: "/course/invoices/allowance", tags: ["Course"], summary: "Issue an invoice allowance" })
 	.input(z.object({ invoiceId: z.string().min(1), amount: z.number().int().positive() }))
-	.handler(async ({ input }) => {
+	.handler(async ({ input, context }) => {
 		const invoice = await db.invoice.findUnique({ where: { id: input.invoiceId } });
 		if (!invoice) throw new ORPCError("NOT_FOUND");
 		if (input.amount + invoice.allowanceTotal > invoice.amount) {
@@ -42,12 +49,18 @@ export const issueInvoiceAllowance = adminProcedure
 
 		try {
 			const result = await applyAllowance({ invoice, provider, amount: input.amount, allowanceId: `ALLOW-${invoice.id}-${Date.now()}` });
-			return {
-				invoice: await db.invoice.update({
+			const updatedInvoice = await db.invoice.update({
 					where: { id: invoice.id },
 					data: { status: result.status, allowanceTotal: result.allowanceTotal },
-				}),
-			};
+			});
+			await recordAdminAction(
+				context.user.id,
+				"ALLOWANCE_INVOICE",
+				{ type: "Invoice", id: invoice.id },
+				{ amount: input.amount },
+				context.session?.ipAddress ?? getClientIp(context.headers),
+			);
+			return { invoice: updatedInvoice };
 		} catch (error) {
 			throw new ORPCError("BAD_REQUEST", { message: error instanceof Error ? error.message : "開立折讓失敗。" });
 		}

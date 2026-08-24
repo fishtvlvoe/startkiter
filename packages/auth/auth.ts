@@ -15,12 +15,13 @@ import { cancelSubscription } from "@startkiter/payments";
 import { getBaseUrl } from "@startkiter/utils";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { createAuthMiddleware } from "better-auth/api";
+import { createAuthMiddleware, getIp, isAPIError } from "better-auth/api";
 import { admin, magicLink, openAPI, organization, twoFactor } from "better-auth/plugins";
 import { parseCookie as parseCookies } from "cookie";
 
 import { config } from "./config";
 import { updateSeatsInOrganizationSubscription } from "./lib/organization";
+import { recordLoginAttempt } from "./login-attempt";
 import { invitationOnlyPlugin } from "./plugins/invitation-only";
 import { getSocialProviders } from "./providers";
 
@@ -88,7 +89,24 @@ export const auth = betterAuth({
 	},
 	hooks: {
 		after: createAuthMiddleware(async (ctx) => {
-			if (ctx.path.startsWith("/organization/accept-invitation")) {
+			if (ctx.path.startsWith("/sign-in")) {
+				const request = ctx.request;
+				if (!request) return;
+				const body = ctx.body as { email?: unknown; loginHint?: unknown } | undefined;
+				const returned = ctx.context.returned;
+				const email =
+					typeof body?.email === "string"
+						? body.email
+						: typeof body?.loginHint === "string"
+							? body.loginHint
+							: "unknown";
+				recordLoginAttempt(
+					email,
+					getIp(request, ctx.context.options) ?? "unknown",
+					!isAPIError(returned),
+					request.headers.get("user-agent") ?? undefined,
+				);
+			} else if (ctx.path.startsWith("/organization/accept-invitation")) {
 				const { invitationId } = ctx.body;
 
 				if (!invitationId) {

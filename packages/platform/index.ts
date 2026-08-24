@@ -1,4 +1,5 @@
 export * from "./src/deployment/types";
+export * from "./src/admin-log";
 export * from "./src/deployment/tiers";
 export * from "./src/deployment/fleet";
 export * from "./src/deployment/status";

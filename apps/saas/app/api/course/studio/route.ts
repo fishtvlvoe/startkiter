@@ -1,5 +1,6 @@
 import { auth } from "@startkiter/auth";
 import { db } from "@startkiter/database";
+import { getClientIp, recordAdminAction } from "@startkiter/platform";
 import { NextResponse } from "next/server";
 import { COURSE_STUDIO_ERROR_CODES } from "@startkiter/api/modules/course/errors";
 import { isCourseOperator } from "@startkiter/api/modules/course/lib/course-operator";
@@ -109,6 +110,13 @@ export async function POST(request: Request) {
 		if (action === "delete_course") {
 			const { id } = payload;
 			await db.course.delete({ where: { id } });
+			await recordAdminAction(
+				userId,
+				"DELETE_COURSE",
+				{ type: "Course", id },
+				undefined,
+				session.session.ipAddress ?? getClientIp(request.headers),
+			);
 			return NextResponse.json({ success: true });
 		}
 
@@ -191,6 +199,13 @@ export async function POST(request: Request) {
 		if (action === "delete_lesson") {
 			const { id } = payload;
 			await db.lesson.delete({ where: { id } });
+			await recordAdminAction(
+				userId,
+				"DELETE_LESSON",
+				{ type: "Lesson", id },
+				undefined,
+				session.session.ipAddress ?? getClientIp(request.headers),
+			);
 			return NextResponse.json({ success: true });
 		}
 

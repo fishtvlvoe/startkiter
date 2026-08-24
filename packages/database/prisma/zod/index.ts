@@ -82,6 +82,18 @@ export const UserNotificationPreferenceScalarFieldEnumSchema = z.enum(['id', 'us
 
 export type UserNotificationPreferenceScalarFieldEnum = z.infer<typeof UserNotificationPreferenceScalarFieldEnumSchema>;
 
+// File: LoginAttemptScalarFieldEnum.schema.ts
+
+export const LoginAttemptScalarFieldEnumSchema = z.enum(['id', 'email', 'ipAddress', 'success', 'userAgent', 'createdAt'])
+
+export type LoginAttemptScalarFieldEnum = z.infer<typeof LoginAttemptScalarFieldEnumSchema>;
+
+// File: AdminLogScalarFieldEnum.schema.ts
+
+export const AdminLogScalarFieldEnumSchema = z.enum(['id', 'adminId', 'action', 'targetType', 'targetId', 'details', 'ipAddress', 'createdAt'])
+
+export type AdminLogScalarFieldEnum = z.infer<typeof AdminLogScalarFieldEnumSchema>;
+
 // File: OrderScalarFieldEnum.schema.ts
 
 export const OrderScalarFieldEnumSchema = z.enum(['id', 'orderNo', 'userId', 'sku', 'amount', 'currency', 'status', 'paymentGateway', 'gatewayTradeNo', 'courseAccess', 'kitClaimEligible', 'paidAt', 'refundedAt', 'invoiceType', 'invoiceCarrierType', 'invoiceCarrierId', 'invoiceTaxId', 'invoiceTitle', 'invoiceAddress', 'invoiceLoveCode', 'createdAt', 'updatedAt'])
@@ -587,6 +599,36 @@ export const UserNotificationPreferenceSchema = z.object({
 });
 
 export type UserNotificationPreferenceType = z.infer<typeof UserNotificationPreferenceSchema>;
+
+
+// File: LoginAttempt.schema.ts
+
+export const LoginAttemptSchema = z.object({
+  id: z.string(),
+  email: z.string(),
+  ipAddress: z.string(),
+  success: z.boolean(),
+  userAgent: z.string().nullish(),
+  createdAt: z.date(),
+});
+
+export type LoginAttemptType = z.infer<typeof LoginAttemptSchema>;
+
+
+// File: AdminLog.schema.ts
+
+export const AdminLogSchema = z.object({
+  id: z.string(),
+  adminId: z.string(),
+  action: z.string(),
+  targetType: z.string().nullish(),
+  targetId: z.string().nullish(),
+  details: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").nullish(),
+  ipAddress: z.string().nullish(),
+  createdAt: z.date(),
+});
+
+export type AdminLogType = z.infer<typeof AdminLogSchema>;
 
 
 // File: Order.schema.ts
