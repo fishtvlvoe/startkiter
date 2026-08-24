@@ -18,7 +18,7 @@
 
 ## 5. Review 與驗證
 
-- [ ] 5.1 派 Codex 或等效工具對本次全部 diff（task 1-4）做 Code Review（correctness／security／performance 三角度）：correctness 確認 `getCourseReviewSummary` 即時計算結果正確、重複評價/投票/檢舉被唯一鍵擋下；security 確認學員視角的 API 回應真的不含真實 `userId`（不是只在前端隱藏，後端回應本身就要排除）；performance 確認 `helpfulCount` 遞增與投票記錄在同一 transaction 內，且課程頁讀取評價摘要沒有 N+1。驗證方式：CR 報告 Critical 數量為 0（PM 覆核）
+- [x] 5.1 派 Codex 或等效工具對本次全部 diff（task 1-4）做 Code Review（correctness／security／performance 三角度）：correctness 確認 `getCourseReviewSummary` 即時計算結果正確、重複評價/投票/檢舉被唯一鍵擋下；security 確認學員視角的 API 回應真的不含真實 `userId`（不是只在前端隱藏，後端回應本身就要排除）；performance 確認 `helpfulCount` 遞增與投票記錄在同一 transaction 內，且課程頁讀取評價摘要沒有 N+1。驗證方式：CR 報告 Critical 數量為 0（PM 覆核）
 - [x] 5.2 用 ego-browser skill 跑一次完整 e2e：學員對一門課評 5 星並留言 → 另一位學員對該評價投有用票 → 學員在單元下方留一則匿名留言 → operator 在管理頁看到該留言的真實身份、標記已讀 → 確認一般學員視角看不到匿名者身份。驗證目標：截圖記錄關鍵畫面，任何一步失敗即視為本 task 未完成
 - [x] 5.3 跑 `spectra analyze course-review-plugin --json` 與 `spectra validate course-review-plugin`，確認 Coverage／Consistency／Ambiguity／Gaps 四個維度皆為 Clean 或僅有 Suggestion。驗證目標：無 Critical／Warning，且 0 warnings／0 errors
 - [x] 5.4 逐項核對 design.md Implementation Contract 的 Acceptance criteria 是否全部滿足：跑 `pnpm --filter @startkiter/course-review test`／`pnpm --filter @startkiter/api test`／`pnpm type-check`／`pnpm build`，確認全數綠燈。驗證目標：所有指令 exit code 為 0
