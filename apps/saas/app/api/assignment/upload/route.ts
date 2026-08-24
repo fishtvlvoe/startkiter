@@ -16,13 +16,18 @@ export async function PUT(request: Request) {
 	const upload = verifyLocalAssignmentUploadToken(token);
 	if (!upload) return Response.json({ error: "Invalid or expired upload token." }, { status: 403 });
 	if (!canAcceptLocalAssignmentUpload(upload.storageKey)) return Response.json({ error: "Upload object already exists." }, { status: 412 });
+	const intent = await db.assignmentUploadIntent.findFirst({
+		where: { storageKey: upload.storageKey, status: "PENDING", expiresAt: { gt: new Date() }, submission: { status: "DRAFT" } },
+		select: { mimeType: true, size: true },
+	});
+	if (!intent || intent.mimeType !== upload.contentType || intent.size !== upload.maxSize) return Response.json({ error: "Upload intent is no longer active." }, { status: 409 });
 
 	const contentType = request.headers.get("content-type") ?? "application/octet-stream";
 	if (contentType !== upload.contentType) return Response.json({ error: "Content type mismatch." }, { status: 415 });
 
 	const declaredLength = request.headers.get("content-length");
 	const declaredContentLength = declaredLength ? Number(declaredLength) : null;
-	if (declaredContentLength !== null && (!Number.isSafeInteger(declaredContentLength) || declaredContentLength < 1 || declaredContentLength > upload.maxSize)) {
+	if (declaredContentLength !== null && (!Number.isSafeInteger(declaredContentLength) || declaredContentLength < 1 || declaredContentLength > intent.size)) {
 		return Response.json({ error: "Invalid upload size." }, { status: 413 });
 	}
 
@@ -32,12 +37,14 @@ export async function PUT(request: Request) {
 	const reader = request.body?.getReader();
 	if (!reader) return Response.json({ error: "Missing upload body." }, { status: 400 });
 	let contentLength = 0;
+	const chunks: Uint8Array[] = [];
 	try {
 		while (true) {
 			const chunk = await reader.read();
 			if (chunk.done) break;
 			contentLength += chunk.value.byteLength;
-			if (contentLength > upload.maxSize) {
+			chunks.push(chunk.value);
+			if (contentLength > intent.size) {
 				await reader.cancel();
 				return Response.json({ error: "Invalid upload size." }, { status: 413 });
 			}
@@ -53,6 +60,6 @@ export async function PUT(request: Request) {
 		data: { status: "UPLOADED" },
 	});
 	if (updated.count !== 1) return Response.json({ error: "Upload intent is no longer active." }, { status: 409 });
-	recordLocalAssignmentUpload({ storageKey: upload.storageKey, contentType: upload.contentType, contentLength });
+	recordLocalAssignmentUpload({ storageKey: upload.storageKey, contentType: upload.contentType, contentLength, body: Buffer.concat(chunks) });
 	return Response.json({ ok: true, storageKey: upload.storageKey });
 }

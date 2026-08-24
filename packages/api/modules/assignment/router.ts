@@ -19,6 +19,7 @@ import {
 	assignmentUploadObjectMatches,
 	buildAssignmentAttachmentStorageKey,
 	deleteAssignmentUploadObject,
+	getAssignmentSignedDownloadUrl,
 	getAssignmentSignedUploadUrl,
 	isAssignmentStorageConfigured,
 } from "./assignment-upload";
@@ -91,11 +92,15 @@ export const assignmentRouter = {
 				where: { pluginContentId_userId: { pluginContentId: definition.id, userId: context.user.id } },
 				select: { id: true, content: true, contentFormat: true, revision: true, updatedAt: true },
 			});
-			const pendingUpload = await db.assignmentUploadIntent.findFirst({
+			let pendingUpload = await db.assignmentUploadIntent.findFirst({
 				where: { pluginContentId: definition.id, userId: context.user.id, status: { in: ["PENDING", "UPLOADED"] }, expiresAt: { gt: new Date() }, submission: { status: "DRAFT" } },
 				orderBy: { createdAt: "desc" },
 				select: { id: true, submissionId: true, filename: true, mimeType: true, size: true, storageKey: true },
 			});
+			if (pendingUpload && !isAssignmentStorageConfigured() && !(await assignmentUploadObjectMatches({ storageKey: pendingUpload.storageKey, contentType: pendingUpload.mimeType, size: pendingUpload.size }))) {
+				await db.assignmentUploadIntent.updateMany({ where: { id: pendingUpload.id, status: { in: ["PENDING", "UPLOADED"] } }, data: { status: "CANCELLED" } });
+				pendingUpload = null;
+			}
 			const result = await db.assignmentSubmission.findFirst({
 				where: { pluginContentId: definition.id, userId: context.user.id, status: "REVIEWED" },
 				orderBy: [{ revisionNumber: "desc" }, { submittedAt: "desc" }],
@@ -224,6 +229,21 @@ export const assignmentRouter = {
 			return { cancelled: cancelled.count === 1 };
 		}),
 
+	getAttachmentUrl: assignmentOperatorProcedure
+		.input(z.object({ attachmentId: z.string().min(1) }))
+		.handler(async ({ input }) => {
+			const attachment = await db.assignmentAttachment.findUnique({
+				where: { id: input.attachmentId },
+				select: { id: true, filename: true, mimeType: true, storageKey: true, submission: { select: { pluginContentId: true } } },
+			});
+			if (!attachment) throw new ORPCError("NOT_FOUND");
+			const definition = await getAssignmentDefinition(attachment.submission.pluginContentId);
+			if (!definition) throw new ORPCError("NOT_FOUND");
+			const downloadUrl = await getAssignmentSignedDownloadUrl({ storageKey: attachment.storageKey, contentType: attachment.mimeType });
+			if (!downloadUrl) throw new ORPCError("NOT_FOUND", { message: "附件物件已失效，請請學員重新上傳。" });
+			return { attachmentId: attachment.id, filename: attachment.filename, downloadUrl };
+		}),
+
 	submit: protectedProcedure
 		.route({ method: "POST", path: "/assignment/{pluginContentId}/submit", tags: ["Assignments"], summary: "Submit an assignment" })
 		.input(z.object({
@@ -250,6 +270,9 @@ export const assignmentRouter = {
 			if (definition.body.submissionType === "FILES" && !input.attachments.length) throw new ORPCError("BAD_REQUEST", { message: "請上傳至少一個檔案。" });
 
 			const allowed = new Set(definition.body.allowedExtensions.map((value) => value.toLowerCase().replace(/^\./, "")));
+			const imageAttachments = input.attachments.filter((attachment) => /^image\//i.test(attachment.mimeType) || /\.(avif|bmp|gif|jpe?g|png|svg|webp)$/i.test(attachment.filename));
+			if (imageAttachments.length > definition.body.maxImages) throw new ORPCError("BAD_REQUEST", { message: "圖片數量超過限制。" });
+			if (imageAttachments.some((attachment) => attachment.size > definition.body.maxImageSize)) throw new ORPCError("BAD_REQUEST", { message: "圖片超過大小限制。" });
 			if (input.attachments.length) {
 				if (!input.submissionId) throw new ORPCError("BAD_REQUEST", { message: "附件上傳工作階段已失效，請重新上傳。" });
 				const expectedIntentStatus = isAssignmentStorageConfigured() ? "PENDING" : "UPLOADED";

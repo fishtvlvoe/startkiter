@@ -10,7 +10,7 @@ type Submission = {
 	status: string;
 	user: { id: string; name: string; email: string };
 	content: string | null;
-	attachments: { filename: string; mimeType: string; size: number }[];
+	attachments: { id: string; filename: string; mimeType: string; size: number }[];
 	reviews: { score: number | null; letterGrade: string | null; feedback: string | null }[];
 };
 
@@ -25,6 +25,7 @@ export function AssignmentAdminForm({ lessons, existingAssignments }: { lessons:
 	const [nextCursor, setNextCursor] = useState<string | null>(null);
 	const [feedback, setFeedback] = useState<Record<string, string>>({});
 	const [scores, setScores] = useState<Record<string, string>>({});
+	const [attachmentUrls, setAttachmentUrls] = useState<Record<string, string>>({});
 	const [message, setMessage] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -101,6 +102,15 @@ export function AssignmentAdminForm({ lessons, existingAssignments }: { lessons:
 		}
 	}
 
+	async function loadAttachmentUrl(attachmentId: string) {
+		try {
+			const result = await orpcClient.assignment.getAttachmentUrl({ attachmentId });
+			setAttachmentUrls((current) => ({ ...current, [attachmentId]: result.downloadUrl }));
+		} catch {
+			setError("附件已失效或無法讀取。");
+		}
+	}
+
 	return (
 		<Card className="max-w-4xl space-y-6 p-6" data-testid="assignment-admin-form">
 			<div className="space-y-2">
@@ -114,7 +124,7 @@ export function AssignmentAdminForm({ lessons, existingAssignments }: { lessons:
 					{existingAssignments.map((assignment) => (
 						<div key={assignment.id} className="flex flex-wrap items-center justify-between gap-3 text-sm">
 							<a className="underline" href={`/assignment/${assignment.id}`}>{assignment.title}</a>
-							<Button type="button" variant="outline" onClick={() => { submissionRequestVersion.current += 1; setIsLoadingSubmissions(false); setCreatedId(assignment.id); setSubmissions([]); setNextCursor(null); setFeedback({}); setScores({}); setMessage(null); setError(null); }}>查看提交</Button>
+							<Button type="button" variant="outline" onClick={() => { submissionRequestVersion.current += 1; setIsLoadingSubmissions(false); setCreatedId(assignment.id); setSubmissions([]); setNextCursor(null); setFeedback({}); setScores({}); setAttachmentUrls({}); setMessage(null); setError(null); }}>查看提交</Button>
 						</div>
 					))}
 				</section>
@@ -132,7 +142,7 @@ export function AssignmentAdminForm({ lessons, existingAssignments }: { lessons:
 							<article key={submission.id} className="space-y-3 rounded-2xl border p-4" data-testid={`assignment-submission-${submission.id}`}>
 								<div className="flex flex-wrap justify-between gap-2 text-sm"><span className="font-medium">{submission.user.name}（{submission.user.email}）</span><span>{submission.status}</span></div>
 								{submission.content && <pre className="whitespace-pre-wrap rounded-xl bg-muted p-3 text-sm">{submission.content}</pre>}
-								{submission.attachments.length > 0 && <p className="text-sm">附件：{submission.attachments.map((attachment) => attachment.filename).join("、")}</p>}
+								{submission.attachments.length > 0 && <div className="space-y-2 text-sm"><p>附件：</p>{submission.attachments.map((attachment) => <div key={attachment.id} className="flex flex-wrap items-center gap-2"><span>{attachment.filename}</span>{attachmentUrls[attachment.id] ? <a className="underline" href={attachmentUrls[attachment.id]} target="_blank" rel="noreferrer">開啟附件</a> : <Button type="button" variant="outline" size="sm" onClick={() => loadAttachmentUrl(attachment.id)}>取得附件連結</Button>}</div>)}</div>}
 								<label className="grid gap-1 text-sm"><Label htmlFor={`assignment-score-${submission.id}`}>分數</Label><Input id={`assignment-score-${submission.id}`} data-testid={`assignment-score-${submission.id}`} type="number" min="0" max="100" value={scores[submission.id] ?? submission.reviews[0]?.score ?? ""} onChange={(event) => setScores((current) => ({ ...current, [submission.id]: event.target.value }))} /></label>
 								<label className="grid gap-1 text-sm"><Label htmlFor={`assignment-feedback-${submission.id}`}>回饋</Label><textarea id={`assignment-feedback-${submission.id}`} data-testid={`assignment-feedback-${submission.id}`} className="min-h-28 rounded-xl border bg-card p-3" value={feedback[submission.id] ?? submission.reviews[0]?.feedback ?? ""} onChange={(event) => setFeedback((current) => ({ ...current, [submission.id]: event.target.value }))} /></label>
 								<Button type="button" variant="primary" onClick={() => reviewSubmission(submission.id)}>儲存批改</Button>

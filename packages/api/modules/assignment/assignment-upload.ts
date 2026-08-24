@@ -1,10 +1,12 @@
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
-import { deleteObject, getSignedUploadUrl, headObject } from "@startkiter/storage/provider/s3";
+import { deleteObject, getSignedUrl, getSignedUploadUrl, headObject } from "@startkiter/storage/provider/s3";
 
 const LOCAL_TOKEN_VERSION = "assignment-upload-v1";
 const LOCAL_OBJECT_TTL_MS = 10 * 60_000;
 const MAX_LOCAL_OBJECTS = 1_000;
-const localUploadedObjects = new Map<string, { contentLength: number; contentType: string; expiresAt: number }>();
+const MAX_LOCAL_BYTES = 100 * 1024 * 1024;
+const MAX_ASSIGNMENT_UPLOAD_SIZE = 100_000_000;
+const localUploadedObjects = new Map<string, { contentLength: number; contentType: string; body?: Buffer; expiresAt: number }>();
 
 function pruneLocalAssignmentUploadObjects(): void {
 	const now = Date.now();
@@ -14,6 +16,15 @@ function pruneLocalAssignmentUploadObjects(): void {
 	while (localUploadedObjects.size > MAX_LOCAL_OBJECTS) {
 		const oldestKey = localUploadedObjects.keys().next().value;
 		if (!oldestKey) break;
+		localUploadedObjects.delete(oldestKey);
+	}
+	let totalBytes = 0;
+	for (const object of localUploadedObjects.values()) totalBytes += object.body?.byteLength ?? 0;
+	while (totalBytes > MAX_LOCAL_BYTES) {
+		const oldestKey = localUploadedObjects.keys().next().value;
+		if (!oldestKey) break;
+		const object = localUploadedObjects.get(oldestKey);
+		totalBytes -= object?.body?.byteLength ?? 0;
 		localUploadedObjects.delete(oldestKey);
 	}
 }
@@ -94,8 +105,9 @@ export function verifyLocalAssignmentUploadToken(token: string): {
 			!/^[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+\.[a-z0-9]+$/.test(parsed.storageKey) ||
 				typeof parsed.contentType !== "string" ||
 				typeof parsed.maxSize !== "number" ||
-				!Number.isSafeInteger(parsed.maxSize) ||
-				parsed.maxSize < 1 ||
+			!Number.isSafeInteger(parsed.maxSize) ||
+			parsed.maxSize < 1 ||
+			parsed.maxSize > MAX_ASSIGNMENT_UPLOAD_SIZE ||
 				typeof parsed.expiresAt !== "number" ||
 			parsed.expiresAt < Date.now()
 		) return null;
@@ -139,11 +151,12 @@ export async function getAssignmentSignedUploadUrl(input: {
 	};
 }
 
-export function recordLocalAssignmentUpload(input: { storageKey: string; contentType: string; contentLength: number }): void {
+export function recordLocalAssignmentUpload(input: { storageKey: string; contentType: string; contentLength: number; body?: Buffer }): void {
 	pruneLocalAssignmentUploadObjects();
 	localUploadedObjects.set(input.storageKey, {
 		contentLength: input.contentLength,
 		contentType: input.contentType,
+		body: input.body,
 		expiresAt: Date.now() + LOCAL_OBJECT_TTL_MS,
 	});
 }
@@ -151,6 +164,21 @@ export function recordLocalAssignmentUpload(input: { storageKey: string; content
 export function canAcceptLocalAssignmentUpload(storageKey: string): boolean {
 	pruneLocalAssignmentUploadObjects();
 	return !localUploadedObjects.has(storageKey);
+}
+
+export function getLocalAssignmentUploadBody(storageKey: string): Buffer | null {
+	pruneLocalAssignmentUploadObjects();
+	const body = localUploadedObjects.get(storageKey)?.body;
+	return body ? Buffer.from(body) : null;
+}
+
+export async function getAssignmentSignedDownloadUrl(input: { storageKey: string; contentType: string }): Promise<string | null> {
+	if (!isAssignmentStorageConfigured()) {
+		const body = getLocalAssignmentUploadBody(input.storageKey);
+		if (!body) return null;
+		return `data:${input.contentType};base64,${body.toString("base64")}`;
+	}
+	return getSignedUrl(input.storageKey, { bucket: "assignments", expiresIn: 300 });
 }
 
 export async function assignmentUploadObjectMatches(input: {
