@@ -1,6 +1,6 @@
 ## 1. 資料模型
 
-- [ ] 1.1 在 `packages/database/prisma/schema.prisma` 新增 `CoursePack`（id/sourcePackId/title/schemaVersion/learningOutcomes/status/importedBy/importedAt）與 `CoursePackMission`（id/coursePackId/missionId/title/goal/sortOrder/missionData，含 `coursePackId+missionId` 唯一索引與 `sourcePackId`/`status` 索引），對應設計決策「儲存結構：CoursePack + CoursePackMission 雙表，Mission 巢狀內容存 JSONB」，執行 `prisma migrate dev` 產生 migration；驗證：`prisma migrate status` 顯示新 migration 已套用，且 `psql` 查得到 `CoursePack`／`CoursePackMission` 兩張表結構符合 design.md DDL
+- [x] 1.1 在 `packages/database/prisma/schema.prisma` 新增 `CoursePack`（id/sourcePackId/title/schemaVersion/learningOutcomes/status/importedBy/importedAt）與 `CoursePackMission`（id/coursePackId/missionId/title/goal/sortOrder/missionData，含 `coursePackId+missionId` 唯一索引與 `sourcePackId`/`status` 索引），對應設計決策「儲存結構：CoursePack + CoursePackMission 雙表，Mission 巢狀內容存 JSONB」，執行 `prisma migrate dev` 產生 migration；驗證：`prisma migrate status` 顯示新 migration 已套用，且 `psql` 查得到 `CoursePack`／`CoursePackMission` 兩張表結構符合 design.md DDL
 
 ## 2. Course Pack Envelope Schema（TDD）
 
