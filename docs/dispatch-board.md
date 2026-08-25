@@ -34,11 +34,12 @@
 
 ## 接力佇列（本次新建，按順序做，一次只跑一張，做完打勾接下一張）
 
-### 1. course-pack-import ⏸️ 排隊中
-- Task 進度：0/10，已解凍（unparked），完整 proposal/design/specs/tasks 都在
-- 誰做：Codex（提詞已交給老闆）
-- 阻塞條件：無，可立即開始
-- 完成後：`spectra archive course-pack-import`，回來打勾，解鎖第 2 項
+### 1. course-pack-import ✅ 已完成
+- Task 進度：10/10
+- 誰做：Codex
+- 驗收：✅ pnpm test 通過、✅ pnpm type-check 通過、✅ pnpm build 通過、✅ spectra validate 無 error/warning、✅ 全部 task 打勾
+- 完成狀態：已 archive、已 push main
+- 下一步：開啟第 2 項（course-pack-mission-execution）
 
 ### 2. course-pack-mission-execution ⏸️ 排隊中
 - Task 進度：0/23，已 park，完整 proposal/design/specs/tasks 都在（2026-08-25 PM 親自跑完 propose 全套，analyze 0 Critical/Warning，validate 通過）
