@@ -6,9 +6,9 @@
 
 ## 2. Owner 唯一性與講師指派權限（對應既有 Requirement「Every organization has exactly one owner」與「Only owner or admin can assign or revoke the instructor role」）
 
-- [ ] 2.1 撰寫紅燈測試：轉移 owner 時前任 owner 自動降為 admin，且組織任何時刻都恰好一位 owner；驗證目標：`pnpm --filter api test` 出現預期失敗
-- [ ] 2.2 撰寫紅燈測試：`instructor` 或 `user` 嘗試變更任何成員角色（含自己）一律被拒絕，`owner`／`admin` 可以指派/撤銷 `instructor`；驗證目標同 2.1
-- [ ] 2.3 實作 `packages/api/modules/organization/procedures/assign-instructor-role.ts`，使 2.1、2.2 測試轉綠燈；驗證目標：`pnpm --filter api test` 全綠
+- [x] 2.1 撰寫紅燈測試：轉移 owner 時前任 owner 自動降為 admin，且組織任何時刻都恰好一位 owner；驗證目標：`pnpm --filter api test` 出現預期失敗
+- [x] 2.2 撰寫紅燈測試：`instructor` 或 `user` 嘗試變更任何成員角色（含自己）一律被拒絕，`owner`／`admin` 可以指派/撤銷 `instructor`；驗證目標同 2.1
+- [x] 2.3 實作 `packages/api/modules/organization/procedures/assign-instructor-role.ts`，使 2.1、2.2 測試轉綠燈；驗證目標：`pnpm --filter api test` 全綠
 
 ## 3. 講師課程權限邊界（對應既有 Requirement「Instructor role grants course content permissions but not billing visibility」）
 
