@@ -142,6 +142,12 @@ export const CoursePackMissionScalarFieldEnumSchema = z.enum(['id', 'coursePackI
 
 export type CoursePackMissionScalarFieldEnum = z.infer<typeof CoursePackMissionScalarFieldEnumSchema>;
 
+// File: MissionFormValueScalarFieldEnum.schema.ts
+
+export const MissionFormValueScalarFieldEnumSchema = z.enum(['id', 'userId', 'coursePackMissionId', 'fieldKey', 'encryptedValue', 'createdAt', 'updatedAt'])
+
+export type MissionFormValueScalarFieldEnum = z.infer<typeof MissionFormValueScalarFieldEnumSchema>;
+
 // File: MediaScalarFieldEnum.schema.ts
 
 export const MediaScalarFieldEnumSchema = z.enum(['id', 'type', 'provider', 'sourceId', 'url', 'filename', 'mimeType', 'size', 'uploadedBy', 'createdAt', 'usageType', 'usageId'])
@@ -879,6 +885,21 @@ export const CoursePackMissionSchema = z.object({
 });
 
 export type CoursePackMissionType = z.infer<typeof CoursePackMissionSchema>;
+
+
+// File: MissionFormValue.schema.ts
+
+export const MissionFormValueSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  coursePackMissionId: z.string(),
+  fieldKey: z.string(),
+  encryptedValue: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type MissionFormValueType = z.infer<typeof MissionFormValueSchema>;
 
 
 // File: Media.schema.ts

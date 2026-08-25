@@ -41,6 +41,7 @@ import { mediaUploadUrl } from "./procedures/media-upload-url";
 import { setCourseCoverMedia } from "./procedures/set-course-cover-media";
 import { importCoursePack } from "./procedures/import-course-pack";
 import { listCoursePacks } from "./procedures/list-course-packs";
+import { submitMissionFormValue } from "./procedures/submit-mission-form-value";
 
 export const courseRouter = publicProcedure.router({
 	// 1. 公開/試看課綱大綱 (Public)
@@ -301,4 +302,5 @@ export const courseRouter = publicProcedure.router({
 	listManageableCourses,
 	importCoursePack,
 	listCoursePacks,
+	submitMissionFormValue,
 });

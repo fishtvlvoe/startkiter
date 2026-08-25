@@ -1,11 +1,11 @@
 ## 1. 前置依賴檢查（阻塞，Apply 開跑前必須先確認）
 
-- [ ] 1.1 確認 `course-pack-import` 已 apply 完成，`CoursePackMission` 表已存在於目標環境，避免本 change 的 migration 找不到外鍵目標資料表：驗證方式為 `grep -n "^model CoursePackMission" packages/database/prisma/schema.prisma` 有命中，且 `prisma migrate status` 顯示對應 migration 已套用。**未滿足此條件前，禁止開始第 2 節以後的任務**
+- [x] 1.1 確認 `course-pack-import` 已 apply 完成，`CoursePackMission` 表已存在於目標環境，避免本 change 的 migration 找不到外鍵目標資料表：驗證方式為 `grep -n "^model CoursePackMission" packages/database/prisma/schema.prisma` 有命中，且 `prisma migrate status` 顯示對應 migration 已套用。**未滿足此條件前，禁止開始第 2 節以後的任務**
 
 ## 2. 資料模型：MissionFormValue（對應設計決策「買家填寫值新增獨立資料表，不塞進既有 SiteSetting」）
 
-- [ ] 2.1 撰寫紅燈測試：同一 (userId, coursePackMissionId, fieldKey) 組合第二次寫入會更新既有記錄而非新增第二筆，涵蓋 Requirement「Structured form field values are persisted per user per mission」；驗證目標：`pnpm --filter database test` 出現預期失敗（schema 尚未新增，型別或資料表不存在）
-- [ ] 2.2 在 `packages/database/prisma/schema.prisma` 新增 `MissionFormValue` model 與 (userId, coursePackMissionId, fieldKey) 唯一索引，執行 `prisma migrate dev` 產生 migration，使 2.1 測試轉綠燈；驗證目標：`pnpm --filter database test` 全綠，`psql` 查詢 `\d "MissionFormValue"` 確認唯一索引存在
+- [x] 2.1 撰寫紅燈測試：同一 (userId, coursePackMissionId, fieldKey) 組合第二次寫入會更新既有記錄而非新增第二筆，涵蓋 Requirement「Structured form field values are persisted per user per mission」；驗證目標：`pnpm --filter database test` 出現預期失敗（schema 尚未新增，型別或資料表不存在）
+- [x] 2.2 在 `packages/database/prisma/schema.prisma` 新增 `MissionFormValue` model 與 (userId, coursePackMissionId, fieldKey) 唯一索引，執行 `prisma migrate dev` 產生 migration，使 2.1 測試轉綠燈；驗證目標：`pnpm --filter database test` 全綠，`psql` 查詢 `\d "MissionFormValue"` 確認唯一索引存在
 
 ## 3. Surface→積木對照表（對應設計決策「Surface→積木對照表採靜態 key-value map，不做條件判斷邏輯」）
 
@@ -15,9 +15,9 @@
 
 ## 4. structured_form 存值 API（對應設計決策「買家填寫值新增獨立資料表，不塞進既有 SiteSetting」）
 
-- [ ] [P] 4.1 撰寫紅燈測試：未登入呼叫 `POST /api/course/mission/form-value` 回傳 401 且不寫入任何值，涵蓋 Requirement「Structured form field values are persisted per user per mission」的 Scenario「Unauthenticated submission is rejected」；驗證目標：`pnpm --filter api test submit-mission-form-value.test.ts` FAIL
-- [ ] 4.2 撰寫紅燈測試：已登入使用者提交欄位值會加密並 upsert 一筆記錄，涵蓋同一 Requirement 的 Scenario「Submitting a field value creates or updates a stored record」；驗證目標同 4.1
-- [ ] 4.3 實作 `packages/api/modules/course/procedures/submit-mission-form-value.ts`，使 4.1、4.2 測試轉綠燈；驗證目標：`pnpm --filter api test submit-mission-form-value.test.ts` 全綠
+- [x] [P] 4.1 撰寫紅燈測試：未登入呼叫 `POST /api/course/mission/form-value` 回傳 401 且不寫入任何值，涵蓋 Requirement「Structured form field values are persisted per user per mission」的 Scenario「Unauthenticated submission is rejected」；驗證目標：`pnpm --filter api test submit-mission-form-value.test.ts` FAIL
+- [x] 4.2 撰寫紅燈測試：已登入使用者提交欄位值會加密並 upsert 一筆記錄，涵蓋同一 Requirement 的 Scenario「Submitting a field value creates or updates a stored record」；驗證目標同 4.1
+- [x] 4.3 實作 `packages/api/modules/course/procedures/submit-mission-form-value.ts`，使 4.1、4.2 測試轉綠燈；驗證目標：`pnpm --filter api test submit-mission-form-value.test.ts` 全綠
 
 ## 5. check_id 具名檢查註冊表（對應設計決策「check_id 具名檢查註冊表，實作與金鑰完全留在 StartKiter 後端」）
 
@@ -43,4 +43,4 @@
 
 - [ ] 8.1 派 Codex 或等效工具對第 2-7 節的 diff 做 Code Review（correctness／security／performance 三角度），重點檢查 `MissionFormValue` 加解密邏輯是否沿用既有工具、check 失敗訊息是否洩漏金鑰片段、未登入呼叫是否皆被拒絕；驗證方式：CR 報告 Critical 數量為 0
 - [ ] 8.2 執行 `pnpm test` 確認全專案測試套件（含本 change 新增的所有紅燈轉綠燈測試）全綠；驗證方式：指令 exit code 為 0
-- [ ] 8.3 執行 `spectra validate course-pack-mission-execution` 確認產出物驗證通過；驗證方式：指令輸出無錯誤
+- [x] 8.3 執行 `spectra validate course-pack-mission-execution` 確認產出物驗證通過；驗證方式：指令輸出無錯誤
