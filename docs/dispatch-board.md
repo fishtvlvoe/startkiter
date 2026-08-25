@@ -41,11 +41,12 @@
 - 完成狀態：已 archive、已 push main
 - 下一步：開啟第 2 項（course-pack-mission-execution）
 
-### 2. course-pack-mission-execution ⏸️ 排隊中
-- Task 進度：0/23，已 park，完整 proposal/design/specs/tasks 都在（2026-08-25 PM 親自跑完 propose 全套，analyze 0 Critical/Warning，validate 通過）
+### 2. course-pack-mission-execution ✅ 已完成
+- Task 進度：23/23
 - 誰做：Codex
-- 阻塞條件：**必須等第 1 項 apply 完成**（`CoursePackMission` 表要存在，本 change 的 `MissionFormValue` 表有外鍵指過去）；且建議跟 Awesome-Koson 那邊的 `structured-action-and-evaluator-checks` 大致同時 apply（schema 版本要對得上）
-- 完成後：解鎖第 6 項（gamified-onboarding-course）
+- 驗收：✅ pnpm test 171 通過、✅ pnpm type-check 26 successful、✅ pnpm build 2 successful、✅ spectra validate 無 error/warning、✅ 全部 task 打勾
+- 完成狀態：已 archive、已 push main
+- 下一步：開啟第 3 項（spec-plan-consistency-cr）
 
 ### 3. spec-plan-consistency-cr ⏸️ 排隊中
 - Task 進度：0/3，已 park，完整 proposal/specs/tasks 都在（2026-08-25 PM 跑完 propose，analyze 0 Critical/Warning，validate 通過）
