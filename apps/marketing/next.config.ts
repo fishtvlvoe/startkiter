@@ -5,10 +5,11 @@ import nextIntlPlugin from "next-intl/plugin";
 const withNextIntl = nextIntlPlugin("./modules/i18n/request.ts");
 
 const nextConfig: NextConfig = {
+	output: "standalone",
 	experimental: {
 		useTypeScriptCli: true,
 	},
-	transpilePackages: ["@startkiter/i18n", "@startkiter/ui"],
+	transpilePackages: ["@startkiter/i18n", "@startkiter/ui", "@startkiter/payments", "@startkiter/database", "@startkiter/utils"],
 	images: {
 		remotePatterns: [
 			{
