@@ -178,6 +178,24 @@ export const CourseSubscriptionScalarFieldEnumSchema = z.enum(['id', 'userId', '
 
 export type CourseSubscriptionScalarFieldEnum = z.infer<typeof CourseSubscriptionScalarFieldEnumSchema>;
 
+// File: EmailDeliveryLogScalarFieldEnum.schema.ts
+
+export const EmailDeliveryLogScalarFieldEnumSchema = z.enum(['id', 'type', 'status', 'orderId', 'subscriptionId', 'userId', 'courseId', 'toEmail', 'subject', 'providerMessageId', 'errorMessage', 'sentAt', 'createdAt'])
+
+export type EmailDeliveryLogScalarFieldEnum = z.infer<typeof EmailDeliveryLogScalarFieldEnumSchema>;
+
+// File: CourseWelcomeEmailScalarFieldEnum.schema.ts
+
+export const CourseWelcomeEmailScalarFieldEnumSchema = z.enum(['id', 'courseId', 'enabled', 'subjectTemplate', 'markdownTemplate', 'updatedAt'])
+
+export type CourseWelcomeEmailScalarFieldEnum = z.infer<typeof CourseWelcomeEmailScalarFieldEnumSchema>;
+
+// File: CourseExpirationReminderScalarFieldEnum.schema.ts
+
+export const CourseExpirationReminderScalarFieldEnumSchema = z.enum(['id', 'subscriptionId', 'daysBefore', 'sentAt'])
+
+export type CourseExpirationReminderScalarFieldEnum = z.infer<typeof CourseExpirationReminderScalarFieldEnumSchema>;
+
 // File: CourseInviteScalarFieldEnum.schema.ts
 
 export const CourseInviteScalarFieldEnumSchema = z.enum(['id', 'courseId', 'tokenHash', 'email', 'maxUses', 'usedCount', 'expiresAt', 'active', 'createdBy', 'createdAt', 'updatedAt'])
@@ -489,6 +507,18 @@ export type SubscriptionInterval = z.infer<typeof SubscriptionIntervalSchema>;
 export const CourseSubscriptionStatusSchema = z.enum(['PENDING', 'ACTIVE', 'CANCELED'])
 
 export type CourseSubscriptionStatus = z.infer<typeof CourseSubscriptionStatusSchema>;
+
+// File: EmailDeliveryType.schema.ts
+
+export const EmailDeliveryTypeSchema = z.enum(['WELCOME_EMAIL', 'EXPIRATION_REMINDER'])
+
+export type EmailDeliveryType = z.infer<typeof EmailDeliveryTypeSchema>;
+
+// File: EmailDeliveryStatus.schema.ts
+
+export const EmailDeliveryStatusSchema = z.enum(['PENDING', 'SENT', 'FAILED'])
+
+export type EmailDeliveryStatus = z.infer<typeof EmailDeliveryStatusSchema>;
 
 // File: PaymentWebhookEventStatus.schema.ts
 
@@ -1002,6 +1032,53 @@ export const CourseSubscriptionSchema = z.object({
 });
 
 export type CourseSubscriptionType = z.infer<typeof CourseSubscriptionSchema>;
+
+
+// File: EmailDeliveryLog.schema.ts
+
+export const EmailDeliveryLogSchema = z.object({
+  id: z.string(),
+  type: EmailDeliveryTypeSchema,
+  status: EmailDeliveryStatusSchema.default("PENDING"),
+  orderId: z.string().nullish(),
+  subscriptionId: z.string().nullish(),
+  userId: z.string(),
+  courseId: z.string().nullish(),
+  toEmail: z.string(),
+  subject: z.string(),
+  providerMessageId: z.string().nullish(),
+  errorMessage: z.string().nullish(),
+  sentAt: z.date().nullish(),
+  createdAt: z.date(),
+});
+
+export type EmailDeliveryLogType = z.infer<typeof EmailDeliveryLogSchema>;
+
+
+// File: CourseWelcomeEmail.schema.ts
+
+export const CourseWelcomeEmailSchema = z.object({
+  id: z.string(),
+  courseId: z.string(),
+  enabled: z.boolean(),
+  subjectTemplate: z.string(),
+  markdownTemplate: z.string(),
+  updatedAt: z.date(),
+});
+
+export type CourseWelcomeEmailType = z.infer<typeof CourseWelcomeEmailSchema>;
+
+
+// File: CourseExpirationReminder.schema.ts
+
+export const CourseExpirationReminderSchema = z.object({
+  id: z.string(),
+  subscriptionId: z.string(),
+  daysBefore: z.number().int(),
+  sentAt: z.date(),
+});
+
+export type CourseExpirationReminderType = z.infer<typeof CourseExpirationReminderSchema>;
 
 
 // File: CourseInvite.schema.ts
