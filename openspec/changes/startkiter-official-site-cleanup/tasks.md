@@ -1,6 +1,6 @@
 ## 1. 確認既有 Coolify 部署現況（對應 Requirement「The SaaS application is deployed on Coolify-managed VPS infrastructure」）
 
-- [ ] 1.1 涵蓋 Requirement「The SaaS application is deployed on Coolify-managed VPS infrastructure」：用 `curl -I https://app.startkiter.dev` 確認回應成功或合理重導向（非連線失敗或 5xx），並記錄目前 Coolify resource 名稱、所在機群節點；驗證目標：curl 結果附進本次實作筆記
+- [x] 1.1 涵蓋 Requirement「The SaaS application is deployed on Coolify-managed VPS infrastructure」：用 `curl -I https://app.startkiter.dev` 確認回應成功或合理重導向（非連線失敗或 5xx），並記錄目前 Coolify resource 名稱、所在機群節點；驗證目標：curl 結果附進本次實作筆記
 
 ## 2. apps/marketing 接上正式網域（對應 Requirement「The marketing site is deployed under the official domain」）
 
