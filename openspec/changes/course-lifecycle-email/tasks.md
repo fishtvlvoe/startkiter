@@ -21,7 +21,7 @@
 
 ## 5. Review 與驗證
 
-- [x] 5.1 完成 task 1-4 的 correctness／security／performance review；`code-review.md` verdict PASS，Critical/High 為 0
+- [x] 5.1 完成 task 1-4 的 correctness／security／performance review；初次發現「先寄信後寫 unique row」Critical，已改為 compound unique 先佔位並以 focused test 驗證；`code-review.md` 最終 verdict PASS，Critical/High 為 0
 - [ ] 5.2 ego-browser 已實跑 operator 登入、`/admin/email-settings` 啟用模板、checkout 點擊、cron 正確 bearer／重複掃描／401、送達紀錄 `EXPIRATION_REMINDER/SENT`；證據：`/tmp/course-lifecycle-email-settings.png`、`/tmp/course-lifecycle-email-checkout-failclosed.png`、`/tmp/course-lifecycle-email-delivery-log-bottom.png`。買斷 PAYUNi acceptance 與 `WELCOME_EMAIL/SENT` 未完成：本 workspace 的 `PAYUNI_MERCHANT_ID`／`PAYUNI_HASH_KEY`／`PAYUNI_HASH_IV` 均未設定，checkout 實跑回傳 503 `payuni_not_configured`；不可用 mock 或 build 代替
 - [x] 5.3 跑 `spectra analyze course-lifecycle-email --json` 與 `spectra validate course-lifecycle-email`，Coverage／Consistency／Ambiguity／Gaps 四個維度均 Clean，0 warnings／0 errors
-- [x] 5.4 逐項核對 design.md Implementation Contract：API 48 files/182 tests、SaaS 31 files/163 tests、API/SaaS type-check 與 root production build 全數綠燈
+- [x] 5.4 逐項核對 design.md Implementation Contract：API 48 files/183 tests、root 28 packages type-check、root production build 全數綠燈；production route 含 `/admin/email-settings` 與 `/api/cron/course-expiration`
