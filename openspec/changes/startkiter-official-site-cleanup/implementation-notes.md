@@ -26,3 +26,17 @@ x-powered-by: Next.js
 ```
 
 結果：PASS。專案目前沒有 Git repository 綁定，因此不會由本 repo 的 Git 整合觸發新部署。未為驗證而推送測試 commit 到 `main`。
+
+## 3.2 舊 Vercel 網址
+
+執行時間：2026-08-25（Asia/Taipei）
+
+已移除 `test-startkiter` Vercel project 的 `test-startkiter.vercel.app` domain binding，並移除該 project。驗證結果：
+
+```text
+$ curl -sS -I --max-time 20 https://test-startkiter.vercel.app
+HTTP/2 404
+x-vercel-error: DEPLOYMENT_NOT_FOUND
+```
+
+結果：PASS。舊測試網址不再指向有效 deployment；`app.startkiter.dev` 仍回 HTTP 307 `/login`，兩者狀態已明確區隔。

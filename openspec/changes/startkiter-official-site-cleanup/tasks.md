@@ -10,7 +10,7 @@
 ## 3. 關閉舊 Vercel 部署（對應 Requirement「The legacy Vercel deployment is decommissioned」）
 
 - [x] 3.1 涵蓋 Requirement「The legacy Vercel deployment is decommissioned」：在 Vercel 後台移除本 repo 的 Git 整合／關閉 auto-deploy webhook；驗證目標：推一個測試 commit 到 main，確認 Vercel 專案沒有觸發新的部署
-- [ ] 3.2 確認 `test-startkiter.vercel.app` 網域不再指向任何有效部署（可保留網域但無 active deployment，或直接刪除該 Vercel 專案，依老闆裁決）；驗證目標：`curl -I https://test-startkiter.vercel.app` 回應與 Coolify 部署行為明確區隔（不再是最新代碼的鏡像）
+- [x] 3.2 確認 `test-startkiter.vercel.app` 網域不再指向任何有效部署（可保留網域但無 active deployment，或直接刪除該 Vercel 專案，依老闆裁決）；驗證目標：`curl -I https://test-startkiter.vercel.app` 回應與 Coolify 部署行為明確區隔（不再是最新代碼的鏡像）
 
 ## 4. 補文件記錄
 
