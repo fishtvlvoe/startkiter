@@ -12,8 +12,8 @@
 
 ## 3. 講師課程權限邊界（對應既有 Requirement「Instructor role grants course content permissions but not billing visibility」）
 
-- [ ] 3.1 撰寫紅燈測試：`instructor` 可編輯所屬組織的課程內容、不可查看組織訂單列表或買家名單；驗證目標：`pnpm --filter course test` 出現預期失敗
-- [ ] 3.2 修改 `packages/course/` 的課程內容編輯權限檢查與訂單列表查詢權限檢查，使 3.1 測試轉綠燈；驗證目標：對應測試全綠
+- [x] 3.1 撰寫紅燈測試：`instructor` 可編輯所屬組織的課程內容、不可查看組織訂單列表或買家名單；驗證目標：`pnpm --filter course test` 出現預期失敗
+- [x] 3.2 修改 `packages/course/` 的課程內容編輯權限檢查與訂單列表查詢權限檢查，使 3.1 測試轉綠燈；驗證目標：對應測試全綠
 
 ## 4. 企業帳號課程存取權繼承（對應 Requirement「Organization-scoped course purchases grant access to all current members」）
 

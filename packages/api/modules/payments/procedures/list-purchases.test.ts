@@ -113,6 +113,23 @@ describe("listPurchases", () => {
 		expect(getPurchasesByOrganizationId).toHaveBeenCalledWith("organization-1");
 	});
 
+	it("rejects instructors from listing their organization's purchases", async () => {
+		vi.mocked(getOrganizationMembership).mockResolvedValueOnce({
+			...organizationMembership,
+			role: "instructor",
+		});
+
+		await expect(
+			call(
+				listPurchases,
+				{ organizationId: "organization-1" },
+				{ context: { headers: new Headers() } },
+			),
+		).rejects.toMatchObject({ code: "FORBIDDEN" });
+
+		expect(getPurchasesByOrganizationId).not.toHaveBeenCalled();
+	});
+
 	it("scopes personal purchases to the authenticated user", async () => {
 		vi.mocked(getPurchasesByUserId).mockResolvedValueOnce([]);
 
