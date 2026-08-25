@@ -130,6 +130,18 @@ export const CourseScalarFieldEnumSchema = z.enum(['id', 'slug', 'title', 'descr
 
 export type CourseScalarFieldEnum = z.infer<typeof CourseScalarFieldEnumSchema>;
 
+// File: CoursePackScalarFieldEnum.schema.ts
+
+export const CoursePackScalarFieldEnumSchema = z.enum(['id', 'sourcePackId', 'title', 'schemaVersion', 'learningOutcomes', 'status', 'importedBy', 'importedAt'])
+
+export type CoursePackScalarFieldEnum = z.infer<typeof CoursePackScalarFieldEnumSchema>;
+
+// File: CoursePackMissionScalarFieldEnum.schema.ts
+
+export const CoursePackMissionScalarFieldEnumSchema = z.enum(['id', 'coursePackId', 'missionId', 'title', 'goal', 'sortOrder', 'missionData'])
+
+export type CoursePackMissionScalarFieldEnum = z.infer<typeof CoursePackMissionScalarFieldEnumSchema>;
+
 // File: MediaScalarFieldEnum.schema.ts
 
 export const MediaScalarFieldEnumSchema = z.enum(['id', 'type', 'provider', 'sourceId', 'url', 'filename', 'mimeType', 'size', 'uploadedBy', 'createdAt', 'usageType', 'usageId'])
@@ -836,6 +848,37 @@ export const CourseSchema = z.object({
 });
 
 export type CourseType = z.infer<typeof CourseSchema>;
+
+
+// File: CoursePack.schema.ts
+
+export const CoursePackSchema = z.object({
+  id: z.string(),
+  sourcePackId: z.string(),
+  title: z.string(),
+  schemaVersion: z.string(),
+  learningOutcomes: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10"),
+  status: z.string().default("active"),
+  importedBy: z.string(),
+  importedAt: z.date(),
+});
+
+export type CoursePackType = z.infer<typeof CoursePackSchema>;
+
+
+// File: CoursePackMission.schema.ts
+
+export const CoursePackMissionSchema = z.object({
+  id: z.string(),
+  coursePackId: z.string(),
+  missionId: z.string(),
+  title: z.string(),
+  goal: z.string(),
+  sortOrder: z.number().int(),
+  missionData: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10"),
+});
+
+export type CoursePackMissionType = z.infer<typeof CoursePackMissionSchema>;
 
 
 // File: Media.schema.ts
