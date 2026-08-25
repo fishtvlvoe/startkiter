@@ -3,7 +3,7 @@ import { render } from "react-email";
 import { CourseWelcome, type CourseLifecycleEmailProps } from "../emails/CourseWelcome";
 
 function escapeMarkdownHtml(source: string): string {
-	return source.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+	return source.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 export async function renderCourseWelcomeEmail(props: CourseLifecycleEmailProps) {
