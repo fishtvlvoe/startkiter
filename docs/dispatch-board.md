@@ -73,9 +73,10 @@
 - 內容：把 supastarter 原生 Organization 系統（`admin/organizations` 現在的殘留頁面，Better Auth `organization` plugin 已啟用、`Member.role` 目前不受限）跟既有角色矩陣（owner/admin/instructor/user，來自已封存的 `organization-role-model`）真正整合，`Order` 新增 `organizationId` 讓企業帳號購買的課程存取權共享給全體成員；解決了該張留下的 3 個 Open Question（courseAccess 歸屬層級＝Organization 聯集查詢、StartKiter 自己的站不強制多組織、邀請通知走 email 不走 LINE）
 - 誰做：Codex apply，PM 需 review（碰權限矩陣）
 
-### 8. startkiter-official-site-cleanup 📝 待 propose
+### 8. startkiter-official-site-cleanup ⏸️ 排隊中
+- Task 進度：0/8，已 park，proposal/specs/tasks 都在（design.md 跳過，低複雜度純 infra，analyze 0 Critical/Warning，validate 通過）
 - 內容：`apps/marketing` 接上 `startkiter.dev` 正式網域、關掉舊 Vercel 測試站、補一張 SR 正式記錄「官網已搬到 Coolify VPS」這件事（已實測 `app.startkiter.dev` 回 307 正常）
-- 誰做：低風險，PM 寫 propose，Codex 可 apply
+- 誰做：低風險，Codex 可 apply（含實際 DNS／Coolify／Vercel 後台操作，非純代碼）
 
 ### 額外待辦（非 SDD change，不佔佇列順位，PM 有空即做）
 - **43 份規格 Purpose 欄位回填**：純文件維護，不透過 delta spec 機制（Purpose 不是 Requirement，見第 3 項的範圍調整說明），PM 或 Haiku 子代理直接編輯 `openspec/specs/*/spec.md`，依現有 Requirement 內容歸納出一句話用途，逐份 commit（`docs: 補齊 <capability> 規格 Purpose 說明`）
