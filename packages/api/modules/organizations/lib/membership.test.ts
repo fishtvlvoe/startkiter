@@ -50,7 +50,7 @@ describe("verifyOrganizationMembership", () => {
 			id: "membership-2",
 			organizationId: "org-2",
 			userId: "user-2",
-			role: "member",
+			role: "user",
 			createdAt: new Date(),
 			organization: {
 				id: "org-2",
@@ -104,7 +104,7 @@ describe("verifyOrganizationBillingManagement", () => {
 			id: "membership-1",
 			organizationId: "org-1",
 			userId: "user-1",
-			role: "member",
+			role: "user",
 			createdAt: new Date(),
 			organization: {
 				id: "org-1",

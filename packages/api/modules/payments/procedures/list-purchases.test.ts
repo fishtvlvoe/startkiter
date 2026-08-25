@@ -66,7 +66,7 @@ const organizationMembership = {
 	id: "membership-1",
 	organizationId: "organization-1",
 	userId: "user-1",
-	role: "member",
+		role: "user",
 	createdAt: new Date(),
 	organization: {
 		id: "organization-1",

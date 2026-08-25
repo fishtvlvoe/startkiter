@@ -17,13 +17,16 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { createAuthMiddleware, getIp, isAPIError } from "better-auth/api";
 import { admin, magicLink, openAPI, organization, twoFactor } from "better-auth/plugins";
+import { memberAc } from "better-auth/plugins/organization/access";
 import { parseCookie as parseCookies } from "cookie";
 
 import { config } from "./config";
 import { updateSeatsInOrganizationSubscription } from "./lib/organization";
+import { organizationRoleHooks } from "./lib/organization-role-hooks";
 import { recordLoginAttempt } from "./login-attempt";
 import { invitationOnlyPlugin } from "./plugins/invitation-only";
 import { getSocialProviders } from "./providers";
+import type { OrganizationMemberRole as OrganizationMemberRoleValue } from "./lib/organization-roles";
 
 const getLocaleFromRequest = (request?: Request) => {
 	const cookies = parseCookies(request?.headers.get("cookie") ?? "");
@@ -274,6 +277,12 @@ export const auth = betterAuth({
 			},
 		}),
 		organization({
+			creatorRole: "owner",
+			roles: {
+				instructor: memberAc,
+				user: memberAc,
+			},
+			organizationHooks: organizationRoleHooks,
 			sendInvitationEmail: async ({ email, id, organization }, request) => {
 				const locale = getLocaleFromRequest(request);
 				const existingUser = await getUserByEmail(email);
@@ -318,7 +327,7 @@ export type ActiveOrganization = NonNullable<
 
 export type Organization = typeof auth.$Infer.Organization;
 
-export type OrganizationMemberRole = ActiveOrganization["members"][number]["role"];
+export type OrganizationMemberRole = OrganizationMemberRoleValue;
 
 export type OrganizationInvitationStatus = typeof auth.$Infer.Invitation.status;
 
