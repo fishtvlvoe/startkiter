@@ -1,0 +1,280 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3840" height="2160" viewBox="0 0 3840 2160">
+  <defs>
+    <style>
+      .sans { font-family: "Noto Sans TC", "Source Han Sans TC", sans-serif; }
+      .serif { font-family: "Noto Serif TC", "Source Han Serif TC", serif; }
+      .title { font-size: 58px; font-weight: 700; fill: #0f172a; letter-spacing: 2px; }
+      .subtitle { font-size: 27px; font-weight: 500; fill: #475569; }
+      .section { font-size: 30px; font-weight: 700; fill: #ffffff; }
+      .label { font-size: 24px; font-weight: 700; fill: #0f172a; }
+      .body { font-size: 23px; font-weight: 400; fill: #334155; }
+      .small { font-size: 20px; font-weight: 400; fill: #475569; }
+      .tiny { font-size: 18px; font-weight: 500; fill: #64748b; }
+      .shot-index { font-size: 32px; font-weight: 700; fill: #ffffff; }
+      .shot-time { font-size: 23px; font-weight: 600; fill: #ffffff; }
+      .shot-title { font-size: 29px; font-weight: 700; fill: #0f172a; }
+      .shot-copy { font-size: 21px; font-weight: 400; fill: #334155; }
+      .shot-meta { font-size: 20px; font-weight: 600; fill: #2563eb; }
+      .shot-detail { font-size: 18px; font-weight: 400; fill: #334155; }
+      .rule { stroke: #cbd5e1; stroke-width: 2; }
+      .soft-rule { stroke: #e2e8f0; stroke-width: 2; }
+      .arrow { stroke: #3b82f6; stroke-width: 7; fill: none; marker-end: url(#arrowhead); }
+      .flow-node { fill: #ffffff; stroke: #94a3b8; stroke-width: 3; }
+    </style>
+    <marker id="arrowhead" markerWidth="12" markerHeight="12" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#3b82f6"/>
+    </marker>
+    <clipPath id="clientFront"><rect x="1090" y="302" width="170" height="186" rx="8"/></clipPath>
+    <clipPath id="clientSide"><rect x="1274" y="302" width="170" height="186" rx="8"/></clipPath>
+    <clipPath id="clientEmotion"><rect x="1458" y="302" width="170" height="186" rx="8"/></clipPath>
+    <clipPath id="pmFront"><rect x="1748" y="302" width="170" height="186" rx="8"/></clipPath>
+    <clipPath id="pmSide"><rect x="1932" y="302" width="170" height="186" rx="8"/></clipPath>
+    <clipPath id="pmAction"><rect x="2116" y="302" width="170" height="186" rx="8"/></clipPath>
+    <clipPath id="shot1"><rect x="80" y="806" width="650" height="366" rx="6"/></clipPath>
+    <clipPath id="shot2"><rect x="1301" y="806" width="650" height="366" rx="6"/></clipPath>
+    <clipPath id="shot3"><rect x="2522" y="806" width="650" height="366" rx="6"/></clipPath>
+    <clipPath id="shot4"><rect x="80" y="1496" width="650" height="366" rx="6"/></clipPath>
+    <clipPath id="shot5"><rect x="1301" y="1496" width="650" height="366" rx="6"/></clipPath>
+    <clipPath id="shot6"><rect x="2522" y="1496" width="650" height="366" rx="6"/></clipPath>
+  </defs>
+
+  <rect width="3840" height="2160" fill="#f8fafc"/>
+
+  <text x="1920" y="78" text-anchor="middle" class="serif title">案神｜15 秒真實接案情境製作板</text>
+  <text x="1920" y="122" text-anchor="middle" class="sans subtitle">模糊詢價 → 價格防衛 → 案神提示 → 說出真需求 → 分階段方案 → 確認下一步</text>
+  <rect x="3070" y="46" width="690" height="58" rx="8" fill="#fffbeb" stroke="#f59e0b" stroke-width="2"/>
+  <text x="3415" y="83" text-anchor="middle" class="sans small" fill="#92400e">人看說明板｜不要直接當 Seedance 首幀</text>
+
+  <!-- A. 專案設定 -->
+  <rect x="64" y="158" width="970" height="520" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <path d="M74 158 H1024 Q1034 158 1034 168 V218 H64 V168 Q64 158 74 158 Z" fill="#0f172a"/>
+  <text x="92" y="199" class="sans section">A. 影片任務與結果</text>
+
+  <text x="92" y="263" class="sans label">故事核心</text>
+  <text x="92" y="304" class="sans body">
+    <tspan x="92" dy="0">客戶以為自己只是在問網站價格；</tspan>
+    <tspan x="92" dy="34">案神協助 PM 找出真正問題，再提出能先使用的方案。</tspan>
+  </text>
+
+  <line x1="92" y1="356" x2="1002" y2="356" class="soft-rule"/>
+  <text x="92" y="403" class="sans label">固定規格</text>
+  <text x="92" y="438" class="sans body">15 秒　｜　6 鏡　｜　16:9　｜　30 fps</text>
+  <text x="92" y="470" class="sans small">製作板／參考圖：3840×2160（4K）　｜　成片：1920×1080</text>
+
+  <line x1="92" y1="492" x2="1002" y2="492" class="soft-rule"/>
+  <text x="92" y="526" class="sans label">畫面語氣</text>
+  <text x="92" y="566" class="sans body">
+    <tspan x="92" dy="0">真實台灣咖啡店、自然光、克制表演。</tspan>
+    <tspan x="92" dy="34">不要 AI 霓虹、夢幻辦公室、浮誇笑容或制式握手。</tspan>
+  </text>
+
+  <rect x="92" y="618" width="914" height="42" rx="6" fill="#eff6ff"/>
+  <text x="549" y="647" text-anchor="middle" class="sans small" fill="#1e3a8a">最終結果：客戶願意確認第一階段，PM 再交正式報價</text>
+
+  <!-- B. 角色與一致性 -->
+  <rect x="1058" y="158" width="1320" height="520" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <path d="M1068 158 H2368 Q2378 158 2378 168 V218 H1058 V168 Q1058 158 1068 158 Z" fill="#0f172a"/>
+  <text x="1086" y="199" class="sans section">B. 角色與身份鎖定</text>
+
+  <text x="1090" y="270" class="sans label">客戶｜企業主，約 40 歲</text>
+  <text x="1090" y="296" class="sans tiny">及肩黑髮・灰米針織・深灰外套</text>
+  <image href="shot-02-price-resistance.png" x="1090" y="302" width="170" height="186" preserveAspectRatio="xMidYMid slice" clip-path="url(#clientFront)"/>
+  <image href="shot-01-vague-need.png" x="1274" y="302" width="170" height="186" preserveAspectRatio="xMinYMid slice" clip-path="url(#clientSide)"/>
+  <image href="shot-04-real-need.png" x="1458" y="302" width="170" height="186" preserveAspectRatio="xMinYMid slice" clip-path="url(#clientEmotion)"/>
+  <rect x="1090" y="302" width="170" height="186" rx="8" fill="none" stroke="#cbd5e1" stroke-width="2"/>
+  <rect x="1274" y="302" width="170" height="186" rx="8" fill="none" stroke="#cbd5e1" stroke-width="2"/>
+  <rect x="1458" y="302" width="170" height="186" rx="8" fill="none" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="1175" y="517" text-anchor="middle" class="sans tiny">正面／警戒</text>
+  <text x="1359" y="517" text-anchor="middle" class="sans tiny">側面／詢價</text>
+  <text x="1543" y="517" text-anchor="middle" class="sans tiny">動作／說真話</text>
+  <text x="1090" y="558" class="sans small">怕被報太貴、怕買錯；情緒從防衛慢慢放鬆。</text>
+  <text x="1090" y="590" class="sans small">配件固定：黑色手機、綠色陶杯。</text>
+
+  <line x1="1688" y1="246" x2="1688" y2="628" class="soft-rule"/>
+
+  <text x="1748" y="270" class="sans label">PM｜提案者，約 35 歲</text>
+  <text x="1748" y="296" class="sans tiny">短黑髮・深灰西裝・白襯衫</text>
+  <image href="shot-03-anson-guidance.png" x="1748" y="302" width="170" height="186" preserveAspectRatio="xMidYMid slice" clip-path="url(#pmFront)"/>
+  <image href="shot-01-vague-need.png" x="1932" y="302" width="170" height="186" preserveAspectRatio="xMaxYMid slice" clip-path="url(#pmSide)"/>
+  <image href="shot-06-next-step.png" x="2116" y="302" width="170" height="186" preserveAspectRatio="xMaxYMid slice" clip-path="url(#pmAction)"/>
+  <rect x="1748" y="302" width="170" height="186" rx="8" fill="none" stroke="#cbd5e1" stroke-width="2"/>
+  <rect x="1932" y="302" width="170" height="186" rx="8" fill="none" stroke="#cbd5e1" stroke-width="2"/>
+  <rect x="2116" y="302" width="170" height="186" rx="8" fill="none" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="1833" y="517" text-anchor="middle" class="sans tiny">正面／提問</text>
+  <text x="2017" y="517" text-anchor="middle" class="sans tiny">側面／傾聽</text>
+  <text x="2201" y="517" text-anchor="middle" class="sans tiny">動作／記錄</text>
+  <text x="1748" y="558" class="sans small">不急著辯護；先看案神、觀察客戶，再追問。</text>
+  <text x="1748" y="590" class="sans small">配件固定：灰色筆電、黑杯、筆記本。</text>
+
+  <text x="1718" y="648" text-anchor="middle" class="sans small" fill="#2563eb">身份鎖：六鏡保持相同臉型、膚色、年齡、髮型、服裝與身形比例</text>
+
+  <!-- C. 場景與生成規則 -->
+  <rect x="2402" y="158" width="1374" height="520" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <path d="M2412 158 H3766 Q3776 158 3776 168 V218 H2402 V168 Q2402 158 2412 158 Z" fill="#0f172a"/>
+  <text x="2430" y="199" class="sans section">C. 空間、道具與生成方式</text>
+
+  <rect x="2440" y="252" width="690" height="360" rx="12" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="2"/>
+  <text x="2785" y="290" text-anchor="middle" class="sans label">180° 鏡頭軸不可跨越</text>
+  <rect x="2540" y="360" width="490" height="160" rx="80" fill="#ffffff" stroke="#94a3b8" stroke-width="3"/>
+  <circle cx="2492" cy="440" r="50" class="flow-node"/>
+  <circle cx="3078" cy="440" r="50" class="flow-node"/>
+  <text x="2492" y="448" text-anchor="middle" class="sans small">客戶</text>
+  <text x="3078" y="448" text-anchor="middle" class="sans small">PM</text>
+  <text x="2785" y="415" text-anchor="middle" class="sans tiny">灰色筆電</text>
+  <text x="2650" y="470" text-anchor="middle" class="sans tiny">綠杯</text>
+  <text x="2915" y="470" text-anchor="middle" class="sans tiny">黑杯</text>
+  <path d="M2540 560 H3030" stroke="#ef4444" stroke-width="5" stroke-dasharray="16 12"/>
+  <text x="2785" y="590" text-anchor="middle" class="sans tiny" fill="#b91c1c">攝影機只在這一側移動</text>
+
+  <text x="3170" y="275" class="sans label">生成設定</text>
+  <text x="3170" y="318" class="sans body">
+    <tspan x="3170" dy="0">一次生成完整 15 秒 multi-shot</tspan>
+    <tspan x="3170" dy="36">Shot 1 獨立圖＝start_image</tspan>
+    <tspan x="3170" dy="36">六格總覽＝全片 reference</tspan>
+    <tspan x="3170" dy="36">每次切鏡都用動作或視線承接</tspan>
+    <tspan x="3170" dy="36">精確中文與字幕由剪神後製</tspan>
+  </text>
+  <rect x="3170" y="510" width="550" height="102" rx="8" fill="#f0fdf4" stroke="#10b981" stroke-width="2"/>
+  <text x="3445" y="550" text-anchor="middle" class="sans small" fill="#065f46">角色左／右位置固定</text>
+  <text x="3445" y="585" text-anchor="middle" class="sans small" fill="#065f46">光線、杯子、手機、筆電都不能跳動</text>
+
+  <rect x="64" y="686" width="3712" height="28" rx="4" fill="#e2e8f0"/>
+  <text x="82" y="708" class="sans tiny" fill="#0f172a">D. 六鏡故事板｜每鏡固定交代：秒數、關鍵幀、焦段、運鏡、台詞、表演、打光、音效、前後承接</text>
+
+  <!-- Shot 1 -->
+  <rect x="64" y="720" width="1198" height="642" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <path d="M74 720 H1252 Q1262 720 1262 730 V784 H64 V730 Q64 720 74 720 Z" fill="#0f172a"/>
+  <text x="92" y="765" class="sans shot-index">1</text>
+  <text x="145" y="765" class="sans shot-time">00:00–00:03</text>
+  <text x="1230" y="765" text-anchor="end" class="sans shot-time">28mm｜環境廣角</text>
+  <image href="shot-01-vague-need.png" x="80" y="806" width="650" height="366" preserveAspectRatio="xMidYMid slice" clip-path="url(#shot1)"/>
+  <text x="758" y="835" class="sans shot-title">模糊需求先進場</text>
+  <text x="758" y="878" class="sans shot-detail">
+    <tspan x="758" dy="0"><tspan font-weight="700">運鏡｜</tspan>穩定手持，緩慢推近</tspan>
+    <tspan x="758" dy="40"><tspan font-weight="700">台詞｜</tspan>客戶：「做網站大概多少錢？」</tspan>
+    <tspan x="758" dy="40"><tspan font-weight="700">表演｜</tspan>前傾、掌心朝上、手比小範圍</tspan>
+    <tspan x="758" dy="40"><tspan font-weight="700">PM｜</tspan>不微笑，先聽完並啟動錄音</tspan>
+    <tspan x="758" dy="40"><tspan font-weight="700">打光｜</tspan>午後窗光＋室內暖光</tspan>
+    <tspan x="758" dy="40"><tspan font-weight="700">音效｜</tspan>咖啡機、談話底噪、杯碟聲</tspan>
+    <tspan x="758" dy="40"><tspan font-weight="700">承接｜</tspan>右手離開手機，移向範圍圖</tspan>
+  </text>
+  <rect x="80" y="1197" width="1150" height="136" rx="8" fill="#eff6ff"/>
+  <text x="106" y="1237" class="sans shot-meta">案神在做什麼</text>
+  <text x="106" y="1274" class="sans shot-copy">把模糊對話與原始資料先收進同一個案子，不急著假設答案。</text>
+
+  <!-- Shot 2 -->
+  <rect x="1285" y="720" width="1198" height="642" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <path d="M1295 720 H2473 Q2483 720 2483 730 V784 H1285 V730 Q1285 720 1295 720 Z" fill="#0f172a"/>
+  <text x="1313" y="765" class="sans shot-index">2</text>
+  <text x="1366" y="765" class="sans shot-time">00:03–00:05</text>
+  <text x="2451" y="765" text-anchor="end" class="sans shot-time">85mm｜臉部特寫</text>
+  <image href="shot-02-price-resistance.png" x="1301" y="806" width="650" height="366" preserveAspectRatio="xMidYMid slice" clip-path="url(#shot2)"/>
+  <text x="1979" y="835" class="sans shot-title">價格讓客戶防衛</text>
+  <text x="1979" y="878" class="sans shot-detail">
+    <tspan x="1979" dy="0"><tspan font-weight="700">運鏡｜</tspan>固定 85mm 特寫，環境聲收窄</tspan>
+    <tspan x="1979" dy="40"><tspan font-weight="700">台詞｜</tspan>客戶：「這麼貴？不就網站？」</tspan>
+    <tspan x="1979" dy="40"><tspan font-weight="700">表演｜</tspan>AU4／7／14／24，身體後靠</tspan>
+    <tspan x="1979" dy="40"><tspan font-weight="700">視線｜</tspan>離開 PM，落到綠色杯子</tspan>
+    <tspan x="1979" dy="40"><tspan font-weight="700">打光｜</tspan>同一午後窗光，臉部自然陰影</tspan>
+    <tspan x="1979" dy="40"><tspan font-weight="700">音效｜</tspan>短暫降環境聲，保留呼吸</tspan>
+    <tspan x="1979" dy="40"><tspan font-weight="700">承接｜</tspan>保持低頭；PM 的手碰筆電</tspan>
+  </text>
+  <rect x="1301" y="1197" width="1150" height="136" rx="8" fill="#fffbeb"/>
+  <text x="1327" y="1237" class="sans shot-meta" fill="#92400e">案神在做什麼</text>
+  <text x="1327" y="1274" class="sans shot-copy">提醒 PM：現在卡住的是認知與風險，不是立刻替價格辯護。</text>
+
+  <!-- Shot 3 -->
+  <rect x="2506" y="720" width="1270" height="642" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <path d="M2516 720 H3766 Q3776 720 3776 730 V784 H2506 V730 Q2506 720 2516 720 Z" fill="#0f172a"/>
+  <text x="2534" y="765" class="sans shot-index">3</text>
+  <text x="2587" y="765" class="sans shot-time">00:05–00:07.5</text>
+  <text x="3744" y="765" text-anchor="end" class="sans shot-time">50mm｜越肩鏡頭</text>
+  <image href="shot-03-anson-guidance.png" x="2522" y="806" width="650" height="366" preserveAspectRatio="xMidYMid slice" clip-path="url(#shot3)"/>
+  <text x="3200" y="835" class="sans shot-title">PM 先看案神，再問問題</text>
+  <text x="3200" y="878" class="sans shot-detail">
+    <tspan x="3200" dy="0"><tspan font-weight="700">運鏡｜</tspan>50mm 越肩＋筆電到眼神拉焦</tspan>
+    <tspan x="3200" dy="40"><tspan font-weight="700">台詞｜</tspan>PM：「現在最急的是預約嗎？」</tspan>
+    <tspan x="3200" dy="40"><tspan font-weight="700">表演｜</tspan>停一秒、不辯解、雙手打開</tspan>
+    <tspan x="3200" dy="40"><tspan font-weight="700">畫面｜</tspan>問號、預算、目標三個無字圖示</tspan>
+    <tspan x="3200" dy="40"><tspan font-weight="700">打光｜</tspan>午後柔光，筆電不發科技藍光</tspan>
+    <tspan x="3200" dy="40"><tspan font-weight="700">音效｜</tspan>環境聲回來，輕微觸控聲</tspan>
+    <tspan x="3200" dy="40"><tspan font-weight="700">承接｜</tspan>PM 抬眼問完；客戶吸氣抬眼</tspan>
+  </text>
+  <rect x="2522" y="1197" width="1222" height="136" rx="8" fill="#eff6ff"/>
+  <text x="2548" y="1237" class="sans shot-meta">案神在做什麼</text>
+  <text x="2548" y="1274" class="sans shot-copy">把「網站多少錢」轉成能被回答的商業問題。</text>
+
+  <!-- Shot 4 -->
+  <rect x="64" y="1410" width="1198" height="686" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <path d="M74 1410 H1252 Q1262 1410 1262 1420 V1474 H64 V1420 Q64 1410 74 1410 Z" fill="#0f172a"/>
+  <text x="92" y="1455" class="sans shot-index">4</text>
+  <text x="145" y="1455" class="sans shot-time">00:07.5–00:10</text>
+  <text x="1230" y="1455" text-anchor="end" class="sans shot-time">85mm｜長焦近景</text>
+  <image href="shot-04-real-need.png" x="80" y="1496" width="650" height="366" preserveAspectRatio="xMidYMid slice" clip-path="url(#shot4)"/>
+  <text x="758" y="1525" class="sans shot-title">客戶說出真正困擾</text>
+  <text x="758" y="1568" class="sans shot-detail">
+    <tspan x="758" dy="0"><tspan font-weight="700">運鏡｜</tspan>85mm 反打特寫，固定鏡頭</tspan>
+    <tspan x="758" dy="40"><tspan font-weight="700">台詞｜</tspan>「我只想讓客人看懂、預約。」</tspan>
+    <tspan x="758" dy="40"><tspan font-weight="700">表演｜</tspan>手臂鬆開、肩膀下降、語速變慢</tspan>
+    <tspan x="758" dy="40"><tspan font-weight="700">視線｜</tspan>先看手機，再回到 PM</tspan>
+    <tspan x="758" dy="40"><tspan font-weight="700">打光｜</tspan>自然窗光，臉部陰影逐步柔和</tspan>
+    <tspan x="758" dy="40"><tspan font-weight="700">音效｜</tspan>手機輕觸聲、自然咖啡店底噪</tspan>
+    <tspan x="758" dy="40"><tspan font-weight="700">承接｜</tspan>手指留在手機；PM 拉近筆電</tspan>
+  </text>
+  <rect x="80" y="1887" width="1150" height="178" rx="8" fill="#f0fdf4"/>
+  <text x="106" y="1927" class="sans shot-meta" fill="#065f46">案神在做什麼</text>
+  <text x="106" y="1964" class="sans shot-copy">
+    <tspan x="106" dy="0">把表面需求翻成可執行需求：</tspan>
+    <tspan x="106" dy="31">先讓客戶看懂服務、完成預約與開始收單。</tspan>
+  </text>
+
+  <!-- Shot 5 -->
+  <rect x="1285" y="1410" width="1198" height="686" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <path d="M1295 1410 H2473 Q2483 1410 2483 1420 V1474 H1285 V1420 Q1285 1410 1295 1410 Z" fill="#0f172a"/>
+  <text x="1313" y="1455" class="sans shot-index">5</text>
+  <text x="1366" y="1455" class="sans shot-time">00:10–00:12.5</text>
+  <text x="2451" y="1455" text-anchor="end" class="sans shot-time">35mm｜雙人中景</text>
+  <image href="shot-05-phased-proposal.png" x="1301" y="1496" width="650" height="366" preserveAspectRatio="xMidYMid slice" clip-path="url(#shot5)"/>
+  <text x="1979" y="1525" class="sans shot-title">提出能先使用的第一階段</text>
+  <text x="1979" y="1568" class="sans shot-detail">
+    <tspan x="1979" dy="0"><tspan font-weight="700">運鏡｜</tspan>35mm 桌側雙人中景，穩定橫移</tspan>
+    <tspan x="1979" dy="40"><tspan font-weight="700">台詞｜</tspan>PM：「會員系統先不要花。」</tspan>
+    <tspan x="1979" dy="40"><tspan font-weight="700">表演｜</tspan>PM 開放手勢；客戶前傾追問</tspan>
+    <tspan x="1979" dy="40"><tspan font-weight="700">畫面｜</tspan>服務頁、預約、報價三個無字區塊</tspan>
+    <tspan x="1979" dy="40"><tspan font-weight="700">打光｜</tspan>同一午後自然光，螢幕亮度克制</tspan>
+    <tspan x="1979" dy="40"><tspan font-weight="700">音效｜</tspan>筆電轉向桌面的摩擦聲</tspan>
+    <tspan x="1979" dy="40"><tspan font-weight="700">承接｜</tspan>食指停在方案上，保留輕微皺眉</tspan>
+  </text>
+  <rect x="1301" y="1887" width="1150" height="178" rx="8" fill="#eff6ff"/>
+  <text x="1327" y="1927" class="sans shot-meta">案神在做什麼</text>
+  <text x="1327" y="1964" class="sans shot-copy">
+    <tspan x="1327" dy="0">依真實需求整理成果、範圍與報價，</tspan>
+    <tspan x="1327" dy="31">避免一開始就賣一整套用不到的系統。</tspan>
+  </text>
+
+  <!-- Shot 6 -->
+  <rect x="2506" y="1410" width="1270" height="686" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+  <path d="M2516 1410 H3766 Q3776 1410 3776 1420 V1474 H2506 V1420 Q2506 1410 2516 1410 Z" fill="#0f172a"/>
+  <text x="2534" y="1455" class="sans shot-index">6</text>
+  <text x="2587" y="1455" class="sans shot-time">00:12.5–00:15</text>
+  <text x="3744" y="1455" text-anchor="end" class="sans shot-time">50mm｜中景微推</text>
+  <image href="shot-06-next-step.png" x="2522" y="1496" width="650" height="366" preserveAspectRatio="xMidYMid slice" clip-path="url(#shot6)"/>
+  <text x="3200" y="1525" class="sans shot-title">確認下一步，不假裝成交</text>
+  <text x="3200" y="1568" class="sans shot-detail">
+    <tspan x="3200" dy="0"><tspan font-weight="700">運鏡｜</tspan>50mm 雙人中景，極輕微推近</tspan>
+    <tspan x="3200" dy="40"><tspan font-weight="700">台詞｜</tspan>客戶：「先做這個，給我報價。」</tspan>
+    <tspan x="3200" dy="40"><tspan font-weight="700">表演｜</tspan>思考半秒、輕點頭、克制微笑</tspan>
+    <tspan x="3200" dy="40"><tspan font-weight="700">動作｜</tspan>手機行事曆轉向 PM，不握手</tspan>
+    <tspan x="3200" dy="40"><tspan font-weight="700">打光｜</tspan>午後自然光不變，畫面微微收暖</tspan>
+    <tspan x="3200" dy="40"><tspan font-weight="700">音效｜</tspan>筆尖聲、杯碟底噪、尾音停住</tspan>
+    <tspan x="3200" dy="40"><tspan font-weight="700">停留｜</tspan>最後 0.5 秒，讓結果被看見</tspan>
+  </text>
+  <rect x="2522" y="1887" width="1222" height="178" rx="8" fill="#f0fdf4"/>
+  <text x="2548" y="1927" class="sans shot-meta" fill="#065f46">客戶最終拿到什麼</text>
+  <text x="2548" y="1964" class="sans shot-copy">
+    <tspan x="2548" dy="0">清楚的第一階段範圍與正式報價；</tspan>
+    <tspan x="2548" dy="31">後續再依需求產出簡報、網站、程式碼或服務說明。</tspan>
+  </text>
+
+  <text x="1920" y="2132" text-anchor="middle" class="sans tiny">角色與場景一致性優先｜精確繁中對白、字卡與音效由剪神後製｜六格乾淨參考圖另存供 Seedance 使用</text>
+</svg>

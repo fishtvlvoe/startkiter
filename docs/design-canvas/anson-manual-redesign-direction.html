@@ -1,0 +1,1154 @@
+<!doctype html>
+<html lang="zh-Hant" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="案神使用說明視覺方向稿。用白話案例說明如何把客戶的模糊需求整理成可確認、可報價、可交付的方案。">
+  <title>案神使用說明｜品牌統一方向稿</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&amp;family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600&amp;family=Noto+Sans+TC:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('startkiter-brand-preview-theme');
+        document.documentElement.dataset.theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      } catch (error) {
+        document.documentElement.dataset.theme = 'light';
+      }
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --olive-50: oklch(98.8% 0.003 106.5);
+      --olive-100: oklch(96.6% 0.005 106.5);
+      --olive-200: oklch(93% 0.007 106.5);
+      --olive-300: oklch(88% 0.011 106.6);
+      --olive-400: oklch(73.7% 0.021 106.9);
+      --olive-500: oklch(58% 0.031 107.3);
+      --olive-600: oklch(46.6% 0.025 107.3);
+      --olive-700: oklch(39.4% 0.023 107.4);
+      --olive-800: oklch(28.6% 0.016 107.4);
+      --olive-900: oklch(22.8% 0.013 107.4);
+      --olive-950: oklch(15.3% 0.006 107.1);
+      --background: var(--olive-50);
+      --foreground: var(--olive-950);
+      --card: #ffffff;
+      --card-foreground: var(--olive-950);
+      --muted: var(--olive-100);
+      --muted-foreground: var(--olive-600);
+      --border: var(--olive-200);
+      --border-strong: var(--olive-300);
+      --primary: var(--olive-950);
+      --primary-foreground: var(--olive-50);
+      --touch: oklch(0.51 0.12 128);
+      --touch-soft: oklch(0.95 0.025 128);
+      --radius: 0.625rem;
+      --radius-lg: 1.125rem;
+      --shadow: 0 18px 50px -32px color-mix(in oklab, var(--olive-950) 36%, transparent);
+      --container: 72rem;
+      --nav-height: 64px;
+      --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --background: var(--olive-950);
+      --foreground: var(--olive-50);
+      --card: var(--olive-900);
+      --card-foreground: var(--olive-50);
+      --muted: var(--olive-900);
+      --muted-foreground: var(--olive-400);
+      --border: var(--olive-800);
+      --border-strong: var(--olive-700);
+      --primary: var(--olive-50);
+      --primary-foreground: var(--olive-950);
+      --touch: oklch(0.76 0.11 128);
+      --touch-soft: oklch(0.25 0.035 128);
+      --shadow: 0 18px 50px -32px rgba(0, 0, 0, 0.82);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+      scroll-padding-top: calc(var(--nav-height) + 24px);
+      overflow-x: clip;
+    }
+
+    body {
+      margin: 0;
+      overflow-x: clip;
+      background: var(--background);
+      color: var(--foreground);
+      font-family: Inter, "Noto Sans TC", ui-sans-serif, system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+      text-rendering: optimizeLegibility;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      color: var(--foreground);
+      font-family: "DM Sans", "Noto Sans TC", ui-sans-serif, system-ui, sans-serif;
+      letter-spacing: -0.025em;
+      line-height: 1.28;
+    }
+
+    h1 { font-size: 30px; }
+    h2 { font-size: 24px; }
+    h3 { font-size: 18px; }
+
+    p,
+    figure,
+    dl,
+    dd {
+      margin: 0;
+    }
+
+    p,
+    dd {
+      color: var(--muted-foreground);
+    }
+
+    a,
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    button {
+      font: inherit;
+      color: inherit;
+    }
+
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--touch);
+      outline-offset: 3px;
+    }
+
+    .skip-link {
+      position: fixed;
+      z-index: 100;
+      top: 8px;
+      left: 16px;
+      transform: translateY(-160%);
+      border-radius: var(--radius);
+      background: var(--primary);
+      color: var(--primary-foreground);
+      padding: 8px 14px;
+      text-decoration: none;
+    }
+
+    .skip-link:focus {
+      transform: translateY(0);
+    }
+
+    .shell {
+      width: min(var(--container), calc(100% - 48px));
+      margin-inline: auto;
+    }
+
+    .topbar {
+      position: sticky;
+      z-index: 50;
+      top: 0;
+      height: var(--nav-height);
+      border-bottom: 1px solid var(--border);
+      background: color-mix(in oklab, var(--background) 94%, transparent);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .topbar-inner {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 24px;
+      height: 100%;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-width: max-content;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius);
+      background: var(--primary);
+      color: var(--primary-foreground);
+      font-size: 14px;
+    }
+
+    .brand-copy {
+      display: grid;
+      line-height: 1.15;
+    }
+
+    .brand-copy small {
+      margin-top: 3px;
+      color: var(--muted-foreground);
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .nav-links {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .nav-links a {
+      border-radius: var(--radius);
+      color: var(--muted-foreground);
+      padding: 7px 10px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background 150ms var(--ease), color 150ms var(--ease);
+    }
+
+    .nav-links a:hover {
+      background: var(--muted);
+      color: var(--foreground);
+    }
+
+    .theme-toggle {
+      min-height: 36px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--card);
+      color: var(--muted-foreground);
+      padding: 0 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 150ms var(--ease), color 150ms var(--ease), transform 150ms var(--ease);
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--border-strong);
+      color: var(--foreground);
+    }
+
+    .theme-toggle:active,
+    .button:active,
+    .case-link:active {
+      transform: translateY(1px) scale(0.99);
+    }
+
+    .preview-note {
+      border-bottom: 1px solid var(--border);
+      background: var(--muted);
+      color: var(--muted-foreground);
+      padding: 8px 16px;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
+      align-items: center;
+      gap: 48px;
+      padding-block: 64px 48px;
+    }
+
+    .hero-copy {
+      max-width: 540px;
+    }
+
+    .kicker {
+      margin-bottom: 14px;
+      color: var(--touch);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .hero h1 {
+      max-width: 18ch;
+    }
+
+    .hero-lead {
+      max-width: 34rem;
+      margin-top: 18px;
+      font-size: 17px;
+      line-height: 1.7;
+    }
+
+    .hero-actions,
+    .cta-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      padding: 0 17px;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: background 150ms var(--ease), border-color 150ms var(--ease), transform 150ms var(--ease);
+    }
+
+    .button-primary {
+      background: var(--primary);
+      color: var(--primary-foreground);
+    }
+
+    .button-primary:hover {
+      background: color-mix(in oklab, var(--primary) 88%, var(--touch));
+    }
+
+    .button-secondary {
+      border-color: var(--border);
+      background: var(--card);
+      color: var(--card-foreground);
+    }
+
+    .button-secondary:hover {
+      border-color: var(--border-strong);
+      background: var(--muted);
+    }
+
+    .hero-media {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 16 / 10;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      filter: saturate(0.72) contrast(0.98);
+    }
+
+    .hero-media figcaption {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      max-width: calc(100% - 24px);
+      border: 1px solid color-mix(in oklab, var(--border) 75%, transparent);
+      border-radius: var(--radius);
+      background: color-mix(in oklab, var(--card) 92%, transparent);
+      color: var(--muted-foreground);
+      padding: 8px 10px;
+      font-size: 12px;
+      backdrop-filter: blur(10px);
+    }
+
+    .outcome-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+
+    .outcome-item {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      gap: 12px;
+      min-height: 104px;
+      padding: 20px;
+    }
+
+    .outcome-item + .outcome-item {
+      border-left: 1px solid var(--border);
+    }
+
+    .output-key {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius);
+      background: var(--muted);
+      color: var(--foreground);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .outcome-item strong {
+      display: block;
+      font-size: 15px;
+    }
+
+    .outcome-item span:last-child {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted-foreground);
+      font-size: 12px;
+    }
+
+    .section {
+      padding-block: 64px;
+    }
+
+    .section + .section {
+      border-top: 1px solid var(--border);
+    }
+
+    .section-head {
+      max-width: 44rem;
+      margin-bottom: 32px;
+    }
+
+    .section-head p {
+      margin-top: 10px;
+      font-size: 15px;
+    }
+
+    .scenario-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+      gap: 48px;
+      align-items: start;
+    }
+
+    .scenario-question {
+      position: sticky;
+      top: calc(var(--nav-height) + 32px);
+      border-left: 4px solid var(--touch);
+      padding-left: 20px;
+    }
+
+    .scenario-question p {
+      margin-top: 12px;
+    }
+
+    .scenario-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .scenario-item {
+      display: grid;
+      grid-template-columns: 2rem minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--card);
+      padding: 18px;
+    }
+
+    .scenario-number {
+      display: grid;
+      place-items: center;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 9999px;
+      background: var(--primary);
+      color: var(--primary-foreground);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+    }
+
+    .scenario-item p {
+      margin-top: 5px;
+      font-size: 14px;
+    }
+
+    .canvas-frame {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: #ffffff;
+      box-shadow: var(--shadow);
+    }
+
+    .canvas-frame img {
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+    }
+
+    .canvas-caption {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      border-top: 1px solid var(--border);
+      background: var(--card);
+    }
+
+    .canvas-caption div {
+      padding: 16px;
+    }
+
+    .canvas-caption div + div {
+      border-left: 1px solid var(--border);
+    }
+
+    .canvas-caption strong {
+      display: block;
+      font-size: 13px;
+    }
+
+    .canvas-caption span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted-foreground);
+      font-size: 12px;
+    }
+
+    .case-stack {
+      display: grid;
+      gap: 32px;
+    }
+
+    .case-study {
+      display: grid;
+      grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+
+    .case-study:nth-child(even) .case-media {
+      order: 2;
+    }
+
+    .case-media {
+      min-height: 390px;
+      background: var(--muted);
+    }
+
+    .case-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: saturate(0.55) contrast(0.96);
+    }
+
+    .case-body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 32px;
+    }
+
+    .case-label {
+      margin-bottom: 10px;
+      color: var(--touch);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .case-summary {
+      margin-top: 10px;
+      font-size: 15px;
+    }
+
+    .case-details {
+      display: grid;
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .case-details div {
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .case-details strong {
+      color: var(--foreground);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .case-details p {
+      margin-top: 5px;
+      font-size: 14px;
+    }
+
+    .case-note {
+      margin-top: 18px;
+      color: var(--muted-foreground);
+      font-size: 12px;
+    }
+
+    .workflow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 0;
+    }
+
+    .workflow-step {
+      position: relative;
+      min-height: 176px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--card);
+      padding: 18px;
+    }
+
+    .workflow-step + .workflow-step {
+      margin-left: 20px;
+    }
+
+    .workflow-step + .workflow-step::before {
+      content: "→";
+      position: absolute;
+      top: 50%;
+      left: -21px;
+      width: 20px;
+      color: var(--muted-foreground);
+      text-align: center;
+      transform: translateY(-50%);
+    }
+
+    .workflow-step b {
+      display: block;
+      color: var(--touch);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+    }
+
+    .workflow-step strong {
+      display: block;
+      margin-top: 14px;
+      font-size: 15px;
+    }
+
+    .workflow-step p {
+      margin-top: 7px;
+      font-size: 13px;
+    }
+
+    .workflow-step small {
+      display: block;
+      margin-top: 14px;
+      color: var(--muted-foreground);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+    }
+
+    .handoff-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      align-items: stretch;
+      gap: 16px;
+    }
+
+    .handoff-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--card);
+      padding: 20px;
+    }
+
+    .handoff-card p {
+      margin-top: 8px;
+      font-size: 13px;
+    }
+
+    .technical-name {
+      display: block;
+      margin-top: 14px;
+      color: var(--muted-foreground);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 10px;
+    }
+
+    .handoff-arrow {
+      display: grid;
+      place-items: center;
+      color: var(--touch);
+      font-size: 22px;
+    }
+
+    .contact-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 32px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--card);
+      padding: 32px;
+      box-shadow: var(--shadow);
+    }
+
+    .contact-panel p {
+      max-width: 42rem;
+      margin-top: 10px;
+    }
+
+    .contact-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      margin-top: 18px;
+      color: var(--muted-foreground);
+      font-size: 12px;
+    }
+
+    .planned {
+      display: inline-flex;
+      align-items: center;
+      min-height: 34px;
+      border: 1px dashed var(--border-strong);
+      border-radius: var(--radius);
+      padding: 0 10px;
+    }
+
+    .contact-feedback {
+      margin-top: 12px;
+      color: var(--touch);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .footer {
+      padding-block: 28px;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      color: var(--muted-foreground);
+      font-size: 12px;
+    }
+
+    @media (max-width: 960px) {
+      .hero,
+      .scenario-layout,
+      .case-study,
+      .contact-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .scenario-question {
+        position: static;
+      }
+
+      .outcome-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .outcome-item:nth-child(3) {
+        border-left: 0;
+        border-top: 1px solid var(--border);
+      }
+
+      .outcome-item:nth-child(4) {
+        border-top: 1px solid var(--border);
+      }
+
+      .case-study:nth-child(even) .case-media {
+        order: 0;
+      }
+
+      .case-media {
+        min-height: 320px;
+      }
+
+      .workflow {
+        grid-template-columns: 1fr;
+        gap: 28px;
+      }
+
+      .workflow-step + .workflow-step {
+        margin-left: 0;
+      }
+
+      .workflow-step + .workflow-step::before {
+        content: "↓";
+        top: -29px;
+        left: 50%;
+        width: auto;
+        transform: translateX(-50%);
+      }
+
+      .handoff-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .handoff-arrow {
+        transform: rotate(90deg);
+      }
+
+      .contact-panel .cta-actions {
+        margin-top: 0;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .shell {
+        width: min(100% - 32px, var(--container));
+      }
+
+      .topbar-inner {
+        grid-template-columns: 1fr auto;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .preview-note {
+        text-align: left;
+      }
+
+      .hero {
+        gap: 28px;
+        padding-block: 40px 32px;
+      }
+
+      .hero-lead {
+        font-size: 16px;
+      }
+
+      .hero-media {
+        aspect-ratio: 4 / 3;
+      }
+
+      .outcome-strip,
+      .canvas-caption {
+        grid-template-columns: 1fr;
+      }
+
+      .outcome-item + .outcome-item,
+      .outcome-item:nth-child(3),
+      .outcome-item:nth-child(4),
+      .canvas-caption div + div {
+        border-top: 1px solid var(--border);
+        border-left: 0;
+      }
+
+      .section {
+        padding-block: 48px;
+      }
+
+      .canvas-frame {
+        overflow: visible;
+      }
+
+      .canvas-frame img {
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      }
+
+      .case-media {
+        min-height: 240px;
+      }
+
+      .case-body,
+      .contact-panel {
+        padding: 24px;
+      }
+
+      .hero-actions,
+      .cta-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .button {
+        width: 100%;
+      }
+
+      .footer-inner {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要內容</a>
+
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="#top" aria-label="回到頁首">
+        <span class="brand-mark" aria-hidden="true">案</span>
+        <span class="brand-copy">案神<small>使用說明</small></span>
+      </a>
+      <nav class="nav-links" aria-label="頁面導覽">
+        <a href="#outcomes">你會拿到什麼</a>
+        <a href="#cases">真實案例</a>
+        <a href="#workflow">怎麼進行</a>
+        <a href="#contact">下一步</a>
+      </nav>
+      <button class="theme-toggle" type="button" aria-label="切換深淺色模式">深色模式</button>
+    </div>
+  </header>
+
+  <div class="preview-note">本機視覺方向稿。先確認品牌風格與閱讀方式，尚未發布。</div>
+
+  <main id="main">
+    <section class="shell hero" id="top" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="kicker">談需求、提案、報價，都可以先交給案神整理</p>
+        <h1 id="hero-title">把模糊需求，整理成能報價、能執行的方案。</h1>
+        <p class="hero-lead">只要雙方需要對齊認知，後面可能收費，就把對話、筆記與文件放進來。案神會整理重點，也會把還沒問清楚的地方留下來給人確認。</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#contact">與我們聯繫</a>
+          <a class="button button-secondary" href="https://github.com/fishtvlvoe/Awesome-Anson" target="_blank" rel="noreferrer">查看 GitHub</a>
+        </div>
+      </div>
+      <figure class="hero-media">
+        <img src="../assets/god-manual-prototype/anson-manual-hero.png" alt="一位顧問在電腦前整理訪談內容、問題與待確認事項" width="1672" height="941">
+        <figcaption>先把話說清楚，再決定要不要做、怎麼報價。</figcaption>
+      </figure>
+    </section>
+
+    <section class="shell" id="outcomes" aria-labelledby="outcomes-title">
+      <header class="section-head">
+        <h2 id="outcomes-title">整理完，最後可以拿到這四種成果</h2>
+        <p>不是只給你一張漂亮流程圖。確認過的需求會繼續變成真正能拿去提案、報價或開工的文件。</p>
+      </header>
+      <div class="outcome-strip" aria-label="案神可協助整理的四種成果">
+        <article class="outcome-item">
+          <span class="output-key">PPT</span>
+          <div><strong>簡報檔</strong><span>提案、內訓或交接簡報</span></div>
+        </article>
+        <article class="outcome-item">
+          <span class="output-key">WEB</span>
+          <div><strong>網頁</strong><span>說明頁、提案頁或 Demo</span></div>
+        </article>
+        <article class="outcome-item">
+          <span class="output-key">CODE</span>
+          <div><strong>程式代碼</strong><span>確認範圍後再進入開發</span></div>
+        </article>
+        <article class="outcome-item">
+          <span class="output-key">QUOTE</span>
+          <div><strong>服務報價說明書</strong><span>方案、範圍與付款條件</span></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="scenario-title">
+      <div class="shell scenario-layout">
+        <div class="scenario-question">
+          <h2 id="scenario-title">什麼時候適合用案神？</h2>
+          <p>判斷方式很簡單：這段討論如果沒弄清楚，後面就可能做錯、報錯或收不到錢，就該先整理。</p>
+        </div>
+        <div class="scenario-list">
+          <article class="scenario-item">
+            <span class="scenario-number">01</span>
+            <div><h3>客戶只說「我想做網站」</h3><p>把目的、使用者、功能、預算與時間拆開問，不直接猜客戶要哪一種網站。</p></div>
+          </article>
+          <article class="scenario-item">
+            <span class="scenario-number">02</span>
+            <div><h3>一場會議同時冒出很多需求</h3><p>把已確認、待確認與推測分開，避免大家會後記得的是不同版本。</p></div>
+          </article>
+          <article class="scenario-item">
+            <span class="scenario-number">03</span>
+            <div><h3>準備提出付費服務</h3><p>先整理做什麼、不做什麼、要交什麼，再產出提案或報價，避免邊做邊吵範圍。</p></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="canvas-title">
+      <div class="shell">
+        <header class="section-head">
+          <h2 id="canvas-title">用一張無限畫布，看懂整個案子</h2>
+          <p>這裡是視覺示意圖，不需要真的拖拉。重點是把散在對話、文件與腦中的資訊放到同一張圖，再一路連到可以交付的成果。</p>
+        </header>
+        <figure class="canvas-frame">
+          <img src="../assets/god-manual-prototype/anson-infinite-canvas-brand.png" alt="案神無限畫布示意圖：把會議、錄音、對話、文件與筆記整理後，經人工確認，產出簡報、網站、程式與報價說明書" width="1672" height="941">
+          <figcaption class="canvas-caption">
+            <div><strong>把資料放進來</strong><span>會議、錄音、訊息、文件、筆記</span></div>
+            <div><strong>案神先整理</strong><span>需求、問題、假設、風險與範圍</span></div>
+            <div><strong>人負責確認</strong><span>重要決定不能交給 AI 自己猜</span></div>
+            <div><strong>接著做成果</strong><span>簡報、網頁、代碼、報價說明書</span></div>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section" id="cases" aria-labelledby="cases-title">
+      <div class="shell">
+        <header class="section-head">
+          <h2 id="cases-title">兩個真的做過的案例</h2>
+          <p>客戶名稱與敏感數字已拿掉，只保留原本遇到的問題、怎麼整理，以及實際做出的文件。</p>
+        </header>
+        <div class="case-stack">
+          <article class="case-study">
+            <figure class="case-media">
+              <img src="../assets/god-manual-prototype/anson-handoff-case.png" alt="顧問與團隊一起確認網站與簡報提案內容" width="1536" height="1024">
+            </figure>
+            <div class="case-body">
+              <p class="case-label">案例一｜一家 5 人公關活動公司</p>
+              <h3>五個需求混在一場對話裡，先整理成兩個能選的服務方案</h3>
+              <p class="case-summary">對方想改善提案、結案報告、社群內容、團隊知識庫與資料分析。每一項都能做，但如果全部一起報價，範圍一定會失控。</p>
+              <div class="case-details">
+                <div><strong>案神怎麼整理</strong><p>先把逐字稿拆成已確認、待確認與推測，再把關鍵問題收斂，最後確認成一天企業內訓與三個月陪跑兩個方向。</p></div>
+                <div><strong>實際產出</strong><p>提案簡報架構、講師簡報交接包、一天內訓課綱，以及兩個方案的範圍說明。</p></div>
+              </div>
+              <p class="case-note">這裡只描述已完成的規劃與文件，不代表客戶已購買或專案已執行。</p>
+            </div>
+          </article>
+
+          <article class="case-study">
+            <figure class="case-media">
+              <img src="../assets/god-manual-prototype/anson-manual-hero.png" alt="顧問在電腦前盤點多套分散工具與系統需求" width="1672" height="941">
+            </figure>
+            <div class="case-body">
+              <p class="case-label">案例二｜一個有四套分散工具的 SaaS 專案</p>
+              <h3>四套工具分散在三個平台，先說清楚要租、要買，還是只需要整合</h3>
+              <p class="case-summary">原本的工具沒有共用會員、登入與收款。真正要處理的不是多加一顆按鈕，而是系統歸屬、代碼權利與後續由誰維護。</p>
+              <div class="case-details">
+                <div><strong>案神怎麼整理</strong><p>盤點現有功能與缺口，拆出租用與買斷兩條路，另外說清楚主機、代碼授權、登入與整合服務的責任邊界。</p></div>
+                <div><strong>實際產出</strong><p>兩種方案比較、正式 HTML 報價說明書、功能清單、時程，以及技術整合的包含與排除範圍。</p></div>
+              </div>
+              <p class="case-note">這份工作交付的是對焦與報價文件，不包含四套工具的實際程式開發與部署。</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="workflow" aria-labelledby="workflow-title">
+      <div class="shell">
+        <header class="section-head">
+          <h2 id="workflow-title">一般會怎麼進行？</h2>
+          <p>案例是做過的事，這裡才是每個新案子都能照著走的流程。</p>
+        </header>
+        <div class="workflow" aria-label="案神五段流程">
+          <article class="workflow-step"><b>01</b><strong>收下原始資料</strong><p>對話、會議、筆記與舊文件先保留，不急著改寫。</p><small>INPUT</small></article>
+          <article class="workflow-step"><b>02</b><strong>拆開事實與猜測</strong><p>把已確認、待確認與推測分開，找出真正缺的答案。</p><small>AWESOME-ANSON</small></article>
+          <article class="workflow-step"><b>03</b><strong>由人確認決定</strong><p>範圍、價格與責任邊界由人拍板，AI 不代替承諾。</p><small>HUMAN REVIEW</small></article>
+          <article class="workflow-step"><b>04</b><strong>產出可用文件</strong><p>依目的做成簡報、網頁、代碼或報價說明書。</p><small>DELIVERABLES</small></article>
+          <article class="workflow-step"><b>05</b><strong>交棒下一個系統</strong><p>可進 GitHub 自己用，也能接後續付費服務與開發。</p><small>HANDOFF</small></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="handoff-title">
+      <div class="shell">
+        <header class="section-head">
+          <h2 id="handoff-title">案神不是最後一站，它負責把事情交代清楚</h2>
+          <p>同一份已確認的內容可以繼續交給其他工具，不用每到下一站又重新解釋一次。</p>
+        </header>
+        <div class="handoff-grid" aria-label="案神串接關係">
+          <article class="handoff-card"><h3>客戶的原始需求</h3><p>談話、提案想法、參考資料與限制條件。</p><span class="technical-name">SOURCE INPUTS</span></article>
+          <span class="handoff-arrow" aria-hidden="true">→</span>
+          <article class="handoff-card"><h3>案神整理與人工確認</h3><p>留下證據、問題、範圍與決策，形成同一份認知。</p><span class="technical-name">AWESOME-ANSON + HUMAN REVIEW</span></article>
+          <span class="handoff-arrow" aria-hidden="true">→</span>
+          <article class="handoff-card"><h3>成果與後續執行</h3><p>交給簡報、網頁、程式、報價或其他神系列繼續處理。</p><span class="technical-name">PPT / WEB / CODE / QUOTE / AGENTS</span></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="contact" aria-labelledby="contact-title">
+      <div class="shell contact-panel">
+        <div>
+          <h2 id="contact-title">手上有一個談不清楚、又準備收費的案子？</h2>
+          <p>先把資料交給案神整理。我們會先確認現在卡在哪裡，再決定適合自己從 GitHub 開始，或由我們接著協助。</p>
+          <div class="contact-meta">
+            <span>開源版本：GitHub</span>
+            <span class="planned">付費系統入口規劃中</span>
+          </div>
+          <p class="contact-feedback" id="contact-feedback" hidden aria-live="polite">正式版會接 StartKiter 聯絡入口；這份本機稿先確認視覺方向。</p>
+        </div>
+        <div class="cta-actions">
+          <button class="button button-primary" id="contact-action" type="button">與我們聯繫</button>
+          <a class="button button-secondary" href="https://github.com/fishtvlvoe/Awesome-Anson" target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="shell footer-inner">
+      <strong>案神使用說明｜品牌統一方向稿</strong>
+      <span>本機原型，尚未發布。GitHub：fishtvlvoe/Awesome-Anson</span>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var themeButton = document.querySelector('.theme-toggle');
+      var contactButton = document.getElementById('contact-action');
+      var contactFeedback = document.getElementById('contact-feedback');
+
+      function renderThemeLabel() {
+        var isDark = root.dataset.theme === 'dark';
+        themeButton.textContent = isDark ? '淺色模式' : '深色模式';
+        themeButton.setAttribute('aria-label', isDark ? '切換成淺色模式' : '切換成深色模式');
+      }
+
+      themeButton.addEventListener('click', function () {
+        root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+        renderThemeLabel();
+        try {
+          localStorage.setItem('startkiter-brand-preview-theme', root.dataset.theme);
+        } catch (error) {
+          /* 本次瀏覽仍可切換。 */
+        }
+      });
+
+      contactButton.addEventListener('click', function () {
+        contactFeedback.hidden = false;
+        contactButton.textContent = '已顯示下一步';
+      });
+
+      renderThemeLabel();
+    })();
+  </script>
+</body>
+</html>
