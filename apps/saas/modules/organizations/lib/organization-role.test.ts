@@ -7,7 +7,7 @@ const organization = {
 	members: [
 		{ userId: "owner-user", role: "owner" },
 		{ userId: "admin-user", role: "admin" },
-		{ userId: "member-user", role: "member" },
+		{ userId: "member-user", role: "user" },
 	],
 } as Parameters<typeof isOrganizationOwner>[0];
 

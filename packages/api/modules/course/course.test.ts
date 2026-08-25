@@ -18,9 +18,10 @@ vi.mock("@startkiter/database", () => ({
 		lessonProgress: { findMany: vi.fn(), findUnique: vi.fn(), create: vi.fn() },
 	order: { findFirst: vi.fn(), findMany: vi.fn() },
 	courseSubscription: { findFirst: vi.fn() },
-	courseInviteRedemption: { findUnique: vi.fn() },
+		courseInviteRedemption: { findUnique: vi.fn() },
 		studioFolder: { findMany: vi.fn() },
 	},
+	getCourseAccessOrdersForUser: vi.fn(),
 }));
 
 vi.mock("@startkiter/course", () => ({
@@ -39,7 +40,7 @@ vi.mock("@startkiter/course", () => ({
 }));
 
 import { auth } from "@startkiter/auth";
-import { db } from "@startkiter/database";
+import { db, getCourseAccessOrdersForUser } from "@startkiter/database";
 
 import { createPrismaBundleCourseAccessReader } from "./lib/course-access";
 import { resolveVideoSource } from "./lib/video-resolver";
@@ -111,10 +112,13 @@ describe("getLessonDetail bundle-aware access", () => {
 		vi.mocked(auth.api.getSession).mockResolvedValue(authenticatedSession as never);
 		vi.mocked(db.lesson.findUnique).mockResolvedValue(paidLesson("course-a") as never);
 		vi.mocked(db.order.findFirst).mockResolvedValue({ id: "legacy-paid-order" } as never);
+		vi.mocked(getCourseAccessOrdersForUser).mockResolvedValue([]);
 	});
 
 	it("returns full lesson content for a course included in the buyer's bundle", async () => {
-		vi.mocked(db.order.findMany).mockResolvedValue([{ sku: "bundle-a" }] as never);
+		vi.mocked(getCourseAccessOrdersForUser).mockResolvedValue([
+			{ sku: "bundle-a", courseAccess: true },
+		]);
 		vi.mocked(db.bundle.findUnique).mockResolvedValue({ courses: [{ courseId: "course-a" }] } as never);
 
 		const result = await call(
@@ -127,7 +131,9 @@ describe("getLessonDetail bundle-aware access", () => {
 	});
 
 	it("rejects a paid lesson outside the buyer's bundle", async () => {
-		vi.mocked(db.order.findMany).mockResolvedValue([{ sku: "bundle-a" }] as never);
+		vi.mocked(getCourseAccessOrdersForUser).mockResolvedValue([
+			{ sku: "bundle-a", courseAccess: true },
+		]);
 		vi.mocked(db.bundle.findUnique).mockResolvedValue({ courses: [{ courseId: "course-b" }] } as never);
 
 		await expect(
@@ -170,17 +176,16 @@ describe("getLessonDetail bundle-aware access", () => {
 	});
 
 	it("uses the buyer-scoped order and bundle query shape", async () => {
-		vi.mocked(db.order.findMany).mockResolvedValue([{ sku: "bundle-a" }] as never);
+		vi.mocked(getCourseAccessOrdersForUser).mockResolvedValue([
+			{ sku: "bundle-a", courseAccess: true },
+		]);
 		vi.mocked(db.bundle.findUnique).mockResolvedValue({ courses: [{ courseId: "course-a" }] } as never);
 
 		const reader = createPrismaBundleCourseAccessReader();
 
 		await expect(reader.findGrantedSkusForUser("buyer-a")).resolves.toEqual(["bundle-a"]);
 		await expect(reader.findBundleCourseIds("bundle-a")).resolves.toEqual(["course-a"]);
-		expect(db.order.findMany).toHaveBeenCalledWith({
-			where: { userId: "buyer-a", courseAccess: true },
-			select: { sku: true },
-		});
+		expect(getCourseAccessOrdersForUser).toHaveBeenCalledWith("buyer-a");
 		expect(db.bundle.findUnique).toHaveBeenCalledWith({
 			where: { id: "bundle-a" },
 			include: { courses: true },

@@ -17,13 +17,17 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { createAuthMiddleware, getIp, isAPIError } from "better-auth/api";
 import { admin, magicLink, openAPI, organization, twoFactor } from "better-auth/plugins";
+import { adminAc, memberAc, ownerAc } from "better-auth/plugins/organization/access";
 import { parseCookie as parseCookies } from "cookie";
 
 import { config } from "./config";
 import { updateSeatsInOrganizationSubscription } from "./lib/organization";
+import { sendOrganizationInvitationEmail } from "./lib/organization-invitation-email";
+import { organizationRoleHooks } from "./lib/organization-role-hooks";
 import { recordLoginAttempt } from "./login-attempt";
 import { invitationOnlyPlugin } from "./plugins/invitation-only";
 import { getSocialProviders } from "./providers";
+import type { OrganizationMemberRole as OrganizationMemberRoleValue } from "./lib/organization-roles";
 
 const getLocaleFromRequest = (request?: Request) => {
 	const cookies = parseCookies(request?.headers.get("cookie") ?? "");
@@ -274,27 +278,26 @@ export const auth = betterAuth({
 			},
 		}),
 		organization({
+			creatorRole: "owner",
+			roles: {
+				owner: ownerAc,
+				admin: adminAc,
+				instructor: memberAc,
+				user: memberAc,
+			},
+			organizationHooks: organizationRoleHooks,
 			sendInvitationEmail: async ({ email, id, organization }, request) => {
-				const locale = getLocaleFromRequest(request);
-				const existingUser = await getUserByEmail(email);
+					const locale = getLocaleFromRequest(request);
+					const existingUser = await getUserByEmail(email);
 
-				const url = new URL(
-					existingUser ? "/login" : "/signup",
-					getBaseUrl(process.env.NEXT_PUBLIC_SAAS_URL, 3000),
-				);
-
-				url.searchParams.set("invitationId", id);
-				url.searchParams.set("email", email);
-
-				await sendEmail({
-					to: email,
-					templateId: "organizationInvitation",
-					locale,
-					context: {
+					await sendOrganizationInvitationEmail({
+						email,
+						id,
 						organizationName: organization.name,
-						url: url.toString(),
-					},
-				});
+						locale,
+						baseUrl: getBaseUrl(process.env.NEXT_PUBLIC_SAAS_URL, 3000),
+						existingUser: Boolean(existingUser),
+					});
 			},
 		}),
 		openAPI(),
@@ -318,7 +321,7 @@ export type ActiveOrganization = NonNullable<
 
 export type Organization = typeof auth.$Infer.Organization;
 
-export type OrganizationMemberRole = ActiveOrganization["members"][number]["role"];
+export type OrganizationMemberRole = OrganizationMemberRoleValue;
 
 export type OrganizationInvitationStatus = typeof auth.$Infer.Invitation.status;
 

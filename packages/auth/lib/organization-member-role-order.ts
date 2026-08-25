@@ -1,7 +1,8 @@
-import type { OrganizationMemberRole } from "../auth";
+import type { OrganizationMemberRole } from "./organization-roles";
 
 export const organizationMemberRoleOrder = [
-	"member",
-	"admin",
 	"owner",
+	"admin",
+	"instructor",
+	"user",
 ] as const satisfies readonly OrganizationMemberRole[];

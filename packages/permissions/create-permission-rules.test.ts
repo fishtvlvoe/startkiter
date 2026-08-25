@@ -52,9 +52,9 @@ describe("createPermissionRules matrix", () => {
 			},
 		},
 		{
-			label: "organization member",
+			label: "organization user",
 			user: { role: "user" },
-			membershipRole: "member",
+			membershipRole: "user",
 			expected: {
 				adminAccess: false,
 				organizationRead: true,
@@ -78,9 +78,9 @@ describe("createPermissionRules matrix", () => {
 			},
 		},
 		{
-			label: "global admin who is also an organization member",
+			label: "global admin who is also an organization user",
 			user: { role: "admin" },
-			membershipRole: "member",
+			membershipRole: "user",
 			expected: {
 				adminAccess: true,
 				organizationRead: true,

@@ -1,4 +1,4 @@
-import { db } from "@startkiter/database";
+import { db, getEligibleKitOrderForUser } from "@startkiter/database";
 import {
 	createGithubAppCollaboratorClient,
 	isGithubOAuthConfigured,
@@ -17,11 +17,7 @@ export function loadGithubKitRuntime() {
 
 export function createPrismaEligibilityReader(): KitEligibilityReader {
 	async function getEligibleKitOrder(userId: string) {
-		const order = await db.order.findFirst({
-			where: { userId, sku: MVP_SKU, kitClaimEligible: true },
-			select: { id: true, orderNo: true },
-		});
-		return order;
+		return getEligibleKitOrderForUser(userId, MVP_SKU);
 	}
 
 	return {

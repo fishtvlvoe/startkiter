@@ -49,7 +49,7 @@ export const listPurchases = protectedProcedure
 		if (organizationId) {
 			const membership = await verifyOrganizationMembership(organizationId, user.id);
 
-			if (!membership) {
+			if (!membership || membership.role === "instructor") {
 				throw new ORPCError("FORBIDDEN");
 			}
 		}

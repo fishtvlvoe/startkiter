@@ -153,7 +153,7 @@ export const member = mysqlTable(
 		userId: text("userId")
 			.notNull()
 			.references(() => user.id, { onDelete: "cascade" }),
-		role: text("role").default("member").notNull(),
+		role: text("role").default("user").notNull(),
 		createdAt: timestamp("createdAt").notNull(),
 	},
 	(table) => [uniqueIndex("member_user_org_idx").on(table.userId, table.organizationId)],

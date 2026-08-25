@@ -66,7 +66,7 @@ const organizationMembership = {
 	id: "membership-1",
 	organizationId: "organization-1",
 	userId: "user-1",
-	role: "member",
+		role: "user",
 	createdAt: new Date(),
 	organization: {
 		id: "organization-1",
@@ -111,6 +111,23 @@ describe("listPurchases", () => {
 
 		expect(result).toEqual([]);
 		expect(getPurchasesByOrganizationId).toHaveBeenCalledWith("organization-1");
+	});
+
+	it("rejects instructors from listing their organization's purchases", async () => {
+		vi.mocked(getOrganizationMembership).mockResolvedValueOnce({
+			...organizationMembership,
+			role: "instructor",
+		});
+
+		await expect(
+			call(
+				listPurchases,
+				{ organizationId: "organization-1" },
+				{ context: { headers: new Headers() } },
+			),
+		).rejects.toMatchObject({ code: "FORBIDDEN" });
+
+		expect(getPurchasesByOrganizationId).not.toHaveBeenCalled();
 	});
 
 	it("scopes personal purchases to the authenticated user", async () => {

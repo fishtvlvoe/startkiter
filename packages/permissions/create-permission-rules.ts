@@ -25,7 +25,12 @@ export type PermissionRules = {
 function isOrganizationMemberRole(
 	membershipRole: string | null | undefined,
 ): membershipRole is OrganizationMemberRole {
-	return membershipRole === "owner" || membershipRole === "admin" || membershipRole === "member";
+	return (
+		membershipRole === "owner" ||
+		membershipRole === "admin" ||
+		membershipRole === "instructor" ||
+		membershipRole === "user"
+	);
 }
 
 /**

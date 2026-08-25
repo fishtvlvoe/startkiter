@@ -16,4 +16,4 @@ export type PermissionsDefinition = ValidateDefinition<{
 	organization: ["read", "manage", "delete", "manageBilling", "accessBillingPortal"];
 }>;
 
-export type OrganizationMemberRole = "owner" | "admin" | "member";
+export type OrganizationMemberRole = "owner" | "admin" | "instructor" | "user";

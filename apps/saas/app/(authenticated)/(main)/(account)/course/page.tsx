@@ -1,24 +1,14 @@
 import { getSession } from "@auth/lib/server";
-import { canAccessCourse, getLesson, listLessons } from "@startkiter/course";
+import { getLesson, listLessons } from "@startkiter/course";
 import { db } from "@startkiter/database";
 import { Card } from "@startkiter/ui";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { MVP_SKU } from "@startkiter/payments/constants";
 import { localizeLesson } from "@course/lib/localize-lesson";
 import { CourseReviewPanel } from "./course-review-panel";
-
-async function hasCourseAccess(userId: string) {
-	return canAccessCourse(userId, {
-		findOrdersForUser: async (id) =>
-			db.order.findMany({
-				where: { userId: id, sku: MVP_SKU },
-				select: { sku: true, courseAccess: true },
-			}),
-	});
-}
+import { userHasCourseAccess } from "../../../../../lib/course-access";
 
 export default async function CoursePage() {
 	const session = await getSession();
@@ -26,7 +16,7 @@ export default async function CoursePage() {
 		redirect("/login");
 	}
 
-	const entitled = await hasCourseAccess(session.user.id);
+	const entitled = await userHasCourseAccess(session.user.id);
 	const course = entitled
 		? await db.course.findFirst({
 				where: { status: "PUBLISHED", chapters: { some: { lessons: { some: { status: "PUBLISHED" } } } } },

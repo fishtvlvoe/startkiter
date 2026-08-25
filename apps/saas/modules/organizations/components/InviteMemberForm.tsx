@@ -16,7 +16,7 @@ import { z } from "zod";
 
 const formSchema = z.object({
 	email: z.email(),
-	role: z.enum(["member", "owner", "admin"]),
+	role: z.enum(["user", "owner", "admin", "instructor"]),
 });
 
 export function InviteMemberForm({ organizationId }: { organizationId: string }) {
@@ -27,7 +27,7 @@ export function InviteMemberForm({ organizationId }: { organizationId: string })
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			email: "",
-			role: "member" as z.infer<typeof formSchema>["role"],
+			role: "user" as z.infer<typeof formSchema>["role"],
 		},
 	});
 

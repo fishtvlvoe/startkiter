@@ -300,9 +300,12 @@
       "title": "Vos organisations"
     },
     "roles": {
+      "assignInstructor": "Assigner comme formateur",
       "admin": "Administrateur",
-      "member": "Membre",
+      "instructor": "Formateur",
       "owner": "Propriétaire",
+      "revokeInstructor": "Retirer le rôle de formateur",
+      "user": "Utilisateur",
       "info": {
         "description": "Les rôles sont classés du moins au plus d'accès :",
         "title": "Permissions des rôles"
