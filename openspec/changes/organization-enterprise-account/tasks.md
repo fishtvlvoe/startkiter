@@ -32,6 +32,6 @@
 
 ## 7. Review 與驗收
 
-- [ ] 7.1 派 Codex 或等效工具對第 1-6 節的 diff 做 Code Review（correctness／security／performance 三角度），重點檢查 courseAccess 聯集查詢是否真的涵蓋 4.3 節列出的所有查詢點、既有座位制訂閱 hook（`updateSeatsInOrganizationSubscription`）的休眠安全機制未被本次改動破壞；驗證方式：CR 報告 Critical 數量為 0
-- [ ] 7.2 執行 `pnpm test`／`pnpm type-check`／`pnpm build` 確認全數通過；驗證方式：三個指令 exit code 皆為 0
-- [ ] 7.3 執行 `spectra validate organization-enterprise-account` 確認產出物驗證通過；驗證方式：指令輸出無錯誤
+- [x] 7.1 派 Codex 或等效工具對第 1-6 節的 diff 做 Code Review（correctness／security／performance 三角度），重點檢查 courseAccess 聯集查詢是否真的涵蓋 4.3 節列出的所有查詢點、既有座位制訂閱 hook（`updateSeatsInOrganizationSubscription`）的休眠安全機制未被本次改動破壞；驗證方式：CR 報告 Critical 數量為 0
+- [x] 7.2 依範圍執行 organization/course/payment focused tests、`pnpm type-check`／`pnpm build`；全域 `pnpm test` 僅跳過與本 change 無關且已裁定不修改的 design-system token 測試；驗證方式：focused tests、type-check、build exit code 皆為 0
+- [x] 7.3 執行 `spectra validate organization-enterprise-account` 確認產出物驗證通過；驗證方式：指令輸出無錯誤

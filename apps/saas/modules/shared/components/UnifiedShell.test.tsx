@@ -83,6 +83,7 @@ vi.mock("@startkiter/database", () => ({
 			findMany: async () => [],
 		},
 	},
+	getCourseAccessOrdersForUser: async () => [],
 }));
 
 vi.mock("@i18n/lib/update-locale", () => ({
