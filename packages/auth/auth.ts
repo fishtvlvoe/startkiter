@@ -17,7 +17,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { createAuthMiddleware, getIp, isAPIError } from "better-auth/api";
 import { admin, magicLink, openAPI, organization, twoFactor } from "better-auth/plugins";
-import { memberAc } from "better-auth/plugins/organization/access";
+import { adminAc, memberAc, ownerAc } from "better-auth/plugins/organization/access";
 import { parseCookie as parseCookies } from "cookie";
 
 import { config } from "./config";
@@ -279,6 +279,8 @@ export const auth = betterAuth({
 		organization({
 			creatorRole: "owner",
 			roles: {
+				owner: ownerAc,
+				admin: adminAc,
 				instructor: memberAc,
 				user: memberAc,
 			},

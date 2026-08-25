@@ -1,13 +1,10 @@
 import { canAccessCourseId, type BundleCourseAccessReader } from "@startkiter/course/access";
-import { db } from "@startkiter/database";
+import { db, getCourseAccessOrdersForUser } from "@startkiter/database";
 
 export function createPrismaBundleCourseAccessReader(): BundleCourseAccessReader {
 	return {
 		findGrantedSkusForUser: async (userId: string) => {
-			const rows = await db.order.findMany({
-				where: { userId, courseAccess: true },
-				select: { sku: true },
-			});
+			const rows = await getCourseAccessOrdersForUser(userId);
 			return rows.map((row) => row.sku);
 		},
 		findBundleCourseIds: async (sku: string) => {

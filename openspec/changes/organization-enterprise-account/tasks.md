@@ -17,9 +17,9 @@
 
 ## 4. 企業帳號課程存取權繼承（對應 Requirement「Organization-scoped course purchases grant access to all current members」）
 
-- [ ] 4.1 在 `packages/database/prisma/schema.prisma` 新增 `Order.organizationId`（可為空，外鍵指向 `Organization`）並產生 migration；驗證目標：`prisma migrate status` 顯示新 migration 已套用，既有 `Order` 資料 `organizationId` 皆為 null
-- [ ] 4.2 撰寫紅燈測試：Member 沒有個人 Order 但所屬 Organization 有 `courseAccess: true` 的 Order 時，存取權檢查成功；新加入的 Member 立即繼承既有企業 Order 的存取權，涵蓋 Requirement「Organization-scoped course purchases grant access to all current members」的兩個 Scenario；驗證目標：`pnpm --filter api test` 出現預期失敗
-- [ ] 4.3 落實設計決策「courseAccess 查詢即時聯集 Organization 層級的 Order，不在建立時複製寫入每個 Member」：`grep -rn "courseAccess" packages/ apps/` 找出所有既有查詢點，逐一修改為 User-or-Organization 聯集判斷，使 4.2 測試轉綠燈；驗證目標：`pnpm test` 全綠，且既有個人購買流程既有測試（不含本次新增）維持綠燈，無回歸
+- [x] 4.1 在 `packages/database/prisma/schema.prisma` 新增 `Order.organizationId`（可為空，外鍵指向 `Organization`）並產生 migration；驗證目標：`prisma migrate status` 顯示新 migration 已套用，既有 `Order` 資料 `organizationId` 皆為 null
+- [x] 4.2 撰寫紅燈測試：Member 沒有個人 Order 但所屬 Organization 有 `courseAccess: true` 的 Order 時，存取權檢查成功；新加入的 Member 立即繼承既有企業 Order 的存取權，涵蓋 Requirement「Organization-scoped course purchases grant access to all current members」的兩個 Scenario；驗證目標：`pnpm --filter api test` 出現預期失敗
+- [x] 4.3 落實設計決策「courseAccess 查詢即時聯集 Organization 層級的 Order，不在建立時複製寫入每個 Member」：`grep -rn "courseAccess" packages/ apps/` 找出所有既有查詢點，逐一修改為 User-or-Organization 聯集判斷，使 4.2 測試轉綠燈；驗證目標：`pnpm test` 全綠，且既有個人購買流程既有測試（不含本次新增）維持綠燈，無回歸
 
 ## 5. Invitation email 通知（對應 Requirement「Organization invitations are delivered by email」，落實設計決策「Invitation 通知沿用既有 Better Auth organization plugin 內建的 email 事件，不新增 LINE 通知」）
 
