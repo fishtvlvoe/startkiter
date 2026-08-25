@@ -67,9 +67,10 @@
 - 阻塞條件：等第 2 項＋第 5 項 apply 完成；教案內容本身由老闆在課神老師端自行設計（不算代碼工作）
 - 誰做：教案內容＝老闆；技術執行層＝已經是第 2 項的範圍，這裡主要是排課程順序與整合
 
-### 7. organization-enterprise-account 📝 待 propose
-- 內容：把 supastarter 原生 Organization 系統（`admin/organizations` 現在的殘留頁面）跟既有角色矩陣（owner/admin/instructor/user，來自已封存的 `organization-role-model`）真正整合，做成能用的企業帳號功能；順帶解決該張留下的 3 個 Open Question
-- 誰做：PM 親自設計（涉及權限矩陣），apply 階段機械部分可派 Codex
+### 7. organization-enterprise-account ⏸️ 排隊中
+- Task 進度：0/13，已 park，完整 proposal/design/specs/tasks 都在（2026-08-25 PM 跑完 propose，analyze 0 Critical/Warning，validate 通過）
+- 內容：把 supastarter 原生 Organization 系統（`admin/organizations` 現在的殘留頁面，Better Auth `organization` plugin 已啟用、`Member.role` 目前不受限）跟既有角色矩陣（owner/admin/instructor/user，來自已封存的 `organization-role-model`）真正整合，`Order` 新增 `organizationId` 讓企業帳號購買的課程存取權共享給全體成員；解決了該張留下的 3 個 Open Question（courseAccess 歸屬層級＝Organization 聯集查詢、StartKiter 自己的站不強制多組織、邀請通知走 email 不走 LINE）
+- 誰做：Codex apply，PM 需 review（碰權限矩陣）
 
 ### 8. startkiter-official-site-cleanup 📝 待 propose
 - 內容：`apps/marketing` 接上 `startkiter.dev` 正式網域、關掉舊 Vercel 測試站、補一張 SR 正式記錄「官網已搬到 Coolify VPS」這件事（已實測 `app.startkiter.dev` 回 307 正常）
