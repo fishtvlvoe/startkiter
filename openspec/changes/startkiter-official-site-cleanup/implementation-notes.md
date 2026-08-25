@@ -53,3 +53,27 @@ $ spectra validate startkiter-official-site-cleanup
 ```
 
 結果：PASS。
+
+## 2.1–2.2 Coolify resource 與正式 DNS
+
+結果：BLOCKED。`https://app.coolify.io` 目前只顯示登入頁；本機沒有 `COOLIFY_BASE_URL` 或 `COOLIFY_API_TOKEN`，因此沒有建立 resource，也沒有在 resource 尚未存在時先建立 `startkiter.dev` DNS，避免把正式網域指到空服務。
+
+已知目標節點與既有測試資源來自本 repo 的 infra 紀錄：節點 `startkiter-managed-fleet-01`；既有測試資源為 `docker-image-rzbtl1kdjd9mdtfabeoaa9tj` 與 `startkiter-coolify-git-deploy-test`。它們不是 marketing resource，未冒充使用。
+
+## 5.2 三網域最終狀態
+
+執行時間：2026-08-25（Asia/Taipei）
+
+```text
+app.startkiter.dev       HTTP/2 307  location: /login
+startkiter.dev           curl: (6) Could not resolve host
+test-startkiter.vercel.app HTTP/2 404  x-vercel-error: DEPLOYMENT_NOT_FOUND
+```
+
+結果：BLOCKED。SaaS 與舊 Vercel 網址符合預期，但官方 marketing 網域尚未建立 DNS／Coolify resource，不能把 5.2 標成 PASS。
+
+## 完整驗證
+
+原始命令 `pnpm test && pnpm build` 已執行；第一次因 Prisma generated client 不存在而在測試階段停止。以一次性 `DATABASE_URL` 執行 Prisma generate 後重跑，測試仍在 `course-quiz` 的真實資料庫 CRUD 因資料庫拒絕存取而失敗；沒有可用真實資料庫連線，未把測試報成全綠。
+
+獨立執行 `DATABASE_URL=... pnpm build`：PASS，turbo 2/2 build tasks 成功（marketing、saas）。build 輸出含 Better Auth default-secret 警告，未影響 exit code 0。
