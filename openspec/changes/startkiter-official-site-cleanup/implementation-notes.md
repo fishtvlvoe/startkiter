@@ -44,3 +44,12 @@ x-vercel-error: DEPLOYMENT_NOT_FOUND
 ## 4.1 文件同步
 
 已更新 `AGENTS.md` 指向 `openspec/changes/startkiter-official-site-cleanup/`，並同步 README 的正式網域與舊 Vercel 測試站狀態。
+
+## 5.1 Spectra 驗證
+
+```text
+$ spectra validate startkiter-official-site-cleanup
+✓ startkiter-official-site-cleanup — valid
+```
+
+結果：PASS。

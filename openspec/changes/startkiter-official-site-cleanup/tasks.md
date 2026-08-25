@@ -18,5 +18,5 @@
 
 ## 5. Review 與驗收
 
-- [ ] 5.1 執行 `spectra validate startkiter-official-site-cleanup` 確認產出物驗證通過；驗證方式：指令輸出無錯誤
+- [x] 5.1 執行 `spectra validate startkiter-official-site-cleanup` 確認產出物驗證通過；驗證方式：指令輸出無錯誤
 - [ ] 5.2 三個網域（`app.startkiter.dev`／`startkiter.dev`／`test-startkiter.vercel.app`）的最終狀態各自用 curl 截圖存證；驗證方式：三筆 curl 結果附進驗收報告
