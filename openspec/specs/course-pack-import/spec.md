@@ -1,0 +1,862 @@
+# course-pack-import Specification
+
+## Purpose
+
+TBD - created by archiving change 'course-pack-import'. Update Purpose after archive.
+
+## Requirements
+
+### Requirement: Operator can import a Course Pack envelope
+
+The system SHALL expose `POST /api/course/packs/import` restricted to `courseOperatorProcedure`. The endpoint SHALL accept a JSON body `{ envelope: unknown }` and validate it against a Course Pack envelope schema requiring `schema_version` literal `"1.0.0"`, `target_runtime` literal `"startkiter"`, and a `course_pack` object with `id`, `title`, `learning_outcomes` (non-empty array), and `missions` (non-empty array). Each mission SHALL require `id`, `title`, `goal`, `action`, `evaluator`, `feedback`, `consequence`, `recovery` (non-empty, sorted by ascending `attempt`), and `evidence` (at least one entry marked `required: true`). On successful validation the system SHALL persist a `CoursePack` record and its `CoursePackMission` records and respond `200` with `{ id, sourcePackId, title, missionCount, importedAt }`. On validation failure the system SHALL respond `400` with `{ errors: { path: string; message: string }[] }` and SHALL NOT persist any record. A caller without operator permission SHALL receive `403` and no data SHALL be persisted.
+
+#### Scenario: Valid envelope is imported successfully
+
+- **WHEN** an operator sends `POST /api/course/packs/import` with an envelope matching the fixture `saas-payment-course-pack.json` (one mission `webhook-01`)
+- **THEN** the system responds `200` with `missionCount: 1`, and a subsequent `GET /api/course/packs` includes the imported pack with `status: "active"`
+
+#### Scenario: Envelope missing a required mission field is rejected
+
+- **WHEN** an operator sends an envelope whose single mission omits the `evaluator` field
+- **THEN** the system responds `400` with a non-empty `errors` array and no `CoursePack` record is created
+
+#### Scenario: Non-operator caller is rejected
+
+- **WHEN** a caller without `courseOperatorProcedure` permission sends `POST /api/course/packs/import` with an otherwise-valid envelope
+- **THEN** the system responds `403` and no `CoursePack` record is created
+
+#### Scenario: Wrong schema_version or target_runtime is rejected
+
+- **WHEN** an operator sends an envelope with `schema_version: "2.0.0"` or `target_runtime: "other-platform"`
+- **THEN** the system responds `400` with a non-empty `errors` array
+
+##### Example: envelope validation boundary cases
+
+| schema_version | target_runtime | missions | Expected |
+| --- | --- | --- | --- |
+| "1.0.0" | "startkiter" | 1 valid mission | 200, imported |
+| "2.0.0" | "startkiter" | 1 valid mission | 400, errors non-empty |
+| "1.0.0" | "other-platform" | 1 valid mission | 400, errors non-empty |
+| "1.0.0" | "startkiter" | [] (empty array) | 400, errors non-empty |
+
+
+<!-- @trace
+source: course-pack-import
+updated: 2026-08-25
+code:
+  - packages/api/modules/course/procedures/list-manageable-courses.ts
+  - apps/saas/app/(authenticated)/(operator)/lesson-messages/lesson-messages-operator-panel.tsx
+  - apps/saas/modules/shared/components/NavBar.tsx
+  - packages/auth/auth.ts
+  - packages/api/modules/course/procedures/register-media.ts
+  - apps/saas/app/(authenticated)/(operator)/course-invites/course-invites-panel.tsx
+  - packages/course/src/course-pack/schema.ts
+  - apps/saas/app/api/checkout/route.ts
+  - docs/dispatch-board.md
+  - packages/api/modules/course/lib/taiwan-billing-month.ts
+  - apps/saas/app/(authenticated)/(operator)/course-invites/page.tsx
+  - packages/api/modules/course/procedures/refund-order.ts
+  - apps/saas/package.json
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-03-anson-guidance.png
+  - packages/database/prisma/migrations/20260824132306_add_course_assignments/migration.sql
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-04-real-need.png
+  - AGENTS.md
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/layout.tsx
+  - packages/api/orpc/router.ts
+  - docs/verification/course-quiz-plugin/6.3-admin-form.png
+  - packages/course-quiz/quiz-grading.ts
+  - packages/course-review/package.json
+  - docs/verification/lesson-watch-time-tracking/13-e2e.md
+  - docs/woomin-integration-master-plan.md
+  - docs/assets/god-manual-prototype/storyboard-seedance/anson-storyboard-overview-2x3.png
+  - packages/api/modules/course/lib/invoice-settings.ts
+  - packages/api/modules/assignment/router.ts
+  - apps/saas/app/(authenticated)/(operator)/assignment-admin/page.tsx
+  - packages/platform/index.ts
+  - packages/course-assignment/index.ts
+  - packages/payments/provider/ecpay/invoice-provider.ts
+  - docs/verification/course-media-library/15-e2e.md
+  - packages/database/prisma/migrations/20260824184722_lesson_message_upload_retention_index/migration.sql
+  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/page.tsx
+  - packages/database/prisma/migrations/20260824103241_add_course_onboarding_survey/migration.sql
+  - apps/saas/app/(authenticated)/(operator)/review-admin/review-admin-panel.tsx
+  - packages/api/modules/course/lib/order-refunds.ts
+  - docs/dashboard/status.html
+  - packages/storage/types.ts
+  - packages/course-assignment/tsconfig.json
+  - packages/course-review/review-summary.ts
+  - packages/payments/package.json
+  - apps/saas/app/(authenticated)/(operator)/assignment-admin/assignment-admin-form.tsx
+  - packages/api/modules/course/lib/invoice-operations.ts
+  - packages/payments/provider/ezpay/invoice-provider.ts
+  - packages/api/modules/review/lesson-comment.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/organizations/[id]/page.tsx
+  - packages/database/prisma/migrations/20260824105109_add_course_onboarding_survey_course_fk/migration.sql
+  - apps/saas/lib/invoice-settings.ts
+  - apps/saas/app/api/payuni/period-notify/route.ts
+  - packages/api/modules/course/lib/course-operator.ts
+  - packages/api/modules/course/procedures/cancel-course-subscription.ts
+  - packages/api/modules/review/router.ts
+  - packages/payments/types.ts
+  - docs/design-canvas/anson-seedance-2.5-storyboard.md
+  - packages/storage/config.ts
+  - apps/saas/app/invite/[token]/invite-redeem-panel.tsx
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-05-phased-proposal.png
+  - apps/saas/app/(authenticated)/(operator)/quiz-admin/page.tsx
+  - apps/saas/app/(authenticated)/(operator)/lesson-messages/page.tsx
+  - apps/saas/modules/admin/component/InvoiceOperationsButtons.tsx
+  - docs/verification/course-quiz-plugin/6.3-passed-final.png
+  - packages/database/prisma/migrations/20260825020000_add_lesson_private_message/migration.sql
+  - apps/saas/app/(authenticated)/quiz/[pluginContentId]/page.tsx
+  - packages/auth/login-attempt.ts
+  - packages/database/prisma/migrations/20260824165414_add_watch_time_log/migration.sql
+  - packages/api/modules/course/procedures/assign-course-instructor.ts
+  - packages/course-review/index.ts
+  - packages/database/prisma/migrations/20260824190603_add_course_media_library/migration.sql
+  - apps/saas/app/(authenticated)/checkout/checkout-button.tsx
+  - packages/api/modules/course/errors.ts
+  - packages/database/prisma/migrations/20260824080400_add_course_review_rating_constraint/migration.sql
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/settings/einvoice/page.tsx
+  - packages/api/modules/course/procedures/list-course-packs.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-03-anson-guidance.png
+  - packages/course-quiz/quiz-session.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-06-next-step.png
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/course/page.tsx
+  - packages/api/modules/course/procedures/set-course-cover-media.ts
+  - packages/api/modules/course/procedures/create-subscription-checkout.ts
+  - packages/course-quiz/tsconfig.json
+  - packages/api/package.json
+  - packages/payments/lib/invoice-preference.ts
+  - apps/saas/app/(authenticated)/assignment/[pluginContentId]/assignment-learner.tsx
+  - packages/api/modules/course/procedures/create-course-invite.ts
+  - docs/verification/lesson-watch-time-tracking/13-code-review.md
+  - apps/saas/app/(authenticated)/(main)/(account)/course/course-review-panel.tsx
+  - apps/saas/modules/admin/component/OrderRefundButton.tsx
+  - packages/course/index.ts
+  - packages/course-quiz/vitest.config.ts
+  - docs/verification/course-quiz-plugin/6.3-passed.png
+  - packages/database/prisma/migrations/20260825055318_add_course_pack_import/migration.sql
+  - packages/platform/src/mount-points.ts
+  - packages/course/src/player/watermark-overlay.tsx
+  - packages/database/prisma/zod/index.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/anson-storyboard-model-reference-4k.png
+  - packages/database/prisma/migrations/20260824184149_lesson_message_upload_cleanup_lifecycle/migration.sql
+  - apps/saas/app/api/assignment/upload/route.ts
+  - packages/course-assignment/assignment-definition.ts
+  - packages/course-review/tsconfig.json
+  - packages/database/prisma/migrations/20260824200500_add_course_video_watermark_setting/migration.sql
+  - packages/database/prisma/migrations/20260824120000_add_einvoice/migration.sql
+  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/onboarding-survey-modal.tsx
+  - packages/storage/provider/s3/index.ts
+  - apps/saas/app/(authenticated)/(operator)/quiz-admin/quiz-admin-form.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/orders/page.tsx
+  - packages/database/prisma/migrations/20260824193000_add_course_instructors/migration.sql
+  - docs/discuss/2026-08-22-platform-positioning-infra-alignment.md
+  - packages/api/modules/course/procedures/record-watch-time.ts
+  - apps/saas/app/(authenticated)/(operator)/review-admin/page.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/bundles/layout.tsx
+  - apps/saas/app/invite/[token]/page.tsx
+  - docs/assets/god-manual-prototype/anson-manual-hero.png
+  - apps/saas/app/(authenticated)/assignment/[pluginContentId]/page.tsx
+  - apps/saas/lib/admin-access.ts
+  - apps/saas/app/api/course/studio/route.ts
+  - packages/api/modules/course/lib/course-invite-auth.ts
+  - apps/saas/app/(authenticated)/(operator)/audit-log/page.tsx
+  - packages/api/modules/course/procedures/media-upload-url.ts
+  - packages/auth/index.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/onboarding-surveys/page.tsx
+  - packages/api/modules/course/procedures/import-course-pack.ts
+  - apps/saas/app/(authenticated)/checkout/payuni-subscription/page.tsx
+  - packages/database/prisma/migrations/20260824142000_add_quiz_attempt/migration.sql
+  - docs/design-canvas/anson-manual-redesign-direction.html
+  - packages/database/prisma/migrations/20260824231000_add_assignment_draft_revision/migration.sql
+  - apps/saas/app/image-proxy/[...path]/route.ts
+  - packages/database/scripts/backfill-lesson-media.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/media/page.tsx
+  - apps/saas/app/api/cron/lesson-message-upload-cleanup/route.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/settings/page.tsx
+  - packages/course-assignment/package.json
+  - packages/course/access.ts
+  - apps/saas/modules/course/components/MediaPicker.tsx
+  - docs/verification/lesson-private-message/14-e2e.md
+  - packages/database/prisma/migrations/20260824223000_add_assignment_submission_revision_unique/migration.sql
+  - docs/verification/course-quiz-plugin/6.3-hidden-answers-final.png
+  - packages/database/prisma/migrations/20260824094111_add_login_attempt_admin_log/migration.sql
+  - packages/course-assignment/submission-rules.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/anson-storyboard-production-board-4k.png
+  - packages/payments/index.ts
+  - packages/api/modules/course/router.ts
+  - packages/api/modules/course/procedures/lesson-message-upload-cleanup.ts
+  - packages/database/prisma/migrations/20260824225000_add_assignment_upload_cleanup_claim/migration.sql
+  - packages/api/modules/course/procedures/list-media.ts
+  - apps/saas/modules/payments/components/SubscriptionCheckoutForm.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/classroom-client.tsx
+  - packages/api/modules/course/procedures/redeem-course-invite.ts
+  - apps/saas/app/(authenticated)/checkout/payuni/page.tsx
+  - packages/course-quiz/index.ts
+  - packages/course-assignment/sanitize-html.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/course/page.tsx
+  - packages/database/prisma/migrations/20260824182322_add_lesson_message_upload_intent/migration.sql
+  - docs/assets/god-manual-prototype/anson-handoff-case.png
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/users/page.tsx
+  - docs/assets/god-manual-prototype/anson-infinite-canvas-workflow.png
+  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/lesson-messages-panel.tsx
+  - apps/saas/app/api/payuni/notify/route.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-05-phased-proposal.png
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-01-vague-need.png
+  - packages/api/modules/course/procedures/delete-media.ts
+  - packages/api/modules/assignment/assignment-draft.ts
+  - apps/saas/lib/orders.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/lesson-comments-panel.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/revenue/page.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/organizations/page.tsx
+  - packages/api/modules/course/procedures/lesson-message-upload.ts
+  - packages/database/prisma/migrations/20260824090022_add_course_invites/migration.sql
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-02-price-resistance.png
+  - packages/database/prisma/schema.prisma
+  - packages/course-quiz/package.json
+  - packages/course-quiz/quiz-definition.ts
+  - docs/verification/course-quiz-plugin/6.3-hidden-answers.png
+  - packages/payments/lib/invoice-issue-input.ts
+  - apps/saas/lib/schedule-after.ts
+  - docs/verification/lesson-private-message/14-code-review.md
+  - packages/api/modules/course/procedures/invoice-operations.ts
+  - packages/course/src/player/FluentPlayer.tsx
+  - packages/api/modules/assignment/assignment-lifecycle.ts
+  - packages/database/prisma/migrations/20260824215500_add_assignment_upload_intents/migration.sql
+  - apps/saas/app/(authenticated)/quiz/[pluginContentId]/quiz-taking.tsx
+  - packages/database/prisma/migrations/20260824080326_add_course_review_plugin/migration.sql
+  - packages/api/modules/course/lib/invoice-events.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-04-real-need.png
+  - docs/verification/course-quiz-plugin/6.1-architecture-review.md
+  - docs/verification/course-quiz-plugin/6.3-e2e.md
+  - packages/platform/src/admin-log.ts
+  - apps/saas/app/api/cron/assignment-upload-cleanup/route.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/anson-storyboard-production-board.svg
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-01-vague-need.png
+  - packages/api/modules/course/lib/course-access.ts
+  - packages/api/modules/course/procedures/send-lesson-message.ts
+  - packages/api/modules/course/procedures/submit-onboarding-survey.ts
+  - docs/verification/course-media-library/15-code-review.md
+  - docs/verification/course-quiz-plugin/6.2-code-review.md
+  - apps/saas/app/api/course/lesson-messages/upload/route.ts
+  - packages/api/modules/quiz/router.ts
+  - docs/assets/god-manual-prototype/anson-infinite-canvas-brand.png
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-02-price-resistance.png
+  - packages/api/modules/course/procedures/remove-course-instructor.ts
+  - packages/api/modules/course/lib/course-instructor-access.ts
+  - packages/database/prisma/migrations/20260824195500_remove_redundant_course_instructor_course_id_index/migration.sql
+  - apps/saas/modules/payments/components/InvoicePreferenceFields.tsx
+  - packages/api/modules/assignment/assignment-upload.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-06-next-step.png
+tests:
+  - packages/api/modules/course/course.test.ts
+  - packages/api/modules/course/procedures/import-course-pack.test.ts
+  - packages/api/modules/assignment/assignment-upload.test.ts
+  - packages/api/modules/course/procedures/redeem-course-invite.test.ts
+  - packages/api/modules/course/procedures/refund-order.test.ts
+  - packages/api/modules/course/procedures/delete-media.test.ts
+  - packages/api/modules/course/procedures/send-lesson-message.test.ts
+  - packages/database/src/course-review/course-review.test.ts
+  - packages/api/modules/course/procedures/record-watch-time.test.ts
+  - packages/auth/login-attempt.test.ts
+  - packages/course-quiz/quiz-attempt.test.ts
+  - packages/course-assignment/sanitize-html.test.ts
+  - packages/api/modules/course/lib/invoice-settings.test.ts
+  - packages/course/src/player/watermark-overlay.test.tsx
+  - apps/saas/app/api/payuni/period-notify/route.test.ts
+  - packages/course-quiz/quiz-session.test.ts
+  - packages/api/modules/course/lib/course-instructor-access.test.ts
+  - packages/payments/lib/invoice-issue-input.test.ts
+  - apps/saas/app/(authenticated)/quiz/[pluginContentId]/page.test.tsx
+  - apps/saas/app/api/course/studio/route.test.ts
+  - packages/course-quiz/quiz-definition.test.ts
+  - packages/platform/src/admin-log.test.ts
+  - packages/api/modules/course/procedures/list-manageable-courses.test.ts
+  - apps/saas/modules/shared/lib/nav-menu-items.test.ts
+  - packages/api/modules/assignment/assignment-draft.test.ts
+  - packages/api/modules/course/procedures/register-media.test.ts
+  - packages/api/modules/course/procedures/create-course-invite.test.ts
+  - packages/api/modules/course/procedures/list-course-packs.test.ts
+  - packages/course/src/course-pack/schema.test.ts
+  - packages/api/modules/course/lib/invoice-operations.test.ts
+  - packages/api/modules/course/lib/order-refunds.test.ts
+  - packages/api/modules/review/router.test.ts
+  - apps/saas/app/api/payuni/notify/route.test.ts
+  - packages/payments/invoice-provider.test.ts
+  - packages/api/modules/review/lesson-comment.test.ts
+  - apps/saas/tests/integration/bundle-course-access.test.ts
+  - packages/auth/better-auth-hook-experiment.test.ts
+  - apps/saas/modules/shared/components/UnifiedShell.test.tsx
+  - packages/api/modules/assignment/assignment-lifecycle.test.ts
+  - packages/course-quiz/quiz-grading.test.ts
+  - packages/api/modules/course/procedures/subscription-procedures.test.ts
+  - packages/course-review/review-summary.test.ts
+  - packages/course-assignment/assignment-definition.test.ts
+  - packages/api/modules/course/lib/refund-invoice.test.ts
+  - packages/course-assignment/submission-rules.test.ts
+  - packages/database/src/invoice/invoice-schema.test.ts
+  - packages/api/modules/course/procedures/assign-course-instructor.test.ts
+  - packages/api/modules/course/lib/invoice-events.test.ts
+  - packages/api/modules/course/procedures/submit-onboarding-survey.test.ts
+  - packages/database/src/assignment/assignment-draft.test.ts
+  - packages/course/access.test.ts
+  - packages/course/src/player/FluentPlayer.test.tsx
+  - packages/api/modules/course/procedures/invoice-operations.test.ts
+-->
+
+---
+### Requirement: Re-importing the same source Course Pack id preserves history
+
+When an operator imports an envelope whose `course_pack.id` matches an existing `CoursePack.sourcePackId` with `status: "active"`, the system SHALL set that existing record's `status` to `"superseded"` and SHALL create a new `CoursePack` record with `status: "active"` for the newly imported version. The system SHALL NOT delete or overwrite the superseded record's data.
+
+#### Scenario: Second import of the same source id supersedes the first
+
+- **WHEN** an operator imports an envelope with `course_pack.id: "saas-payment-mvp"`, and later imports another valid envelope also with `course_pack.id: "saas-payment-mvp"`
+- **THEN** `GET /api/course/packs` includes two records for `sourcePackId: "saas-payment-mvp"`: the first with `status: "superseded"` and the second with `status: "active"`
+
+
+<!-- @trace
+source: course-pack-import
+updated: 2026-08-25
+code:
+  - packages/api/modules/course/procedures/list-manageable-courses.ts
+  - apps/saas/app/(authenticated)/(operator)/lesson-messages/lesson-messages-operator-panel.tsx
+  - apps/saas/modules/shared/components/NavBar.tsx
+  - packages/auth/auth.ts
+  - packages/api/modules/course/procedures/register-media.ts
+  - apps/saas/app/(authenticated)/(operator)/course-invites/course-invites-panel.tsx
+  - packages/course/src/course-pack/schema.ts
+  - apps/saas/app/api/checkout/route.ts
+  - docs/dispatch-board.md
+  - packages/api/modules/course/lib/taiwan-billing-month.ts
+  - apps/saas/app/(authenticated)/(operator)/course-invites/page.tsx
+  - packages/api/modules/course/procedures/refund-order.ts
+  - apps/saas/package.json
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-03-anson-guidance.png
+  - packages/database/prisma/migrations/20260824132306_add_course_assignments/migration.sql
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-04-real-need.png
+  - AGENTS.md
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/layout.tsx
+  - packages/api/orpc/router.ts
+  - docs/verification/course-quiz-plugin/6.3-admin-form.png
+  - packages/course-quiz/quiz-grading.ts
+  - packages/course-review/package.json
+  - docs/verification/lesson-watch-time-tracking/13-e2e.md
+  - docs/woomin-integration-master-plan.md
+  - docs/assets/god-manual-prototype/storyboard-seedance/anson-storyboard-overview-2x3.png
+  - packages/api/modules/course/lib/invoice-settings.ts
+  - packages/api/modules/assignment/router.ts
+  - apps/saas/app/(authenticated)/(operator)/assignment-admin/page.tsx
+  - packages/platform/index.ts
+  - packages/course-assignment/index.ts
+  - packages/payments/provider/ecpay/invoice-provider.ts
+  - docs/verification/course-media-library/15-e2e.md
+  - packages/database/prisma/migrations/20260824184722_lesson_message_upload_retention_index/migration.sql
+  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/page.tsx
+  - packages/database/prisma/migrations/20260824103241_add_course_onboarding_survey/migration.sql
+  - apps/saas/app/(authenticated)/(operator)/review-admin/review-admin-panel.tsx
+  - packages/api/modules/course/lib/order-refunds.ts
+  - docs/dashboard/status.html
+  - packages/storage/types.ts
+  - packages/course-assignment/tsconfig.json
+  - packages/course-review/review-summary.ts
+  - packages/payments/package.json
+  - apps/saas/app/(authenticated)/(operator)/assignment-admin/assignment-admin-form.tsx
+  - packages/api/modules/course/lib/invoice-operations.ts
+  - packages/payments/provider/ezpay/invoice-provider.ts
+  - packages/api/modules/review/lesson-comment.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/organizations/[id]/page.tsx
+  - packages/database/prisma/migrations/20260824105109_add_course_onboarding_survey_course_fk/migration.sql
+  - apps/saas/lib/invoice-settings.ts
+  - apps/saas/app/api/payuni/period-notify/route.ts
+  - packages/api/modules/course/lib/course-operator.ts
+  - packages/api/modules/course/procedures/cancel-course-subscription.ts
+  - packages/api/modules/review/router.ts
+  - packages/payments/types.ts
+  - docs/design-canvas/anson-seedance-2.5-storyboard.md
+  - packages/storage/config.ts
+  - apps/saas/app/invite/[token]/invite-redeem-panel.tsx
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-05-phased-proposal.png
+  - apps/saas/app/(authenticated)/(operator)/quiz-admin/page.tsx
+  - apps/saas/app/(authenticated)/(operator)/lesson-messages/page.tsx
+  - apps/saas/modules/admin/component/InvoiceOperationsButtons.tsx
+  - docs/verification/course-quiz-plugin/6.3-passed-final.png
+  - packages/database/prisma/migrations/20260825020000_add_lesson_private_message/migration.sql
+  - apps/saas/app/(authenticated)/quiz/[pluginContentId]/page.tsx
+  - packages/auth/login-attempt.ts
+  - packages/database/prisma/migrations/20260824165414_add_watch_time_log/migration.sql
+  - packages/api/modules/course/procedures/assign-course-instructor.ts
+  - packages/course-review/index.ts
+  - packages/database/prisma/migrations/20260824190603_add_course_media_library/migration.sql
+  - apps/saas/app/(authenticated)/checkout/checkout-button.tsx
+  - packages/api/modules/course/errors.ts
+  - packages/database/prisma/migrations/20260824080400_add_course_review_rating_constraint/migration.sql
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/settings/einvoice/page.tsx
+  - packages/api/modules/course/procedures/list-course-packs.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-03-anson-guidance.png
+  - packages/course-quiz/quiz-session.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-06-next-step.png
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/course/page.tsx
+  - packages/api/modules/course/procedures/set-course-cover-media.ts
+  - packages/api/modules/course/procedures/create-subscription-checkout.ts
+  - packages/course-quiz/tsconfig.json
+  - packages/api/package.json
+  - packages/payments/lib/invoice-preference.ts
+  - apps/saas/app/(authenticated)/assignment/[pluginContentId]/assignment-learner.tsx
+  - packages/api/modules/course/procedures/create-course-invite.ts
+  - docs/verification/lesson-watch-time-tracking/13-code-review.md
+  - apps/saas/app/(authenticated)/(main)/(account)/course/course-review-panel.tsx
+  - apps/saas/modules/admin/component/OrderRefundButton.tsx
+  - packages/course/index.ts
+  - packages/course-quiz/vitest.config.ts
+  - docs/verification/course-quiz-plugin/6.3-passed.png
+  - packages/database/prisma/migrations/20260825055318_add_course_pack_import/migration.sql
+  - packages/platform/src/mount-points.ts
+  - packages/course/src/player/watermark-overlay.tsx
+  - packages/database/prisma/zod/index.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/anson-storyboard-model-reference-4k.png
+  - packages/database/prisma/migrations/20260824184149_lesson_message_upload_cleanup_lifecycle/migration.sql
+  - apps/saas/app/api/assignment/upload/route.ts
+  - packages/course-assignment/assignment-definition.ts
+  - packages/course-review/tsconfig.json
+  - packages/database/prisma/migrations/20260824200500_add_course_video_watermark_setting/migration.sql
+  - packages/database/prisma/migrations/20260824120000_add_einvoice/migration.sql
+  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/onboarding-survey-modal.tsx
+  - packages/storage/provider/s3/index.ts
+  - apps/saas/app/(authenticated)/(operator)/quiz-admin/quiz-admin-form.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/orders/page.tsx
+  - packages/database/prisma/migrations/20260824193000_add_course_instructors/migration.sql
+  - docs/discuss/2026-08-22-platform-positioning-infra-alignment.md
+  - packages/api/modules/course/procedures/record-watch-time.ts
+  - apps/saas/app/(authenticated)/(operator)/review-admin/page.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/bundles/layout.tsx
+  - apps/saas/app/invite/[token]/page.tsx
+  - docs/assets/god-manual-prototype/anson-manual-hero.png
+  - apps/saas/app/(authenticated)/assignment/[pluginContentId]/page.tsx
+  - apps/saas/lib/admin-access.ts
+  - apps/saas/app/api/course/studio/route.ts
+  - packages/api/modules/course/lib/course-invite-auth.ts
+  - apps/saas/app/(authenticated)/(operator)/audit-log/page.tsx
+  - packages/api/modules/course/procedures/media-upload-url.ts
+  - packages/auth/index.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/onboarding-surveys/page.tsx
+  - packages/api/modules/course/procedures/import-course-pack.ts
+  - apps/saas/app/(authenticated)/checkout/payuni-subscription/page.tsx
+  - packages/database/prisma/migrations/20260824142000_add_quiz_attempt/migration.sql
+  - docs/design-canvas/anson-manual-redesign-direction.html
+  - packages/database/prisma/migrations/20260824231000_add_assignment_draft_revision/migration.sql
+  - apps/saas/app/image-proxy/[...path]/route.ts
+  - packages/database/scripts/backfill-lesson-media.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/media/page.tsx
+  - apps/saas/app/api/cron/lesson-message-upload-cleanup/route.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/settings/page.tsx
+  - packages/course-assignment/package.json
+  - packages/course/access.ts
+  - apps/saas/modules/course/components/MediaPicker.tsx
+  - docs/verification/lesson-private-message/14-e2e.md
+  - packages/database/prisma/migrations/20260824223000_add_assignment_submission_revision_unique/migration.sql
+  - docs/verification/course-quiz-plugin/6.3-hidden-answers-final.png
+  - packages/database/prisma/migrations/20260824094111_add_login_attempt_admin_log/migration.sql
+  - packages/course-assignment/submission-rules.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/anson-storyboard-production-board-4k.png
+  - packages/payments/index.ts
+  - packages/api/modules/course/router.ts
+  - packages/api/modules/course/procedures/lesson-message-upload-cleanup.ts
+  - packages/database/prisma/migrations/20260824225000_add_assignment_upload_cleanup_claim/migration.sql
+  - packages/api/modules/course/procedures/list-media.ts
+  - apps/saas/modules/payments/components/SubscriptionCheckoutForm.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/classroom-client.tsx
+  - packages/api/modules/course/procedures/redeem-course-invite.ts
+  - apps/saas/app/(authenticated)/checkout/payuni/page.tsx
+  - packages/course-quiz/index.ts
+  - packages/course-assignment/sanitize-html.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/course/page.tsx
+  - packages/database/prisma/migrations/20260824182322_add_lesson_message_upload_intent/migration.sql
+  - docs/assets/god-manual-prototype/anson-handoff-case.png
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/users/page.tsx
+  - docs/assets/god-manual-prototype/anson-infinite-canvas-workflow.png
+  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/lesson-messages-panel.tsx
+  - apps/saas/app/api/payuni/notify/route.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-05-phased-proposal.png
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-01-vague-need.png
+  - packages/api/modules/course/procedures/delete-media.ts
+  - packages/api/modules/assignment/assignment-draft.ts
+  - apps/saas/lib/orders.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/lesson-comments-panel.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/revenue/page.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/organizations/page.tsx
+  - packages/api/modules/course/procedures/lesson-message-upload.ts
+  - packages/database/prisma/migrations/20260824090022_add_course_invites/migration.sql
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-02-price-resistance.png
+  - packages/database/prisma/schema.prisma
+  - packages/course-quiz/package.json
+  - packages/course-quiz/quiz-definition.ts
+  - docs/verification/course-quiz-plugin/6.3-hidden-answers.png
+  - packages/payments/lib/invoice-issue-input.ts
+  - apps/saas/lib/schedule-after.ts
+  - docs/verification/lesson-private-message/14-code-review.md
+  - packages/api/modules/course/procedures/invoice-operations.ts
+  - packages/course/src/player/FluentPlayer.tsx
+  - packages/api/modules/assignment/assignment-lifecycle.ts
+  - packages/database/prisma/migrations/20260824215500_add_assignment_upload_intents/migration.sql
+  - apps/saas/app/(authenticated)/quiz/[pluginContentId]/quiz-taking.tsx
+  - packages/database/prisma/migrations/20260824080326_add_course_review_plugin/migration.sql
+  - packages/api/modules/course/lib/invoice-events.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-04-real-need.png
+  - docs/verification/course-quiz-plugin/6.1-architecture-review.md
+  - docs/verification/course-quiz-plugin/6.3-e2e.md
+  - packages/platform/src/admin-log.ts
+  - apps/saas/app/api/cron/assignment-upload-cleanup/route.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/anson-storyboard-production-board.svg
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-01-vague-need.png
+  - packages/api/modules/course/lib/course-access.ts
+  - packages/api/modules/course/procedures/send-lesson-message.ts
+  - packages/api/modules/course/procedures/submit-onboarding-survey.ts
+  - docs/verification/course-media-library/15-code-review.md
+  - docs/verification/course-quiz-plugin/6.2-code-review.md
+  - apps/saas/app/api/course/lesson-messages/upload/route.ts
+  - packages/api/modules/quiz/router.ts
+  - docs/assets/god-manual-prototype/anson-infinite-canvas-brand.png
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-02-price-resistance.png
+  - packages/api/modules/course/procedures/remove-course-instructor.ts
+  - packages/api/modules/course/lib/course-instructor-access.ts
+  - packages/database/prisma/migrations/20260824195500_remove_redundant_course_instructor_course_id_index/migration.sql
+  - apps/saas/modules/payments/components/InvoicePreferenceFields.tsx
+  - packages/api/modules/assignment/assignment-upload.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-06-next-step.png
+tests:
+  - packages/api/modules/course/course.test.ts
+  - packages/api/modules/course/procedures/import-course-pack.test.ts
+  - packages/api/modules/assignment/assignment-upload.test.ts
+  - packages/api/modules/course/procedures/redeem-course-invite.test.ts
+  - packages/api/modules/course/procedures/refund-order.test.ts
+  - packages/api/modules/course/procedures/delete-media.test.ts
+  - packages/api/modules/course/procedures/send-lesson-message.test.ts
+  - packages/database/src/course-review/course-review.test.ts
+  - packages/api/modules/course/procedures/record-watch-time.test.ts
+  - packages/auth/login-attempt.test.ts
+  - packages/course-quiz/quiz-attempt.test.ts
+  - packages/course-assignment/sanitize-html.test.ts
+  - packages/api/modules/course/lib/invoice-settings.test.ts
+  - packages/course/src/player/watermark-overlay.test.tsx
+  - apps/saas/app/api/payuni/period-notify/route.test.ts
+  - packages/course-quiz/quiz-session.test.ts
+  - packages/api/modules/course/lib/course-instructor-access.test.ts
+  - packages/payments/lib/invoice-issue-input.test.ts
+  - apps/saas/app/(authenticated)/quiz/[pluginContentId]/page.test.tsx
+  - apps/saas/app/api/course/studio/route.test.ts
+  - packages/course-quiz/quiz-definition.test.ts
+  - packages/platform/src/admin-log.test.ts
+  - packages/api/modules/course/procedures/list-manageable-courses.test.ts
+  - apps/saas/modules/shared/lib/nav-menu-items.test.ts
+  - packages/api/modules/assignment/assignment-draft.test.ts
+  - packages/api/modules/course/procedures/register-media.test.ts
+  - packages/api/modules/course/procedures/create-course-invite.test.ts
+  - packages/api/modules/course/procedures/list-course-packs.test.ts
+  - packages/course/src/course-pack/schema.test.ts
+  - packages/api/modules/course/lib/invoice-operations.test.ts
+  - packages/api/modules/course/lib/order-refunds.test.ts
+  - packages/api/modules/review/router.test.ts
+  - apps/saas/app/api/payuni/notify/route.test.ts
+  - packages/payments/invoice-provider.test.ts
+  - packages/api/modules/review/lesson-comment.test.ts
+  - apps/saas/tests/integration/bundle-course-access.test.ts
+  - packages/auth/better-auth-hook-experiment.test.ts
+  - apps/saas/modules/shared/components/UnifiedShell.test.tsx
+  - packages/api/modules/assignment/assignment-lifecycle.test.ts
+  - packages/course-quiz/quiz-grading.test.ts
+  - packages/api/modules/course/procedures/subscription-procedures.test.ts
+  - packages/course-review/review-summary.test.ts
+  - packages/course-assignment/assignment-definition.test.ts
+  - packages/api/modules/course/lib/refund-invoice.test.ts
+  - packages/course-assignment/submission-rules.test.ts
+  - packages/database/src/invoice/invoice-schema.test.ts
+  - packages/api/modules/course/procedures/assign-course-instructor.test.ts
+  - packages/api/modules/course/lib/invoice-events.test.ts
+  - packages/api/modules/course/procedures/submit-onboarding-survey.test.ts
+  - packages/database/src/assignment/assignment-draft.test.ts
+  - packages/course/access.test.ts
+  - packages/course/src/player/FluentPlayer.test.tsx
+  - packages/api/modules/course/procedures/invoice-operations.test.ts
+-->
+
+---
+### Requirement: Operator can list imported Course Packs
+
+The system SHALL expose `GET /api/course/packs` restricted to `courseOperatorProcedure`, returning all `CoursePack` records ordered by `importedAt` descending as `{ id, sourcePackId, title, status, missionCount, importedAt }[]`. When no Course Pack has been imported, the system SHALL respond `200` with an empty array.
+
+#### Scenario: List returns imported packs newest first
+
+- **WHEN** an operator imports pack `a` and then pack `b`
+- **THEN** `GET /api/course/packs` responds `200` with `b` before `a` in the array
+
+#### Scenario: List returns empty array when nothing imported
+
+- **WHEN** an operator calls `GET /api/course/packs` before any import has happened
+- **THEN** the system responds `200` with `[]`
+
+<!-- @trace
+source: course-pack-import
+updated: 2026-08-25
+code:
+  - packages/api/modules/course/procedures/list-manageable-courses.ts
+  - apps/saas/app/(authenticated)/(operator)/lesson-messages/lesson-messages-operator-panel.tsx
+  - apps/saas/modules/shared/components/NavBar.tsx
+  - packages/auth/auth.ts
+  - packages/api/modules/course/procedures/register-media.ts
+  - apps/saas/app/(authenticated)/(operator)/course-invites/course-invites-panel.tsx
+  - packages/course/src/course-pack/schema.ts
+  - apps/saas/app/api/checkout/route.ts
+  - docs/dispatch-board.md
+  - packages/api/modules/course/lib/taiwan-billing-month.ts
+  - apps/saas/app/(authenticated)/(operator)/course-invites/page.tsx
+  - packages/api/modules/course/procedures/refund-order.ts
+  - apps/saas/package.json
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-03-anson-guidance.png
+  - packages/database/prisma/migrations/20260824132306_add_course_assignments/migration.sql
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-04-real-need.png
+  - AGENTS.md
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/layout.tsx
+  - packages/api/orpc/router.ts
+  - docs/verification/course-quiz-plugin/6.3-admin-form.png
+  - packages/course-quiz/quiz-grading.ts
+  - packages/course-review/package.json
+  - docs/verification/lesson-watch-time-tracking/13-e2e.md
+  - docs/woomin-integration-master-plan.md
+  - docs/assets/god-manual-prototype/storyboard-seedance/anson-storyboard-overview-2x3.png
+  - packages/api/modules/course/lib/invoice-settings.ts
+  - packages/api/modules/assignment/router.ts
+  - apps/saas/app/(authenticated)/(operator)/assignment-admin/page.tsx
+  - packages/platform/index.ts
+  - packages/course-assignment/index.ts
+  - packages/payments/provider/ecpay/invoice-provider.ts
+  - docs/verification/course-media-library/15-e2e.md
+  - packages/database/prisma/migrations/20260824184722_lesson_message_upload_retention_index/migration.sql
+  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/page.tsx
+  - packages/database/prisma/migrations/20260824103241_add_course_onboarding_survey/migration.sql
+  - apps/saas/app/(authenticated)/(operator)/review-admin/review-admin-panel.tsx
+  - packages/api/modules/course/lib/order-refunds.ts
+  - docs/dashboard/status.html
+  - packages/storage/types.ts
+  - packages/course-assignment/tsconfig.json
+  - packages/course-review/review-summary.ts
+  - packages/payments/package.json
+  - apps/saas/app/(authenticated)/(operator)/assignment-admin/assignment-admin-form.tsx
+  - packages/api/modules/course/lib/invoice-operations.ts
+  - packages/payments/provider/ezpay/invoice-provider.ts
+  - packages/api/modules/review/lesson-comment.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/organizations/[id]/page.tsx
+  - packages/database/prisma/migrations/20260824105109_add_course_onboarding_survey_course_fk/migration.sql
+  - apps/saas/lib/invoice-settings.ts
+  - apps/saas/app/api/payuni/period-notify/route.ts
+  - packages/api/modules/course/lib/course-operator.ts
+  - packages/api/modules/course/procedures/cancel-course-subscription.ts
+  - packages/api/modules/review/router.ts
+  - packages/payments/types.ts
+  - docs/design-canvas/anson-seedance-2.5-storyboard.md
+  - packages/storage/config.ts
+  - apps/saas/app/invite/[token]/invite-redeem-panel.tsx
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-05-phased-proposal.png
+  - apps/saas/app/(authenticated)/(operator)/quiz-admin/page.tsx
+  - apps/saas/app/(authenticated)/(operator)/lesson-messages/page.tsx
+  - apps/saas/modules/admin/component/InvoiceOperationsButtons.tsx
+  - docs/verification/course-quiz-plugin/6.3-passed-final.png
+  - packages/database/prisma/migrations/20260825020000_add_lesson_private_message/migration.sql
+  - apps/saas/app/(authenticated)/quiz/[pluginContentId]/page.tsx
+  - packages/auth/login-attempt.ts
+  - packages/database/prisma/migrations/20260824165414_add_watch_time_log/migration.sql
+  - packages/api/modules/course/procedures/assign-course-instructor.ts
+  - packages/course-review/index.ts
+  - packages/database/prisma/migrations/20260824190603_add_course_media_library/migration.sql
+  - apps/saas/app/(authenticated)/checkout/checkout-button.tsx
+  - packages/api/modules/course/errors.ts
+  - packages/database/prisma/migrations/20260824080400_add_course_review_rating_constraint/migration.sql
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/settings/einvoice/page.tsx
+  - packages/api/modules/course/procedures/list-course-packs.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-03-anson-guidance.png
+  - packages/course-quiz/quiz-session.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-06-next-step.png
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/course/page.tsx
+  - packages/api/modules/course/procedures/set-course-cover-media.ts
+  - packages/api/modules/course/procedures/create-subscription-checkout.ts
+  - packages/course-quiz/tsconfig.json
+  - packages/api/package.json
+  - packages/payments/lib/invoice-preference.ts
+  - apps/saas/app/(authenticated)/assignment/[pluginContentId]/assignment-learner.tsx
+  - packages/api/modules/course/procedures/create-course-invite.ts
+  - docs/verification/lesson-watch-time-tracking/13-code-review.md
+  - apps/saas/app/(authenticated)/(main)/(account)/course/course-review-panel.tsx
+  - apps/saas/modules/admin/component/OrderRefundButton.tsx
+  - packages/course/index.ts
+  - packages/course-quiz/vitest.config.ts
+  - docs/verification/course-quiz-plugin/6.3-passed.png
+  - packages/database/prisma/migrations/20260825055318_add_course_pack_import/migration.sql
+  - packages/platform/src/mount-points.ts
+  - packages/course/src/player/watermark-overlay.tsx
+  - packages/database/prisma/zod/index.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/anson-storyboard-model-reference-4k.png
+  - packages/database/prisma/migrations/20260824184149_lesson_message_upload_cleanup_lifecycle/migration.sql
+  - apps/saas/app/api/assignment/upload/route.ts
+  - packages/course-assignment/assignment-definition.ts
+  - packages/course-review/tsconfig.json
+  - packages/database/prisma/migrations/20260824200500_add_course_video_watermark_setting/migration.sql
+  - packages/database/prisma/migrations/20260824120000_add_einvoice/migration.sql
+  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/onboarding-survey-modal.tsx
+  - packages/storage/provider/s3/index.ts
+  - apps/saas/app/(authenticated)/(operator)/quiz-admin/quiz-admin-form.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/orders/page.tsx
+  - packages/database/prisma/migrations/20260824193000_add_course_instructors/migration.sql
+  - docs/discuss/2026-08-22-platform-positioning-infra-alignment.md
+  - packages/api/modules/course/procedures/record-watch-time.ts
+  - apps/saas/app/(authenticated)/(operator)/review-admin/page.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/bundles/layout.tsx
+  - apps/saas/app/invite/[token]/page.tsx
+  - docs/assets/god-manual-prototype/anson-manual-hero.png
+  - apps/saas/app/(authenticated)/assignment/[pluginContentId]/page.tsx
+  - apps/saas/lib/admin-access.ts
+  - apps/saas/app/api/course/studio/route.ts
+  - packages/api/modules/course/lib/course-invite-auth.ts
+  - apps/saas/app/(authenticated)/(operator)/audit-log/page.tsx
+  - packages/api/modules/course/procedures/media-upload-url.ts
+  - packages/auth/index.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/onboarding-surveys/page.tsx
+  - packages/api/modules/course/procedures/import-course-pack.ts
+  - apps/saas/app/(authenticated)/checkout/payuni-subscription/page.tsx
+  - packages/database/prisma/migrations/20260824142000_add_quiz_attempt/migration.sql
+  - docs/design-canvas/anson-manual-redesign-direction.html
+  - packages/database/prisma/migrations/20260824231000_add_assignment_draft_revision/migration.sql
+  - apps/saas/app/image-proxy/[...path]/route.ts
+  - packages/database/scripts/backfill-lesson-media.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/media/page.tsx
+  - apps/saas/app/api/cron/lesson-message-upload-cleanup/route.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/settings/page.tsx
+  - packages/course-assignment/package.json
+  - packages/course/access.ts
+  - apps/saas/modules/course/components/MediaPicker.tsx
+  - docs/verification/lesson-private-message/14-e2e.md
+  - packages/database/prisma/migrations/20260824223000_add_assignment_submission_revision_unique/migration.sql
+  - docs/verification/course-quiz-plugin/6.3-hidden-answers-final.png
+  - packages/database/prisma/migrations/20260824094111_add_login_attempt_admin_log/migration.sql
+  - packages/course-assignment/submission-rules.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/anson-storyboard-production-board-4k.png
+  - packages/payments/index.ts
+  - packages/api/modules/course/router.ts
+  - packages/api/modules/course/procedures/lesson-message-upload-cleanup.ts
+  - packages/database/prisma/migrations/20260824225000_add_assignment_upload_cleanup_claim/migration.sql
+  - packages/api/modules/course/procedures/list-media.ts
+  - apps/saas/modules/payments/components/SubscriptionCheckoutForm.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/classroom-client.tsx
+  - packages/api/modules/course/procedures/redeem-course-invite.ts
+  - apps/saas/app/(authenticated)/checkout/payuni/page.tsx
+  - packages/course-quiz/index.ts
+  - packages/course-assignment/sanitize-html.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/course/page.tsx
+  - packages/database/prisma/migrations/20260824182322_add_lesson_message_upload_intent/migration.sql
+  - docs/assets/god-manual-prototype/anson-handoff-case.png
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/users/page.tsx
+  - docs/assets/god-manual-prototype/anson-infinite-canvas-workflow.png
+  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/lesson-messages-panel.tsx
+  - apps/saas/app/api/payuni/notify/route.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-05-phased-proposal.png
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-01-vague-need.png
+  - packages/api/modules/course/procedures/delete-media.ts
+  - packages/api/modules/assignment/assignment-draft.ts
+  - apps/saas/lib/orders.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/lesson-comments-panel.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/revenue/page.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/organizations/page.tsx
+  - packages/api/modules/course/procedures/lesson-message-upload.ts
+  - packages/database/prisma/migrations/20260824090022_add_course_invites/migration.sql
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-02-price-resistance.png
+  - packages/database/prisma/schema.prisma
+  - packages/course-quiz/package.json
+  - packages/course-quiz/quiz-definition.ts
+  - docs/verification/course-quiz-plugin/6.3-hidden-answers.png
+  - packages/payments/lib/invoice-issue-input.ts
+  - apps/saas/lib/schedule-after.ts
+  - docs/verification/lesson-private-message/14-code-review.md
+  - packages/api/modules/course/procedures/invoice-operations.ts
+  - packages/course/src/player/FluentPlayer.tsx
+  - packages/api/modules/assignment/assignment-lifecycle.ts
+  - packages/database/prisma/migrations/20260824215500_add_assignment_upload_intents/migration.sql
+  - apps/saas/app/(authenticated)/quiz/[pluginContentId]/quiz-taking.tsx
+  - packages/database/prisma/migrations/20260824080326_add_course_review_plugin/migration.sql
+  - packages/api/modules/course/lib/invoice-events.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-04-real-need.png
+  - docs/verification/course-quiz-plugin/6.1-architecture-review.md
+  - docs/verification/course-quiz-plugin/6.3-e2e.md
+  - packages/platform/src/admin-log.ts
+  - apps/saas/app/api/cron/assignment-upload-cleanup/route.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/anson-storyboard-production-board.svg
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-01-vague-need.png
+  - packages/api/modules/course/lib/course-access.ts
+  - packages/api/modules/course/procedures/send-lesson-message.ts
+  - packages/api/modules/course/procedures/submit-onboarding-survey.ts
+  - docs/verification/course-media-library/15-code-review.md
+  - docs/verification/course-quiz-plugin/6.2-code-review.md
+  - apps/saas/app/api/course/lesson-messages/upload/route.ts
+  - packages/api/modules/quiz/router.ts
+  - docs/assets/god-manual-prototype/anson-infinite-canvas-brand.png
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-02-price-resistance.png
+  - packages/api/modules/course/procedures/remove-course-instructor.ts
+  - packages/api/modules/course/lib/course-instructor-access.ts
+  - packages/database/prisma/migrations/20260824195500_remove_redundant_course_instructor_course_id_index/migration.sql
+  - apps/saas/modules/payments/components/InvoicePreferenceFields.tsx
+  - packages/api/modules/assignment/assignment-upload.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-06-next-step.png
+tests:
+  - packages/api/modules/course/course.test.ts
+  - packages/api/modules/course/procedures/import-course-pack.test.ts
+  - packages/api/modules/assignment/assignment-upload.test.ts
+  - packages/api/modules/course/procedures/redeem-course-invite.test.ts
+  - packages/api/modules/course/procedures/refund-order.test.ts
+  - packages/api/modules/course/procedures/delete-media.test.ts
+  - packages/api/modules/course/procedures/send-lesson-message.test.ts
+  - packages/database/src/course-review/course-review.test.ts
+  - packages/api/modules/course/procedures/record-watch-time.test.ts
+  - packages/auth/login-attempt.test.ts
+  - packages/course-quiz/quiz-attempt.test.ts
+  - packages/course-assignment/sanitize-html.test.ts
+  - packages/api/modules/course/lib/invoice-settings.test.ts
+  - packages/course/src/player/watermark-overlay.test.tsx
+  - apps/saas/app/api/payuni/period-notify/route.test.ts
+  - packages/course-quiz/quiz-session.test.ts
+  - packages/api/modules/course/lib/course-instructor-access.test.ts
+  - packages/payments/lib/invoice-issue-input.test.ts
+  - apps/saas/app/(authenticated)/quiz/[pluginContentId]/page.test.tsx
+  - apps/saas/app/api/course/studio/route.test.ts
+  - packages/course-quiz/quiz-definition.test.ts
+  - packages/platform/src/admin-log.test.ts
+  - packages/api/modules/course/procedures/list-manageable-courses.test.ts
+  - apps/saas/modules/shared/lib/nav-menu-items.test.ts
+  - packages/api/modules/assignment/assignment-draft.test.ts
+  - packages/api/modules/course/procedures/register-media.test.ts
+  - packages/api/modules/course/procedures/create-course-invite.test.ts
+  - packages/api/modules/course/procedures/list-course-packs.test.ts
+  - packages/course/src/course-pack/schema.test.ts
+  - packages/api/modules/course/lib/invoice-operations.test.ts
+  - packages/api/modules/course/lib/order-refunds.test.ts
+  - packages/api/modules/review/router.test.ts
+  - apps/saas/app/api/payuni/notify/route.test.ts
+  - packages/payments/invoice-provider.test.ts
+  - packages/api/modules/review/lesson-comment.test.ts
+  - apps/saas/tests/integration/bundle-course-access.test.ts
+  - packages/auth/better-auth-hook-experiment.test.ts
+  - apps/saas/modules/shared/components/UnifiedShell.test.tsx
+  - packages/api/modules/assignment/assignment-lifecycle.test.ts
+  - packages/course-quiz/quiz-grading.test.ts
+  - packages/api/modules/course/procedures/subscription-procedures.test.ts
+  - packages/course-review/review-summary.test.ts
+  - packages/course-assignment/assignment-definition.test.ts
+  - packages/api/modules/course/lib/refund-invoice.test.ts
+  - packages/course-assignment/submission-rules.test.ts
+  - packages/database/src/invoice/invoice-schema.test.ts
+  - packages/api/modules/course/procedures/assign-course-instructor.test.ts
+  - packages/api/modules/course/lib/invoice-events.test.ts
+  - packages/api/modules/course/procedures/submit-onboarding-survey.test.ts
+  - packages/database/src/assignment/assignment-draft.test.ts
+  - packages/course/access.test.ts
+  - packages/course/src/player/FluentPlayer.test.tsx
+  - packages/api/modules/course/procedures/invoice-operations.test.ts
+-->

@@ -476,3 +476,60 @@ tests:
   - apps/saas/app/api/mcp/route.test.ts
   - packages/github-kit/revoke.test.ts
 -->
+
+---
+### Requirement: Interactive blocks accept Mission-driven content as an alternate source
+The system SHALL render an existing interactive block using content supplied by an imported Course Pack Mission, in addition to content authored directly in the course editor.
+
+#### Scenario: Mission-sourced content renders through the existing block registry
+- **WHEN** a Mission's action surface maps to a registered block
+- **THEN** the system SHALL render that block using the Mission's structured action payload as its content source
+
+#### Scenario: Editor-authored content path is unaffected
+- **WHEN** a lesson's block content is authored directly through the existing course editor
+- **THEN** the system SHALL render it exactly as before, unaffected by the addition of the Mission-driven content source
+
+<!-- @trace
+source: course-pack-mission-execution
+updated: 2026-08-25
+code:
+  - docs/design-canvas/anson-manual-redesign-direction.html
+  - docs/assets/god-manual-prototype/anson-manual-hero.png
+  - docs/assets/god-manual-prototype/anson-handoff-case.png
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-04-real-need.png
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-03-anson-guidance.png
+  - packages/database/prisma/migrations/20260825061601_add_mission_form_value/migration.sql
+  - docs/assets/god-manual-prototype/storyboard-seedance/anson-storyboard-overview-2x3.png
+  - docs/assets/god-manual-prototype/anson-infinite-canvas-workflow.png
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-04-real-need.png
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-05-phased-proposal.png
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-06-next-step.png
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-06-next-step.png
+  - docs/design-canvas/anson-seedance-2.5-storyboard.md
+  - docs/assets/god-manual-prototype/anson-infinite-canvas-brand.png
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-05-phased-proposal.png
+  - packages/api/modules/course/procedures/import-course-pack.ts
+  - packages/course/src/course-pack/schema.ts
+  - packages/database/prisma/zod/index.ts
+  - packages/api/modules/course/router.ts
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-02-price-resistance.png
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-03-anson-guidance.png
+  - packages/api/modules/course/lib/mission-form-value-crypto.ts
+  - docs/dispatch-board.md
+  - docs/assets/god-manual-prototype/storyboard-seedance/anson-storyboard-production-board.svg
+  - docs/assets/god-manual-prototype/storyboard-seedance/4k/shot-01-vague-need.png
+  - docs/assets/god-manual-prototype/storyboard-seedance/anson-storyboard-production-board-4k.png
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-01-vague-need.png
+  - packages/database/prisma/schema.prisma
+  - docs/assets/god-manual-prototype/storyboard-seedance/shot-02-price-resistance.png
+  - packages/api/modules/course/procedures/list-course-packs.ts
+  - packages/api/modules/course/procedures/submit-mission-form-value.ts
+  - packages/database/prisma/migrations/20260825055318_add_course_pack_import/migration.sql
+  - docs/assets/god-manual-prototype/storyboard-seedance/anson-storyboard-model-reference-4k.png
+tests:
+  - packages/api/modules/course/procedures/import-course-pack.test.ts
+  - packages/course/src/course-pack/schema.test.ts
+  - packages/api/modules/course/procedures/list-course-packs.test.ts
+  - packages/database/src/mission-form-value/mission-form-value.test.ts
+  - packages/api/modules/course/procedures/submit-mission-form-value.test.ts
+-->
