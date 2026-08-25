@@ -1,0 +1,15 @@
+Dockerfile
+.dockerignore
+node_modules
+**/node_modules
+.next
+.git
+.pnpm-store
+.env
+.env.*
+coverage
+dist
+out
+*.tsbuildinfo
+*.log
+.DS_Store

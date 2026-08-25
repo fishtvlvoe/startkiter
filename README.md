@@ -54,6 +54,17 @@ LINE Login Channel 做登入。學員社群是邀請連結，不能靜默入群�
 
 點擊上方按鈕即可在 Zeabur 一鍵建立 StartKiter 全端服務與 PostgreSQL 資料庫。部署設定檔位於 [`deploy/zeabur.yaml`](./deploy/zeabur.yaml)，會自動建立 PostgreSQL 相依與 `DATABASE_URL`、`BETTER_AUTH_URL`、`BETTER_AUTH_SECRET` 等環境變數配置。
 
+### 自架 VPS（Docker）
+
+任何支援 Docker 的 VPS 都可以使用同一份 `apps/saas/Dockerfile`。建置機建議至少有 4GB RAM；記憶體較小時可用 `NODE_OPTIONS=--max-old-space-size=4096` 限制 Node.js 建置記憶體：
+
+```bash
+docker build --build-arg NODE_OPTIONS=--max-old-space-size=4096 -f apps/saas/Dockerfile . -t startkiter
+docker run --env-file .env -p 3000:3000 startkiter
+```
+
+請在 `.env` 填入實際部署所需的環境變數，至少包含 `DATABASE_URL`、`BETTER_AUTH_URL`、`BETTER_AUTH_SECRET`；金流金鑰未設定時，結帳端點會維持既有的 fail-closed 行為。
+
 【下一步】
 
 對齊文件後，施工 `extract-github-kit-fulfillment`（`/spectra-apply extract-github-kit-fulfillment`）。不要在 Development 根目錄開施工單。不要改來源 repo。產品衝突以 `openspec/specs/` 為準，不以 `docs/discuss/` 舊稿為準。
