@@ -13,6 +13,10 @@ function errorMessage(error: unknown): string {
 	return error instanceof Error ? error.message.slice(0, 500) : "Email delivery failed";
 }
 
+function isUniqueConstraintError(error: unknown): boolean {
+	return typeof error === "object" && error !== null && "code" in error && error.code === "P2002";
+}
+
 export async function scanAndSendExpirationReminders(): Promise<{
 	sent: number;
 	skipped: number;
@@ -41,19 +45,6 @@ export async function scanAndSendExpirationReminders(): Promise<{
 		const daysBefore = Math.round((startOfUtcDay(subscription.currentPeriodEnd).getTime() - today.getTime()) / DAY_MS);
 		if (!REMINDER_DAYS.has(daysBefore)) continue;
 
-		const existing = await db.courseExpirationReminder.findUnique({
-			where: {
-				subscriptionId_daysBefore: {
-					subscriptionId: subscription.id,
-					daysBefore,
-				},
-			},
-		});
-		if (existing) {
-			skipped += 1;
-			continue;
-		}
-
 		const subject = daysBefore === 0
 			? `課程「${subscription.course.title}」今天到期`
 			: `課程「${subscription.course.title}」將於 ${daysBefore} 天後到期`;
@@ -61,7 +52,22 @@ export async function scanAndSendExpirationReminders(): Promise<{
 			? `你的「${subscription.course.title}」訂閱今天到期，請登入課程頁確認續訂狀態。`
 			: `你的「${subscription.course.title}」訂閱將於 ${daysBefore} 天後到期，請登入課程頁確認續訂狀態。`;
 
+		try {
+			await db.courseExpirationReminder.create({
+				data: { subscriptionId: subscription.id, daysBefore },
+			});
+		} catch (error) {
+			if (isUniqueConstraintError(error)) {
+				skipped += 1;
+				continue;
+			}
+			failed += 1;
+			logger.error(error);
+			continue;
+		}
+
 		let delivery;
+		let delivered = false;
 		try {
 			delivery = await db.emailDeliveryLog.create({
 				data: {
@@ -74,20 +80,18 @@ export async function scanAndSendExpirationReminders(): Promise<{
 					subject,
 				},
 			});
-			const delivered = await sendEmail({
+			const providerAccepted = await sendEmail({
 				to: subscription.user.email,
 				locale: subscription.user.locale as Parameters<typeof sendEmail>[0]["locale"],
 				subject,
 				text,
 			});
-			if (!delivered) throw new Error("Email provider rejected delivery");
+			if (!providerAccepted) throw new Error("Email provider rejected delivery");
+			delivered = true;
 
 			await db.emailDeliveryLog.update({
 				where: { id: delivery.id },
 				data: { status: "SENT", sentAt: new Date() },
-			});
-			await db.courseExpirationReminder.create({
-				data: { subscriptionId: subscription.id, daysBefore },
 			});
 			sent += 1;
 		} catch (error) {
@@ -96,6 +100,16 @@ export async function scanAndSendExpirationReminders(): Promise<{
 				await db.emailDeliveryLog.update({
 					where: { id: delivery.id },
 					data: { status: "FAILED", errorMessage: errorMessage(error) },
+				}).catch(() => undefined);
+			}
+			if (!delivered) {
+				await db.courseExpirationReminder.delete({
+					where: {
+						subscriptionId_daysBefore: {
+							subscriptionId: subscription.id,
+							daysBefore,
+						},
+					},
 				}).catch(() => undefined);
 			}
 			logger.error(error);

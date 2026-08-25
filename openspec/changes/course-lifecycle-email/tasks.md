@@ -22,6 +22,6 @@
 ## 5. Review 與驗證
 
 - [x] 5.1 完成 task 1-4 的 correctness／security／performance review；`code-review.md` verdict PASS，Critical/High 為 0
-- [ ] 5.2 真實 authenticated browser checkout／PAYUNi acceptance／外部 cron／production mail provider E2E：本 workspace 沒有授權的 production credentials 或 live payment environment，需真實環境驗證；不以 mock 或 build 代替
+- [ ] 5.2 ego-browser 已實跑 operator 登入、`/admin/email-settings` 啟用模板、checkout 點擊、cron 正確 bearer／重複掃描／401、送達紀錄 `EXPIRATION_REMINDER/SENT`；證據：`/tmp/course-lifecycle-email-settings.png`、`/tmp/course-lifecycle-email-checkout-failclosed.png`、`/tmp/course-lifecycle-email-delivery-log-bottom.png`。買斷 PAYUNi acceptance 與 `WELCOME_EMAIL/SENT` 未完成：本 workspace 的 `PAYUNI_MERCHANT_ID`／`PAYUNI_HASH_KEY`／`PAYUNI_HASH_IV` 均未設定，checkout 實跑回傳 503 `payuni_not_configured`；不可用 mock 或 build 代替
 - [x] 5.3 跑 `spectra analyze course-lifecycle-email --json` 與 `spectra validate course-lifecycle-email`，Coverage／Consistency／Ambiguity／Gaps 四個維度均 Clean，0 warnings／0 errors
 - [x] 5.4 逐項核對 design.md Implementation Contract：API 48 files/182 tests、SaaS 31 files/163 tests、API/SaaS type-check 與 root production build 全數綠燈

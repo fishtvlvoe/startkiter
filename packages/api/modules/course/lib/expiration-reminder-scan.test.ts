@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@startkiter/database", () => ({
-	db: {
-		courseExpirationReminder: { findUnique: vi.fn(), create: vi.fn() },
+		db: {
+		courseExpirationReminder: { create: vi.fn(), delete: vi.fn() },
 		courseSubscription: { findMany: vi.fn() },
 		emailDeliveryLog: { create: vi.fn(), update: vi.fn() },
 		user: { findUnique: vi.fn() },
@@ -41,8 +41,8 @@ describe("scanAndSendExpirationReminders", () => {
 			subscription(1),
 			subscription(0),
 		] as never);
-		vi.mocked(db.courseExpirationReminder.findUnique).mockResolvedValue(null);
 		vi.mocked(db.courseExpirationReminder.create).mockResolvedValue({ id: "reminder-1" } as never);
+		vi.mocked(db.courseExpirationReminder.delete).mockResolvedValue({ id: "reminder-1" } as never);
 		vi.mocked(db.emailDeliveryLog.create).mockResolvedValue({ id: "delivery-1" } as never);
 		vi.mocked(db.emailDeliveryLog.update).mockResolvedValue({ id: "delivery-1" } as never);
 		vi.mocked(sendEmail).mockResolvedValue(true);
@@ -56,13 +56,20 @@ describe("scanAndSendExpirationReminders", () => {
 	});
 
 	it("skips a threshold that has already been recorded", async () => {
-		vi.mocked(db.courseExpirationReminder.findUnique).mockImplementation((args) =>
-			Promise.resolve(
-				args.where.subscriptionId_daysBefore?.daysBefore === 7 ? ({ id: "existing" } as never) : null,
-			) as never,
-		);
+		vi.mocked(db.courseExpirationReminder.create).mockRejectedValueOnce({ code: "P2002" });
 
 		await expect(scanAndSendExpirationReminders()).resolves.toEqual({ sent: 2, skipped: 1, failed: 0 });
+		expect(sendEmail).toHaveBeenCalledTimes(2);
+	});
+
+	it("uses the compound unique reservation before sending under a concurrent duplicate", async () => {
+		vi.mocked(db.courseExpirationReminder.create).mockRejectedValueOnce({ code: "P2002" });
+
+		await scanAndSendExpirationReminders();
+
+		expect(db.courseExpirationReminder.create.mock.invocationCallOrder[0]).toBeLessThan(
+			sendEmail.mock.invocationCallOrder[0],
+		);
 		expect(sendEmail).toHaveBeenCalledTimes(2);
 	});
 
