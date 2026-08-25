@@ -23,8 +23,8 @@
 
 ## 5. Invitation email 通知（對應 Requirement「Organization invitations are delivered by email」，落實設計決策「Invitation 通知沿用既有 Better Auth organization plugin 內建的 email 事件，不新增 LINE 通知」）
 
-- [ ] 5.1 撰寫紅燈測試：涵蓋 Requirement「Organization invitations are delivered by email」——建立 Invitation 後觸發 email 通知、不觸發任何 LINE 訊息；驗證目標：`pnpm --filter api test` 出現預期失敗
-- [ ] 5.2 串接既有 `packages/mail` 到 Better Auth Invitation 建立事件，使 5.1 測試轉綠燈；驗證目標：對應測試全綠
+- [x] 5.1 撰寫紅燈測試：涵蓋 Requirement「Organization invitations are delivered by email」——建立 Invitation 後觸發 email 通知、不觸發任何 LINE 訊息；驗證目標：`pnpm --filter api test` 出現預期失敗
+- [x] 5.2 串接既有 `packages/mail` 到 Better Auth Invitation 建立事件，使 5.1 測試轉綠燈；驗證目標：對應測試全綠
 
 ## 6. 後台 UI：講師指派入口
 

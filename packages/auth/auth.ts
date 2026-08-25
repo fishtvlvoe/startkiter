@@ -22,6 +22,7 @@ import { parseCookie as parseCookies } from "cookie";
 
 import { config } from "./config";
 import { updateSeatsInOrganizationSubscription } from "./lib/organization";
+import { sendOrganizationInvitationEmail } from "./lib/organization-invitation-email";
 import { organizationRoleHooks } from "./lib/organization-role-hooks";
 import { recordLoginAttempt } from "./login-attempt";
 import { invitationOnlyPlugin } from "./plugins/invitation-only";
@@ -286,26 +287,17 @@ export const auth = betterAuth({
 			},
 			organizationHooks: organizationRoleHooks,
 			sendInvitationEmail: async ({ email, id, organization }, request) => {
-				const locale = getLocaleFromRequest(request);
-				const existingUser = await getUserByEmail(email);
+					const locale = getLocaleFromRequest(request);
+					const existingUser = await getUserByEmail(email);
 
-				const url = new URL(
-					existingUser ? "/login" : "/signup",
-					getBaseUrl(process.env.NEXT_PUBLIC_SAAS_URL, 3000),
-				);
-
-				url.searchParams.set("invitationId", id);
-				url.searchParams.set("email", email);
-
-				await sendEmail({
-					to: email,
-					templateId: "organizationInvitation",
-					locale,
-					context: {
+					await sendOrganizationInvitationEmail({
+						email,
+						id,
 						organizationName: organization.name,
-						url: url.toString(),
-					},
-				});
+						locale,
+						baseUrl: getBaseUrl(process.env.NEXT_PUBLIC_SAAS_URL, 3000),
+						existingUser: Boolean(existingUser),
+					});
 			},
 		}),
 		openAPI(),
