@@ -6,6 +6,7 @@ import { NextResponse } from "next/server";
 
 import { findOrderByNo, loadPayUniCredentials, markOrderPaid } from "../../../../lib/orders";
 import { triggerInvoiceForOrder } from "@startkiter/api/modules/course/lib/invoice-events";
+import { sendWelcomeEmailsForOrder } from "@startkiter/api/modules/course/lib/send-welcome-email";
 import { scheduleAfterResponse } from "../../../../lib/schedule-after";
 
 export async function POST(request: Request) {
@@ -91,7 +92,10 @@ export async function POST(request: Request) {
 			return NextResponse.json({ error: "order_not_pending" }, { status: 400 });
 		}
 		scheduleAfterResponse(async () => {
-			await triggerInvoiceForOrder(existing.id);
+			await Promise.all([
+				triggerInvoiceForOrder(existing.id),
+				sendWelcomeEmailsForOrder(existing.id),
+			]);
 		});
 	}
 

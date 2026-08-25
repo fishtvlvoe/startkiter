@@ -10,6 +10,7 @@ import {
 	fingerprintPayUniPeriodEvent,
 } from "@startkiter/api/modules/course/lib/webhook-events";
 import { triggerInvoiceForSubscriptionPeriod } from "@startkiter/api/modules/course/lib/invoice-events";
+import { sendWelcomeEmail } from "@startkiter/api/modules/course/lib/send-welcome-email";
 import { scheduleAfterResponse } from "../../../../lib/schedule-after";
 
 function stringField(value: unknown): string {
@@ -97,6 +98,8 @@ export async function POST(request: Request) {
 			where: { gatewayTradeNo },
 			select: {
 				id: true,
+				userId: true,
+				courseId: true,
 				status: true,
 				pricePerPeriod: true,
 				paidPeriods: true,
@@ -158,7 +161,15 @@ export async function POST(request: Request) {
 			});
 			claimed = false;
 		scheduleAfterResponse(async () => {
-			await triggerInvoiceForSubscriptionPeriod(subscription.id, periodNumber);
+			const tasks: Array<Promise<unknown>> = [triggerInvoiceForSubscriptionPeriod(subscription.id, periodNumber)];
+			if (periodNumber === 1) {
+				tasks.push(sendWelcomeEmail({
+					userId: subscription.userId,
+					courseId: subscription.courseId,
+					subscriptionId: subscription.id,
+				}));
+			}
+			await Promise.all(tasks);
 		});
 		return NextResponse.json({ message: "OK" });
 	} catch (error) {

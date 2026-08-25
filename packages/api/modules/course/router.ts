@@ -42,6 +42,8 @@ import { setCourseCoverMedia } from "./procedures/set-course-cover-media";
 import { importCoursePack } from "./procedures/import-course-pack";
 import { listCoursePacks } from "./procedures/list-course-packs";
 import { submitMissionFormValue } from "./procedures/submit-mission-form-value";
+import { listEmailDeliveryLog } from "./procedures/list-email-delivery-log";
+import { updateWelcomeEmailSettings } from "./procedures/update-welcome-email-settings";
 
 export const courseRouter = publicProcedure.router({
 	// 1. 公開/試看課綱大綱 (Public)
@@ -303,4 +305,6 @@ export const courseRouter = publicProcedure.router({
 	importCoursePack,
 	listCoursePacks,
 	submitMissionFormValue,
+	listEmailDeliveryLog,
+	updateWelcomeEmailSettings,
 });

@@ -56,8 +56,10 @@ describe("scanAndSendExpirationReminders", () => {
 	});
 
 	it("skips a threshold that has already been recorded", async () => {
-		vi.mocked(db.courseExpirationReminder.findUnique).mockImplementation(async ({ where }) =>
-			where.subscriptionId_daysBefore?.daysBefore === 7 ? ({ id: "existing" } as never) : null,
+		vi.mocked(db.courseExpirationReminder.findUnique).mockImplementation((args) =>
+			Promise.resolve(
+				args.where.subscriptionId_daysBefore?.daysBefore === 7 ? ({ id: "existing" } as never) : null,
+			) as never,
 		);
 
 		await expect(scanAndSendExpirationReminders()).resolves.toEqual({ sent: 2, skipped: 1, failed: 0 });

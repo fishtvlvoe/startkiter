@@ -674,6 +674,9 @@ importers:
       '@startkiter/logs':
         specifier: workspace:*
         version: link:../logs
+      '@startkiter/mail':
+        specifier: workspace:*
+        version: link:../mail
       '@startkiter/notifications':
         specifier: workspace:*
         version: link:../notifications
