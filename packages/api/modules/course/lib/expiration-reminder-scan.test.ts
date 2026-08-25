@@ -63,13 +63,20 @@ describe("scanAndSendExpirationReminders", () => {
 	});
 
 	it("uses the compound unique reservation before sending under a concurrent duplicate", async () => {
+		const events: string[] = [];
 		vi.mocked(db.courseExpirationReminder.create).mockRejectedValueOnce({ code: "P2002" });
+		vi.mocked(db.courseExpirationReminder.create).mockImplementation((async () => {
+			events.push("reserve");
+			return { id: "reminder-1" } as never;
+		}) as never);
+		vi.mocked(sendEmail).mockImplementation(async () => {
+			events.push("send");
+			return true;
+		});
 
 		await scanAndSendExpirationReminders();
 
-		expect(db.courseExpirationReminder.create.mock.invocationCallOrder[0]).toBeLessThan(
-			sendEmail.mock.invocationCallOrder[0],
-		);
+		expect(events[0]).toBe("reserve");
 		expect(sendEmail).toHaveBeenCalledTimes(2);
 	});
 
