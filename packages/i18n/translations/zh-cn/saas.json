@@ -300,9 +300,12 @@
       "title": "Your organizations"
     },
     "roles": {
+      "assignInstructor": "指派讲师",
       "admin": "Admin",
-      "member": "Member",
+      "instructor": "讲师",
       "owner": "Owner",
+      "revokeInstructor": "撤销讲师",
+      "user": "用户",
       "info": {
         "description": "Roles are listed from least to most access:",
         "title": "Role permissions"

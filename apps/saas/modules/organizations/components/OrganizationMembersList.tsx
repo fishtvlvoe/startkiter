@@ -20,6 +20,7 @@ import { Table, TableBody, TableCell, TableRow } from "@startkiter/ui/components
 import { toastPromise } from "@startkiter/ui/components/toast";
 import { UserAvatar } from "@shared/components/UserAvatar";
 import { clientDataTableFeatures } from "@shared/lib/table-features";
+import { orpcClient } from "@shared/lib/orpc-client";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef, ColumnFiltersState, SortingState } from "@tanstack/react-table";
 import { flexRender, useTable } from "@tanstack/react-table";
@@ -57,6 +58,32 @@ export function OrganizationMembersList({ organizationId }: { organizationId: st
 					organizationId,
 				});
 			},
+			{
+				loading: t(
+					"organizations.settings.members.notifications.updateMembership.loading.description",
+				),
+				success: () => {
+					void queryClient.invalidateQueries({
+						queryKey: fullOrganizationQueryKey(organizationId),
+					});
+
+					return t(
+						"organizations.settings.members.notifications.updateMembership.success.description",
+					);
+				},
+				error: t("organizations.settings.members.notifications.updateMembership.error.description"),
+			},
+		);
+	};
+
+	const setInstructorRole = async (memberId: string, role: "instructor" | "user") => {
+		toastPromise(
+			() =>
+				orpcClient.organizations.assignInstructorRole({
+					organizationId,
+					memberId,
+					role,
+				}),
 			{
 				loading: t(
 					"organizations.settings.members.notifications.updateMembership.loading.description",
@@ -126,10 +153,30 @@ export function OrganizationMembersList({ organizationId }: { organizationId: st
 			accessorKey: "actions",
 			header: "",
 			cell: ({ row }) => {
+				const canToggleInstructor = row.original.role === "user" || row.original.role === "instructor";
+
 				return (
 					<div className="gap-2 flex flex-row justify-end">
 						{canManageOrganization ? (
 							<>
+								{canToggleInstructor && (
+									<Button
+										size="sm"
+										variant="outline"
+										onClick={() =>
+											setInstructorRole(
+												row.original.id,
+												row.original.role === "instructor" ? "user" : "instructor",
+											)
+										}
+									>
+										{t(
+											row.original.role === "instructor"
+												? "organizations.roles.revokeInstructor"
+												: "organizations.roles.assignInstructor",
+										)}
+									</Button>
+								)}
 								<OrganizationRoleSelect
 									value={row.original.role}
 									onSelect={async (value) => updateMemberRole(row.original.id, value)}

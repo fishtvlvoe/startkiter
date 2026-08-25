@@ -28,7 +28,7 @@
 
 ## 6. 後台 UI：講師指派入口
 
-- [ ] 6.1 修改 `apps/saas/app/(authenticated)/(main)/(account)/admin/organizations/page.tsx` 新增「指派/撤銷講師」操作按鈕，僅 `owner`／`admin` 可見與可操作，串接第 2 節的 procedure；驗證目標：手動以三種角色（owner／instructor／user）登入測試，非 owner/admin 看不到此按鈕
+- [x] 6.1 修改 `apps/saas/app/(authenticated)/(main)/(account)/admin/organizations/page.tsx` 新增「指派/撤銷講師」操作按鈕，僅 `owner`／`admin` 可見與可操作，串接第 2 節的 procedure；驗證目標：手動以三種角色（owner／instructor／user）登入測試，非 owner/admin 看不到此按鈕
 
 ## 7. Review 與驗收
 

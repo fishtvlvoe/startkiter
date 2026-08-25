@@ -299,9 +299,12 @@
       "title": "Deine Organisationen"
     },
     "roles": {
+      "assignInstructor": "Lehrkraft zuweisen",
       "admin": "Administration",
-      "member": "Mitglied",
+      "instructor": "Lehrkraft",
       "owner": "Eigentümer",
+      "revokeInstructor": "Lehrkraft entziehen",
+      "user": "Benutzer",
       "info": {
         "description": "Rollen sind nach Zugriffsstufe sortiert (wenig bis viel):",
         "title": "Rollenberechtigungen"

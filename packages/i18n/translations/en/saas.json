@@ -300,9 +300,12 @@
       "title": "Your organizations"
     },
     "roles": {
+      "assignInstructor": "Assign instructor",
       "admin": "Admin",
-      "member": "Member",
+      "instructor": "Instructor",
       "owner": "Owner",
+      "revokeInstructor": "Revoke instructor",
+      "user": "User",
       "info": {
         "description": "Roles are listed from least to most access:",
         "title": "Role permissions"
