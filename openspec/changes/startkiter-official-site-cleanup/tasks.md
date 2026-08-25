@@ -5,7 +5,7 @@
 ## 2. apps/marketing 接上正式網域（對應 Requirement「The marketing site is deployed under the official domain」）
 
 - [ ] 2.1 在 Coolify 新建 `apps/marketing` 對應的 resource（Build Pack 依 `apps/marketing` 既有建置慣例設定），並設定自訂網域 `startkiter.dev`；驗證目標：Coolify 後台顯示該 resource 狀態為 running
-- [x] 2.2 涵蓋 Requirement「The marketing site is deployed under the official domain」：在 Cloudflare DNS 設定 `startkiter.dev` A/CNAME 記錄指向對應的 Coolify 節點，確認 SSL 憑證簽發成功；驗證目標：`curl -I https://startkiter.dev` 回應成功或合理重導向
+- [ ] 2.2 涵蓋 Requirement「The marketing site is deployed under the official domain」：在 Cloudflare DNS 設定 `startkiter.dev` A/CNAME 記錄指向對應的 Coolify 節點，確認 SSL 憑證簽發成功；驗證目標：`curl -I https://startkiter.dev` 回應成功或合理重導向
 
 ## 3. 關閉舊 Vercel 部署（對應 Requirement「The legacy Vercel deployment is decommissioned」）
 
@@ -19,4 +19,4 @@
 ## 5. Review 與驗收
 
 - [x] 5.1 執行 `spectra validate startkiter-official-site-cleanup` 確認產出物驗證通過；驗證方式：指令輸出無錯誤
-- [x] 5.2 三個網域（`app.startkiter.dev`／`startkiter.dev`／`test-startkiter.vercel.app`）的最終狀態各自用 curl 截圖存證；驗證方式：三筆 curl 結果附進驗收報告
+- [ ] 5.2 三個網域（`app.startkiter.dev`／`startkiter.dev`／`test-startkiter.vercel.app`）的最終狀態各自用 curl 截圖存證；驗證方式：三筆 curl 結果附進驗收報告
