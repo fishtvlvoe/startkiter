@@ -40,3 +40,7 @@ x-vercel-error: DEPLOYMENT_NOT_FOUND
 ```
 
 結果：PASS。舊測試網址不再指向有效 deployment；`app.startkiter.dev` 仍回 HTTP 307 `/login`，兩者狀態已明確區隔。
+
+## 4.1 文件同步
+
+已更新 `AGENTS.md` 指向 `openspec/changes/startkiter-official-site-cleanup/`，並同步 README 的正式網域與舊 Vercel 測試站狀態。

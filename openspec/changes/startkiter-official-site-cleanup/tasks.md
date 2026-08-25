@@ -14,7 +14,7 @@
 
 ## 4. 補文件記錄
 
-- [ ] 4.1 更新 `AGENTS.md` 對應段落，移除「細節與遷移步驟待寫成新 Spectra change，尚未 propose」這句過時描述，改為指向本張 change；驗證目標：`grep -n "official-site-deployment" AGENTS.md` 有命中
+- [x] 4.1 更新 `AGENTS.md` 對應段落，移除「細節與遷移步驟待寫成新 Spectra change，尚未 propose」這句過時描述，改為指向本張 change；驗證目標：`grep -n "official-site-deployment" AGENTS.md` 有命中
 
 ## 5. Review 與驗收
 

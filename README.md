@@ -46,7 +46,7 @@ LINE Login Channel 做登入。學員社群是邀請連結，不能靜默入群�
 
 【網域】
 
-盯 `startkiter.com`，備案 `startkiter.me`。下單前再查 whois。沒買到先用 Zeabur 子網域，不准借 libon.me。
+官方銷售頁：[`https://startkiter.dev`](https://startkiter.dev)；SaaS 應用：[`https://app.startkiter.dev`](https://app.startkiter.dev)。舊測試站 `test-startkiter.vercel.app` 已關閉，不再作為部署入口。
 
 【一鍵部署】
 
