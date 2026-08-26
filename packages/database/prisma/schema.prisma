@@ -47,6 +47,7 @@ model User {
   lessonProgresses                   LessonProgress[]
   watchTimeLogs                      WatchTimeLog[]
   courseSubscriptions                CourseSubscription[]
+  emailDeliveryLogs                  EmailDeliveryLog[]
   pluginContents                     PluginContent[]
   quizAttempts                       QuizAttempt[]
   assignmentSubmissions              AssignmentSubmission[]           @relation("AssignmentSubmissionUser")
@@ -336,6 +337,7 @@ model Order {
   user               User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   organization       Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   invoice            Invoice?
+  emailDeliveryLogs  EmailDeliveryLog[]
 
   @@index([userId])
   @@index([organizationId])
@@ -487,6 +489,17 @@ enum CourseSubscriptionStatus {
   CANCELED
 }
 
+enum EmailDeliveryType {
+  WELCOME_EMAIL
+  EXPIRATION_REMINDER
+}
+
+enum EmailDeliveryStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
 enum PaymentWebhookEventStatus {
   PROCESSING
   COMPLETED
@@ -506,6 +519,8 @@ model Course {
   chapters                  Chapter[]
   subscriptionPlans         CourseSubscriptionPlan[]
   subscriptions             CourseSubscription[]
+  welcomeEmail              CourseWelcomeEmail?
+  emailDeliveryLogs         EmailDeliveryLog[]
   invites                   CourseInvite[]
   inviteRedemptions         CourseInviteRedemption[]
   onboardingSurveyResponses CourseOnboardingSurveyResponse[]
@@ -668,11 +683,66 @@ model CourseSubscription {
   createdAt             DateTime                 @default(now())
   updatedAt             DateTime                 @updatedAt
   invoices              Invoice[]
+  expirationReminders   CourseExpirationReminder[]
+  emailDeliveryLogs     EmailDeliveryLog[]
 
   @@index([userId])
   @@index([courseId])
   @@index([userId, courseId])
   @@map("course_subscription")
+}
+
+model EmailDeliveryLog {
+  id                String              @id @default(cuid())
+  type              EmailDeliveryType
+  status            EmailDeliveryStatus @default(PENDING)
+  orderId           String?
+  subscriptionId    String?
+  userId            String
+  courseId          String?
+  toEmail           String
+  subject           String
+  providerMessageId String?
+  errorMessage      String?             @db.Text
+  sentAt            DateTime?
+  createdAt         DateTime            @default(now())
+
+  order        Order?              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  subscription CourseSubscription? @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course       Course?             @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([type])
+  @@index([status])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("email_delivery_log")
+}
+
+model CourseWelcomeEmail {
+  id               String   @id @default(cuid())
+  courseId         String   @unique
+  enabled          Boolean  @default(false)
+  subjectTemplate  String
+  markdownTemplate String   @db.Text
+  updatedAt        DateTime @updatedAt
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@map("course_welcome_email")
+}
+
+model CourseExpirationReminder {
+  id             String   @id @default(cuid())
+  subscriptionId String
+  daysBefore     Int
+  sentAt         DateTime @default(now())
+
+  subscription CourseSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@unique([subscriptionId, daysBefore])
+  @@index([sentAt])
+  @@map("course_expiration_reminder")
 }
 
 model CourseInvite {

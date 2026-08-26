@@ -9,11 +9,15 @@ vi.mock("../../../../lib/orders", () => ({
 vi.mock("@startkiter/api/modules/course/lib/invoice-events", () => ({
 	triggerInvoiceForOrder: vi.fn(),
 }));
+vi.mock("@startkiter/api/modules/course/lib/send-welcome-email", () => ({
+	sendWelcomeEmailsForOrder: vi.fn(),
+}));
 
 import { db } from "@startkiter/database";
 import { PayUniService } from "@startkiter/payments";
 
 import { triggerInvoiceForOrder } from "@startkiter/api/modules/course/lib/invoice-events";
+import { sendWelcomeEmailsForOrder } from "@startkiter/api/modules/course/lib/send-welcome-email";
 import { findOrderByNo, loadPayUniCredentials, markOrderPaid } from "../../../../lib/orders";
 import { POST } from "./route";
 
@@ -61,6 +65,7 @@ describe("PAYUNi one-time notify invoice trigger", () => {
 		} as never);
 		vi.mocked(markOrderPaid).mockResolvedValue(1);
 		vi.mocked(db.order.updateMany).mockResolvedValue({ count: 1 } as never);
+		vi.mocked(sendWelcomeEmailsForOrder).mockResolvedValue(undefined);
 	});
 
 	it("keeps payment successful with invoicing disabled and creates no invoice", async () => {
@@ -71,6 +76,7 @@ describe("PAYUNi one-time notify invoice trigger", () => {
 		expect(response.status).toBe(200);
 		expect(markOrderPaid).toHaveBeenCalledWith("ORDER-1", "PAYMENT-1");
 		expect(triggerInvoiceForOrder).toHaveBeenCalledWith("order-id");
+		expect(sendWelcomeEmailsForOrder).toHaveBeenCalledWith("order-id");
 		expect(db.order).not.toHaveProperty("invoice");
 	});
 

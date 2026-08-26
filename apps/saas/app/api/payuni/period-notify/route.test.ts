@@ -22,6 +22,9 @@ vi.mock("@startkiter/api/modules/course/lib/webhook-events", () => ({
 vi.mock("@startkiter/api/modules/course/lib/invoice-events", () => ({
 	triggerInvoiceForSubscriptionPeriod: vi.fn(),
 }));
+vi.mock("@startkiter/api/modules/course/lib/send-welcome-email", () => ({
+	sendWelcomeEmail: vi.fn(),
+}));
 
 import { db } from "@startkiter/database";
 import { PayUniService } from "@startkiter/payments";
@@ -33,6 +36,7 @@ import {
 	failWebhookEvent,
 } from "@startkiter/api/modules/course/lib/webhook-events";
 import { triggerInvoiceForSubscriptionPeriod } from "@startkiter/api/modules/course/lib/invoice-events";
+import { sendWelcomeEmail } from "@startkiter/api/modules/course/lib/send-welcome-email";
 import { POST } from "./route";
 
 const credentials = {
@@ -72,6 +76,7 @@ describe("PAYUNi period-notify", () => {
 		vi.mocked(completeWebhookEvent).mockResolvedValue(undefined);
 		vi.mocked(failWebhookEvent).mockResolvedValue(undefined);
 		vi.mocked(triggerInvoiceForSubscriptionPeriod).mockResolvedValue(null);
+		vi.mocked(sendWelcomeEmail).mockResolvedValue(undefined);
 		vi.mocked(db.courseSubscription.findUnique).mockResolvedValue({
 			id: "subscription-1",
 			status: "PENDING",
@@ -105,6 +110,9 @@ describe("PAYUNi period-notify", () => {
 			}),
 		);
 		expect(triggerInvoiceForSubscriptionPeriod).toHaveBeenCalledWith("subscription-1", 1);
+		expect(sendWelcomeEmail).toHaveBeenCalledWith(expect.objectContaining({
+			subscriptionId: "subscription-1",
+		}));
 	});
 
 	it("keeps subscription payment success when invoice issuance fails", async () => {

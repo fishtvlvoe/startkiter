@@ -24,6 +24,7 @@
 		"@startkiter/database": "workspace:*",
 		"@startkiter/i18n": "workspace:*",
 		"@startkiter/logs": "workspace:*",
+		"@startkiter/mail": "workspace:*",
 		"@startkiter/notifications": "workspace:*",
 		"@startkiter/payments": "workspace:*",
 		"@startkiter/permissions": "workspace:*",

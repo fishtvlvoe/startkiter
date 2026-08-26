@@ -114,4 +114,14 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		},
 		dataSpec: "none",
 	},
+	{
+		id: "email-settings",
+		name: "課程郵件",
+		version: "0.1.0",
+		mount: {
+			route: { path: "/admin/email-settings" },
+			menu: { label: "郵件設定", icon: "mail", order: 18, requiresOperator: true },
+		},
+		dataSpec: "none",
+	},
 ];
