@@ -30,7 +30,7 @@ function settings(provider: "ecpay" | "ezpay") {
 	return {
 		provider,
 		merchantId: "TEST-MERCHANT",
-		hashKey: "1234567890123456",
+		hashKey: provider === "ezpay" ? "12345678901234567890123456789012" : "1234567890123456",
 		hashIV: "1234567890123456",
 		testMode: true,
 		sellerName: "Invoice Settings Test",
@@ -61,11 +61,12 @@ describe("invoice provider settings", () => {
 
 		expect(provider).toEqual({ provider: "ecpay" });
 		expect(createEcpayInvoiceProvider).toHaveBeenCalledWith({
-		merchantId: "TEST-MERCHANT",
-		hashKey: "1234567890123456",
-		hashIV: "1234567890123456",
-		testMode: true,
-	});
+			merchantId: "TEST-MERCHANT",
+			hashKey: "1234567890123456",
+			hashIV: "1234567890123456",
+			testMode: true,
+			timeoutMs: 15_000,
+		});
 	});
 
 	it("selects the ezPay provider from encrypted settings", async () => {
@@ -80,11 +81,12 @@ describe("invoice provider settings", () => {
 
 		expect(provider).toEqual({ provider: "ezpay" });
 		expect(createEzpayInvoiceProvider).toHaveBeenCalledWith({
-		merchantId: "TEST-MERCHANT",
-		hashKey: "1234567890123456",
-		hashIV: "1234567890123456",
-		testMode: true,
-	});
+			merchantId: "TEST-MERCHANT",
+			hashKey: "12345678901234567890123456789012",
+			hashIV: "1234567890123456",
+			testMode: true,
+			timeoutMs: 15_000,
+		});
 	});
 
 	it("fails closed when the encryption key cannot decrypt settings", async () => {

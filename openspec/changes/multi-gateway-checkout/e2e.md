@@ -2,16 +2,17 @@
 
 日期：2026-08-26
 
-執行工具：`ego-browser` skill，`useOrCreateTaskSpace(10)`，實際操作 localhost 管理頁、結帳頁、第三方 sandbox 頁與訂單頁。沒有用 Playwright、Puppeteer 或其他瀏覽器工具。
+執行工具：`ego-browser` skill，`useOrCreateTaskSpace('startkiter-e2e-repair')`（task space 14），實際操作 localhost 管理頁、結帳頁、第三方 sandbox 頁與訂單頁。沒有用 Playwright、Puppeteer 或其他瀏覽器工具。
 
 ## Shopline sandbox
 
 1. 由 operator 後台選擇 Shopline，填入官方 sandbox 測試設定，儲存後確認設定頁顯示 Shopline 已設定。
 2. 由登入買家實際開啟結帳，瀏覽器被導向 Shopline sandbox hosted checkout。
-3. 以官方 sandbox Visa test card 測試 NT$8,800；依官方測試規則，偶數金額的非 3DS 卡片會被拒絕，實際看到 declined 畫面：
+3. 以官方 sandbox Visa test card 測試 NT$8,800；依官方測試規則，偶數金額的非 3DS 卡片會被拒絕。這次確實按下付款，收銀台實際顯示「您的付款被銀行拒絕，請換其他銀行卡或切換其他付款方式重試。」：
    - `/tmp/startkiter-shopline-non3d-declined.png`
-4. 切換 sandbox 的 `VirtualAccount` 測試付款方式並將交易狀態設為 `SUCCEEDED`，瀏覽器回到本地 checkout return。
-5. 用瀏覽器 fetch 送出以 raw body 計算的 signed webhook，API 回 `{"ok":true}`；回到 operator 訂單頁確認 order `SK20260826de25f82e5433` 為 `paid`、課程權限已授予、ECPay invoice 為 `ISSUED`／`LA25027215`。
+4. 這張截圖同時可看到 Shopline hosted checkout、商品合計 `NT$8800`、已填測試卡欄位、條款勾選，以及拒絕訊息；不是尚未送出的結帳表單。
+5. 切換 sandbox 的 `VirtualAccount` 測試付款方式並將交易狀態設為 `SUCCEEDED`，瀏覽器回到本地 checkout return。
+6. 用瀏覽器 fetch 送出以 raw body 計算的 signed webhook，API 回 `{"ok":true}`；回到 operator 訂單頁確認 order `SK20260826de25f82e5433` 為 `paid`、課程權限已授予、ECPay invoice 為 `ISSUED`／`LA25027215`。
    - `/tmp/startkiter-shopline-ecpay-issued.png`
 
 Shopline sandbox 的官方流程與測試資源：[Shopline 沙盒環境資源](https://docs.shoplinepayments.com/overview/sandboxResource/)、[串接流程](https://docs.shoplinepayments.com/guide/guideOverview)。

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildIssueInput } from "./invoice-issue-input";
+import { buildAllowanceInput, buildIssueInput } from "./invoice-issue-input";
 
 const base = {
 	orderNo: "ORDER-20260824-0001",
@@ -81,5 +81,19 @@ describe("buildIssueInput", () => {
 		});
 
 		expect(result.items[0]?.description).toHaveLength(500);
+	});
+
+	it("normalizes ezPay allowance references to its 20-character safe format", () => {
+		const result = buildAllowanceInput({
+			provider: "ezpay",
+			invoiceNumber: "CD12345678",
+			allowanceId: "ALLOW-cmta6nhuc000pmbz7dhj88nx7-1050",
+			originalOrderId: "ORDER-1",
+			amount: 1050,
+			itemName: "開站包",
+		});
+
+		expect(result.allowanceId).toMatch(/^[A-Za-z0-9_]{1,20}$/);
+		expect(result.providerOptions).toMatchObject({ merchantOrderNo: result.allowanceId });
 	});
 });

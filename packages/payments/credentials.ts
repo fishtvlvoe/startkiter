@@ -22,6 +22,10 @@ export type ResolvedPayUniCredentials = {
 
 const DEFAULT_API_URL = "https://sandbox-api.payuni.com.tw/api/upp";
 
+export function isValidPayUniCredentials(credentials: Pick<ResolvedPayUniCredentials, "hashKey" | "hashIV">): boolean {
+	return credentials.hashKey.length === 32 && credentials.hashIV.length === 16;
+}
+
 /** settings → env；settings 可回空，但必須先問 settings。無效長度一律當未設定（fail-closed）。 */
 export function resolvePayUniCredentials(args: {
 	readSettings: PaymentSettingsReader;
@@ -37,7 +41,7 @@ export function resolvePayUniCredentials(args: {
 		return null;
 	}
 
-	if (hashKey.length !== 32 || hashIV.length !== 16) {
+	if (!isValidPayUniCredentials({ hashKey, hashIV })) {
 		return null;
 	}
 

@@ -214,6 +214,12 @@ export const InvoiceScalarFieldEnumSchema = z.enum(['id', 'orderId', 'subscripti
 
 export type InvoiceScalarFieldEnum = z.infer<typeof InvoiceScalarFieldEnumSchema>;
 
+// File: InvoiceAllowanceOperationScalarFieldEnum.schema.ts
+
+export const InvoiceAllowanceOperationScalarFieldEnumSchema = z.enum(['id', 'invoiceId', 'allowanceId', 'provider', 'amount', 'status', 'allowanceNumber', 'errorMessage', 'createdAt', 'updatedAt'])
+
+export type InvoiceAllowanceOperationScalarFieldEnum = z.infer<typeof InvoiceAllowanceOperationScalarFieldEnumSchema>;
+
 // File: PaymentWebhookEventScalarFieldEnum.schema.ts
 
 export const PaymentWebhookEventScalarFieldEnumSchema = z.enum(['id', 'gateway', 'eventId', 'eventType', 'status', 'payload', 'error', 'createdAt', 'updatedAt'])
@@ -1135,6 +1141,24 @@ export const InvoiceSchema = z.object({
 });
 
 export type InvoiceType = z.infer<typeof InvoiceSchema>;
+
+
+// File: InvoiceAllowanceOperation.schema.ts
+
+export const InvoiceAllowanceOperationSchema = z.object({
+  id: z.string(),
+  invoiceId: z.string(),
+  allowanceId: z.string(),
+  provider: z.string(),
+  amount: z.number().int(),
+  status: z.string().default("PENDING"),
+  allowanceNumber: z.string().nullish(),
+  errorMessage: z.string().nullish(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type InvoiceAllowanceOperationType = z.infer<typeof InvoiceAllowanceOperationSchema>;
 
 
 // File: PaymentWebhookEvent.schema.ts

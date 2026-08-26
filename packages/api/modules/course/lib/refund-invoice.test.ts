@@ -7,10 +7,12 @@ vi.mock("@startkiter/database", () => ({
 }));
 vi.mock("./invoice-settings", () => ({
 	getInvoiceProvider: vi.fn(),
+	isInvoiceProviderName: vi.fn((value: string) => value === "ecpay" || value === "ezpay"),
+	withInvoiceOperationLock: vi.fn(async (callback) => callback(db as never)),
 }));
 
 import { db } from "@startkiter/database";
-import { getInvoiceProvider } from "./invoice-settings";
+import { getInvoiceProvider, withInvoiceOperationLock } from "./invoice-settings";
 import { handleRefundInvoice, handleRefundInvoiceForSubscription } from "./invoice-events";
 
 const invoice = {
@@ -33,22 +35,30 @@ const invoice = {
 };
 
 describe("refund invoice handling", () => {
+	const provider = { void: vi.fn().mockResolvedValue({ success: true }) };
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.mocked(db.invoice.findUnique).mockResolvedValue(invoice as never);
 		vi.mocked(db.invoice.update).mockResolvedValue({ ...invoice, status: "VOIDED" } as never);
-		vi.mocked(getInvoiceProvider).mockResolvedValue({
-			void: vi.fn().mockResolvedValue({ success: true }),
-		} as never);
+		provider.void.mockResolvedValue({ success: true });
+		vi.mocked(getInvoiceProvider).mockResolvedValue(provider as never);
 	});
 
 	it("voids an issued invoice when refund stays in the same billing month", async () => {
 		await handleRefundInvoice("order-1", new Date("2026-08-24T00:00:00.000Z"));
 
+		expect(withInvoiceOperationLock).toHaveBeenCalledTimes(1);
+		expect(getInvoiceProvider).toHaveBeenCalledWith("ecpay");
 		expect(db.invoice.update).toHaveBeenCalledWith(expect.objectContaining({
 			where: { id: "invoice-1" },
 			data: { status: "VOIDED", attentionReason: null },
 		}));
+		expect(provider.void).toHaveBeenCalledWith({
+			invoiceNumber: "AB12345678",
+			reason: "退款",
+			invoiceDate: invoice.invoiceDate,
+		});
 	});
 
 	it("marks a cross-month refund for manual allowance handling", async () => {
@@ -78,6 +88,7 @@ describe("refund invoice handling", () => {
 
 		await handleRefundInvoiceForSubscription("subscription-1", new Date("2026-08-24T00:00:00.000Z"));
 
+		expect(withInvoiceOperationLock).toHaveBeenCalledTimes(1);
 		expect(db.invoice.findFirst).toHaveBeenCalledWith(expect.objectContaining({
 			where: { subscriptionId: "subscription-1", status: "ISSUED" },
 			orderBy: { periodNumber: "desc" },

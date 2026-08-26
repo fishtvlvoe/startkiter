@@ -28,7 +28,11 @@ export function createEcpayInvoiceProvider(config: InvoiceProviderConfig): Invoi
 		},
 		async void(params) {
 			try {
-				await provider.void({ invoiceNumber: params.invoiceNumber, reason: params.reason });
+				await provider.void({
+					invoiceNumber: params.invoiceNumber,
+					reason: params.reason,
+					date: params.invoiceDate ?? undefined,
+				});
 				return { success: true };
 			} catch (error) {
 				return { success: false, error: error instanceof Error ? error.message : "ECPay 作廢失敗" };
@@ -44,12 +48,12 @@ export function createEcpayInvoiceProvider(config: InvoiceProviderConfig): Invoi
 						originalOrderId: params.originalOrderId ?? params.invoiceNumber,
 						amount: params.amount,
 						itemName: params.itemName ?? "商品",
-						invoiceDate: undefined,
+						invoiceDate: params.invoiceDate,
 					}),
 				);
 				return { success: true, allowanceNumber: result.allowanceNumber };
 			} catch (error) {
-				return { success: false, error: error instanceof Error ? error.message : "ECPay 折讓失敗" };
+				return { success: false, ambiguous: true, error: error instanceof Error ? error.message : "ECPay 折讓失敗" };
 			}
 		},
 	};

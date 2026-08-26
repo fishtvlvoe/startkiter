@@ -66,7 +66,14 @@ export async function POST(request: Request) {
 		nestedOrder.referenceId,
 		payload.referenceOrderId,
 	);
-	const tradeNo = stringAt(data.tradeOrderId, data.tradeNo, data.transactionId, data.referenceId, data.sessionId);
+	const tradeNo = stringAt(
+		data.tradeOrderId,
+		data.tradeNo,
+		data.transactionId,
+		nestedOrder.tradeOrderId,
+		nestedOrder.tradeNo,
+		nestedOrder.transactionId,
+	);
 	if (!orderNo || !tradeNo) return NextResponse.json({ error: "invalid_trade" }, { status: 400 });
 
 	const order = await findOrderByNo(orderNo);
@@ -81,11 +88,21 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: "amount_mismatch" }, { status: 400 });
 	}
 
-	if (order.status === "paid") return NextResponse.json({ ok: true }, { status: 200 });
-	const updated = await markOrderPaid(orderNo, tradeNo, "shopline");
+	if (order.status === "paid") {
+		scheduleAfterResponse(async () => {
+			await Promise.all([triggerInvoiceForOrder(order.id), sendWelcomeEmailsForOrder(order.id)]);
+		});
+		return NextResponse.json({ ok: true }, { status: 200 });
+	}
+	const updated = await markOrderPaid(order.id, orderNo, tradeNo, "shopline");
 	if (updated === 0) {
 		const latest = await findOrderByNo(orderNo);
-		if (latest?.status === "paid") return NextResponse.json({ ok: true }, { status: 200 });
+		if (latest?.status === "paid") {
+			scheduleAfterResponse(async () => {
+				await Promise.all([triggerInvoiceForOrder(order.id), sendWelcomeEmailsForOrder(order.id)]);
+			});
+			return NextResponse.json({ ok: true }, { status: 200 });
+		}
 		return NextResponse.json({ error: "order_not_pending" }, { status: 400 });
 	}
 

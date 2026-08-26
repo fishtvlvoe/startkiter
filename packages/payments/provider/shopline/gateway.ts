@@ -1,4 +1,4 @@
-import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 
 import type { CheckoutGateway, CheckoutPaymentSessionResult, RefundResult } from "../../types";
 
@@ -62,6 +62,10 @@ function safeEqualHex(actual: string, expected: string): boolean {
 	return actualBytes.length === expectedBytes.length && timingSafeEqual(actualBytes, expectedBytes);
 }
 
+function refundIdempotencyKey(params: { gatewayPaymentId: string; orderNo?: string }): string {
+	return `refund_${createHash("sha256").update(`${params.orderNo ?? ""}:${params.gatewayPaymentId}`, "utf8").digest("hex").slice(0, 32)}`;
+}
+
 export class ShoplineGateway implements CheckoutGateway {
 	readonly type = "shopline" as const;
 
@@ -118,12 +122,16 @@ export class ShoplineGateway implements CheckoutGateway {
 			return { success: false, error: "缺少 Shopline 退款金額或幣別，無法退款" };
 		}
 		try {
-			const response = await this.request<ShoplineRefundResponse>("/api/v1/trade/refund/create", {
-				referenceOrderId: `refund_${params.orderNo ?? params.gatewayPaymentId}`,
-				tradeOrderId: params.gatewayPaymentId,
-				amount: { value: refundAmount * 100, currency },
-				reason: "退款",
-			});
+			const response = await this.request<ShoplineRefundResponse>(
+				"/api/v1/trade/refund/create",
+				{
+					referenceOrderId: `refund_${params.orderNo ?? params.gatewayPaymentId}`,
+					tradeOrderId: params.gatewayPaymentId,
+					amount: { value: refundAmount * 100, currency },
+					reason: "退款",
+				},
+				refundIdempotencyKey({ gatewayPaymentId: params.gatewayPaymentId, orderNo: params.orderNo }),
+			);
 			if (response.status !== "SUCCEEDED") {
 				return {
 					success: false,
@@ -144,7 +152,7 @@ export class ShoplineGateway implements CheckoutGateway {
 		return safeEqualHex(args.signature, expected);
 	}
 
-	private async request<T>(path: string, body: Record<string, unknown>): Promise<T> {
+	private async request<T>(path: string, body: Record<string, unknown>, requestId = randomUUID().replace(/-/g, "")): Promise<T> {
 		const controller = new AbortController();
 		const timeout = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
 		let response: Response;
@@ -155,19 +163,22 @@ export class ShoplineGateway implements CheckoutGateway {
 					"content-type": "application/json",
 					merchantId: this.config.merchantId,
 					apiKey: this.config.apiKey,
-					requestId: randomUUID().replace(/-/g, ""),
+					requestId,
 				},
 				body: JSON.stringify(body),
 				signal: controller.signal,
 			});
+			const payload: unknown = await response.json().catch((error) => {
+				if (controller.signal.aborted) throw error;
+				return null;
+			});
+			if (!response.ok) throw new Error(responseMessage(payload));
+			return payload as T;
 		} catch (error) {
 			if (controller.signal.aborted) throw new Error("Shopline API request timed out");
 			throw error;
 		} finally {
 			clearTimeout(timeout);
 		}
-		const payload: unknown = await response.json().catch(() => null);
-		if (!response.ok) throw new Error(responseMessage(payload));
-		return payload as T;
 	}
 }

@@ -74,7 +74,7 @@ describe("PAYUNi one-time notify invoice trigger", () => {
 		const response = await POST(signedRequest());
 
 		expect(response.status).toBe(200);
-		expect(markOrderPaid).toHaveBeenCalledWith("ORDER-1", "PAYMENT-1");
+		expect(markOrderPaid).toHaveBeenCalledWith("order-id", "ORDER-1", "PAYMENT-1");
 		expect(triggerInvoiceForOrder).toHaveBeenCalledWith("order-id");
 		expect(sendWelcomeEmailsForOrder).toHaveBeenCalledWith("order-id");
 		expect(db.order).not.toHaveProperty("invoice");

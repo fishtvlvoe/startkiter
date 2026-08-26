@@ -15,11 +15,20 @@ vi.mock("@startkiter/database", () => ({
 			findUnique: vi.fn(),
 			update: vi.fn(),
 		},
+		invoiceAllowanceOperation: {
+			findUnique: vi.fn(),
+			create: vi.fn(),
+			update: vi.fn(),
+		},
+		$executeRaw: vi.fn(),
+		$transaction: vi.fn(),
 	},
 }));
 
 vi.mock("../lib/invoice-settings", () => ({
 	getInvoiceProvider: vi.fn(),
+	isInvoiceProviderName: vi.fn((value: string) => value === "ecpay" || value === "ezpay"),
+	withInvoiceOperationLock: vi.fn(async (callback) => callback(db as never)),
 }));
 
 vi.mock("@startkiter/platform", () => ({
@@ -41,6 +50,12 @@ const invoice = {
 	invoiceDate: new Date("2026-08-24T00:00:00.000Z"),
 	allowanceTotal: 0,
 	amount: 8800,
+	provider: "ecpay",
+};
+
+const provider = {
+	void: vi.fn().mockResolvedValue({ success: true }),
+	allowance: vi.fn().mockResolvedValue({ success: true, allowanceNumber: "AL-1" }),
 };
 
 describe("invoice admin audit logging", () => {
@@ -51,16 +66,19 @@ describe("invoice admin audit logging", () => {
 			user: { id: "admin-1", email: "admin@example.com", role: "admin" },
 		} as never);
 		vi.mocked(db.invoice.findUnique).mockResolvedValue(invoice as never);
+		vi.mocked(db.invoiceAllowanceOperation.findUnique).mockResolvedValue(null);
 		vi.mocked(db.invoice.update).mockResolvedValue({ ...invoice, status: "VOIDED" } as never);
-		vi.mocked(getInvoiceProvider).mockResolvedValue({
-			void: vi.fn().mockResolvedValue({ success: true }),
-			allowance: vi.fn().mockResolvedValue({ success: true, allowanceNumber: "AL-1" }),
-		} as never);
+		vi.mocked(db.$executeRaw).mockResolvedValue(0);
+		vi.mocked(db.$transaction).mockImplementation(async (callback) => callback(db as never) as never);
+		vi.mocked(getInvoiceProvider).mockResolvedValue(provider as never);
+		provider.void.mockClear();
+		provider.allowance.mockClear();
 	});
 
 	it("records invoice voiding after the provider and database update succeed", async () => {
 		await call(voidInvoice, { invoiceId: "invoice-1" }, { context: { headers: new Headers() } as never });
 
+		expect(getInvoiceProvider).toHaveBeenCalledWith("ecpay");
 		expect(recordAdminAction).toHaveBeenCalledWith(
 			"admin-1",
 			"VOID_INVOICE",
@@ -73,6 +91,14 @@ describe("invoice admin audit logging", () => {
 	it("records invoice allowance creation without including the invoice number in details", async () => {
 		await call(issueInvoiceAllowance, { invoiceId: "invoice-1", amount: 300 }, { context: { headers: new Headers() } as never });
 
+		expect(getInvoiceProvider).toHaveBeenCalledWith("ecpay");
+		expect(provider.allowance).toHaveBeenCalledWith({
+			invoiceNumber: "AB12345678",
+			amount: 300,
+			allowanceId: "ALLOW-invoice-1-300",
+			invoiceDate: invoice.invoiceDate,
+			taxExclusive: false,
+		});
 		expect(recordAdminAction).toHaveBeenCalledWith(
 			"admin-1",
 			"ALLOWANCE_INVOICE",
@@ -80,5 +106,26 @@ describe("invoice admin audit logging", () => {
 			{ amount: 300 },
 			"203.0.113.11",
 		);
+	});
+
+	it("preserves the source order tax mode for an ezPay company allowance", async () => {
+		const ezpayInvoice = {
+			...invoice,
+			provider: "ezpay",
+			order: { invoiceType: "COMPANY" },
+			subscription: null,
+		};
+		vi.mocked(db.invoice.findUnique).mockResolvedValue(ezpayInvoice as never);
+
+		await call(issueInvoiceAllowance, { invoiceId: "invoice-1", amount: 300 }, { context: { headers: new Headers() } as never });
+
+		expect(db.invoice.findUnique).toHaveBeenCalledWith({
+			where: { id: "invoice-1" },
+			include: {
+				order: { select: { invoiceType: true } },
+				subscription: { select: { invoiceType: true } },
+			},
+		});
+		expect(provider.allowance).toHaveBeenCalledWith(expect.objectContaining({ taxExclusive: true }));
 	});
 });

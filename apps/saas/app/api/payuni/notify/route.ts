@@ -83,14 +83,28 @@ export async function POST(request: Request) {
 		if (!tradeNo) {
 			return NextResponse.json({ error: "missing_trade_no" }, { status: 400 });
 		}
-		const updated = await markOrderPaid(orderNo, tradeNo);
+		const updated = await markOrderPaid(existing.id, orderNo, tradeNo);
 		if (updated === 0) {
 			const latest = await findOrderByNo(orderNo);
 			if (latest?.status === "paid") {
+				scheduleAfterResponse(async () => {
+					await Promise.all([
+						triggerInvoiceForOrder(existing.id),
+						sendWelcomeEmailsForOrder(existing.id),
+					]);
+				});
 				return NextResponse.json({ ok: true }, { status: 200 });
 			}
 			return NextResponse.json({ error: "order_not_pending" }, { status: 400 });
 		}
+		scheduleAfterResponse(async () => {
+			await Promise.all([
+				triggerInvoiceForOrder(existing.id),
+				sendWelcomeEmailsForOrder(existing.id),
+			]);
+		});
+	}
+	if (!decision.shouldMarkPaid && existing.status === "paid") {
 		scheduleAfterResponse(async () => {
 			await Promise.all([
 				triggerInvoiceForOrder(existing.id),

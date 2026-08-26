@@ -1,6 +1,6 @@
 import { db } from "@startkiter/database";
 import { handleRefundInvoice } from "@startkiter/api/modules/course/lib/invoice-events";
-import { markOrderRefundedByOrderNo } from "@startkiter/api/modules/course/lib/order-refunds";
+import { refundOrderThroughGateway, withOrderStateLock } from "@startkiter/api/modules/course/lib/order-refunds";
 import { scheduleAfterResponse } from "./schedule-after";
 import {
 	MVP_AMOUNT_TWD,
@@ -77,18 +77,26 @@ export async function createPendingOrderForUser(
 	};
 }
 
-export async function markOrderPaid(orderNo: string, gatewayTradeNo: string, paymentGateway?: CheckoutGatewayType) {
-	const result = await db.order.updateMany({
-		where: { orderNo, status: "pending", ...(paymentGateway ? { paymentGateway } : {}) },
-		data: {
-			status: "paid",
-			courseAccess: true,
-			kitClaimEligible: true,
-			gatewayTradeNo,
-			paidAt: new Date(),
-		},
+
+export async function markOrderPaid(
+	orderId: string,
+	orderNo: string,
+	gatewayTradeNo: string,
+	paymentGateway?: CheckoutGatewayType,
+) {
+	return withOrderStateLock(orderId, async (tx) => {
+		const result = await tx.order.updateMany({
+			where: { id: orderId, orderNo, status: "pending", ...(paymentGateway ? { paymentGateway } : {}) },
+			data: {
+				status: "paid",
+				courseAccess: true,
+				kitClaimEligible: true,
+				gatewayTradeNo,
+				paidAt: new Date(),
+			},
+		});
+		return result.count;
 	});
-	return result.count;
 }
 
 export async function findOrderByNo(orderNo: string) {
@@ -105,19 +113,10 @@ export async function findOrderByNo(orderNo: string) {
 export async function markOrderRefundedInDb(orderNo: string) {
 	const order = await db.order.findUnique({
 		where: { orderNo },
-		select: { id: true, status: true, paymentGateway: true, gatewayTradeNo: true, amount: true, currency: true },
+		select: { id: true },
 	});
-	if (!order || (order.status !== "pending" && order.status !== "paid") || (order.paymentGateway !== "payuni" && order.paymentGateway !== "shopline" && order.paymentGateway !== "stripe")) {
-		return 0;
-	}
-
-	const configured = await loadGatewayCredentials(order.paymentGateway);
-	if (!configured) return 0;
-	const gateway = createMvpCheckoutGateway(configured.gateway, configured.credentials);
-	const refund = await gateway.processRefund({ gatewayPaymentId: order.gatewayTradeNo, orderNo, amount: order.amount, currency: order.currency });
-	if (!refund.success) return 0;
-
-	const count = await markOrderRefundedByOrderNo(orderNo);
+	if (!order) return 0;
+	const count = await refundOrderThroughGateway(order.id);
 	if (count > 0) {
 		scheduleAfterResponse(async () => {
 			await handleRefundInvoice(order.id);

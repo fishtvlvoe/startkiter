@@ -7,7 +7,15 @@ type InvoiceForOperation = {
 	invoiceNumber: string | null;
 	invoiceDate: Date | null;
 	allowanceTotal: number;
+	taxExclusive?: boolean;
 };
+
+export class InvoiceAllowanceError extends Error {
+	constructor(message: string, readonly ambiguous: boolean) {
+		super(message);
+		this.name = "InvoiceAllowanceError";
+	}
+}
 
 export async function voidInvoice(args: {
 	invoice: InvoiceForOperation;
@@ -20,7 +28,7 @@ export async function voidInvoice(args: {
 		throw new Error("發票已跨月，請改用折讓");
 	}
 
-	const result = await args.provider.void({ invoiceNumber: invoice.invoiceNumber, reason: "退款" });
+	const result = await args.provider.void({ invoiceNumber: invoice.invoiceNumber, reason: "退款", invoiceDate: invoice.invoiceDate });
 	if (!result.success) throw new Error(result.error ?? "作廢發票失敗");
 	return { ...invoice, status: "VOIDED" };
 }
@@ -40,8 +48,10 @@ export async function issueInvoiceAllowance(args: {
 		invoiceNumber: invoice.invoiceNumber,
 		amount: args.amount,
 		allowanceId: args.allowanceId,
+		invoiceDate: invoice.invoiceDate,
+		taxExclusive: invoice.taxExclusive,
 	});
-	if (!result.success) throw new Error(result.error ?? "開立折讓失敗");
+	if (!result.success) throw new InvoiceAllowanceError(result.error ?? "開立折讓失敗", result.ambiguous === true);
 	return {
 		...invoice,
 		status: "ALLOWANCE",

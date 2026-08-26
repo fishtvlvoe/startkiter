@@ -29,6 +29,51 @@ function errorMessage(error: unknown): string {
 	return error instanceof Error ? error.message.slice(0, 500) : "Email delivery failed";
 }
 
+async function reserveWelcomeDelivery(input: {
+	userId: string;
+	courseId: string;
+	orderId?: string;
+	subscriptionId?: string;
+	toEmail: string;
+	subject: string;
+}): Promise<{ id: string } | null> {
+	const lockKey = `startkiter:welcome:${input.userId}:${input.courseId}:${input.orderId ?? ""}:${input.subscriptionId ?? ""}`;
+	return db.$transaction(
+		async (tx) => {
+			await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${lockKey}, 0))`;
+			const previous = await tx.emailDeliveryLog.findFirst({
+				where: {
+					type: "WELCOME_EMAIL",
+					orderId: input.orderId ?? null,
+					subscriptionId: input.subscriptionId ?? null,
+					userId: input.userId,
+					courseId: input.courseId,
+				},
+				orderBy: { createdAt: "desc" },
+			});
+			if (previous?.status === "SENT" || previous?.status === "PENDING") return null;
+			return previous
+				? tx.emailDeliveryLog.update({
+						where: { id: previous.id },
+						data: { status: "PENDING", errorMessage: null, toEmail: input.toEmail, subject: input.subject },
+					})
+				: tx.emailDeliveryLog.create({
+						data: {
+							type: "WELCOME_EMAIL",
+							status: "PENDING",
+							orderId: input.orderId,
+							subscriptionId: input.subscriptionId,
+							userId: input.userId,
+							courseId: input.courseId,
+							toEmail: input.toEmail,
+							subject: input.subject,
+						},
+					});
+		},
+		{ maxWait: 10_000, timeout: 10_000 },
+	);
+}
+
 export async function sendWelcomeEmail(input: {
 	userId: string;
 	courseId: string;
@@ -56,18 +101,8 @@ export async function sendWelcomeEmail(input: {
 			markdown: interpolateTemplate(setting.markdownTemplate, values),
 		});
 
-		const delivery = await db.emailDeliveryLog.create({
-			data: {
-				type: "WELCOME_EMAIL",
-				status: "PENDING",
-				orderId: input.orderId,
-				subscriptionId: input.subscriptionId,
-				userId: input.userId,
-				courseId: input.courseId,
-				toEmail: user.email,
-				subject,
-			},
-		});
+		const delivery = await reserveWelcomeDelivery({ ...input, toEmail: user.email, subject });
+		if (!delivery) return;
 
 		try {
 			const sent = await sendEmail({

@@ -50,7 +50,7 @@ export function normalizeBuyerName(
 
 export function normalizeProviderOrderId(orderNo: string, provider?: "ecpay" | "ezpay"): string {
 	const normalized = orderNo.trim();
-	if (provider !== "ezpay" || normalized.length <= EZPAY_MAX_ORDER_ID_LENGTH) return normalized;
+	if (provider !== "ezpay" || (normalized.length <= EZPAY_MAX_ORDER_ID_LENGTH && /^[A-Za-z0-9_]+$/.test(normalized))) return normalized;
 	return `EZ${createHash("sha256").update(normalized).digest("hex").slice(0, 18)}`;
 }
 
@@ -117,15 +117,19 @@ export function buildAllowanceInput(params: {
 	const amount = splitTaxInclusive(params.amount);
 	const taxExclusiveItems = params.provider === "ezpay" && params.taxExclusive === true;
 	const lineAmount = taxExclusiveItems ? amount.salesAmount : params.amount;
+	const allowanceId = normalizeProviderOrderId(params.allowanceId, params.provider);
 	return {
 		invoiceNumber: params.invoiceNumber,
-		allowanceId: params.allowanceId,
+		allowanceId,
 		items: [
 			{
 				description: normalizeItemName(params.itemName, params.provider),
 				quantity: 1,
 				unitPrice: lineAmount,
 				amount: lineAmount,
+				// ECPay has no allowance-level merchant reference; ItemRemark is its
+				// provider-supported field that lets reconciliation find this retry key.
+				remark: params.provider === "ecpay" ? allowanceId : undefined,
 			},
 		],
 		amount,
@@ -133,7 +137,7 @@ export function buildAllowanceInput(params: {
 		providerOptions:
 				params.provider === "ezpay"
 					? {
-							merchantOrderNo: params.originalOrderId,
+							merchantOrderNo: allowanceId,
 							taxRate: taxExclusiveItems ? 0.05 : 0,
 							buyerEmail: params.buyerEmail?.trim() || undefined,
 						}

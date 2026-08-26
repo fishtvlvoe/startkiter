@@ -11,6 +11,9 @@ vi.mock("../../../../lib/orders", () => ({
 vi.mock("@startkiter/api/modules/course/lib/invoice-events", () => ({
 	triggerInvoiceForOrder: vi.fn(),
 }));
+vi.mock("@startkiter/api/modules/course/lib/send-welcome-email", () => ({
+	sendWelcomeEmailsForOrder: vi.fn(),
+}));
 vi.mock("../../../../lib/schedule-after", () => ({
 	scheduleAfterResponse: vi.fn((task: () => Promise<void>) => void task()),
 }));
@@ -74,7 +77,7 @@ describe("Stripe payment webhook", () => {
 		const response = await POST(signedRequest());
 
 		expect(response.status).toBe(200);
-		expect(markOrderPaid).toHaveBeenCalledWith("ORDER-1", "pi_test_1", "stripe");
+		expect(markOrderPaid).toHaveBeenCalledWith("order-id", "ORDER-1", "pi_test_1", "stripe");
 		expect(triggerInvoiceForOrder).toHaveBeenCalledWith("order-id");
 	});
 

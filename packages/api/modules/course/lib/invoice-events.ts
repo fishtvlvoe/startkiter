@@ -1,7 +1,8 @@
 import { buildIssueInput, type InvoiceProvider } from "@startkiter/payments";
-import { db, type Prisma } from "@startkiter/database";
+import { type Prisma } from "@startkiter/database";
 
-import { getInvoiceProvider, getInvoiceSettings } from "./invoice-settings";
+import { getInvoiceProvider, getInvoiceSettings, isInvoiceProviderName, withInvoiceOperationLock } from "./invoice-settings";
+import { acquireOrderStateLock } from "./order-refunds";
 import { sameTaiwanBillingMonth } from "./taiwan-billing-month";
 
 type InvoiceRecord = Prisma.InvoiceGetPayload<{}>;
@@ -40,7 +41,7 @@ function errorMessage(error: unknown): string {
 	return error instanceof Error ? error.message.slice(0, 500) : "電子發票開立失敗";
 }
 
-async function createFailedInvoice(args: {
+async function createFailedInvoice(client: Prisma.TransactionClient, args: {
 	provider: "ecpay" | "ezpay";
 	amount: number;
 	orderId?: string;
@@ -48,7 +49,7 @@ async function createFailedInvoice(args: {
 	periodNumber?: number;
 	failReason: string;
 }): Promise<InvoiceRecord> {
-	return db.invoice.create({
+	return client.invoice.create({
 		data: {
 			provider: args.provider,
 			status: "FAILED",
@@ -61,15 +62,43 @@ async function createFailedInvoice(args: {
 	});
 }
 
-async function issueForOrder(orderId: string, provider: InvoiceProvider, providerName: "ecpay" | "ezpay") {
-	const order = await db.order.findUnique({
+async function recordFailedInvoice(
+	client: Prisma.TransactionClient,
+	args: Parameters<typeof createFailedInvoice>[1],
+	existing: InvoiceRecord | null,
+): Promise<InvoiceRecord> {
+	if (existing) {
+		return client.invoice.update({
+			where: { id: existing.id },
+			data: { provider: args.provider, status: "FAILED", amount: args.amount, failReason: args.failReason },
+		});
+	}
+	return createFailedInvoice(client, args);
+}
+
+async function issueForOrder(
+	client: Prisma.TransactionClient,
+	orderId: string,
+	provider: InvoiceProvider | null,
+	providerName: "ecpay" | "ezpay",
+) {
+	const order = await client.order.findUnique({
 		where: { id: orderId },
 		include: { user: true },
 	});
 	if (!order) return null;
 
-	const existing = await db.invoice.findUnique({ where: { orderId } });
-	if (existing) return existing;
+	const existing = await client.invoice.findUnique({ where: { orderId } });
+	if (order.status !== "paid") return existing;
+	if (existing && existing.status !== "FAILED") return existing;
+	if (!provider) {
+		return recordFailedInvoice(client, {
+			provider: providerName,
+			amount: order.amount,
+			orderId,
+			failReason: "電子發票 provider 尚未設定完整",
+		}, existing);
+	}
 
 	try {
 		const result = await provider.issue(
@@ -84,9 +113,24 @@ async function issueForOrder(orderId: string, provider: InvoiceProvider, provide
 			}),
 		);
 		if ("failReason" in result) {
-			return createFailedInvoice({ provider: providerName, amount: order.amount, orderId, failReason: result.failReason });
+			return recordFailedInvoice(client, { provider: providerName, amount: order.amount, orderId, failReason: result.failReason }, existing);
 		}
-		return db.invoice.create({
+		if (existing) {
+			return client.invoice.update({
+				where: { id: existing.id },
+				data: {
+					provider: providerName,
+					status: "ISSUED",
+					amount: order.amount,
+					invoiceNumber: result.invoiceNumber,
+					randomCode: result.randomCode,
+					invoiceDate: result.invoiceDate,
+					rawResponse: jsonValue(result.raw),
+					failReason: null,
+				},
+			});
+		}
+		return client.invoice.create({
 			data: {
 				provider: providerName,
 				status: "ISSUED",
@@ -99,115 +143,109 @@ async function issueForOrder(orderId: string, provider: InvoiceProvider, provide
 			},
 		});
 	} catch (error) {
-		return createFailedInvoice({ provider: providerName, amount: order.amount, orderId, failReason: errorMessage(error) });
+		return recordFailedInvoice(client, { provider: providerName, amount: order.amount, orderId, failReason: errorMessage(error) }, existing);
 	}
 }
 
 export async function triggerInvoiceForOrder(orderId: string): Promise<InvoiceRecord | null> {
-	const settings = await getInvoiceSettings();
-	if (!settings.einvoiceEnabled || !settings.autoIssueEnabled) return null;
+	return withInvoiceOperationLock(async (tx) => {
+		const settings = await getInvoiceSettings();
+		if (!settings.einvoiceEnabled || !settings.autoIssueEnabled) return null;
 
-	const provider = await getInvoiceProvider();
-	if (!provider) {
-		const order = await db.order.findUnique({ where: { id: orderId }, select: { amount: true } });
-		return order
-			? createFailedInvoice({
-					provider: settings.provider,
-					amount: order.amount,
-					orderId,
-					failReason: "電子發票 provider 尚未設定完整",
-				})
-			: null;
-	}
-	return issueForOrder(orderId, provider, settings.provider);
+		const provider = await getInvoiceProvider(settings.provider);
+		await acquireOrderStateLock(tx, orderId);
+		return issueForOrder(tx, orderId, provider, settings.provider);
+	});
 }
 
 export async function triggerInvoiceForSubscriptionPeriod(
 	subscriptionId: string,
 	periodNumber: number,
 ): Promise<InvoiceRecord | null> {
-	const settings = await getInvoiceSettings();
-	if (!settings.einvoiceEnabled || !settings.autoIssueEnabled) return null;
+	return withInvoiceOperationLock(async (tx) => {
+		const settings = await getInvoiceSettings();
+		if (!settings.einvoiceEnabled || !settings.autoIssueEnabled) return null;
 
-	const existing = await db.invoice.findFirst({ where: { subscriptionId, periodNumber } });
-	if (existing) return existing;
-	const subscription = await db.courseSubscription.findUnique({
-		where: { id: subscriptionId },
-		include: { user: true, plan: { include: { course: true } } },
-	});
-	if (!subscription) return null;
-
-	const provider = await getInvoiceProvider();
-	if (!provider) {
-		return createFailedInvoice({
-			provider: settings.provider,
-			amount: subscription.pricePerPeriod,
-			subscriptionId,
-			periodNumber,
-			failReason: "電子發票 provider 尚未設定完整",
+		const existing = await tx.invoice.findFirst({ where: { subscriptionId, periodNumber } });
+		if (existing) return existing;
+		const subscription = await tx.courseSubscription.findUnique({
+			where: { id: subscriptionId },
+			include: { user: true, plan: { include: { course: true } } },
 		});
-	}
+		if (!subscription) return null;
 
-	try {
-		const result = await provider.issue(
-			buildIssueInput({
-				orderNo: `${subscription.gatewayTradeNo}-${periodNumber}`,
-				amount: subscription.pricePerPeriod,
-				itemName: subscription.plan.course.title,
-				buyerName: subscription.user.name,
-				buyerEmail: subscription.user.email,
-				preference: invoicePreference(subscription),
-				provider: settings.provider,
-			}),
-		);
-		if ("failReason" in result) {
-			return createFailedInvoice({
+		const provider = await getInvoiceProvider(settings.provider);
+		if (!provider) {
+			return createFailedInvoice(tx, {
 				provider: settings.provider,
 				amount: subscription.pricePerPeriod,
 				subscriptionId,
 				periodNumber,
-				failReason: result.failReason,
+				failReason: "電子發票 provider 尚未設定完整",
 			});
 		}
-		return db.invoice.create({
-			data: {
+
+		try {
+			const result = await provider.issue(
+				buildIssueInput({
+					orderNo: `${subscription.gatewayTradeNo}-${periodNumber}`,
+					amount: subscription.pricePerPeriod,
+					itemName: subscription.plan.course.title,
+					buyerName: subscription.user.name,
+					buyerEmail: subscription.user.email,
+					preference: invoicePreference(subscription),
+					provider: settings.provider,
+				}),
+			);
+			if ("failReason" in result) {
+				return createFailedInvoice(tx, {
+					provider: settings.provider,
+					amount: subscription.pricePerPeriod,
+					subscriptionId,
+					periodNumber,
+					failReason: result.failReason,
+				});
+			}
+			return tx.invoice.create({
+				data: {
+					provider: settings.provider,
+					status: "ISSUED",
+					amount: subscription.pricePerPeriod,
+					subscription: { connect: { id: subscriptionId } },
+					periodNumber,
+					invoiceNumber: result.invoiceNumber,
+					randomCode: result.randomCode,
+					invoiceDate: result.invoiceDate,
+					rawResponse: jsonValue(result.raw),
+				},
+			});
+		} catch (error) {
+			return createFailedInvoice(tx, {
 				provider: settings.provider,
-				status: "ISSUED",
 				amount: subscription.pricePerPeriod,
-				subscription: { connect: { id: subscriptionId } },
+				subscriptionId,
 				periodNumber,
-				invoiceNumber: result.invoiceNumber,
-				randomCode: result.randomCode,
-				invoiceDate: result.invoiceDate,
-				rawResponse: jsonValue(result.raw),
-			},
-		});
-	} catch (error) {
-		return createFailedInvoice({
-			provider: settings.provider,
-			amount: subscription.pricePerPeriod,
-			subscriptionId,
-			periodNumber,
-			failReason: errorMessage(error),
-		});
-	}
+				failReason: errorMessage(error),
+			});
+		}
+	});
 }
 
-async function refundInvoice(invoice: InvoiceRecord, provider: InvoiceProvider | null, now: Date) {
+async function refundInvoice(client: Prisma.TransactionClient, invoice: InvoiceRecord, provider: InvoiceProvider | null, now: Date) {
 	if (invoice.status !== "ISSUED" || !invoice.invoiceNumber) return invoice;
 	if (!provider || !invoice.invoiceDate || !sameTaiwanBillingMonth(invoice.invoiceDate, now)) {
-		return db.invoice.update({
+		return client.invoice.update({
 			where: { id: invoice.id },
 			data: { attentionReason: "REFUND_NEEDS_ALLOWANCE" },
 		});
 	}
 	try {
-		const result = await provider.void({ invoiceNumber: invoice.invoiceNumber, reason: "退款" });
+		const result = await provider.void({ invoiceNumber: invoice.invoiceNumber, reason: "退款", invoiceDate: invoice.invoiceDate });
 		return result.success
-			? db.invoice.update({ where: { id: invoice.id }, data: { status: "VOIDED", attentionReason: null } })
-			: db.invoice.update({ where: { id: invoice.id }, data: { attentionReason: "REFUND_NEEDS_ALLOWANCE", failReason: result.error } });
+			? client.invoice.update({ where: { id: invoice.id }, data: { status: "VOIDED", attentionReason: null } })
+			: client.invoice.update({ where: { id: invoice.id }, data: { attentionReason: "REFUND_NEEDS_ALLOWANCE", failReason: result.error } });
 	} catch (error) {
-		return db.invoice.update({
+		return client.invoice.update({
 			where: { id: invoice.id },
 			data: { attentionReason: "REFUND_NEEDS_ALLOWANCE", failReason: errorMessage(error) },
 		});
@@ -215,21 +253,25 @@ async function refundInvoice(invoice: InvoiceRecord, provider: InvoiceProvider |
 }
 
 export async function handleRefundInvoice(orderId: string, now = new Date()): Promise<InvoiceRecord | null> {
-	const invoice = await db.invoice.findUnique({ where: { orderId } });
-	if (!invoice) return null;
-	const provider = await getInvoiceProvider();
-	return refundInvoice(invoice, provider, now);
+	return withInvoiceOperationLock(async (tx) => {
+		const invoice = await tx.invoice.findUnique({ where: { orderId } });
+		if (!invoice) return null;
+		const provider = isInvoiceProviderName(invoice.provider) ? await getInvoiceProvider(invoice.provider) : null;
+		return refundInvoice(tx, invoice, provider, now);
+	});
 }
 
 export async function handleRefundInvoiceForSubscription(
 	subscriptionId: string,
 	now = new Date(),
 ): Promise<InvoiceRecord | null> {
-	const invoice = await db.invoice.findFirst({
-		where: { subscriptionId, status: "ISSUED" },
-		orderBy: { periodNumber: "desc" },
+	return withInvoiceOperationLock(async (tx) => {
+		const invoice = await tx.invoice.findFirst({
+			where: { subscriptionId, status: "ISSUED" },
+			orderBy: { periodNumber: "desc" },
+		});
+		if (!invoice) return null;
+		const provider = isInvoiceProviderName(invoice.provider) ? await getInvoiceProvider(invoice.provider) : null;
+		return refundInvoice(tx, invoice, provider, now);
 	});
-	if (!invoice) return null;
-	const provider = await getInvoiceProvider();
-	return refundInvoice(invoice, provider, now);
 }

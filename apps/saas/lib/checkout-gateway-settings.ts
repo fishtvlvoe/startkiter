@@ -25,6 +25,10 @@ function settingsSecret(): string {
 	return process.env.SETTINGS_ENCRYPTION_KEY ?? "";
 }
 
+function envOrStored(value: string | undefined, envName: string): string {
+	return value?.trim() || process.env[envName]?.trim() || "";
+}
+
 function parseStoredSettings(json: string | null): StoredCheckoutSettings {
 	if (!json) return {};
 	try {
@@ -60,11 +64,14 @@ export async function getCheckoutGatewaySettings(): Promise<CheckoutGatewaySetti
 	const active = await loadGatewayCredentials();
 	const shopline = await loadGatewayCredentials("shopline");
 	const stripe = await loadGatewayCredentials("stripe");
+	const shoplineTestMode = shopline?.gateway === "shopline" && "testMode" in shopline.credentials
+		? Boolean(shopline.credentials.testMode)
+		: undefined;
 	return {
 		gateway: active?.gateway ?? stored.enabledGateway ?? stored.gateway ?? "payuni",
 		shoplineConfigured: Boolean(shopline),
 		stripeConfigured: Boolean(stripe),
-		testMode: stored.shopline?.testMode ?? stored.testMode ?? true,
+		testMode: shoplineTestMode ?? stored.shopline?.testMode ?? stored.testMode ?? process.env.SHOPLINE_TEST_MODE !== "false",
 	};
 }
 
@@ -103,10 +110,19 @@ export async function writeCheckoutGatewaySettings(args: {
 		},
 	};
 
-	if (next.gateway === "shopline" && (!next.shopline?.merchantId || !next.shopline.apiKey || !next.shopline.signKey)) {
+	if (
+		next.gateway === "shopline" &&
+		(!envOrStored(next.shopline?.merchantId, "SHOPLINE_MERCHANT_ID") ||
+			!envOrStored(next.shopline?.apiKey, "SHOPLINE_API_KEY") ||
+			!envOrStored(next.shopline?.signKey, "SHOPLINE_SIGN_KEY"))
+	) {
 		return { ok: false, error: "incomplete_shopline_settings", httpStatus: 400 };
 	}
-	if (next.gateway === "stripe" && (!next.stripe?.secretKey || !next.stripe.webhookSecret)) {
+	if (
+		next.gateway === "stripe" &&
+		(!envOrStored(next.stripe?.secretKey, "STRIPE_SECRET_KEY") ||
+			!envOrStored(next.stripe?.webhookSecret, "STRIPE_WEBHOOK_SECRET"))
+	) {
 		return { ok: false, error: "incomplete_stripe_settings", httpStatus: 400 };
 	}
 

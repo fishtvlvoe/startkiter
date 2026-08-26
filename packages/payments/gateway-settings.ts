@@ -3,6 +3,7 @@ import { createDecipheriv, createHash } from "node:crypto";
 import { db } from "@startkiter/database";
 
 import type { CheckoutGatewayCredentials } from "./factory";
+import { isValidPayUniCredentials } from "./credentials";
 import type { CheckoutGatewayType } from "./types";
 import type { PayUniCredentials } from "./provider/payuni/gateway";
 import type { ShoplineConfig } from "./provider/shopline/gateway";
@@ -45,6 +46,8 @@ function envOrStored(stored: string | undefined, envName: string): string {
 	return stored?.trim() || process.env[envName]?.trim() || "";
 }
 
+const DEFAULT_PAYUNI_API_URL = "https://sandbox-api.payuni.com.tw/api/upp";
+
 async function readSettings(id: string): Promise<StoredSettings> {
 	const secret = process.env.SETTINGS_ENCRYPTION_KEY?.trim() ?? "";
 	if (!secret) return {};
@@ -70,9 +73,9 @@ export async function loadCheckoutGatewayCredentials(requestedGateway?: Checkout
 			merchantId: envOrStored(payuni.merchantId, "PAYUNI_MERCHANT_ID"),
 			hashKey: envOrStored(payuni.hashKey, "PAYUNI_HASH_KEY"),
 			hashIV: envOrStored(payuni.hashIV, "PAYUNI_HASH_IV"),
-			apiUrl: envOrStored(payuni.apiUrl, "PAYUNI_API_URL"),
+			apiUrl: envOrStored(payuni.apiUrl, "PAYUNI_API_URL") || DEFAULT_PAYUNI_API_URL,
 		};
-		return credentials.merchantId && credentials.hashKey && credentials.hashIV && credentials.apiUrl
+		return credentials.merchantId && credentials.hashKey && credentials.hashIV && isValidPayUniCredentials(credentials)
 			? { gateway, credentials }
 			: null;
 	}

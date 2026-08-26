@@ -12,7 +12,7 @@ export class StripeGateway implements CheckoutGateway {
 	private readonly stripe: Stripe;
 
 	constructor(private readonly config: StripeCheckoutConfig) {
-		this.stripe = new Stripe(config.secretKey, { typescript: true });
+		this.stripe = new Stripe(config.secretKey, { typescript: true, timeout: 15_000, maxNetworkRetries: 0 });
 	}
 
 	getStripeInstance(): Stripe {
@@ -64,7 +64,7 @@ export class StripeGateway implements CheckoutGateway {
 			}
 			return refund.status === "succeeded"
 				? { success: true, gatewayRefundId: refund.id }
-				: { success: true, gatewayRefundId: refund.id, pending: true };
+				: { success: false, gatewayRefundId: refund.id, pending: true, error: "Stripe 退款仍在處理中，尚未完成" };
 		} catch (error) {
 			return { success: false, error: error instanceof Error ? error.message : "Stripe 退款失敗" };
 		}

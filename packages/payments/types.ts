@@ -197,16 +197,17 @@ export interface InvoiceProvider {
 		| { invoiceNumber: string; randomCode: string; invoiceDate: Date; raw?: unknown }
 		| { failReason: string }
 	>;
-	void(params: { invoiceNumber: string; reason: string }): Promise<{ success: boolean; error?: string }>;
+	void(params: { invoiceNumber: string; reason: string; invoiceDate?: Date | null }): Promise<{ success: boolean; error?: string }>;
 	allowance(params: {
 		invoiceNumber: string;
 		amount: number;
 		allowanceId?: string;
+		invoiceDate?: Date | null;
 		itemName?: string;
 		originalOrderId?: string;
 		buyerEmail?: string | null;
 		taxExclusive?: boolean;
-	}): Promise<{ success: boolean; allowanceNumber?: string; error?: string }>;
+	}): Promise<{ success: boolean; allowanceNumber?: string; error?: string; ambiguous?: boolean }>;
 }
 
 export type WebhookHandler = (req: Request) => Promise<Response>;

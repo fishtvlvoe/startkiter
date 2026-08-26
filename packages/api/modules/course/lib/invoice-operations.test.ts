@@ -21,7 +21,11 @@ describe("invoice operations", () => {
 		});
 
 		expect(result.status).toBe("VOIDED");
-		expect(provider.void).toHaveBeenCalledWith({ invoiceNumber: "AB12345678", reason: "退款" });
+		expect(provider.void).toHaveBeenCalledWith({
+			invoiceNumber: "AB12345678",
+			reason: "退款",
+			invoiceDate: issuedInvoice.invoiceDate,
+		});
 	});
 
 	it("rejects cross-month voiding without changing the invoice", async () => {

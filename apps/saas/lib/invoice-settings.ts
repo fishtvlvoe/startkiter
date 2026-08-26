@@ -1,6 +1,8 @@
 import { db } from "@startkiter/database";
 import {
 	EINVOICE_SETTING_ID,
+	isValidInvoiceCredentialLength,
+	withInvoiceOperationLock,
 	EMPTY_INVOICE_SETTINGS,
 	getInvoiceSettings,
 	type InvoiceProviderName,
@@ -40,36 +42,70 @@ function mergeSettings(existing: InvoiceSettings, patch: InvoiceSettingsPatch): 
 	};
 }
 
+type InvoiceActionClient = Pick<import("@startkiter/database").Prisma.TransactionClient, "invoice">;
+
+async function hasActionableInvoices(client: InvoiceActionClient): Promise<boolean | null> {
+	try {
+		const invoices = await client.invoice.findMany({
+			where: { status: { in: ["ISSUED", "ALLOWANCE"] } },
+			select: { amount: true, allowanceTotal: true },
+		});
+		return invoices.some((invoice) => invoice.allowanceTotal < invoice.amount);
+	} catch {
+		return null;
+	}
+}
+
+function operationalSettingsChanged(before: InvoiceSettings, after: InvoiceSettings): boolean {
+	return before.provider !== after.provider || before.merchantId !== after.merchantId || before.hashKey !== after.hashKey || before.hashIV !== after.hashIV || before.testMode !== after.testMode;
+}
+
 export async function writeInvoiceSettings(args: {
 	patch: InvoiceSettingsPatch;
 	actorUserId: string;
 }): Promise<{ ok: true; settings: InvoiceSettings } | { ok: false; error: string }> {
-	if (args.patch.clear) {
-		try {
-			await db.siteSetting.deleteMany({ where: { id: EINVOICE_SETTING_ID } });
-			return { ok: true, settings: { ...EMPTY_INVOICE_SETTINGS } };
-		} catch {
-			return { ok: false, error: "settings_unavailable" };
-		}
-	}
-
 	const invalid = validateInvoiceSettingsPatch(args.patch);
 	if (invalid) return { ok: false, error: invalid };
 	const secret = encryptionKey();
 	if (!secret.trim()) return { ok: false, error: "encryption_key_required" };
-	const settings = mergeSettings(await getInvoiceSettings(), args.patch);
-	if (!settings.merchantId || !settings.hashKey || !settings.hashIV || !settings.sellerName || !settings.sellerTaxId) {
-		return { ok: false, error: "incomplete_invoice_settings" };
-	}
 
 	try {
-		const ciphertext = encryptSettingsJson(JSON.stringify(settings), secret);
-		await db.siteSetting.upsert({
-			where: { id: EINVOICE_SETTING_ID },
-			create: { id: EINVOICE_SETTING_ID, ciphertext, updatedBy: args.actorUserId },
-			update: { ciphertext, updatedBy: args.actorUserId },
+		return await withInvoiceOperationLock(async (tx) => {
+			if (args.patch.clear) {
+				const hasActionable = await hasActionableInvoices(tx);
+				if (hasActionable === null) return { ok: false, error: "settings_unavailable" };
+				if (hasActionable) return { ok: false, error: "settings_clear_blocked_existing_actionable_invoices" };
+				await tx.siteSetting.deleteMany({ where: { id: EINVOICE_SETTING_ID } });
+				return { ok: true, settings: { ...EMPTY_INVOICE_SETTINGS } };
+			}
+
+			const existing = await getInvoiceSettings();
+			const settings = mergeSettings(existing, args.patch);
+			if (!settings.merchantId || !settings.hashKey || !settings.hashIV || !settings.sellerName || !settings.sellerTaxId) {
+				return { ok: false, error: "incomplete_invoice_settings" };
+			}
+			if (!isValidInvoiceCredentialLength(settings)) return { ok: false, error: "invalid_invoice_credentials" };
+			if (operationalSettingsChanged(existing, settings)) {
+				const hasActionable = await hasActionableInvoices(tx);
+				if (hasActionable === null) return { ok: false, error: "settings_unavailable" };
+				if (hasActionable) {
+					return {
+						ok: false,
+						error: existing.provider !== settings.provider
+							? "provider_switch_blocked_existing_issued_invoices"
+							: "invoice_settings_change_blocked_existing_actionable_invoices",
+					};
+				}
+			}
+
+			const ciphertext = encryptSettingsJson(JSON.stringify(settings), secret);
+			await tx.siteSetting.upsert({
+				where: { id: EINVOICE_SETTING_ID },
+				create: { id: EINVOICE_SETTING_ID, ciphertext, updatedBy: args.actorUserId },
+				update: { ciphertext, updatedBy: args.actorUserId },
+			});
+			return { ok: true, settings };
 		});
-		return { ok: true, settings };
 	} catch {
 		return { ok: false, error: "settings_unavailable" };
 	}

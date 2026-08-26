@@ -1,8 +1,10 @@
 import { createEcpayInvoiceProvider, createEzpayInvoiceProvider, type InvoiceProvider, type InvoiceProviderConfig } from "@startkiter/payments";
-import { db } from "@startkiter/database";
+import { db, type Prisma } from "@startkiter/database";
 import { createDecipheriv, createHash } from "node:crypto";
 
 export const EINVOICE_SETTING_ID = "einvoice";
+export const EINVOICE_OPERATION_LOCK_ID = "startkiter:einvoice-operation";
+const EINVOICE_PROVIDER_TIMEOUT_MS = 15_000;
 
 export type InvoiceProviderName = "ecpay" | "ezpay";
 
@@ -29,6 +31,25 @@ export const EMPTY_INVOICE_SETTINGS: InvoiceSettings = {
 	autoIssueEnabled: false,
 	einvoiceEnabled: false,
 };
+
+export function isInvoiceProviderName(value: string): value is InvoiceProviderName {
+	return value === "ecpay" || value === "ezpay";
+}
+
+export function isValidInvoiceCredentialLength(settings: Pick<InvoiceSettings, "provider" | "hashKey" | "hashIV">): boolean {
+	const hashKeyLength = settings.provider === "ecpay" ? 16 : 32;
+	return settings.hashKey.length === hashKeyLength && settings.hashIV.length === 16;
+}
+
+export async function withInvoiceOperationLock<T>(callback: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> {
+	return db.$transaction(
+		async (tx) => {
+			await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${EINVOICE_OPERATION_LOCK_ID}, 0))`;
+			return callback(tx);
+		},
+		{ maxWait: 10_000, timeout: 30_000 },
+	);
+}
 
 function decryptSettingsJson(payload: string, secret: string): string | null {
 	if (!secret.trim() || !payload.startsWith("v1:")) return null;
@@ -85,14 +106,16 @@ export async function getInvoiceSettings(): Promise<InvoiceSettings> {
 	return (await readInvoiceSettingsPlain()) ?? { ...EMPTY_INVOICE_SETTINGS };
 }
 
-export async function getInvoiceProvider(): Promise<InvoiceProvider | null> {
+export async function getInvoiceProvider(expectedProvider?: InvoiceProviderName): Promise<InvoiceProvider | null> {
 	const settings = await getInvoiceSettings();
-	if (!settings.merchantId || !settings.hashKey || !settings.hashIV) return null;
+	if (expectedProvider && settings.provider !== expectedProvider) return null;
+	if (!settings.merchantId || !isValidInvoiceCredentialLength(settings)) return null;
 	const config: InvoiceProviderConfig = {
 		merchantId: settings.merchantId,
 		hashKey: settings.hashKey,
 		hashIV: settings.hashIV,
 		testMode: settings.testMode,
+		timeoutMs: EINVOICE_PROVIDER_TIMEOUT_MS,
 	};
 	return settings.provider === "ezpay" ? createEzpayInvoiceProvider(config) : createEcpayInvoiceProvider(config);
 }

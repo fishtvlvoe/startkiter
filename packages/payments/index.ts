@@ -22,7 +22,7 @@ export { ShoplineGateway } from "./provider/shopline/gateway";
 export { StripeGateway } from "./provider/stripe/gateway";
 export { PayUniPeriodGateway } from "./provider/payuni/period-gateway";
 export { createPayUniSubscriptionGateway } from "./subscription-factory";
-export { buildIssueInput, buildAllowanceInput } from "./lib/invoice-issue-input";
+export { buildIssueInput, buildAllowanceInput, normalizeProviderOrderId } from "./lib/invoice-issue-input";
 export { invoicePreferenceSchema, normalizeInvoicePreference } from "./lib/invoice-preference";
 export { createEcpayInvoiceProvider } from "./provider/ecpay/invoice-provider";
 export { createEzpayInvoiceProvider } from "./provider/ezpay/invoice-provider";

@@ -183,6 +183,15 @@ export class PayUniService {
 				body,
 				signal: controller.signal,
 			});
+			if (!response.ok) {
+				throw new Error(`PAYUNi API returned HTTP ${response.status}`);
+			}
+
+			const envelope = parsePayUniApiEnvelope(await response.text());
+			if (envelope.kind === "error") {
+				return { Status: envelope.status, Message: envelope.message };
+			}
+			return this.verifyAndDecrypt(envelope.encryptInfo, envelope.hashInfo);
 		} catch (error) {
 			if (controller.signal.aborted) {
 				throw new Error("PAYUNi API request timed out");
@@ -191,15 +200,5 @@ export class PayUniService {
 		} finally {
 			clearTimeout(timeout);
 		}
-
-		if (!response.ok) {
-			throw new Error(`PAYUNi API returned HTTP ${response.status}`);
-		}
-
-		const envelope = parsePayUniApiEnvelope(await response.text());
-		if (envelope.kind === "error") {
-			return { Status: envelope.status, Message: envelope.message };
-		}
-		return this.verifyAndDecrypt(envelope.encryptInfo, envelope.hashInfo);
 	}
 }

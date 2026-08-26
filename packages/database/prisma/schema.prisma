@@ -801,11 +801,31 @@ model Invoice {
   rawResponse     Json?
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
+  allowanceOperations InvoiceAllowanceOperation[]
 
   @@index([invoiceNumber])
   @@index([status])
   @@index([subscriptionId, periodNumber], map: "invoice_subscription_period_idx")
   @@map("invoice")
+}
+
+model InvoiceAllowanceOperation {
+  id              String   @id @default(cuid())
+  invoiceId       String
+  allowanceId     String   @unique
+  provider        String
+  amount          Int
+  status          String   @default("PENDING")
+  allowanceNumber String?
+  errorMessage    String?  @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@index([status])
+  @@map("invoice_allowance_operation")
 }
 
 model PaymentWebhookEvent {

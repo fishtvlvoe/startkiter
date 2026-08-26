@@ -56,14 +56,58 @@ describe("InvoiceProvider implementations", () => {
 			});
 
 			it("voids an invoice", async () => {
-				await expect(createProvider(config).void({ invoiceNumber, reason: "退款" })).resolves.toEqual({ success: true });
-				expect(adapter.void).toHaveBeenCalledWith({ invoiceNumber, reason: "退款" });
+				const invoiceDate = new Date("2026-08-24T00:00:00.000Z");
+				await expect(createProvider(config).void({ invoiceNumber, reason: "退款", invoiceDate })).resolves.toEqual({ success: true });
+				expect(adapter.void).toHaveBeenCalledWith(
+					name === "ECPay"
+						? { invoiceNumber, reason: "退款", date: invoiceDate }
+						: { invoiceNumber, reason: "退款" },
+				);
 			});
 
 			it("issues an allowance", async () => {
-				await expect(createProvider(config).allowance({ invoiceNumber, amount: 1050 })).resolves.toEqual({ success: true, allowanceNumber });
+				const invoiceDate = new Date("2026-08-24T00:00:00.000Z");
+				await expect(
+					createProvider(config).allowance({
+						invoiceNumber,
+						amount: 1050,
+						allowanceId: "ALLOW-invoice-1-1050",
+						invoiceDate,
+					}),
+				).resolves.toEqual({ success: true, allowanceNumber });
 				expect(adapter.allowance).toHaveBeenCalled();
+				const [input] = adapter.allowance.mock.calls[0] as [{ allowanceId: string; date: Date; items: Array<{ remark?: string }>; providerOptions?: { merchantOrderNo?: string } }];
+				const expectedAllowanceId = name === "ezPay" ? expect.stringMatching(/^[A-Za-z0-9_]{1,20}$/) : "ALLOW-invoice-1-1050";
+				expect(input.allowanceId).toEqual(expectedAllowanceId);
+				expect(input.date).toEqual(invoiceDate);
+				if (name === "ECPay") {
+					expect(input.items[0]?.remark).toBe("ALLOW-invoice-1-1050");
+				} else {
+					expect(input.providerOptions?.merchantOrderNo).toEqual(expectedAllowanceId);
+				}
 			});
 		});
 	}
+
+	it("keeps the original 5% tax split for an ezPay company allowance payload", async () => {
+		const invoiceDate = new Date("2026-08-24T00:00:00.000Z");
+		await expect(
+			createEzpayInvoiceProvider(config).allowance({
+				invoiceNumber: "CD12345678",
+				amount: 1050,
+				allowanceId: "ALLOW-company-1050",
+				invoiceDate,
+				taxExclusive: true,
+			}),
+		).resolves.toEqual({ success: true, allowanceNumber: "AL-2" });
+
+		const [input] = ezpayAdapter.allowance.mock.calls[0] as [{ amount: { salesAmount: number; taxAmount: number; totalAmount: number }; items: Array<{ amount: number }>; providerOptions?: { merchantOrderNo: string; taxRate: number } }];
+		expect(input.amount).toEqual({ salesAmount: 1000, taxAmount: 50, totalAmount: 1050 });
+		expect(input.items[0]?.amount).toBe(1000);
+		expect(input.providerOptions).toMatchObject({
+			merchantOrderNo: expect.stringMatching(/^[A-Za-z0-9_]{1,20}$/),
+			taxRate: 0.05,
+			buyerEmail: undefined,
+		});
+	});
 });

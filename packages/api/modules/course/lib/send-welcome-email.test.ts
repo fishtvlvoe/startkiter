@@ -4,7 +4,9 @@ vi.mock("@startkiter/database", () => ({
 	db: {
 		course: { findUnique: vi.fn() },
 		courseWelcomeEmail: { findUnique: vi.fn() },
-		emailDeliveryLog: { create: vi.fn(), update: vi.fn() },
+		emailDeliveryLog: { findFirst: vi.fn(), create: vi.fn(), update: vi.fn() },
+		$executeRaw: vi.fn(),
+		$transaction: vi.fn(),
 		user: { findUnique: vi.fn() },
 	},
 }));
@@ -22,6 +24,8 @@ import { sendWelcomeEmail } from "./send-welcome-email";
 describe("sendWelcomeEmail", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		vi.mocked(db.$executeRaw).mockResolvedValue(0);
+		vi.mocked(db.$transaction).mockImplementation(async (callback) => callback(db as never) as never);
 		vi.mocked(db.courseWelcomeEmail.findUnique).mockResolvedValue({
 			courseId: "course-1",
 			enabled: true,
@@ -40,6 +44,7 @@ describe("sendWelcomeEmail", () => {
 			slug: "startkiter",
 		} as never);
 		vi.mocked(db.emailDeliveryLog.create).mockResolvedValue({ id: "delivery-1" } as never);
+		vi.mocked(db.emailDeliveryLog.findFirst).mockResolvedValue(null);
 		vi.mocked(db.emailDeliveryLog.update).mockResolvedValue({ id: "delivery-1", status: "SENT" } as never);
 		vi.mocked(renderCourseWelcomeEmail).mockResolvedValue({
 			html: "<p>請從 <a href=\"https://startkiter.test/course/startkiter\">課程入口</a> 開始。</p>",
@@ -90,5 +95,37 @@ describe("sendWelcomeEmail", () => {
 		expect(db.emailDeliveryLog.update).toHaveBeenCalledWith(expect.objectContaining({
 			data: expect.objectContaining({ status: "FAILED", errorMessage: expect.any(String) }),
 		}));
+	});
+
+	it("reuses a previous failed delivery when a paid webhook is replayed", async () => {
+		vi.mocked(db.emailDeliveryLog.findFirst).mockResolvedValue({ id: "delivery-1", status: "FAILED" } as never);
+
+		await sendWelcomeEmail({ userId: "user-1", courseId: "course-1", orderId: "order-1" });
+
+		expect(db.emailDeliveryLog.create).not.toHaveBeenCalled();
+		expect(db.emailDeliveryLog.update).toHaveBeenCalledWith(expect.objectContaining({
+			where: { id: "delivery-1" },
+			data: expect.objectContaining({ status: "PENDING", errorMessage: null }),
+		}));
+		expect(sendEmail).toHaveBeenCalledTimes(1);
+	});
+
+	it("does not send a duplicate when the previous delivery is already SENT", async () => {
+		vi.mocked(db.emailDeliveryLog.findFirst).mockResolvedValue({ id: "delivery-1", status: "SENT" } as never);
+
+		await sendWelcomeEmail({ userId: "user-1", courseId: "course-1", orderId: "order-1" });
+
+		expect(sendEmail).not.toHaveBeenCalled();
+		expect(db.emailDeliveryLog.create).not.toHaveBeenCalled();
+	});
+
+	it("does not send concurrently when a previous delivery is still pending", async () => {
+		vi.mocked(db.emailDeliveryLog.findFirst).mockResolvedValue({ id: "delivery-1", status: "PENDING" } as never);
+
+		await sendWelcomeEmail({ userId: "user-1", courseId: "course-1", orderId: "order-1" });
+
+		expect(sendEmail).not.toHaveBeenCalled();
+		expect(db.emailDeliveryLog.create).not.toHaveBeenCalled();
+		expect(db.emailDeliveryLog.update).not.toHaveBeenCalled();
 	});
 });

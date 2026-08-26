@@ -10,7 +10,7 @@ export function createEzpayInvoiceProvider(config: InvoiceProviderConfig): Invoi
 		hashIV: config.hashIV,
 		mode: config.testMode ? "TEST" : "PRODUCTION",
 		timeoutMs: config.timeoutMs,
-		validatePayload: false,
+		validatePayload: true,
 	});
 
 	return {
@@ -45,13 +45,14 @@ export function createEzpayInvoiceProvider(config: InvoiceProviderConfig): Invoi
 						originalOrderId: params.originalOrderId ?? params.invoiceNumber,
 						amount: params.amount,
 						itemName: params.itemName ?? "商品",
+						invoiceDate: params.invoiceDate,
 						buyerEmail: params.buyerEmail,
 						taxExclusive: params.taxExclusive,
 					}),
 				);
 				return { success: true, allowanceNumber: result.allowanceNumber };
 			} catch (error) {
-				return { success: false, error: error instanceof Error ? error.message : "ezPay 折讓失敗" };
+				return { success: false, ambiguous: true, error: error instanceof Error ? error.message : "ezPay 折讓失敗" };
 			}
 		},
 	};
