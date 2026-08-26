@@ -1,3 +1,5 @@
+import type { CheckoutGatewayType } from "./types";
+
 export type OrderStatus = "pending" | "paid" | "refunded";
 
 export type OrderRecord = {
@@ -8,7 +10,7 @@ export type OrderRecord = {
 	amount: number;
 	currency: string;
 	status: OrderStatus;
-	paymentGateway: "payuni";
+	paymentGateway: CheckoutGatewayType;
 	gatewayTradeNo: string | null;
 	courseAccess: boolean;
 	kitClaimEligible: boolean;

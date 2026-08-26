@@ -66,6 +66,11 @@ export default async function AdminLayout({ children }: PropsWithChildren) {
 								href: "/admin/settings/einvoice",
 								icon: <ClipboardListIcon className="size-4 opacity-50" />,
 							},
+							{
+								title: "結帳金流",
+								href: "/admin/settings/checkout-gateway",
+								icon: <ClipboardListIcon className="size-4 opacity-50" />,
+							},
 						...(config.organizations.enable
 								? [
 										{

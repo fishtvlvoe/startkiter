@@ -7,45 +7,29 @@ import {
 	MVP_SKU,
 	buildPendingOrderInput,
 	createMvpCheckoutGateway,
-	resolvePayUniCredentials,
 	normalizeInvoicePreference,
 	type OrderRecord,
 	type InvoicePreferenceInput,
-	type PayUniEnv,
+	type CheckoutGatewayType,
 } from "@startkiter/payments";
 
-import { readPayuniSettingsPlain } from "./site-settings";
-import type { PayuniPlainSettings } from "./payuni-settings";
+import { loadPayUniCredentials } from "./payuni-credentials";
+import { loadGatewayCredentials } from "./checkout-gateway-settings";
 
-export async function loadPayUniCredentials(opts?: {
-	readSettings?: () => Promise<PayuniPlainSettings | null>;
-	env?: PayUniEnv;
-}) {
-	const readSettings = opts?.readSettings ?? readPayuniSettingsPlain;
-	const env = opts?.env ?? process.env;
-	let settings: PayuniPlainSettings | null = null;
-	try {
-		settings = await readSettings();
-	} catch {
-		settings = null;
-	}
-
-	return resolvePayUniCredentials({
-		readSettings: () => settings,
-		env,
-	});
-}
+export { loadPayUniCredentials } from "./payuni-credentials";
 
 export async function createPendingOrderForUser(
 	userId: string,
 	amount: number = MVP_AMOUNT_TWD,
 	sku: string = MVP_SKU,
 	invoicePreference?: InvoicePreferenceInput,
+	paymentGateway: CheckoutGatewayType = "payuni",
 ): Promise<OrderRecord> {
 	const pending = buildPendingOrderInput({
 		userId,
 		sku,
 		amount,
+		paymentGateway,
 	});
 	const row = await db.order.create({
 		data: {
@@ -55,7 +39,7 @@ export async function createPendingOrderForUser(
 			amount: pending.amount,
 			currency: pending.currency,
 			status: "pending",
-			paymentGateway: "payuni",
+			paymentGateway,
 			courseAccess: false,
 			kitClaimEligible: false,
 			...(invoicePreference
@@ -82,7 +66,7 @@ export async function createPendingOrderForUser(
 		amount: row.amount,
 		currency: row.currency,
 		status: row.status,
-		paymentGateway: "payuni",
+		paymentGateway: row.paymentGateway as CheckoutGatewayType,
 		gatewayTradeNo: row.gatewayTradeNo,
 		courseAccess: row.courseAccess,
 		kitClaimEligible: row.kitClaimEligible,
@@ -93,9 +77,9 @@ export async function createPendingOrderForUser(
 	};
 }
 
-export async function markOrderPaid(orderNo: string, gatewayTradeNo: string) {
+export async function markOrderPaid(orderNo: string, gatewayTradeNo: string, paymentGateway?: CheckoutGatewayType) {
 	const result = await db.order.updateMany({
-		where: { orderNo, status: "pending" },
+		where: { orderNo, status: "pending", ...(paymentGateway ? { paymentGateway } : {}) },
 		data: {
 			status: "paid",
 			courseAccess: true,
@@ -119,14 +103,25 @@ export async function findOrderByNo(orderNo: string) {
  * bundle 訂單寫專屬的撤銷邏輯（驗證見 `packages/bundles/src/access-integration.test.ts`）。
  */
 export async function markOrderRefundedInDb(orderNo: string) {
+	const order = await db.order.findUnique({
+		where: { orderNo },
+		select: { id: true, status: true, paymentGateway: true, gatewayTradeNo: true, amount: true, currency: true },
+	});
+	if (!order || (order.status !== "pending" && order.status !== "paid") || (order.paymentGateway !== "payuni" && order.paymentGateway !== "shopline" && order.paymentGateway !== "stripe")) {
+		return 0;
+	}
+
+	const configured = await loadGatewayCredentials(order.paymentGateway);
+	if (!configured) return 0;
+	const gateway = createMvpCheckoutGateway(configured.gateway, configured.credentials);
+	const refund = await gateway.processRefund({ gatewayPaymentId: order.gatewayTradeNo, orderNo, amount: order.amount, currency: order.currency });
+	if (!refund.success) return 0;
+
 	const count = await markOrderRefundedByOrderNo(orderNo);
 	if (count > 0) {
-		const order = await db.order.findUnique({ where: { orderNo }, select: { id: true } });
-		if (order) {
-			scheduleAfterResponse(async () => {
-				await handleRefundInvoice(order.id);
-			});
-		}
+		scheduleAfterResponse(async () => {
+			await handleRefundInvoice(order.id);
+		});
 	}
 	return count;
 }
@@ -137,6 +132,19 @@ export async function buildPayuniSession(order: OrderRecord, baseUrl: string, em
 		return null;
 	}
 	const gateway = createMvpCheckoutGateway("payuni", credentials);
+	return gateway.createPaymentSession({
+		orderNo: order.orderNo,
+		amount: order.amount,
+		productTitle: "StartKiter MVP",
+		customerEmail: email,
+		baseUrl,
+	});
+}
+
+export async function buildCheckoutSession(order: OrderRecord, baseUrl: string, email?: string) {
+	const configured = await loadGatewayCredentials(order.paymentGateway);
+	if (!configured) return null;
+	const gateway = createMvpCheckoutGateway(configured.gateway, configured.credentials);
 	return gateway.createPaymentSession({
 		orderNo: order.orderNo,
 		amount: order.amount,

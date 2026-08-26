@@ -16,7 +16,7 @@ vi.mock("@startkiter/database", () => ({
 }));
 
 vi.mock("../lib/order-refunds", () => ({
-	markOrderRefundedById: vi.fn(),
+	refundOrderThroughGateway: vi.fn(),
 }));
 
 vi.mock("../lib/invoice-events", () => ({
@@ -31,7 +31,7 @@ vi.mock("@startkiter/platform", () => ({
 import { auth } from "@startkiter/auth";
 import { db } from "@startkiter/database";
 import { handleRefundInvoice } from "../lib/invoice-events";
-import { markOrderRefundedById } from "../lib/order-refunds";
+import { refundOrderThroughGateway } from "../lib/order-refunds";
 import { recordAdminAction } from "@startkiter/platform";
 import { refundOrder } from "./refund-order";
 
@@ -42,7 +42,7 @@ describe("refundOrder procedure", () => {
 			session: { id: "session-1", userId: "admin-1", ipAddress: "203.0.113.10" },
 			user: { id: "admin-1", email: "admin@example.com", role: "admin" },
 		} as never);
-		vi.mocked(markOrderRefundedById).mockResolvedValue(1);
+		vi.mocked(refundOrderThroughGateway).mockResolvedValue(1);
 		vi.mocked(handleRefundInvoice).mockResolvedValue(null);
 		vi.mocked(db.order.findUnique).mockResolvedValue({ id: "order-1", status: "refunded", amount: 8800 } as never);
 	});
@@ -54,7 +54,7 @@ describe("refundOrder procedure", () => {
 			{ context: { headers: new Headers() } as never },
 		);
 
-		expect(markOrderRefundedById).toHaveBeenCalledWith("order-1");
+		expect(refundOrderThroughGateway).toHaveBeenCalledWith("order-1");
 		expect(handleRefundInvoice).toHaveBeenCalledWith("order-1");
 		expect(recordAdminAction).toHaveBeenCalledWith(
 			"admin-1",
@@ -67,7 +67,7 @@ describe("refundOrder procedure", () => {
 	});
 
 	it("rejects an order that is not pending or paid", async () => {
-		vi.mocked(markOrderRefundedById).mockResolvedValue(0);
+		vi.mocked(refundOrderThroughGateway).mockResolvedValue(0);
 
 		await expect(
 			call(refundOrder, { orderId: "order-1" }, { context: { headers: new Headers() } as never }),

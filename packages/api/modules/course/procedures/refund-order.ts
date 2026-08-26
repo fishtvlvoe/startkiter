@@ -5,13 +5,13 @@ import { z } from "zod";
 
 import { adminProcedure } from "../../../orpc/procedures";
 import { handleRefundInvoice } from "../lib/invoice-events";
-import { markOrderRefundedById } from "../lib/order-refunds";
+import { refundOrderThroughGateway } from "../lib/order-refunds";
 
 export const refundOrder = adminProcedure
 	.route({ method: "POST", path: "/course/orders/refund", tags: ["Course"], summary: "Refund an order" })
 	.input(z.object({ orderId: z.string().min(1) }))
 	.handler(async ({ input, context }) => {
-		const count = await markOrderRefundedById(input.orderId);
+		const count = await refundOrderThroughGateway(input.orderId);
 		if (count === 0) {
 			throw new ORPCError("BAD_REQUEST", { message: "這筆訂單不存在或已完成退款。" });
 		}

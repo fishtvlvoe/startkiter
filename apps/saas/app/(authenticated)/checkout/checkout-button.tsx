@@ -4,13 +4,13 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { InvoicePreferenceFields, DEFAULT_INVOICE_PREFERENCE } from "@payments/components/InvoicePreferenceFields";
-import type { InvoicePreferenceInput } from "@startkiter/payments";
+import type { CheckoutPaymentSessionResult, InvoicePreferenceInput } from "@startkiter/payments";
 
 function checkoutErrorMessage(status: number, code?: string) {
 	if (code === "public_base_url_required") {
 		return "站台公開網址尚未設定，暫時無法結帳。";
 	}
-	if (status === 503 || code === "payuni_not_configured") {
+	if (status === 503 || code === "payuni_not_configured" || code === "checkout_gateway_not_configured" || code === "checkout_gateway_unavailable") {
 		return "金流尚未設定完成，暫時無法結帳。";
 	}
 	if (status === 401) {
@@ -21,16 +21,7 @@ function checkoutErrorMessage(status: number, code?: string) {
 
 type CheckoutResponse = {
 	orderNo: string;
-	payment: {
-		type: string;
-		formData: {
-			apiUrl: string;
-			MerID: string;
-			Version: string;
-			EncryptInfo: string;
-			HashInfo: string;
-		};
-	};
+	payment: CheckoutPaymentSessionResult;
 };
 
 export function CheckoutButton() {
@@ -62,6 +53,10 @@ export function CheckoutButton() {
 			}
 
 			const payload = (await response.json()) as CheckoutResponse;
+			if (payload.payment.type === "redirect") {
+				window.location.assign(payload.payment.checkoutUrl);
+				return;
+			}
 			sessionStorage.setItem("payuniCheckout", JSON.stringify({ ...payload.payment, orderNo: payload.orderNo }));
 			router.push("/checkout/payuni");
 		} catch {

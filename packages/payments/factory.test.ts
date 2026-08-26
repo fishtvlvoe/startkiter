@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { createMvpCheckoutGateway } from "./factory";
+import { ShoplineGateway } from "./provider/shopline/gateway";
+import { StripeGateway } from "./provider/stripe/gateway";
 
 const credentials = {
 	merchantId: "MERCHANT",
@@ -15,8 +17,32 @@ describe("MVP gateway factory", () => {
 		expect(gateway.type).toBe("payuni");
 	});
 
-	it("rejects shopline and stripe for MVP checkout", () => {
-		expect(() => createMvpCheckoutGateway("shopline", credentials)).toThrow(/payuni/i);
-		expect(() => createMvpCheckoutGateway("stripe", credentials)).toThrow(/payuni/i);
+	it("creates Shopline when Shopline is enabled", () => {
+		const gateway = createMvpCheckoutGateway("shopline", {
+			merchantId: "shopline-merchant",
+			apiKey: "shopline-api-key",
+			clientKey: "shopline-client-key",
+			signKey: "shopline-sign-key",
+			testMode: true,
+		});
+
+		expect(gateway).toBeInstanceOf(ShoplineGateway);
+		expect(gateway.type).toBe("shopline");
+	});
+
+	it("creates Stripe when Stripe is enabled", () => {
+		const gateway = createMvpCheckoutGateway("stripe", {
+			secretKey: "sk_test_checkout",
+			webhookSecret: "whsec_test",
+		});
+
+		expect(gateway).toBeInstanceOf(StripeGateway);
+		expect(gateway.type).toBe("stripe");
+	});
+
+	it("keeps PAYUNi as the fallback gateway", () => {
+		const gateway = createMvpCheckoutGateway("payuni", credentials);
+
+		expect(gateway.type).toBe("payuni");
 	});
 });

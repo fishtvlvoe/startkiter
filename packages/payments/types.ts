@@ -127,6 +127,42 @@ export type SubscriptionSessionResult = {
 	gatewaySessionId: string;
 };
 
+export type CheckoutGatewayType = "payuni" | "shopline" | "stripe";
+
+export type CheckoutPaymentSessionResult =
+	| SubscriptionSessionResult
+	| {
+			type: "redirect";
+			checkoutUrl: string;
+			gatewaySessionId: string;
+		};
+
+export type RefundResult = {
+	success: boolean;
+	error?: string;
+	gatewayRefundId?: string;
+	pending?: boolean;
+	requiresManualAction?: boolean;
+};
+
+/** Provider-neutral contract for the one-time StartKiter checkout. */
+export interface CheckoutGateway {
+	readonly type: CheckoutGatewayType;
+	createPaymentSession(params: {
+		orderNo: string;
+		amount: number;
+		productTitle: string;
+		customerEmail?: string;
+		baseUrl: string;
+	}): CheckoutPaymentSessionResult | Promise<CheckoutPaymentSessionResult>;
+	processRefund(params: {
+		gatewayPaymentId: string | null;
+		orderNo?: string;
+		amount?: number;
+		currency?: string;
+	}): Promise<RefundResult>;
+}
+
 /** Provider-neutral contract for recurring billing. */
 export interface SubscriptionGateway {
 	createSubscriptionSession(params: {

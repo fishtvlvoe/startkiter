@@ -13,9 +13,11 @@ vi.mock("@startkiter/coupons", () => ({
 }));
 
 vi.mock("../../../lib/orders", () => ({
-	loadPayUniCredentials: vi.fn(),
 	createPendingOrderForUser: vi.fn(),
-	buildPayuniSession: vi.fn(),
+	buildCheckoutSession: vi.fn(),
+}));
+vi.mock("../../../lib/checkout-gateway-settings", () => ({
+	loadEnabledGatewayCredentials: vi.fn(),
 }));
 
 vi.mock("../../../lib/public-base-url", () => ({
@@ -35,14 +37,15 @@ import { auth } from "@startkiter/auth";
 import { validateCoupon } from "@startkiter/coupons";
 import { MVP_AMOUNT_TWD, MVP_SKU, createMvpCheckoutGateway, getProduct } from "@startkiter/payments";
 
-import { buildPayuniSession, createPendingOrderForUser, loadPayUniCredentials } from "../../../lib/orders";
+import { buildCheckoutSession, createPendingOrderForUser } from "../../../lib/orders";
+import { loadEnabledGatewayCredentials } from "../../../lib/checkout-gateway-settings";
 import { POST } from "./route";
 
 const mockedGetSession = vi.mocked(auth.api.getSession);
 const mockedValidateCoupon = vi.mocked(validateCoupon);
-const mockedLoadCredentials = vi.mocked(loadPayUniCredentials);
+const mockedLoadCredentials = vi.mocked(loadEnabledGatewayCredentials);
 const mockedCreatePendingOrder = vi.mocked(createPendingOrderForUser);
-const mockedBuildPayuniSession = vi.mocked(buildPayuniSession);
+const mockedBuildCheckoutSession = vi.mocked(buildCheckoutSession);
 const mockedCreateGateway = vi.mocked(createMvpCheckoutGateway);
 const mockedGetProduct = vi.mocked(getProduct);
 
@@ -82,9 +85,8 @@ describe("POST /api/checkout coupon integration", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mockedGetSession.mockResolvedValue(SESSION as never);
-		mockedLoadCredentials.mockResolvedValue({} as never);
-		mockedCreateGateway.mockReturnValue({ createPaymentSession: vi.fn() } as never);
-		mockedBuildPayuniSession.mockResolvedValue({ formUrl: "https://payuni.example/pay" } as never);
+		mockedLoadCredentials.mockResolvedValue({ gateway: "payuni", credentials: {} } as never);
+		mockedBuildCheckoutSession.mockResolvedValue({ type: "form_post", formData: {}, gatewaySessionId: "order_1" } as never);
 		mockedGetProduct.mockResolvedValue(MVP_PRODUCT);
 	});
 
@@ -99,7 +101,7 @@ describe("POST /api/checkout coupon integration", () => {
 		const response = await POST(jsonRequest({ couponCode: "SAVE100" }));
 
 		expect(response.status).toBe(200);
-		expect(mockedCreatePendingOrder).toHaveBeenCalledWith("user_1", 8700, MVP_SKU);
+		expect(mockedCreatePendingOrder).toHaveBeenCalledWith("user_1", 8700, MVP_SKU, undefined, "payuni");
 		const body = await response.json();
 		expect(body.amount).toBe(8700);
 	});
@@ -123,7 +125,7 @@ describe("POST /api/checkout coupon integration", () => {
 
 		expect(response.status).toBe(200);
 		expect(mockedValidateCoupon).not.toHaveBeenCalled();
-		expect(mockedCreatePendingOrder).toHaveBeenCalledWith("user_1", 8800, MVP_SKU);
+		expect(mockedCreatePendingOrder).toHaveBeenCalledWith("user_1", 8800, MVP_SKU, undefined, "payuni");
 	});
 
 	it("charges the bundle's configured price and stores the bundle id as sku when productId is a bundle (Scenario: Checkout amount for a bundle product uses the bundle's configured price / Created order for a bundle stores the bundle's own product id)", async () => {
@@ -134,7 +136,7 @@ describe("POST /api/checkout coupon integration", () => {
 
 		expect(response.status).toBe(200);
 		expect(mockedGetProduct).toHaveBeenCalledWith("bundle_1");
-		expect(mockedCreatePendingOrder).toHaveBeenCalledWith("user_1", 6000, "bundle_1");
+		expect(mockedCreatePendingOrder).toHaveBeenCalledWith("user_1", 6000, "bundle_1", undefined, "payuni");
 		const body = await response.json();
 		expect(body.amount).toBe(6000);
 		expect(body.sku).toBe("bundle_1");

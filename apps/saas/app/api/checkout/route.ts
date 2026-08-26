@@ -1,13 +1,13 @@
 import { auth } from "@startkiter/auth";
 import { validateCoupon } from "@startkiter/coupons";
-import { MVP_SKU, createMvpCheckoutGateway, getProduct, invoicePreferenceSchema, type InvoicePreferenceInput } from "@startkiter/payments";
+import { MVP_SKU, getProduct, invoicePreferenceSchema, type InvoicePreferenceInput } from "@startkiter/payments";
 import { NextResponse } from "next/server";
 
 import {
-	buildPayuniSession,
+	buildCheckoutSession,
 	createPendingOrderForUser,
-	loadPayUniCredentials,
 } from "../../../lib/orders";
+import { loadEnabledGatewayCredentials } from "../../../lib/checkout-gateway-settings";
 import { resolvePublicBaseUrl } from "../../../lib/public-base-url";
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -71,16 +71,8 @@ export async function POST(request: Request) {
 		amount = couponResult.finalAmount;
 	}
 
-	const credentials = await loadPayUniCredentials();
-	if (!credentials) {
-		return NextResponse.json({ error: "payuni_not_configured" }, { status: 503 });
-	}
-
-	try {
-		createMvpCheckoutGateway("payuni", credentials);
-	} catch {
-		return NextResponse.json({ error: "payuni_not_configured" }, { status: 503 });
-	}
+	const configured = await loadEnabledGatewayCredentials();
+	if (!configured) return NextResponse.json({ error: "checkout_gateway_not_configured" }, { status: 503 });
 
 	const baseUrl = resolvePublicBaseUrl(process.env.BETTER_AUTH_URL);
 	if (!baseUrl) {
@@ -88,11 +80,16 @@ export async function POST(request: Request) {
 	}
 
 	const order = invoicePreference
-		? await createPendingOrderForUser(session.user.id, amount, product.sku, invoicePreference)
-		: await createPendingOrderForUser(session.user.id, amount, product.sku);
-	const payment = await buildPayuniSession(order, baseUrl, session.user.email);
+		? await createPendingOrderForUser(session.user.id, amount, product.sku, invoicePreference, configured.gateway)
+		: await createPendingOrderForUser(session.user.id, amount, product.sku, undefined, configured.gateway);
+	let payment;
+	try {
+		payment = await buildCheckoutSession(order, baseUrl, session.user.email);
+	} catch {
+		return NextResponse.json({ error: "checkout_gateway_unavailable" }, { status: 503 });
+	}
 	if (!payment) {
-		return NextResponse.json({ error: "payuni_not_configured" }, { status: 503 });
+		return NextResponse.json({ error: "checkout_gateway_not_configured" }, { status: 503 });
 	}
 
 	return NextResponse.json({

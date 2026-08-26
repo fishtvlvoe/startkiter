@@ -28,7 +28,7 @@ export default async function CheckoutPage() {
 					<CardDescription>
 						{entitled
 							? "你已擁有開站包，可直接進入課程與領取代碼包。"
-							: "課 + 終身代碼包，一次買斷 NT$8,800。付款走 PAYUNi。"}
+							: "課 + 終身代碼包，一次買斷 NT$8,800。付款方式由站方目前啟用的金流處理。"}
 					</CardDescription>
 				</CardHeader>
 

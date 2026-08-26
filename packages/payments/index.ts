@@ -14,8 +14,12 @@ export type { OrderRecord, OrderStore, OrderStatus } from "./memory-store";
 export { resolvePayUniCredentials } from "./credentials";
 export type { PayUniEnv, PaymentSettingsReader, ResolvedPayUniCredentials } from "./credentials";
 export { createMvpCheckoutGateway } from "./factory";
+export type { CheckoutGatewayCredentials } from "./factory";
+export { loadCheckoutGatewayCredentials } from "./gateway-settings";
 export { PayUniService } from "./provider/payuni/crypto";
 export { PayUniOneTimeGateway } from "./provider/payuni/gateway";
+export { ShoplineGateway } from "./provider/shopline/gateway";
+export { StripeGateway } from "./provider/stripe/gateway";
 export { PayUniPeriodGateway } from "./provider/payuni/period-gateway";
 export { createPayUniSubscriptionGateway } from "./subscription-factory";
 export { buildIssueInput, buildAllowanceInput } from "./lib/invoice-issue-input";
@@ -28,5 +32,9 @@ export type {
 	SubscriptionGateway,
 	SubscriptionInterval,
 	SubscriptionSessionResult,
+	CheckoutGateway,
+	CheckoutGatewayType,
+	CheckoutPaymentSessionResult,
+	RefundResult,
 } from "./types";
 export type { InvoicePreferenceInput } from "./lib/invoice-preference";

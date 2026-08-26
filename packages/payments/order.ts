@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 
 import { MVP_AMOUNT_TWD, MVP_CURRENCY, MVP_SKU } from "./constants";
+import type { CheckoutGatewayType } from "./types";
 
 /** PAYUNi MerTradeNo 保守上限 25；格式對齊 thetu：前綴 + YYYYMMDD + 12 hex。 */
 export const MER_TRADE_NO_MAX_LEN = 25;
@@ -12,7 +13,7 @@ export type PendingOrderInput = {
 	amount: number;
 	currency: string;
 	status: "pending";
-	paymentGateway: "payuni";
+	paymentGateway: CheckoutGatewayType;
 	gatewayTradeNo: null;
 	courseAccess: false;
 	kitClaimEligible: false;
@@ -36,6 +37,7 @@ export function buildPendingOrderInput(args: {
 	amount: number;
 	sku?: string;
 	orderNo?: string;
+	paymentGateway?: CheckoutGatewayType;
 }): PendingOrderInput {
 	const { amount } = args;
 	if (amount === undefined || amount === null || Number.isNaN(amount) || amount <= 0) {
@@ -63,7 +65,7 @@ export function buildPendingOrderInput(args: {
 		amount,
 		currency: MVP_CURRENCY,
 		status: "pending",
-		paymentGateway: "payuni",
+		paymentGateway: args.paymentGateway ?? "payuni",
 		gatewayTradeNo: null,
 		courseAccess: false,
 		kitClaimEligible: false,

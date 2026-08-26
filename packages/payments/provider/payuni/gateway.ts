@@ -1,4 +1,5 @@
 import { PayUniService } from "./crypto";
+import type { CheckoutGateway, RefundResult } from "../../types";
 
 export type PayUniCredentials = {
 	merchantId: string;
@@ -19,7 +20,7 @@ export type FormPostResult = {
 	gatewaySessionId: string;
 };
 
-export class PayUniOneTimeGateway {
+export class PayUniOneTimeGateway implements CheckoutGateway {
 	readonly type = "payuni" as const;
 	private service: PayUniService;
 
@@ -58,5 +59,15 @@ export class PayUniOneTimeGateway {
 
 	verifyNotify(encryptInfo: string, hashInfo: string) {
 		return this.service.verifyAndDecrypt(encryptInfo, hashInfo);
+	}
+
+	async processRefund(_params: { gatewayPaymentId: string | null; orderNo?: string; amount?: number; currency?: string }): Promise<RefundResult> {
+		// PAYUNi does not expose an API refund in this package. Keep the existing
+		// operator-led flow explicit instead of pretending the gateway was refunded.
+		return {
+			success: false,
+			requiresManualAction: true,
+			error: "PAYUNi 退款需要人工在商戶後台處理",
+		};
 	}
 }
