@@ -2,6 +2,7 @@ import { createEzpayProvider } from "@paid-tw/einvoice-ezpay";
 
 import { buildAllowanceInput } from "../../lib/invoice-issue-input";
 import type { InvoiceProvider, InvoiceProviderConfig } from "../../types";
+import { normalizeInvoiceQueryError } from "../invoice-query-errors";
 
 export function createEzpayInvoiceProvider(config: InvoiceProviderConfig): InvoiceProvider {
 	const provider = createEzpayProvider({
@@ -24,7 +25,22 @@ export function createEzpayInvoiceProvider(config: InvoiceProviderConfig): Invoi
 					raw: result.raw,
 				};
 			} catch (error) {
-				return { failReason: error instanceof Error ? error.message : "ezPay 開票失敗" };
+				return { failReason: error instanceof Error ? error.message : "ezPay 開票失敗", ambiguous: true };
+			}
+		},
+		async query(params) {
+			try {
+				const result = await provider.query({
+					...(params.invoiceNumber ? { invoiceNumber: params.invoiceNumber } : {}),
+					...(params.orderId ? { orderId: params.orderId } : {}),
+					providerOptions: {
+						...(params.randomCode ? { randomNum: params.randomCode } : {}),
+						...(params.amount !== undefined ? { totalAmt: params.amount } : {}),
+					},
+				});
+				return { status: String(result.status), invoiceNumber: result.invoiceNumber, invoiceDate: result.invoiceDate, randomCode: result.randomCode, raw: result.raw };
+			} catch (error) {
+				return normalizeInvoiceQueryError(error, "ezPay 查詢失敗");
 			}
 		},
 		async void(params) {

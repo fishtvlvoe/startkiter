@@ -44,6 +44,16 @@ function integerField(value: unknown): number {
 	return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : 0;
 }
 
+function cancellationStatus(response: Record<string, unknown>): "ACTIVE" | "CANCELED" | "UNKNOWN" {
+	const state = ["PeriodStatus", "PeriodState", "SubscriptionStatus", "TradeStatus", "CloseStatus"]
+		.map((key) => String(response[key] ?? "").trim().toUpperCase())
+		.find(Boolean);
+	if (!state) return "UNKNOWN";
+	if (["CANCELED", "CANCELLED", "END", "ENDED", "STOP", "STOPPED", "INACTIVE", "EXPIRED"].includes(state)) return "CANCELED";
+	if (["ACTIVE", "ENABLED", "ENABLE", "BUILD", "PROCESSING"].includes(state)) return "ACTIVE";
+	return "UNKNOWN";
+}
+
 export class PayUniPeriodGateway implements SubscriptionGateway {
 	private readonly service: PayUniService;
 
@@ -87,7 +97,7 @@ export class PayUniPeriodGateway implements SubscriptionGateway {
 		};
 	}
 
-	async cancelSubscription(params: { gatewaySubscriptionId: string }): Promise<{ success: boolean; error?: string }> {
+	async cancelSubscription(params: { gatewaySubscriptionId: string }): Promise<{ success: boolean; error?: string; ambiguous?: boolean }> {
 		if (!params.gatewaySubscriptionId.trim()) {
 			return { success: true };
 		}
@@ -99,17 +109,18 @@ export class PayUniPeriodGateway implements SubscriptionGateway {
 			});
 			if (response.Status === "SUCCESS" || response.Status === "PMDF02013") {
 				return { success: true };
+				}
+				return { success: false, error: response.Message || `PAYUNi cancellation failed (${response.Status})` };
+			} catch (error) {
+				return { success: false, ambiguous: true, error: error instanceof Error ? error.message : "PAYUNi cancellation result is unknown" };
 			}
-			return { success: false, error: response.Message || `PAYUNi cancellation failed (${response.Status})` };
-		} catch (error) {
-			return { success: false, error: error instanceof Error ? error.message : "PAYUNi cancellation failed" };
-		}
 	}
 
 	async queryPeriod(gatewaySubscriptionId: string): Promise<{
 		status: string;
 		totalTimes: number;
 		alreadyTimes: number;
+		cancellationStatus: "ACTIVE" | "CANCELED" | "UNKNOWN";
 	}> {
 		const response = await this.service.requestApi(periodEndpoint(this.credentials.apiUrl, "query"), {
 			PeriodTradeNo: gatewaySubscriptionId,
@@ -118,6 +129,7 @@ export class PayUniPeriodGateway implements SubscriptionGateway {
 			status: String(response.Status ?? ""),
 			totalTimes: integerField(response.TotalTimes),
 			alreadyTimes: integerField(response.AlreadyTimes),
+			cancellationStatus: cancellationStatus(response),
 		};
 	}
 }

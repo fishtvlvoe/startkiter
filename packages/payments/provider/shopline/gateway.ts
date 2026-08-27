@@ -141,7 +141,7 @@ export class ShoplineGateway implements CheckoutGateway {
 			}
 			return { success: true, gatewayRefundId: response.refundOrderId };
 		} catch (error) {
-			return { success: false, error: error instanceof Error ? error.message : "Shopline 退款失敗" };
+			return { success: false, ambiguous: true, error: error instanceof Error ? error.message : "Shopline 退款失敗" };
 		}
 	}
 

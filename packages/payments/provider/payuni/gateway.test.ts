@@ -17,7 +17,7 @@ describe("PayUniOneTimeGateway refunds", () => {
 
 	it("closes a captured trade through the PAYUNi refund API", async () => {
 		const service = new PayUniService(credentials);
-		const query = service.createFormData({ Status: "SUCCESS", CloseStatus: "2", TradeAmt: "8800" });
+		const query = service.createFormData({ Status: "SUCCESS", CloseStatus: "2", TradeAmt: "8800", CloseAmt: "8800" });
 		const close = service.createFormData({ Status: "SUCCESS" });
 		const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
 			new Response(JSON.stringify(query)),
@@ -82,6 +82,33 @@ describe("PayUniOneTimeGateway refunds", () => {
 		await expect(new PayUniOneTimeGateway(credentials).processRefund({
 			gatewayPaymentId: "PAYUNI-TRADE-1",
 		})).resolves.toEqual({ success: true });
+	});
+
+	it("does not recover a PAYUNi partial refund as a full order refund", async () => {
+		const service = new PayUniService(credentials);
+		const query = service.createFormData({ Status: "SUCCESS", CloseStatus: "3", CloseAmt: "500" });
+		vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify(query)));
+
+		await expect(new PayUniOneTimeGateway(credentials).queryRefund({
+			gatewayPaymentId: "PAYUNI-TRADE-PARTIAL",
+			amount: 8800,
+			currency: "TWD",
+		})).resolves.toEqual({
+			status: "UNKNOWN",
+			error: "PAYUNi 已退款金額無法確認與訂單金額一致",
+		});
+	});
+
+	it("recovers a full PAYUNi refund only when the returned amount matches", async () => {
+		const service = new PayUniService(credentials);
+		const query = service.createFormData({ Status: "SUCCESS", CloseStatus: "3", CloseAmt: "8800" });
+		vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify(query)));
+
+		await expect(new PayUniOneTimeGateway(credentials).queryRefund({
+			gatewayPaymentId: "PAYUNI-TRADE-FULL",
+			amount: 8800,
+			currency: "TWD",
+		})).resolves.toEqual({ status: "REFUNDED" });
 	});
 
 	it("does not mark a trade refundable when PAYUNi rejects the query", async () => {

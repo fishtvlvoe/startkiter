@@ -82,9 +82,9 @@ describe("order refund persistence", () => {
 			amount: 8800,
 			currency: "TWD",
 		});
-		expect(db.order.updateMany).toHaveBeenCalledWith(expect.objectContaining({
-			where: { id: `order-${paymentGateway}`, status: { in: ["pending", "paid"] } },
-			data: expect.objectContaining({ status: "refunded" }),
+		expect(db.order.updateMany).toHaveBeenLastCalledWith(expect.objectContaining({
+			where: { id: `order-${paymentGateway}`, status: "paid", refundOperationToken: expect.any(String) },
+			data: expect.objectContaining({ status: "refunded", refundStatus: "SUCCEEDED" }),
 		}));
 		expect(db.$transaction).toHaveBeenCalledWith(expect.any(Function), { maxWait: 10_000, timeout: 30_000 });
 	});
@@ -125,7 +125,39 @@ describe("order refund persistence", () => {
 		await expect(refundOrderThroughGateway("order-failed")).resolves.toBe(0);
 
 		expect(processRefund).toHaveBeenCalledOnce();
-		expect(db.order.updateMany).not.toHaveBeenCalled();
+		expect(db.order.updateMany).toHaveBeenLastCalledWith(expect.objectContaining({
+			where: { id: "order-failed", status: "paid", refundOperationToken: expect.any(String) },
+			data: expect.objectContaining({ refundStatus: "FAILED", refundError: "gateway unavailable" }),
+		}));
+	});
+
+	it("reconciles a refund marked for review before retrying the provider", async () => {
+		vi.mocked(db.order.findUnique).mockResolvedValue({
+			orderNo: "SK-RECONCILE",
+			status: "paid",
+			paymentGateway: "stripe",
+			gatewayTradeNo: "pi-reconcile",
+			amount: 8800,
+			currency: "TWD",
+			refundStatus: "NEEDS_REVIEW",
+		} as never);
+		vi.mocked(loadCheckoutGatewayCredentials).mockResolvedValue({ gateway: "stripe", credentials: { secretKey: "sk", webhookSecret: "wh" } } as never);
+		const queryRefund = vi.fn().mockResolvedValue({ status: "REFUNDED", gatewayRefundId: "re-reconcile" });
+		const processRefund = vi.fn();
+		vi.mocked(createMvpCheckoutGateway).mockReturnValue({ queryRefund, processRefund } as never);
+
+		await expect(refundOrderThroughGateway("order-reconcile")).resolves.toBe(1);
+
+		expect(queryRefund).toHaveBeenCalledWith({
+			gatewayPaymentId: "pi-reconcile",
+			orderNo: "SK-RECONCILE",
+			amount: 8800,
+			currency: "TWD",
+		});
+		expect(processRefund).not.toHaveBeenCalled();
+		expect(db.order.updateMany).toHaveBeenLastCalledWith(expect.objectContaining({
+			data: expect.objectContaining({ status: "refunded", refundStatus: "SUCCEEDED", refundGatewayRefundId: "re-reconcile" }),
+		}));
 	});
 
 	it("does not hold the order transaction open while the provider is pending", async () => {

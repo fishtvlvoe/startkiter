@@ -21,7 +21,13 @@ vi.mock("@startkiter/database", () => ({
 			updateMany: vi.fn(),
 		},
 		siteSetting: { findUnique: vi.fn() },
+		$executeRaw: vi.fn(),
+		$transaction: vi.fn(),
 	},
+}));
+
+vi.mock("../lib/invoice-settings", () => ({
+	withInvoiceOperationLock: vi.fn(async (callback) => callback(db as never)),
 }));
 
 vi.mock("../lib/subscription-gateway", () => ({
@@ -88,6 +94,9 @@ describe("subscription procedures", () => {
 			interval: "MONTH",
 			pricePerPeriod: plan.price,
 		} as never);
+		vi.mocked(db.courseSubscription.updateMany).mockResolvedValue({ count: 1 } as never);
+		vi.mocked(db.$executeRaw).mockResolvedValue(0);
+		vi.mocked(db.$transaction).mockImplementation(async (callback) => callback(db as never) as never);
 		gateway.createSubscriptionSession.mockResolvedValue(payment);
 	});
 
@@ -182,9 +191,9 @@ describe("subscription procedures", () => {
 		expect(settled).toBe(true);
 
 		expect(gateway.cancelSubscription).toHaveBeenCalledWith({ gatewaySubscriptionId: "PERIOD-1" });
-		expect(db.courseSubscription.update).toHaveBeenCalledWith(
+		expect(db.courseSubscription.updateMany).toHaveBeenLastCalledWith(
 			expect.objectContaining({
-				where: { id: "subscription-1" },
+				where: expect.objectContaining({ id: "subscription-1" }),
 				data: expect.objectContaining({ status: "CANCELED" }),
 			}),
 		);
@@ -207,5 +216,94 @@ describe("subscription procedures", () => {
 			),
 		).rejects.toMatchObject({ code: "BAD_REQUEST" });
 		expect(db.courseSubscription.update).not.toHaveBeenCalled();
+	});
+
+	it("queries PAYUNi before retrying a stale cancellation lease", async () => {
+		vi.mocked(db.courseSubscription.findUnique).mockResolvedValue({
+			id: "subscription-1",
+			userId: user.id,
+			status: "ACTIVE",
+			gatewaySubscriptionId: "PERIOD-1",
+			cancellationOperationToken: "stale-token",
+			cancellationOperationStartedAt: new Date(Date.now() - 120_000),
+		} as never);
+		gateway.queryPeriod.mockResolvedValue({ status: "SUCCESS", totalTimes: 900, alreadyTimes: 1, cancellationStatus: "ACTIVE" });
+		gateway.cancelSubscription.mockResolvedValue({ success: true });
+
+		await expect(call(
+			cancelCourseSubscription,
+			{ subscriptionId: "subscription-1" },
+			{ context: { headers: new Headers() } as never },
+		)).resolves.toBeDefined();
+
+		expect(gateway.queryPeriod).toHaveBeenCalledWith("PERIOD-1");
+		expect(gateway.cancelSubscription).toHaveBeenCalledWith({ gatewaySubscriptionId: "PERIOD-1" });
+	});
+
+	it("reconciles a remotely canceled subscription without resending cancellation", async () => {
+		vi.mocked(db.courseSubscription.findUnique).mockResolvedValue({
+			id: "subscription-1",
+			userId: user.id,
+			status: "ACTIVE",
+			gatewaySubscriptionId: "PERIOD-1",
+			cancellationOperationToken: "stale-token",
+			cancellationOperationStartedAt: new Date(Date.now() - 120_000),
+		} as never);
+		gateway.queryPeriod.mockResolvedValue({ status: "SUCCESS", totalTimes: 900, alreadyTimes: 1, cancellationStatus: "CANCELED" });
+		vi.mocked(db.courseSubscription.findUnique).mockResolvedValueOnce({
+			id: "subscription-1",
+			userId: user.id,
+			status: "ACTIVE",
+			gatewaySubscriptionId: "PERIOD-1",
+			cancellationOperationToken: "stale-token",
+			cancellationOperationStartedAt: new Date(Date.now() - 120_000),
+		} as never).mockResolvedValueOnce({ id: "subscription-1", status: "CANCELED" } as never);
+
+		await expect(call(cancelCourseSubscription, { subscriptionId: "subscription-1" }, { context: { headers: new Headers() } as never })).resolves.toMatchObject({
+			subscription: { status: "CANCELED" },
+		});
+
+		expect(gateway.queryPeriod).toHaveBeenCalledWith("PERIOD-1");
+		expect(gateway.cancelSubscription).not.toHaveBeenCalled();
+		expect(handleRefundInvoiceForSubscription).toHaveBeenCalledWith("subscription-1");
+	});
+
+	it("does not resend an ambiguous stale cancellation when remote state is unknown", async () => {
+		vi.mocked(db.courseSubscription.findUnique).mockResolvedValue({
+			id: "subscription-1",
+			userId: user.id,
+			status: "ACTIVE",
+			gatewaySubscriptionId: "PERIOD-1",
+			cancellationOperationToken: "stale-token",
+			cancellationOperationStartedAt: new Date(Date.now() - 120_000),
+		} as never);
+		gateway.queryPeriod.mockResolvedValue({ status: "SUCCESS", totalTimes: 0, alreadyTimes: 0, cancellationStatus: "UNKNOWN" });
+
+		await expect(call(cancelCourseSubscription, { subscriptionId: "subscription-1" }, { context: { headers: new Headers() } as never })).rejects.toMatchObject({ code: "CONFLICT" });
+
+		expect(gateway.cancelSubscription).not.toHaveBeenCalled();
+		expect(db.courseSubscription.updateMany).toHaveBeenLastCalledWith(expect.objectContaining({
+			data: expect.objectContaining({ cancellationError: "取消狀態無法確認，請稍後重試或人工查核。" }),
+		}));
+	});
+
+	it("keeps an ambiguous cancellation lease for later reconciliation", async () => {
+		vi.mocked(db.courseSubscription.findUnique).mockResolvedValue({
+			id: "subscription-1",
+			userId: user.id,
+			status: "ACTIVE",
+			gatewaySubscriptionId: "PERIOD-1",
+		} as never);
+		gateway.cancelSubscription.mockResolvedValue({ success: false, ambiguous: true, error: "timeout" });
+
+		await expect(call(
+			cancelCourseSubscription,
+			{ subscriptionId: "subscription-1" },
+			{ context: { headers: new Headers() } as never },
+		)).rejects.toMatchObject({ code: "CONFLICT" });
+
+		expect(db.courseSubscription.updateMany).toHaveBeenLastCalledWith(expect.objectContaining({
+			data: expect.objectContaining({ cancellationError: "timeout" }),
+		}));
 	});
 });

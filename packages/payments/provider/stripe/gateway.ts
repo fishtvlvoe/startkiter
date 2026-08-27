@@ -66,7 +66,33 @@ export class StripeGateway implements CheckoutGateway {
 				? { success: true, gatewayRefundId: refund.id }
 				: { success: false, gatewayRefundId: refund.id, pending: true, error: "Stripe 退款仍在處理中，尚未完成" };
 		} catch (error) {
-			return { success: false, error: error instanceof Error ? error.message : "Stripe 退款失敗" };
+			return { success: false, ambiguous: true, error: error instanceof Error ? error.message : "Stripe 退款失敗" };
+		}
+	}
+
+	async queryRefund(params: { gatewayPaymentId: string; orderNo?: string; amount?: number; currency?: string }): Promise<{ status: "REFUNDED" | "PENDING" | "NOT_REFUNDED" | "UNKNOWN"; gatewayRefundId?: string; error?: string }> {
+		try {
+			const refunds = await this.stripe.refunds.list({ payment_intent: params.gatewayPaymentId, limit: 100 });
+			const succeeded = refunds.data.filter((item) => item.status === "succeeded");
+			const pending = refunds.data.filter((item) => item.status === "pending");
+			if (params.amount === undefined) {
+				if (succeeded[0]) return { status: "REFUNDED", gatewayRefundId: succeeded[0].id };
+				if (pending[0]) return { status: "PENDING", gatewayRefundId: pending[0].id };
+			} else {
+				const targetAmount = Math.round(params.amount);
+				const succeededAmount = succeeded.reduce((total, item) => total + item.amount, 0);
+					if (succeededAmount === targetAmount) return { status: "REFUNDED", gatewayRefundId: succeeded[succeeded.length - 1]?.id };
+					if (succeededAmount > 0) {
+						return { status: "UNKNOWN", gatewayRefundId: succeeded[succeeded.length - 1]?.id, error: `Stripe 已成功部分退款 ${succeededAmount}/${targetAmount}` };
+				}
+				if (pending[0]) return { status: "PENDING", gatewayRefundId: pending[0].id };
+			}
+			const refund = refunds.data.find((item) => item.status === "failed" || item.status === "canceled");
+			return refund
+				? { status: "NOT_REFUNDED", gatewayRefundId: refund.id, error: `Stripe 退款狀態為 ${refund.status}` }
+				: { status: "NOT_REFUNDED" };
+		} catch (error) {
+			return { status: "UNKNOWN", error: error instanceof Error ? error.message : "Stripe 退款查詢失敗" };
 		}
 	}
 

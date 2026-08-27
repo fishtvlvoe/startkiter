@@ -189,6 +189,33 @@ describe("CheckoutGateway provider implementations", () => {
 		});
 	});
 
+	it("prefers a successful Stripe refund during recovery", async () => {
+		const stripe = new StripeGateway({ secretKey: "sk_test_checkout", webhookSecret: "whsec_test" });
+		vi.spyOn(stripe.getStripeInstance().refunds, "list").mockResolvedValue({
+			data: [
+				{ id: "re_failed", status: "failed", amount: 8800 },
+				{ id: "re_succeeded", status: "succeeded", amount: 8800 },
+			],
+		} as never);
+
+		await expect(stripe.queryRefund({ gatewayPaymentId: "pi_test_recovery", amount: checkoutParams.amount, currency: "TWD" })).resolves.toEqual({
+			status: "REFUNDED",
+			gatewayRefundId: "re_succeeded",
+		});
+	});
+
+	it("does not treat a partial Stripe refund as a full order refund", async () => {
+		const stripe = new StripeGateway({ secretKey: "sk_test_checkout", webhookSecret: "whsec_test" });
+		vi.spyOn(stripe.getStripeInstance().refunds, "list").mockResolvedValue({
+			data: [{ id: "re_partial", status: "succeeded", amount: 500 }],
+		} as never);
+
+		await expect(stripe.queryRefund({ gatewayPaymentId: "pi_test_partial", amount: checkoutParams.amount, currency: "TWD" })).resolves.toMatchObject({
+			status: "UNKNOWN",
+			error: "Stripe 已成功部分退款 500/8800",
+		});
+	});
+
 	it("does not treat a Shopline HTTP 200 business failure as a successful refund", async () => {
 		vi.spyOn(globalThis, "fetch").mockResolvedValue(
 			new Response(JSON.stringify({ status: "FAILED", code: "1018", msg: "Business error" }), {

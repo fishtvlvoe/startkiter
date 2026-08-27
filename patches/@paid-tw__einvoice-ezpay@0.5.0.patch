@@ -1,0 +1,14 @@
+diff --git a/dist/index.cjs b/dist/index.cjs
+index b5d3ddc18a5986cccfc1f1e2c0f81dabc82b8f4b..41a7b40ca5630d297495b140db3e33608dce48f8 100644
+--- a/dist/index.cjs
++++ b/dist/index.cjs
+@@ -975,1 +975,1 @@
+-	if (s === "0" || s === 0) return _paid_tw_einvoice.InvoiceStatus.VOIDED;
++	if (s === "0" || s === 0 || s === "2" || s === 2) return _paid_tw_einvoice.InvoiceStatus.VOIDED;
+diff --git a/dist/index.js b/dist/index.js
+index 9659870c702a3dc01816418a7423db8dbabdf724..6b8ca8a2e1eb1197a625d00b3787a8c6ab4bd2d4 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -974,1 +974,1 @@
+-	if (s === "0" || s === 0) return InvoiceStatus.VOIDED;
++	if (s === "0" || s === 0 || s === "2" || s === 2) return InvoiceStatus.VOIDED;

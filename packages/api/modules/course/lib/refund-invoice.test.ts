@@ -1,18 +1,24 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("node:crypto", async (importOriginal) => ({
+	...(await importOriginal<typeof import("node:crypto")>()),
+	randomUUID: vi.fn(() => "operation-token"),
+}));
+
 vi.mock("@startkiter/database", () => ({
 	db: {
-		invoice: { findUnique: vi.fn(), findFirst: vi.fn(), update: vi.fn() },
+		invoice: { findUnique: vi.fn(), findFirst: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
 	},
 }));
 vi.mock("./invoice-settings", () => ({
-	getInvoiceProvider: vi.fn(),
+	getInvoiceSettings: vi.fn(),
+	createInvoiceProvider: vi.fn(),
 	isInvoiceProviderName: vi.fn((value: string) => value === "ecpay" || value === "ezpay"),
 	withInvoiceOperationLock: vi.fn(async (callback) => callback(db as never)),
 }));
 
 import { db } from "@startkiter/database";
-import { getInvoiceProvider, withInvoiceOperationLock } from "./invoice-settings";
+import { createInvoiceProvider, getInvoiceSettings, withInvoiceOperationLock } from "./invoice-settings";
 import { handleRefundInvoice, handleRefundInvoiceForSubscription } from "./invoice-events";
 
 const invoice = {
@@ -39,20 +45,24 @@ describe("refund invoice handling", () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-		vi.mocked(db.invoice.findUnique).mockResolvedValue(invoice as never);
+		vi.mocked(getInvoiceSettings).mockResolvedValue({ provider: "ecpay" } as never);
+		vi.mocked(db.invoice.findUnique)
+			.mockResolvedValueOnce(invoice as never)
+			.mockResolvedValue({ ...invoice, attentionReason: "REFUND_IN_PROGRESS", operationToken: "operation-token" } as never);
 		vi.mocked(db.invoice.update).mockResolvedValue({ ...invoice, status: "VOIDED" } as never);
+		vi.mocked(db.invoice.updateMany).mockResolvedValue({ count: 1 } as never);
 		provider.void.mockResolvedValue({ success: true });
-		vi.mocked(getInvoiceProvider).mockResolvedValue(provider as never);
+		vi.mocked(createInvoiceProvider).mockReturnValue(provider as never);
 	});
 
 	it("voids an issued invoice when refund stays in the same billing month", async () => {
 		await handleRefundInvoice("order-1", new Date("2026-08-24T00:00:00.000Z"));
 
-		expect(withInvoiceOperationLock).toHaveBeenCalledTimes(1);
-		expect(getInvoiceProvider).toHaveBeenCalledWith("ecpay");
-		expect(db.invoice.update).toHaveBeenCalledWith(expect.objectContaining({
-			where: { id: "invoice-1" },
-			data: { status: "VOIDED", attentionReason: null },
+		expect(withInvoiceOperationLock).toHaveBeenCalled();
+		expect(createInvoiceProvider).toHaveBeenCalledWith({ provider: "ecpay" });
+		expect(db.invoice.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+			where: expect.objectContaining({ id: "invoice-1" }),
+			data: expect.objectContaining({ status: "VOIDED", attentionReason: null }),
 		}));
 		expect(provider.void).toHaveBeenCalledWith({
 			invoiceNumber: "AB12345678",
@@ -71,15 +81,15 @@ describe("refund invoice handling", () => {
 
 	it("marks a refund for manual handling when the provider throws", async () => {
 		const providerError = new Error("provider timeout");
-		vi.mocked(getInvoiceProvider).mockResolvedValue({
+		vi.mocked(createInvoiceProvider).mockReturnValue({
 			void: vi.fn().mockRejectedValue(providerError),
 		} as never);
 
 		await handleRefundInvoice("order-1", new Date("2026-08-24T00:00:00.000Z"));
 
-		expect(db.invoice.update).toHaveBeenCalledWith(expect.objectContaining({
-			where: { id: "invoice-1" },
-			data: { attentionReason: "REFUND_NEEDS_ALLOWANCE", failReason: "provider timeout" },
+		expect(db.invoice.updateMany).toHaveBeenCalledWith(expect.objectContaining({
+			where: expect.objectContaining({ id: "invoice-1" }),
+			data: expect.objectContaining({ attentionReason: "REFUND_NEEDS_ALLOWANCE", failReason: "provider timeout" }),
 		}));
 	});
 
@@ -88,7 +98,7 @@ describe("refund invoice handling", () => {
 
 		await handleRefundInvoiceForSubscription("subscription-1", new Date("2026-08-24T00:00:00.000Z"));
 
-		expect(withInvoiceOperationLock).toHaveBeenCalledTimes(1);
+		expect(withInvoiceOperationLock).toHaveBeenCalled();
 		expect(db.invoice.findFirst).toHaveBeenCalledWith(expect.objectContaining({
 			where: { subscriptionId: "subscription-1", status: "ISSUED" },
 			orderBy: { periodNumber: "desc" },

@@ -44,6 +44,19 @@ function mergeSettings(existing: InvoiceSettings, patch: InvoiceSettingsPatch): 
 
 type InvoiceActionClient = Pick<import("@startkiter/database").Prisma.TransactionClient, "invoice">;
 
+async function hasPendingInvoiceOperations(client: InvoiceActionClient): Promise<boolean | null> {
+	try {
+		const invoices = await client.invoice.findMany({
+			where: { OR: [{ status: { in: ["PENDING", "FAILED"] } }, { attentionReason: { not: null } }] },
+			select: { id: true },
+			take: 1,
+		});
+		return invoices.length > 0;
+	} catch {
+		return null;
+	}
+}
+
 async function hasActionableInvoices(client: InvoiceActionClient): Promise<boolean | null> {
 	try {
 		const invoices = await client.invoice.findMany({
@@ -56,8 +69,8 @@ async function hasActionableInvoices(client: InvoiceActionClient): Promise<boole
 	}
 }
 
-function operationalSettingsChanged(before: InvoiceSettings, after: InvoiceSettings): boolean {
-	return before.provider !== after.provider || before.merchantId !== after.merchantId || before.hashKey !== after.hashKey || before.hashIV !== after.hashIV || before.testMode !== after.testMode;
+function invoiceSettingsChanged(before: InvoiceSettings, after: InvoiceSettings): boolean {
+	return Object.keys(before).some((key) => before[key as keyof InvoiceSettings] !== after[key as keyof InvoiceSettings]);
 }
 
 export async function writeInvoiceSettings(args: {
@@ -72,6 +85,9 @@ export async function writeInvoiceSettings(args: {
 	try {
 		return await withInvoiceOperationLock(async (tx) => {
 			if (args.patch.clear) {
+				const hasPending = await hasPendingInvoiceOperations(tx);
+				if (hasPending === null) return { ok: false, error: "settings_unavailable" };
+				if (hasPending) return { ok: false, error: "invoice_settings_clear_blocked_pending_operations" };
 				const hasActionable = await hasActionableInvoices(tx);
 				if (hasActionable === null) return { ok: false, error: "settings_unavailable" };
 				if (hasActionable) return { ok: false, error: "settings_clear_blocked_existing_actionable_invoices" };
@@ -79,13 +95,16 @@ export async function writeInvoiceSettings(args: {
 				return { ok: true, settings: { ...EMPTY_INVOICE_SETTINGS } };
 			}
 
-			const existing = await getInvoiceSettings();
+			const existing = await getInvoiceSettings(tx);
 			const settings = mergeSettings(existing, args.patch);
 			if (!settings.merchantId || !settings.hashKey || !settings.hashIV || !settings.sellerName || !settings.sellerTaxId) {
 				return { ok: false, error: "incomplete_invoice_settings" };
 			}
 			if (!isValidInvoiceCredentialLength(settings)) return { ok: false, error: "invalid_invoice_credentials" };
-			if (operationalSettingsChanged(existing, settings)) {
+			if (invoiceSettingsChanged(existing, settings)) {
+				const hasPending = await hasPendingInvoiceOperations(tx);
+				if (hasPending === null) return { ok: false, error: "settings_unavailable" };
+				if (hasPending) return { ok: false, error: "invoice_settings_change_blocked_pending_operations" };
 				const hasActionable = await hasActionableInvoices(tx);
 				if (hasActionable === null) return { ok: false, error: "settings_unavailable" };
 				if (hasActionable) {

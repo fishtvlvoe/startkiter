@@ -79,4 +79,28 @@ describe("PayUniPeriodGateway", () => {
 			error: "declined",
 		});
 	});
+
+	it("marks a transport failure as an ambiguous cancellation result", async () => {
+		vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("socket timeout"));
+		const gateway = new PayUniPeriodGateway(credentials);
+
+		await expect(gateway.cancelSubscription({ gatewaySubscriptionId: "PERIOD001" })).resolves.toEqual({
+			success: false,
+			ambiguous: true,
+			error: "socket timeout",
+		});
+	});
+
+	it("normalizes the remote period cancellation state for reconciliation", async () => {
+		const service = new PayUniService(credentials);
+		const response = service.createFormData({ Status: "SUCCESS", PeriodStatus: "CANCELED", TotalTimes: 900, AlreadyTimes: 1 });
+		vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify(response)));
+
+		await expect(new PayUniPeriodGateway(credentials).queryPeriod("PERIOD001")).resolves.toEqual({
+			status: "SUCCESS",
+			totalTimes: 900,
+			alreadyTimes: 1,
+			cancellationStatus: "CANCELED",
+		});
+	});
 });

@@ -65,7 +65,7 @@ export default async function AdminOrdersPage() {
 											<p className="text-sm">
 												{invoice.invoiceNumber ?? "尚未取得發票號碼"} · {invoice.provider} · NT$ {invoice.amount.toLocaleString()}
 											</p>
-											{invoice.attentionReason && <p className="text-sm text-amber-700">退款但發票待處理：請改用折讓。</p>}
+											{invoice.attentionReason && <p className="text-sm text-amber-700">發票作業待處理：{invoice.attentionReason}</p>}
 											<InvoiceOperationsButtons
 												invoice={{
 													id: invoice.id,
@@ -73,7 +73,8 @@ export default async function AdminOrdersPage() {
 													amount: invoice.amount,
 													allowanceTotal: invoice.allowanceTotal,
 													invoiceDate: invoice.invoiceDate,
-													canVoid,
+									canVoid,
+									attentionReason: invoice.attentionReason,
 												}}
 											/>
 										</div>
@@ -98,7 +99,7 @@ export default async function AdminOrdersPage() {
 									</div>
 									<span className="text-sm">NT$ {invoice.amount.toLocaleString()}</span>
 								</div>
-								{invoice.attentionReason && <p className="mt-2 text-sm text-amber-700">退款但發票待處理：請改用折讓。</p>}
+								{invoice.attentionReason && <p className="mt-2 text-sm text-amber-700">發票作業待處理：{invoice.attentionReason}</p>}
 								<div className="mt-3">
 									<InvoiceOperationsButtons
 										invoice={{
@@ -107,11 +108,12 @@ export default async function AdminOrdersPage() {
 											amount: invoice.amount,
 											allowanceTotal: invoice.allowanceTotal,
 											invoiceDate: invoice.invoiceDate,
-											canVoid: Boolean(
-												invoice.status === "ISSUED" &&
-												invoice.invoiceDate &&
-												sameTaiwanBillingMonth(invoice.invoiceDate, new Date()),
-											),
+									canVoid: Boolean(
+											invoice.status === "ISSUED" &&
+											invoice.invoiceDate &&
+											sameTaiwanBillingMonth(invoice.invoiceDate, new Date()),
+										),
+										attentionReason: invoice.attentionReason,
 										}}
 									/>
 								</div>

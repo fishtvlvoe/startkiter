@@ -3,8 +3,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@startkiter/database", () => ({
 	db: {
 		$transaction: vi.fn(),
-		courseSubscription: { findUnique: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
-		paymentWebhookEvent: { update: vi.fn() },
+		$executeRaw: vi.fn(),
+			courseSubscription: { findUnique: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
+			invoice: { findFirst: vi.fn(), create: vi.fn() },
+			paymentWebhookEvent: { update: vi.fn() },
 	},
 }));
 
@@ -14,6 +16,7 @@ vi.mock("../../../../lib/orders", () => ({
 
 vi.mock("@startkiter/api/modules/course/lib/webhook-events", () => ({
 	claimWebhookEvent: vi.fn(),
+	assertWebhookClaim: vi.fn(),
 	completeWebhookEvent: vi.fn(),
 	failWebhookEvent: vi.fn(),
 	fingerprintPayUniPeriodEvent: vi.fn(() => "event-1"),
@@ -21,6 +24,9 @@ vi.mock("@startkiter/api/modules/course/lib/webhook-events", () => ({
 
 vi.mock("@startkiter/api/modules/course/lib/invoice-events", () => ({
 	triggerInvoiceForSubscriptionPeriod: vi.fn(),
+}));
+vi.mock("@startkiter/api/modules/course/lib/invoice-settings", () => ({
+	withInvoiceOperationLock: vi.fn(async (callback) => callback(db as never)),
 }));
 vi.mock("@startkiter/api/modules/course/lib/send-welcome-email", () => ({
 	sendWelcomeEmail: vi.fn(),
@@ -31,6 +37,7 @@ import { PayUniService } from "@startkiter/payments";
 
 import { loadPayUniCredentials } from "../../../../lib/orders";
 import {
+	assertWebhookClaim,
 	claimWebhookEvent,
 	completeWebhookEvent,
 	failWebhookEvent,
@@ -72,9 +79,10 @@ describe("PAYUNi period-notify", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.mocked(loadPayUniCredentials).mockResolvedValue(credentials);
-		vi.mocked(claimWebhookEvent).mockResolvedValue("CLAIMED");
-		vi.mocked(completeWebhookEvent).mockResolvedValue(undefined);
-		vi.mocked(failWebhookEvent).mockResolvedValue(undefined);
+		vi.mocked(claimWebhookEvent).mockResolvedValue({ status: "CLAIMED", token: "claim-token" });
+		vi.mocked(completeWebhookEvent).mockResolvedValue(true);
+		vi.mocked(failWebhookEvent).mockResolvedValue(true);
+		vi.mocked(assertWebhookClaim).mockResolvedValue(undefined);
 		vi.mocked(triggerInvoiceForSubscriptionPeriod).mockResolvedValue(null);
 		vi.mocked(sendWelcomeEmail).mockResolvedValue(undefined);
 		vi.mocked(db.courseSubscription.findUnique).mockResolvedValue({
@@ -87,6 +95,7 @@ describe("PAYUNi period-notify", () => {
 		} as never);
 		vi.mocked(db.courseSubscription.update).mockResolvedValue({ id: "subscription-1" } as never);
 		vi.mocked(db.$transaction).mockImplementation(async (callback) => callback(db as never));
+		vi.mocked(db.$executeRaw).mockResolvedValue(0);
 	});
 
 	it("activates a pending subscription on the first successful period payment", async () => {
@@ -99,16 +108,11 @@ describe("PAYUNi period-notify", () => {
 				data: expect.objectContaining({
 					status: "ACTIVE",
 					gatewaySubscriptionId: "PERIOD-1",
-					paidPeriods: { increment: 1 },
+				paidPeriods: 1,
 				}),
 			}),
 		);
-		expect(db.paymentWebhookEvent.update).toHaveBeenCalledWith(
-			expect.objectContaining({
-				where: { gateway_eventId: { gateway: "payuni", eventId: "event-1" } },
-				data: { status: "COMPLETED", error: null },
-			}),
-		);
+		expect(completeWebhookEvent).toHaveBeenCalledWith("payuni", "event-1", "claim-token");
 		expect(triggerInvoiceForSubscriptionPeriod).toHaveBeenCalledWith("subscription-1", 1);
 		expect(sendWelcomeEmail).toHaveBeenCalledWith(expect.objectContaining({
 			subscriptionId: "subscription-1",
@@ -124,14 +128,27 @@ describe("PAYUNi period-notify", () => {
 		expect(db.courseSubscription.update).toHaveBeenCalled();
 	});
 
-	it("returns OK and skips state changes for a duplicate event", async () => {
-		vi.mocked(claimWebhookEvent).mockResolvedValue("DUPLICATE");
+	it("keeps the committed subscription payment when invoice intent work fails", async () => {
+		vi.mocked(triggerInvoiceForSubscriptionPeriod).mockRejectedValue(new Error("invoice database unavailable"));
+
+		const response = await POST(signedRequest());
+
+		expect(response.status).toBe(200);
+		expect(db.courseSubscription.update).toHaveBeenCalledWith(expect.objectContaining({
+			data: expect.objectContaining({ status: "ACTIVE", paidPeriods: 1 }),
+		}));
+		expect(completeWebhookEvent).toHaveBeenCalledWith("payuni", "event-1", "claim-token");
+	});
+
+	it("returns OK and skips state changes while another worker is processing the event", async () => {
+		vi.mocked(claimWebhookEvent).mockResolvedValue({ status: "PROCESSING" });
 
 		const response = await POST(signedRequest());
 
 		expect(response.status).toBe(200);
 		expect(db.courseSubscription.findUnique).not.toHaveBeenCalled();
 		expect(db.courseSubscription.update).not.toHaveBeenCalled();
+		expect(triggerInvoiceForSubscriptionPeriod).not.toHaveBeenCalled();
 	});
 
 	it("rejects a bad signature before claiming or changing state", async () => {
@@ -160,5 +177,38 @@ describe("PAYUNi period-notify", () => {
 		expect(response.status).toBe(200);
 		const update = vi.mocked(db.courseSubscription.update).mock.calls[0]?.[0];
 		expect(update?.data).not.toHaveProperty("currentPeriodEnd");
+	});
+
+	it("uses the provider period number when events arrive out of order", async () => {
+		vi.mocked(db.courseSubscription.findUnique).mockResolvedValue({
+			id: "subscription-1",
+			status: "ACTIVE",
+			pricePerPeriod: 390,
+			gatewaySubscriptionId: "PERIOD-1",
+			currentPeriodEnd: null,
+			paidPeriods: 1,
+		} as never);
+
+		const response = await POST(signedRequest({
+			PeriodOrderNo: "SUBTRADE_2",
+			ThisPeriod: 2,
+			NextAuthDate: "2026-10-23",
+		}));
+
+		expect(response.status).toBe(200);
+		expect(db.courseSubscription.update).toHaveBeenCalledWith(expect.objectContaining({
+			data: expect.objectContaining({ paidPeriods: 2 }),
+		}));
+		expect(triggerInvoiceForSubscriptionPeriod).toHaveBeenCalledWith("subscription-1", 2);
+	});
+
+	it("retries invoice work when a completed event is replayed", async () => {
+		vi.mocked(claimWebhookEvent).mockResolvedValue({ status: "COMPLETED" });
+		vi.mocked(db.courseSubscription.findUnique).mockResolvedValue({ id: "subscription-1" } as never);
+
+		const response = await POST(signedRequest());
+
+		expect(response.status).toBe(200);
+		expect(triggerInvoiceForSubscriptionPeriod).toHaveBeenCalledWith("subscription-1", 1);
 	});
 });

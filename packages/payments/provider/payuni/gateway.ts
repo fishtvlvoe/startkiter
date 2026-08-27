@@ -19,6 +19,23 @@ function parseTradeAmount(value: unknown): number | null {
 	return Number.isFinite(amount) && amount > 0 ? Math.round(amount) : null;
 }
 
+function parseRefundAmount(query: Record<string, unknown>): number | null {
+	return parseTradeAmount(
+		query.CloseAmt ??
+			query["Result[0][CloseAmt]"] ??
+			query.RefundAmt ??
+			query["Result[0][RefundAmt]"] ??
+			query.CloseAmount ??
+			query["Result[0][CloseAmount]"],
+	);
+}
+
+function expectedRefundAmount(amount: number | undefined): number | null {
+	if (amount === undefined) return null;
+	const parsed = Number(amount);
+	return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
 export type PayUniCredentials = {
 	merchantId: string;
 	hashKey: string;
@@ -106,6 +123,10 @@ export class PayUniOneTimeGateway implements CheckoutGateway {
 
 			const closeStatus = String(query.CloseStatus ?? query["Result[0][CloseStatus]"] ?? "").trim();
 			if (closeStatus === "3" || closeStatus === "9") {
+				const expectedAmount = expectedRefundAmount(params.amount);
+				if (expectedAmount !== null && parseRefundAmount(query) !== expectedAmount) {
+					return { success: false, error: "PAYUNi 已退款金額無法確認與訂單金額一致，需人工查核" };
+				}
 				return { success: true };
 			}
 
@@ -129,6 +150,10 @@ export class PayUniOneTimeGateway implements CheckoutGateway {
 				if (tradeAmount === null) {
 					return { success: false, error: "PAYUNi 交易查詢缺少有效 TradeAmt，不能執行退款" };
 				}
+				const expectedAmount = expectedRefundAmount(params.amount);
+				if (expectedAmount !== null && tradeAmount !== expectedAmount) {
+					return { success: false, error: "PAYUNi 交易金額與訂單退款金額不一致，不能執行退款" };
+				}
 				const closed = await this.service.requestApi(
 					tradeEndpoint(this.service.getApiUrl(), "close"),
 					{
@@ -149,7 +174,30 @@ export class PayUniOneTimeGateway implements CheckoutGateway {
 
 			return { success: false, error: `PAYUNi 回傳未支援的 CloseStatus：${closeStatus || "空值"}` };
 		} catch (error) {
-			return { success: false, error: error instanceof Error ? error.message : "PAYUNi 退款請求失敗" };
+			return { success: false, ambiguous: true, error: error instanceof Error ? error.message : "PAYUNi 退款請求失敗" };
+		}
+	}
+
+	async queryRefund(params: { gatewayPaymentId: string; orderNo?: string; amount?: number; currency?: string }): Promise<{ status: "REFUNDED" | "PENDING" | "NOT_REFUNDED" | "UNKNOWN"; error?: string }> {
+		try {
+			const query = await this.service.requestApi(
+				tradeEndpoint(this.service.getApiUrl(), "query"),
+				{ TradeNo: params.gatewayPaymentId },
+				{ version: "2.0", timeoutMs: REFUND_REQUEST_TIMEOUT_MS },
+			);
+			if (!this.service.isTradeSuccess(String(query.Status ?? ""))) return { status: "UNKNOWN", error: query.Message || "PAYUNi 交易查詢失敗" };
+			const closeStatus = String(query.CloseStatus ?? query["Result[0][CloseStatus]"] ?? "").trim();
+			if (closeStatus === "3" || closeStatus === "9") {
+				const expectedAmount = expectedRefundAmount(params.amount);
+				if (expectedAmount !== null && parseRefundAmount(query) !== expectedAmount) {
+					return { status: "UNKNOWN", error: "PAYUNi 已退款金額無法確認與訂單金額一致" };
+				}
+				return { status: "REFUNDED" };
+			}
+			if (closeStatus === "2" || closeStatus === "7" || closeStatus === "1") return { status: "NOT_REFUNDED" };
+			return { status: "PENDING" };
+		} catch (error) {
+			return { status: "UNKNOWN", error: error instanceof Error ? error.message : "PAYUNi 交易查詢失敗" };
 		}
 	}
 }

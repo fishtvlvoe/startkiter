@@ -5,13 +5,21 @@ import { NextResponse } from "next/server";
 import { loadPayUniCredentials } from "../../../../lib/orders";
 import {
 	claimWebhookEvent,
+	assertWebhookClaim,
 	completeWebhookEvent,
 	failWebhookEvent,
 	fingerprintPayUniPeriodEvent,
 } from "@startkiter/api/modules/course/lib/webhook-events";
+import { withInvoiceOperationLock } from "@startkiter/api/modules/course/lib/invoice-settings";
 import { triggerInvoiceForSubscriptionPeriod } from "@startkiter/api/modules/course/lib/invoice-events";
 import { sendWelcomeEmail } from "@startkiter/api/modules/course/lib/send-welcome-email";
 import { scheduleAfterResponse } from "../../../../lib/schedule-after";
+
+const SUBSCRIPTION_STATE_LOCK_PREFIX = "startkiter:subscription-state:";
+
+async function acquireSubscriptionStateLock(tx: Prisma.TransactionClient, subscriptionId: string): Promise<void> {
+	await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`${SUBSCRIPTION_STATE_LOCK_PREFIX}${subscriptionId}`}, 0))`;
+}
 
 function stringField(value: unknown): string {
 	return typeof value === "string" ? value.trim() : String(value ?? "").trim();
@@ -82,6 +90,7 @@ export async function POST(request: Request) {
 	const isSuccess = status === "SUCCESS";
 	const eventId = fingerprintPayUniPeriodEvent(payload);
 	let claimed = false;
+	let claimToken = "";
 	try {
 		const claim = await claimWebhookEvent({
 			gateway: "payuni",
@@ -89,10 +98,20 @@ export async function POST(request: Request) {
 			eventType: `period.${isSuccess ? "paid" : "failed"}`,
 			payload: payload as Prisma.InputJsonValue,
 		});
-		if (claim === "DUPLICATE") {
+		if (claim.status !== "CLAIMED") {
+			if (claim.status === "COMPLETED" && isSuccess) {
+				const existingSubscription = await db.courseSubscription.findUnique({
+						where: { gatewayTradeNo },
+						select: { id: true },
+				});
+				if (existingSubscription) {
+					await triggerInvoiceForSubscriptionPeriod(existingSubscription.id, periodNumber).catch(() => undefined);
+				}
+			}
 			return NextResponse.json({ message: "OK" });
 		}
 		claimed = true;
+		claimToken = claim.token;
 
 		const subscription = await db.courseSubscription.findUnique({
 			where: { gatewayTradeNo },
@@ -105,16 +124,17 @@ export async function POST(request: Request) {
 				paidPeriods: true,
 				gatewaySubscriptionId: true,
 				currentPeriodEnd: true,
+				cancellationOperationToken: true,
 			},
 		});
 		if (!subscription) {
-			await failWebhookEvent("payuni", eventId, new Error("Subscription not found"));
+			await failWebhookEvent("payuni", eventId, claimToken, new Error("Subscription not found"));
 			claimed = false;
 			return NextResponse.json({ error: "Subscription not found" }, { status: 400 });
 		}
 
 		if (!isSuccess) {
-			await completeWebhookEvent("payuni", eventId);
+			await completeWebhookEvent("payuni", eventId, claimToken);
 			claimed = false;
 			return NextResponse.json({ message: "OK" });
 		}
@@ -134,15 +154,31 @@ export async function POST(request: Request) {
 		if (!periodEnd) {
 			throw new Error("Missing valid period end date");
 		}
-		const periodNumber = subscription.paidPeriods + 1;
-		const updateData: Parameters<typeof db.courseSubscription.update>[0]["data"] = {
-			status: subscription.status === "PENDING" ? "ACTIVE" : subscription.status,
-			gatewaySubscriptionId: subscription.gatewaySubscriptionId ?? periodTradeNo,
-			paidPeriods: { increment: 1 },
-			lastPaymentAt: new Date(),
-		};
-		await db.$transaction(async (tx) => {
-			if (!subscription.currentPeriodEnd || periodEnd > subscription.currentPeriodEnd) {
+		const shouldProcess = await withInvoiceOperationLock(async (tx) => {
+			await assertWebhookClaim(tx, "payuni", eventId, claimToken);
+			await acquireSubscriptionStateLock(tx, subscription.id);
+			const latestSubscription = await tx.courseSubscription.findUnique({
+					where: { id: subscription.id },
+					select: {
+						id: true,
+						userId: true,
+						courseId: true,
+						status: true,
+						pricePerPeriod: true,
+						paidPeriods: true,
+						gatewaySubscriptionId: true,
+						currentPeriodEnd: true,
+						cancellationOperationToken: true,
+						},
+			});
+			if (!latestSubscription) throw new Error("Subscription not found");
+			if (latestSubscription.status === "CANCELED") return false;
+			if (latestSubscription.cancellationOperationToken) throw new Error("Subscription cancellation is in progress");
+			if (latestSubscription.gatewaySubscriptionId && latestSubscription.gatewaySubscriptionId !== periodTradeNo) {
+				throw new Error("PeriodTradeNo does not match subscription");
+			}
+			const nextPaidPeriods = Math.max(latestSubscription.paidPeriods, periodNumber);
+			if (!latestSubscription.currentPeriodEnd || periodEnd > latestSubscription.currentPeriodEnd) {
 				// Keep the max operation in the database so two different period events
 				// cannot overwrite a newer period end with an older one.
 				await tx.courseSubscription.updateMany({
@@ -153,13 +189,20 @@ export async function POST(request: Request) {
 					data: { currentPeriodEnd: periodEnd },
 				});
 			}
-			await tx.courseSubscription.update({ where: { id: subscription.id }, data: updateData });
-			await tx.paymentWebhookEvent.update({
-				where: { gateway_eventId: { gateway: "payuni", eventId } },
-				data: { status: "COMPLETED", error: null },
-			});
-			});
-			claimed = false;
+			await tx.courseSubscription.update({
+					where: { id: subscription.id },
+					data: {
+						status: latestSubscription.status === "PENDING" ? "ACTIVE" : latestSubscription.status,
+						gatewaySubscriptionId: latestSubscription.gatewaySubscriptionId ?? periodTradeNo,
+						paidPeriods: nextPaidPeriods,
+						lastPaymentAt: new Date(),
+					},
+				});
+			return true;
+		});
+		await completeWebhookEvent("payuni", eventId, claimToken);
+		claimed = false;
+		if (!shouldProcess) return NextResponse.json({ message: "OK" });
 		scheduleAfterResponse(async () => {
 			const tasks: Array<Promise<unknown>> = [triggerInvoiceForSubscriptionPeriod(subscription.id, periodNumber)];
 			if (periodNumber === 1) {
@@ -174,7 +217,7 @@ export async function POST(request: Request) {
 		return NextResponse.json({ message: "OK" });
 	} catch (error) {
 		if (claimed) {
-			await failWebhookEvent("payuni", eventId, error).catch(() => undefined);
+			await failWebhookEvent("payuni", eventId, claimToken ?? "", error).catch(() => undefined);
 		}
 		return NextResponse.json({ error: "Internal error" }, { status: 500 });
 	}

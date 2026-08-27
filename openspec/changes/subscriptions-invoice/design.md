@@ -31,7 +31,7 @@
 
 ### Decision: Invoice model 同時支援 Order 與訂閱期款兩種付款來源
 
-`Invoice.orderId` 改為 nullable，新增 `Invoice.subscriptionId`（nullable）與 `Invoice.periodNumber`（nullable，Int），兩組欄位互斥：恰好其中一組非空（`orderId` 非空且 `subscriptionId`／`periodNumber` 皆空，或反之）。一次買斷付款成功時建立 `Invoice{orderId}`；訂閱每期扣款成功時建立 `Invoice{subscriptionId, periodNumber}`，`periodNumber` 對應 `CourseSubscription.paidPeriods` 遞增後的值，確保同一期不會重複開票（`@@unique([subscriptionId, periodNumber])`，`subscriptionId` 非空時生效）。
+`Invoice.orderId` 改為 nullable，新增 `Invoice.subscriptionId`（nullable）與 `Invoice.periodNumber`（nullable，Int），兩組欄位互斥：恰好其中一組非空（`orderId` 非空且 `subscriptionId`／`periodNumber` 皆空，或反之）。一次買斷付款成功時建立 `Invoice{orderId}`；訂閱每期扣款成功時依 PayUNi `PeriodOrderNo` 的實際期數建立 `Invoice{subscriptionId, periodNumber}`，並在 subscription advisory lock 內以該期數更新 `paidPeriods` 的最大值，確保亂序 webhook 不會把期數重新編號或重複開票（`@@unique([subscriptionId, periodNumber])`，`subscriptionId` 非空時生效）。
 
 Alternatives Considered:
 - 照抄 woomin 單一 `orderId` 綁定，訂閱扣款時額外建立一筆輕量 `Order` 記錄專門給發票用 → 否決：這違反 `payuni-recurring-billing` change 的既有決策「訂閱不建立 Order 記錄」（design.md 已記錄理由：避免 `Order.sku === MVP_SKU` 判斷邏輯被訂閱期款污染），為了發票功能推翻已驗證的決策不划算，且會讓 `Order` 表混雜兩種語意
@@ -63,7 +63,7 @@ Alternatives Considered:
 
 ### Decision: 開票觸發邏輯抽成 gateway-agnostic 共用函式，不寫死在 PAYUNi 專屬 route 裡
 
-`packages/api/modules/course/lib/invoice-events.ts` 新增 `triggerInvoiceForOrder(orderId: string)` 與 `triggerInvoiceForSubscriptionPeriod(subscriptionId: string, periodNumber: number)` 兩個共用函式，內部處理「讀取電子發票設定 → 判斷是否啟用/自動開立 → 組出 `buildIssueInput` → 呼叫 `InvoiceProvider.issue` → 寫入 `Invoice`」全流程。`apps/saas/app/api/payuni/notify/route.ts`／`apps/saas/app/api/payuni/period-notify/route.ts` 只需要在既有成功分支呼叫這兩個函式，不在 route 檔案內直接重複開票邏輯。StartKiter 的 v1 硬邊界目前只接通 PAYUNi 一家金流，但這兩個函式的參數（`orderId`／`subscriptionId`＋`periodNumber`）不含任何 PAYUNi 專屬概念，未來若有其他金流的付款成功 webhook（例如另一張處理多金流的 change），可以直接呼叫同一組函式，不需要重新設計或複製貼上開票邏輯到每個 gateway 各自的 route 裡。
+`packages/api/modules/course/lib/invoice-events.ts` 新增 `triggerInvoiceForOrder(orderId: string)` 與 `triggerInvoiceForSubscriptionPeriod(subscriptionId: string, periodNumber: number)` 兩個共用函式，內部處理「讀取電子發票設定 → 判斷是否啟用/自動開立 → 組出 `buildIssueInput` → 呼叫 `InvoiceProvider.issue` → 寫入 `Invoice`」全流程。`apps/saas/app/api/payuni/notify/route.ts`／`apps/saas/app/api/payuni/period-notify/route.ts` 只需要在既有成功分支呼叫這兩個函式，不在 route 檔案內直接重複開票邏輯。StartKiter 的 v1 硬邊界目前只接通 PAYUNi 一家金流，但這兩個函式的參數（`orderId`／`subscriptionId`＋`periodNumber`）不含任何 PAYUNi 專屬概念，未來若有其他金流的付款成功 webhook（例如另一張處理多金流的 change），可以直接呼叫同一組函式，不需要重新設計或複製貼上開票邏輯到每個 gateway 各自的 route 裡。一次買斷付款 transaction 會一併建立 `Invoice{status: PENDING}` intent；`/api/cron/invoice-retry` 會以 bearer secret 重試超過冷卻時間的 `PENDING`／`FAILED` intent。
 
 Alternatives Considered:
 - 把開票邏輯直接寫在 `payuni/notify`／`payuni/period-notify` 兩個 route 檔案內部（如同這兩個 route 本來就有的付款狀態更新邏輯）→ 否決：這次 propose 過程中已確認未來會有處理其他金流（Shopline/Stripe）的獨立 change，若開票邏輯跟 PAYUNi 專屬 route 綁死，屆時每新增一個金流的 webhook route 都要重新複製一份開票判斷邏輯，任何一處未來修改（例如發票欄位邏輯調整）都要同步改多處，容易漏改
@@ -71,7 +71,7 @@ Alternatives Considered:
 
 ### Decision: 退款時自動作廢同月發票，跨月或已對獎則標記待人工處理
 
-Fish 明確要求退款要自動處理發票，不是完全丟給操作員自己記得去點按鈕。`apps/saas/lib/orders.ts` 的 `markOrderRefundedInDb`（既有退款流程，清除 `courseAccess`、寫入 `refundedAt`；`packages/payments/refund.ts` 是未使用的舊 memory-store 代碼，不是本次修改對象）之後，新增呼叫 `packages/api/modules/course/lib/invoice-events.ts` 的 `handleRefundInvoice(orderId)`：查詢該 `Order` 對應的 `Invoice`，若 `status === "ISSUED"` 且發票開立日仍在當前月份內，自動呼叫 `InvoiceProvider.void`，成功則 `Invoice.status = VOIDED`；若已跨月（`invoiceDate` 的月份早於退款當下月份）或作廢呼叫本身失敗，不強制自動開折讓（折讓金額與稅務認定需要人工判斷，`.docs/launch-course-research/pages/docs__getting-started__einvoice-setup.md` 官方文件明講「退款牽涉到稅，認定上比較細，第一次處理直接問記帳士」），而是把 `Invoice.attentionReason` 設為 `"REFUND_NEEDS_ALLOWANCE"`，訂單頁與發票列表對這個狀態要顯示明顯的「退款但發票待處理」提示，操作員自己決定金額後手動點「開立折讓」。訂閱取消（`cancel-course-subscription` procedure）同理：取消成功後對該訂閱最近一筆 `ISSUED` 發票跑同一套 `handleRefundInvoice` 邏輯。
+Fish 明確要求退款要自動處理發票，不是完全丟給操作員自己記得去點按鈕。`apps/saas/lib/orders.ts` 的 `markOrderRefundedInDb`（既有退款流程，清除 `courseAccess`、寫入 `refundedAt`；`packages/payments/refund.ts` 是未使用的舊 memory-store 代碼，不是本次修改對象）之後，新增呼叫 `packages/api/modules/course/lib/invoice-events.ts` 的 `handleRefundInvoice(orderId)`：查詢該 `Order` 對應的 `Invoice`，若 `status === "ISSUED"` 且發票開立日仍在當前月份內，自動呼叫 `InvoiceProvider.void`，成功則 `Invoice.status = VOIDED`；若已跨月（`invoiceDate` 的月份早於退款當下月份）或作廢呼叫本身失敗，不強制自動開折讓（折讓金額與稅務認定需要人工判斷，`.docs/launch-course-research/pages/docs__getting-started__einvoice-setup.md` 官方文件明講「退款牽涉到稅，認定上比較細，第一次處理直接問記帳士」），而是把 `Invoice.attentionReason` 設為 `"REFUND_NEEDS_ALLOWANCE"`，訂單頁與發票列表對這個狀態要顯示明顯的「退款但發票待處理」提示，操作員自己決定金額後手動點「開立折讓」。訂閱取消（`cancel-course-subscription` procedure）同理：取消成功後對該訂閱最近一筆 `ISSUED` 發票跑同一套 `handleRefundInvoice` 邏輯。所有外部發票作業先以 `*_IN_PROGRESS` marker 搶占，完成時條件式寫回；開票完成前若來源已退款／取消，會立即嘗試作廢，否則留下 `REFUND_NEEDS_ALLOWANCE` 待查。
 
 Alternatives Considered:
 - 跨月也自動開立全額折讓 → 否決：折讓金額不一定是全額（買家可能只退部分課程），且已對獎中獎的發票折讓有額外的加值中心流程要求，自動猜測金額風險高於效益，官方文件也建議這種情況交給人工判斷
@@ -81,7 +81,7 @@ Alternatives Considered:
 
 **Behavior:**
 - 買家在結帳頁（一次買斷或訂閱）填寫發票偏好（B2C 載具／B2B 統編抬頭／捐贈愛心碼），資料存進 `Order` 或 `CourseSubscription` 的 `invoice*` 欄位
-- 一次買斷付款成功（`payuni/notify`）或訂閱期款成功（`payuni/period-notify`）時，若後台「啟用電子發票」與「付款成功後自動開立」皆開啟，觸發 `InvoiceProvider.issue`，成功建立 `Invoice{status: ISSUED}`，失敗建立 `Invoice{status: FAILED, failReason}` 但不阻塞付款成功的其他既有流程
+- 一次買斷付款成功（`payuni/notify`、Shopline notify 或 Stripe webhook）或訂閱期款成功（`payuni/period-notify`）時，若後台「啟用電子發票」與「付款成功後自動開立」皆開啟，先留下 `Invoice{status: PENDING}` operation intent，再於 transaction 外呼叫 `InvoiceProvider.issue`；成功更新為 `ISSUED`，失敗更新為 `FAILED`，不阻塞付款成功的其他既有流程，重送 webhook 或 `/api/cron/invoice-retry` stale job 可重試
 - 操作員在訂單頁對已 `ISSUED` 的發票點「作廢」：同期間未跨月時允許，呼叫 `InvoiceProvider.void`，成功後 `Invoice.status = VOIDED`
 - 操作員點「開立折讓」：填折讓金額（預設全額），呼叫 `InvoiceProvider.allowance`，成功後 `Invoice.status = ALLOWANCE`，`allowanceTotal` 累加
 
@@ -137,10 +137,11 @@ ALTER TABLE "course_subscription" ADD COLUMN "invoiceLoveCode" TEXT;
 ```
 
 **Failure modes:**
-- `InvoiceProvider.issue` 失敗（加值中心 API 錯誤、金鑰未設定）→ `Invoice{status: FAILED, failReason}`，付款本身視為成功（不因發票失敗而回滾付款），操作員可在後台看到失敗原因並手動重試
+- `InvoiceProvider.issue` 失敗（加值中心 API 錯誤、金鑰未設定）→ `Invoice{status: FAILED, failReason}`，付款本身視為成功（不因發票失敗而回滾付款），`/api/cron/invoice-retry` 或重送已完成 webhook 可重試
 - 電子發票總開關未啟用 → 完全不建立 `Invoice` 記錄，付款流程行為跟現在一致
 - 作廢已跨月的發票 → provider 回傳失敗，UI 顯示「已跨月，請改用折讓」
 - 未設定發票金鑰時嘗試開票 → 視為 `FAILED`，不拋例外中斷付款 webhook 處理
+- 發票仍有 `PENDING`／`FAILED` 或 operation marker 時 → 阻擋更換 provider／金鑰，避免 retry 使用錯誤的 provider snapshot；操作員只能在待查作業結束後修改設定
 
 **Acceptance criteria:**
 - `pnpm --filter @startkiter/api test` 涵蓋：B2C 開票成功、B2B 開票成功、捐贈開票成功、訂閱期款開票成功且 `periodNumber` 唯一、重複期款不重複開票、作廢成功、跨月作廢被拒、折讓成功且 `allowanceTotal` 累加正確
@@ -153,7 +154,10 @@ ALTER TABLE "course_subscription" ADD COLUMN "invoiceLoveCode" TEXT;
 
 ## Risks / Trade-offs
 
-- [Risk] 訂閱期款發票依賴 `CourseSubscription.paidPeriods` 作為 `periodNumber` 來源，若 webhook 處理順序錯亂導致 `paidPeriods` 跳號 → Mitigation: `period-notify` route 既有 transaction 保護 `paidPeriods` 遞增與狀態更新的原子性（`payuni-recurring-billing` change 已實作），發票建立掛在同一次成功處理之後，不額外引入新的並發風險
+- [Risk] 訂閱期款 webhook 可能亂序或並行抵達 → Mitigation: 使用 PayUNi `PeriodOrderNo` 的實際期數，不再以讀取後的 `paidPeriods + 1` 猜期數；subscription advisory lock 內以最大期數更新 `paidPeriods`，`Invoice(subscriptionId, periodNumber)` 唯一鍵防止重複
+- [Risk] 外部開票成功後本地更新可能中斷 → Mitigation: 先在付款 transaction 寫入 `PENDING` intent，外部 mutation 在 transaction 外執行；本地 finalize 失敗時保留可由 webhook replay 或 `/api/cron/invoice-retry` stale job 重試的 intent，不把遠端 mutation 包在會 rollback 的 DB transaction 內
+- [Risk] 付款成功後來源在開票期間被退款／取消 → Mitigation: finalize 重新查核 Order／CourseSubscription 狀態；若來源已失效，先標記並立即作廢，失敗則保留 `REFUND_NEEDS_ALLOWANCE`
+- [Risk] provider 設定在待辦重試前被替換 → Mitigation: 有 `PENDING`／`FAILED` 或 attention marker 時，設定頁拒絕 provider／金鑰／測試模式變更
 - [Risk] 電子發票金鑰與 PAYUNi 金鑰共用同一個 `SETTINGS_ENCRYPTION_KEY` 解密機制，若該金鑰外洩會同時影響金流與發票憑證 → Mitigation: 沿用既有機制，不新增額外攻擊面，這是既有風險非本次引入
 - [Risk] `Invoice` 的 CHECK 約束（`orderId`／`subscriptionId`+`periodNumber` 互斥）若應用層邏輯寫錯，可能同時傳兩組值導致 DB 拒絕寫入 → Mitigation: DB CHECK 約束本身就是最後一道防線，寫入邏輯出錯會直接在 insert 階段失敗，不會產生髒資料
 - [Risk] 作廢/折讓涉及金額異動，若操作員誤按可能造成加值中心那邊真的送出作廢/折讓請求（不可逆） → Mitigation: UI 需二次確認對話框（已在 Non-Goals 外的既有 UI 慣例），且 provider 回應失敗時不變更本地 `Invoice.status`

@@ -83,8 +83,8 @@ export async function POST(request: Request) {
 	const amountObject = recordAt(data, "amount");
 	const amount = numberAt(amountObject.value) ?? numberAt(data.amount);
 	const currency = stringAt(amountObject.currency, data.currency).toUpperCase();
-	const expectedValues = new Set([order.amount, order.amount * 100]);
-	if (amount === null || !expectedValues.has(amount) || currency !== order.currency.toUpperCase()) {
+	const expectedMinorUnitAmount = order.amount * 100;
+	if (amount === null || amount !== expectedMinorUnitAmount || currency !== order.currency.toUpperCase()) {
 		return NextResponse.json({ error: "amount_mismatch" }, { status: 400 });
 	}
 

@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@startkiter/database", () => ({
-	db: { order: { findUnique: vi.fn(), updateMany: vi.fn() } },
+	db: {
+		order: { findUnique: vi.fn(), updateMany: vi.fn() },
+		invoice: { findUnique: vi.fn(), create: vi.fn() },
+	},
 }));
 vi.mock("@startkiter/api/modules/course/lib/order-refunds", () => ({
 	refundOrderThroughGateway: vi.fn(),
@@ -10,9 +13,6 @@ vi.mock("@startkiter/api/modules/course/lib/order-refunds", () => ({
 vi.mock("@startkiter/api/modules/course/lib/invoice-events", () => ({
 	handleRefundInvoice: vi.fn(),
 }));
-vi.mock("./schedule-after", () => ({
-	scheduleAfterResponse: vi.fn(),
-}));
 vi.mock("@startkiter/payments", async (importOriginal) => ({
 	...(await importOriginal<typeof import("@startkiter/payments")>()),
 	createMvpCheckoutGateway: vi.fn(),
@@ -20,6 +20,7 @@ vi.mock("@startkiter/payments", async (importOriginal) => ({
 
 import { db } from "@startkiter/database";
 import { refundOrderThroughGateway } from "@startkiter/api/modules/course/lib/order-refunds";
+import { handleRefundInvoice } from "@startkiter/api/modules/course/lib/invoice-events";
 import { markOrderPaid, markOrderRefundedInDb } from "./orders";
 
 describe("database refund gateway dispatch", () => {
@@ -28,7 +29,11 @@ describe("database refund gateway dispatch", () => {
 		vi.mocked(db.order.findUnique).mockResolvedValue({
 			id: "order-id",
 			status: "paid",
+			amount: 8800,
 		} as never);
+		vi.mocked(db.invoice.findUnique).mockResolvedValue(null);
+		vi.mocked(db.invoice.create).mockResolvedValue({ id: "invoice-1" } as never);
+		vi.mocked(handleRefundInvoice).mockResolvedValue(null);
 		vi.mocked(refundOrderThroughGateway).mockResolvedValue(1);
 		vi.mocked(db.order.updateMany).mockResolvedValue({ count: 1 } as never);
 	});
@@ -41,7 +46,13 @@ describe("database refund gateway dispatch", () => {
 		}));
 	});
 
-	it("uses the shared gateway dispatcher before scheduling invoice handling", async () => {
+	it("does not couple payment success to invoice intent persistence", async () => {
+		await expect(markOrderPaid("order-id", "ORDER-1", "PAYMENT-1", "payuni")).resolves.toBe(1);
+
+		expect(db.invoice.create).not.toHaveBeenCalled();
+	});
+
+	it("uses the shared gateway dispatcher before handling invoice reconciliation", async () => {
 		const result = await markOrderRefundedInDb("ORDER-1");
 
 		expect(result).toBe(1);

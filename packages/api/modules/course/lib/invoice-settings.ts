@@ -89,11 +89,13 @@ function parseSettings(json: string): InvoiceSettings | null {
 	}
 }
 
-export async function readInvoiceSettingsPlain(): Promise<InvoiceSettings | null> {
+type InvoiceSettingsClient = Pick<Prisma.TransactionClient, "siteSetting">;
+
+export async function readInvoiceSettingsPlain(client: InvoiceSettingsClient = db): Promise<InvoiceSettings | null> {
 	const secret = process.env.SETTINGS_ENCRYPTION_KEY ?? "";
 	if (!secret.trim()) return null;
 	try {
-		const row = await db.siteSetting.findUnique({ where: { id: EINVOICE_SETTING_ID } });
+		const row = await client.siteSetting.findUnique({ where: { id: EINVOICE_SETTING_ID } });
 		if (!row) return null;
 		const json = decryptSettingsJson(row.ciphertext, secret);
 		return json ? parseSettings(json) : null;
@@ -102,13 +104,11 @@ export async function readInvoiceSettingsPlain(): Promise<InvoiceSettings | null
 	}
 }
 
-export async function getInvoiceSettings(): Promise<InvoiceSettings> {
-	return (await readInvoiceSettingsPlain()) ?? { ...EMPTY_INVOICE_SETTINGS };
+export async function getInvoiceSettings(client: InvoiceSettingsClient = db): Promise<InvoiceSettings> {
+	return (await readInvoiceSettingsPlain(client)) ?? { ...EMPTY_INVOICE_SETTINGS };
 }
 
-export async function getInvoiceProvider(expectedProvider?: InvoiceProviderName): Promise<InvoiceProvider | null> {
-	const settings = await getInvoiceSettings();
-	if (expectedProvider && settings.provider !== expectedProvider) return null;
+export function createInvoiceProvider(settings: InvoiceSettings): InvoiceProvider | null {
 	if (!settings.merchantId || !isValidInvoiceCredentialLength(settings)) return null;
 	const config: InvoiceProviderConfig = {
 		merchantId: settings.merchantId,
@@ -118,4 +118,10 @@ export async function getInvoiceProvider(expectedProvider?: InvoiceProviderName)
 		timeoutMs: EINVOICE_PROVIDER_TIMEOUT_MS,
 	};
 	return settings.provider === "ezpay" ? createEzpayInvoiceProvider(config) : createEcpayInvoiceProvider(config);
+}
+
+export async function getInvoiceProvider(expectedProvider?: InvoiceProviderName): Promise<InvoiceProvider | null> {
+	const settings = await getInvoiceSettings();
+	if (expectedProvider && settings.provider !== expectedProvider) return null;
+	return createInvoiceProvider(settings);
 }

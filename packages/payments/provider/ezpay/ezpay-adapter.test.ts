@@ -32,3 +32,37 @@ describe("ezPay allowance adapter payload", () => {
 		expect(fetchMock).toHaveBeenCalledOnce();
 	});
 });
+
+describe("ezPay invoice status mapping", () => {
+	it.each(["2", 2])("maps the provider's InvoiceStatus=%s to VOIDED", async (invoiceStatus) => {
+		const fetchMock = vi.fn().mockResolvedValue(
+			new Response(
+				JSON.stringify({
+					Status: "SUCCESS",
+					Message: "查詢成功",
+					Result: JSON.stringify({
+						InvoiceNumber: "DQ70632357",
+							InvoiceStatus: invoiceStatus,
+						CreateTime: "2026-08-27 18:22:54",
+						RandomNum: "1234",
+						TotalAmt: "390",
+					}),
+				}),
+				{ status: 200, headers: { "content-type": "application/json" } },
+			),
+		);
+		const provider = createEzpayProvider({
+			merchantId: "MERCHANT",
+			hashKey: "12345678901234567890123456789012",
+			hashIV: "1234567890123456",
+			mode: "PRODUCTION",
+			validatePayload: true,
+			fetch: fetchMock,
+		});
+
+		await expect(provider.query({ invoiceNumber: "DQ70632357", providerOptions: { randomNum: "1234" } })).resolves.toMatchObject({
+			invoiceNumber: "DQ70632357",
+			status: "VOIDED",
+		});
+	});
+});

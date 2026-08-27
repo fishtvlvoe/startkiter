@@ -142,6 +142,7 @@ export type RefundResult = {
 	error?: string;
 	gatewayRefundId?: string;
 	pending?: boolean;
+	ambiguous?: boolean;
 	requiresManualAction?: boolean;
 };
 
@@ -161,6 +162,11 @@ export interface CheckoutGateway {
 		amount?: number;
 		currency?: string;
 	}): Promise<RefundResult>;
+	queryRefund?(params: { gatewayPaymentId: string; orderNo?: string; amount?: number; currency?: string }): Promise<{
+		status: "REFUNDED" | "PENDING" | "NOT_REFUNDED" | "UNKNOWN";
+		gatewayRefundId?: string;
+		error?: string;
+	}>;
 }
 
 /** Provider-neutral contract for recurring billing. */
@@ -176,11 +182,12 @@ export interface SubscriptionGateway {
 	}): Promise<SubscriptionSessionResult>;
 	cancelSubscription(params: {
 		gatewaySubscriptionId: string;
-	}): Promise<{ success: boolean; error?: string }>;
+	}): Promise<{ success: boolean; error?: string; ambiguous?: boolean }>;
 	queryPeriod(gatewaySubscriptionId: string): Promise<{
 		status: string;
 		totalTimes: number;
 		alreadyTimes: number;
+		cancellationStatus: "ACTIVE" | "CANCELED" | "UNKNOWN";
 	}>;
 }
 
@@ -195,8 +202,21 @@ export type InvoiceProviderConfig = {
 export interface InvoiceProvider {
 	issue(input: IssueInvoiceInput): Promise<
 		| { invoiceNumber: string; randomCode: string; invoiceDate: Date; raw?: unknown }
-		| { failReason: string }
+		| { failReason: string; ambiguous?: boolean }
 	>;
+	query?(params: { invoiceNumber?: string; orderId?: string; randomCode?: string; invoiceDate?: Date | null; amount?: number }): Promise<{
+		status: string;
+		invoiceNumber?: string;
+		invoiceDate?: Date;
+		randomCode?: string;
+		raw?: unknown;
+		error?: string;
+	}>;
+	queryAllowance?(params: { invoiceNumber: string; allowanceId: string; invoiceDate?: Date | null }): Promise<{
+		status: "SUCCEEDED" | "NOT_FOUND" | "UNKNOWN";
+		allowanceNumber?: string;
+		error?: string;
+	}>;
 	void(params: { invoiceNumber: string; reason: string; invoiceDate?: Date | null }): Promise<{ success: boolean; error?: string }>;
 	allowance(params: {
 		invoiceNumber: string;

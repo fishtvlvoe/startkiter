@@ -7,8 +7,17 @@ type InvoiceForOperation = {
 	invoiceNumber: string | null;
 	invoiceDate: Date | null;
 	allowanceTotal: number;
+	attentionReason?: string | null;
 	taxExclusive?: boolean;
 };
+
+export function assertInvoiceVoidable(invoice: InvoiceForOperation, now = new Date()): void {
+	if (invoice.status !== "ISSUED" || !invoice.invoiceNumber) throw new Error("只有已開立且有發票號碼的發票可以作廢");
+	if (invoice.attentionReason) throw new Error("發票目前有待確認的作業，請先完成查核");
+	if (!invoice.invoiceDate || !sameTaiwanBillingMonth(invoice.invoiceDate, now)) {
+		throw new Error("發票已跨月，請改用折讓");
+	}
+}
 
 export class InvoiceAllowanceError extends Error {
 	constructor(message: string, readonly ambiguous: boolean) {
@@ -23,12 +32,9 @@ export async function voidInvoice(args: {
 	now?: Date;
 }): Promise<InvoiceForOperation & { status: "VOIDED" }> {
 	const invoice = args.invoice;
-	if (invoice.status !== "ISSUED" || !invoice.invoiceNumber) throw new Error("只有已開立且有發票號碼的發票可以作廢");
-	if (!invoice.invoiceDate || !sameTaiwanBillingMonth(invoice.invoiceDate, args.now ?? new Date())) {
-		throw new Error("發票已跨月，請改用折讓");
-	}
+	assertInvoiceVoidable(invoice, args.now);
 
-	const result = await args.provider.void({ invoiceNumber: invoice.invoiceNumber, reason: "退款", invoiceDate: invoice.invoiceDate });
+	const result = await args.provider.void({ invoiceNumber: invoice.invoiceNumber!, reason: "退款", invoiceDate: invoice.invoiceDate! });
 	if (!result.success) throw new Error(result.error ?? "作廢發票失敗");
 	return { ...invoice, status: "VOIDED" };
 }

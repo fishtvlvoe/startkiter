@@ -325,6 +325,11 @@ model Order {
   kitClaimEligible   Boolean     @default(false)
   paidAt             DateTime?
   refundedAt         DateTime?
+  refundOperationToken String?
+  refundOperationStartedAt DateTime?
+  refundGatewayRefundId String?
+  refundError        String?
+  refundStatus       String?
   invoiceType        String?
   invoiceCarrierType String?
   invoiceCarrierId   String?
@@ -673,6 +678,9 @@ model CourseSubscription {
   currentPeriodEnd      DateTime?
   lastPaymentAt         DateTime?
   canceledAt            DateTime?
+  cancellationOperationToken String?
+  cancellationOperationStartedAt DateTime?
+  cancellationError     String?
   invoiceType           String?
   invoiceCarrierType    String?
   invoiceCarrierId      String?
@@ -798,6 +806,8 @@ model Invoice {
   allowanceTotal  Int                 @default(0)
   failReason      String?
   attentionReason String?
+  operationToken  String?
+  operationStartedAt DateTime?
   rawResponse     Json?
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
@@ -836,6 +846,8 @@ model PaymentWebhookEvent {
   status    PaymentWebhookEventStatus @default(PROCESSING)
   payload   Json
   error     String?
+  processingStartedAt DateTime?
+  claimToken String?
   createdAt DateTime                  @default(now())
   updatedAt DateTime                  @updatedAt
 

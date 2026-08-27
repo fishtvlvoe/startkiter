@@ -14,6 +14,7 @@ vi.mock("@startkiter/database", () => ({
 		invoice: {
 			findUnique: vi.fn(),
 			update: vi.fn(),
+			updateMany: vi.fn(),
 		},
 		invoiceAllowanceOperation: {
 			findUnique: vi.fn(),
@@ -51,6 +52,7 @@ const invoice = {
 	allowanceTotal: 0,
 	amount: 8800,
 	provider: "ecpay",
+	attentionReason: null,
 };
 
 const provider = {
@@ -68,6 +70,7 @@ describe("invoice admin audit logging", () => {
 		vi.mocked(db.invoice.findUnique).mockResolvedValue(invoice as never);
 		vi.mocked(db.invoiceAllowanceOperation.findUnique).mockResolvedValue(null);
 		vi.mocked(db.invoice.update).mockResolvedValue({ ...invoice, status: "VOIDED" } as never);
+		vi.mocked(db.invoice.updateMany).mockResolvedValue({ count: 1 } as never);
 		vi.mocked(db.$executeRaw).mockResolvedValue(0);
 		vi.mocked(db.$transaction).mockImplementation(async (callback) => callback(db as never) as never);
 		vi.mocked(getInvoiceProvider).mockResolvedValue(provider as never);

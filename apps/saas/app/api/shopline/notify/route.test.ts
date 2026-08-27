@@ -67,7 +67,7 @@ describe("Shopline payment notify", () => {
 	it("marks a signed successful payment paid and calls the shared invoice hook", async () => {
 		const body = JSON.stringify({
 			type: "payment.succeeded",
-			data: { referenceOrderId: "ORDER-1", tradeOrderId: "sl_trade_1", amount: { value: 8800, currency: "TWD" } },
+			data: { referenceOrderId: "ORDER-1", tradeOrderId: "sl_trade_1", amount: { value: 880000, currency: "TWD" } },
 		});
 
 		const response = await POST(signedRequest(body));
@@ -80,7 +80,7 @@ describe("Shopline payment notify", () => {
 	it("rejects an invalid signature before reading or changing the order", async () => {
 		const body = JSON.stringify({
 			type: "payment.succeeded",
-			data: { referenceOrderId: "ORDER-1", tradeOrderId: "sl_trade_1", amount: { value: 8800, currency: "TWD" } },
+			data: { referenceOrderId: "ORDER-1", tradeOrderId: "sl_trade_1", amount: { value: 880000, currency: "TWD" } },
 		});
 
 		const response = await POST(signedRequest(body, "wrong-sign-key"));
@@ -94,7 +94,7 @@ describe("Shopline payment notify", () => {
 	it("rejects a signed success notification without an exact currency", async () => {
 		const body = JSON.stringify({
 			type: "payment.succeeded",
-			data: { referenceOrderId: "ORDER-1", tradeOrderId: "sl_trade_1", amount: { value: 8800 } },
+			data: { referenceOrderId: "ORDER-1", tradeOrderId: "sl_trade_1", amount: { value: 880000 } },
 		});
 
 		const response = await POST(signedRequest(body));
@@ -115,5 +115,18 @@ describe("Shopline payment notify", () => {
 		expect(response.status).toBe(400);
 		expect(findOrderByNo).not.toHaveBeenCalled();
 		expect(markOrderPaid).not.toHaveBeenCalled();
+	});
+
+	it("rejects a major-unit amount when Shopline sends minor units", async () => {
+		const body = JSON.stringify({
+			type: "payment.succeeded",
+			data: { referenceOrderId: "ORDER-1", tradeOrderId: "sl_trade_1", amount: { value: 8800, currency: "TWD" } },
+		});
+
+		const response = await POST(signedRequest(body));
+
+		expect(response.status).toBe(400);
+		expect(markOrderPaid).not.toHaveBeenCalled();
+		expect(triggerInvoiceForOrder).not.toHaveBeenCalled();
 	});
 });

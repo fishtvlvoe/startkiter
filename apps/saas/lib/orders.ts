@@ -1,7 +1,6 @@
 import { db } from "@startkiter/database";
 import { handleRefundInvoice } from "@startkiter/api/modules/course/lib/invoice-events";
 import { refundOrderThroughGateway, withOrderStateLock } from "@startkiter/api/modules/course/lib/order-refunds";
-import { scheduleAfterResponse } from "./schedule-after";
 import {
 	MVP_AMOUNT_TWD,
 	MVP_SKU,
@@ -118,9 +117,7 @@ export async function markOrderRefundedInDb(orderNo: string) {
 	if (!order) return 0;
 	const count = await refundOrderThroughGateway(order.id);
 	if (count > 0) {
-		scheduleAfterResponse(async () => {
-			await handleRefundInvoice(order.id);
-		});
+		await handleRefundInvoice(order.id).catch(() => undefined);
 	}
 	return count;
 }

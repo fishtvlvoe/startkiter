@@ -52,19 +52,32 @@ describe("writeInvoiceSettings", () => {
 		vi.clearAllMocks();
 		process.env.SETTINGS_ENCRYPTION_KEY = "invoice-settings-test-secret";
 		vi.mocked(getInvoiceSettings).mockResolvedValue(currentSettings);
-		vi.mocked(db.invoice.findMany).mockResolvedValue([{ amount: 8800, allowanceTotal: 0 }] as never);
+		vi.mocked(db.invoice.findMany).mockResolvedValue([]);
 		vi.mocked(db.siteSetting.upsert).mockResolvedValue({} as never);
 		vi.mocked(db.$executeRaw).mockResolvedValue(0);
 		vi.mocked(db.$transaction).mockImplementation(async (callback) => callback(db as never) as never);
 	});
 
 	it("blocks switching provider while an issued invoice is outstanding", async () => {
+		vi.mocked(db.invoice.findMany)
+			.mockResolvedValueOnce([])
+			.mockResolvedValueOnce([{ amount: 8800, allowanceTotal: 0 }] as never);
 		await expect(writeInvoiceSettings({
 			patch: { provider: "ezpay", hashKey: "12345678901234567890123456789012" },
 			actorUserId: "admin-1",
 		})).resolves.toEqual({ ok: false, error: "provider_switch_blocked_existing_issued_invoices" });
 
-		expect(db.invoice.findMany).toHaveBeenCalledWith({
+		expect(db.invoice.findMany).toHaveBeenNthCalledWith(1, {
+			where: {
+			OR: [
+				{ status: { in: ["PENDING", "FAILED"] } },
+				{ attentionReason: { not: null } },
+			],
+		},
+		select: { id: true },
+		take: 1,
+	});
+		expect(db.invoice.findMany).toHaveBeenNthCalledWith(2, {
 			where: { status: { in: ["ISSUED", "ALLOWANCE"] } },
 			select: { amount: true, allowanceTotal: true },
 		});
@@ -94,7 +107,9 @@ describe("writeInvoiceSettings", () => {
 	});
 
 	it("blocks credential rotation while a partially allowed invoice remains actionable", async () => {
-		vi.mocked(db.invoice.findMany).mockResolvedValue([{ amount: 8800, allowanceTotal: 300 }] as never);
+		vi.mocked(db.invoice.findMany)
+			.mockResolvedValueOnce([])
+			.mockResolvedValueOnce([{ amount: 8800, allowanceTotal: 300 }] as never);
 
 		await expect(writeInvoiceSettings({
 			patch: { hashKey: "9876543210987654" },
@@ -105,7 +120,9 @@ describe("writeInvoiceSettings", () => {
 	});
 
 	it("allows credential rotation when all allowance invoices are fully settled", async () => {
-		vi.mocked(db.invoice.findMany).mockResolvedValue([{ amount: 8800, allowanceTotal: 8800 }] as never);
+		vi.mocked(db.invoice.findMany)
+			.mockResolvedValueOnce([])
+			.mockResolvedValueOnce([{ amount: 8800, allowanceTotal: 8800 }] as never);
 
 		await expect(writeInvoiceSettings({
 			patch: { hashKey: "9876543210987654" },
@@ -113,5 +130,16 @@ describe("writeInvoiceSettings", () => {
 		})).resolves.toMatchObject({ ok: true, settings: { hashKey: "9876543210987654" } });
 
 		expect(db.siteSetting.upsert).toHaveBeenCalledTimes(1);
+	});
+
+	it("blocks provider rotation while a failed invoice still needs retry", async () => {
+		vi.mocked(db.invoice.findMany).mockResolvedValueOnce([{ id: "invoice-1" }] as never);
+
+		await expect(writeInvoiceSettings({
+			patch: { provider: "ezpay", hashKey: "12345678901234567890123456789012" },
+			actorUserId: "admin-1",
+		})).resolves.toEqual({ ok: false, error: "invoice_settings_change_blocked_pending_operations" });
+
+		expect(db.siteSetting.upsert).not.toHaveBeenCalled();
 	});
 });
