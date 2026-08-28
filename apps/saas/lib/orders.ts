@@ -1,5 +1,6 @@
 import { db } from "@startkiter/database";
 import { handleRefundInvoice } from "@startkiter/api/modules/course/lib/invoice-events";
+import { sendWelcomeEmailsForOrder } from "@startkiter/api/modules/course/lib/send-welcome-email";
 import { refundOrderThroughGateway, withOrderStateLock } from "@startkiter/api/modules/course/lib/order-refunds";
 import {
 	MVP_AMOUNT_TWD,
@@ -83,7 +84,7 @@ export async function markOrderPaid(
 	gatewayTradeNo: string,
 	paymentGateway?: CheckoutGatewayType,
 ) {
-	return withOrderStateLock(orderId, async (tx) => {
+	const updated = await withOrderStateLock(orderId, async (tx) => {
 		const result = await tx.order.updateMany({
 			where: { id: orderId, orderNo, status: "pending", ...(paymentGateway ? { paymentGateway } : {}) },
 			data: {
@@ -96,6 +97,8 @@ export async function markOrderPaid(
 		});
 		return result.count;
 	});
+	if (updated > 0) void sendWelcomeEmailsForOrder(orderId);
+	return updated;
 }
 
 export async function findOrderByNo(orderNo: string) {
