@@ -29,6 +29,6 @@
 
 - [x] 6.1 payments／i18n／UI／marketing 測試、marketing type-check 與 build 全部 exit 0；全 repo test 為 20/20。
 - [x] 6.2 完成兩輪獨立 Codex Code Review；最終 Critical／High／Medium／Low 均為 0，原 Medium findings 已修正並重審。
-- [ ] 6.3 用 ego-browser 驗證 zh-tw／zh-cn／en production 首頁，確認單一 NT$8,800 一次買斷商品與真實文案，留下三張截圖。
+- [x] 6.3 用 ego-browser 驗證 production `https://startkiter.dev/{zh-tw,zh-cn,en}?validation=4fc4ec93-final`：三語首頁顯示 StartKiter 真實文案；pricing 均為單一 `NT$8,800` 一次買斷，舊模板 pricing／身份均未出現。截圖：`/tmp/startkiter-marketing-zh-tw.png`、`/tmp/startkiter-marketing-zh-cn.png`、`/tmp/startkiter-marketing-en.png`、`/tmp/startkiter-marketing-zh-tw-pricing.png`、`/tmp/startkiter-marketing-zh-cn-pricing.png`、`/tmp/startkiter-marketing-en-pricing.png`。
 - [x] 6.4 `spectra analyze marketing-site-real-content --json` 的 Coverage／Consistency／Gaps 為 Clean、僅 Ambiguity Suggestions；`spectra validate` 通過，0 warnings／0 errors。
 - [x] 6.5 已核對 design.md acceptance／scope：模板身份 grep 為空、未觸碰 `apps/saas`，實測暴露的 `PricingSection.tsx`／`HeroWireframe.tsx` 修正均在範圍內。
