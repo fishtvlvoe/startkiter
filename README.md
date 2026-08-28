@@ -50,7 +50,7 @@ LINE Login Channel 做登入。學員社群是邀請連結，不能靜默入群�
 
 【部署】
 
-正式環境使用 Coolify 管理 VPS 部署。部署前置條件、環境變數分類與驗收方式見 [`docs/vps-deployment-sop.md`](./docs/vps-deployment-sop.md)。
+正式環境使用 Coolify 管理 VPS 部署。部署前置條件、環境變數分類與驗收方式見 [`docs/vps-deployment-sop.md`](./docs/vps-deployment-sop.md)。學員乾淨安裝包的倉庫邊界、晉升 checklist 與 `promote-clean-package` 腳本見 [`docs/clean-package-promotion-guide.md`](./docs/clean-package-promotion-guide.md)。
 
 ### 自架 VPS（Docker）
 

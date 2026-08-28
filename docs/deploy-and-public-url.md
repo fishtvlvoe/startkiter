@@ -12,7 +12,7 @@
 
 • TEST 倉庫：`test-startkiter`（命名規則 `test-<專案名>`）。Private。專門邊裝邊測、托管部署（Vercel／可選 Cloudflare 或 VPS）+ 雲端 DB。會髒：測試帳號、測試圖、安裝雜物、**我們公司自己的 Landing／文章／營運內容**都可以待在這裡。用戶看不到這個倉庫。Git push `test` remote 的 `main` → Vercel 自動部署（已於 2026-08-15 接通 Login Connection；CLI `vercel deploy` 僅作備援）。
 
-• 正式倉庫（乾淨安裝包）：從 TEST 把**乾淨的東西拉出來**另成一個 Private（或之後給客戶的）倉庫。對標 `/Users/fishtv/Development/supastarter-nextjs-main` 那種乾淨度——單純安裝包：殼、前端頁面骨架、資料庫 schema／必要 seed。**不要**塞架站維運雜訊、**不要**塞我們公司資訊、**不要**塞 Landing 文章頁這類營運內容。這才是未來給客戶、並持續迭代更新的本體。
+• 正式倉庫（乾淨安裝包）：獨立 GitHub 私有倉庫 `fishtvlvoe/startkiter-starter-kit`。從 TEST／本機施工庫把**乾淨的東西拉出來**，對標 `/Users/fishtv/Development/supastarter-nextjs-main` 那種乾淨度——單純安裝包：殼、前端頁面骨架、資料庫 schema／必要 seed。**不要**塞架站維運雜訊、**不要**塞我們公司資訊、**不要**塞 Landing 文章頁這類營運內容。這才是未來給客戶、並持續迭代更新的本體。禁止把 `test-startkiter` 改名或把 TEST 歷史當客戶包。完整 Allow／Forbid 與腳本見 [`docs/clean-package-promotion-guide.md`](./clean-package-promotion-guide.md)。
 
 • 學員終身代碼包：付費後 GitHub App 邀的 kit repo。跟 TEST／正式安裝包都無關。
 
@@ -44,7 +44,7 @@
         │
         │  從裡面「只拉乾淨的」出來
         ▼
- GitHub: 正式倉庫＝乾淨安裝包（對標 supastarter）
+ GitHub: fishtvlvoe/startkiter-starter-kit（乾淨安裝包）
    有：殼、前端骨架、DB schema
    無：架站雜訊、公司資訊、Landing 文章營運頁
         │
@@ -57,7 +57,7 @@
 flowchart TD
   local["本機 products/startkiter"]
   testRepo["TEST: test-startkiter<br/>Private 髒站"]
-  cleanRepo["正式倉庫：乾淨安裝包<br/>對標 supastarter"]
+  cleanRepo["startkiter-starter-kit<br/>乾淨安裝包"]
   kit["學員 kit repo"]
 
   local --> testRepo
@@ -137,6 +137,8 @@ Coolify 為 StartKiter 集中代管式機群維運核心（常駐 Node、固定 
 
 ▋ 晉升 checklist（TEST → 正式乾淨安裝包）
 
+Promotion gate：功能只能經顯式 promotion 進入 `fishtvlvoe/startkiter-starter-kit`。操作指令、Allow／Forbid List 與敏感詞掃描見 [`docs/clean-package-promotion-guide.md`](./clean-package-promotion-guide.md)。
+
 可晉升（通過才准拉）：
 
 • [ ] 殼／前端骨架（無公司 Landing 文章營運頁）
@@ -144,6 +146,8 @@ Coolify 為 StartKiter 集中代管式機群維運核心（常駐 Node、固定 
 • [ ] 資料庫 schema 與必要 seed（無測試帳號資料）
 
 • [ ] 通用安裝包行為（對標 supastarter 乾淨度）
+
+• [ ] `pnpm tsx tooling/scripts/promote-clean-package.ts --dry-run` 通過，且非 dry-run 時目標目錄 `pnpm install && pnpm build && pnpm test` 為 0
 
 永不可晉升：
 
@@ -169,7 +173,7 @@ Coolify 為 StartKiter 集中代管式機群維運核心（常駐 Node、固定 
 
 ▋ 漂移（drift）與節奏
 
-TEST 營運中的內容與正式安裝包**本來就可以不一樣**，直到晉升。每張功能 SR archive 後，人工檢視是否有可晉升物（checklist）；**不做**自動 sync 工具（另開 SR 再說）。
+TEST 營運中的內容與正式安裝包**本來就可以不一樣**，直到晉升。每張功能 SR archive 後，人工檢視是否有可晉升物（checklist）。自動化只做單向過濾導出（`tooling/scripts/promote-clean-package.ts`），**不做** TEST ↔ 乾淨包雙向定時同步。
 
 ▋ 溝通約定（結構類）
 

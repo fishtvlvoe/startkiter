@@ -17,6 +17,7 @@ export default defineConfig({
 			"apps/saas/lib/**/*.test.ts",
 			"apps/saas/lib/**/*.test.tsx",
 			"docs/design-system-demo/**/*.test.ts",
+			"tooling/scripts/**/*.test.ts",
 		],
 	},
 });
