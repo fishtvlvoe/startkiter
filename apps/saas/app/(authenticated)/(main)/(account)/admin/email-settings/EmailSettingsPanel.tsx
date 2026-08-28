@@ -28,6 +28,9 @@ type DeliveryLog = {
 	course: { id: string; title: string } | null;
 };
 
+type DeliveryType = DeliveryLog["type"];
+type DeliveryStatus = DeliveryLog["status"];
+
 const DEFAULT_SETTING: CourseSetting = {
 	enabled: false,
 	subjectTemplate: "歡迎 {{userName}} 加入 {{courseName}}",
@@ -39,6 +42,8 @@ export default function EmailSettingsPanel({ initialCourses }: { initialCourses:
 	const [selectedCourseId, setSelectedCourseId] = useState(initialCourses[0]?.id ?? "");
 	const [setting, setSetting] = useState<CourseSetting>(initialCourses[0]?.welcomeEmail ?? DEFAULT_SETTING);
 	const [logs, setLogs] = useState<DeliveryLog[]>([]);
+	const [typeFilter, setTypeFilter] = useState<DeliveryType | "">("");
+	const [statusFilter, setStatusFilter] = useState<DeliveryStatus | "">("");
 	const [saving, setSaving] = useState(false);
 	const [message, setMessage] = useState("");
 
@@ -48,10 +53,14 @@ export default function EmailSettingsPanel({ initialCourses }: { initialCourses:
 	}, [courses, selectedCourseId]);
 
 	useEffect(() => {
-		void orpcClient.course.listEmailDeliveryLog({ limit: 50 })
+		void orpcClient.course.listEmailDeliveryLog({
+			limit: 50,
+			...(typeFilter ? { type: typeFilter } : {}),
+			...(statusFilter ? { status: statusFilter } : {}),
+		})
 			.then((result) => setLogs(result.logs as DeliveryLog[]))
 			.catch(() => setMessage("送達紀錄載入失敗。"));
-	}, []);
+	}, [statusFilter, typeFilter]);
 
 	function updateSetting<K extends keyof CourseSetting>(key: K, value: CourseSetting[K]) {
 		setSetting((current) => ({ ...current, [key]: value }));
@@ -124,6 +133,35 @@ export default function EmailSettingsPanel({ initialCourses }: { initialCourses:
 			<Card>
 				<CardHeader><CardTitle>送達紀錄</CardTitle></CardHeader>
 				<CardContent>
+					<div className="mb-4 grid gap-3 sm:grid-cols-2">
+						<div className="space-y-2">
+							<Label htmlFor="delivery-type-filter">郵件類型</Label>
+							<select
+								id="delivery-type-filter"
+								className="w-full rounded-md border bg-background px-3 py-2"
+								value={typeFilter}
+								onChange={(event) => setTypeFilter(event.target.value as DeliveryType | "")}
+							>
+								<option value="">全部類型</option>
+								<option value="WELCOME_EMAIL">購買歡迎信</option>
+								<option value="EXPIRATION_REMINDER">到期提醒信</option>
+							</select>
+						</div>
+						<div className="space-y-2">
+							<Label htmlFor="delivery-status-filter">送達狀態</Label>
+							<select
+								id="delivery-status-filter"
+								className="w-full rounded-md border bg-background px-3 py-2"
+								value={statusFilter}
+								onChange={(event) => setStatusFilter(event.target.value as DeliveryStatus | "")}
+							>
+								<option value="">全部狀態</option>
+								<option value="PENDING">待處理</option>
+								<option value="SENT">已送出</option>
+								<option value="FAILED">失敗</option>
+							</select>
+						</div>
+					</div>
 					{logs.length === 0 ? <p className="text-sm text-muted-foreground">目前沒有送達紀錄。</p> : (
 						<div className="space-y-3">
 							{logs.map((log) => (
