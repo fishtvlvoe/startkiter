@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { BLOCK_REGISTRY } from "./block-registry";
+import { BLOCK_REGISTRY, resolveMissionBlock } from "./block-registry";
 import { LESSON_MDX_COMPONENT_SET } from "./allowed-components";
 
 describe("BLOCK_REGISTRY", () => {
@@ -69,5 +69,25 @@ describe("BLOCK_REGISTRY", () => {
 				explanation: "E",
 			}).success,
 		).toBe(false);
+	});
+
+	it("透過 surface 對照表將 Mission action 轉成既有積木 props", () => {
+		const result = resolveMissionBlock({
+			surface: "structured_form",
+			fields: [
+				{ key: "apiKey", label: "Bunny API Key", inputType: "text", required: true },
+			],
+		});
+
+		expect(result).toEqual({
+			ok: true,
+			blockName: "DialogueWindow",
+			props: {
+				prompts: [{ question: "Bunny API Key (text)", response: "apiKey" }],
+			},
+		});
+
+		const definition = BLOCK_REGISTRY.find((block) => block.name === result.blockName);
+		expect(definition?.propsSchema.safeParse(result.props).success).toBe(true);
 	});
 });
