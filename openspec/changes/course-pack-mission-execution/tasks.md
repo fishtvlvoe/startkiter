@@ -27,7 +27,7 @@
 
 ## 6. 第一批 check 實作：deployment_heartbeat_fresh 與 bunny_zone_created
 
-- [ ] [P] 6.1 撰寫紅燈測試：`deployment_heartbeat_fresh` 在心跳資料時效內回傳 `passed`、過期或缺資料回傳 `pending`，涵蓋 Requirement「External check evaluators dispatch to a named check registry」；驗證目標：`pnpm --filter course test deployment-heartbeat-fresh.test.ts` FAIL
+- [x] [P] 6.1 撰寫紅燈測試：`deployment_heartbeat_fresh` 在心跳資料時效內回傳 `passed`、過期或缺資料回傳 `pending`，涵蓋 Requirement「External check evaluators dispatch to a named check registry」；驗證目標：`pnpm --filter course test deployment-heartbeat-fresh.test.ts` FAIL
 - [ ] 6.2 實作 `packages/course/src/course-pack/checks/deployment-heartbeat-fresh.ts`，使 6.1 測試轉綠燈並註冊進 check-registry；驗證目標：`pnpm --filter course test deployment-heartbeat-fresh.test.ts` 全綠
 - [ ] [P] 6.3 撰寫紅燈測試：`bunny_zone_created` 在必要的 `MissionFormValue`（Bunny API Key）尚未提交時回傳 `pending` 且不發出任何外部網路呼叫，涵蓋 Requirement「A check that depends on a missing stored value fails closed」；驗證目標：`pnpm --filter course test bunny-zone-created.test.ts` FAIL
 - [ ] 6.4 撰寫紅燈測試：`bunny_zone_created` 呼叫 Bunny API 遇到 401 回傳 `reasonCode: auth_error`、逾時或網路錯誤回傳 `reasonCode: network_error`，涵蓋 Requirement「External check failures are classified by reason」；驗證目標同 6.3
