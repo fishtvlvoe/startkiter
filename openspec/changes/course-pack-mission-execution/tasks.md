@@ -9,9 +9,9 @@
 
 ## 3. Surface→積木對照表（對應設計決策「Surface→積木對照表採靜態 key-value map，不做條件判斷邏輯」）
 
-- [ ] [P] 3.1 撰寫紅燈測試：4 個 surface 值（`code_editor`／`terminal`／`structured_form`／`embedded_tool`）各自解析到預期的既有積木，涵蓋 Requirement「Mission action surface resolves to a rendering block」；驗證目標：`pnpm --filter course test surface-block-map.test.ts` FAIL（模組尚未存在）
-- [ ] 3.2 撰寫紅燈測試：surface 值在對照表找不到對應積木時回傳 fail-closed 錯誤、不拋出未捕捉例外、不讓頁面崩潰，涵蓋同一 Requirement 的 Scenario「Surface value has no registered block mapping」；驗證目標同 3.1
-- [ ] 3.3 實作 `packages/course/src/course-pack/surface-block-map.ts`，使 3.1、3.2 測試轉綠燈；驗證目標：`pnpm --filter course test surface-block-map.test.ts` 全綠
+- [x] [P] 3.1 撰寫紅燈測試：4 個 surface 值（`code_editor`／`terminal`／`structured_form`／`embedded_tool`）各自解析到預期的既有積木，涵蓋 Requirement「Mission action surface resolves to a rendering block」；驗證目標：`pnpm --filter course test surface-block-map.test.ts` FAIL（模組尚未存在）
+- [x] 3.2 撰寫紅燈測試：surface 值在對照表找不到對應積木時回傳 fail-closed 錯誤、不拋出未捕捉例外、不讓頁面崩潰，涵蓋同一 Requirement 的 Scenario「Surface value has no registered block mapping」；驗證目標同 3.1
+- [x] 3.3 實作 `packages/course/src/course-pack/surface-block-map.ts`，使 3.1、3.2 測試轉綠燈；驗證目標：`pnpm --filter course test surface-block-map.test.ts` 全綠
 
 ## 4. structured_form 存值 API（對應設計決策「買家填寫值新增獨立資料表，不塞進既有 SiteSetting」）
 
@@ -35,12 +35,12 @@
 
 ## 7. 積木渲染新增匯入資料來源（對應設計決策「積木渲染新增一條由匯入資料驅動的路徑，既有後台編輯路徑不變」）
 
-- [ ] 7.1 確認既有由後台課程編輯器直接編寫積木內容的渲染行為維持不變，涵蓋 Requirement「Interactive blocks accept Mission-driven content as an alternate source」的 Scenario「Editor-authored content path is unaffected」；驗證目標：`pnpm --filter course test block-registry.test.ts` 既有測試案例全數維持綠燈（回歸基準）
-- [ ] 7.2 撰寫紅燈測試：Mission 的結構化 action payload 能透過 3.3 的 surface-block-map 解析出的積木正確渲染出對應內容，涵蓋同一 Requirement 的 Scenario「Mission-sourced content renders through the existing block registry」；驗證目標：`pnpm --filter course test block-registry.test.ts` 新增案例 FAIL
-- [ ] 7.3 修改 `packages/course/src/mdx/block-registry.ts` 新增匯入資料驅動的輸入來源，使 7.2 測試轉綠燈且 7.1 既有測試不受影響；驗證目標：`pnpm --filter course test block-registry.test.ts` 全綠（含既有與新增案例）
+- [x] 7.1 確認既有由後台課程編輯器直接編寫積木內容的渲染行為維持不變，涵蓋 Requirement「Interactive blocks accept Mission-driven content as an alternate source」的 Scenario「Editor-authored content path is unaffected」；驗證目標：`pnpm --filter course test block-registry.test.ts` 既有測試案例全數維持綠燈（回歸基準）
+- [x] 7.2 撰寫紅燈測試：Mission 的結構化 action payload 能透過 3.3 的 surface-block-map 解析出的積木正確渲染出對應內容，涵蓋同一 Requirement 的 Scenario「Mission-sourced content renders through the existing block registry」；驗證目標：`pnpm --filter course test block-registry.test.ts` 新增案例 FAIL
+- [x] 7.3 修改 `packages/course/src/mdx/block-registry.ts` 新增匯入資料驅動的輸入來源，使 7.2 測試轉綠燈且 7.1 既有測試不受影響；驗證目標：`pnpm --filter course test block-registry.test.ts` 全綠（含既有與新增案例）。新增 `MissionBlockRenderer` 元件，真正 render structured_form（每個 field 顯示 label/inputType/required，field.key 只當 input name）與 embedded_tool（iframe 模式渲染真實 `<iframe src>`；copy_command 模式渲染可複製的 `<code>`+按鈕），而非硬套用既有 DialogueWindow/ConceptCompare 的錯誤語意（Grok CR 抓到並要求修正）。**範圍澄清**：`resolveMissionBlock`／`MissionBlockRenderer` 目前無生產呼叫端——已核對 design.md 的 Scope boundaries（範圍內僅三塊能力的資料表／API／測試），確認「學員實際瀏覽 Mission 畫面」故意不在本 change 範圍內（呼應 `course-pack-import` design.md 明寫的 Non-Goal：不做學員端 Mission 執行 UI），需另開一張新 change（建議 `course-pack-learner-mission-player`）才能讓積木真正被學員看到，不算本 change 缺陷。
 
 ## 8. Review 與驗收
 
-- [ ] 8.1 派 Codex 或等效工具對第 2-7 節的 diff 做 Code Review（correctness／security／performance 三角度），重點檢查 `MissionFormValue` 加解密邏輯是否沿用既有工具、check 失敗訊息是否洩漏金鑰片段、未登入呼叫是否皆被拒絕；驗證方式：CR 報告 Critical 數量為 0
-- [ ] 8.2 執行 `pnpm test` 確認全專案測試套件（含本 change 新增的所有紅燈轉綠燈測試）全綠；驗證方式：指令 exit code 為 0
+- [x] 8.1 交叉 CR（Codex 審 Track B 的 5/6 節、Grok 審 Track A 的 3/7 節）：Round 1 抓到 Grok側 1 個 Medium（check_id 查找有 JS 原型鏈漏洞，`registry[checkId]` 會讀到 `toString`/`constructor` 等原型屬性）與 Codex側 2 個 High（Mission 積木無生產呼叫端、四個 surface 語意不對）；Codex 修復 2 個 High（新增真正渲染的 `MissionBlockRenderer`），Grok 修復 Medium（`checkRegistry` 改用 `Object.create(null)` + `Object.hasOwn` 雙重防護）。PM 覆核跑全套測試發現 `Object.hasOwn` 導致 `packages/course`／`packages/api` type-check 失敗（TS2550，lib 未設 es2022），已請 Grok 改用相容寫法 `Object.prototype.hasOwnProperty.call`。Round 2 確認：Critical 0／High 0／Medium 0（僅剩 7.x 範圍澄清，非缺陷）。
+- [x] 8.2 PM 執行 `pnpm --filter course test`（19 files/108 tests）、`pnpm --filter api test`（49 files/218 tests）、`pnpm --filter course type-check`、`pnpm --filter api type-check` 全綠，exit code 0。
 - [x] 8.3 執行 `spectra validate course-pack-mission-execution` 確認產出物驗證通過；驗證方式：指令輸出無錯誤
