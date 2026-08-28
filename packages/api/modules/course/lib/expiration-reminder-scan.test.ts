@@ -86,4 +86,16 @@ describe("scanAndSendExpirationReminders", () => {
 		await expect(scanAndSendExpirationReminders()).resolves.toEqual({ sent: 0, skipped: 0, failed: 0 });
 		expect(sendEmail).not.toHaveBeenCalled();
 	});
+
+	it("keeps the reminder reservation and records FAILED when delivery fails", async () => {
+		vi.mocked(db.courseSubscription.findMany).mockResolvedValue([subscription(7)] as never);
+		vi.mocked(sendEmail).mockResolvedValue(false);
+
+		await expect(scanAndSendExpirationReminders()).resolves.toEqual({ sent: 0, skipped: 0, failed: 1 });
+
+		expect(db.emailDeliveryLog.update).toHaveBeenCalledWith(expect.objectContaining({
+			data: expect.objectContaining({ status: "FAILED", errorMessage: expect.any(String) }),
+		}));
+		expect(db.courseExpirationReminder.delete).not.toHaveBeenCalled();
+	});
 });
