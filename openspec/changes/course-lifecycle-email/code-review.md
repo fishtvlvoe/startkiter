@@ -129,3 +129,23 @@ Critical 定義（本輪硬門檻）對照結果：
 主契約（7/1/0 各一次、unique 擋成功路徑重複、CANCELED 不寄、enabled 開關、未授權 cron 不掃描、markdown 不跑 script 標籤、掃描非逐筆查訂閱、付款成功主路徑會寄）成立。
 
 HIGH 三條都是**中斷／重放／不確定失敗**的冪等問題，不是 happy path 漏寄或未授權掃描。建議修 H1–H3 再 archive，但不擋本輪 Critical 門檻。
+
+---
+
+## Round 2（2026-08-28 19:00，獨立 CR，針對 H1/H2/H3 修復 diff）
+
+修復 commit：`21ffa13d`／`6949e265`（H1）、`5ff35e4c`／`94edf2ad`（H2）、`2a4316b8`／`e7a26a96`（H3）
+
+- H2、H3：**PASS**。H2 訂閱首期 `COMPLETED` 重放會補寄歡迎信（內部 SENT 去重安全）；H3 寄信失敗不再刪除 `CourseExpirationReminder` 預約，改記錄 `EmailDeliveryLog: FAILED`，成功路徑 unique 擋重複邏輯未受影響。
+- H1 升級為 **Critical（C1）**：PENDING 過期重試沒有刷新 lease 時間戳（`createdAt`）。情境：Request A 看到 16 分鐘前的 PENDING → update（但 `createdAt` 沒變）→ commit → 開始寄；Request B 排隊拿到 lock 後看到的還是同一筆舊 `createdAt` 的 PENDING → 一樣判定過期 → 再寄一次。兩個並發過期重放會雙寄，advisory lock 擋不住。
+- Medium 追加：`send-welcome-email.test.ts` 缺「兩個過期 PENDING 只准寄一次」測試；`period-notify/route.test.ts` 缺「非首期 `periodNumber=2` 不觸發歡迎信」負向測試。
+
+## Round 3（2026-08-28 19:12，獨立 CR，針對 C1 修復 diff）
+
+修復 commit：`e3da1102`（補併發與期數負向測試）、`465a278c`（retry 時刷新 `createdAt` lease）
+
+驗證：Request A 佔到過期 PENDING 時，update 現在會寫 `createdAt: new Date()`，再放 lock、才寄信；Request B 接著進來看到的是「仍是 PENDING，但 lease 剛刷新」，`pendingIsFresh` 為真，直接 return null，不會再寄。新測試「refreshes the lease so concurrent expired retries send only once」覆蓋此時序。
+
+**最終 Verdict：PASS — Critical 0 / High 0**
+
+PM 自行覆核：`pnpm --filter @startkiter/api test` 212/212、`pnpm --filter @startkiter/saas test period-notify` 9/9、API／SaaS `type-check` 皆通過。全部 10 個 commit（`a81a06ec`…`465a278c`）已 push 至 `origin/main`（`122b03e3..465a278c`）。Medium／Low 未修，留待後續视需要處理，不擋本 change 完成。
