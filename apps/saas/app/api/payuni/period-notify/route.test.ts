@@ -204,7 +204,11 @@ describe("PAYUNi period-notify", () => {
 
 	it("retries invoice work when a completed event is replayed", async () => {
 		vi.mocked(claimWebhookEvent).mockResolvedValue({ status: "COMPLETED" });
-		vi.mocked(db.courseSubscription.findUnique).mockResolvedValue({ id: "subscription-1" } as never);
+		vi.mocked(db.courseSubscription.findUnique).mockResolvedValue({
+			id: "subscription-1",
+			userId: "user-1",
+			courseId: "course-1",
+		} as never);
 
 		const response = await POST(signedRequest());
 

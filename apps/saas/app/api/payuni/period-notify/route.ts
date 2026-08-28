@@ -100,13 +100,20 @@ export async function POST(request: Request) {
 		});
 		if (claim.status !== "CLAIMED") {
 			if (claim.status === "COMPLETED" && isSuccess) {
-				const existingSubscription = await db.courseSubscription.findUnique({
+					const existingSubscription = await db.courseSubscription.findUnique({
 						where: { gatewayTradeNo },
-						select: { id: true },
-				});
-				if (existingSubscription) {
-					await triggerInvoiceForSubscriptionPeriod(existingSubscription.id, periodNumber).catch(() => undefined);
-				}
+						select: { id: true, userId: true, courseId: true },
+					});
+					if (existingSubscription) {
+						await triggerInvoiceForSubscriptionPeriod(existingSubscription.id, periodNumber).catch(() => undefined);
+						if (periodNumber === 1) {
+							await sendWelcomeEmail({
+								userId: existingSubscription.userId,
+								courseId: existingSubscription.courseId,
+								subscriptionId: existingSubscription.id,
+							});
+						}
+					}
 			}
 			return NextResponse.json({ message: "OK" });
 		}
