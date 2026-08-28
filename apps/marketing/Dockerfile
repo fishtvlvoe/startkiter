@@ -29,11 +29,16 @@ RUN DATABASE_URL=postgresql://localhost:5432/startkiter pnpm --filter @startkite
 RUN DATABASE_URL=postgresql://localhost:5432/startkiter pnpm turbo run build --filter=@startkiter/marketing...
 RUN mkdir -p /app/apps/marketing/public
 RUN set -eux; \
-	helper_store_dir="$(find /app/node_modules/.pnpm -maxdepth 1 -type d -name '@swc+helpers@*' | head -n 1)"; \
-	test -n "$helper_store_dir"; \
-	helper_package_dir="/app/runtime-node-modules/.pnpm/$(basename "$helper_store_dir")/node_modules/@swc"; \
-	mkdir -p "$helper_package_dir"; \
-	cp -a "$helper_store_dir/node_modules/@swc/helpers" "$helper_package_dir/"
+	helper_store_names="$(find /app/apps/marketing/.next/standalone/node_modules/.pnpm -type l -path '*/node_modules/@swc/helpers' -exec readlink {} \; | sed -n 's#.*\(@swc+helpers@[^/]*/node_modules/@swc/helpers\)$#\1#p' | sed 's#/node_modules/@swc/helpers$##' | sort -u)"; \
+	test -n "$helper_store_names"; \
+	for helper_store_name in $helper_store_names; do \
+		helper_store_dir="/app/node_modules/.pnpm/$helper_store_name"; \
+		test -d "$helper_store_dir/node_modules/@swc/helpers"; \
+		test -f "$helper_store_dir/node_modules/@swc/helpers/esm/_interop_require_default.js"; \
+		helper_package_dir="/app/runtime-node-modules/.pnpm/$helper_store_name/node_modules/@swc"; \
+		mkdir -p "$helper_package_dir"; \
+		cp -a "$helper_store_dir/node_modules/@swc/helpers" "$helper_package_dir/"; \
+	done
 
 FROM base AS runner
 

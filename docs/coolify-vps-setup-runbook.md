@@ -64,5 +64,5 @@ curl -sv https://<你的網域>/ -o /dev/null 2>&1 | grep -i "issuer\|verify"
 ## 教學化建議（給之後寫課程用）
 
 - 步驟 1-4（買機器、接上 Coolify）對純小白學生來說仍然偏技術，建議做成**帶截圖的逐步教學**，而不是文字描述
-- 步驟 5-7（部署、接網域）如果走 `coolify-managed-deployment` SR 規劃的 AI 對話介面自動化，學生理論上完全不用手動做這幾步——本次 runbook 記錄的是**驗證用的手動流程**，不是最終要教給學生的流程
+- 步驟 5-7（部署、接網域）是歷史驗證紀錄；正式、可重複的部署流程以 [`docs/vps-deployment-sop.md`](./vps-deployment-sop.md) 為準
 - 「選錯 Marketplace App」這個坑本身可以直接寫成教材裡的警示框，因為這是最直覺、最容易誤踩的地方

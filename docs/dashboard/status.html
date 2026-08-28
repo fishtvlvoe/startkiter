@@ -472,11 +472,11 @@
       <div class="infra-card">
         <h3>網域規劃（已定案，DNS 已建好）</h3>
         <dl>
-          <dt>本體</dt><dd><code>startkiter.dev</code> 先空著</dd>
-          <dt>主站</dt><dd><code>app.startkiter.dev</code> → 45.76.187.247 ✅</dd>
+          <dt>官網</dt><dd><code>startkiter.dev</code> → 45.76.187.247 ✅（307 → 200）</dd>
+          <dt>主站</dt><dd><code>app.startkiter.dev</code> → 45.76.187.247 ✅（307 → /login）</dd>
           <dt>客服</dt><dd><code>support.startkiter.dev</code> → 45.76.187.247 ✅</dd>
         </dl>
-        <p class="note">兩筆 DNS A 記錄已建立並 dig 驗證解析成功，等服務裝上去 Coolify 會自動簽 SSL。</p>
+        <p class="note">DNS A 記錄已建立並 dig 驗證解析成功；Coolify resource 已運作，正式站 503 已於 2026-08-28 修復。</p>
       </div>
       <div class="infra-card">
         <h3>Cloudflare</h3>
@@ -494,7 +494,7 @@
         </dl>
       </div>
     </div>
-    <p class="caveat" style="margin-top:16px">完整記錄 → <code>docs/discuss/2026-08-22-platform-positioning-infra-alignment.md</code>　｜　下一步：主站從 Vercel 遷到這台 VPS、裝 Chatwoot</p>
+    <p class="caveat" style="margin-top:16px">完整記錄 → <code>docs/vps-deployment-sop.md</code>　｜　2026-08-28：Coolify marketing resource 已恢復，<code>startkiter.dev</code> follow redirect 回 200</p>
   </section>
 
   <section>
