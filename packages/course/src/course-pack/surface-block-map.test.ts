@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { surfaceBlockMap } from "./surface-block-map";
+import { resolveSurfaceBlock, surfaceBlockMap } from "./surface-block-map";
 
 describe("surfaceBlockMap", () => {
 	it("將每個 Mission action surface 對應到既有積木", () => {
@@ -9,6 +9,13 @@ describe("surfaceBlockMap", () => {
 			terminal: "WebContainerSandbox",
 			structured_form: "DialogueWindow",
 			embedded_tool: "ConceptCompare",
+		});
+	});
+
+	it("找不到對照時回傳 fail-closed 結果，不拋出例外", () => {
+		expect(resolveSurfaceBlock("unknown_surface")).toEqual({
+			ok: false,
+			error: "Unsupported Mission action surface: unknown_surface",
 		});
 	});
 });
