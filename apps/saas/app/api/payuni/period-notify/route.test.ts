@@ -210,5 +210,10 @@ describe("PAYUNi period-notify", () => {
 
 		expect(response.status).toBe(200);
 		expect(triggerInvoiceForSubscriptionPeriod).toHaveBeenCalledWith("subscription-1", 1);
+		expect(sendWelcomeEmail).toHaveBeenCalledWith({
+		userId: expect.any(String),
+		courseId: expect.any(String),
+		subscriptionId: "subscription-1",
+	});
 	});
 });
