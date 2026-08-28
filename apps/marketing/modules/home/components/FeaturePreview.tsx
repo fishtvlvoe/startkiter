@@ -1,10 +1,7 @@
-import { dummyTeamPortraits } from "@home/lib/dummy-portraits";
 import { cn } from "@startkiter/ui";
-import { CreditCardIcon, ReceiptIcon, WalletIcon } from "lucide-react";
-import type { StaticImageData } from "next/image";
-import Image from "next/image";
+import { CheckCircle2Icon, CreditCardIcon, ReceiptIcon, WalletIcon } from "lucide-react";
 
-export function FeaturePreview({ variant }: { variant: "teams" | "billing" }) {
+export function FeaturePreview({ variant }: { variant: "learning" | "delivery" }) {
 	return (
 		<div className="shadow-olive-950/25 dark:shadow-black/65 w-full overflow-hidden rounded-2xl border border-border/70 bg-card shadow-[0_16px_48px_-28px]">
 			<div className="gap-1.5 px-3 py-2.5 flex items-center border-b border-border/60">
@@ -13,25 +10,25 @@ export function FeaturePreview({ variant }: { variant: "teams" | "billing" }) {
 				<span className="size-2 rounded-full bg-foreground/10" />
 			</div>
 
-			{variant === "teams" ? <TeamsPreview /> : <BillingPreview />}
+			{variant === "learning" ? <LearningPreview /> : <DeliveryPreview />}
 		</div>
 	);
 }
 
 function PreviewRow({
 	meta,
-	portrait,
 	emphasized = false,
 }: {
 	meta: string;
-	portrait: StaticImageData;
 	emphasized?: boolean;
 }) {
 	return (
 		<div
 			className={cn("gap-3 px-3 py-2.5 flex items-center rounded-lg", emphasized && "bg-touch/6")}
 		>
-			<Image src={portrait} alt="" className="size-7 shrink-0 rounded-full object-cover" />
+			<span className="size-7 flex shrink-0 items-center justify-center rounded-full border border-touch/20 bg-touch/8 text-touch">
+				<CheckCircle2Icon className="size-3.5" />
+			</span>
 			<div className="min-w-0 flex-1">
 				<div className="h-2 w-24 rounded-full bg-foreground/20" />
 				<div className="mt-1.5 h-1.5 w-16 rounded-full bg-foreground/10" />
@@ -41,7 +38,7 @@ function PreviewRow({
 	);
 }
 
-function TeamsPreview() {
+function LearningPreview() {
 	return (
 		<div className="gap-6 p-4 sm:grid-cols-[7.5rem_1fr] grid grid-cols-1">
 			<div className="gap-2 sm:flex hidden flex-col">
@@ -51,15 +48,15 @@ function TeamsPreview() {
 				<div className="mt-3 h-2 w-10 rounded-full bg-foreground/8" />
 			</div>
 			<div className="gap-1 flex flex-col">
-				<PreviewRow meta="Owner" portrait={dummyTeamPortraits[0]} emphasized />
-				<PreviewRow meta="Admin" portrait={dummyTeamPortraits[1]} />
-				<PreviewRow meta="Member" portrait={dummyTeamPortraits[2]} />
+				<PreviewRow meta="Lesson" emphasized />
+				<PreviewRow meta="Practice" />
+				<PreviewRow meta="Checkpoint" />
 			</div>
 		</div>
 	);
 }
 
-function BillingPreview() {
+function DeliveryPreview() {
 	return (
 		<div className="gap-1 p-4 flex flex-col">
 			<div className="gap-3 px-3 py-3 flex items-center justify-between rounded-lg">

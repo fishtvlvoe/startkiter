@@ -46,13 +46,11 @@ LINE Login Channel 做登入。學員社群是邀請連結，不能靜默入群�
 
 【網域】
 
-盯 `startkiter.com`，備案 `startkiter.me`。下單前再查 whois。沒買到先用 Zeabur 子網域，不准借 libon.me。
+盯 `startkiter.dev`。下單前再查 whois。不使用 libon.me 網域。
 
-【一鍵部署】
+【部署】
 
-[![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/new?template=https%3A%2F%2Fgithub.com%2Ffishtvlvoe%2Fstartkiter)
-
-點擊上方按鈕即可在 Zeabur 一鍵建立 StartKiter 全端服務與 PostgreSQL 資料庫。部署設定檔位於 [`deploy/zeabur.yaml`](./deploy/zeabur.yaml)，會自動建立 PostgreSQL 相依與 `DATABASE_URL`、`BETTER_AUTH_URL`、`BETTER_AUTH_SECRET` 等環境變數配置。
+正式環境使用 Coolify 管理 VPS 部署。部署前置條件、環境變數分類與驗收方式見 [`docs/vps-deployment-sop.md`](./docs/vps-deployment-sop.md)。
 
 ### 自架 VPS（Docker）
 

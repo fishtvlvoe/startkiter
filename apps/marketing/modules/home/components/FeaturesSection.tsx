@@ -25,7 +25,7 @@ interface FeatureItem {
 	title: string;
 	subtitle?: string;
 	description?: ReactNode;
-	preview: "teams" | "billing";
+	preview: "learning" | "delivery";
 	highlights?: FeatureHighlight[];
 }
 
@@ -38,7 +38,7 @@ export function FeaturesSection() {
 			title: t("home.features.feature1.title"),
 			subtitle: t("home.features.feature1.subtitle"),
 			description: t("home.features.feature1.description"),
-			preview: "teams",
+			preview: "learning",
 			highlights: [
 				{
 					title: t("home.features.feature1.benefit1.title"),
@@ -62,7 +62,7 @@ export function FeaturesSection() {
 			title: t("home.features.feature2.title"),
 			subtitle: t("home.features.feature2.subtitle"),
 			description: t("home.features.feature2.description"),
-			preview: "billing",
+			preview: "delivery",
 			highlights: [
 				{
 					title: t("home.features.feature2.benefit1.title"),

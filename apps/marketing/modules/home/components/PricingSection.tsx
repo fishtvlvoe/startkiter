@@ -35,19 +35,6 @@ export function PricingSection() {
 			to: string;
 		}> = [];
 
-		if (!paymentsConfig.requireActiveSubscription) {
-			result.push({
-				id: "free",
-				title: t("pricing.products.free.title") ?? "",
-				description: t("pricing.products.free.description") ?? "",
-				features: Object.values(
-					(t.raw("pricing.products.free.features") as Record<string, string>) ?? {},
-				),
-				cta: t("pricing.getStarted") ?? "",
-				to: signupUrl ?? "#",
-			});
-		}
-
 		for (const [planId, plan] of Object.entries(paymentsConfig.plans)) {
 			const isEnterprise = "isEnterprise" in plan;
 			const prices = "prices" in plan ? (plan as PaidPlan).prices : undefined;
@@ -149,16 +136,29 @@ export function PricingSection() {
 											</strong>
 										)}
 
-										{price && (
-											<strong
-												className="mt-3 font-medium text-3xl tracking-tight block"
-												data-test="price-table-plan-price"
-											>
-												{format.number(price.amount, {
-													style: "currency",
-													currency: price.currency,
-												})}
-												{price.type === "subscription" && (
+						{price && (
+							<strong
+								className="mt-3 font-medium text-3xl tracking-tight block"
+								data-test="price-table-plan-price"
+							>
+								{price.currency === "TWD"
+									? `NT$${format.number(price.amount, {
+											style: "decimal",
+											maximumFractionDigits: 0,
+										})}`
+									: format.number(price.amount, {
+											style: "currency",
+											currency: price.currency,
+										})}
+								{price.type === "one-time" && (
+									<span
+										className="ml-2 font-normal text-sm text-foreground/55"
+										data-test="price-table-plan-billing"
+									>
+										{t("pricing.oneTime")}
+									</span>
+								)}
+								{price.type === "subscription" && (
 													<span className="ml-1 font-normal text-sm text-foreground/45">
 														/
 														{price.interval === "year"

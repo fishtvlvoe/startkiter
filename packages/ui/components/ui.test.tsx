@@ -14,7 +14,7 @@ describe("UI primitives", () => {
 		const html = renderToStaticMarkup(<Logo />);
 
 		expect(html).toContain('viewBox="0 0 32 32"');
-		expect(html).toContain(">Acme</span>");
+		expect(html).toContain(">StartKiter</span>");
 	});
 
 	it("renders a primary button with its content", () => {

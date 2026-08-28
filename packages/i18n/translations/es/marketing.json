@@ -1,331 +1,265 @@
 {
-	"blog": {
-		"badge": "Blog",
-		"description": "Cómo pensamos los workspaces, la facturación y los detalles que aparecen cuando invitas al equipo.",
-		"title": "Notas del producto",
-		"back": "Volver al diario",
-		"allTags": "Todas",
-		"filterLabel": "Filtrar por etiqueta",
-		"emptyFilter": "No hay notas con esta etiqueta."
-	},
-	"changelog": {
-		"badge": "Novedades",
-		"description": "Roles nuevos, cambios de workspace más rápidos y los detalles de facturación que hemos enviado esta temporada.",
-		"title": "Lo que acabamos de lanzar",
-		"latest": "Nuevo",
-		"kinds": {
-			"added": "Nuevo",
-			"improved": "Mejorado",
-			"fixed": "Corregido"
-		},
-		"entries": {
-			"clientPortals": {
-				"date": "2026-08-06",
-				"version": "v1.4",
-				"title": "Un espacio para cada cliente",
-				"summary": "Los clientes pueden entrar en su propio workspace, ver qué está en marcha y dejar una nota — sin pedir prestado el acceso de alguien del equipo.",
-				"changes": {
-					"item1": {
-						"kind": "added",
-						"text": "Acceso de invitado con un rol de solo lectura, para que el cliente vea el progreso sin una plaza completa."
-					},
-					"item2": {
-						"kind": "added",
-						"text": "Una vista lista para el cliente en la página de inicio, con el trabajo que importa esta semana."
-					},
-					"item3": {
-						"kind": "improved",
-						"text": "Al cambiar de organización se conserva el sitio, incluso con una lista larga de clientes."
-					}
-				}
-			},
-			"planClarity": {
-				"date": "2026-07-22",
-				"version": "v1.3",
-				"title": "Planes que se explican en una reunión",
-				"summary": "El checkout y la tabla de precios empiezan por el importe y luego los detalles — nadie tiene que descifrar una hoja de cálculo en una llamada.",
-				"changes": {
-					"item1": {
-						"kind": "improved",
-						"text": "La tabla de precios lidera con el precio y después las funciones incluidas."
-					},
-					"item2": {
-						"kind": "added",
-						"text": "Los planes anuales muestran el ahorro en el checkout, no cuando llega la factura."
-					},
-					"item3": {
-						"kind": "fixed",
-						"text": "El estado de la suscripción podía retrasarse justo después del pago. Ahora se actualiza al momento."
-					}
-				}
-			},
-			"quietWeek": {
-				"date": "2026-07-08",
-				"version": "",
-				"title": "Una semana más tranquila de pulido",
-				"summary": "Sin un gran titular — solo los estados vacíos, los correos y los bordes de las invitaciones que hacen que el producto se sienta terminado.",
-				"changes": {
-					"item1": {
-						"kind": "improved",
-						"text": "Las pantallas vacías de miembros e invitaciones ahora proponen un siguiente paso en lugar de quedarse mirándote."
-					},
-					"item2": {
-						"kind": "fixed",
-						"text": "Los enlaces de invitación fallaban si la persona ya tenía cuenta. Ahora entran en el workspace correcto."
-					},
-					"item3": {
-						"kind": "improved",
-						"text": "Los correos de facturación nombran el workspace, para que una bandeja con varios clientes se pueda leer."
-					}
-				}
-			},
-			"workspaceSwitching": {
-				"date": "2026-06-30",
-				"version": "v1.2",
-				"title": "Cambia de workspace sin esperar",
-				"summary": "Pasar de un cliente a otro debería sentirse como cambiar de carpeta, no como recargar la app. Esta versión va de ese clic.",
-				"changes": {
-					"item1": {
-						"kind": "improved",
-						"text": "El cambio de organización sigue siendo ágil incluso con decenas de pertenencias."
-					},
-					"item2": {
-						"kind": "added",
-						"text": "Recordamos el último workspace abierto y te devolvemos allí."
-					},
-					"item3": {
-						"kind": "fixed",
-						"text": "El selector de organización podía mostrar un nombre antiguo después de un cambio. Ahora sigue al workspace."
-					}
-				}
-			},
-			"invites": {
-				"date": "2026-05-14",
-				"version": "v1.1",
-				"title": "Invitaciones que se sienten como un apretón de manos",
-				"summary": "El primer correo de Acme debería nombrar el workspace, quién te ha pedido y qué hacer después.",
-				"changes": {
-					"item1": {
-						"kind": "added",
-						"text": "Los correos de invitación incluyen el nombre del workspace y quién te ha invitado."
-					},
-					"item2": {
-						"kind": "improved",
-						"text": "La configuración inicial te guía para crear la primera organización en lugar de dejarte en una página de inicio vacía."
-					},
-					"item3": {
-						"kind": "fixed",
-						"text": "Las invitaciones caducadas ahora lo dicen, en lugar de un error genérico."
-					}
-				}
-			},
-			"launch": {
-				"date": "2026-04-02",
-				"version": "v1.0",
-				"title": "Acme, desde el primer acceso",
-				"summary": "La primera versión pública: organizaciones, roles y facturación en un solo sitio — para que un equipo pueda invitar gente y cobrar el trabajo sin un rodeo.",
-				"changes": {
-					"item1": {
-						"kind": "added",
-						"text": "Organizaciones, roles y facturación conviven desde el primer día."
-					},
-					"item2": {
-						"kind": "added",
-						"text": "Una página de inicio por workspace para que el equipo sepa por dónde empezar."
-					},
-					"item3": {
-						"kind": "added",
-						"text": "Cambios de plan en autoservicio desde el portal del cliente."
-					}
-				}
-			}
-		}
-	},
-	"contact": {
-		"badge": "Contacto",
-		"description": "Preguntas sobre planes, incorporación o un workspace para tu equipo. Solemos responder en un día laborable.",
-		"form": {
-			"email": "Correo electrónico",
-			"message": "Mensaje",
-			"name": "Nombre",
-			"notifications": {
-				"error": "No pudimos enviar tu mensaje. Inténtalo de nuevo en un momento.",
-				"success": "Mensaje enviado. Te responderemos pronto."
-			},
-			"submit": "Enviar mensaje"
-		},
-		"title": "Cuéntanos qué necesitas"
-	},
-	"documentation": {
-		"title": "Documentación"
-	},
-	"faq": {
-		"badge": "Preguntas",
-		"description": "Respuestas claras a las preguntas que los equipos se hacen antes de empezar.",
-		"title": "Preguntas frecuentes",
-		"items": {
-			"refundPolicy": {
-				"question": "¿Cuál es la política de reembolso?",
-				"answer": "Si el producto no encaja, solicita un reembolso en un plazo de 30 días y lo procesaremos íntegramente."
-			},
-			"cancelSubscription": {
-				"question": "¿Cómo cancelo mi suscripción?",
-				"answer": "Abre Facturación en la configuración de tu cuenta y cancela cuando quieras. El acceso continúa hasta el final del periodo actual."
-			},
-			"changePlan": {
-				"question": "¿Puedo cambiar mi plan?",
-				"answer": "Sí. Sube o baja de plan desde Facturación en cualquier momento. Los cambios se aplican en la siguiente factura salvo que se indique lo contrario."
-			},
-			"freeTrial": {
-				"question": "¿Ofrecen una prueba gratuita?",
-				"answer": "Sí. Los planes de pago incluyen 7 días de prueba para que tu equipo evalúe el producto completo."
-			}
-		}
-	},
-	"home": {
-		"hero": {
-			"new": "Nuevo",
-			"featureBadge": "Auth multi-tenant, billing y orgs — listo para lanzar",
-			"title": "Construye tu SaaS sin reinventar los cimientos",
-			"subtitle": "Un starter de Next.js orientado a producción con autenticación, organizaciones, billing y los patrones de UI que necesitas para lanzar más rápido.",
-			"getStarted": "Empezar a construir",
-			"documentation": "Leer la documentación",
-			"imageAlt": "Vista previa del panel del producto",
-			"preview": {
-				"organization": "Acme",
-				"start": "Inicio",
-				"chatbot": "Chatbot de IA",
-				"organizationSettings": "Ajustes de organización",
-				"accountSettings": "Ajustes de cuenta",
-				"welcome": "Bienvenido a la página de inicio de esta organización.",
-				"newClients": "Nuevos clientes",
-				"revenue": "Ingresos",
-				"churn": "Churn",
-				"placeholder": "Coloca tu contenido aquí...",
-				"userName": "Maya Chen",
-				"userEmail": "maya@acme.com"
-			}
-		},
-		"features": {
-			"badge": "Producto",
-			"title": "Todo entre el registro y la escala",
-			"description": "Defaults con criterio para las partes difíciles de un SaaS — para que tu equipo se centre en el producto que pagan los clientes.",
-			"feature1": {
-				"title": "Equipos y organizaciones",
-				"subtitle": "Invita miembros, gestiona roles y mantén cada workspace aislado desde el primer día.",
-				"description": "La estructura multi-tenant viene integrada: crea una organización, invita a tu equipo y cambia de contexto sin scaffolding a medida.",
-				"benefit1": {
-					"title": "Acceso por roles",
-					"description": "Owners, admins y members reciben permisos claros desde el principio."
-				},
-				"benefit2": {
-					"title": "Invitaciones que funcionan",
-					"description": "Invitaciones por email y flujos de unión pensados para onboarding real, no solo demos."
-				},
-				"benefit3": {
-					"title": "Contexto de workspace activo",
-					"description": "Los usuarios cambian entre organizaciones sin perder su lugar en el producto."
-				}
-			},
-			"feature2": {
-				"title": "Billing que no estorba",
-				"subtitle": "Suscripciones, trials y portales de cliente con un catálogo de planes limpio.",
-				"description": "Configura los planes una vez; el checkout y los portales de billing hacen el resto mientras sigues lanzando funciones.",
-				"benefit1": {
-					"title": "Catálogo de planes flexible",
-					"description": "Opciones mensuales, anuales y de pago único se adaptan a tu modelo de precios."
-				},
-				"benefit2": {
-					"title": "Trials sin código a medida",
-					"description": "Da tiempo a los equipos para evaluar antes de comprometerse."
-				},
-				"benefit3": {
-					"title": "Upgrades de autoservicio",
-					"description": "Los clientes gestionan métodos de pago y cambios de plan desde un portal."
-				}
-			}
-		},
-		"testimonials": {
-			"badge": "Clientes",
-			"title": "La confianza de equipos que lanzan productos reales",
-			"description": "Citas de ejemplo que puedes sustituir por las de tus clientes cuando lances.",
-			"items": {
-				"item1": {
-					"quote": "Sustituimos meses de trabajo en auth y billing por una base que sí podíamos extender. Nuestros primeros clientes de pago estaban en producción en semanas, no en trimestres.",
-					"name": "Maya Chen",
-					"role": "Founder, Northline"
-				},
-				"item2": {
-					"quote": "El modelo de organizaciones encajó con cómo vendemos. Invitaciones, roles y cambio de workspace simplemente funcionaron — invertimos el tiempo en el producto.",
-					"name": "Jonas Weber",
-					"role": "CTO, Latticeworks"
-				},
-				"item3": {
-					"quote": "Defaults limpios, estructura clara y nada luchando contra nosotros al personalizar. Se siente como si un equipo senior nos hubiera dejado un punto de partida sólido.",
-					"name": "Amelia Ortiz",
-					"role": "Product Lead, Harbor Studio"
-				}
-			}
-		},
-		"cta": {
-			"badge": "Empieza",
-			"title": "¿Listo para tu próximo lanzamiento?",
-			"description": "Empieza con una base SaaS completa — auth, orgs, billing y UI — y hazla tuya.",
-			"primary": "Crea tu cuenta",
-			"secondary": "Habla con nosotros"
-		}
-	},
-	"newsletter": {
-		"email": "Correo electrónico",
-		"hints": {
-			"error": {
-				"message": "No se pudo suscribir. Inténtalo más tarde."
-			},
-			"success": {
-				"message": "Estás en la lista. Compartiremos actualizaciones del producto con moderación.",
-				"title": "Suscrito"
-			}
-		},
-		"submit": "Suscribirse",
-		"subtitle": "Notas de producto y actualizaciones de lanzamiento — sin ruido.",
-		"title": "Mantente al día"
-	},
-	"notFound": {
-		"code": "404",
-		"title": "Esta página no existe",
-		"goToDashboard": "Ir al panel",
-		"goToHomepage": "Ir a la página principal"
-	},
-	"common": {
-		"footer": {
-			"blog": "Blog",
-			"features": "Funciones",
-			"pricing": "Precios",
-			"privacyPolicy": "Política de privacidad",
-			"termsAndConditions": "Términos y condiciones",
-			"builtWith": "Construido con supastarter"
-		},
-		"menu": {
-			"blog": "Blog",
-			"changelog": "Changelog",
-			"contact": "Contacto",
-			"dashboard": "Panel",
-			"docs": "Docs",
-			"faq": "FAQ",
-			"login": "Iniciar sesión",
-			"pricing": "Precios"
-		},
-		"aria": {
-			"menu": "Menú",
-			"language": "Idioma"
-		},
-		"tableOfContents": {
-			"title": "En esta página"
-		},
-		"colorMode": {
-			"system": "Sistema",
-			"light": "Claro",
-			"dark": "Oscuro"
-		}
-	}
+  "blog": {
+    "badge": "Blog",
+    "description": "Cómo conectamos la práctica del curso, la entrega del código y tu propio sitio.",
+    "title": "Notas del producto",
+    "back": "Volver al diario",
+    "allTags": "Todas",
+    "filterLabel": "Filtrar por etiqueta",
+    "emptyFilter": "No hay notas con esta etiqueta."
+  },
+  "changelog": {
+    "badge": "Actualizaciones",
+    "description": "Cambios del curso, la entrega del código y la base de la plataforma.",
+    "title": "Lo que hemos publicado",
+    "latest": "Último",
+    "kinds": {
+      "added": "Añadido",
+      "improved": "Mejorado",
+      "fixed": "Corregido"
+    },
+    "entries": {
+      "packageLaunch": {
+        "date": "2026-08-26",
+        "version": "v1.0",
+        "title": "Lanzamiento del paquete StartKiter",
+        "summary": "El curso, la entrega del código de GitHub y la base de módulos ampliables se presentan juntos.",
+        "changes": {
+          "item1": {
+            "kind": "added",
+            "text": "Las lecciones conectan requisitos y despliegue con puntos de control."
+          },
+          "item2": {
+            "kind": "added",
+            "text": "Los compradores reciben su propio paquete de código de GitHub mediante el flujo de entrega."
+          },
+          "item3": {
+            "kind": "improved",
+            "text": "La base conserva puntos de montaje para futuros módulos."
+          }
+        }
+      }
+    }
+  },
+  "contact": {
+    "badge": "Contacto",
+    "description": "Preguntas sobre el paquete, el recorrido de aprendizaje o la entrega del código. Solemos responder en un día laborable.",
+    "form": {
+      "email": "Correo electrónico",
+      "message": "Mensaje",
+      "name": "Nombre",
+      "notifications": {
+        "error": "No pudimos enviar tu mensaje. Inténtalo de nuevo en un momento.",
+        "success": "Mensaje enviado. Te responderemos pronto."
+      },
+      "submit": "Enviar mensaje"
+    },
+    "title": "Cuéntanos qué necesitas"
+  },
+  "documentation": {
+    "title": "Documentación"
+  },
+  "faq": {
+    "badge": "Preguntas",
+    "description": "Respuestas claras antes de empezar el paquete.",
+    "title": "Preguntas frecuentes",
+    "items": {
+      "refundPolicy": {
+        "question": "¿Cómo recibo el contenido después del pago?",
+        "answer": "Después del pago y la confirmación del pedido, sigue el flujo del sitio para recibir acceso al curso y la entrega del código de GitHub."
+      },
+      "cancelSubscription": {
+        "question": "¿Es un pago único?",
+        "answer": "Sí. El paquete StartKiter cuesta NT$8.800 en un solo pago; no se cobra mensual ni anualmente."
+      },
+      "changePlan": {
+        "question": "¿Qué incluye la compra?",
+        "answer": "Incluye el curso, un paquete de código de GitHub de por vida y una base de plataforma con puntos de montaje."
+      },
+      "freeTrial": {
+        "question": "¿Puedo conocer el contenido antes de comprar?",
+        "answer": "La página de inicio y la vista previa del curso explican el alcance; usa la página de contacto para preguntas sobre la entrega."
+      }
+    }
+  },
+  "home": {
+    "hero": {
+      "new": "Paquete StartKiter",
+      "featureBadge": "Curso, código de por vida y módulos ampliables — una sola compra",
+      "title": "Convierte tu servicio de IA en tu propio sitio con StartKiter",
+      "subtitle": "Sigue un recorrido práctico desde la idea hasta el lanzamiento, recibe el curso y el código de GitHub de por vida en una sola compra y añade módulos cuando los necesites.",
+      "getStarted": "Ver el paquete",
+      "documentation": "Leer la documentación",
+      "imageAlt": "Vista previa del paquete StartKiter",
+      "preview": {
+        "organization": "StartKiter",
+        "start": "Resumen del curso",
+        "chatbot": "Ayuda para lanzar",
+        "organizationSettings": "Ajustes de módulos",
+        "accountSettings": "Ajustes de cuenta",
+        "welcome": "Empieza con tu progreso y completa el paquete paso a paso.",
+        "courseContent": "Contenido del curso",
+        "codeDelivery": "Código de GitHub",
+        "moduleGrowth": "Extensiones por módulos",
+        "contentPreview": "Tus lecciones, tu código y tus módulos están aquí.",
+        "userName": "Alumno del paquete",
+        "userEmail": "learner@startkiter.dev"
+      }
+    },
+    "features": {
+      "badge": "Contenido del paquete",
+      "title": "Un camino del aprendizaje a la entrega",
+      "description": "Las lecciones, la práctica ejecutable y la entrega del código siguen un mismo flujo para que construyas un sitio realmente tuyo.",
+      "feature1": {
+        "title": "Curso y práctica",
+        "subtitle": "Pasa de los requisitos al despliegue completando tu sitio de servicio de IA lección a lección.",
+        "description": "Cada paso se convierte en una tarea práctica con ejercicios y puntos de control para saber si el trabajo está terminado.",
+        "benefit1": {
+          "title": "Avanza en orden",
+          "description": "Sigue el recorrido y convierte una idea en una página funcional paso a paso."
+        },
+        "benefit2": {
+          "title": "Ve cada resultado",
+          "description": "La práctica y los puntos de control muestran el resultado actual, no solo un vídeo o documento."
+        },
+        "benefit3": {
+          "title": "Aprende a reparar bloqueos",
+          "description": "Las señales de validación ayudan a localizar el paso que necesita otra revisión."
+        }
+      },
+      "feature2": {
+        "title": "Código y plataforma",
+        "subtitle": "Recibe el código de GitHub una vez y conserva espacio para módulos ampliables.",
+        "description": "Lleva el resultado a tu propio repositorio, mantén la base y añade capacidades cuando el sitio crezca.",
+        "benefit1": {
+          "title": "Entrega en GitHub",
+          "description": "Recibe tu propio paquete de código para mantenerlo y desplegarlo desde GitHub."
+        },
+        "benefit2": {
+          "title": "Compra una vez",
+          "description": "El curso y el código de por vida se entregan juntos, sin renovaciones mensuales o anuales."
+        },
+        "benefit3": {
+          "title": "Amplía con módulos",
+          "description": "La base de la plataforma conserva puntos de montaje para añadir capacidades después."
+        }
+      }
+    },
+    "testimonials": {
+      "badge": "Contenido del paquete",
+      "title": "Un paquete que puedes llevarte y seguir haciendo crecer",
+      "description": "Cada tarjeta representa una parte concreta de lo que entrega el paquete StartKiter.",
+      "items": {
+        "item1": {
+          "quote": "Desde los requisitos hasta el lanzamiento, el curso usa un recorrido práctico para ayudarte a completar tu propio sitio.",
+          "name": "Curso y práctica",
+          "role": "Paquete StartKiter"
+        },
+        "item2": {
+          "quote": "Después de comprarlo, recibes tu propio código y puedes mantenerlo y desplegarlo desde GitHub.",
+          "name": "Código de GitHub",
+          "role": "Incluido en la compra única"
+        },
+        "item3": {
+          "quote": "La base conserva puntos de montaje para añadir módulos más adelante sin rehacer todo el sitio.",
+          "name": "Módulos ampliables",
+          "role": "Plataforma StartKiter"
+        }
+      }
+    },
+    "cta": {
+      "badge": "Empieza ahora",
+      "title": "¿Listo para construir tu propio sitio?",
+      "description": "Empieza con el curso, completa la práctica, recibe el código y haz tuyo el paquete.",
+      "primary": "Comprar el paquete",
+      "secondary": "Contactar"
+    },
+    "title": "Compra una vez. Conserva el curso y el código de por vida.",
+    "description": "Aprende a convertir un servicio de IA en tu propio sitio. Un pago de NT$8.800 por el curso y el código de GitHub.",
+    "buyCta": "Comprar el paquete StartKiter NT$8.800",
+    "loginCta": "¿Ya tienes una cuenta? Inicia sesión"
+  },
+  "newsletter": {
+    "email": "Correo electrónico",
+    "hints": {
+      "error": {
+        "message": "No se pudo suscribir. Inténtalo más tarde."
+      },
+      "success": {
+        "message": "Estás en la lista. Compartiremos actualizaciones del producto con moderación.",
+        "title": "Suscrito"
+      }
+    },
+    "submit": "Suscribirse",
+    "subtitle": "Notas de producto y actualizaciones de lanzamiento — sin ruido.",
+    "title": "Mantente al día"
+  },
+  "notFound": {
+    "code": "404",
+    "title": "Esta página no existe",
+    "goToDashboard": "Ir al panel",
+    "goToHomepage": "Ir a la página principal"
+  },
+  "common": {
+    "footer": {
+      "blog": "Blog",
+      "features": "Funciones",
+      "pricing": "Precios",
+      "privacyPolicy": "Política de privacidad",
+      "termsAndConditions": "Términos y condiciones",
+      "builtWith": "Paquete StartKiter"
+    },
+    "menu": {
+      "blog": "Blog",
+      "changelog": "Changelog",
+      "contact": "Contacto",
+      "dashboard": "Panel",
+      "docs": "Docs",
+      "faq": "FAQ",
+      "login": "Iniciar sesión",
+      "pricing": "Precios"
+    },
+    "aria": {
+      "menu": "Menú",
+      "language": "Idioma"
+    },
+    "tableOfContents": {
+      "title": "En esta página"
+    },
+    "colorMode": {
+      "system": "Sistema",
+      "light": "Claro",
+      "dark": "Oscuro"
+    },
+    "consent": {
+      "description": "Este sitio usa durante un máximo de 30 días una cookie necesaria de consentimiento para recordar tu elección; ahora mismo no carga analítica de terceros.",
+      "decline": "Rechazar",
+      "allow": "Permitir"
+    }
+  },
+  "pricing": {
+    "badge": "Precio del paquete",
+    "title": "Precios",
+    "description": "Recibe el curso y el código de GitHub de por vida, y amplía la plataforma con módulos cuando los necesites.",
+    "products": {
+      "startkiter-mvp": {
+        "title": "Paquete StartKiter",
+        "description": "Construye tu propio sitio de servicio de IA con un curso práctico y código que puedes llevarte.",
+        "features": {
+          "course": "Curso completo para lanzar",
+          "code": "Código de GitHub de por vida",
+          "modules": "Base de plataforma con puntos de montaje"
+        }
+      }
+    },
+    "getStarted": "Comprar el paquete",
+    "contactSales": "Contactar",
+    "oneTime": "Compra única",
+    "recommended": "Recomendado",
+    "monthly": "Mensual",
+    "yearly": "Anual",
+    "month": "mes",
+    "year": "año",
+    "trialPeriod": "{days} días"
+  }
 }

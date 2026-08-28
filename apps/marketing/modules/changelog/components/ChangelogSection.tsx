@@ -3,14 +3,7 @@
 import { cn } from "@startkiter/ui";
 import { useFormatter, useTranslations } from "next-intl";
 
-const CHANGELOG_ENTRY_KEYS = [
-	"clientPortals",
-	"planClarity",
-	"quietWeek",
-	"workspaceSwitching",
-	"invites",
-	"launch",
-] as const;
+const CHANGELOG_ENTRY_KEYS = ["packageLaunch"] as const;
 
 const CHANGE_ITEM_KEYS = ["item1", "item2", "item3"] as const;
 

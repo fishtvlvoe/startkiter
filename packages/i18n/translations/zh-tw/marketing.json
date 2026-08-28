@@ -1,7 +1,7 @@
 {
   "blog": {
     "badge": "部落格",
-    "description": "我們如何看待工作區、帳單，以及邀請團隊後會遇到的細節。",
+    "description": "我們如何把課程練習、代碼交付與自己的網站連成一條路。",
     "title": "產品筆記",
     "back": "返回文章列表",
     "allTags": "全部",
@@ -10,8 +10,8 @@
   },
   "changelog": {
     "badge": "更新",
-    "description": "本季推出的新角色、更快的切換，以及帳單細節。",
-    "title": "看看最近推出了什麼",
+    "description": "課程內容、代碼交付與平台骨架的更新紀錄。",
+    "title": "最近完成了什麼",
     "latest": "最新",
     "kinds": {
       "added": "新增",
@@ -19,123 +19,23 @@
       "fixed": "修正"
     },
     "entries": {
-      "clientPortals": {
-        "date": "2026-08-06",
-        "version": "v1.4",
-        "title": "每位客戶都有自己的空間",
-        "summary": "客戶可以進入自己的工作區、查看進度並留言，不必借用隊友的登入資訊。",
-        "changes": {
-          "item1": {
-            "kind": "added",
-            "text": "提供僅限檢視的訪客角色，客戶不用完整席次也能查看進度。"
-          },
-          "item2": {
-            "kind": "added",
-            "text": "首頁提供適合客戶查看的總覽，聚焦本週重要工作。"
-          },
-          "item3": {
-            "kind": "improved",
-            "text": "即使客戶清單很長，切換組織也會保留目前位置。"
-          }
-        }
-      },
-      "planClarity": {
-        "date": "2026-07-22",
-        "version": "v1.3",
-        "title": "一次說清楚的方案",
-        "summary": "結帳與價格表現在先呈現金額，再顯示細節，銷售通話時不用解讀試算表。",
-        "changes": {
-          "item1": {
-            "kind": "improved",
-            "text": "價格表先呈現價格，再列出包含的功能。"
-          },
-          "item2": {
-            "kind": "added",
-            "text": "年繳方案在結帳時就顯示省下的金額，不必等帳單寄來才知道。"
-          },
-          "item3": {
-            "kind": "fixed",
-            "text": "訂閱狀態過去可能在結帳後延遲，現在會立即更新。"
-          }
-        }
-      },
-      "quietWeek": {
-        "date": "2026-07-08",
-        "version": "",
-        "title": "安靜打磨的一週",
-        "summary": "沒有頭條功能，只有讓產品更完整的空狀態、Email 與邀請流程細節。",
-        "changes": {
-          "item1": {
-            "kind": "improved",
-            "text": "成員與邀請空白頁現在會提示下一步，不再只顯示空白。"
-          },
-          "item2": {
-            "kind": "fixed",
-            "text": "受邀者已有帳號時，邀請連結過去會失效；現在會直接進入正確工作區。"
-          },
-          "item3": {
-            "kind": "improved",
-            "text": "帳單 Email 會標示所屬工作區，讓多客戶信箱更容易閱讀。"
-          }
-        }
-      },
-      "workspaceSwitching": {
-        "date": "2026-06-30",
-        "version": "v1.2",
-        "title": "不用等待就能切換工作區",
-        "summary": "在客戶之間移動應該像換資料夾，而不是重新載入應用程式；這次更新就是讓那一下點擊更順。",
-        "changes": {
-          "item1": {
-            "kind": "improved",
-            "text": "即使有數十個成員資格，組織切換仍然快速。"
-          },
-          "item2": {
-            "kind": "added",
-            "text": "系統會記住你上次開啟的工作區，並帶你回到那裡。"
-          },
-          "item3": {
-            "kind": "fixed",
-            "text": "組織重新命名後，切換器過去可能顯示舊名稱；現在會跟著工作區更新。"
-          }
-        }
-      },
-      "invites": {
-        "date": "2026-05-14",
-        "version": "v1.1",
-        "title": "像握手一樣自然的邀請",
-        "summary": "對方收到 Acme 的第一封 Email 應該看得到工作區、邀請人與下一步該做什麼。",
-        "changes": {
-          "item1": {
-            "kind": "added",
-            "text": "邀請 Email 會包含工作區名稱與邀請人。"
-          },
-          "item2": {
-            "kind": "improved",
-            "text": "首次設定會引導你建立第一個組織，不會把你丟在空白首頁。"
-          },
-          "item3": {
-            "kind": "fixed",
-            "text": "過期邀請現在會明確顯示，不再只回傳籠統錯誤。"
-          }
-        }
-      },
-      "launch": {
-        "date": "2026-04-02",
+      "packageLaunch": {
+        "date": "2026-08-26",
         "version": "v1.0",
-        "title": "從第一次登入開始使用 Acme",
-        "summary": "第一個公開版本把組織、角色與帳單放在一起，團隊可以邀請成員並為工作收費，不必繞遠路。",
+        "title": "StartKiter 開站包推出",
+        "summary": "課程、GitHub 代碼交付與可掛載模組的平台骨架正式整合。",
         "changes": {
           "item1": {
             "kind": "added",
-            "text": "從第一天起，組織、角色與帳單就集中在同一處。"
+            "text": "課程用單元與檢查點串起從需求到部署的路徑。"
           },
           "item2": {
             "kind": "added",
-            "text": "每個工作區都有首頁，團隊知道該從哪裡開始。"
+            "text": "購買後依流程取得自己的 GitHub 代碼包。"
           },
           "item3": {
-            "kind": "added",
-            "text": "客戶可從入口自助變更方案。"
+            "kind": "improved",
+            "text": "平台骨架保留掛載點，方便後續加入功能模組。"
           }
         }
       }
@@ -143,7 +43,7 @@
   },
   "contact": {
     "badge": "聯絡我們",
-    "description": "對方案、導入流程或團隊工作區有疑問嗎？我們通常會在一個工作天內回覆。",
+    "description": "對開站包、學習流程或代碼交付有疑問嗎？我們通常會在一個工作天內回覆。",
     "form": {
       "email": "Email",
       "message": "訊息",
@@ -161,124 +61,149 @@
   },
   "faq": {
     "badge": "常見問題",
-    "description": "直接回答團隊開始使用前最常問的問題。",
+    "description": "直接回答開始使用開站包前最常問的問題。",
     "title": "常見問題",
     "items": {
       "refundPolicy": {
-        "question": "退款政策是什麼？",
-        "answer": "如果產品不適合你，請在 30 天內申請退款，我們會全額處理。"
+        "question": "付款後如何取得內容？",
+        "answer": "付款完成且訂單確認後，依站內流程取得課程權限與 GitHub 代碼交付。"
       },
       "cancelSubscription": {
-        "question": "如何取消訂閱？",
-        "answer": "在帳號設定開啟帳單即可隨時取消，存取權會持續到目前週期結束。"
+        "question": "這是一次性付款嗎？",
+        "answer": "是，開站包售價 NT$8,800，一次付款，不是按月或按年收費。"
       },
       "changePlan": {
-        "question": "可以變更方案嗎？",
-        "answer": "可以，隨時從帳單升級或降級。除非另有說明，變更會在下一張帳單生效。"
+        "question": "一次買到哪些內容？",
+        "answer": "包含開站課程、GitHub 終身代碼包，以及可掛載模組的平台骨架。"
       },
       "freeTrial": {
-        "question": "有提供免費試用嗎？",
-        "answer": "有，付費方案包含 7 天試用期，讓你和團隊完整評估產品。"
+        "question": "購買前能了解內容嗎？",
+        "answer": "首頁與課程預覽會先說明學習範圍；需要確認交付細節可透過聯絡頁詢問。"
       }
     }
   },
   "home": {
-    "legacyFallback": "這個字串只存在繁體中文目錄，用來驗證缺 key fallback。",
     "hero": {
-      "new": "新功能",
-      "featureBadge": "多租戶登入、帳單與組織功能，開箱即可上線",
-      "title": "已經在用 AI 做事的人，需要的是一套 SaaS 開站包",
-      "subtitle": "以正式上線為目標打造的 Next.js 起始套件，整合登入、組織、帳單與加速上線所需的 UI 模式。",
-      "getStarted": "開始打造",
+      "new": "StartKiter 開站包",
+      "featureBadge": "課程、終身代碼包與可掛載模組平台，一次買斷",
+      "title": "用 StartKiter 把 AI 服務做成自己的站",
+      "subtitle": "跟著課程完成從想法到上線的流程，付款一次取得課程與 GitHub 終身代碼包，之後按需要擴充模組。",
+      "getStarted": "查看開站包",
       "documentation": "閱讀文件",
-      "imageAlt": "產品控制台預覽",
+      "imageAlt": "StartKiter 開站包預覽",
       "preview": {
-        "organization": "Acme",
-        "start": "首頁",
-        "chatbot": "AI 助手",
-        "organizationSettings": "組織設定",
+        "organization": "StartKiter",
+        "start": "課程總覽",
+        "chatbot": "開站助手",
+        "organizationSettings": "模組設定",
         "accountSettings": "帳號設定",
-        "welcome": "歡迎來到這個組織的首頁！",
-        "newClients": "新客戶",
-        "revenue": "營收",
-        "churn": "流失率",
-        "placeholder": "把你的內容放在這裡⋯",
-        "userName": "Maya Chen",
-        "userEmail": "maya@acme.com"
+        "welcome": "從課程進度開始，逐步完成自己的開站包。",
+        "courseContent": "課程內容",
+        "codeDelivery": "GitHub 代碼",
+        "moduleGrowth": "模組擴充",
+        "contentPreview": "課程、代碼與模組會集中在這裡。",
+        "userName": "開站包學員",
+        "userEmail": "learner@startkiter.dev"
       }
     },
     "features": {
-      "badge": "產品",
-      "title": "從註冊到成長所需的一切",
-      "description": "為 SaaS 難題準備好有主見的預設值，讓團隊專心打造客戶願意付費的產品。",
+      "badge": "產品內容",
+      "title": "從學習到交付，一條路完成開站",
+      "description": "把課程、可執行的練習與代碼交付放在同一個流程，讓你真的做出自己的網站。",
       "feature1": {
-        "title": "團隊與組織",
-        "subtitle": "邀請成員、管理角色，從第一天就讓每個工作區彼此隔離。",
-        "description": "內建多租戶結構：建立組織、邀請團隊，不用自行搭鷹架就能切換工作環境。",
+        "title": "課程與實作",
+        "subtitle": "從需求拆解到部署，按單元完成自己的 AI 服務網站。",
+        "description": "每一步都拆成可操作任務，搭配練習與檢查點，知道自己是否真的完成。",
         "benefit1": {
-          "title": "依角色控管存取",
-          "description": "擁有者、管理員與成員開箱即有清楚的權限。"
+          "title": "循序完成",
+          "description": "按照單元順序前進，把想法逐步變成可運作的頁面。"
         },
         "benefit2": {
-          "title": "真正能用的邀請流程",
-          "description": "Email 邀請與加入流程可直接用於正式 onboarding，不是展示用假流程。"
+          "title": "看見每一步結果",
+          "description": "練習與檢查點讓你知道目前成果，不只停在看影片或讀文件。"
         },
         "benefit3": {
-          "title": "保留目前工作區",
-          "description": "使用者切換組織時，不會在產品中迷失目前位置。"
+          "title": "遇到問題知道怎麼修",
+          "description": "流程保留清楚的驗證線索，方便回頭定位卡住的地方。"
         }
       },
       "feature2": {
-        "title": "不打擾產品工作的帳單功能",
-        "subtitle": "清楚的方案目錄、訂閱、試用與客戶入口。",
-        "description": "設定一次方案，就讓結帳與帳單入口處理後續工作，你可以繼續推出產品功能。",
+        "title": "代碼包與平台",
+        "subtitle": "付款一次取得 GitHub 代碼包，保留可掛載模組的擴充空間。",
+        "description": "把課程成果帶回自己的 repo，從核心殼開始持續維護與加入功能。",
         "benefit1": {
-          "title": "彈性的方案目錄",
-          "description": "每月、每年與一次性方案，都能清楚對應你的定價模式。"
+          "title": "GitHub 交付",
+          "description": "購買後依流程取得自己的代碼包，方便持續維護與部署。"
         },
         "benefit2": {
-          "title": "不用客製程式碼的試用期",
-          "description": "讓團隊先評估，再決定是否投入。"
+          "title": "一次買斷",
+          "description": "課程與終身代碼包一起取得，不用按月或按年續費。"
         },
         "benefit3": {
-          "title": "自助升級",
-          "description": "客戶可從入口管理付款方式與方案變更。"
+          "title": "模組化擴充",
+          "description": "平台骨架保留掛載點，之後可按需要加入功能模組。"
         }
       }
     },
     "testimonials": {
-      "badge": "客戶",
-      "title": "正在交付真實產品的團隊都信任",
-      "description": "上線後可把這些範例引言換成你的真實客戶回饋。",
+      "badge": "開站包內容",
+      "title": "一份可以帶走、持續長大的開站包",
+      "description": "從產品內容到代碼交付，每張卡都對應你實際拿到的價值。",
       "items": {
         "item1": {
-          "quote": "我們用一套真正能延伸的基礎，取代數月的登入與帳單工作。第一批付費客戶幾週內就上線，不必等上幾季。",
-          "name": "Maya Chen",
-          "role": "Northline 創辦人"
+          "quote": "從需求拆解到正式上線，課程用可操作的流程帶你完成自己的網站。",
+          "name": "課程與實作",
+          "role": "StartKiter 開站包"
         },
         "item2": {
-          "quote": "組織模型符合我們原本的銷售方式。邀請、角色與工作區切換都能直接運作，我們把時間花在產品上。",
-          "name": "Jonas Weber",
-          "role": "Latticeworks 技術長"
+          "quote": "購買後拿到自己的代碼交付，能在 GitHub 上持續維護與部署。",
+          "name": "GitHub 代碼包",
+          "role": "一次買斷後取得"
         },
         "item3": {
-          "quote": "乾淨的預設值、清楚的結構，客製化時沒有任何阻力。就像資深團隊替我們留下很好的起點。",
-          "name": "Amelia Ortiz",
-          "role": "Harbor Studio 產品主管"
+          "quote": "平台殼保留掛載點，之後可按需要加入功能模組，不必重做整個網站。",
+          "name": "可掛載模組",
+          "role": "StartKiter 平台架構"
         }
       }
     },
     "cta": {
-      "badge": "開始使用",
-      "title": "準備好推出下一個版本了嗎？",
-      "description": "從完整的 SaaS 基礎開始——登入、組織、帳單與 UI——再把它變成你的產品。",
-      "primary": "建立帳號",
+      "badge": "現在開始",
+      "title": "準備好做出自己的站了嗎？",
+      "description": "從課程開始，完成實作、取得代碼，再把開站包變成你的產品。",
+      "primary": "購買開站包",
       "secondary": "聯絡我們"
     },
     "title": "一次買斷，帶走課與終身代碼包",
     "description": "教你把 AI 服務做成自己的站。付一次 NT$8,800，課程與 GitHub 代碼包一起到手。",
     "buyCta": "購買開站包 NT$8,800",
-    "loginCta": "已有帳號，登入"
+    "loginCta": "已有帳號，登入",
+    "legacyFallback": "這個字串只存在繁體中文目錄，用來驗證缺 key fallback。"
+  },
+  "pricing": {
+    "badge": "開站包價格",
+    "title": "價格",
+    "description": "課程與終身 GitHub 代碼包一起取得，後續可按需要擴充模組。",
+    "products": {
+      "startkiter-mvp": {
+        "title": "StartKiter 開站包",
+        "description": "用一套可帶走的課程與代碼，完成自己的 AI 服務網站。",
+        "features": {
+          "course": "完整開站課程",
+          "code": "GitHub 終身代碼包",
+          "modules": "可掛載模組的平台骨架"
+        }
+      }
+    },
+    "getStarted": "購買開站包",
+    "contactSales": "聯絡我們",
+    "oneTime": "一次買斷",
+    "recommended": "推薦",
+    "monthly": "每月",
+    "yearly": "每年",
+    "month": "個月",
+    "year": "年",
+    "trialPeriod": "試用 {days} 天"
   },
   "newsletter": {
     "email": "Email",
@@ -308,7 +233,7 @@
       "pricing": "價格",
       "privacyPolicy": "隱私權政策",
       "termsAndConditions": "條款與細則",
-      "builtWith": "使用 supastarter 打造"
+      "builtWith": "StartKiter 開站包"
     },
     "menu": {
       "blog": "部落格",
@@ -333,7 +258,7 @@
       "dark": "深色"
     },
     "consent": {
-      "description": "這個網站目前還沒有使用 Cookie，但我們加上這個橫幅讓你看看效果。",
+      "description": "網站會用必要的 consent Cookie 記住你選擇允許或拒絕的結果，保存最多 30 天；目前不載入第三方分析工具。",
       "decline": "拒絕",
       "allow": "允許"
     }
