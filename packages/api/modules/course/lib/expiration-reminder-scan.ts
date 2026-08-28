@@ -67,7 +67,6 @@ export async function scanAndSendExpirationReminders(): Promise<{
 		}
 
 		let delivery;
-		let delivered = false;
 		try {
 			delivery = await db.emailDeliveryLog.create({
 				data: {
@@ -87,7 +86,6 @@ export async function scanAndSendExpirationReminders(): Promise<{
 				text,
 			});
 			if (!providerAccepted) throw new Error("Email provider rejected delivery");
-			delivered = true;
 
 			await db.emailDeliveryLog.update({
 				where: { id: delivery.id },
@@ -100,16 +98,6 @@ export async function scanAndSendExpirationReminders(): Promise<{
 				await db.emailDeliveryLog.update({
 					where: { id: delivery.id },
 					data: { status: "FAILED", errorMessage: errorMessage(error) },
-				}).catch(() => undefined);
-			}
-			if (!delivered) {
-				await db.courseExpirationReminder.delete({
-					where: {
-						subscriptionId_daysBefore: {
-							subscriptionId: subscription.id,
-							daysBefore,
-						},
-					},
 				}).catch(() => undefined);
 			}
 			logger.error(error);
