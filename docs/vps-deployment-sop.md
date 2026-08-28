@@ -166,7 +166,7 @@ Coolify resource `8x5bmcpct9dri6tnnhjleeed` 起初是 `exited:unhealthy`，Traef
 4. 修正 `pnpm-lock.yaml` 中 `@paid-tw/einvoice-ezpay` patch hash 與實際 patch 檔一致，讓 `pnpm install --frozen-lockfile` 可在 Coolify 重現。
 5. 以新 commit Redeploy，等待 deployment finished，回讀 resource status、container status、restart count，再做 live curl。
 
-本次部署驗證結果：deployment `jxhh0ldhhmaxxrbhjzdpa5ag` finished，commit `45fb8248`；Coolify container 為 running、restart count 為 `0`；`curl -L https://startkiter.dev` 回 `200`，`curl -I https://app.startkiter.dev` 回 `307` 導向 `/login`。
+本次最新部署驗證結果：deployment `dxcl5unsc8wj4j0m1swilc4i` finished，commit `228847af`；Coolify container 為 running、restart count 為 `0`（2026-08-28 02:03）；`curl -L https://startkiter.dev` 回 `200`，`curl -I https://app.startkiter.dev` 回 `307` 導向 `/login`。headers 存於 `/tmp/startkiter-vps-production-final-startkiter-dev.headers` 與 `/tmp/startkiter-vps-production-final-app.headers`。
 
 ### Build 失敗：`ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`
 

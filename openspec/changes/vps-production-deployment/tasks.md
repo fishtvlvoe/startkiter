@@ -1,7 +1,7 @@
 ## 1. 診斷 startkiter.dev 503 事故根因
 
 - [x] 1.1 依 design.md「Decision: 先診斷 503 根本原因，不假設是資源不足或 DNS 問題」：Coolify resource `8x5bmcpct9dri6tnnhjleeed` 起初 `exited:unhealthy`；container log 確認 standalone image 缺少 `@swc/helpers/esm/_interop_require_default.js`，不是 DNS 或 VPS 資源問題。完整診斷記錄於 `implementation-notes.md`。
-- [x] 1.2 依診斷結果修復並重新部署，涵蓋 Requirement「The marketing site is deployed under the official domain」：`apps/marketing/Dockerfile` 補齊 pnpm store 的完整 `@swc/helpers` package，Coolify start command 使用 `node apps/marketing/server.js`。deployment `jxhh0ldhhmaxxrbhjzdpa5ag` finished，resource/container running；`curl -L https://startkiter.dev` 回 `200`，headers 存於 `/tmp/startkiter-vps-production-startkiter-dev.headers`。
+- [x] 1.2 依診斷結果修復並重新部署，涵蓋 Requirement「The marketing site is deployed under the official domain」：`apps/marketing/Dockerfile` 補齊 pnpm store 的完整 `@swc/helpers` package，Coolify start command 使用 `node apps/marketing/server.js`。最新 deployment `dxcl5unsc8wj4j0m1swilc4i`（commit `228847af`）finished，resource/container running、restart count 0；`curl -L https://startkiter.dev` 回 `200`，headers 存於 `/tmp/startkiter-vps-production-final-startkiter-dev.headers`。
 
 ## 2. Fish 確認兩個建議方案
 
@@ -24,8 +24,8 @@
 
 ## 6. Review 與驗證
 
-- [ ] 6.1 grep `startkiter.dev`／`app.startkiter.dev`／`coolify-vps-setup-runbook` 所有既有引用點（`docs/`、`AGENTS.md`、`README.md`），確認本次新增的 SOP 文件與既有文件之間沒有互相矛盾的部署步驟描述。驗證目標：無矛盾描述，或已在對應位置加註「詳見 docs/vps-deployment-sop.md」導向新文件
-- [ ] 6.2 派 Codex 或等效工具對本次全部 diff（task 1-5，含文件變更與 VPS 上的實際操作記錄）做 Code Review（correctness／security／performance 三角度）：correctness 確認 SOP 文件的步驟描述與實際在 Coolify 上執行過的操作一致（不是憑空編寫的理論步驟）、security 確認 `docs/vps-deployment-sop.md` 與 `docs/coolify-vps-setup-runbook.md` 全文搜尋不出現任何機密變數的實際值（`SETTINGS_ENCRYPTION_KEY`／`DATABASE_URL` 等只出現變數名稱不出現值）、performance 確認若本次有調整 VPS 規格，調整過程有沒有造成非預期的服務中斷超出必要時間。驗證方式：CR 報告 Critical 數量為 0（PM 覆核）
-- [ ] 6.3 用 ego-browser skill 或 curl 實際驗證：`https://startkiter.dev` 與 `https://app.startkiter.dev` 同時回應成功狀態碼或合理重導向（非 5xx），並截圖或存證兩者的 HTTP 回應標頭。驗證目標：兩個網域的驗證結果（含 HTTP 狀態碼與回應標頭）附進實作筆記，任何一個網域驗證失敗即視為本 task 未完成，禁止只憑「文件寫完」就判定通過
-- [ ] 6.4 跑 `spectra analyze vps-production-deployment --json` 與 `spectra validate vps-production-deployment`，確認 Coverage／Consistency／Ambiguity／Gaps 四個維度皆為 Clean 或僅有 Suggestion。驗證目標：無 Critical／Warning，且 0 warnings／0 errors
-- [ ] 6.5 逐項核對 design.md Implementation Contract 的 Acceptance criteria 與 Scope boundaries 是否全部滿足：`curl -I https://startkiter.dev`／`curl -I https://app.startkiter.dev` 皆非 5xx；`docs/vps-deployment-sop.md` 涵蓋五個必要章節；`git diff --stat` 核對改動檔案清單與 Scope boundaries 一致，未觸碰 `apps/saas` 既有 Coolify 設定、未執行任何 Chatwoot 部署動作、未修改行銷網站文案內容。驗證目標：所有檢查項目確認通過
+- [x] 6.1 grep `startkiter.dev`／`app.startkiter.dev`／`coolify-vps-setup-runbook` 所有既有引用點（`docs/`、`AGENTS.md`、`README.md`），已確認正式 SOP 指向一致；歷史討論稿與 reference 文件保留為歷史／上游說明，未當成現行 Coolify 操作指示。
+- [x] 6.2 第三輪全新 context Codex 唯讀 CR：Critical 0／High 0／Medium 0／Low 0，status PASS；已核對 correctness、security、performance、Dockerfile symlink、source env closure、dashboard、scope 與 Coolify `228847af` 部署證據。報告存於 `/tmp/startkiter-vps-independent-cr-final-3.txt`。
+- [x] 6.3 curl 實際驗證兩個 domain：`startkiter.dev` direct `307` → `/zh-tw`、follow redirect `200`；`app.startkiter.dev` `307` → `/login`；Coolify resource running、container `Up`、restart count 0。headers 存於 `/tmp/startkiter-vps-production-final-startkiter-dev.headers`、`/tmp/startkiter-vps-production-final-app.headers`。
+- [x] 6.4 `spectra analyze vps-production-deployment --json` 四維度 Coverage／Consistency／Ambiguity／Gaps 全 Clean、0 findings；`spectra validate vps-production-deployment` valid。
+- [x] 6.5 已核對 Implementation Contract、Acceptance criteria 與 scope：SOP 五章齊全、install/test/type-check/build 全綠、未改 `apps/saas`、未部署 Chatwoot、未改 marketing 文案；最新 live deployment 與文件證據均為 `228847af`。本 change 保持開啟，未 archive。

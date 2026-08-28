@@ -17,18 +17,18 @@
 
 | 項目 | 結果 |
 |---|---|
-| 修復 commit | `45fb8248` `fix: 補齊 marketing standalone 的 swc runtime 檔案` |
-| Coolify deployment | `jxhh0ldhhmaxxrbhjzdpa5ag`，`finished` |
+| 修復 commit | `228847af` `fix: 完成官網 VPS standalone 部署修復`（包含 `45fb8248` 的 runtime 修復） |
+| Coolify deployment | `dxcl5unsc8wj4j0m1swilc4i`，`finished` |
 | Coolify resource | `running:unknown`，`server_status=true` |
-| container | `Up`，image tag 為 `8x5bmcpct9dri6tnnhjleeed:45fb8248...` |
-| restart count | `0`（回讀時間 2026-08-28 01:36） |
+| container | `Up`，image tag 為 `8x5bmcpct9dri6tnnhjleeed:228847af...` |
+| restart count | `0`（回讀時間 2026-08-28 02:03） |
 | `startkiter.dev` | 直接請求 `307` → `/zh-tw`；follow redirect `200` |
 | `app.startkiter.dev` | `307` → `/login` |
 
 HTTP headers 已保存於：
 
-- `/tmp/startkiter-vps-production-startkiter-dev.headers`
-- `/tmp/startkiter-vps-production-app.headers`
+- `/tmp/startkiter-vps-production-final-startkiter-dev.headers`
+- `/tmp/startkiter-vps-production-final-app.headers`
 
 兩份 headers 由 `curl` 直接取得，沒有寫入 credentials。marketing response body 驗證到 Next.js HTML 與目前既有頁面標記；文案與假資料清理留給 `marketing-site-real-content` change。
 
@@ -39,6 +39,7 @@ HTTP headers 已保存於：
 - `pnpm type-check`：`26 successful, 26 total`
 - `pnpm build`：`2 successful, 2 total`
 - Dockerfile assertion：確認 installer source 有 ESM helper，standalone 原始輸出沒有，補充 copy 步驟存在且目標為 pnpm store path
+- Coolify clean rebuild：以 `228847af` 完成 Docker build、container startup 與 live liveness；精確 symlink 解析步驟在 Debian `node:22-slim` build log 通過
 
 ## 決策記錄
 
