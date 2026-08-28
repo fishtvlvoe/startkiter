@@ -155,11 +155,11 @@ describe("sendWelcomeEmail", () => {
 			status: "PENDING",
 			createdAt: new Date(Date.now() - 16 * 60_000),
 		};
-		vi.mocked(db.emailDeliveryLog.findFirst).mockImplementation(async () => current as never);
-		vi.mocked(db.emailDeliveryLog.update).mockImplementation(async ({ data }) => {
+		vi.mocked(db.emailDeliveryLog.findFirst).mockImplementation((async () => current as never) as never);
+		vi.mocked(db.emailDeliveryLog.update).mockImplementation((async ({ data }: { data: Record<string, unknown> }) => {
 			current = { ...current, ...data } as typeof current;
 			return current as never;
-		});
+		}) as never);
 
 		let release!: () => void;
 		const sendStarted = new Promise<void>((resolve) => {

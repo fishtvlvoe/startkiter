@@ -58,7 +58,13 @@ async function reserveWelcomeDelivery(input: {
 			return previous
 				? tx.emailDeliveryLog.update({
 						where: { id: previous.id },
-						data: { status: "PENDING", errorMessage: null, toEmail: input.toEmail, subject: input.subject },
+						data: {
+							status: "PENDING",
+							errorMessage: null,
+							toEmail: input.toEmail,
+							subject: input.subject,
+							createdAt: new Date(),
+						},
 					})
 				: tx.emailDeliveryLog.create({
 						data: {
