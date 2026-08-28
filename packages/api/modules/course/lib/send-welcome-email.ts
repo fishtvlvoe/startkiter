@@ -149,7 +149,10 @@ export async function sendWelcomeEmailsForOrder(orderId: string): Promise<void> 
 
 		let courseIds: string[] = [];
 		if (order.sku === MVP_SKU) {
-			const course = await db.course.findFirst({ where: { status: "PUBLISHED" }, select: { id: true } });
+			const course = await db.course.findFirst({
+				where: { status: "PUBLISHED", welcomeEmail: { enabled: true } },
+				select: { id: true },
+			});
 			if (course) courseIds = [course.id];
 		} else {
 			courseIds = (await db.bundle.findUnique({

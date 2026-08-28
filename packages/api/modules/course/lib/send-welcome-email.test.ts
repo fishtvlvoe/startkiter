@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@startkiter/database", () => ({
 	db: {
-		course: { findUnique: vi.fn() },
+		order: { findUnique: vi.fn() },
+		course: { findUnique: vi.fn(), findFirst: vi.fn() },
 		courseWelcomeEmail: { findUnique: vi.fn() },
 		emailDeliveryLog: { findFirst: vi.fn(), create: vi.fn(), update: vi.fn() },
 		$executeRaw: vi.fn(),
@@ -19,12 +20,13 @@ vi.mock("@startkiter/mail", () => ({
 import { db } from "@startkiter/database";
 import { renderCourseWelcomeEmail, sendEmail } from "@startkiter/mail";
 
-import { sendWelcomeEmail } from "./send-welcome-email";
+import { sendWelcomeEmail, sendWelcomeEmailsForOrder } from "./send-welcome-email";
 
 describe("sendWelcomeEmail", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.mocked(db.$executeRaw).mockResolvedValue(0);
+		vi.mocked(db.order.findUnique).mockResolvedValue({ userId: "user-1", sku: "startkiter-mvp" } as never);
 		vi.mocked(db.$transaction).mockImplementation(async (callback) => callback(db as never) as never);
 		vi.mocked(db.courseWelcomeEmail.findUnique).mockResolvedValue({
 			courseId: "course-1",
@@ -51,6 +53,32 @@ describe("sendWelcomeEmail", () => {
 			text: "請從課程入口開始。",
 		});
 		vi.mocked(sendEmail).mockResolvedValue(true);
+	});
+
+	it("sends an MVP welcome email for the published course with welcome email enabled", async () => {
+		vi.mocked(db.course.findFirst).mockResolvedValue({ id: "course-enabled" } as never);
+		vi.mocked(db.courseWelcomeEmail.findUnique).mockResolvedValue({
+			courseId: "course-enabled",
+			enabled: true,
+			subjectTemplate: "歡迎 {{userName}} 加入 {{courseName}}",
+			markdownTemplate: "請從 [課程入口]({{courseUrl}}) 開始。",
+		} as never);
+		vi.mocked(db.course.findUnique).mockResolvedValue({
+			id: "course-enabled",
+			title: "已啟用課程",
+			slug: "enabled-course",
+		} as never);
+
+		await sendWelcomeEmailsForOrder("order-mvp");
+
+		expect(db.course.findFirst).toHaveBeenCalledWith({
+			where: { status: "PUBLISHED", welcomeEmail: { enabled: true } },
+			select: { id: true },
+		});
+		expect(sendEmail).toHaveBeenCalledWith(expect.objectContaining({
+			to: "fish@example.com",
+			subject: "歡迎 Fish 加入 已啟用課程",
+		}));
 	});
 
 	it("sends an enabled welcome email and records SENT", async () => {
