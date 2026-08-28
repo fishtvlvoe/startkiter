@@ -20,3 +20,4 @@
 - `HeroWireframe`、`FeaturePreview`、`TestimonialsSection` 移除假數字、假客戶身份、假頭像與模板計費視覺。
 - `PricingSection` 顯示單一 StartKiter 商品、`NT$8,800` 與各語言「一次買斷」標籤。
 - `Logo` 的品牌文字改為 StartKiter；未修改 `apps/saas`。
+- `packages/i18n/lib/get-messages.ts` 讓 marketing scope 優先於 shared fallback，避免 shared 的模板 pricing 覆蓋 marketing 真實商品文案；`packages/i18n/i18n.test.ts` 已補 runtime precedence 斷言。

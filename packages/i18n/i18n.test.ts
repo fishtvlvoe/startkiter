@@ -44,6 +44,7 @@ describe("translated app surfaces", () => {
 				courseLabel: "課程",
 				courseLocked: "購買開站包後即可解鎖全部單元。",
 				marketingPricing: "價格",
+				marketingPricingDescription: "課程與終身 GitHub 代碼包一起取得，後續可按需要擴充模組。",
 			},
 		],
 		[
@@ -54,6 +55,7 @@ describe("translated app surfaces", () => {
 				courseLabel: "课程",
 				courseLocked: "购买开站包后即可解锁全部单元。",
 				marketingPricing: "价格",
+				marketingPricingDescription: "课程与终身 GitHub 代码包一起取得，之后可按需要扩展模块。",
 			},
 		],
 	] as const)("provides translated strings for %s", async (locale, expected) => {
@@ -62,12 +64,15 @@ describe("translated app surfaces", () => {
 			app: { menu: { accountSettings: string } };
 			course: { navLabel: string; lockedDescription: string };
 		}>(locale, "saas");
-		const marketing = await getMessagesForLocale<{ pricing: { title: string } }>(locale, "marketing");
+		const marketing = await getMessagesForLocale<{
+			pricing: { title: string; description: string };
+		}>(locale, "marketing");
 
 		expect(saas.auth.login.title).toBe(expected.loginTitle);
 		expect(saas.app.menu.accountSettings).toBe(expected.accountSettings);
 		expect(saas.course.navLabel).toBe(expected.courseLabel);
 		expect(saas.course.lockedDescription).toBe(expected.courseLocked);
 		expect(marketing.pricing.title).toBe(expected.marketingPricing);
+		expect(marketing.pricing.description).toBe(expected.marketingPricingDescription);
 	});
 });

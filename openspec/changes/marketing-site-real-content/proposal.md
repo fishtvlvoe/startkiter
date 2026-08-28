@@ -43,6 +43,8 @@
     - `apps/marketing/modules/shared/components/Footer.tsx`
     - `apps/marketing/tests/blog.spec.ts`
     - `apps/marketing/tests/home.spec.ts`
+    - `packages/i18n/i18n.test.ts`
+    - `packages/i18n/lib/get-messages.ts`
     - `packages/payments/config.ts`
     - `packages/i18n/translations/zh-tw/marketing.json`
     - `packages/i18n/translations/zh-cn/marketing.json`

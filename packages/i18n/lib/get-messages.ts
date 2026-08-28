@@ -41,9 +41,16 @@ export async function getMessagesForLocale<T = MessageCatalog>(
 	const resolvedLocale = resolveLocale(locale);
 	const defaultScope = await importLocaleMessages(config.defaultLocale, scope);
 	const defaultShared = await importLocaleMessages(config.defaultLocale, "shared");
-	const defaultMessages = mergeMessages(defaultScope, defaultShared);
+	const defaultMessages =
+		scope === "marketing"
+			? mergeMessages(defaultShared, defaultScope)
+			: mergeMessages(defaultScope, defaultShared);
 	if (resolvedLocale === config.defaultLocale) return defaultMessages as T;
 	const localeScope = await importLocaleMessages(resolvedLocale, scope);
 	const localeShared = await importLocaleMessages(resolvedLocale, "shared");
-	return mergeMessages(defaultMessages, mergeMessages(localeScope, localeShared)) as T;
+	const localeMessages =
+		scope === "marketing"
+			? mergeMessages(localeShared, localeScope)
+			: mergeMessages(localeScope, localeShared);
+	return mergeMessages(defaultMessages, localeMessages) as T;
 }

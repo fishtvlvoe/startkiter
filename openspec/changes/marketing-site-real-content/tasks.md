@@ -6,7 +6,7 @@
 
 ## 2. 商品定價資料源頭
 
-- [x] 2.1 Decision: 定價區塊改用單一商品卡片，不比照 supastarter 三層訂閱方案排版硬套。`packages/payments/config.ts` 只保留 `startkiter-mvp` 一次買斷 8800 TWD；已核對具體 plan key 呼叫點與型別契約。
+- [x] 2.1 Decision: 定價區塊改用單一商品卡片，不比照 supastarter 三層訂閱方案排版硬套。`packages/payments/config.ts` 只保留 `startkiter-mvp` 一次買斷 8800 TWD；已核對具體 plan key 呼叫點與型別契約，並修正 marketing scope 被 shared pricing 覆蓋的 runtime precedence。
 
 ## 3. 行銷網站 i18n 內容修正
 
