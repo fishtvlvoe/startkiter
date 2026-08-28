@@ -1,0 +1,21 @@
+---
+title: Upstream Sync
+description: 將官方更新同步到自己的代碼包，以及理解衝突責任。
+---
+
+StartKiter 交付的是可讀寫的專屬 GitHub 倉庫。官方後續釋出新功能、安全修補或效能調校時，可以把官方倉庫設定成 `startkiter-upstream`，再把更新合併回自己的分支。
+
+## 同步流程
+
+```bash
+git fetch startkiter-upstream
+git merge startkiter-upstream/main
+```
+
+上面的流程只描述官方文件約定的同步入口。實際合併前，先保存自己目前的工作並檢查即將進入的變更。
+
+## Core 修改後的責任
+
+如果你直接修改了 Core 檔案，之後同步官方更新時產生的 Git merge conflict，或因此造成的核心依賴破壞，必須由你或你使用的 AI 工具自行承擔與解決。StartKiter 不提供自動衝突解決保證。
+
+若希望日後比較容易同步，新增業務功能時優先採用 Plugin 掛載點，不要把新功能硬塞進 Core。

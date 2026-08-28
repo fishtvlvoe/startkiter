@@ -1,0 +1,65 @@
+---
+title: Core／Plugin 邊界
+description: 了解平台固定能力、合法掛載點與買家擴充方式。
+---
+
+StartKiter 以完整原始碼交付，但仍把穩定的商業邏輯整理成 Core，把新增業務功能導向獨立 Plugin。這個分界是為了讓你可以擴充，同時保留日後維護與同步的清楚責任。
+
+## Core 固定能力
+
+以下能力是平台 Core。Plugin 不可以透過掛載點替換它們，例如註冊另一個金流處理器或覆蓋 Shell 版型。
+
+| Core 模組 | 職責與能力範圍 | 實作位置 |
+| --- | --- | --- |
+| 支付與結帳 | 台灣金流（PAYUNi）、訂單狀態機、購買權限授予與防偽驗證 | `packages/payments/` |
+| 通知系統 | Email、LINE 通知整合與發送基底 | `packages/notifications/`、`packages/mail/` |
+| 認證與授權 | Better Auth 帳號體系、LINE／OAuth 登入、Session 與權限管理 | `packages/auth/` |
+| 頁面編輯與後台外殼 | WordPress Admin 語彙後台 Shell 與頁面編輯系統 | `apps/saas/modules/`、`packages/platform/` |
+| 課程播放引擎 | 課程單元播放、章節權限判定、影音播放適配與學習進度追蹤 | `packages/course/` |
+
+## 官方 Plugin 擴充路徑
+
+新增業務模組時，建立獨立的 `packages/<name>/` 套件，入口放在 `packages/<name>/src/index.ts`，再用 `PluginManifest` 宣告掛載需求並註冊到 `packages/platform/src/mount-points.ts` 的靜態清單。改完後 commit 並 push，既有 git-push-auto-deploy 會接手建置；本頁不提供具體部署指令。
+
+### 合法掛載點
+
+- `route`：前台或後台頁面路由，例如 `/my-tool`。
+- `menu`：側邊欄選單項目、圖示、排序與權限。
+- `content`：前台內容掛載，支援 `auto`、`shortcode`、`block` 三種放置模式。
+
+Plugin 只能使用這三種掛載點。`authProvider`、`shellOverride`、`paymentGateway` 不是支援的掛載點。
+
+### 資料規格
+
+```typescript
+export type PluginManifest = {
+  id: string;
+  name: string;
+  version: string;
+  mount: {
+    route?: { path: string };
+    menu?: { label: string; icon: string; order: number; requiresOperator?: boolean };
+    content?: { kind: "auto" | "shortcode" | "block"; boundTo?: string };
+  };
+  dataSpec: "content" | "none";
+};
+```
+
+內容型 Plugin 使用 `dataSpec: "content"`，共用 PostgreSQL 的 `PluginContent` JSONB 資料表，適合非高頻內容。純 UI 或工具 Plugin 使用 `dataSpec: "none"`。TypeScript 會在編譯期拒絕 `payment`、`transaction` 等未受控資料規格。
+
+## 直接修改 Core
+
+買家取得完整、可讀寫的專屬 GitHub 私有倉庫。StartKiter 不設置 License Key Check、代碼混淆、代碼簽署檢查或 Runtime Gate 來阻止你檢視或修改 Core。
+
+但直接修改 `packages/platform/`、`packages/auth/`、`packages/payments/` 或 `apps/saas/app/` 的底層結構，是買家自行維護的路徑，不受官方升級保護與技術支援保證。同步更新時的衝突責任請看 [Upstream Sync](./upstream-sync)。
+
+## 交易型資料的未來規則
+
+目前 v1 只提供共用的 `PluginContent` 表，不附交易型 Plugin 的通用 scaffolding、CLI 產生器或模板。未來若需要高頻交易模組，必須建立專屬的 Prisma migration 資料表與索引，不要把高頻交易與關聯資料塞進 `PluginContent` JSONB。
+
+## 新增功能前的檢查清單
+
+- 確認新功能沒有侵入金流、通知、認證或 Shell 等 Core 固定能力；若有，先接受自行維護的責任。
+- 確認新模組放在 `packages/<name>/`，並符合 `docs/buyer-extension-convention.md`。
+- 確認 Manifest 只使用 `route`、`menu`、`content` 掛載點，以及 `"content"`、`"none"` 資料規格。
+- 執行 `pnpm type-check` 與 `pnpm test`，確認整個倉庫維持綠燈。

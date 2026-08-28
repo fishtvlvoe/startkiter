@@ -1,0 +1,18 @@
+---
+title: StartKiter 文件
+description: 給買家使用的開站包技術文件，從本機啟動到模組擴充都在這裡。
+---
+
+這裡是 StartKiter 開站包的買家技術文件。你拿到的是一份可以自己維護的課程與網站代碼，不是只能使用的黑盒服務。
+
+## 從哪裡開始
+
+- [環境變數設定](./getting-started/environment-variables)：先分辨哪些設定是啟動需要，哪些只在特定功能開啟時使用。
+- [本地開發啟動](./getting-started/local-development)：安裝相依套件並啟動整個 monorepo。
+- [Core／Plugin 邊界](./core-and-plugins/core-boundary)：了解哪些能力屬於平台核心，以及新功能應該放在哪裡。
+- [Upstream Sync](./core-and-plugins/upstream-sync)：將官方更新帶回自己的倉庫時，先看清楚衝突責任。
+- [部署指引](./deployment/overview)：部署章節目前只有骨架，正式步驟驗證後才會回填。
+
+## 這份文件的使用方式
+
+先照「環境變數設定」和「本地開發啟動」讓代碼在自己的環境跑起來，再閱讀 Core／Plugin 邊界決定要新增模組還是修改核心。需要同步官方更新時，使用 Upstream Sync 頁面的原則。

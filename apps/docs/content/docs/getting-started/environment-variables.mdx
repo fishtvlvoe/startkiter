@@ -1,0 +1,154 @@
+---
+title: 環境變數設定
+description: 逐一查看 StartKiter 的環境變數、用途與必填條件。
+---
+
+StartKiter 的環境變數範例來自 `apps/saas/.env.example`。請複製一份給自己的本機或部署環境使用；不要把真實金鑰、密碼或私鑰放進 Git。
+
+## 怎麼看必填／選填
+
+本頁列出範例檔中的全部 88 個變數。`必填` 表示應用程式基本啟動沒有安全預設值；`選填` 表示有預設值、空值會安全降級，或只在對應功能啟用時需要。標成選填的功能一旦啟用，仍要填完整的一組設定。
+
+## 基本執行環境
+
+| 變數 | 必填／選填 | 用途 |
+| --- | --- | --- |
+| `DATABASE_URL` | 必填 | PostgreSQL 資料庫連線。 |
+| `BETTER_AUTH_SECRET` | 必填 | Better Auth session 與簽章密鑰。 |
+| `BETTER_AUTH_URL` | 必填 | 結帳與對外 origin。缺少時結帳路徑會 fail closed。正式環境請填實際網址。 |
+| `NEXT_PUBLIC_SAAS_URL` | 選填 | Better Auth `baseURL` 與應用程式公開網址；未填時本機會落到 localhost。正式環境請填實際網址。 |
+| `NEXT_PUBLIC_MARKETING_URL` | 選填 | 行銷站公開網址。 |
+| `NEXT_PUBLIC_DOCS_URL` | 選填 | 文件站公開網址。 |
+| `NEXT_PUBLIC_VERCEL_URL` | 選填 | 舊部署環境相容用的公開網址。 |
+| `ADMIN_EMAIL` | 選填 | Operator 電子郵件；空白時不授予任何人 operator 權限。 |
+| `SETTINGS_ENCRYPTION_KEY` | 選填 | 加密資料庫設定；要從後台寫入 PAYUNi 或電子發票設定時必填。 |
+
+## PAYUNi 與電子發票
+
+| 變數 | 必填／選填 | 用途 |
+| --- | --- | --- |
+| `PAYUNI_MERCHANT_ID` | 選填 | PAYUNi 商店代號；啟用 PAYUNi 結帳時必填。 |
+| `PAYUNI_HASH_KEY` | 選填 | PAYUNi 驗證金鑰；啟用 PAYUNi 結帳時必填。 |
+| `PAYUNI_HASH_IV` | 選填 | PAYUNi 驗證向量；啟用 PAYUNi 結帳時必填。 |
+| `PAYUNI_API_URL` | 選填 | PAYUNi API 位址，範例有 sandbox 預設值。 |
+| `EINVOICE_PROVIDER` | 選填 | 電子發票 provider，範例預設為 ezPay。 |
+| `EINVOICE_MERCHANT_ID` | 選填 | 電子發票商家代號；啟用開票時必填。 |
+| `EINVOICE_HASH_KEY` | 選填 | 電子發票驗證金鑰；啟用開票時必填。 |
+| `EINVOICE_HASH_IV` | 選填 | 電子發票驗證向量；啟用開票時必填。 |
+| `EINVOICE_TEST_MODE` | 選填 | 電子發票測試模式，範例預設為 true。 |
+| `EINVOICE_ENABLED` | 選填 | 是否啟用電子發票，範例預設為 false。 |
+
+## 登入與社群
+
+| 變數 | 必填／選填 | 用途 |
+| --- | --- | --- |
+| `GOOGLE_CLIENT_ID` | 選填 | Google OAuth client；啟用 Google 登入時使用。 |
+| `GOOGLE_CLIENT_SECRET` | 選填 | Google OAuth secret；啟用 Google 登入時使用。 |
+| `LINE_CHANNEL_ID` | 選填 | LINE Login channel；啟用 LINE 登入時使用。 |
+| `LINE_CHANNEL_SECRET` | 選填 | LINE Login channel secret；啟用 LINE 登入時使用。 |
+| `LINE_COMMUNITY_INVITE_URL` | 選填 | 付費學員可見的 LINE 社群邀請連結。 |
+| `LINE_MESSAGING_CHANNEL_ACCESS_TOKEN` | 選填 | LINE Messaging webhook 存取憑證。 |
+| `LINE_MESSAGING_CHANNEL_SECRET` | 選填 | LINE Messaging webhook 簽章密鑰。 |
+
+## GitHub 代碼包履約
+
+| 變數 | 必填／選填 | 用途 |
+| --- | --- | --- |
+| `GITHUB_CLIENT_ID` | 選填 | GitHub OAuth client；啟用代碼領取登入時使用。 |
+| `GITHUB_CLIENT_SECRET` | 選填 | GitHub OAuth secret；啟用代碼領取登入時使用。 |
+| `GITHUB_APP_ID` | 選填 | GitHub App 識別值；啟用倉庫邀請履約時使用。 |
+| `GITHUB_APP_INSTALLATION_ID` | 選填 | GitHub App installation 識別值。 |
+| `GITHUB_APP_PRIVATE_KEY` | 選填 | GitHub App 私鑰內容；只能放在 Secret 管理中。 |
+| `GITHUB_APP_PRIVATE_KEY_PATH` | 選填 | GitHub App 私鑰檔案路徑；只能指向受保護的本機檔案。 |
+| `GITHUB_KIT_ORG` | 選填 | 買家代碼包 GitHub 組織。 |
+| `GITHUB_KIT_REPO` | 選填 | 買家代碼包目標倉庫。 |
+| `GITHUB_KIT_TEMPLATE_REPO` | 選填 | 建立買家代碼包時使用的模板倉庫。 |
+
+## 檔案與媒體儲存
+
+| 變數 | 必填／選填 | 用途 |
+| --- | --- | --- |
+| `S3_ENDPOINT` | 選填 | S3 相容物件儲存 endpoint；啟用上傳功能時使用。 |
+| `S3_REGION` | 選填 | S3 region，範例預設為 auto。 |
+| `S3_ACCESS_KEY_ID` | 選填 | S3 存取識別值。 |
+| `S3_SECRET_ACCESS_KEY` | 選填 | S3 存取密鑰。 |
+| `NEXT_PUBLIC_ASSIGNMENTS_BUCKET_NAME` | 選填 | 作業附件 bucket。 |
+| `NEXT_PUBLIC_AVATARS_BUCKET_NAME` | 選填 | 使用者頭像 bucket。 |
+| `NEXT_PUBLIC_LESSON_MESSAGES_BUCKET_NAME` | 選填 | 單元留言附件 bucket。 |
+| `NEXT_PUBLIC_MEDIA_BUCKET_NAME` | 選填 | 課程媒體 bucket。 |
+| `NEXT_PUBLIC_CHATWOOT_BASE_URL` | 選填 | 前端客服入口的 Chatwoot 網址。 |
+| `NEXT_PUBLIC_CHATWOOT_WEBSITE_TOKEN` | 選填 | 前端客服 widget token。 |
+
+## Chatwoot、Telegram 與客服
+
+| 變數 | 必填／選填 | 用途 |
+| --- | --- | --- |
+| `CHATWOOT_BASE_URL` | 選填 | Chatwoot API 網址。 |
+| `CHATWOOT_ACCOUNT_ID` | 選填 | Chatwoot account 識別值。 |
+| `CHATWOOT_INBOX_ID` | 選填 | Chatwoot inbox 識別值。 |
+| `CHATWOOT_API_ACCESS_TOKEN` | 選填 | Chatwoot API 存取憑證。 |
+| `CHATWOOT_WEBHOOK_SECRET` | 選填 | Chatwoot webhook 驗證密鑰。 |
+| `CHATWOOT_WEBHOOK_DEBUG` | 選填 | Chatwoot webhook debug 開關，範例預設為 0。 |
+| `TELEGRAM_BOT_TOKEN` | 選填 | Telegram Bot API 憑證。 |
+| `TELEGRAM_WEBHOOK_SECRET` | 選填 | Telegram webhook 驗證密鑰。 |
+
+## Email
+
+| 變數 | 必填／選填 | 用途 |
+| --- | --- | --- |
+| `MAIL_FROM` | 選填 | 寄件人地址；啟用 Email 發送時使用。 |
+| `RESEND_API_KEY` | 選填 | Resend provider 憑證。 |
+| `MAILGUN_API_KEY` | 選填 | Mailgun provider 憑證。 |
+| `MAILGUN_DOMAIN` | 選填 | Mailgun domain。 |
+| `POSTMARK_SERVER_TOKEN` | 選填 | Postmark provider 憑證。 |
+| `MAIL_HOST` | 選填 | SMTP host。 |
+| `MAIL_PORT` | 選填 | SMTP port，範例預設為 587。 |
+| `MAIL_USER` | 選填 | SMTP 使用者。 |
+| `MAIL_PASS` | 選填 | SMTP 密碼。 |
+| `SUPPORT_EMAIL` | 選填 | 客服收件地址。 |
+
+## AI
+
+| 變數 | 必填／選填 | 用途 |
+| --- | --- | --- |
+| `OPENAI_API_KEY` | 選填 | AI 功能使用的 OpenAI 憑證；缺少時 AI 路由 fail closed。 |
+
+## 舊金流相容設定
+
+這些名稱由共用 payments package 保留。StartKiter 現行一次買斷主路徑不依賴它們，只有對應 provider 或舊資料仍使用時才需要填。
+
+| 變數 | 必填／選填 | 用途 |
+| --- | --- | --- |
+| `PRICE_ID_LIFETIME` | 選填 | 舊版 lifetime price 識別值。 |
+| `PRICE_ID_PRO_MONTHLY` | 選填 | 舊版月訂閱 price 識別值。 |
+| `PRICE_ID_PRO_YEARLY` | 選填 | 舊版年訂閱 price 識別值。 |
+| `CREEM_API_KEY` | 選填 | Creem provider 憑證。 |
+| `CREEM_WEBHOOK_SECRET` | 選填 | Creem webhook 密鑰。 |
+| `DODO_PAYMENTS_API_KEY` | 選填 | Dodo Payments provider 憑證。 |
+| `DODO_PAYMENTS_WEBHOOK_SECRET` | 選填 | Dodo Payments webhook 密鑰。 |
+| `LEMONSQUEEZY_API_KEY` | 選填 | Lemon Squeezy provider 憑證。 |
+| `LEMONSQUEEZY_STORE_ID` | 選填 | Lemon Squeezy store 識別值。 |
+| `LEMONSQUEEZY_WEBHOOK_SECRET` | 選填 | Lemon Squeezy webhook 密鑰。 |
+| `POLAR_ACCESS_TOKEN` | 選填 | Polar provider 憑證。 |
+| `POLAR_WEBHOOK_SECRET` | 選填 | Polar webhook 密鑰。 |
+| `STRIPE_SECRET_KEY` | 選填 | Stripe provider secret；只有該 provider 啟用時需要。 |
+| `STRIPE_WEBHOOK_SECRET` | 選填 | Stripe webhook 驗證密鑰。 |
+
+## 部署管理與排程清理
+
+| 變數 | 必填／選填 | 用途 |
+| --- | --- | --- |
+| `COOLIFY_API_TOKEN` | 選填 | Coolify API 存取憑證；啟用部署管理功能時使用。 |
+| `COOLIFY_PROJECT_UUID` | 選填 | Coolify project 識別值。 |
+| `COOLIFY_APP_REPO_URL` | 選填 | Coolify 應用程式 Git repository。 |
+| `COOLIFY_APP_GIT_BRANCH` | 選填 | Coolify 部署分支，範例預設為 main。 |
+| `COOLIFY_PRIVATE_KEY_UUID` | 選填 | Coolify 使用的 SSH private key 識別值。 |
+| `ASSIGNMENT_UPLOAD_CLEANUP_SECRET` | 選填 | 作業附件清理 cron endpoint 密鑰。 |
+| `LESSON_MESSAGE_UPLOAD_CLEANUP_SECRET` | 選填 | 單元留言附件清理 cron endpoint 密鑰。 |
+| `PORT` | 選填 | HTTP port，預設為 3000。 |
+| `NODE_ENV` | 選填 | 執行環境，範例預設為 development。 |
+| `CI` | 選填 | CI 執行環境標記。 |
+
+## 安全提醒
+
+本頁只列變數名稱、條件與用途，不提供任何實際憑證值。公開文件、截圖、commit 與 issue 都不應出現 `.env` 的真實內容。
