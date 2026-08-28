@@ -52,4 +52,24 @@ describe("course.runMissionCheck", () => {
 		expect(checkImpl).not.toHaveBeenCalled();
 		expect(missionFormValueFindMany).not.toHaveBeenCalled();
 	});
+
+	it("returns unknown_check_id for an unregistered check without treating it as a failed learning attempt", async () => {
+		await expect(
+			call(
+				runMissionCheck,
+				{
+					coursePackMissionId: "mission-1",
+					checkId: "not_a_real_check",
+					params: {},
+				},
+				{ context: { headers: new Headers() } },
+			),
+		).resolves.toEqual({
+			status: "failed",
+			reasonCode: "unknown_check_id",
+		});
+
+		expect(checkImpl).not.toHaveBeenCalled();
+		expect(missionFormValueFindMany).not.toHaveBeenCalled();
+	});
 });
