@@ -220,4 +220,19 @@ describe("PAYUNi period-notify", () => {
 		subscriptionId: "subscription-1",
 	});
 	});
+
+	it("does not send a welcome email for a completed non-first period replay", async () => {
+		vi.mocked(claimWebhookEvent).mockResolvedValue({ status: "COMPLETED" });
+		vi.mocked(db.courseSubscription.findUnique).mockResolvedValue({
+			id: "subscription-1",
+			userId: "user-1",
+			courseId: "course-1",
+		} as never);
+
+		const response = await POST(signedRequest({ PeriodOrderNo: "SUBTRADE_2", ThisPeriod: 2 }));
+
+		expect(response.status).toBe(200);
+		expect(triggerInvoiceForSubscriptionPeriod).toHaveBeenCalledWith("subscription-1", 2);
+		expect(sendWelcomeEmail).not.toHaveBeenCalled();
+	});
 });

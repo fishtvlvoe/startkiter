@@ -148,4 +148,35 @@ describe("sendWelcomeEmail", () => {
 		}));
 		expect(sendEmail).toHaveBeenCalledTimes(1);
 	});
+
+	it("refreshes the lease so concurrent expired retries send only once", async () => {
+		let current = {
+			id: "delivery-1",
+			status: "PENDING",
+			createdAt: new Date(Date.now() - 16 * 60_000),
+		};
+		vi.mocked(db.emailDeliveryLog.findFirst).mockImplementation(async () => current as never);
+		vi.mocked(db.emailDeliveryLog.update).mockImplementation(async ({ data }) => {
+			current = { ...current, ...data } as typeof current;
+			return current as never;
+		});
+
+		let release!: () => void;
+		const sendStarted = new Promise<void>((resolve) => {
+			vi.mocked(sendEmail).mockImplementationOnce(async () => {
+				resolve();
+				await new Promise<void>((done) => { release = done; });
+				return true;
+			});
+		});
+
+		const first = sendWelcomeEmail({ userId: "user-1", courseId: "course-1", orderId: "order-1" });
+		await sendStarted;
+		await sendWelcomeEmail({ userId: "user-1", courseId: "course-1", orderId: "order-1" });
+		release();
+		await first;
+
+		expect(sendEmail).toHaveBeenCalledTimes(1);
+		expect(current.createdAt.getTime()).toBeGreaterThan(Date.now() - 60_000);
+	});
 });
