@@ -75,6 +75,29 @@ describe("course.runMissionCheck", () => {
 		expect(missionFormValueFindMany).not.toHaveBeenCalled();
 	});
 
+	it.each(["toString", "constructor"] as const)(
+		"returns unknown_check_id for prototype property %s",
+		async (checkId) => {
+			await expect(
+				call(
+					runMissionCheck,
+					{
+						coursePackMissionId: "mission-1",
+						checkId,
+						params: {},
+					},
+					{ context: { headers: new Headers() } },
+				),
+			).resolves.toEqual({
+				status: "failed",
+				reasonCode: "unknown_check_id",
+			});
+
+			expect(checkImpl).not.toHaveBeenCalled();
+			expect(missionFormValueFindMany).not.toHaveBeenCalled();
+		},
+	);
+
 	it("dispatches a registered check_id with decrypted form values", async () => {
 		missionFormValueFindMany.mockResolvedValue([
 			{

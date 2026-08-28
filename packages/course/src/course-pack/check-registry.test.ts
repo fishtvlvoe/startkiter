@@ -18,6 +18,16 @@ describe("check-registry", () => {
 		});
 	});
 
+	it.each(["toString", "constructor"] as const)(
+		"returns unknown_check_id for prototype property %s",
+		async (checkId) => {
+			await expect(dispatchCheck(checkId, {}, context)).resolves.toEqual({
+				status: "failed",
+				reasonCode: "unknown_check_id",
+			});
+		},
+	);
+
 	it("dispatches a registered check_id to its implementation", async () => {
 		const implementation = vi.fn().mockResolvedValue({ status: "passed" });
 

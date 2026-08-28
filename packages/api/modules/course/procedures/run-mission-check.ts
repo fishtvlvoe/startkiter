@@ -34,10 +34,11 @@ export const runMissionCheck = protectedProcedure
 		}),
 	)
 	.handler(async ({ input, context }) => {
-		const implementation = checkRegistry[input.checkId];
-		if (!implementation) {
+		if (!Object.hasOwn(checkRegistry, input.checkId)) {
 			return { status: "failed" as const, reasonCode: "unknown_check_id" as const };
 		}
+
+		const implementation = checkRegistry[input.checkId];
 
 		const rows = await db.missionFormValue.findMany({
 			where: {

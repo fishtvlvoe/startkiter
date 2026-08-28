@@ -21,10 +21,13 @@ export type CheckImplementation = (
 	context: CheckContext,
 ) => Promise<CheckResult>;
 
-export const checkRegistry: Record<string, CheckImplementation> = {
-	deployment_heartbeat_fresh: checkDeploymentHeartbeatFresh,
-	bunny_zone_created: checkBunnyZoneCreated,
-};
+export const checkRegistry: Record<string, CheckImplementation> = Object.assign(
+	Object.create(null),
+	{
+		deployment_heartbeat_fresh: checkDeploymentHeartbeatFresh,
+		bunny_zone_created: checkBunnyZoneCreated,
+	},
+);
 
 export async function dispatchCheck(
 	checkId: string,
@@ -32,10 +35,9 @@ export async function dispatchCheck(
 	context: CheckContext,
 	registry: Record<string, CheckImplementation> = checkRegistry,
 ): Promise<CheckResult> {
-	const implementation = registry[checkId];
-	if (!implementation) {
+	if (!Object.hasOwn(registry, checkId)) {
 		return { status: "failed", reasonCode: "unknown_check_id" };
 	}
 
-	return implementation(params, context);
+	return registry[checkId](params, context);
 }
