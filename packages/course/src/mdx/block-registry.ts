@@ -11,6 +11,8 @@ import {
 	WebContainerSandbox,
 	WorkflowSorter,
 } from "../components/interactive";
+import type { Mission } from "../course-pack/schema";
+import { resolveSurfaceBlock } from "../course-pack/surface-block-map";
 
 export type BlockDefinition<T extends Record<string, unknown> = Record<string, unknown>> = {
 	name: string;
@@ -165,4 +167,64 @@ export const BLOCK_REGISTRY: BlockDefinition<any>[] = [
 
 export function isRegisteredBlockName(name: string): boolean {
 	return BLOCK_REGISTRY.some((block) => block.name === name);
+}
+
+export type MissionBlockResolution =
+	| { ok: true; blockName: string; props: Record<string, unknown> }
+	| { ok: false; error: string };
+
+function missionActionProps(action: Mission["action"], blockId: string): Record<string, unknown> {
+	switch (action.surface) {
+		case "code_editor":
+		case "terminal":
+			return {
+				blockId,
+				files: { "mission-instructions.txt": action.instructions.join("\n") },
+				hints: [],
+			};
+		case "structured_form":
+			return {
+				prompts: action.fields.map((field) => ({
+					question: `${field.label} (${field.inputType})`,
+					response: field.key,
+				})),
+			};
+		case "embedded_tool":
+			return {
+				tabs: [
+					{
+						title: action.mode,
+						description: action.url ?? "未提供工具網址",
+					},
+				],
+			};
+	}
+}
+
+export function resolveMissionBlock(
+	action: Mission["action"],
+	blockId = "mission-action",
+): MissionBlockResolution {
+	const surface = resolveSurfaceBlock(action.surface);
+	if (!surface.ok) {
+		return surface;
+	}
+
+	const definition = BLOCK_REGISTRY.find((block) => block.name === surface.blockName);
+	if (!definition) {
+		return {
+			ok: false,
+			error: `Unregistered rendering block: ${surface.blockName}`,
+		};
+	}
+
+	const props = missionActionProps(action, blockId);
+	if (!definition.propsSchema.safeParse(props).success) {
+		return {
+			ok: false,
+			error: `Invalid props for rendering block: ${surface.blockName}`,
+		};
+	}
+
+	return { ok: true, blockName: surface.blockName, props };
 }

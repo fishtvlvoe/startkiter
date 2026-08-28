@@ -78,6 +78,7 @@ describe("BLOCK_REGISTRY", () => {
 				{ key: "apiKey", label: "Bunny API Key", inputType: "text", required: true },
 			],
 		});
+		if (!result.ok) throw new Error(result.error);
 
 		expect(result).toEqual({
 			ok: true,
