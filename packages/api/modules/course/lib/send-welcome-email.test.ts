@@ -120,12 +120,32 @@ describe("sendWelcomeEmail", () => {
 	});
 
 	it("does not send concurrently when a previous delivery is still pending", async () => {
-		vi.mocked(db.emailDeliveryLog.findFirst).mockResolvedValue({ id: "delivery-1", status: "PENDING" } as never);
+		vi.mocked(db.emailDeliveryLog.findFirst).mockResolvedValue({
+			id: "delivery-1",
+			status: "PENDING",
+			createdAt: new Date(Date.now() - 60_000),
+		} as never);
 
 		await sendWelcomeEmail({ userId: "user-1", courseId: "course-1", orderId: "order-1" });
 
 		expect(sendEmail).not.toHaveBeenCalled();
 		expect(db.emailDeliveryLog.create).not.toHaveBeenCalled();
 		expect(db.emailDeliveryLog.update).not.toHaveBeenCalled();
+	});
+
+	it("retries a pending delivery after its reservation TTL expires", async () => {
+		vi.mocked(db.emailDeliveryLog.findFirst).mockResolvedValue({
+			id: "delivery-1",
+			status: "PENDING",
+			createdAt: new Date(Date.now() - 16 * 60_000),
+		} as never);
+
+		await sendWelcomeEmail({ userId: "user-1", courseId: "course-1", orderId: "order-1" });
+
+		expect(db.emailDeliveryLog.update).toHaveBeenCalledWith(expect.objectContaining({
+			where: { id: "delivery-1" },
+			data: expect.objectContaining({ status: "PENDING", errorMessage: null }),
+		}));
+		expect(sendEmail).toHaveBeenCalledTimes(1);
 	});
 });
