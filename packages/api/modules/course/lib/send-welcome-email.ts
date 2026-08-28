@@ -5,6 +5,7 @@ import { MVP_SKU } from "@startkiter/payments/constants";
 
 const TEMPLATE_VARIABLES = ["userName", "courseName", "courseUrl"] as const;
 type TemplateVariable = (typeof TEMPLATE_VARIABLES)[number];
+const PENDING_DELIVERY_TTL_MS = 15 * 60 * 1000;
 
 function baseUrl(): string {
 	return (process.env.NEXT_PUBLIC_SAAS_URL || process.env.BETTER_AUTH_URL || "http://localhost:3000").replace(/\/$/, "");
@@ -51,7 +52,9 @@ async function reserveWelcomeDelivery(input: {
 				},
 				orderBy: { createdAt: "desc" },
 			});
-			if (previous?.status === "SENT" || previous?.status === "PENDING") return null;
+			const pendingIsFresh = previous?.status === "PENDING"
+				&& previous.createdAt.getTime() > Date.now() - PENDING_DELIVERY_TTL_MS;
+			if (previous?.status === "SENT" || pendingIsFresh) return null;
 			return previous
 				? tx.emailDeliveryLog.update({
 						where: { id: previous.id },
