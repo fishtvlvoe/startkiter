@@ -34,7 +34,7 @@ export const runMissionCheck = protectedProcedure
 		}),
 	)
 	.handler(async ({ input, context }) => {
-		if (!Object.hasOwn(checkRegistry, input.checkId)) {
+		if (!Object.prototype.hasOwnProperty.call(checkRegistry, input.checkId)) {
 			return { status: "failed" as const, reasonCode: "unknown_check_id" as const };
 		}
 

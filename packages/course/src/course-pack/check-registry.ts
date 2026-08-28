@@ -35,7 +35,7 @@ export async function dispatchCheck(
 	context: CheckContext,
 	registry: Record<string, CheckImplementation> = checkRegistry,
 ): Promise<CheckResult> {
-	if (!Object.hasOwn(registry, checkId)) {
+	if (!Object.prototype.hasOwnProperty.call(registry, checkId)) {
 		return { status: "failed", reasonCode: "unknown_check_id" };
 	}
 
