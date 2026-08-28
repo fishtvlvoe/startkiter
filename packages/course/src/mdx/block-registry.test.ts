@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { createElement } from "react";
 
-import { BLOCK_REGISTRY, resolveMissionBlock } from "./block-registry";
+import { BLOCK_REGISTRY, MissionBlockRenderer, resolveMissionBlock } from "./block-registry";
 import { LESSON_MDX_COMPONENT_SET } from "./allowed-components";
 
 describe("BLOCK_REGISTRY", () => {
@@ -14,6 +15,7 @@ describe("BLOCK_REGISTRY", () => {
 			"TeacherAvatar",
 			"DialogueWindow",
 			"WebContainerSandbox",
+			"MissionBlockRenderer",
 		]);
 	});
 
@@ -84,11 +86,76 @@ describe("BLOCK_REGISTRY", () => {
 			ok: true,
 			blockName: "DialogueWindow",
 			props: {
-				prompts: [{ question: "Bunny API Key (text)", response: "apiKey" }],
+				prompts: [{ question: "Bunny API Key", response: "text · 必填" }],
 			},
 		});
 
 		const definition = BLOCK_REGISTRY.find((block) => block.name === result.blockName);
 		expect(definition?.propsSchema.safeParse(result.props).success).toBe(true);
+	});
+
+	it("保留 embedded_tool 的模式與網址語意", () => {
+		const result = resolveMissionBlock({
+			surface: "embedded_tool",
+			url: "https://example.com/tool",
+			mode: "iframe",
+		});
+
+		if (!result.ok) throw new Error(result.error);
+
+		expect(result).toEqual({
+			ok: true,
+			blockName: "ConceptCompare",
+			props: {
+				tabs: [{
+					title: "iframe",
+					description: "https://example.com/tool",
+					code: "https://example.com/tool",
+				}],
+			},
+		});
+
+		const definition = BLOCK_REGISTRY.find((block) => block.name === result.blockName);
+		expect(definition?.propsSchema.safeParse(result.props).success).toBe(true);
+	});
+
+	it("MissionBlockRenderer 實際渲染 structured_form 的欄位語意", async () => {
+		const { renderToStaticMarkup } = await import("react-dom/server");
+		const markup = renderToStaticMarkup(
+			createElement(MissionBlockRenderer, {
+				action: {
+					surface: "structured_form",
+					fields: [
+						{ key: "apiKey", label: "Bunny API Key", inputType: "text", required: true },
+						{ key: "zoneName", label: "Zone name", inputType: "text", required: false },
+					],
+				},
+			}),
+		);
+
+		expect(markup).toContain('aria-label="Bunny API Key"');
+		expect(markup).toContain('name="apiKey"');
+		expect(markup).toContain('type="text"');
+		expect(markup).toContain('required=""');
+		expect(markup).toContain('name="zoneName"');
+	});
+
+	it("MissionBlockRenderer 實際渲染 embedded_tool 的可操作入口", async () => {
+		const { renderToStaticMarkup } = await import("react-dom/server");
+		const iframeMarkup = renderToStaticMarkup(
+			createElement(MissionBlockRenderer, {
+				action: { surface: "embedded_tool", url: "https://example.com/tool", mode: "iframe" },
+			}),
+		);
+		const copyMarkup = renderToStaticMarkup(
+			createElement(MissionBlockRenderer, {
+				action: { surface: "embedded_tool", url: "npm run setup", mode: "copy_command" },
+			}),
+		);
+
+		expect(iframeMarkup).toContain('src="https://example.com/tool"');
+		expect(iframeMarkup).toContain('title="Mission embedded tool"');
+		expect(copyMarkup).toContain('data-copy-value="npm run setup"');
+		expect(copyMarkup).toContain("複製命令");
 	});
 });

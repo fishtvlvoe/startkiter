@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { ComponentType } from "react";
+import { createElement, Fragment, type ComponentType } from "react";
 
 import {
 	ConceptCompare,
@@ -140,6 +140,38 @@ const dialogueWindowPropsSchema = z
 	})
 	.strict();
 
+const missionActionSchema = z.discriminatedUnion("surface", [
+	z.object({
+		surface: z.literal("code_editor"),
+		instructions: z.array(z.string().trim().min(1)).min(1),
+	}).strict(),
+	z.object({
+		surface: z.literal("terminal"),
+		instructions: z.array(z.string().trim().min(1)).min(1),
+	}).strict(),
+	z.object({
+		surface: z.literal("structured_form"),
+		fields: z.array(
+			z.object({
+				key: z.string().trim().min(1),
+				label: z.string().trim().min(1),
+				inputType: z.enum(["text", "number", "url"]),
+				required: z.boolean(),
+			}).strict(),
+		).min(1),
+	}).strict(),
+	z.object({
+		surface: z.literal("embedded_tool"),
+		url: z.string().trim().min(1).optional(),
+		mode: z.enum(["iframe", "copy_command"]),
+	}).strict(),
+]);
+
+const missionBlockRendererPropsSchema = z.object({
+	action: missionActionSchema,
+	blockId: z.string().trim().min(1).optional(),
+}).strict();
+
 export const webContainerSandboxPropsSchema = z
 	.object({
 		blockId: z.string(),
@@ -163,6 +195,11 @@ export const BLOCK_REGISTRY: BlockDefinition<any>[] = [
 		propsSchema: webContainerSandboxPropsSchema,
 		component: WebContainerSandbox,
 	},
+	{
+		name: "MissionBlockRenderer",
+		propsSchema: missionBlockRendererPropsSchema,
+		component: MissionBlockRenderer,
+	},
 ];
 
 export function isRegisteredBlockName(name: string): boolean {
@@ -185,8 +222,8 @@ function missionActionProps(action: Mission["action"], blockId: string): Record<
 		case "structured_form":
 			return {
 				prompts: action.fields.map((field) => ({
-					question: `${field.label} (${field.inputType})`,
-					response: field.key,
+					question: field.label,
+					response: `${field.inputType} · ${field.required ? "必填" : "選填"}`,
 				})),
 			};
 		case "embedded_tool":
@@ -195,6 +232,7 @@ function missionActionProps(action: Mission["action"], blockId: string): Record<
 					{
 						title: action.mode,
 						description: action.url ?? "未提供工具網址",
+						code: action.url,
 					},
 				],
 			};
@@ -227,4 +265,76 @@ export function resolveMissionBlock(
 	}
 
 	return { ok: true, blockName: surface.blockName, props };
+}
+
+export type MissionBlockRendererProps = {
+	action: Mission["action"];
+	blockId?: string;
+};
+
+export function MissionBlockRenderer({ action, blockId = "mission-action" }: MissionBlockRendererProps) {
+	const resolution = resolveMissionBlock(action, blockId);
+	if (!resolution.ok) {
+		return createElement("p", { role: "alert" }, resolution.error);
+	}
+
+	if (action.surface === "structured_form") {
+		return createElement(
+			"form",
+			{ className: "mission-structured-form", "data-block-id": blockId },
+			action.fields.map((field) =>
+				createElement(
+					"label",
+					{ key: field.key, className: "mission-structured-form__field" },
+					createElement("span", {}, `${field.label} (${field.inputType} · ${field.required ? "必填" : "選填"})`),
+					createElement("input", {
+						"aria-label": field.label,
+						name: field.key,
+						type: field.inputType,
+						required: field.required,
+					}),
+				),
+			),
+		);
+	}
+
+	if (action.surface === "embedded_tool") {
+		if (!action.url) {
+			return createElement("p", { role: "alert" }, "工具缺少網址或命令，無法開啟。");
+		}
+
+		if (action.mode === "iframe") {
+			return createElement("iframe", {
+				className: "mission-embedded-tool",
+				"data-block-id": blockId,
+				src: action.url,
+				title: "Mission embedded tool",
+				sandbox: "allow-forms allow-modals allow-popups allow-scripts",
+				referrerPolicy: "no-referrer",
+			});
+		}
+
+		return createElement(
+			"div",
+			{ className: "mission-copy-command", "data-block-id": blockId },
+			createElement("code", { "data-copy-value": action.url }, action.url),
+			createElement(
+				"button",
+				{
+					type: "button",
+					onClick: () => {
+						if (typeof navigator !== "undefined" && navigator.clipboard) {
+							void navigator.clipboard.writeText(action.url!);
+						}
+					},
+				},
+				"複製命令",
+			),
+		);
+	}
+
+	const definition = BLOCK_REGISTRY.find((block) => block.name === resolution.blockName);
+	return definition
+		? createElement(definition.component, resolution.props)
+		: createElement(Fragment, {}, null);
 }
