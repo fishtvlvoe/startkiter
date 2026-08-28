@@ -72,11 +72,19 @@ support.startkiter.dev  （Chatwoot 客服）
 | 付款成功 → 課程權限開通 | ✅已接（既有 Order/CourseSubscription 流程） |
 | Plugin 掛載 → 後台選單 | ✅已接（`packages/platform` Mount Points） |
 | 發票設定 → 後台可視化操作 | ✅已接（`settings/einvoice` 頁面） |
-| 課程系統 → 通知系統（完課提醒等） | 🟡部分：`course-lifecycle-email` 這張卡 0/13，是「付款成功後除了 welcome 通知，其他生命週期事件（如訂閱到期提醒）還沒接」 |
-| 行銷頁定價 → 真實金流方案 | ❌未接：`packages/payments/config.ts` 現在還是 supastarter demo 假方案，不是你的 NT$8800 一次買斷 |
+| 課程系統 → 通知系統（完課提醒等） | ✅已接（2026-08-28 完成）：`course-lifecycle-email` 13/13，購買歡迎信＋訂閱到期提醒（7/1/0 天）皆已上線，含真實 E2E 驗證（Stripe 真實買斷→DB 確認 SENT→cron 三次驗證寄出/不重複/401） |
+| 行銷頁定價 → 真實金流方案 | ✅已接（2026-08-28 完成）：`packages/payments/config.ts` 已改為 NT$8800 一次買斷，`marketing-site-real-content` 已 apply 並封存 |
 
-## 5. 我需要 Fish 確認的地方
+## 5. 現況總結（2026-08-28 更新）
 
-1. 第 3 節 UI/UX 建議只是我的初稿，你要不要調整？
-2. 第 4 節「課程生命週期通知」(`course-lifecycle-email`) 目前排在四張隊列之外，要不要一起排進去？
-3. 你之前問的「發票供應商」問題已經在處理（用正式帳號跑真實 E2E），這張表會隨結果更新。
+**五張交付 change 全部完成並已封存**（`spectra archive`）：
+1. `vps-production-deployment` — 官網／SaaS 皆已在 Vultr VPS 正式部署，`curl` 確認 200
+2. `marketing-site-real-content` — 官網真實文案＋單一 NT$8800 定價
+3. `buyer-docs-site` — 買家技術文件站（Fumadocs），本機可跑，正式網域 `docs.startkiter.dev` 依設計暫不部署
+4. `plan-clean-install-package-repo` — 買家最終交付用的乾淨代碼包產出流程
+5. `course-lifecycle-email` — 購買歡迎信＋訂閱到期提醒，過程中抓到並修復一個真實 bug（MVP 買斷選錯課程寄信）
+
+**還沒完成的（不在這次五張範圍內）：**
+- `unified-support-desk` 9.4：三管道（網站/LINE/Telegram）串 Chatwoot 客服的端對端驗證。Chatwoot 服務本身已於 2026-08-28 從 VPS 移除（省資源），**Fish 已裁決：等網站穩定後再決定新家，此項暫緩**。候選機器：Zeabur 上 `fish Tokyo 2C 8GB`（目前跑 wumin，Fish 確認可清空改裝）——這只是已知選項，不是定案。
+- `course-pack-mission-execution`（16 項未完成）：課神匯入教案的互動關卡執行系統，屬進階教學功能，非本次交付上線必要路徑，待 Fish 之後決定是否補做或明確 descope。
+- 第 3 節 UI/UX 整合建議（4 網域導覽、後台總覽儀表板）仍是初稿，未跟 Fish 對過，之後可另開 change 討論。

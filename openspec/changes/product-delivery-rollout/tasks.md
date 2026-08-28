@@ -13,18 +13,18 @@
 ### 1. 新開的 5 張交付 change（依序 apply）
 
 - [x] 1.1 確認 `vps-production-deployment` 完成 `/spectra-apply`：test/type-check/build 全綠（20/20、26/26、2/2）、第三輪全新 context 獨立 CR Critical/High/Medium/Low 全 0、Coolify 以 `228847af` 部署成功，`curl -L -s -o /dev/null -w "%{http_code}" https://startkiter.dev` 回傳 200。CR 報告：`/tmp/startkiter-vps-independent-cr-final-3.txt`；headers：`/tmp/startkiter-vps-production-final-startkiter-dev.headers`、`/tmp/startkiter-vps-production-final-app.headers`。
-- [ ] 1.2 回報 Fish：`vps-production-deployment` 是否 archive，等待 Fish 明確決策後才執行 `spectra archive vps-production-deployment`（若 Fish 同意）
+- [x] 1.2 Fish 同意，已 `spectra archive vps-production-deployment` → `openspec/changes/archive/2026-08-28-vps-production-deployment`。
 
 - [x] 2.1 確認 `marketing-site-real-content` 完成 `/spectra-apply`：`packages/payments/config.ts` 方案改為 NT$8800 一次買斷、6 語系 `pricing` i18n key 補齊、Acme/Maya Chen 等示範假資料清除；獨立 CR PASS，Critical／High／Medium／Low 全 0。Coolify deployment `h9kn9yhyvytax9pne2srm05j` 以 commit `4fc4ec93` finished，resource running、restart count 0；`curl` 驗證 `startkiter.dev` 與三語路徑 HTTP 200，ego-browser 實測三語首頁與 pricing 均為單一 `NT$8,800` 一次買斷且無舊模板文案。截圖：`/tmp/startkiter-marketing-zh-tw.png`、`/tmp/startkiter-marketing-zh-cn.png`、`/tmp/startkiter-marketing-en.png`、`/tmp/startkiter-marketing-zh-tw-pricing.png`、`/tmp/startkiter-marketing-zh-cn-pricing.png`、`/tmp/startkiter-marketing-en-pricing.png`。
-- [ ] 2.2 回報 Fish：`marketing-site-real-content` 是否 archive
+- [x] 2.2 Fish 同意，已 `spectra archive marketing-site-real-content` → `openspec/changes/archive/2026-08-28-marketing-site-real-content`。
 
 - [x] 3.1 確認 `buyer-docs-site` 完成 `/spectra-apply`：`apps/docs` 以 Fumadocs 建立且可本機啟動、涵蓋環境變數/本機開發/Core-Plugin 邊界/Upstream Sync 章節，獨立 CR PASS 且 0 Critical。驗證：docs 測試 5/5、`pnpm type-check` 27/27、`pnpm build` docs/marketing/saas 3/3；ego-browser 實測首頁三分類、五個章節頁（環境變數表格 88 列）、搜尋「環境變數／PAYUNi／dataSpec」皆命中。commit `dc3949c2` 已 push。CR：`openspec/changes/buyer-docs-site/code-review.md`（Critical 0 / High 1 / Medium 3 / Low 4）。`docs.startkiter.dev` DNS 尚未建立：本 change 設計把正式網域列為 Open Question、Migration Plan 明寫本次不部署，因此不擋這張 apply。
-- [ ] 3.2 回報 Fish：`buyer-docs-site` 是否 archive
+- [x] 3.2 Fish 同意，已 `spectra archive buyer-docs-site` → `openspec/changes/archive/2026-08-28-buyer-docs-site`。
 
 - [x] 4.1 確認 `plan-clean-install-package-repo` 完成 `/spectra-apply`：買家最終交付的乾淨代碼包產出流程可重複執行，獨立 CR 第二輪 PASS 且 0 Critical。驗證：單元測試 9/9；`pnpm tsx tooling/scripts/promote-clean-package.ts --dry-run` 納入 1189、排除 4765，included 無 `.env*`／`.pem`／demo／docs/discuss；實拷 `/tmp/startkiter-clean-package-export` 1191 檔無 aiver.me／demo／discuss。第一輪 CR Critical 1（`.env.*` 變體）已修。報告：`openspec/changes/plan-clean-install-package-repo/code-review.md`、`code-review-round2.md`。遠端 `fishtvlvoe/startkiter-starter-kit` 依 Non-Goals 未建立。
-- [ ] 4.2 回報 Fish：`plan-clean-install-package-repo` 是否 archive
+- [x] 4.2 Fish 同意，已 `spectra archive plan-clean-install-package-repo` → `openspec/changes/archive/2026-08-28-plan-clean-install-package-repo`。
 
 - [x] 5.1 確認 `course-lifecycle-email` 完成 `/spectra-apply`：訂閱到期等生命週期通知事件觸發正確，獨立 CR 三輪後 PASS 且 0 Critical／0 High。Round 1 CR 抓到 High 3（H1 歡迎信 PENDING 冪等鎖死、H2 訂閱首期重放漏寄、H3 到期提醒失敗誤刪導致重寄），Codex 修復後 Round 2 CR 把 H1 的修法升級為新 Critical（C1：並發過期重放仍會雙寄），Codex 再修（刷新 lease 時間戳）後 Round 3 CR 確認 C1 解決，Critical 0／High 0。PM 自行覆核：`pnpm --filter @startkiter/api test` 212/212、`pnpm --filter @startkiter/saas test period-notify` 9/9、API／SaaS `type-check` 全綠、`spectra analyze` 四維 Clean。全部 10 個 commit（`a81a06ec`…`465a278c`）已 push（`122b03e3..465a278c`）。報告：`openspec/changes/course-lifecycle-email/code-review.md`。**task 5.2 真實買斷+信箱 e2e 已完成**：過程中抓到並修復真實 bug（MVP_SKU 選課邏輯選錯課程，commit `afc36953` 已 push），修復後 PM 直接查 DB（`email_delivery_log` 表）確認寄對課程、狀態 SENT；到期提醒 cron 三次驗證（寄出1筆/不重複/401）皆通過。PM 最終覆核：`pnpm --filter @startkiter/api test` 213/213。
-- [ ] 5.2 回報 Fish：`course-lifecycle-email` 是否 archive
+- [x] 5.2 Fish 同意，已 `spectra archive course-lifecycle-email` → `openspec/changes/archive/2026-08-28-course-lifecycle-email`。另從一個孤兒 orca worktree 中救回一份未提交的送達記錄 type/status 篩選功能（對應舊 CR 的 M3 發現），已補進 commit `fac83b24` 並 push。
 
-- [ ] 6.1 五張子 change 全數完成後，更新 `docs/discuss/2026-08-27-product-delivery-master-roadmap.md` 反映最終狀態，並回報 Fish 完整驗收清單（含每張的 CR 結論、curl/測試證據連結）。驗證目標：文件內容與 `spectra list`/`spectra list --parked` 實際輸出一致
+- [x] 6.1 五張子 change 全數完成，已更新 `docs/discuss/2026-08-27-product-delivery-master-roadmap.md` 反映最終狀態（五張皆完成並封存、`course-pack-mission-execution`／Chatwoot 9.4 為已知未完成項）。`spectra list` 確認僅剩 `product-delivery-rollout`（本身）與 `unified-support-desk`（51/55，卡在 9.4 待 Chatwoot 新家決定）。
