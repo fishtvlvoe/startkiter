@@ -1,3 +1,5 @@
+import { checkDeploymentHeartbeatFresh } from "./checks/deployment-heartbeat-fresh";
+
 export type CheckContext = {
 	userId: string;
 	coursePackMissionId: string;
@@ -18,7 +20,9 @@ export type CheckImplementation = (
 	context: CheckContext,
 ) => Promise<CheckResult>;
 
-export const checkRegistry: Record<string, CheckImplementation> = {};
+export const checkRegistry: Record<string, CheckImplementation> = {
+	deployment_heartbeat_fresh: checkDeploymentHeartbeatFresh,
+};
 
 export async function dispatchCheck(
 	checkId: string,

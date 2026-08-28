@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { checkDeploymentHeartbeatFresh } from "./checks/deployment-heartbeat-fresh";
 import { checkRegistry, dispatchCheck, type CheckContext } from "./check-registry";
 
 const context: CheckContext = {
@@ -30,5 +31,9 @@ describe("check-registry", () => {
 
 	it("does not register unknown names on the production registry", () => {
 		expect(checkRegistry.not_a_real_check).toBeUndefined();
+	});
+
+	it("registers deployment_heartbeat_fresh", () => {
+		expect(checkRegistry.deployment_heartbeat_fresh).toBe(checkDeploymentHeartbeatFresh);
 	});
 });

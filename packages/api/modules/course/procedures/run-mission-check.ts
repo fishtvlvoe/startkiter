@@ -1,9 +1,23 @@
 import { db } from "@startkiter/database";
 import { checkRegistry } from "@startkiter/course/src/course-pack/check-registry";
+import { setDeploymentHeartbeatReader } from "@startkiter/course/src/course-pack/checks/deployment-heartbeat-fresh";
 import { z } from "zod";
 
 import { protectedProcedure } from "../../../orpc/procedures";
 import { decryptMissionFormValue } from "../lib/mission-form-value-crypto";
+
+setDeploymentHeartbeatReader({
+	findLatestForUser: async (userId) => {
+		const row = await db.buyerDeployment.findFirst({
+			where: { userId },
+			select: { lastDeployedAt: true },
+		});
+		if (!row?.lastDeployedAt) {
+			return null;
+		}
+		return { receivedAt: row.lastDeployedAt };
+	},
+});
 
 export const runMissionCheck = protectedProcedure
 	.route({
