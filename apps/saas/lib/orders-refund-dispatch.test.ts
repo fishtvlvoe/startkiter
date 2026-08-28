@@ -13,6 +13,9 @@ vi.mock("@startkiter/api/modules/course/lib/order-refunds", () => ({
 vi.mock("@startkiter/api/modules/course/lib/invoice-events", () => ({
 	handleRefundInvoice: vi.fn(),
 }));
+vi.mock("@startkiter/api/modules/course/lib/send-welcome-email", () => ({
+	sendWelcomeEmailsForOrder: vi.fn(),
+}));
 vi.mock("@startkiter/payments", async (importOriginal) => ({
 	...(await importOriginal<typeof import("@startkiter/payments")>()),
 	createMvpCheckoutGateway: vi.fn(),
@@ -21,6 +24,7 @@ vi.mock("@startkiter/payments", async (importOriginal) => ({
 import { db } from "@startkiter/database";
 import { refundOrderThroughGateway } from "@startkiter/api/modules/course/lib/order-refunds";
 import { handleRefundInvoice } from "@startkiter/api/modules/course/lib/invoice-events";
+import { sendWelcomeEmailsForOrder } from "@startkiter/api/modules/course/lib/send-welcome-email";
 import { markOrderPaid, markOrderRefundedInDb } from "./orders";
 
 describe("database refund gateway dispatch", () => {
@@ -44,6 +48,12 @@ describe("database refund gateway dispatch", () => {
 		expect(db.order.updateMany).toHaveBeenCalledWith(expect.objectContaining({
 			where: { id: "order-id", orderNo: "ORDER-1", status: "pending", paymentGateway: "payuni" },
 		}));
+	});
+
+	it("dispatches the welcome email after payment is marked paid", async () => {
+		await expect(markOrderPaid("order-id", "ORDER-1", "PAYMENT-1", "payuni")).resolves.toBe(1);
+
+		expect(sendWelcomeEmailsForOrder).toHaveBeenCalledWith("order-id");
 	});
 
 	it("does not couple payment success to invoice intent persistence", async () => {
