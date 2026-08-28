@@ -54,4 +54,18 @@ describe("bunny_zone_created", () => {
 			reasonCode: "network_error",
 		});
 	});
+
+	it("returns passed when Bunny lists an existing storage zone", async () => {
+		const fetchImpl = vi.fn().mockResolvedValue(
+			new Response(JSON.stringify([{ Id: 1, Name: "learner-zone" }]), {
+				status: 200,
+				headers: { "Content-Type": "application/json" },
+			}),
+		);
+		const check = createBunnyZoneCreatedCheck({ fetch: fetchImpl });
+
+		await expect(
+			check({}, { ...context, formValues: { bunnyApiKey: "secret-bunny-key" } }),
+		).resolves.toEqual({ status: "passed" });
+	});
 });

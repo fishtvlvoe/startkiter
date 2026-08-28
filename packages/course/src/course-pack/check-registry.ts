@@ -1,3 +1,4 @@
+import { checkBunnyZoneCreated } from "./checks/bunny-zone-created";
 import { checkDeploymentHeartbeatFresh } from "./checks/deployment-heartbeat-fresh";
 
 export type CheckContext = {
@@ -22,6 +23,7 @@ export type CheckImplementation = (
 
 export const checkRegistry: Record<string, CheckImplementation> = {
 	deployment_heartbeat_fresh: checkDeploymentHeartbeatFresh,
+	bunny_zone_created: checkBunnyZoneCreated,
 };
 
 export async function dispatchCheck(

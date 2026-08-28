@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { checkBunnyZoneCreated } from "./checks/bunny-zone-created";
 import { checkDeploymentHeartbeatFresh } from "./checks/deployment-heartbeat-fresh";
 import { checkRegistry, dispatchCheck, type CheckContext } from "./check-registry";
 
@@ -35,5 +36,9 @@ describe("check-registry", () => {
 
 	it("registers deployment_heartbeat_fresh", () => {
 		expect(checkRegistry.deployment_heartbeat_fresh).toBe(checkDeploymentHeartbeatFresh);
+	});
+
+	it("registers bunny_zone_created", () => {
+		expect(checkRegistry.bunny_zone_created).toBe(checkBunnyZoneCreated);
 	});
 });
