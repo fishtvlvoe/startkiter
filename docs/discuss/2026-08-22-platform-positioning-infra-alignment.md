@@ -60,7 +60,8 @@ Fish 看了一份現況圖解（https://share.onorca.dev/a/3CEeYhHiSGfP）後指
 
 **已確認（2026-08-22）：**
 - Fish 說「已經買好也串好 vps」就是指這台 Vultr 機器，沒有第二台待接的新機器。
-- 曾考慮用 Zeabur 上那台 Tencent Cloud 東京機器（2 核/7.5GB，當時查到只用了 2.7GB，還有 4.9GB 空間）塞 Chatwoot 省一台 VPS 錢——**已否決**：那台跑的 `thetu-platform-production` / `wumin` 是客戶的正式營運服務，不能碰（Fish 2026-08-22 明確定案）。
+- 曾考慮用 Zeabur 上的東京機器塞 Chatwoot 省一台 VPS 錢——**已否決**：當時誤判 `thetu-platform-production`／`wumin` 兩個專案跑在同一台不能碰的機器上（Fish 2026-08-22 明確定案）。
+- **2026-08-27 更正**：`zeabur project list` 顯示兩個專案其實是**兩台不同機器**：`thetu-platform-production` 跑在 `Tencent Cloud Tokyo 2C 8GB`（別人的客戶正式營運服務，不能碰）；`wumin` 跑在 `fish Tokyo 2C 8GB`（Fish 自己的機器，可以動）。Fish 確認：等 StartKiter 自己的部署都弄好、穩定之後，`fish Tokyo 2C 8GB` 這台可以清掉 wumin 資料改裝 Chatwoot，不用急著現在買新 VPS——這是之後的選項之一，不是這次的定案。
 
 **還沒決定（不要自己猜，等 Fish 選）：**
 1. 把現有這台 Vultr VPS 升級規格（加 RAM），主站＋Chatwoot 塞同一台，一張帳單
