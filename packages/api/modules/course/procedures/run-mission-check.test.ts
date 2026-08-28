@@ -21,11 +21,13 @@ vi.mock("@startkiter/course/src/course-pack/check-registry", () => ({
 
 import { auth } from "@startkiter/auth";
 
+import { encryptMissionFormValue } from "../lib/mission-form-value-crypto";
 import { runMissionCheck } from "./run-mission-check";
 
 describe("course.runMissionCheck", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		process.env.SETTINGS_ENCRYPTION_KEY = "mission-value-test-key";
 		vi.mocked(auth.api.getSession).mockResolvedValue({
 			session: { id: "session-1", userId: "learner-1" },
 			user: { id: "learner-1", email: "learner@example.com", role: "user" },
@@ -71,5 +73,36 @@ describe("course.runMissionCheck", () => {
 
 		expect(checkImpl).not.toHaveBeenCalled();
 		expect(missionFormValueFindMany).not.toHaveBeenCalled();
+	});
+
+	it("dispatches a registered check_id with decrypted form values", async () => {
+		missionFormValueFindMany.mockResolvedValue([
+			{
+				fieldKey: "bunnyApiKey",
+				encryptedValue: encryptMissionFormValue("secret-value", "mission-value-test-key"),
+			},
+		]);
+		checkImpl.mockResolvedValue({ status: "passed" });
+
+		await expect(
+			call(
+				runMissionCheck,
+				{
+					coursePackMissionId: "mission-1",
+					checkId: "deployment_heartbeat_fresh",
+					params: { max_age_seconds: "300" },
+				},
+				{ context: { headers: new Headers() } },
+			),
+		).resolves.toEqual({ status: "passed" });
+
+		expect(checkImpl).toHaveBeenCalledWith(
+			{ max_age_seconds: "300" },
+			{
+				userId: "learner-1",
+				coursePackMissionId: "mission-1",
+				formValues: { bunnyApiKey: "secret-value" },
+			},
+		);
 	});
 });

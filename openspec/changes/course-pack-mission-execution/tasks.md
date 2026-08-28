@@ -23,7 +23,7 @@
 
 - [x] 5.1 撰寫紅燈測試：未登入呼叫 `POST /api/course/mission/check` 回傳 401 且不執行任何 check 實作，涵蓋 Requirement「External check execution requires an authenticated learner」；驗證目標：`pnpm --filter api test run-mission-check.test.ts` FAIL
 - [x] 5.2 撰寫紅燈測試：呼叫未註冊的 `check_id` 回傳 `reasonCode: unknown_check_id` 且不視為失敗學習嘗試，涵蓋 Requirement「External check evaluators dispatch to a named check registry」的 Scenario「Unregistered check_id is rejected distinctly from a failed check」；驗證目標同 5.1
-- [ ] 5.3 實作 `packages/course/src/course-pack/check-registry.ts` 與 `packages/api/modules/course/procedures/run-mission-check.ts`，使 5.1、5.2 測試轉綠燈；驗證目標：`pnpm --filter api test run-mission-check.test.ts`、`pnpm --filter course test check-registry.test.ts` 全綠
+- [x] 5.3 實作 `packages/course/src/course-pack/check-registry.ts` 與 `packages/api/modules/course/procedures/run-mission-check.ts`，使 5.1、5.2 測試轉綠燈；驗證目標：`pnpm --filter api test run-mission-check.test.ts`、`pnpm --filter course test check-registry.test.ts` 全綠
 
 ## 6. 第一批 check 實作：deployment_heartbeat_fresh 與 bunny_zone_created
 
