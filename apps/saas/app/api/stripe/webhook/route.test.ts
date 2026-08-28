@@ -33,7 +33,7 @@ const order = {
 	paymentGateway: "stripe",
 };
 
-function signedRequest(signatureSecret = credentials.webhookSecret) {
+function signedRequest(signatureSecret = credentials.webhookSecret, amountTotal = 880000) {
 	const payload = JSON.stringify({
 		id: "evt_test_1",
 		object: "event",
@@ -45,7 +45,7 @@ function signedRequest(signatureSecret = credentials.webhookSecret) {
 				object: "checkout.session",
 				mode: "payment",
 				payment_status: "paid",
-				amount_total: 8800,
+				amount_total: amountTotal,
 				currency: "twd",
 				payment_intent: "pi_test_1",
 				metadata: { orderNo: "ORDER-1" },
@@ -86,6 +86,14 @@ describe("Stripe payment webhook", () => {
 
 		expect(response.status).toBe(400);
 		expect(findOrderByNo).not.toHaveBeenCalled();
+		expect(markOrderPaid).not.toHaveBeenCalled();
+		expect(triggerInvoiceForOrder).not.toHaveBeenCalled();
+	});
+
+	it("rejects a Stripe amount that does not match the TWD order amount", async () => {
+		const response = await POST(signedRequest(credentials.webhookSecret, 8800));
+
+		expect(response.status).toBe(400);
 		expect(markOrderPaid).not.toHaveBeenCalled();
 		expect(triggerInvoiceForOrder).not.toHaveBeenCalled();
 	});

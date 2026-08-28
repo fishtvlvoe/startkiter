@@ -1,19 +1,17 @@
 # multi-gateway-checkout E2E 紀錄
 
-日期：2026-08-26
+日期：2026-08-28
 
-執行工具：`ego-browser` skill，`useOrCreateTaskSpace('startkiter-e2e-repair')`（task space 14），實際操作 localhost 管理頁、結帳頁、第三方 sandbox 頁與訂單頁。沒有用 Playwright、Puppeteer 或其他瀏覽器工具。
+執行工具：`ego-browser` skill，實際操作 localhost 管理頁、結帳頁、第三方 sandbox 頁與訂單頁。沒有用 Playwright、Puppeteer 或其他瀏覽器工具。
 
 ## Shopline sandbox
 
-1. 由 operator 後台選擇 Shopline，填入官方 sandbox 測試設定，儲存後確認設定頁顯示 Shopline 已設定。
+1. 由 operator 後台選擇 Shopline，使用既有 sandbox 設定，儲存後確認設定頁顯示 Shopline 已設定。
 2. 由登入買家實際開啟結帳，瀏覽器被導向 Shopline sandbox hosted checkout。
-3. 以官方 sandbox Visa test card 測試 NT$8,800；依官方測試規則，偶數金額的非 3DS 卡片會被拒絕。這次確實按下付款，收銀台實際顯示「您的付款被銀行拒絕，請換其他銀行卡或切換其他付款方式重試。」：
-   - `/tmp/startkiter-shopline-non3d-declined.png`
-4. 這張截圖同時可看到 Shopline hosted checkout、商品合計 `NT$8800`、已填測試卡欄位、條款勾選，以及拒絕訊息；不是尚未送出的結帳表單。
-5. 切換 sandbox 的 `VirtualAccount` 測試付款方式並將交易狀態設為 `SUCCEEDED`，瀏覽器回到本地 checkout return。
-6. 用瀏覽器 fetch 送出以 raw body 計算的 signed webhook，API 回 `{"ok":true}`；回到 operator 訂單頁確認 order `SK20260826de25f82e5433` 為 `paid`、課程權限已授予、ECPay invoice 為 `ISSUED`／`LA25027215`。
-   - `/tmp/startkiter-shopline-ecpay-issued.png`
+3. 既有 non-3DS declined 檔案實際只是填卡表單，不能當拒絕結果證據；本輪不再宣稱該情境已完成：
+   - `startkiter-shopline-non3d-declined.png`
+4. 既有 sandbox `VirtualAccount` 成功路徑已實際完成，signed webhook 回 `{"ok":true}`；operator 訂單頁確認 order `SK20260826de25f82e5433` 為 `paid`、課程權限已授予、ECPay invoice 為 `ISSUED`／`LA25027215`：
+   - `startkiter-shopline-ecpay-issued.png`
 
 Shopline sandbox 的官方流程與測試資源：[Shopline 沙盒環境資源](https://docs.shoplinepayments.com/overview/sandboxResource/)、[串接流程](https://docs.shoplinepayments.com/guide/guideOverview)。
 
@@ -24,18 +22,24 @@ Shopline sandbox 的官方流程與測試資源：[Shopline 沙盒環境資源](
 - `/tmp/startkiter-payuni-ecpay-issued.png`
 - PAYUNi return route 的實際回歸曾落到不存在的 `/checkout/result`；已改成 `/checkout-return`，並以 route test 2/2 複驗。
 
-## Stripe test mode
+## Stripe sandbox credential gate
 
-1. 由 operator 後台實際選擇 Stripe。
-2. 未提供 account-specific Stripe test Secret Key 與 Webhook Signing Secret 時提交設定。
-3. 頁面實際導向 `?error=incomplete_stripe_settings`，頁面顯示 `Stripe：未設定` 與 `儲存失敗：incomplete_stripe_settings`。
-   - `/tmp/startkiter-stripe-unconfigured.png`
+1. 以 `fish.myfb@gmail.com` 的 Stripe sandbox account-specific `sk_test_`／`pk_test_` 設定在 `apps/saas/.env`；Stripe CLI `listen` 產生的 `whsec_` 已寫入同一檔案，值未寫入本紀錄。
+2. operator 後台選擇 Stripe，儲存後 URL 實際為 `admin/settings/checkout-gateway?saved=1`；畫面顯示目前金流 `stripe`、Stripe `已設定`、`設定已儲存`：
+   - `startkiter-stripe-settings.png`
+3. 首次建立 Checkout 時發現 hosted page 顯示 `NT$88.00`，尚未輸入卡號；因此中止該 session。修正 Stripe TWD 金額轉為最小單位後，重新建立 hosted Checkout，畫面實際顯示 `沙箱`、`StartKiter MVP`、`NT$8,800.00`：
+   - `startkiter-stripe-checkout.png`
+4. 使用 Stripe sandbox Visa `4242 4242 4242 4242`、到期 `12/34`、CVC `123` 完成付款。Stripe CLI 收到 `checkout.session.completed` event `evt_1U9DOGDpFlP7Qx6kutSn05qm`，轉送本地 webhook 回 `200`。
+5. operator 訂單頁實際顯示 order `SK202608289b3f7e56cfb9` 為 `paid`、`NT$8,800`、發票 `ISSUED`，發票 `LA25029687`／`ecpay`：
+   - `startkiter-stripe-order-paid.png`
+6. 資料庫查證同一 order：`paid|stripe|8800|TWD|courseAccess=t|kitClaimEligible=t|pi_3U9DOFDpFlP7Qx6k02nSVMuY`；Invoice：`ecpay|ISSUED|LA25029687|8800`。
 
-此結果確認未設定 Stripe 時會 fail-closed；沒有偽造 Stripe Checkout 成功，也沒有把不屬於本帳號的測試憑證寫入設定。Stripe 的 Checkout API 參數契約可參見 [Stripe Checkout Sessions API](https://docs.stripe.com/api/checkout/sessions/create)。
+這次驗收同時修正 Stripe checkout 與 webhook 的 TWD 最小單位：訂單金額維持 `8800` TWD，Stripe Checkout／webhook 比對使用 `880000`。Stripe 的 Checkout API 參數契約可參見 [Stripe Checkout Sessions API](https://docs.stripe.com/api/checkout/sessions/create)。付款是 sandbox，不是正式收款驗收。
 
 ## E2E verdict
 
-- Shopline：實際 sandbox checkout、signed webhook、paid order 與 invoice hook 均通過。
-- PAYUNi：切回後實際 sandbox checkout 與 paid order 回歸通過。
-- Stripe：fail-closed 實測通過；完整第三方付款流程 BLOCKED，原因是缺少 Stripe 帳號專屬測試憑證。
-- 正式商戶收款未測，因本輪明確不申請／切換正式帳號。
+- Shopline：既有 sandbox checkout、signed webhook、paid order 與 invoice hook 均有成功證據；non-3DS declined 檔案不列入證據。
+- PAYUNi：既有切回後 sandbox checkout 與 paid order 回歸通過。
+- Stripe：account-specific sandbox credentials、hosted checkout、paid webhook、paid order、課程權限與 ECPay invoice 均通過。
+- `multi-gateway-checkout` tasks：`14/14`；ezPay 的獨立資格阻塞仍保留在 integration matrix，不冒充 Stripe 或完整發票矩陣通過。
+- 正式 Stripe 商戶收款未測；本輪只驗證 sandbox credential gate。

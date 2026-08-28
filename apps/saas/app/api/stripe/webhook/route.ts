@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import { loadGatewayCredentials } from "../../../../lib/checkout-gateway-settings";
 import { findOrderByNo, markOrderPaid } from "../../../../lib/orders";
 import { scheduleAfterResponse } from "../../../../lib/schedule-after";
-import { StripeGateway, type StripeCheckoutConfig } from "@startkiter/payments";
+import { StripeGateway, toStripeTwdAmount, type StripeCheckoutConfig } from "@startkiter/payments";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -49,7 +49,8 @@ export async function POST(request: Request) {
 	const order = await findOrderByNo(orderNo);
 	if (!order) return NextResponse.json({ error: "order_not_found" }, { status: 400 });
 	if (order.paymentGateway !== "stripe") return NextResponse.json({ error: "gateway_mismatch" }, { status: 400 });
-	if (session.amount_total !== order.amount || stringValue(session.currency).toLowerCase() !== order.currency.toLowerCase()) {
+	const expectedStripeAmount = toStripeTwdAmount(order.amount);
+	if (session.amount_total !== expectedStripeAmount || stringValue(session.currency).toLowerCase() !== order.currency.toLowerCase()) {
 		return NextResponse.json({ error: "amount_mismatch" }, { status: 400 });
 	}
 	if (order.status === "paid") {

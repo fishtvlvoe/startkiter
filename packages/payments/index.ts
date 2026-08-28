@@ -19,7 +19,7 @@ export { loadCheckoutGatewayCredentials } from "./gateway-settings";
 export { PayUniService } from "./provider/payuni/crypto";
 export { PayUniOneTimeGateway } from "./provider/payuni/gateway";
 export { ShoplineGateway } from "./provider/shopline/gateway";
-export { StripeGateway } from "./provider/stripe/gateway";
+export { StripeGateway, toStripeTwdAmount } from "./provider/stripe/gateway";
 export { PayUniPeriodGateway } from "./provider/payuni/period-gateway";
 export { createPayUniSubscriptionGateway } from "./subscription-factory";
 export { buildIssueInput, buildAllowanceInput, normalizeProviderOrderId } from "./lib/invoice-issue-input";

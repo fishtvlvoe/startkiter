@@ -2,6 +2,12 @@ import Stripe from "stripe";
 
 import type { CheckoutGateway, CheckoutPaymentSessionResult, RefundResult } from "../../types";
 
+const STRIPE_TWD_MINOR_UNIT_MULTIPLIER = 100;
+
+export function toStripeTwdAmount(amount: number): number {
+	return Math.round(amount * STRIPE_TWD_MINOR_UNIT_MULTIPLIER);
+}
+
 export type StripeCheckoutConfig = {
 	secretKey: string;
 	webhookSecret: string;
@@ -42,7 +48,7 @@ export class StripeGateway implements CheckoutGateway {
 				price_data: {
 					currency: "twd",
 					product_data: { name: params.productTitle.slice(0, 250) },
-					unit_amount: Math.round(params.amount),
+					unit_amount: toStripeTwdAmount(params.amount),
 				},
 				quantity: 1,
 			}],
@@ -79,7 +85,7 @@ export class StripeGateway implements CheckoutGateway {
 				if (succeeded[0]) return { status: "REFUNDED", gatewayRefundId: succeeded[0].id };
 				if (pending[0]) return { status: "PENDING", gatewayRefundId: pending[0].id };
 			} else {
-				const targetAmount = Math.round(params.amount);
+				const targetAmount = toStripeTwdAmount(params.amount);
 				const succeededAmount = succeeded.reduce((total, item) => total + item.amount, 0);
 					if (succeededAmount === targetAmount) return { status: "REFUNDED", gatewayRefundId: succeeded[succeeded.length - 1]?.id };
 					if (succeededAmount > 0) {

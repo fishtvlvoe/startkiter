@@ -86,7 +86,7 @@ describe("CheckoutGateway provider implementations", () => {
 		}
 	});
 
-	it("creates a Stripe redirect session with the TWD amount in its currency unit", async () => {
+	it("creates a Stripe redirect session with TWD converted to Stripe's smallest unit", async () => {
 		const stripe = new StripeGateway({ secretKey: "sk_test_checkout", webhookSecret: "whsec_test" });
 		const createSession = vi.spyOn(stripe.getStripeInstance().checkout.sessions, "create").mockResolvedValue({
 			id: "cs_test_1",
@@ -105,7 +105,7 @@ describe("CheckoutGateway provider implementations", () => {
 				mode: "payment",
 				currency: "twd",
 				line_items: [{
-					price_data: expect.objectContaining({ unit_amount: 8800, currency: "twd" }),
+					price_data: expect.objectContaining({ unit_amount: 880000, currency: "twd" }),
 					quantity: 1,
 				}],
 			}),
@@ -193,8 +193,8 @@ describe("CheckoutGateway provider implementations", () => {
 		const stripe = new StripeGateway({ secretKey: "sk_test_checkout", webhookSecret: "whsec_test" });
 		vi.spyOn(stripe.getStripeInstance().refunds, "list").mockResolvedValue({
 			data: [
-				{ id: "re_failed", status: "failed", amount: 8800 },
-				{ id: "re_succeeded", status: "succeeded", amount: 8800 },
+				{ id: "re_failed", status: "failed", amount: 880000 },
+				{ id: "re_succeeded", status: "succeeded", amount: 880000 },
 			],
 		} as never);
 
@@ -212,7 +212,7 @@ describe("CheckoutGateway provider implementations", () => {
 
 		await expect(stripe.queryRefund({ gatewayPaymentId: "pi_test_partial", amount: checkoutParams.amount, currency: "TWD" })).resolves.toMatchObject({
 			status: "UNKNOWN",
-			error: "Stripe 已成功部分退款 500/8800",
+			error: "Stripe 已成功部分退款 500/880000",
 		});
 	});
 

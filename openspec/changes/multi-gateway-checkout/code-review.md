@@ -1,6 +1,6 @@
 # multi-gateway-checkout Code Review
 
-日期：2026-08-27
+日期：2026-08-28
 
 ## Review scope
 
@@ -12,6 +12,7 @@
 - 原 M-2：Shopline refund 未送官方要求的 amount/currency 且未檢查 response status，已補 minor-unit amount、currency、reason、timeout 與成功狀態檢查。
 - 第五輪全新 context CR 另發現 Shopline checkout 使用元單位、webhook 卻按 minor unit 驗證；已修成結帳傳 `amount * 100`，notify 僅接受 `order.amount * 100`，並補 8800 錯誤單位拒絕測試。
 - 第六輪全新 context CR（`/tmp/startkiter-independent-cr-sixth.txt`）只讀檢查修正後 diff，最終結果：`Critical 0 / High 0 / Medium 0`，Verdict `PASS`。
+- 2026-08-28 全新 context CR（`/tmp/startkiter-independent-cr-stripe-final.txt`）重新檢查本輪 Stripe credential gate 與金額單位修正，結果：`Critical 0 / High 0 / Medium 0 / Low 0`，Verdict `PASS`。
 
 ## Final checks
 
@@ -20,6 +21,7 @@
 - factory 只依 `payuni`／`shopline`／`stripe` 建立 provider，結帳金額與 SKU 仍由 server 目錄決定。
 - Shopline webhook 先驗 HMAC-SHA256、5 分鐘 timestamp window、`timingSafeEqual`，再查 DB；gateway、minor-unit amount 與 currency 都嚴格綁定。
 - Stripe webhook 將 raw body 與 `stripe-signature` 交給 Stripe SDK 驗證，只接受已付款 Checkout Session，並綁定 metadata orderNo、PaymentIntent、amount、currency、gateway。
+- Stripe 訂單保存 `8800` TWD；Checkout `unit_amount`、webhook `amount_total`、退款查詢加總統一轉為 Stripe 最小單位 `880000`，避免把 NT$8,800 建成 NT$88。
 - `pending` 狀態更新保護付款競態；重複通知不重複觸發開票。退款外部成功後才更新本地 refunded，PAYUNi 不確定結果不假裝成功。
 
 ### Security and performance
@@ -31,17 +33,18 @@
 
 ## Writable verification
 
-- API：`48 files / 209 tests` 全數通過；payments：`17 files / 76 tests` 全數通過；SaaS：`39 files / 195 tests` 全數通過。
+- API：`48 files / 209 tests` 全數通過；payments：`17 files / 76 tests` 全數通過；SaaS：`39 files / 196 tests` 全數通過。
+- 本輪新增／修正 focused tests：Stripe gateway `11/11`、Stripe webhook `3/3`；全 workspace type-check `26/26` 通過。
 - API、payments、database、SaaS type-check 全數 exit 0；SaaS 與 marketing production build 全數 exit 0。
 - `spectra validate multi-gateway-checkout` valid；`spectra analyze` 只有既有 Suggestion，沒有 Warning／Error。
 - 第六輪 CR 的 focused test 未以 CR sandbox 宣稱通過，因唯讀 sandbox 建立 system temp `ssr` 遭 `EPERM`；上列測試是本 session 在可寫環境獨立實跑的結果。
 
 ## E2E boundary
 
-- `multi-gateway-checkout` 目前 `12/14`：task 6.3 的 Shopline／Stripe 完整 browser checkout 與 task 7.1 的 account-specific credentials 仍未完成。
+- `multi-gateway-checkout` tasks 現為 `14/14`：Shopline 成功路徑、Stripe sandbox account-specific credential gate、兩者 webhook／paid order 與 PAYUNi regression 均有證據。
 - 現有 `startkiter-shopline-non3d-declined.png` 是表單畫面，不能當 declined 結果證據；本報告不宣稱 Shopline non-3DS declined E2E 已完成。
-- Stripe 真實沙盒 checkout 受缺少 account-specific credentials 阻塞；這是環境驗收狀態，不是第六輪 CR finding。
+- Stripe 本輪 sandbox checkout 已通過；這不是正式 Stripe 商戶收款驗收。ezPay 測試資格仍是 integration matrix 的獨立阻塞。
 
 ## Verdict
 
-第六輪全新 context CR：`Critical 0 / High 0 / Medium 0`，`PASS`。程式碼層 finding 已關閉；未完成的 2 項是缺第三方帳號／憑證造成的真實 E2E 阻塞，因此不 archive。
+2026-08-28 全新 context CR：`Critical 0 / High 0 / Medium 0 / Low 0`，`PASS`。本輪 Stripe 金額單位修正與 credential gate 已通過；正式 Stripe 收款及 ezPay 獨立矩陣仍不在本輪驗收範圍，因此不 archive。
