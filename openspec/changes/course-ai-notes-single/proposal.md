@@ -22,6 +22,8 @@
     - `packages/platform/src/course-ai-notes/srt-parser.ts`（.srt 字幕解析為純文字）
     - `packages/platform/src/course-ai-notes/rate-limiter.ts`（單一講師每分鐘生成次數上限）
     - `packages/api/modules/course/lib/gemini-settings.ts`（比照 `apps/saas/lib/site-settings.ts` 的 payuni 設定慣例，儲存講師自帶 Gemini API Key，共用 `encryptSettingsJson`/`decryptSettingsJson`）
+    - `packages/api/modules/course/lib/settings-crypto.ts`（共用既有設定加密實作）
+    - `apps/saas/lib/settings-crypto.ts`（相容既有匯入路徑的 re-export）
     - `apps/saas/app/api/course/ai-notes/generate/route.ts`（接收字幕內容，呼叫 Gemini，串流回傳生成內容）
     - `apps/saas/modules/shared/components/AiNotesDialog.tsx`（講師端：上傳字幕、預覽生成內容、確認後存檔的對話框）
   - Modified:

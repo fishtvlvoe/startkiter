@@ -1216,7 +1216,13 @@ export default function CourseAdminStudioPage() {
 								lessonTitle={selectedLesson.title}
 								initialDraft={selectedLesson.content}
 								onOpenChange={setShowAiNotesDialog}
-								onSaved={({ title, content }) => setSelectedLesson((current) => current ? { ...current, title, content } : current)}
+								onSaved={({ title, content }) => {
+									setSelectedLesson((current) => current ? { ...current, title, content } : current);
+									setChapters((current) => current.map((chapter) => ({
+										...chapter,
+										lessons: chapter.lessons.map((lesson) => lesson.id === selectedLesson.id ? { ...lesson, title, content } : lesson),
+									})));
+								}}
 							/>
 						</DialogContent>
 					</Dialog>

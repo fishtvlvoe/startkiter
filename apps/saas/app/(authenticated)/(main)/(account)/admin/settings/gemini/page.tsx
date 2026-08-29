@@ -18,8 +18,8 @@ async function requireInstructorSettingsAccess() {
 async function saveGeminiSettings(formData: FormData) {
 	"use server";
 
-	await requireInstructorSettingsAccess();
-	const result = await writeGeminiApiKey(String(formData.get("apiKey") ?? ""));
+	const session = await requireInstructorSettingsAccess();
+	const result = await writeGeminiApiKey(session.user.id, String(formData.get("apiKey") ?? ""));
 	if (!result.ok) {
 		redirect(`/admin/settings/gemini?error=${encodeURIComponent(result.error ?? "settings_unavailable")}`);
 	}
@@ -36,8 +36,8 @@ export default async function GeminiSettingsPage({
 }: {
 	searchParams: Promise<{ saved?: string; error?: string }>;
 }) {
-	await requireInstructorSettingsAccess();
-	const configured = Boolean(await readGeminiApiKey());
+	const session = await requireInstructorSettingsAccess();
+	const configured = Boolean(await readGeminiApiKey(session.user.id));
 	const params = await searchParams;
 
 	return (

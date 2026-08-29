@@ -35,10 +35,25 @@ describe("Gemini API key settings", () => {
 	});
 
 	it("stores the API key encrypted and reads back the original key", async () => {
-		await expect(writeGeminiApiKey(apiKey)).resolves.toEqual({ ok: true });
+		await expect(writeGeminiApiKey("instructor-a", apiKey)).resolves.toEqual({ ok: true });
 
 		expect(storedCiphertext).not.toContain(apiKey);
 		expect(decryptSettingsJson(storedCiphertext, encryptionSecret)).not.toBeNull();
-		await expect(readGeminiApiKey()).resolves.toBe(apiKey);
+		await expect(readGeminiApiKey("instructor-a")).resolves.toBe(apiKey);
+	});
+
+	it("keeps each instructor API key isolated", async () => {
+		const secondKey = "AIza-second-instructor-key";
+		await writeGeminiApiKey("instructor-a", apiKey);
+		const firstCiphertext = storedCiphertext;
+		await writeGeminiApiKey("instructor-b", secondKey);
+
+		expect(firstCiphertext).not.toBe(storedCiphertext);
+		vi.mocked(db.siteSetting.findUnique).mockImplementation((async ({ where }: { where: { id: string } }) => {
+			if (where.id === "gemini-notes:instructor-a") return { id: where.id, ciphertext: firstCiphertext };
+			return { id: where.id, ciphertext: storedCiphertext };
+		}) as never);
+		await expect(readGeminiApiKey("instructor-a")).resolves.toBe(apiKey);
+		await expect(readGeminiApiKey("instructor-b")).resolves.toBe(secondKey);
 	});
 });

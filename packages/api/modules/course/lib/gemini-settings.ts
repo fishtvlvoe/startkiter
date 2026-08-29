@@ -4,18 +4,22 @@ import { decryptSettingsJson, encryptSettingsJson } from "./settings-crypto";
 
 export const GEMINI_SETTING_ID = "gemini-notes";
 
+export function getGeminiSettingId(instructorId: string): string {
+	return `${GEMINI_SETTING_ID}:${instructorId}`;
+}
+
 function encryptionKey(): string {
 	return process.env.SETTINGS_ENCRYPTION_KEY ?? "";
 }
 
-export async function readGeminiApiKey(): Promise<string | null> {
+export async function readGeminiApiKey(instructorId: string): Promise<string | null> {
 	const secret = encryptionKey();
 	if (!secret.trim()) {
 		return null;
 	}
 
 	try {
-		const row = await db.siteSetting.findUnique({ where: { id: GEMINI_SETTING_ID } });
+		const row = await db.siteSetting.findUnique({ where: { id: getGeminiSettingId(instructorId) } });
 		if (!row) {
 			return null;
 		}
@@ -34,7 +38,7 @@ export async function readGeminiApiKey(): Promise<string | null> {
 	}
 }
 
-export async function writeGeminiApiKey(key: string): Promise<{ ok: boolean; error?: string }> {
+export async function writeGeminiApiKey(instructorId: string, key: string): Promise<{ ok: boolean; error?: string }> {
 	if (!key.trim()) {
 		return { ok: false, error: "api_key_required" };
 	}
@@ -47,8 +51,8 @@ export async function writeGeminiApiKey(key: string): Promise<{ ok: boolean; err
 	try {
 		const ciphertext = encryptSettingsJson(JSON.stringify({ apiKey: key }), secret);
 		await db.siteSetting.upsert({
-			where: { id: GEMINI_SETTING_ID },
-			create: { id: GEMINI_SETTING_ID, ciphertext },
+			where: { id: getGeminiSettingId(instructorId) },
+			create: { id: getGeminiSettingId(instructorId), ciphertext },
 			update: { ciphertext },
 		});
 		return { ok: true };

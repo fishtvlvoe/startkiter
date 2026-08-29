@@ -26,7 +26,7 @@ vi.mock("../../../../../../../packages/ai", () => ({
 }));
 
 vi.mock("@ai-sdk/openai", () => ({
-	createOpenAI: vi.fn(() => vi.fn()),
+	createOpenAI: vi.fn(() => ({ chat: vi.fn(() => "gemini-model") })),
 }));
 
 import { auth } from "@startkiter/auth";
@@ -34,6 +34,7 @@ import { canManageCourse } from "@startkiter/api/modules/course/lib/course-instr
 import { readGeminiApiKey } from "@startkiter/api/modules/course/lib/gemini-settings";
 import { db } from "@startkiter/database";
 import { checkRateLimit } from "@startkiter/platform";
+import { streamText } from "../../../../../../../packages/ai";
 import { POST } from "./route";
 
 const session = {
@@ -77,6 +78,8 @@ describe("POST /api/course/ai-notes/generate", () => {
 
 		expect(response.status).toBe(400);
 		expect(await response.json()).toMatchObject({ error: "GEMINI_KEY_MISSING" });
+		expect(checkRateLimit).not.toHaveBeenCalled();
+		expect(streamText).not.toHaveBeenCalled();
 	});
 
 	it("returns 403 for a non-manager without consuming rate-limit quota", async () => {
@@ -96,5 +99,29 @@ describe("POST /api/course/ai-notes/generate", () => {
 
 		expect(response.status).toBe(429);
 		expect(await response.json()).toMatchObject({ error: "RATE_LIMITED", retryAfterMs: 12_345 });
+		expect(streamText).not.toHaveBeenCalled();
+	});
+
+	it("returns the provider text stream after authorization, key, and rate checks", async () => {
+		vi.mocked(streamText).mockReturnValue({
+			toTextStreamResponse: () => new Response("generated notes"),
+		} as never);
+
+		const response = await POST(request());
+
+		expect(response.status).toBe(200);
+		expect(await response.text()).toBe("generated notes");
+		expect(streamText).toHaveBeenCalledOnce();
+	});
+
+	it("returns an explicit failure when the provider cannot create a stream", async () => {
+		vi.mocked(streamText).mockImplementation(() => {
+			throw new Error("provider unavailable");
+		});
+
+		const response = await POST(request());
+
+		expect(response.status).toBe(502);
+		expect(await response.json()).toMatchObject({ error: "GENERATION_FAILED" });
 	});
 });

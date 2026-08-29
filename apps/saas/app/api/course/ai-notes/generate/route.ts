@@ -64,14 +64,14 @@ export async function POST(request: Request) {
 		return jsonError("FORBIDDEN", 403);
 	}
 
+	const apiKey = await readGeminiApiKey(session.user.id);
+	if (!apiKey) {
+		return jsonError("GEMINI_KEY_MISSING", 400);
+	}
+
 	const rateLimit = checkRateLimit(session.user.id);
 	if (!rateLimit.allowed) {
 		return jsonError("RATE_LIMITED", 429, { retryAfterMs: rateLimit.retryAfterMs });
-	}
-
-	const apiKey = await readGeminiApiKey();
-	if (!apiKey) {
-		return jsonError("GEMINI_KEY_MISSING", 400);
 	}
 
 	const gemini = createOpenAI({
@@ -79,16 +79,23 @@ export async function POST(request: Request) {
 		baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
 		name: "gemini",
 	});
-	const result = streamText({
-		model: gemini.chat("gemini-2.5-flash"),
-		system: [
-			"你是課程講義編輯助手。請只根據字幕內容整理教學講義，不要捏造字幕沒有的事實。",
-			"使用多個 Markdown H1 分段，每段結尾加入對應影片時間軸連結，格式為 [MM:SS](#t=秒數)。",
-			`章節標題：${chapterTitle}`,
-			`單元標題：${lessonTitle}`,
-		].join("\n\n"),
-		prompt: srtToText(srtContent),
-	});
+	try {
+		const result = streamText({
+			model: gemini.chat("gemini-2.5-flash"),
+			system: [
+				"你是課程講義編輯助手。請只根據字幕內容整理教學講義，不要捏造字幕沒有的事實。",
+				"使用多個 Markdown H1 分段，每段結尾加入對應影片時間軸連結，格式為 [MM:SS](#t=秒數)。",
+				`章節標題：${chapterTitle}`,
+				`單元標題：${lessonTitle}`,
+			].join("\n\n"),
+			prompt: srtToText(srtContent),
+			onError: () => {
+				console.error("Gemini 講義生成串流失敗");
+			},
+		});
 
-	return result.toTextStreamResponse();
+		return result.toTextStreamResponse();
+	} catch {
+		return jsonError("GENERATION_FAILED", 502, { message: "生成失敗：AI provider 無法回應" });
+	}
 }
