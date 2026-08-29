@@ -483,6 +483,17 @@ enum PublishStatus {
   ARCHIVED
 }
 
+enum ContentType {
+  POST
+  PAGE
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
 enum SubscriptionInterval {
   MONTH
   YEAR
@@ -1319,4 +1330,27 @@ model Coupon {
   updatedAt         DateTime  @updatedAt
 
   @@index([active])
+}
+
+model Page {
+  id               String        @id @default(cuid())
+  type             ContentType
+  slug             String
+  locale           String
+  title            String
+  excerpt          String?
+  body             String        @db.Text
+  coverImageUrl    String?
+  seoTitle         String?
+  seoDescription   String?
+  tags             String[]      @default([])
+  status           ContentStatus @default(DRAFT)
+  publishedAt      DateTime?
+  previousSnapshot Json?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@unique([slug, locale])
+  @@index([type, status, locale])
+  @@map("page")
 }

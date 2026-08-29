@@ -6,6 +6,8 @@ export {
   CourseSubscriptionStatus,
   PaymentWebhookEventStatus,
   PublishStatus,
+  ContentType,
+  ContentStatus,
   SubscriptionInterval,
 	SupportTicketChannel,
 	SupportTicketResolvedBy,

@@ -388,6 +388,12 @@ export const CouponScalarFieldEnumSchema = z.enum(['id', 'code', 'discountType',
 
 export type CouponScalarFieldEnum = z.infer<typeof CouponScalarFieldEnumSchema>;
 
+// File: PageScalarFieldEnum.schema.ts
+
+export const PageScalarFieldEnumSchema = z.enum(['id', 'type', 'slug', 'locale', 'title', 'excerpt', 'body', 'coverImageUrl', 'seoTitle', 'seoDescription', 'tags', 'status', 'publishedAt', 'previousSnapshot', 'createdAt', 'updatedAt'])
+
+export type PageScalarFieldEnum = z.infer<typeof PageScalarFieldEnumSchema>;
+
 // File: SortOrder.schema.ts
 
 export const SortOrderSchema = z.enum(['asc', 'desc'])
@@ -543,6 +549,18 @@ export type VideoProvider = z.infer<typeof VideoProviderSchema>;
 export const LessonMessageUploadIntentStatusSchema = z.enum(['PENDING', 'FINALIZED', 'CLEANING'])
 
 export type LessonMessageUploadIntentStatus = z.infer<typeof LessonMessageUploadIntentStatusSchema>;
+
+// File: ContentType.schema.ts
+
+export const ContentTypeSchema = z.enum(['POST', 'PAGE'])
+
+export type ContentType = z.infer<typeof ContentTypeSchema>;
+
+// File: ContentStatus.schema.ts
+
+export const ContentStatusSchema = z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED'])
+
+export type ContentStatus = z.infer<typeof ContentStatusSchema>;
 
 // File: User.schema.ts
 
@@ -1624,4 +1642,28 @@ export const CouponSchema = z.object({
 });
 
 export type CouponType = z.infer<typeof CouponSchema>;
+
+
+// File: Page.schema.ts
+
+export const PageSchema = z.object({
+  id: z.string(),
+  type: ContentTypeSchema,
+  slug: z.string(),
+  locale: z.string(),
+  title: z.string(),
+  excerpt: z.string().nullish(),
+  body: z.string(),
+  coverImageUrl: z.string().nullish(),
+  seoTitle: z.string().nullish(),
+  seoDescription: z.string().nullish(),
+  tags: z.array(z.string()),
+  status: ContentStatusSchema.default("DRAFT"),
+  publishedAt: z.date().nullish(),
+  previousSnapshot: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").nullish(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type PageType = z.infer<typeof PageSchema>;
 
