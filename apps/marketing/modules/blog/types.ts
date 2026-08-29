@@ -1,3 +1,5 @@
 import type { Post as ContentCollectionsPost } from "content-collections";
 
-export type Post = Omit<ContentCollectionsPost, "_meta">;
+export type Post = Omit<ContentCollectionsPost, "_meta"> & {
+	htmlBody?: string;
+};

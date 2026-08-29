@@ -39,4 +39,4 @@
 
 - [x] 5.1 執行全域測試（`platform`／`api`／`saas`／`marketing` 四個 package 的 `pnpm test`）與 `pnpm type-check`，全部通過。驗證：附上實際跑出的通過筆數（例如 X/X passed），不得只回報「測試通過」四字
 - [ ] 5.2 由不同於本次實作的 CLI 或 agent 執行一次獨立 code review，檢查 Critical／High 發現數為 0；若有發現，送回修復後回到 5.1 重新驗證。驗證：code review 報告存為 `openspec/changes/buyer-pages-cms/code-review.md`
-- [ ] 5.3 用真實測試買家帳號走一次端對端：新增頁面、發布、確認公開網址可見、確認該頁面出現於 sitemap 輸出、故意改壞內容後按還原確認回復正確；並對測試用 `.mdx` fixture 執行一次 `migrate-mdx-to-pages-cms.ts --dry-run` 確認輸出筆數與檔案清單正確。驗證：截圖與指令輸出存證，附在最終驗收報告中
+- [x] 5.3 用真實測試買家帳號走一次端對端：新增頁面、發布、確認公開網址可見、確認該頁面出現於 sitemap 輸出、故意改壞內容後按還原確認回復正確；並對測試用 `.mdx` fixture 執行一次 `migrate-mdx-to-pages-cms.ts --dry-run` 確認輸出筆數與檔案清單正確。驗證：截圖與指令輸出存證，附在最終驗收報告中

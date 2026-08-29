@@ -52,7 +52,7 @@ export default async function BlogPostPage(props: { params: Promise<Params> }) {
 		return localeRedirect({ href: "/blog", locale });
 	}
 
-	const { title, date, authorName, authorImage, tags, image, body } = post;
+	const { title, date, authorName, authorImage, tags, image, body, htmlBody } = post;
 
 	return (
 		<div className="py-20 md:py-24 lg:py-28 lg:pb-40 container">
@@ -113,7 +113,14 @@ export default async function BlogPostPage(props: { params: Promise<Params> }) {
 			)}
 
 			<div className="pb-8">
-				<PostContent content={body} />
+				{htmlBody ? (
+					<div
+						className="prose dark:prose-invert mt-8 max-w-2xl"
+						dangerouslySetInnerHTML={{ __html: htmlBody }}
+					/>
+				) : (
+					<PostContent content={body} />
+				)}
 			</div>
 		</div>
 	);

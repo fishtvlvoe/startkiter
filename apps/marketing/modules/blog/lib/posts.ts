@@ -3,7 +3,26 @@ import { config as i18nConfig } from "@i18n/config";
 import { getLocalizedDocumentWithFallback, getUniqueBasePaths } from "@shared/lib/content";
 import { allPosts } from "content-collections";
 
+import { listPublishedDatabasePages, type DatabasePublicPage } from "./database-pages";
+
 const defaultLocale = i18nConfig.defaultLocale;
+
+function toPost(page: DatabasePublicPage): Post {
+	return {
+		title: page.title,
+		date: (page.publishedAt ?? page.updatedAt).toISOString(),
+		image: page.coverImageUrl ?? undefined,
+		authorName: "",
+		excerpt: page.excerpt ?? undefined,
+		tags: page.tags,
+		published: true,
+		content: page.body,
+		body: page.body,
+		locale: page.locale,
+		path: page.slug,
+		htmlBody: page.body,
+	} as Post;
+}
 
 /**
  * Returns paths of all published posts for use in generateStaticParams.
@@ -26,7 +45,7 @@ export async function getAllPosts(locale?: string): Promise<Post[]> {
 	const resolvedLocale = locale ?? defaultLocale;
 	const paths = getUniqueBasePaths(allPosts);
 
-	const posts = paths
+	const filePosts = paths
 		.map((path) =>
 			getLocalizedDocumentWithFallback(allPosts, path, resolvedLocale, {
 				defaultLocale,
@@ -35,9 +54,21 @@ export async function getAllPosts(locale?: string): Promise<Post[]> {
 		.filter((post): post is NonNullable<typeof post> => post != null)
 		.filter((post) => post.published);
 
-	return Promise.resolve(
-		posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
-	);
+	const dbPosts = (await listPublishedDatabasePages("POST"))
+		.filter((page) => page.locale === resolvedLocale || page.locale === defaultLocale)
+		.map(toPost);
+
+	const byPath = new Map<string, Post>();
+	for (const post of filePosts) {
+		byPath.set(post.path, post);
+	}
+	for (const post of dbPosts) {
+		if (post.locale === resolvedLocale || !byPath.has(post.path)) {
+			byPath.set(post.path, post);
+		}
+	}
+
+	return [...byPath.values()].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
 /**
@@ -51,9 +82,18 @@ export async function getPostBySlug(
 	},
 ): Promise<Post | null> {
 	const resolvedLocale = options?.locale ?? defaultLocale;
-	const post = getLocalizedDocumentWithFallback(allPosts, slug, resolvedLocale, {
+	const filePost = getLocalizedDocumentWithFallback(allPosts, slug, resolvedLocale, {
 		defaultLocale,
 	});
+	if (filePost) {
+		return filePost;
+	}
 
-	return Promise.resolve(post ?? null);
+	const dbPosts = await listPublishedDatabasePages("POST");
+	const dbPost =
+		dbPosts.find((page) => page.slug === slug && page.locale === resolvedLocale) ??
+		dbPosts.find((page) => page.slug === slug && page.locale === defaultLocale) ??
+		null;
+
+	return dbPost ? toPost(dbPost) : null;
 }
