@@ -22,7 +22,7 @@
 
 ## 5. 講師端後台與學員端顯示
 
-- [ ] 5.1 [P] 在課程管理後台單元編輯區塊新增「內嵌工具（選填）」欄位（網址 + 標題輸入框），儲存時呼叫 3.2 的 API，網址被拒絕時顯示明確錯誤訊息，並在欄位旁顯示「這是外部工具，請確認來源可信」提示（對應 Requirement: Instructor can configure an embedded tool for a lesson）。驗證：ego-browser 走一次「講師登入→設定工具網址→儲存成功→改成內網網址儲存被拒絕看到錯誤訊息」的完整畫面流程並截圖存證
+- [x] 5.1 [P] 在課程管理後台單元編輯區塊新增「內嵌工具（選填）」欄位（網址 + 標題輸入框），儲存時呼叫 3.2 的 API，網址被拒絕時顯示明確錯誤訊息，並在欄位旁顯示「這是外部工具，請確認來源可信」提示（對應 Requirement: Instructor can configure an embedded tool for a lesson）。驗證：ego-browser 走一次「講師登入→設定工具網址→儲存成功→改成內網網址儲存被拒絕看到錯誤訊息」的完整畫面流程並截圖存證
 - [ ] 5.2 [P] 修改課程播放頁（`classroom-client.tsx` 或既有內容渲染區塊），有設定 `toolUrl` 的單元顯示 sandboxed iframe（`sandbox="allow-scripts allow-forms allow-popups allow-downloads"`）連同標題，並提供「在新分頁開啟」連結指向 4.2 的頁面；沒有設定 `toolUrl` 的單元不顯示任何工具區塊（對應 Requirement: Embedded tool renders in a sandboxed iframe alongside lesson content）。驗證：ego-browser 走一次「學員登入→看有設定工具的課看到 iframe→看沒設定的課沒有工具區塊→點新分頁開啟」的完整畫面流程並截圖存證
 
 ## 6. 整合驗證與交付
