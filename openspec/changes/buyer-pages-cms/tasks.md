@@ -32,7 +32,7 @@
 
 ## 4. 後台 UI 與 Core 掛載
 
-- [ ] 4.1 [P] 建立頁面管理後台列表頁與新增/編輯表單（含類型/語系切換、標題、slug、內文、SEO 標題/描述、封面圖欄位、sanitize warnings 顯示、還原上一版按鈕），呼叫 3.4 的 API（對應 Requirement: Buyer can create and edit page or post content）。驗證：ego-browser 走一次「新增草稿→發布→看到 warnings 提示（若有）→按還原→確認內容回復」的完整畫面流程並截圖存證
+- [x] 4.1 [P] 建立頁面管理後台列表頁與新增/編輯表單（含類型/語系切換、標題、slug、內文、SEO 標題/描述、封面圖欄位、sanitize warnings 顯示、還原上一版按鈕），呼叫 3.4 的 API（對應 Requirement: Buyer can create and edit page or post content）。驗證：ego-browser 走一次「新增草稿→發布→看到 warnings 提示（若有）→按還原→確認內容回復」的完整畫面流程並截圖存證
 - [ ] 4.2 [P] 於 `packages/platform/src/mount-points.ts` 新增 `pages-cms` Core 掛載項（`requiresOperator: true`），並在 Plugin manifest 驗證邏輯中把 `pages-cms` 列為保留 id、拒絕任何 Plugin 註冊同名掛載點（對應 Requirement: This capability is a fixed Core capability, not a replaceable Plugin）。驗證：`mount-points.test.ts` 新增案例確認 Plugin 註冊 `pages-cms` 遭拒絕，且後台側邊欄實際出現「頁面管理」選單項目
 
 ## 5. 整合驗證與交付
