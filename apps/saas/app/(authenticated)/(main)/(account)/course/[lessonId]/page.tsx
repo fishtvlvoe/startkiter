@@ -6,6 +6,7 @@ import { createProcedureClient, ORPCError } from "@orpc/server";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { courseRouter } from "@startkiter/api/modules/course/router";
+import { buildLessonToolEmbedPath } from "@startkiter/platform/src/lesson-tool/embed-path";
 import { AcademyClassroomClient } from "./classroom-client";
 import { OnboardingSurveyModal } from "./onboarding-survey-modal";
 
@@ -24,6 +25,9 @@ interface LessonData {
 	aiContext: string;
 	courseTitle: string;
 	watermarkSetting: Omit<WatermarkPlayerSettings, "email" | "courseTitle"> | null;
+	toolUrl?: string;
+	toolTitle?: string;
+	toolEmbedHref?: string;
 }
 
 interface ChapterData {
@@ -66,7 +70,26 @@ function stripSensitiveFields(lesson: LessonData): LessonData {
 		videoUrl: "",
 		content: "",
 		aiContext: "",
+		toolUrl: "",
+		toolTitle: "",
+		toolEmbedHref: "",
 	};
+}
+
+function buildToolEmbed(lessonId: string, toolUrl: string | null, userId: string | undefined): {
+	toolUrl: string;
+	toolEmbedHref: string;
+} {
+	if (!toolUrl || !userId) {
+		return { toolUrl: "", toolEmbedHref: "" };
+	}
+
+	const issued = buildLessonToolEmbedPath({ lessonId, userId, toolUrl });
+	if (!issued) {
+		return { toolUrl: "", toolEmbedHref: "" };
+	}
+
+	return { toolUrl, toolEmbedHref: issued.path };
 }
 
 export default async function LessonPage({ params }: LessonPageProps) {
@@ -123,6 +146,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
 	for (const ch of chaptersFromDb) {
 		const chapterLessons: LessonData[] = [];
 		for (const l of ch.lessons) {
+			const embed = buildToolEmbed(l.id, l.toolUrl, session?.user?.id);
 			const baseLesson: LessonData = {
 				id: l.id,
 				title: l.title,
@@ -134,6 +158,9 @@ export default async function LessonPage({ params }: LessonPageProps) {
 				aiContext: l.aiContext || "",
 				courseTitle: ch.course.title,
 				watermarkSetting: normalizeWatermarkSetting(ch.course.watermarkSetting),
+				toolUrl: embed.toolUrl,
+				toolTitle: l.toolTitle || "",
+				toolEmbedHref: embed.toolEmbedHref,
 			};
 
 			try {
