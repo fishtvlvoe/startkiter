@@ -46,7 +46,9 @@ export function BatchImportDialog({ courseId, onClose, onImported }: { courseId:
 	}
 
 	async function retry(lessonId: string) {
-		await retryFailedLesson(chapters.flatMap((chapter) => chapter.lessons), lessonId, processLesson);
+		const states = chapters.flatMap((chapter) => chapter.lessons);
+		const updated = await retryFailedLesson(states, lessonId, processLesson);
+		setChapters((current) => current.map((chapter) => ({ ...chapter, lessons: chapter.lessons.map((lesson) => ({ ...lesson, ...(updated.find((item) => item.id === lesson.id) ?? {}) })) })));
 	}
 
 	async function confirmImport() {
@@ -63,7 +65,7 @@ export function BatchImportDialog({ courseId, onClose, onImported }: { courseId:
 	return <div role="dialog" aria-modal="true" aria-labelledby="batch-import-title" className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
 		<div className="max-h-[90vh] w-full max-w-3xl overflow-auto rounded-xl border border-neutral-700 bg-neutral-950 p-6 text-white shadow-xl">
 			<div className="flex items-start justify-between gap-4"><div><h2 id="batch-import-title" className="text-xl font-semibold">批次匯入課程</h2><p className="text-sm text-neutral-400">僅支援 Chrome/Edge 瀏覽器。資料夾格式：課程 / 章節 / 單元 / 檔案。</p></div><button type="button" onClick={onClose} aria-label="關閉">×</button></div>
-			<label htmlFor="batch-import-folder" className="mt-5 block cursor-pointer rounded-lg border border-dashed border-neutral-600 p-8 text-center text-neutral-300">拖拉資料夾到這裡，或點擊選取<input id="batch-import-folder" type="file" className="sr-only" multiple // @ts-expect-error webkitdirectory is supported by Chrome and Edge
+			<label htmlFor="batch-import-folder" onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); if (event.dataTransfer.files.length) readFiles(event.dataTransfer.files); }} className="mt-5 block cursor-pointer rounded-lg border border-dashed border-neutral-600 p-8 text-center text-neutral-300">拖拉資料夾到這裡，或點擊選取<input id="batch-import-folder" type="file" className="sr-only" multiple // @ts-expect-error webkitdirectory is supported by Chrome and Edge
 				webkitdirectory="" onChange={(event) => { if (event.target.files) readFiles(event.target.files); }} /></label>
 			{message ? <p className="mt-3 text-sm text-amber-200">{message}</p> : null}
 			<div className="mt-4 space-y-3">{chapters.map((chapter, chapterIndex) => <section key={chapter.name}><input aria-label={`章節 ${chapter.name}`} className="w-full rounded border border-neutral-700 bg-neutral-900 p-2 font-medium" value={chapter.name} onChange={(event) => setChapters((current) => current.map((item, index) => index === chapterIndex ? { ...item, name: event.target.value } : item))} />{chapter.lessons.map((lesson) => <div key={lesson.id} className="ml-4 mt-2 flex items-center justify-between rounded border border-neutral-800 p-2 text-sm"><span>{lesson.name}</span><span>{lesson.status === "error" ? <Button size="sm" variant="outline" onClick={() => retry(lesson.id)}>重試</Button> : lesson.status === "completed" ? "已完成" : lesson.status === "uploading" ? "上傳中" : "等待中"}</span></div>)}</section>)}</div>
