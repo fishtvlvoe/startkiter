@@ -6,7 +6,7 @@
 
 ## 2. 核心邏輯實作
 
-- [ ] 2.1 [P] 實作 `packages/platform/src/lesson-tool/url-safety.ts` 的 `isPrivateOrLocalUrl`，讓 1.2 測試轉綠燈。驗證：`pnpm --filter platform test` 全綠
+- [x] 2.1 [P] 實作 `packages/platform/src/lesson-tool/url-safety.ts` 的 `isPrivateOrLocalUrl`，讓 1.2 測試轉綠燈。驗證：`pnpm --filter platform test` 全綠
 - [ ] 2.2 [P] 實作 `packages/platform/src/lesson-tool/token.ts` 的 `signLessonToolToken`／`verifyLessonToolToken`，沿用 `lesson-message-upload.ts` 的 HMAC 簽章慣例（`BETTER_AUTH_SECRET` + 版本前綴 + `timingSafeEqual`），讓 1.3 測試轉綠燈。驗證：`pnpm --filter platform test` 全綠
 
 ## 3. 講師設定 API 與紅燈測試
