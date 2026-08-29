@@ -81,3 +81,80 @@
 ## Verdict
 
 不通過。Critical 0、High 2、Medium 3、Low 0。至少 H-1 與 H-2 修復並重新執行完整驗證前，不應 archive 這張 change。
+
+## 複審結果
+
+覆查範圍：僅針對 03c2be4c `fix(pages-cms): 修復 Codex CR 的 2 High／3 Medium` 所宣稱的 H-1、H-2、M-1、M-2、M-3 修復。
+
+### H-1：未完全解決
+
+- `apps/saas/app/(authenticated)/(main)/(account)/admin/pages/layout.tsx:1-11` 與 `packages/api/modules/pages-cms/handlers.ts:30-42` 現在都呼叫 `resolvePagesCmsAccess()`，核心 layout/API 判斷已共用 `session.user.email` 對 `ADMIN_EMAIL`，不再一邊看 role、一邊看 email。
+- 兩個反向情境實測測試通過：`role=admin` 但非 `ADMIN_EMAIL` → layout redirect `/`、API 403；`ADMIN_EMAIL` 但 `role=user` → layout render、API 201。`apps/saas/.../admin/pages/layout.test.ts` 2/2、`packages/api/modules/pages-cms/access.test.ts` 3/3、handlers 10/10 通過。
+- 但 `apps/saas/modules/shared/components/NavBar.tsx:593-642` 仍以 `check("admin.access")`（即 `user.role === "admin"`）決定 operator menu。第一個情境仍會看到「頁面管理」選單，點入後才被 layout redirect；因此原本「畫面權限與 API 權限可能對不上」的 UI 症狀尚未完全消失。
+- 結論：layout/API 的高風險授權繞過已解決，但整體管理 UI/API 行為仍不一致，保留為 Medium 級殘留，不可標記本項完全已解決。
+
+### H-2：已解決
+
+- `tooling/scripts/migrate-mdx-to-pages-cms.ts:164-180` 先對每筆 record 呼叫 `prepareSanitizedPageWrite()`，正式 `createPage(record.data)` 使用已清洗 body。
+- CLI fallback `defaultCreatePage()` 在 `tooling/scripts/migrate-mdx-to-pages-cms.ts:217-220` 也再次經過同一 sanitizer；`packages/platform/src/pages-cms/write.ts:1-12` 明確把 `sanitizePageBody()` 的結果放進 DB write payload。
+- 直接測試 `tooling/scripts/migrate-mdx-to-pages-cms.test.ts` 3/3 通過，XSS fixture 實際檢查寫入 payload 不含 `<script>`、`onerror`、`javascript:`，並產生 warnings。此項已解除原 H-2。
+
+### M-1：已解決
+
+- `packages/platform/src/pages-cms/reserved-slugs.ts:33-51` 會先 decode URI、以 POSIX path normalize、壓平重複 slash，再取 normalized path 的第一段比對保留字。
+- `../admin`、`blog/../admin`、`./admin`、`%2e%2e/admin`、`foo%2f%2e%2e%2fadmin`、`%61dmin` 測試全部回傳 `SLUG_RESERVED`；`about//us` 會 canonicalize 成 `about/us`。`reserved-slugs.test.ts` 11/11 通過。
+- API 會使用回傳的 normalized slug 查詢衝突並寫入，不再以原始 path 形成 URL。此項已解除原 M-1。
+
+### M-2：未解決
+
+- `packages/database/prisma/schema.prisma:1354` 已改成宣稱的 `(status,type,locale)`，這與 sitemap 的 `where: { status: "PUBLISHED" }`（`apps/marketing/app/sitemap.ts:34`）方向一致。
+- 但 production migration `packages/database/prisma/migrations/20260829180000_add_page/migration.sql:33` 仍建立 `page_type_status_locale_idx` 的 `(type,status,locale)`，沒有同步改成 `(status,type,locale)`，也沒有 DROP/CREATE 修正既有 index 的 migration。
+- 因此 fresh database 依 migration 落地時仍是舊順序；只改 Prisma schema 不會改變已執行的資料庫 index。此項仍未解決，必須補 migration 並以資料庫 `EXPLAIN` 驗證。
+
+### M-3：已解決
+
+- `apps/marketing/app/sitemap-entries.ts:33-41` 現在每筆 DB page 只產生 `page.locale` 對應的 URL，不再對所有 locales 展開。
+- `apps/marketing/modules/blog/lib/database-pages.ts:19-28,74-76` 改用 exact locale → 固定 fallback locale（預設 `zh-tw`）→ `null`，已移除 `matches[0]`。
+- en-only、zh-cn-only、缺少翻譯 fallback 與 default locale URL 測試通過；Marketing 2 files / 9 tests passed。此項已解除原 M-3。
+
+### 複審驗證
+
+- Platform：2 files / 9 tests passed（slug normalization、sanitized write）。
+- API：2 files / 10 tests passed（shared access matrix、pages-cms handlers）。
+- SaaS layout：1 file / 2 tests passed（兩個反向授權情境）。
+- Marketing：2 files / 9 tests passed（sitemap locale、deterministic fallback）。
+- Migration：1 file / 3 tests passed（含 XSS payload 寫入前清洗）。
+- M-2 migration mismatch：`schema.prisma` 是 `(status,type,locale)`，migration SQL 仍是 `(type,status,locale)`，以 source evidence 確認未修好。
+
+### 新 Verdict
+
+Critical 0、High 0、Medium 2、Low 0。不可 archive：M-2 必須修正；H-1 的 layout/API 核心已一致，但 NavBar 仍可能顯示給 role admin 非 operator，建議一併改為共用 `canAccessPagesCmsAdmin`，再重新驗證。
+
+## 最終複審
+
+覆查範圍：僅針對 commit `3256994d` 後的兩項剩餘問題：NavBar/pages-cms 權限來源與 migration index 順序。
+
+### M-1（原 H-1 殘留）：已解決
+
+- `apps/saas/app/(authenticated)/layout.tsx:73-93` 在 server side 以 `canAccessPagesCmsAdmin(session, process.env.ADMIN_EMAIL)` 計算結果，透過 `PagesCmsAccessProvider` 傳給整個 authenticated UI。
+- `apps/saas/modules/shared/components/NavBar.tsx:599-648` 使用 `useCanAccessPagesCmsAdmin()`，並把結果傳給 `getMountMenuItems()`；`apps/saas/modules/shared/lib/nav-menu-items.ts:37-55` 只對 `plugin.id === "pages-cms"` 使用此判斷。
+- pages-cms admin layout 與 API 仍使用同一 `resolvePagesCmsAccess()`/`canAccessPagesCmsAdmin` family。因此兩個反向情境現在一致：role admin 但非 `ADMIN_EMAIL` 不顯示 pages-cms menu、layout redirect、API 403；`ADMIN_EMAIL` 但 role 非 admin 顯示 menu、layout render、API 允許。
+- 其他 `requiresOperator` 選單項仍在 `nav-menu-items.ts:53-55` 使用原本的 `isOperator`（NavBar 的 `check("admin.access")`），沒有被 pages-cms 的特殊判斷改變。測試：SaaS Nav/menu 2 files / 21 tests passed，authenticated layout 2/2 passed；platform mount-point 7/7 passed。
+- 結論：已解除，且沒有改變其他 operator-only menu 的既有行為。
+
+### M-2（migration index 順序）：已解決
+
+- 新 migration：`packages/database/prisma/migrations/20260829190000_page_status_type_locale_index/migration.sql:1-3` 先執行 `DROP INDEX IF EXISTS "page_type_status_locale_idx"`，再建立 `page_status_type_locale_idx`，欄位順序為 `("status", "type", "locale")`。
+- `packages/database/prisma/schema.prisma:1354` 已使用 `@@index([status, type, locale], map: "page_status_type_locale_idx")`，名稱與欄位順序都一致。
+- 結論：fresh migration 與既有 page migration 的 index transition 已對齊，已解除。
+
+### 最終驗證
+
+- NavBar/menu：2 files / 21 tests passed。
+- Authenticated layout：1 file / 2 tests passed。
+- Platform mount points：1 file / 7 tests passed。
+- Migration SQL 與 Prisma schema：逐行核對通過；SQL 明確包含 drop 舊 index、create 新 index。
+
+### 最終 Verdict
+
+Critical 0、High 0、Medium 0、Low 0。這兩項修復已解決，可以 archive。
