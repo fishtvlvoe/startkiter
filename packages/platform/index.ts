@@ -13,3 +13,4 @@ export * from "./src/course-ai-notes/srt-parser";
 export * from "./src/course-ai-notes/rate-limiter";
 export * from "./src/course-batch-import/folder-parser";
 export * from "./src/course-batch-import/bunny-uploader";
+export * from "./src/course-batch-import/concurrency-controller";
