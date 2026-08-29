@@ -1,11 +1,24 @@
 import { BUNNY_API_KEY_FIELD } from "@startkiter/course";
+import { canManageCourse } from "@startkiter/api/modules/course/lib/course-instructor-access";
+import { isCourseOperator } from "@startkiter/api/modules/course/lib/course-operator";
+import { auth } from "@startkiter/auth";
 import { uploadVideoToBunny } from "@startkiter/platform";
 import { NextResponse } from "next/server";
 
 const MAX_VIDEO_SIZE_BYTES = 2 * 1024 * 1024 * 1024;
 
 export async function POST(request: Request) {
+	const session = await auth.api.getSession({ headers: request.headers });
+	if (!session) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
 	const formData = await request.formData();
+	const courseId = formData.get("courseId");
+	if (typeof courseId !== "string" || !courseId) return NextResponse.json({ error: "INVALID_COURSE" }, { status: 400 });
+	const allowed = await canManageCourse({
+		userId: session.user.id,
+		courseId,
+		isOperator: isCourseOperator(session.user.email, process.env.ADMIN_EMAIL),
+	});
+	if (!allowed) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 	const file = formData.get("file");
 	if (!(file instanceof File)) return NextResponse.json({ error: "INVALID_FILE" }, { status: 400 });
 

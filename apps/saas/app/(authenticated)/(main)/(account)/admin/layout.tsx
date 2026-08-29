@@ -1,7 +1,7 @@
 import { getSession } from "@auth/lib/server";
 import { config } from "@startkiter/auth/config";
 import { hasAnyCourseInstructorAssignment } from "@startkiter/api/modules/course/lib/course-instructor-access";
-import { isCourseOperator } from "@startkiter/api/modules/course/lib/course-operator";
+import { checkPermission } from "@startkiter/permissions";
 import { Logo } from "@startkiter/ui";
 import { SettingsMenu } from "@settings/components/SettingsMenu";
 import { PageHeader } from "@shared/components/PageHeader";
@@ -18,8 +18,8 @@ export default async function AdminLayout({ children }: PropsWithChildren) {
 		redirect("/login");
 	}
 
-	// 課程管理與 API 共用 ADMIN_EMAIL operator 判定，不要求新測試帳號額外具備 admin role。
-	const isOperator = isCourseOperator(session.user.email, process.env.ADMIN_EMAIL);
+	// Nested layouts can render before the parent authenticated layout calls setup(), so do not use permix.check here.
+	const isOperator = checkPermission({ user: session.user }, "admin.access");
 	const isInstructor = !isOperator && (await hasAnyCourseInstructorAssignment(session.user.id));
 	if (!isOperator && !isInstructor) {
 		redirect("/");

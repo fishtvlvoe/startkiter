@@ -37,10 +37,9 @@ export async function generateBatchLessonContent(
 ): Promise<string> {
 	if (input.notes) return input.notes.text();
 	if (!input.subtitle) return "";
-	const { srtToText } = await import("../course-ai-notes/srt-parser");
 	return generate({
 		chapterTitle: input.chapterTitle,
 		lessonTitle: input.lessonTitle,
-		srtContent: srtToText(await input.subtitle.text()),
+		srtContent: await input.subtitle.text(),
 	});
 }

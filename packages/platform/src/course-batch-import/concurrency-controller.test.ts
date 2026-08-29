@@ -43,6 +43,6 @@ describe("runWithConcurrency", () => {
 			subtitle: new File(["1\n00:00:00,000 --> 00:00:01,000\n字幕內容"], "lesson.srt"),
 		}, generate);
 
-		expect(content).toBe("generated: 字幕內容");
+		expect(content).toBe("generated: 1\n00:00:00,000 --> 00:00:01,000\n字幕內容");
 	});
 });

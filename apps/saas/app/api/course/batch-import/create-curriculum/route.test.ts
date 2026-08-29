@@ -2,11 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
 	getSession: vi.fn(),
+	canManageCourse: vi.fn(),
 	chapterCreate: vi.fn(),
 	lessonCreate: vi.fn(),
 }));
 
 vi.mock("@startkiter/auth", () => ({ auth: { api: { getSession: mocks.getSession } } }));
+vi.mock("@startkiter/api/modules/course/lib/course-instructor-access", () => ({ canManageCourse: mocks.canManageCourse }));
+vi.mock("@startkiter/api/modules/course/lib/course-operator", () => ({ isCourseOperator: vi.fn(() => false) }));
 vi.mock("@startkiter/database", () => ({
 	db: { chapter: { create: mocks.chapterCreate }, lesson: { create: mocks.lessonCreate } },
 }));
@@ -29,7 +32,8 @@ const batch = {
 describe("POST /api/course/batch-import/create-curriculum", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		mocks.getSession.mockResolvedValue({ user: { id: "operator-1", email: "operator@example.com" } });
+	mocks.getSession.mockResolvedValue({ user: { id: "operator-1", email: "operator@example.com" } });
+	 mocks.canManageCourse.mockResolvedValue(true);
 		mocks.chapterCreate.mockResolvedValue({ id: "chapter-1" });
 		mocks.lessonCreate.mockResolvedValue({ id: "lesson-1" });
 		process.env.ADMIN_EMAIL = "operator@example.com";
@@ -62,5 +66,19 @@ describe("POST /api/course/batch-import/create-curriculum", () => {
 
 		expect(response.status).toBe(207);
 		expect(await response.json()).toMatchObject({ chaptersCreated: 1, lessonsCreated: 1, failures: [{ lessonTitle: "Lesson 1" }] });
+	});
+
+	it("generates a unique slug for every lesson", async () => {
+		await POST(request({
+			...batch,
+			confirmed: true,
+			chapters: [{ title: "Chapter 1", lessons: [batch.chapters[0].lessons[0], { title: "Lesson 2" }] }],
+		}));
+
+		const firstSlug = mocks.lessonCreate.mock.calls[0]?.[0].data.slug;
+		const secondSlug = mocks.lessonCreate.mock.calls[1]?.[0].data.slug;
+		expect(firstSlug).toMatch(/^course-1-lesson-/);
+		expect(secondSlug).toMatch(/^course-1-lesson-/);
+		expect(firstSlug).not.toBe(secondSlug);
 	});
 });

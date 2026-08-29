@@ -1,8 +1,8 @@
 import { auth } from "@startkiter/auth";
+import { canManageCourse } from "@startkiter/api/modules/course/lib/course-instructor-access";
+import { isCourseOperator } from "@startkiter/api/modules/course/lib/course-operator";
 import { db } from "@startkiter/database";
 import { NextResponse } from "next/server";
-
-import { isOperator } from "../../../../../lib/operator";
 
 type LessonInput = {
 	title: string;
@@ -17,9 +17,6 @@ type ChapterInput = { title: string; lessons: LessonInput[] };
 export async function POST(request: Request) {
 	const session = await auth.api.getSession({ headers: request.headers });
 	if (!session) return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
-	if (!isOperator(session.user.email, process.env.ADMIN_EMAIL)) {
-		return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
-	}
 
 	let body: { courseId?: unknown; confirmed?: unknown; chapters?: unknown };
 	try {
@@ -30,6 +27,12 @@ export async function POST(request: Request) {
 	if (body.confirmed !== true || typeof body.courseId !== "string" || !Array.isArray(body.chapters)) {
 		return NextResponse.json({ error: "CONFIRMATION_REQUIRED" }, { status: 400 });
 	}
+	const allowed = await canManageCourse({
+		userId: session.user.id,
+		courseId: body.courseId,
+		isOperator: isCourseOperator(session.user.email, process.env.ADMIN_EMAIL),
+	});
+	if (!allowed) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 
 	let chaptersCreated = 0;
 	let lessonsCreated = 0;
@@ -43,7 +46,7 @@ export async function POST(request: Request) {
 					data: {
 						chapterId: createdChapter.id,
 						title: lesson.title,
-						slug: lesson.slug ?? `${body.courseId}-${chapterIndex + 1}-${lessonIndex + 1}`,
+						slug: lesson.slug ?? generateLessonSlug(body.courseId),
 						content: lesson.content ?? "",
 						order: lessonIndex,
 						videoProvider: lesson.bunnyVideoId ? "BUNNY" : undefined,
@@ -59,4 +62,8 @@ export async function POST(request: Request) {
 	}
 
 	return NextResponse.json({ chaptersCreated, lessonsCreated, failures }, { status: failures.length ? 207 : 201 });
+}
+
+function generateLessonSlug(courseId: string): string {
+	return `${courseId}-lesson-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }

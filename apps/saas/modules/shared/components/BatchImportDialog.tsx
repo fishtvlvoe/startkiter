@@ -1,13 +1,12 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { parseFileList, type ParsedChapter, type ParsedLesson } from "../../../../../packages/platform/src/course-batch-import/folder-parser";
-import { generateBatchLessonContent, runWithConcurrency } from "../../../../../packages/platform/src/course-batch-import/concurrency-controller";
+import { generateBatchLessonContent, parseFileList, runWithConcurrency, type ParsedChapter, type ParsedLesson } from "@startkiter/platform";
 import { Button } from "@startkiter/ui";
 
 import { retryFailedLesson, type BatchLessonState } from "../lib/batch-import-state";
 
-type LessonData = ParsedLesson & BatchLessonState & { content: string; bunnyVideoId?: string; duration?: number };
+type LessonData = ParsedLesson & BatchLessonState & { content: string; bunnyVideoId?: string; duration?: number; enabled: boolean };
 type ChapterData = Omit<ParsedChapter, "lessons"> & { lessons: LessonData[] };
 
 export function BatchImportDialog({ courseId, onClose, onImported }: { courseId: string; onClose: () => void; onImported?: () => void }) {
@@ -20,7 +19,7 @@ export function BatchImportDialog({ courseId, onClose, onImported }: { courseId:
 		const parsed = parseFileList(files);
 		setChapters(parsed.map((chapter) => ({
 			...chapter,
-			lessons: chapter.lessons.map((lesson, index) => ({ ...lesson, id: `${chapter.name}-${index}`, status: "pending", content: "" })),
+		lessons: chapter.lessons.map((lesson, index) => ({ ...lesson, id: `${chapter.name}-${index}`, status: "pending", content: "", enabled: true })),
 		})));
 		setMessage(parsed.length ? "已解析資料夾，請確認結構後開始處理。" : "找不到符合三層結構的檔案。請選擇 Course/Chapter/Lesson/檔案。 ");
 	}
@@ -34,6 +33,7 @@ export function BatchImportDialog({ courseId, onClose, onImported }: { courseId:
 			if (!lesson.video) throw new Error("MISSING_VIDEO");
 			const form = new FormData();
 			form.append("file", lesson.video);
+			form.append("courseId", courseId);
 			const uploadRequest = uploadQueue.current.then(async () => {
 				const upload = await fetch("/api/course/batch-import/upload-video", { method: "POST", body: form });
 				if (!upload.ok) throw new Error((await upload.json().catch(() => ({}))).error ?? "UPLOAD_FAILED");
@@ -92,7 +92,7 @@ export function BatchImportDialog({ courseId, onClose, onImported }: { courseId:
 		const response = await fetch("/api/course/batch-import/create-curriculum", {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ courseId, confirmed: true, chapters: chapters.map((chapter) => ({ title: chapter.name, lessons: chapter.lessons.filter((lesson) => lesson.status === "completed").map((lesson) => ({ title: lesson.name, content: lesson.content, bunnyVideoId: lesson.bunnyVideoId, duration: lesson.duration })) })) }),
+			body: JSON.stringify({ courseId, confirmed: true, chapters: chapters.map((chapter) => ({ title: chapter.name, lessons: chapter.lessons.filter((lesson) => lesson.enabled && lesson.status === "completed").map((lesson) => ({ title: lesson.name, content: lesson.content, bunnyVideoId: lesson.bunnyVideoId, duration: lesson.duration })) })) }),
 		});
 		if (!response.ok) { setMessage("匯入失敗，請檢查失敗項目後重試。"); return; }
 		onImported?.();
@@ -105,7 +105,7 @@ export function BatchImportDialog({ courseId, onClose, onImported }: { courseId:
 			<label htmlFor="batch-import-folder" onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); if (event.dataTransfer.files.length) readFiles(event.dataTransfer.files); }} className="mt-5 block cursor-pointer rounded-lg border border-dashed border-neutral-600 p-8 text-center text-neutral-300">拖拉資料夾到這裡，或點擊選取<input id="batch-import-folder" type="file" className="sr-only" multiple // @ts-expect-error webkitdirectory is supported by Chrome and Edge
 				webkitdirectory="" onChange={(event) => { if (event.target.files) readFiles(event.target.files); }} /></label>
 			{message ? <p className="mt-3 text-sm text-amber-200">{message}</p> : null}
-			<div className="mt-4 space-y-3">{chapters.map((chapter, chapterIndex) => <section key={chapter.name}><input aria-label={`章節 ${chapter.name}`} className="w-full rounded border border-neutral-700 bg-neutral-900 p-2 font-medium" value={chapter.name} onChange={(event) => setChapters((current) => current.map((item, index) => index === chapterIndex ? { ...item, name: event.target.value } : item))} />{chapter.lessons.map((lesson) => <div key={lesson.id} className="ml-4 mt-2 flex items-center justify-between rounded border border-neutral-800 p-2 text-sm"><span>{lesson.name}</span><span>{lesson.status === "error" ? <span className="flex items-center gap-2"><span>失敗：{lesson.error ?? "UPLOAD_FAILED"}</span><Button size="sm" variant="outline" onClick={() => retry(lesson.id)}>重試</Button></span> : lesson.status === "completed" ? "已完成" : lesson.status === "generating" ? "生成中" : lesson.status === "uploading" ? "上傳中" : "等待中"}</span></div>)}</section>)}</div>
+			<div className="mt-4 space-y-3">{chapters.map((chapter, chapterIndex) => <section key={chapter.name}><input aria-label={`章節 ${chapter.name}`} className="w-full rounded border border-neutral-700 bg-neutral-900 p-2 font-medium" value={chapter.name} onChange={(event) => setChapters((current) => current.map((item, index) => index === chapterIndex ? { ...item, name: event.target.value } : item))} />{chapter.lessons.map((lesson) => <div key={lesson.id} className="ml-4 rounded border border-neutral-800 p-2 text-sm"><div className="flex items-center justify-between gap-2"><input aria-label={`單元 ${lesson.name}`} className="min-w-0 flex-1 rounded border border-neutral-700 bg-neutral-900 p-1" value={lesson.name} onChange={(event) => setChapters((current) => current.map((item) => ({ ...item, lessons: item.lessons.map((entry) => entry.id === lesson.id ? { ...entry, name: event.target.value } : entry) })))} /><label className="flex items-center gap-1"><input type="checkbox" checked={lesson.enabled} onChange={(event) => setChapters((current) => current.map((item) => ({ ...item, lessons: item.lessons.map((entry) => entry.id === lesson.id ? { ...entry, enabled: event.target.checked } : entry) })))} />啟用</label><span>{lesson.status === "error" ? <span className="flex items-center gap-2"><span>失敗：{lesson.error ?? "UPLOAD_FAILED"}</span><Button size="sm" variant="outline" onClick={() => retry(lesson.id)}>重試</Button></span> : lesson.status === "completed" ? "已完成" : lesson.status === "generating" ? "生成中" : lesson.status === "uploading" ? "上傳中" : "等待中"}</span></div>{lesson.warnings.map((warning) => <span key={warning} className="mr-2 mt-1 inline-block rounded bg-amber-900/60 px-2 py-1 text-xs text-amber-200">{warning === "MISSING_VIDEO" ? "缺少影片" : "缺少字幕/講義"}</span>)}</div>)}</section>)}</div>
 			<div className="mt-6 flex justify-end gap-2"><Button variant="outline" onClick={onClose}>取消</Button><Button variant="outline" onClick={startProcessing} disabled={processing || chapters.length === 0}>開始處理</Button><Button onClick={confirmImport} disabled={processing || chapters.length === 0}>確認匯入</Button></div>
 		</div>
 	</div>;
