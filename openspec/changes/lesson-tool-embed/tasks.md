@@ -1,7 +1,7 @@
 ## 1. 資料庫與共用工具函式
 
 - [x] 1.1 [P] 新增 Prisma `Lesson.toolUrl`／`Lesson.toolTitle` 可選欄位（對應 Decision: `toolUrl`／`toolTitle` 直接加在 Lesson model 上，不建獨立表）。驗證：`pnpm --filter database prisma validate` 通過，migration 檔存在
-- [ ] 1.2 [P] 撰寫 `isPrivateOrLocalUrl` 紅燈測試，涵蓋 `localhost`／`127.0.0.1`／`10.1.2.3`／`192.168.1.1`／`169.254.169.254` 回傳 true、一般公開網域回傳 false（對應 Requirement: Tool URL must not resolve to a private or local address）。驗證：新測試檔執行為紅燈
+- [x] 1.2 [P] 撰寫 `isPrivateOrLocalUrl` 紅燈測試，涵蓋 `localhost`／`127.0.0.1`／`10.1.2.3`／`192.168.1.1`／`169.254.169.254` 回傳 true、一般公開網域回傳 false（對應 Requirement: Tool URL must not resolve to a private or local address）。驗證：新測試檔執行為紅燈
 - [ ] 1.3 [P] 撰寫 `signLessonToolToken`／`verifyLessonToolToken` 紅燈測試，涵蓋正常簽發驗證通過、竄改 payload／lessonId 不符／userId 不符／超過 2 小時皆驗證失敗（對應 Requirement: Learner accesses the embedded tool through a short-lived signed token；Decision: 沿用既有 HMAC 簽章模式，不引入新的簽章函式庫）。驗證：新測試檔執行為紅燈
 
 ## 2. 核心邏輯實作
