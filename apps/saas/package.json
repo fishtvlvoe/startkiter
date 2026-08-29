@@ -16,6 +16,7 @@
 		"type-check": "next typegen && tsc --noEmit"
 	},
 	"dependencies": {
+		"@ai-sdk/openai": "catalog:",
 		"@ai-sdk/react": "catalog:",
 		"@bprogress/next": "^3.2.12",
 		"@hookform/resolvers": "catalog:",
