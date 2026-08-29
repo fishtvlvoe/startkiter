@@ -46,7 +46,7 @@ export async function POST(request: Request) {
 					data: {
 						chapterId: createdChapter.id,
 						title: lesson.title,
-						slug: lesson.slug ?? generateLessonSlug(body.courseId),
+						slug: generateLessonSlug(body.courseId),
 						content: lesson.content ?? "",
 						order: lessonIndex,
 						videoProvider: lesson.bunnyVideoId ? "BUNNY" : undefined,

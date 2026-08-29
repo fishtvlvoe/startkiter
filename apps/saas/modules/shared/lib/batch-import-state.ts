@@ -6,6 +6,10 @@ export type BatchLessonState = {
 	error?: string;
 };
 
+export function formatImportFailures(failures: readonly { chapterTitle?: string; lessonTitle: string; error?: string }[]): string {
+	return `${failures.length} 個單元建立失敗：${failures.map((failure) => failure.lessonTitle).join("、")}`;
+}
+
 export async function retryFailedLesson(
 	states: readonly BatchLessonState[],
 	lessonId: string,

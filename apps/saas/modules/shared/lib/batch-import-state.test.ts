@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { retryFailedLesson, type BatchLessonState } from "./batch-import-state";
+import { formatImportFailures, retryFailedLesson, type BatchLessonState } from "./batch-import-state";
 
 describe("retryFailedLesson", () => {
 	it("reprocesses only the failed lesson and preserves completed state", async () => {
@@ -18,5 +18,14 @@ describe("retryFailedLesson", () => {
 			{ id: "done", status: "completed" },
 			{ id: "failed", status: "completed" },
 		]);
+	});
+});
+
+describe("formatImportFailures", () => {
+	it("summarizes partial import failures for the instructor", () => {
+		expect(formatImportFailures([
+			{ chapterTitle: "Chapter 1", lessonTitle: "Lesson 1", error: "DB_ERROR" },
+			{ chapterTitle: "Chapter 2", lessonTitle: "Lesson 2", error: "DB_ERROR" },
+		])).toBe("2 個單元建立失敗：Lesson 1、Lesson 2");
 	});
 });

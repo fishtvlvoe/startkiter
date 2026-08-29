@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { generateBatchLessonContent, parseFileList, runWithConcurrency, type ParsedChapter, type ParsedLesson } from "@startkiter/platform";
 import { Button } from "@startkiter/ui";
 
-import { retryFailedLesson, type BatchLessonState } from "../lib/batch-import-state";
+import { formatImportFailures, retryFailedLesson, type BatchLessonState } from "../lib/batch-import-state";
 
 type LessonData = ParsedLesson & BatchLessonState & { content: string; bunnyVideoId?: string; duration?: number; enabled: boolean };
 type ChapterData = Omit<ParsedChapter, "lessons"> & { lessons: LessonData[] };
@@ -94,6 +94,11 @@ export function BatchImportDialog({ courseId, onClose, onImported }: { courseId:
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ courseId, confirmed: true, chapters: chapters.map((chapter) => ({ title: chapter.name, lessons: chapter.lessons.filter((lesson) => lesson.enabled && lesson.status === "completed").map((lesson) => ({ title: lesson.name, content: lesson.content, bunnyVideoId: lesson.bunnyVideoId, duration: lesson.duration })) })) }),
 		});
+		if (response.status === 207) {
+			const result = await response.json().catch(() => ({ failures: [] })) as { failures?: Array<{ lessonTitle: string }> };
+			setMessage(formatImportFailures(result.failures ?? []));
+			return;
+		}
 		if (!response.ok) { setMessage("匯入失敗，請檢查失敗項目後重試。"); return; }
 		onImported?.();
 		onClose();

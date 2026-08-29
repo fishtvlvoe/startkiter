@@ -72,7 +72,7 @@ describe("POST /api/course/batch-import/create-curriculum", () => {
 		await POST(request({
 			...batch,
 			confirmed: true,
-			chapters: [{ title: "Chapter 1", lessons: [batch.chapters[0].lessons[0], { title: "Lesson 2" }] }],
+			chapters: [{ title: "Chapter 1", lessons: [{ ...batch.chapters[0].lessons[0], slug: "attacker-controlled-slug" }, { title: "Lesson 2" }] }],
 		}));
 
 		const firstSlug = mocks.lessonCreate.mock.calls[0]?.[0].data.slug;
