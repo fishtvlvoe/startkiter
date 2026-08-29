@@ -117,13 +117,16 @@ function toRecord(page: {
 	return {
 		id: page.id,
 		...toSnapshot(page),
-		previousSnapshot: isPageSnapshot(page.previousSnapshot) ? page.previousSnapshot : null,
+		previousSnapshot: parseSnapshot(page.previousSnapshot),
 	};
 }
 
-function isPageSnapshot(value: Prisma.JsonValue | null): value is PageSnapshot {
-	if (!isPlainObject(value)) return false;
-	return typeof value.title === "string" && typeof value.body === "string" && typeof value.slug === "string";
+function parseSnapshot(value: Prisma.JsonValue | null): PageSnapshot | null {
+	if (!isPlainObject(value)) return null;
+	if (typeof value.title !== "string" || typeof value.body !== "string" || typeof value.slug !== "string") {
+		return null;
+	}
+	return value as unknown as PageSnapshot;
 }
 
 async function findSlugConflict(slug: string, locale: string, excludeId?: string) {
