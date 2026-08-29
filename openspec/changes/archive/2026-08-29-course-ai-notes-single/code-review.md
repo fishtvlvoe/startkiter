@@ -88,3 +88,25 @@
 • 再修 H1（開對話框前或 generate 前檢查 Key）與 H2（route／前端明確錯誤）
 • 釐清 H3（改 spec 為全站 Key，或改成 per-instructor 儲存）
 • 其餘 Medium／Low 可同輪或下一輪處理
+
+▋ 複審結果（2026-08-29，針對 C1／H1／H2／H3）
+
+• 複審範圍：commit `7720994a`（`fix: 修正單堂 AI 講義資料一致性與講師金鑰隔離`）相對初審四項；其餘 Medium／Low 未重審。
+• 對照基準：初審 C1／H1／H2／H3 的具體失敗條件。
+
+• C1 — 已解決
+• 證據：`admin/course/page.tsx` 的 `onSaved` 現在同時 `setSelectedLesson` 與 `setChapters`（依 `selectedLesson.id` 更新對應 lesson 的 `title`／`content`），型態與同檔 `handleSaveLesson` 的 chapters 同步一致。切換側欄單元再存檔時，來源資料已是新內容，不再用舊快取蓋 DB。
+
+• H1 — 已解決
+• 證據：`AiNotesDialog` 開啟時打 `GET /api/course/ai-notes/settings`（依 `session.user.id` 回 `configured`）；`keyConfigured !== true` 時上傳 input `disabled`，`generate()` 開頭直接 return 並顯示「請先設定 API Key」。元件測試覆蓋「無 Key 時 disabled 且不呼叫 generate API」。不是只靠後端 400。
+
+• H2 — 已解決
+• 證據：route 對 `streamText`／`toTextStreamResponse` 包 `try/catch`，同步失敗回 502 `GENERATION_FAILED` + `message: "生成失敗：AI provider 無法回應"`（有測試）。前端：非 200 顯示對應訊息；空串流顯示「生成失敗：沒有收到內容」而不標完成；`catch` 顯示「生成失敗：[原因]」。附註：`onError` 目前只 `console.error`，若未來要更嚴可把串流中錯誤也映射成前端可讀失敗，但不影響本項「不會誤判空／同步失敗為完成」的通過標準。
+
+• H3 — 已解決
+• 證據：`getGeminiSettingId(instructorId)` → `gemini-notes:${instructorId}`；`readGeminiApiKey`／`writeGeminiApiKey` 皆必填 `instructorId`。設定頁、settings API、generate route 都傳 `session.user.id`。單元測試「keeps each instructor API key isolated」驗證 A／B 互不覆蓋。
+
+• 最終 Verdict
+• 初審 Critical／High（C1 + H1–H3）剩餘：Critical 0、High 0
+• 就 tasks.md 5.2「Critical／High 發現數為 0」而言：可以 archive（本複審四項皆已解決）
+• 未重審的初審 Medium／Low（M3／M5／L1–L4 等）不阻擋 5.2 的 Critical／High 門檻；若要清技術債可另開後續 change
