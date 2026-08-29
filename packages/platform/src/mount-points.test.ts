@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { MOUNT_POINTS } from "./mount-points";
+import {
+	assertPluginManifestAllowed,
+	MOUNT_POINTS,
+	registerPluginManifest,
+} from "./mount-points";
+import type { PluginManifest } from "./types";
 
 describe("MOUNT_POINTS registry tests (Task 3.1)", () => {
 	it("3.1 contains course plugin manifest with mount.content.kind 'auto'", () => {
@@ -71,5 +76,28 @@ describe("MOUNT_POINTS operator-only menu filtering (Task 3.3)", () => {
 		// (without requiresOperator, it should be visible to all)
 		const coursePlugin = MOUNT_POINTS.find((p) => p.id === "course");
 		expect(coursePlugin?.mount.menu?.requiresOperator).not.toBe(true);
+	});
+});
+
+describe("pages-cms Core mount point (Requirement: This capability is a fixed Core capability, not a replaceable Plugin)", () => {
+	it("registers pages-cms as an operator-only Core menu item", () => {
+		const pagesCms = MOUNT_POINTS.find((plugin) => plugin.id === "pages-cms");
+		expect(pagesCms).toBeDefined();
+		expect(pagesCms?.mount.route?.path).toBe("/admin/pages");
+		expect(pagesCms?.mount.menu?.label).toBe("頁面管理");
+		expect(pagesCms?.mount.menu?.requiresOperator).toBe(true);
+	});
+
+	it("rejects a Plugin manifest that uses the reserved pages-cms id", () => {
+		const plugin: PluginManifest = {
+			id: "pages-cms",
+			name: "Override Pages",
+			version: "9.9.9",
+			mount: { route: { path: "/hijack-pages" } },
+			dataSpec: "none",
+		};
+
+		expect(() => assertPluginManifestAllowed(plugin)).toThrow(/RESERVED_MOUNT_ID:pages-cms/);
+		expect(() => registerPluginManifest(plugin, [])).toThrow(/RESERVED_MOUNT_ID:pages-cms/);
 	});
 });

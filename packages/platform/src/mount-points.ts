@@ -1,5 +1,25 @@
 import type { PluginManifest } from "./types";
 
+export const CORE_RESERVED_MOUNT_IDS = ["pages-cms"] as const;
+
+export function assertPluginManifestAllowed(manifest: PluginManifest): void {
+	if ((CORE_RESERVED_MOUNT_IDS as readonly string[]).includes(manifest.id)) {
+		throw new Error(`RESERVED_MOUNT_ID:${manifest.id}`);
+	}
+}
+
+export function registerPluginManifest(
+	manifest: PluginManifest,
+	registry: PluginManifest[] = MOUNT_POINTS,
+): PluginManifest[] {
+	assertPluginManifestAllowed(manifest);
+	if (registry.some((entry) => entry.id === manifest.id)) {
+		throw new Error(`DUPLICATE_MOUNT_ID:${manifest.id}`);
+	}
+	registry.push(manifest);
+	return registry;
+}
+
 export const MOUNT_POINTS: PluginManifest[] = [
 	{
 		id: "start",
@@ -43,6 +63,16 @@ export const MOUNT_POINTS: PluginManifest[] = [
 			content: { kind: "auto", boundTo: "/assignment" },
 		},
 		dataSpec: "content",
+	},
+	{
+		id: "pages-cms",
+		name: "頁面管理",
+		version: "0.1.0",
+		mount: {
+			route: { path: "/admin/pages" },
+			menu: { label: "頁面管理", icon: "file-text", order: 14, requiresOperator: true },
+		},
+		dataSpec: "none",
 	},
 	{
 		id: "review",
