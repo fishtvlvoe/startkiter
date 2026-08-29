@@ -22,6 +22,6 @@
 
 ## 5. 整合驗證與交付
 
-- [ ] 5.1 執行全域測試（`platform`／`api`／`saas` 三個 package 的 `pnpm test`）與 `pnpm type-check`，全部通過。驗證：附上實際跑出的通過筆數，不得只回報「測試通過」四字
+- [x] 5.1 執行全域測試（`platform`／`api`／`saas` 三個 package 的 `pnpm test`）與 `pnpm type-check`，全部通過。驗證：platform 19 files/92 tests passed；api 52 files/230 tests passed；saas 44 files/217 tests passed；`pnpm type-check` 27 successful/27 total（api/saas 使用 `pnpm exec dotenv -c --` 載入既有 `.env`）
 - [ ] 5.2 由不同於本次實作的 CLI 或 agent 執行一次獨立 code review，檢查 Critical／High 發現數為 0；若有發現，送回修復後回到 5.1 重新驗證。驗證：code review 報告存為 `openspec/changes/course-ai-batch-import/code-review.md`
 - [ ] 5.3 用真實測試帳號走一次端對端：準備一個小型測試資料夾（2 章節、每章 2 單元，附小測試影片與字幕），完整走過拖入→預覽→處理→個別重試一個故意失敗的單元→確認匯入，資料庫查詢確認課程結構正確建立。驗證：截圖與指令輸出存證，附在最終驗收報告中
