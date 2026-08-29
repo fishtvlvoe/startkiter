@@ -28,7 +28,7 @@
 - [x] 3.3 [P] 實作版本復原邏輯（更新 `Page` 前把目前欄位寫入 `previousSnapshot`，還原時寫回主欄位），讓 2.3 測試轉綠燈。驗證：`pnpm --filter platform test` 全綠
 - [x] 3.4 實作 Pages CRUD API（`POST /api/pages-cms`、`PATCH /api/pages-cms/[id]`、`POST /api/pages-cms/[id]/restore`、`DELETE /api/pages-cms/[id]`），串接 3.1-3.3 的 sanitize／slug 檢查／版本復原邏輯，回傳 `{ page, warnings }` 形狀，讓 2.4 測試轉綠燈。驗證：`pnpm --filter api test` 全綠
 - [x] 3.5 [P] 實作 sitemap 合併邏輯（`apps/marketing/app/sitemap.ts` 同時讀取既有 `.mdx` 檔案清單與資料庫 `Page` 表格已發布項目，設定 revalidate 快取），讓 2.5 測試轉綠燈。驗證：`pnpm --filter marketing test` 全綠
-- [ ] 3.6 [P] 實作 `.mdx` 遷移腳本（`tooling/scripts/migrate-mdx-to-pages-cms.ts`，支援 `--dry-run`），讓 2.6 測試轉綠燈。驗證：`pnpm tsx tooling/scripts/migrate-mdx-to-pages-cms.ts --dry-run` 對測試 fixture 資料夾輸出正確筆數與失敗清單
+- [x] 3.6 [P] 實作 `.mdx` 遷移腳本（`tooling/scripts/migrate-mdx-to-pages-cms.ts`，支援 `--dry-run`），讓 2.6 測試轉綠燈。驗證：`pnpm tsx tooling/scripts/migrate-mdx-to-pages-cms.ts --dry-run` 對測試 fixture 資料夾輸出正確筆數與失敗清單
 
 ## 4. 後台 UI 與 Core 掛載
 
