@@ -4,7 +4,7 @@
 
 ## 2. 紅燈測試（TDD，先寫測試，此時全部應為失敗）
 
-- [ ] 2.1 [P] 撰寫 sanitize 函式單元測試，涵蓋 `<script>`／`onerror=`／`javascript:` payload 被移除與允許標籤（p、h1-h6、ul、ol、li、a、img、strong、em、blockquote、code）被保留兩類案例（對應 Requirement: Content is sanitized before storage；Decision: 內容清洗使用白名單式 sanitizer，於寫入時而非讀取時執行）。驗證：新測試檔執行為紅燈（函式尚未實作）
+- [x] 2.1 [P] 撰寫 sanitize 函式單元測試，涵蓋 `<script>`／`onerror=`／`javascript:` payload 被移除與允許標籤（p、h1-h6、ul、ol、li、a、img、strong、em、blockquote、code）被保留兩類案例（對應 Requirement: Content is sanitized before storage；Decision: 內容清洗使用白名單式 sanitizer，於寫入時而非讀取時執行）。驗證：新測試檔執行為紅燈（函式尚未實作）
 - [ ] 2.2 [P] 撰寫 slug 檢查單元測試，涵蓋落入掛載點衍生黑名單、同語系重複 slug 兩種拒絕情境（對應 Requirement: Slug must not collide with reserved routes or existing content；Decision: slug 保留字用靜態黑名單比對，自動衍生自現有掛載點路由集合）。驗證：新測試檔執行為紅燈
 - [ ] 2.3 [P] 撰寫版本復原單元測試，涵蓋有 `previousSnapshot` 可還原、無 snapshot 回 409 兩種情境（對應 Requirement: Buyer can restore the previous version of a content record；Decision: 版本復原採儲存前自動備份上一版的單層快照，不做完整版本歷史表）。驗證：新測試檔執行為紅燈
 - [ ] 2.4 [P] 撰寫 Pages CRUD API 整合測試，涵蓋草稿建立、發布後 `publishedAt` 寫入、非 operator 呼叫遭 401/403 拒絕三種情境（對應 Requirement: Buyer can create and edit page or post content；Requirement: Non-operator cannot access the pages management API 相關情境）。驗證：新測試檔執行為紅燈
