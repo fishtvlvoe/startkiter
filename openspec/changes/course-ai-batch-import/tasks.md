@@ -1,7 +1,7 @@
 ## 1. 資料夾解析與紅燈測試
 
 - [x] 1.1 [P] 撰寫 `parseFileList` 紅燈測試，涵蓋正確三層結構解析、缺影片/缺講義字幕的單元被納入結構但附警示、超過四層或非三層結構的檔案被忽略三種情境（對應 Requirement: Instructor can import a course structure from a strict three-level folder；Decision: 資料夾解析邏輯整段搬用舊系統的三層結構規則，不做更彈性的巢狀支援）。驗證：`pnpm --filter platform exec vitest run src/course-batch-import/folder-parser.test.ts` 紅燈，`Cannot find module './folder-parser'`、`0 test`
-- [ ] 1.2 實作 `packages/platform/src/course-batch-import/folder-parser.ts` 的 `parseFileList`，讓 1.1 測試轉綠燈。驗證：`pnpm --filter platform test` 全綠
+- [x] 1.2 實作 `packages/platform/src/course-batch-import/folder-parser.ts` 的 `parseFileList`，讓 1.1 測試轉綠燈。驗證：`pnpm --filter platform test`，17 files passed、88 tests passed
 
 ## 2. 影片上傳與並行控制
 

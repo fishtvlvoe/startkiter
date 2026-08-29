@@ -11,3 +11,4 @@ export * from "./src/mount-points";
 export * from "./src/templates";
 export * from "./src/course-ai-notes/srt-parser";
 export * from "./src/course-ai-notes/rate-limiter";
+export * from "./src/course-batch-import/folder-parser";
