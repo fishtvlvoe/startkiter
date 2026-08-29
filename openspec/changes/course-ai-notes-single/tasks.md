@@ -12,7 +12,7 @@
 
 ## 3. 生成 API 與紅燈測試
 
-- [ ] 3.1 撰寫 `POST /api/course/ai-notes/generate` 整合測試，涵蓋未設定 Key 回傳 400 `GEMINI_KEY_MISSING`、非講師呼叫回傳 403 且不消費 rate limit 額度、超過速率限制回傳 429 三種情境（對應 Requirement: Generation is blocked without a configured API key；Requirement: Non-manager cannot trigger generation；Requirement: Generation calls are rate-limited per instructor）。驗證：新測試檔執行為紅燈
+- [x] 3.1 撰寫 `POST /api/course/ai-notes/generate` 整合測試，涵蓋未設定 Key 回傳 400 `GEMINI_KEY_MISSING`、非講師呼叫回傳 403 且不消費 rate limit 額度、超過速率限制回傳 429 三種情境（對應 Requirement: Generation is blocked without a configured API key；Requirement: Non-manager cannot trigger generation；Requirement: Generation calls are rate-limited per instructor）。驗證：新測試檔執行為紅燈
 - [ ] 3.2 實作 `apps/saas/app/api/course/ai-notes/generate/route.ts`（對應 Decision: v1 只支援字幕上傳生成，不支援無字幕直接分析影片，只接受 `srtContent` 輸入，不接受影片網址作為生成來源），呼叫既有 `canManageCourse` 做權限檢查、呼叫 2.1/2.2/2.3 的工具函式，串接 Gemini streamText（System Prompt 沿用舊系統 H1 分段+時間軸標記慣例），讓 3.1 測試轉綠燈。驗證：`pnpm --filter saas test` 全綠
 
 ## 4. 講師端設定與生成介面
