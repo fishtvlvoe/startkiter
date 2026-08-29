@@ -234,7 +234,7 @@ export type ChapterScalarFieldEnum = z.infer<typeof ChapterScalarFieldEnumSchema
 
 // File: LessonScalarFieldEnum.schema.ts
 
-export const LessonScalarFieldEnumSchema = z.enum(['id', 'chapterId', 'slug', 'title', 'content', 'isFreePreview', 'order', 'status', 'videoProvider', 'videoUrl', 'videoDuration', 'aiPrompt', 'aiContext', 'createdAt', 'updatedAt'])
+export const LessonScalarFieldEnumSchema = z.enum(['id', 'chapterId', 'slug', 'title', 'content', 'isFreePreview', 'order', 'status', 'videoProvider', 'videoUrl', 'videoDuration', 'aiPrompt', 'aiContext', 'toolUrl', 'toolTitle', 'createdAt', 'updatedAt'])
 
 export type LessonScalarFieldEnum = z.infer<typeof LessonScalarFieldEnumSchema>;
 
@@ -1238,6 +1238,8 @@ export const LessonSchema = z.object({
   videoDuration: z.string().nullish(),
   aiPrompt: z.string().nullish(),
   aiContext: z.string().nullish(),
+  toolUrl: z.string().nullish(),
+  toolTitle: z.string().nullish(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
