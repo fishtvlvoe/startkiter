@@ -34,11 +34,13 @@ export async function POST(request: Request) {
 	}
 
 	const lessonId = body.lessonId;
+	const courseId = body.courseId;
 	const chapterTitle = body.chapterTitle;
 	const lessonTitle = body.lessonTitle;
 	const srtContent = body.srtContent;
 	if (
-		typeof lessonId !== "string" ||
+		(lessonId !== undefined && typeof lessonId !== "string") ||
+		(lessonId === undefined && typeof courseId !== "string") ||
 		typeof chapterTitle !== "string" ||
 		typeof lessonTitle !== "string" ||
 		typeof srtContent !== "string" ||
@@ -47,17 +49,18 @@ export async function POST(request: Request) {
 		return jsonError("INVALID_BODY", 400);
 	}
 
-	const lesson = await db.lesson.findUnique({
+	const lesson = typeof lessonId === "string" ? await db.lesson.findUnique({
 		where: { id: lessonId },
 		include: { chapter: true },
-	});
-	if (!lesson) {
+	}) : null;
+	if (lessonId !== undefined && !lesson) {
 		return jsonError("NOT_FOUND", 404);
 	}
 
+	const managedCourseId = lesson?.chapter.courseId ?? courseId;
 	const allowed = await canManageCourse({
 		userId: session.user.id,
-		courseId: lesson.chapter.courseId,
+		courseId: managedCourseId as string,
 		isOperator: isCourseOperator(session.user.email, process.env.ADMIN_EMAIL),
 	});
 	if (!allowed) {

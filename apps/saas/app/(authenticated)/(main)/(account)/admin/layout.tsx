@@ -18,8 +18,7 @@ export default async function AdminLayout({ children }: PropsWithChildren) {
 		redirect("/login");
 	}
 
-	// Nested layouts can render before the parent authenticated layout calls
-	// setup(), so do not use permix.check here. admin.access is user-scoped.
+	// Nested layouts can render before the parent authenticated layout calls setup(), so do not use permix.check here.
 	const isOperator = checkPermission({ user: session.user }, "admin.access");
 	const isInstructor = !isOperator && (await hasAnyCourseInstructorAssignment(session.user.id));
 	if (!isOperator && !isInstructor) {

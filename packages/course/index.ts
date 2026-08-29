@@ -69,3 +69,4 @@ export type {
 	ModuleMountPoints,
 	ModuleNavigation,
 } from "./src/config/modules";
+export { BUNNY_API_KEY_FIELD } from "./src/course-pack/checks/bunny-zone-created";
