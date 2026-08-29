@@ -76,3 +76,51 @@ API schema 只要求 `toolUrl` 是字串；`isPrivateOrLocalUrl` 對非 HTTP(S) 
 - platform 聚焦測試：3 files、13 tests passed。
 - saas lesson-tool 聚焦測試：2 files、8 tests passed。
 - 測試未涵蓋 DNS resolution／rebinding、IPv6 private ranges、非 HTTP scheme、以及 iframe 是否經過 token-protected proxy，因此上述問題不會被目前測試捕捉。
+
+## 複審結果
+
+複審範圍只包含 Grok 新增的 `78a5923f fix(lesson-tool): 修復 CR 的 SSRF DNS 解析與 iframe 通行證缺口`，並以 `main...HEAD`／`git log main..HEAD` 排除 `course-ai-notes-single` 平行 change。
+
+### H-1：已解決
+
+位置：`packages/platform/src/lesson-tool/url-safety.ts:154-212`
+
+現在使用 `resolve4(hostname)` 與 `resolve6(hostname)`，以 `Promise.allSettled` 收集兩種 DNS 記錄；所有解析結果都經過 `isPrivateOrLocalAddress`，任一 A／AAAA 位址命中即拒絕，無結果或 DNS 失敗也 fail-closed。IPv6 ULA（`fc00::/7`）、link-local（`fe80::/10`）、loopback、IPv4-mapped IPv6 及 IPv4 私有／metadata 範圍都有分類。儲存 API（`route.ts:59-64`）、簽發路徑（`embed-path.ts:23-27`）及新分頁頁面（`page.tsx:67-70`）都使用這個 async 檢查。
+
+覆查測試：公開 hostname 解析到 `10.0.0.1`、`169.254.169.254`、混合 public/private 記錄、IPv6 ULA、IPv6 link-local、IPv4-mapped loopback 都被拒絕；platform lesson-tool 測試 21/21 通過。
+
+### H-2：已解決
+
+位置：
+
+- `apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/page.tsx:77-92`
+- `apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/lesson-tool-embed.tsx:3-34`
+- `apps/saas/app/lesson-tool/[lessonId]/[encodedOrigin]/page.tsx:51-70`
+
+主課程頁不再把資料庫原始 `toolUrl` 放入 `LessonData` 或 iframe；`buildToolEmbed` 只回傳含 HMAC token 的 `/lesson-tool/...` 路徑，`LessonToolEmbed` 的 iframe 與新分頁連結都使用 `embedHref`。該路徑每次請求都重新查 `userCanAccessCourseId`／`canManageCourse`，撤銷購課後再次載入主頁 iframe URL 會先 `notFound()` 404，因此不是只有新分頁按鈕受到保護。
+
+限制：已經在瀏覽器中載入完成的第三方文件，不會因資料庫退款事件被伺服器主動卸載；但任何 iframe 初次載入、重新載入或導航到這個受保護路徑的請求都會重新驗證。這符合 spec 的「每次 page loads」契約。
+
+覆查測試：主頁 embed component 斷言 iframe 使用 protected href 且不含 raw URL；saas lesson-tool 測試 11/11 通過，其中撤權路徑仍驗證 404。
+
+### M-1：已解決
+
+位置：`packages/platform/src/lesson-tool/url-safety.ts:165-178`
+
+共用 `checkLessonToolUrl` 現在只接受 `http:`／`https:`，`data:`、`javascript:`、`file:` 回傳 `TOOL_URL_INVALID`。設定 API 在寫入前、簽發路徑及新分頁頁面都使用同一個 validator，不會再只靠 origin 組裝放行非 HTTP(S) scheme。
+
+覆查測試：非 HTTP(S) 三種 scheme 均被拒絕；設定 API 的 `TOOL_URL_INVALID` 測試通過。
+
+### M-2：已解決
+
+位置：`apps/saas/app/(authenticated)/(main)/(account)/admin/course/page.tsx:567-610`
+
+這次沒有做跨 API transaction，但流程改成先驗證／儲存 tool 設定，再儲存標題、影片與講義。工具網址驗證失敗時，後半段不會執行，並明確顯示「標題／影片／講義尚未儲存」；反過來若工具已保存但一般 lesson update 失敗，也明確顯示「工具網址已儲存，但標題／影片／講義儲存失敗」。符合本項「原子，或部分失敗時明確告知」的驗收條件。
+
+## 複審 Verdict
+
+- 本次覆查 4 項：H-1、H-2、M-1、M-2 均已解決。
+- 尚存 Critical：0。
+- 尚存 High：0。
+- 尚存 Medium：0。
+- 就這 4 項而言可以 archive；本 Verdict 不取代整張 change 其他既定的全域測試、Spectra validation 與交付 gate。
