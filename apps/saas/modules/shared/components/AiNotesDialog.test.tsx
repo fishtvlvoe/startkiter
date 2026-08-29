@@ -6,6 +6,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AiNotesDialog } from "./AiNotesDialog";
 
+globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+
 const roots = new Set<Root>();
 
 async function render(element: ReactElement) {
@@ -48,7 +50,8 @@ describe("AiNotesDialog", () => {
 		expect(editor).not.toBeNull();
 		await act(async () => {
 			if (!editor) throw new Error("editor not found");
-			editor.value = "# Instructor-edited draft";
+			const setValue = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")?.set;
+			setValue?.call(editor, "# Instructor-edited draft");
 			editor.dispatchEvent(new Event("input", { bubbles: true }));
 			editor.dispatchEvent(new Event("change", { bubbles: true }));
 		});
