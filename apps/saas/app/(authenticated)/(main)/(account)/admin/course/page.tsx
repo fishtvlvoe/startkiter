@@ -21,6 +21,7 @@ import type { WatermarkPlayerSettings } from "@startkiter/course";
 import { reorderLesson } from "./reorder-lessons";
 import { getCourseStudioErrorMessage, type CourseStudioErrorResponse } from "./studio-error-message";
 import { MediaPicker, type MediaPickerValue } from "@course/components/MediaPicker";
+import { BatchImportDialog } from "@shared/components/BatchImportDialog";
 
 type ProviderType = "BUNNY" | "YOUTUBE" | "VIMEO" | "CUSTOM_MP4" | "HLS";
 
@@ -171,6 +172,7 @@ export default function CourseAdminStudioPage() {
 	const [lessonTitle, setLessonTitle] = useState("");
 	const [createLessonChapterId, setCreateLessonChapterId] = useState<string | null>(null);
 	const [showCreateCourseDialog, setShowCreateCourseDialog] = useState(false);
+	const [showBatchImportDialog, setShowBatchImportDialog] = useState(false);
 	const [courseTitle, setCourseTitle] = useState("");
 
 	// 課綱狀態
@@ -662,6 +664,9 @@ export default function CourseAdminStudioPage() {
 							<Button variant="outline" onClick={() => setShowCreateCourseDialog(true)}>
 								新增課程
 							</Button>
+							<Button variant="outline" onClick={() => setShowBatchImportDialog(true)} disabled={!courseId}>
+								批次匯入
+							</Button>
 							<div className="min-w-72 space-y-1">
 								<Label htmlFor="instructor-selector">管理講師</Label>
 								<div className="flex gap-2">
@@ -707,6 +712,7 @@ export default function CourseAdminStudioPage() {
 						</>
 					) : null}
 				</Card>
+				{showBatchImportDialog && courseId ? <BatchImportDialog courseId={courseId} onClose={() => setShowBatchImportDialog(false)} onImported={() => loadStudio().catch((error) => showMessage("error", String(error)))} /> : null}
 
 				{isOperator && courseId ? (
 					<Card className="space-y-3 p-4" data-testid="course-cover-settings">

@@ -1,4 +1,5 @@
-import { BUNNY_API_KEY_FIELD, uploadVideoToBunny } from "@startkiter/platform";
+import { BUNNY_API_KEY_FIELD } from "@startkiter/course";
+import { uploadVideoToBunny } from "@startkiter/platform";
 import { NextResponse } from "next/server";
 
 const MAX_VIDEO_SIZE_BYTES = 2 * 1024 * 1024 * 1024;
