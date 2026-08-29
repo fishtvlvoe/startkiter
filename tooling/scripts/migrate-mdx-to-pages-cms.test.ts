@@ -87,4 +87,35 @@ Body here
 			status: "PUBLISHED",
 		});
 	});
+
+	it("sanitizes script, onerror, and javascript: payloads before writing", async () => {
+		const dir = makeFixtureDir();
+		writeFileSync(
+			join(dir, "xss.mdx"),
+			`---
+title: Unsafe
+date: 2026-08-01
+tags:
+  - xss
+published: true
+---
+<p>ok</p><script>alert(1)</script><img src="https://example.com/x.png" onerror=alert(1)><a href="javascript:alert(1)">click</a>
+`,
+		);
+		const create = vi.fn().mockResolvedValue({ id: "page_xss" });
+
+		const result = await migrateMdxToPagesCms({
+			dir,
+			dryRun: false,
+			createPage: create,
+		});
+
+		expect(result.created).toBe(1);
+		expect(result.warnings.length).toBeGreaterThan(0);
+		const written = create.mock.calls[0]?.[0] as { body: string };
+		expect(written.body).not.toMatch(/<script/i);
+		expect(written.body).not.toMatch(/onerror/i);
+		expect(written.body).not.toMatch(/javascript:/i);
+		expect(written.body).toContain("ok");
+	});
 });

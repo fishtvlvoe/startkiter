@@ -32,9 +32,47 @@ describe("marketing sitemap merge (Requirement: Published content is included in
 
 		expect(urls).toContain("https://example.com/about");
 		expect(urls).toContain("https://example.com/blog/hello");
-		expect(urls).toContain("https://example.com/en/about");
-		expect(urls).toContain("https://example.com/en/blog/hello");
+		expect(urls).not.toContain("https://example.com/en/about");
+		expect(urls).not.toContain("https://example.com/en/blog/hello");
 		expect(urls).toContain("https://example.com/blog/first-post");
+	});
+
+	it("emits only the page's own locale URL for en-only and zh-cn-only content", () => {
+		const dbPages: DatabasePageSitemapEntry[] = [
+			{ slug: "about", locale: "en", status: "PUBLISHED", type: "PAGE", updatedAt: new Date("2026-08-29") },
+			{ slug: "intro", locale: "zh-cn", status: "PUBLISHED", type: "PAGE", updatedAt: new Date("2026-08-29") },
+		];
+
+		const urls = mergeSitemapUrls({
+			baseUrl: "https://example.com",
+			defaultLocale: "zh-tw",
+			locales: ["zh-tw", "zh-cn", "en"],
+			fileEntries,
+			dbPages,
+		}).map((entry) => entry.url);
+
+		expect(urls).toContain("https://example.com/en/about");
+		expect(urls).toContain("https://example.com/zh-cn/intro");
+		expect(urls).not.toContain("https://example.com/about");
+		expect(urls).not.toContain("https://example.com/zh-cn/about");
+		expect(urls).not.toContain("https://example.com/intro");
+		expect(urls).not.toContain("https://example.com/en/intro");
+	});
+
+	it("uses the zh-tw URL without a locale prefix for default-locale pages", () => {
+		const dbPages: DatabasePageSitemapEntry[] = [
+			{ slug: "about", locale: "zh-tw", status: "PUBLISHED", type: "PAGE", updatedAt: new Date("2026-08-29") },
+		];
+
+		const urls = mergeSitemapUrls({
+			baseUrl: "https://example.com",
+			defaultLocale: "zh-tw",
+			locales: ["zh-tw", "en"],
+			fileEntries: [],
+			dbPages,
+		}).map((entry) => entry.url);
+
+		expect(urls).toEqual(["https://example.com/about"]);
 	});
 
 	it("excludes DRAFT and ARCHIVED database pages from the sitemap", () => {

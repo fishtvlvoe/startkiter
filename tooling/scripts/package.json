@@ -10,7 +10,8 @@
 	"dependencies": {
 		"@startkiter/auth": "workspace:*",
 		"@startkiter/database": "workspace:*",
-		"@startkiter/logs": "workspace:*"
+		"@startkiter/logs": "workspace:*",
+		"@startkiter/platform": "workspace:*"
 	},
 	"devDependencies": {
 		"@startkiter/tsconfig": "workspace:*",

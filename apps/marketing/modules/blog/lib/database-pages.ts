@@ -14,7 +14,21 @@ export type DatabasePublicPage = {
 	updatedAt: Date;
 };
 
-async function queryPublishedPages(): Promise<DatabasePublicPage[]> {
+export const DEFAULT_CONTENT_LOCALE = "zh-tw";
+
+export function pickLocalizedPage<T extends { locale: string }>(
+	pages: T[],
+	locale: string,
+	fallbackLocale: string = DEFAULT_CONTENT_LOCALE,
+): T | null {
+	return (
+		pages.find((page) => page.locale === locale) ??
+		pages.find((page) => page.locale === fallbackLocale) ??
+		null
+	);
+}
+
+async function queryPublishedPages(type?: "POST" | "PAGE"): Promise<DatabasePublicPage[]> {
 	if (!process.env.DATABASE_URL) {
 		return [];
 	}
@@ -22,7 +36,10 @@ async function queryPublishedPages(): Promise<DatabasePublicPage[]> {
 	try {
 		const { db } = await import("@startkiter/database");
 		return db.page.findMany({
-			where: { status: "PUBLISHED" },
+			where: {
+				status: "PUBLISHED",
+				...(type ? { type } : {}),
+			},
 			select: {
 				id: true,
 				type: true,
@@ -45,8 +62,7 @@ async function queryPublishedPages(): Promise<DatabasePublicPage[]> {
 }
 
 export async function listPublishedDatabasePages(type?: "POST" | "PAGE"): Promise<DatabasePublicPage[]> {
-	const pages = await queryPublishedPages();
-	return type ? pages.filter((page) => page.type === type) : pages;
+	return queryPublishedPages(type);
 }
 
 export async function getPublishedDatabasePage(input: {
@@ -55,13 +71,7 @@ export async function getPublishedDatabasePage(input: {
 	type: "POST" | "PAGE";
 	fallbackLocale?: string;
 }): Promise<DatabasePublicPage | null> {
-	const pages = await listPublishedDatabasePages(input.type);
-	const matches = pages.filter((page) => page.slug === input.slug);
-	if (matches.length === 0) return null;
-	return (
-		matches.find((page) => page.locale === input.locale) ??
-		matches.find((page) => page.locale === (input.fallbackLocale ?? "zh-tw")) ??
-		matches[0] ??
-		null
-	);
+	const pages = (await listPublishedDatabasePages(input.type)).filter((page) => page.slug === input.slug);
+	if (pages.length === 0) return null;
+	return pickLocalizedPage(pages, input.locale, input.fallbackLocale ?? DEFAULT_CONTENT_LOCALE);
 }

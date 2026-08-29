@@ -32,12 +32,12 @@ export function mergeSitemapUrls(input: {
 }): SitemapUrl[] {
 	const dbEntries = input.dbPages
 		.filter((page) => page.status === "PUBLISHED")
-		.flatMap((page) => {
+		.map((page) => {
 			const path = page.type === "POST" ? `/blog/${page.slug}` : `/${page.slug}`;
-			return input.locales.map((locale) => ({
-				url: new URL(localePath(locale, input.defaultLocale, path), input.baseUrl).href,
+			return {
+				url: new URL(localePath(page.locale, input.defaultLocale, path), input.baseUrl).href,
 				lastModified: page.updatedAt,
-			}));
+			};
 		});
 
 	return [...input.fileEntries, ...dbEntries];

@@ -2,6 +2,8 @@ import { readdir, readFile } from "node:fs/promises";
 import { isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { prepareSanitizedPageWrite } from "@startkiter/platform/src/pages-cms/write";
+
 export type MigratePageInput = {
 	type: "POST";
 	slug: string;
@@ -19,6 +21,7 @@ export type MigrateResult = {
 	created: number;
 	failed: Array<{ file: string; error: string }>;
 	files: string[];
+	warnings: Array<{ file: string; warnings: string[] }>;
 };
 
 const FRONTMATTER_RE = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/;
@@ -134,7 +137,7 @@ export async function migrateMdxToPagesCms(options: {
 }): Promise<MigrateResult> {
 	const files = await collectMdxFiles(options.dir);
 	const failed: Array<{ file: string; error: string }> = [];
-	const records: MigratePageInput[] = [];
+	const records: Array<MigratePageInput & { file: string }> = [];
 
 	for (const file of files) {
 		try {
@@ -142,6 +145,7 @@ export async function migrateMdxToPagesCms(options: {
 			const parsed = parseMdxFrontmatter(source);
 			const { slug, locale } = slugFromFilename(file);
 			records.push({
+				file: relative(options.dir, file) || file,
 				type: "POST",
 				slug,
 				locale,
@@ -160,12 +164,26 @@ export async function migrateMdxToPagesCms(options: {
 		}
 	}
 
+	const sanitizedRecords = records.map((record) => {
+		const { file, ...page } = record;
+		const prepared = prepareSanitizedPageWrite(page);
+		return {
+			file,
+			data: prepared.data,
+			warnings: prepared.warnings,
+		};
+	});
+	const sanitizerWarnings = sanitizedRecords
+		.filter((record) => record.warnings.length > 0)
+		.map((record) => ({ file: record.file, warnings: record.warnings }));
+
 	if (options.dryRun) {
 		return {
-			wouldCreate: records.length,
+			wouldCreate: sanitizedRecords.length,
 			created: 0,
 			failed,
-			files: records.map((record) => record.slug),
+			files: sanitizedRecords.map((record) => record.data.slug),
+			warnings: sanitizerWarnings,
 		};
 	}
 
@@ -175,16 +193,17 @@ export async function migrateMdxToPagesCms(options: {
 	}
 
 	let created = 0;
-	for (const record of records) {
-		await createPage(record);
+	for (const record of sanitizedRecords) {
+		await createPage(record.data);
 		created += 1;
 	}
 
 	return {
-		wouldCreate: records.length,
+		wouldCreate: sanitizedRecords.length,
 		created,
 		failed,
-		files: records.map((record) => record.slug),
+		files: sanitizedRecords.map((record) => record.data.slug),
+		warnings: sanitizerWarnings,
 	};
 }
 
@@ -198,7 +217,8 @@ function parseArgs(argv: string[]) {
 
 async function defaultCreatePage(input: MigratePageInput) {
 	const { db } = await import("@startkiter/database");
-	return db.page.create({ data: input });
+	const prepared = prepareSanitizedPageWrite(input);
+	return db.page.create({ data: prepared.data });
 }
 
 async function main() {
@@ -217,6 +237,7 @@ async function main() {
 				created: result.created,
 				failed: result.failed,
 				files: result.files,
+				warnings: result.warnings,
 			},
 			null,
 			2,

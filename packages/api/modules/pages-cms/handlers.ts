@@ -9,9 +9,9 @@ import {
 	type PageRecord,
 	type PageSnapshot,
 } from "@startkiter/platform/src/pages-cms/restore";
-import { sanitizePageBody } from "@startkiter/platform/src/pages-cms/sanitize";
+import { prepareSanitizedPageWrite } from "@startkiter/platform/src/pages-cms/write";
 
-import { isCourseOperator } from "../course/lib/course-operator";
+import { resolvePagesCmsAccess } from "./access";
 
 const LOCALES = new Set(["zh-tw", "zh-cn", "en"]);
 const TYPES = new Set<ContentTypeValue>(["POST", "PAGE"]);
@@ -32,13 +32,14 @@ async function requireOperator(request: Request): Promise<
 	| { ok: false; response: Response }
 > {
 	const session = await auth.api.getSession({ headers: request.headers });
-	if (!session?.user?.id) {
+	const access = resolvePagesCmsAccess(session, process.env.ADMIN_EMAIL);
+	if (access === 401) {
 		return { ok: false, response: json({ error: "UNAUTHORIZED" }, 401) };
 	}
-	if (!isCourseOperator(session.user.email, process.env.ADMIN_EMAIL)) {
+	if (access === 403) {
 		return { ok: false, response: json({ error: "FORBIDDEN" }, 403) };
 	}
-	return { ok: true, userId: session.user.id };
+	return { ok: true, userId: session!.user.id };
 }
 
 async function readBody(request: Request): Promise<Record<string, unknown> | null> {
@@ -173,39 +174,35 @@ export async function POST(request: Request) {
 		return json({ error: "invalid_status" }, 400);
 	}
 
-	const existing = await findSlugConflict(slug, locale);
-	const slugCheck = checkSlug({
-		slug,
-		locale,
-		existing: existing ? [existing] : [],
-	});
+	const slugCheck = checkSlug({ slug, locale });
 	if (!slugCheck.ok) {
 		return json({ error: slugCheck.code }, 400);
 	}
+	const existing = await findSlugConflict(slugCheck.slug, locale);
+	if (existing) {
+		return json({ error: "SLUG_TAKEN" }, 400);
+	}
 
-	const sanitized = sanitizePageBody(rawBody);
-	const status = statusValue as ContentStatusValue;
-	const publishedAt = status === "PUBLISHED" ? new Date() : null;
-	const tags = asStringArray(body.tags) ?? [];
-
-	const page = await db.page.create({
-		data: {
-			type: type as ContentTypeValue,
-			slug,
-			locale,
-			title,
-			excerpt: asNullableString(body.excerpt) ?? null,
-			body: sanitized.html,
-			coverImageUrl: asNullableString(body.coverImageUrl) ?? null,
-			seoTitle: asNullableString(body.seoTitle) ?? null,
-			seoDescription: asNullableString(body.seoDescription) ?? null,
-			tags,
-			status,
-			publishedAt,
-		},
+	const prepared = prepareSanitizedPageWrite({
+		type: type as ContentTypeValue,
+		slug: slugCheck.slug,
+		locale,
+		title,
+		excerpt: asNullableString(body.excerpt) ?? null,
+		body: rawBody,
+		coverImageUrl: asNullableString(body.coverImageUrl) ?? null,
+		seoTitle: asNullableString(body.seoTitle) ?? null,
+		seoDescription: asNullableString(body.seoDescription) ?? null,
+		tags: asStringArray(body.tags) ?? [],
+		status: statusValue as ContentStatusValue,
+		publishedAt: statusValue === "PUBLISHED" ? new Date() : null,
 	});
 
-	return json({ page, warnings: sanitized.warnings }, 201);
+	const page = await db.page.create({
+		data: prepared.data,
+	});
+
+	return json({ page, warnings: prepared.warnings }, 201);
 }
 
 export async function PATCH(request: Request, context: RouteContext) {
@@ -223,14 +220,13 @@ export async function PATCH(request: Request, context: RouteContext) {
 	const nextLocale = asString(body.locale)?.trim() ?? current.locale;
 	if (!LOCALES.has(nextLocale)) return json({ error: "invalid_locale" }, 400);
 
-	const existing = await findSlugConflict(nextSlug, nextLocale, current.id);
-	const slugCheck = checkSlug({
-		slug: nextSlug,
-		locale: nextLocale,
-		existing: existing ? [existing] : [],
-	});
+	const slugCheck = checkSlug({ slug: nextSlug, locale: nextLocale });
 	if (!slugCheck.ok) {
 		return json({ error: slugCheck.code }, 400);
+	}
+	const existing = await findSlugConflict(slugCheck.slug, nextLocale, current.id);
+	if (existing) {
+		return json({ error: "SLUG_TAKEN" }, 400);
 	}
 
 	const nextStatus = (asString(body.status) as ContentStatusValue | undefined) ?? current.status;
@@ -241,13 +237,13 @@ export async function PATCH(request: Request, context: RouteContext) {
 	if (body.body !== undefined) {
 		const rawBody = asString(body.body);
 		if (rawBody === undefined) return json({ error: "invalid_body" }, 400);
-		const sanitized = sanitizePageBody(rawBody);
-		nextBody = sanitized.html;
-		warnings = sanitized.warnings;
+		const prepared = prepareSanitizedPageWrite({ body: rawBody });
+		nextBody = prepared.data.body;
+		warnings = prepared.warnings;
 	}
 
 	const data: Prisma.PageUpdateInput = {
-		slug: nextSlug,
+		slug: slugCheck.slug,
 		locale: nextLocale,
 		title: asString(body.title)?.trim() ?? current.title,
 		excerpt: body.excerpt !== undefined ? (asNullableString(body.excerpt) ?? null) : current.excerpt,

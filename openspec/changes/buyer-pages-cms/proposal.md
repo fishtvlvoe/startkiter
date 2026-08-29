@@ -38,4 +38,6 @@
     - `packages/platform/src/mount-points.ts`（新增掛載點）
     - `apps/marketing/modules/blog/lib/posts.ts`（改為同時支援 `.mdx` 與資料庫兩種來源）
     - `apps/marketing/app/sitemap.ts`（納入資料庫來源頁面）
+    - `apps/marketing/app/[locale]/[...rest]/page.tsx`（公開站讀取資料庫 PAGE）
+    - `apps/marketing/app/[locale]/blog/[...path]/page.tsx`（公開站讀取資料庫 POST）
   - Removed: 無

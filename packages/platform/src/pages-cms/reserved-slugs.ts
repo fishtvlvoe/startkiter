@@ -1,9 +1,11 @@
+import path from "node:path";
+
 import { MOUNT_POINTS } from "../mount-points";
 
 const SYSTEM_SEGMENTS = ["api", "admin", "auth", "_next"] as const;
 
 export type SlugCheckResult =
-	| { ok: true }
+	| { ok: true; slug: string }
 	| { ok: false; code: "SLUG_RESERVED" | "SLUG_TAKEN" };
 
 export type ExistingSlug = {
@@ -19,13 +21,34 @@ export function getReservedSlugs(): Set<string> {
 	const reserved = new Set<string>(SYSTEM_SEGMENTS);
 
 	for (const plugin of MOUNT_POINTS) {
-		const path = plugin.mount.route?.path;
-		if (!path) continue;
-		const segment = firstPathSegment(path);
+		const pathName = plugin.mount.route?.path;
+		if (!pathName) continue;
+		const segment = firstPathSegment(pathName);
 		if (segment) reserved.add(segment);
 	}
 
 	return reserved;
+}
+
+export function normalizeContentSlug(raw: string): string | null {
+	const trimmed = raw.trim();
+	if (!trimmed) return null;
+
+	let decoded = trimmed;
+	try {
+		decoded = decodeURIComponent(trimmed);
+	} catch {
+		return null;
+	}
+
+	const posixPath = path.posix.normalize(`/${decoded.replace(/^\/+/, "")}`);
+	const segments = posixPath.split("/").filter((segment) => segment.length > 0);
+	if (segments.length === 0) return null;
+	if (segments.some((segment) => segment === "." || segment === "..")) {
+		return null;
+	}
+
+	return segments.map((segment) => segment.toLowerCase()).join("/");
 }
 
 export function checkSlug(input: {
@@ -33,21 +56,25 @@ export function checkSlug(input: {
 	locale: string;
 	existing?: ExistingSlug[];
 }): SlugCheckResult {
-	const slug = input.slug.trim();
+	const slug = normalizeContentSlug(input.slug);
 	const locale = input.locale.trim();
-	const firstSegment = firstPathSegment(slug);
-	const reserved = getReservedSlugs();
+	if (!slug) {
+		return { ok: false, code: "SLUG_RESERVED" };
+	}
 
+	const reserved = getReservedSlugs();
+	const firstSegment = firstPathSegment(slug);
 	if (!firstSegment || reserved.has(firstSegment)) {
 		return { ok: false, code: "SLUG_RESERVED" };
 	}
 
-	const taken = (input.existing ?? []).some(
-		(entry) => entry.slug === slug && entry.locale === locale,
-	);
+	const taken = (input.existing ?? []).some((entry) => {
+		const existingSlug = normalizeContentSlug(entry.slug) ?? entry.slug;
+		return existingSlug === slug && entry.locale === locale;
+	});
 	if (taken) {
 		return { ok: false, code: "SLUG_TAKEN" };
 	}
 
-	return { ok: true };
+	return { ok: true, slug };
 }

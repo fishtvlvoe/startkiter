@@ -170,4 +170,43 @@ describe("Pages CMS HTTP API (Requirement: Buyer can create and edit page or pos
 		expect(response.status).toBe(403);
 		expect(mockedUpdate).not.toHaveBeenCalled();
 	});
+
+	it("returns 403 for a role=admin user whose email is not ADMIN_EMAIL", async () => {
+		mockedGetSession.mockResolvedValue({
+			user: { id: "admin_1", email: "role-admin@example.com", role: "admin" },
+		} as never);
+
+		const response = await POST(
+			jsonRequest("http://localhost/api/pages-cms", "POST", {
+				type: "POST",
+				title: "草稿標題",
+				slug: "hello",
+				body: "<p>內容</p>",
+				locale: "zh-tw",
+			}),
+		);
+
+		expect(response.status).toBe(403);
+		expect(mockedCreate).not.toHaveBeenCalled();
+	});
+
+	it("allows ADMIN_EMAIL even when role is not admin", async () => {
+		mockedGetSession.mockResolvedValue({
+			user: { id: "op_1", email: OPERATOR_EMAIL, role: "user" },
+		} as never);
+		mockedCreate.mockResolvedValue(draftPage() as never);
+
+		const response = await POST(
+			jsonRequest("http://localhost/api/pages-cms", "POST", {
+				type: "POST",
+				title: "草稿標題",
+				slug: "hello",
+				body: "<p>內容</p>",
+				locale: "zh-tw",
+			}),
+		);
+
+		expect(response.status).toBe(201);
+		expect(mockedCreate).toHaveBeenCalled();
+	});
 });

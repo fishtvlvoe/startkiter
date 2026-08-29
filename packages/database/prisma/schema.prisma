@@ -1351,6 +1351,6 @@ model Page {
   updatedAt        DateTime      @updatedAt
 
   @@unique([slug, locale])
-  @@index([type, status, locale])
+  @@index([status, type, locale])
   @@map("page")
 }
