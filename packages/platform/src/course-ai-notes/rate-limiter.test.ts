@@ -1,4 +1,5 @@
 import { checkRateLimit } from "./rate-limiter";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 describe("checkRateLimit", () => {
 	afterEach(() => {

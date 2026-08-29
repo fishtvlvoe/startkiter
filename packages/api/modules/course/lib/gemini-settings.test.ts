@@ -1,6 +1,7 @@
 import { db } from "@startkiter/database";
 import { decryptSettingsJson } from "../../../../../apps/saas/lib/settings-crypto";
 import { readGeminiApiKey, writeGeminiApiKey } from "./gemini-settings";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@startkiter/database", () => ({
 	db: {
@@ -19,13 +20,13 @@ describe("Gemini API key settings", () => {
 	beforeEach(() => {
 		process.env.SETTINGS_ENCRYPTION_KEY = encryptionSecret;
 		storedCiphertext = "";
-		vi.mocked(db.siteSetting.upsert).mockImplementation(async ({ create }) => {
+		vi.mocked(db.siteSetting.upsert).mockImplementation((async ({ create }: { create: { ciphertext: string } }) => {
 			storedCiphertext = create.ciphertext;
 			return create as never;
-		});
-		vi.mocked(db.siteSetting.findUnique).mockImplementation(async () =>
-			storedCiphertext ? ({ id: "gemini-notes", ciphertext: storedCiphertext } as never) : null,
-		);
+		}) as never);
+		vi.mocked(db.siteSetting.findUnique).mockImplementation((async () =>
+			(storedCiphertext ? { id: "gemini-notes", ciphertext: storedCiphertext } : null)
+		) as never);
 	});
 
 	afterEach(() => {

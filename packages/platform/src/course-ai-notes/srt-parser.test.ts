@@ -1,4 +1,5 @@
 import { srtToText } from "./srt-parser";
+import { describe, expect, it } from "vitest";
 
 describe("srtToText", () => {
 	it("removes cue numbers and timestamps while preserving subtitle text", () => {
