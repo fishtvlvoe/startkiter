@@ -24,7 +24,7 @@
 ## 3. 核心邏輯實作
 
 - [x] 3.1 [P] 實作 sanitize 函式（`packages/platform/src/pages-cms/sanitize.ts`），讓 2.1 測試轉綠燈。驗證：`pnpm --filter platform test` 全綠
-- [ ] 3.2 [P] 實作 slug 保留字清單與檢查函式（`packages/platform/src/pages-cms/reserved-slugs.ts`，衍生自 `MOUNT_POINTS` 路由前綴），讓 2.2 測試轉綠燈。驗證：`pnpm --filter platform test` 全綠
+- [x] 3.2 [P] 實作 slug 保留字清單與檢查函式（`packages/platform/src/pages-cms/reserved-slugs.ts`，衍生自 `MOUNT_POINTS` 路由前綴），讓 2.2 測試轉綠燈。驗證：`pnpm --filter platform test` 全綠
 - [ ] 3.3 [P] 實作版本復原邏輯（更新 `Page` 前把目前欄位寫入 `previousSnapshot`，還原時寫回主欄位），讓 2.3 測試轉綠燈。驗證：`pnpm --filter platform test` 全綠
 - [ ] 3.4 實作 Pages CRUD API（`POST /api/pages-cms`、`PATCH /api/pages-cms/[id]`、`POST /api/pages-cms/[id]/restore`、`DELETE /api/pages-cms/[id]`），串接 3.1-3.3 的 sanitize／slug 檢查／版本復原邏輯，回傳 `{ page, warnings }` 形狀，讓 2.4 測試轉綠燈。驗證：`pnpm --filter api test` 全綠
 - [ ] 3.5 [P] 實作 sitemap 合併邏輯（`apps/marketing/app/sitemap.ts` 同時讀取既有 `.mdx` 檔案清單與資料庫 `Page` 表格已發布項目，設定 revalidate 快取），讓 2.5 測試轉綠燈。驗證：`pnpm --filter marketing test` 全綠
