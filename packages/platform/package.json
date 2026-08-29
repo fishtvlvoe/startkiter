@@ -10,10 +10,13 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@startkiter/database": "workspace:*"
+		"@startkiter/database": "workspace:*",
+		"dompurify": "3.4.13",
+		"jsdom": "26.1.0"
 	},
 	"devDependencies": {
 		"@startkiter/tsconfig": "workspace:*",
+		"@types/jsdom": "21.1.7",
 		"@types/node": "catalog:",
 		"typescript": "catalog:",
 		"vitest": "catalog:"
