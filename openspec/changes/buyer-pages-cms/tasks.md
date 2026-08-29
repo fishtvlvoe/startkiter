@@ -10,7 +10,16 @@
 - [x] 2.4 [P] 撰寫 Pages CRUD API 整合測試，涵蓋草稿建立、發布後 `publishedAt` 寫入、非 operator 呼叫遭 401/403 拒絕三種情境（對應 Requirement: Buyer can create and edit page or post content；Requirement: Non-operator cannot access the pages management API 相關情境）。驗證：新測試檔執行為紅燈
 - [x] 2.5 [P] 撰寫 sitemap 整合測試，涵蓋 `PUBLISHED` 內容出現於輸出、`DRAFT`／`ARCHIVED` 內容不出現兩種情境（對應 Requirement: Published content is included in the site's sitemap；Decision: sitemap 改為執行期動態產生，不再是建置期靜態產出）。驗證：新測試檔執行為紅燈
 - [x] 2.6 [P] 撰寫 `.mdx` 遷移腳本測試，涵蓋 `--dry-run` 不寫入資料庫、正式執行時 `title`/`date`/`tags`/`published` 正確映射至 `Page` 欄位兩種情境（對應 Requirement: Existing file-based content can be migrated into the database）。驗證：新測試檔執行為紅燈
-- [ ] 2.7 執行一次 2.1 至 2.6 全部新增測試檔，確認全部為紅燈失敗（尚無對應實作），記錄每個失敗訊息，供第 3 節逐項核對是否已修正為綠燈
+- [x] 2.7 執行一次 2.1 至 2.6 全部新增測試檔，確認全部為紅燈失敗（尚無對應實作），記錄每個失敗訊息，供第 3 節逐項核對是否已修正為綠燈
+
+<!-- 2.7 紅燈紀錄（2026-08-29）
+2.1 Cannot find module './sanitize'
+2.2 Cannot find module './reserved-slugs'
+2.3 Cannot find module './restore'
+2.4 Cannot find module './handlers'
+2.5 Cannot find module './sitemap-entries'
+2.6 Cannot find module './migrate-mdx-to-pages-cms'
+-->
 
 ## 3. 核心邏輯實作
 
