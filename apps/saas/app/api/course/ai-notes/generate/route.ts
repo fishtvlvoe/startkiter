@@ -5,7 +5,7 @@ import { readGeminiApiKey } from "@startkiter/api/modules/course/lib/gemini-sett
 import { auth } from "@startkiter/auth";
 import { db } from "@startkiter/database";
 import { checkRateLimit, srtToText } from "@startkiter/platform";
-import { streamText } from "../../../../../../packages/ai";
+import { streamText } from "../../../../../../../packages/ai";
 import { NextResponse } from "next/server";
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {

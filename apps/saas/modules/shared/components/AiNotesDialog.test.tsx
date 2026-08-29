@@ -6,8 +6,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AiNotesDialog } from "./AiNotesDialog";
 
-globalThis.IS_REACT_ACT_ENVIRONMENT = true;
-
 const roots = new Set<Root>();
 
 async function render(element: ReactElement) {

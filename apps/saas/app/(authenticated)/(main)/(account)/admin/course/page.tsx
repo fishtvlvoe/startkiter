@@ -15,6 +15,7 @@ import {
 	Textarea,
 } from "@startkiter/ui";
 import { CourseStudioContentPreview } from "@shared/components/CourseStudioContentPreview";
+import { AiNotesDialog } from "@shared/components/AiNotesDialog";
 import { orpcClient } from "@shared/lib/orpc-client";
 import type { WatermarkPlayerSettings } from "@startkiter/course";
 import { reorderLesson } from "./reorder-lessons";
@@ -178,6 +179,7 @@ export default function CourseAdminStudioPage() {
 	const [courseId, setCourseId] = useState<string | null>(null);
 	const [chapters, setChapters] = useState<ChapterItem[]>([]);
 	const [selectedLesson, setSelectedLesson] = useState<LessonItem | null>(null);
+	const [showAiNotesDialog, setShowAiNotesDialog] = useState(false);
 	const [draggedLessonId, setDraggedLessonId] = useState<string | null>(null);
 	const [videoInputUrl, setVideoInputUrl] = useState("");
 	const [resolvedCard, setResolvedCard] = useState<{
@@ -188,6 +190,7 @@ export default function CourseAdminStudioPage() {
 	const [users, setUsers] = useState<Array<{ id: string; name: string; email: string }>>([]);
 	const [selectedInstructorId, setSelectedInstructorId] = useState("");
 	const selectedCourse = courses.find((course) => course.id === courseId);
+	const selectedChapter = chapters.find((chapter) => chapter.lessons.some((lesson) => lesson.id === selectedLesson?.id));
 	const assignedInstructors = selectedCourse?.instructors ?? [];
 	const [watermarkSetting, setWatermarkSetting] = useState(DEFAULT_WATERMARK_SETTING);
 
@@ -1165,7 +1168,10 @@ export default function CourseAdminStudioPage() {
 							{/* MDX 講義內容與 AI Context */}
 							<div className="grid grid-cols-2 gap-4">
 								<Card className="space-y-2 p-4">
-									<Label>MDX 講義內容 (支援 8 款純向量 SVG 互動積木)</Label>
+									<div className="flex items-center justify-between gap-3">
+										<Label>MDX 講義內容 (支援 8 款純向量 SVG 互動積木)</Label>
+										<Button variant="outline" onClick={() => setShowAiNotesDialog(true)}>AI 生成講義</Button>
+									</div>
 									<Textarea
 										value={selectedLesson.content}
 										onChange={(e) => setSelectedLesson({ ...selectedLesson, content: e.target.value })}
@@ -1199,6 +1205,22 @@ export default function CourseAdminStudioPage() {
 						</div>
 					)}
 				</div>
+
+				{selectedLesson && (
+					<Dialog open={showAiNotesDialog} onOpenChange={setShowAiNotesDialog}>
+						<DialogContent className="max-w-3xl">
+							<AiNotesDialog
+								open={showAiNotesDialog}
+								lessonId={selectedLesson.id}
+								chapterTitle={selectedChapter?.title ?? ""}
+								lessonTitle={selectedLesson.title}
+								initialDraft={selectedLesson.content}
+								onOpenChange={setShowAiNotesDialog}
+								onSaved={({ title, content }) => setSelectedLesson((current) => current ? { ...current, title, content } : current)}
+							/>
+						</DialogContent>
+					</Dialog>
+				)}
 				</div>
 
 				{/* 新增課程 Dialog */}

@@ -9,6 +9,7 @@ type AiNotesDialogProps = {
 	lessonTitle: string;
 	initialDraft?: string;
 	onOpenChange: (open: boolean) => void;
+	onSaved?: (lesson: { title: string; content: string }) => void;
 };
 
 export function AiNotesDialog({
@@ -18,6 +19,7 @@ export function AiNotesDialog({
 	lessonTitle: initialLessonTitle,
 	initialDraft = "",
 	onOpenChange,
+	onSaved,
 }: AiNotesDialogProps) {
 	const [title, setTitle] = useState(initialLessonTitle);
 	const [content, setContent] = useState(initialDraft);
@@ -87,6 +89,7 @@ export function AiNotesDialog({
 				}),
 			});
 			if (!response.ok) throw new Error("講義儲存失敗");
+			onSaved?.({ title, content });
 			onOpenChange(false);
 		} catch (error) {
 			setStatus(error instanceof Error ? error.message : "講義儲存失敗");
@@ -100,6 +103,7 @@ export function AiNotesDialog({
 			<div>
 				<h2 id="ai-notes-title" className="text-lg font-semibold">AI 生成講義</h2>
 				<p className="text-sm text-muted-foreground">生成內容是草稿，確認後才會寫入單元。</p>
+				<a href="/admin/settings/gemini" className="text-sm underline">尚未設定 API Key？前往設定</a>
 			</div>
 			<label className="grid gap-2">標題<input value={title} onChange={(event) => setTitle(event.target.value)} /></label>
 			<label className="grid gap-2">上傳字幕<input type="file" accept=".srt" disabled={busy} onChange={(event) => { const file = event.target.files?.[0]; if (file) void generate(file); }} /></label>
