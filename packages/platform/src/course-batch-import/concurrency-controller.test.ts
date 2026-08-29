@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { runWithConcurrency } from "./concurrency-controller";
+import { generateBatchLessonContent, runWithConcurrency } from "./concurrency-controller";
 
 describe("runWithConcurrency", () => {
 	it("never runs more tasks than the configured limit", async () => {
@@ -33,5 +33,16 @@ describe("runWithConcurrency", () => {
 			running -= 1;
 		});
 		expect(maximum).toBe(5);
+	});
+
+	it("converts SRT to plain text before calling the existing generator", async () => {
+		const generate = async ({ srtContent }: { srtContent: string }) => `generated: ${srtContent}`;
+		const content = await generateBatchLessonContent({
+			chapterTitle: "Chapter",
+			lessonTitle: "Lesson",
+			subtitle: new File(["1\n00:00:00,000 --> 00:00:01,000\n字幕內容"], "lesson.srt"),
+		}, generate);
+
+		expect(content).toBe("generated: 字幕內容");
 	});
 });

@@ -61,6 +61,19 @@ function request() {
 	});
 }
 
+function batchRequest() {
+	return new Request("http://localhost/api/course/ai-notes/generate", {
+		method: "POST",
+		headers: { "content-type": "application/json" },
+		body: JSON.stringify({
+			courseId: "course-1",
+			chapterTitle: "Chapter title",
+			lessonTitle: "Lesson title",
+			srtContent: "Subtitle",
+		}),
+	});
+}
+
 describe("POST /api/course/ai-notes/generate", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -112,6 +125,19 @@ describe("POST /api/course/ai-notes/generate", () => {
 		expect(response.status).toBe(200);
 		expect(await response.text()).toBe("generated notes");
 		expect(streamText).toHaveBeenCalledOnce();
+	});
+
+	it("supports batch drafts before a lesson record exists", async () => {
+		vi.mocked(streamText).mockReturnValue({
+			toTextStreamResponse: () => new Response("generated batch notes"),
+		} as never);
+
+		const response = await POST(batchRequest());
+
+		expect(response.status).toBe(200);
+		expect(await response.text()).toBe("generated batch notes");
+		expect(db.lesson.findUnique).not.toHaveBeenCalled();
+		expect(canManageCourse).toHaveBeenCalledWith({ userId: "instructor-1", courseId: "course-1", isOperator: false });
 	});
 
 	it("returns an explicit failure when the provider cannot create a stream", async () => {

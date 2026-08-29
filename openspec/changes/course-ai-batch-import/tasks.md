@@ -7,7 +7,7 @@
 
 - [x] 2.1 [P] 撰寫 Bunny 影片上傳紅燈測試，涵蓋正常上傳成功回傳 `bunnyVideoId`、超過檔案大小上限回傳 `FILE_TOO_LARGE` 且不影響其他單元繼續處理兩種情境（對應 Requirement: Video upload has a maximum file size and does not block other lessons on failure；Decision: 影片上傳採用伺服器代轉的簡單直接上傳，不做用戶端直傳 TUS 斷點續傳）。驗證：`pnpm --filter platform exec vitest run src/course-batch-import/bunny-uploader.test.ts` 紅燈，`Cannot find module './bunny-uploader'`、`0 test`
 - [x] 2.2 實作 `packages/platform/src/course-batch-import/bunny-uploader.ts` 與 `apps/saas/app/api/course/batch-import/upload-video/route.ts`，讓 2.1 測試轉綠燈。驗證：`pnpm --filter platform --filter saas test`，platform 18 files/90 tests passed；saas 42 files/213 tests passed
-- [x] 2.3 [P] 實作 `packages/platform/src/course-batch-import/concurrency-controller.ts`（對應 Decision: 並行處理沿用舊系統的 concurrency 慣例（上傳序列化、AI 生成 5 個並行）），影片上傳 concurrency=1、AI 生成呼叫 concurrency=5，重用 `course-ai-notes-single` 已完成的 `srtToText`／生成 API／rate limiter。驗證：`pnpm --filter platform exec vitest run src/course-batch-import/concurrency-controller.test.ts`，1 file/2 tests passed；上傳上限 1、AI 上限 5
+- [x] 2.3 [P] 實作 `packages/platform/src/course-batch-import/concurrency-controller.ts`（對應 Decision: 並行處理沿用舊系統的 concurrency 慣例（上傳序列化、AI 生成 5 個並行）），影片上傳 concurrency=1、AI 生成呼叫 concurrency=5，重用 `course-ai-notes-single` 已完成的 `srtToText`／生成 API／rate limiter；SRT 單元先轉純文字，再呼叫既有生成 API 串流並收集內容。驗證：`pnpm --filter platform exec vitest run src/course-batch-import/concurrency-controller.test.ts`，1 file/3 tests passed；`pnpm --filter saas exec vitest run app/api/course/ai-notes/generate/route.test.ts`，1 file/6 tests passed；上傳 queue 上限 1、AI 上限 5
 
 ## 3. 個別重試與批次寫入 API
 

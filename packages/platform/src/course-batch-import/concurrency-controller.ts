@@ -17,3 +17,30 @@ export async function runWithConcurrency<T, R>(
 	await Promise.all(Array.from({ length: Math.min(limit, items.length) }, () => consume()));
 	return results;
 }
+
+export type BatchLessonContentInput = {
+	chapterTitle: string;
+	lessonTitle: string;
+	notes?: File;
+	subtitle?: File;
+};
+
+export type BatchLessonContentGenerator = (input: {
+	chapterTitle: string;
+	lessonTitle: string;
+	srtContent: string;
+}) => Promise<string>;
+
+export async function generateBatchLessonContent(
+	input: BatchLessonContentInput,
+	generate: BatchLessonContentGenerator,
+): Promise<string> {
+	if (input.notes) return input.notes.text();
+	if (!input.subtitle) return "";
+	const { srtToText } = await import("../course-ai-notes/srt-parser");
+	return generate({
+		chapterTitle: input.chapterTitle,
+		lessonTitle: input.lessonTitle,
+		srtContent: srtToText(await input.subtitle.text()),
+	});
+}
