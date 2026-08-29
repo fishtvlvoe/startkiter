@@ -4,6 +4,14 @@ import { getUniqueBasePaths } from "@shared/lib/content";
 import { allLegalPages, allPosts } from "content-collections";
 import type { MetadataRoute } from "next";
 
+import {
+	SITEMAP_REVALIDATE_SECONDS,
+	mergeSitemapUrls,
+	type DatabasePageSitemapEntry,
+} from "./sitemap-entries";
+
+export const revalidate = SITEMAP_REVALIDATE_SECONDS;
+
 const baseUrl = getBaseUrl();
 const locales = Object.keys(i18nConfig.locales);
 const defaultLocale = i18nConfig.defaultLocale;
@@ -15,11 +23,41 @@ function localePath(locale: string, path: string): string {
 
 const staticMarketingPages = ["", "/blog", "/changelog"];
 
+async function listPublishedDatabasePages(): Promise<DatabasePageSitemapEntry[]> {
+	if (!process.env.DATABASE_URL) {
+		return [];
+	}
+
+	try {
+		const { db } = await import("@startkiter/database");
+		const pages = await db.page.findMany({
+			where: { status: "PUBLISHED" },
+			select: {
+				slug: true,
+				locale: true,
+				status: true,
+				type: true,
+				updatedAt: true,
+			},
+		});
+		return pages.map((page) => ({
+			slug: page.slug,
+			locale: page.locale,
+			status: page.status,
+			type: page.type,
+			updatedAt: page.updatedAt,
+		}));
+	} catch {
+		return [];
+	}
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	const postPaths = getUniqueBasePaths(allPosts);
 	const legalPaths = getUniqueBasePaths(allLegalPages);
+	const dbPages = await listPublishedDatabasePages();
 
-	return [
+	const fileEntries = [
 		...staticMarketingPages.flatMap((page) =>
 			locales.map((locale) => ({
 				url: new URL(localePath(locale, page), baseUrl).href,
@@ -39,4 +77,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 			})),
 		),
 	];
+
+	return mergeSitemapUrls({
+		baseUrl,
+		defaultLocale,
+		locales,
+		fileEntries,
+		dbPages,
+	});
 }
