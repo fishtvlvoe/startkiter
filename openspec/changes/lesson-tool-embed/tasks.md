@@ -17,7 +17,7 @@
 ## 4. 新分頁進入頁與存取重新驗證
 
 - [x] 4.1 撰寫 `/lesson-tool/[lessonId]/[encodedOrigin]` 頁面整合測試，涵蓋通行證有效且該使用者目前仍有課程存取權限時渲染 iframe、已無存取權限（例如已退款）時回傳 404、通行證過期或竄改時拒絕載入三種情境（對應 Requirement: New-tab entry page re-validates course access on every load）。驗證：新測試檔執行為紅燈
-- [ ] 4.2 實作 `apps/saas/app/lesson-tool/[lessonId]/[encodedOrigin]/page.tsx`（對應 Decision: 新分頁進入頁重新呼叫既有課程存取判斷，不快取存取結果），每次載入都重新呼叫既有課程存取判斷，呼叫 2.2 的 `verifyLessonToolToken` 驗證通行證，讓 4.1 測試轉綠燈。驗證：`pnpm --filter saas test` 全綠
+- [x] 4.2 實作 `apps/saas/app/lesson-tool/[lessonId]/[encodedOrigin]/page.tsx`（對應 Decision: 新分頁進入頁重新呼叫既有課程存取判斷，不快取存取結果），每次載入都重新呼叫既有課程存取判斷，呼叫 2.2 的 `verifyLessonToolToken` 驗證通行證，讓 4.1 測試轉綠燈。驗證：`pnpm --filter saas test` 全綠
 - [ ] 4.3 在簽發通行證組裝代理路徑的當下，重新呼叫 2.1 的 `isPrivateOrLocalUrl` 檢查一次目前解析到的網址（對應 Decision: SSRF 防護在伺服器端組裝代理路徑時做網址檢查，不在瀏覽器端做；Requirement: Re-check happens at token issuance time, not only at save time）。驗證：對應紅燈測試（涵蓋於 3.1／4.1 測試集中已包含此情境）轉綠燈
 
 ## 5. 講師端後台與學員端顯示

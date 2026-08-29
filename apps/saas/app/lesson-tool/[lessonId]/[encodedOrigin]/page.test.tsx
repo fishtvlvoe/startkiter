@@ -31,6 +31,10 @@ vi.mock("@startkiter/api/modules/course/lib/course-access", () => ({
 	userCanAccessCourseId: vi.fn(),
 }));
 
+vi.mock("@startkiter/api/modules/course/lib/course-instructor-access", () => ({
+	canManageCourse: vi.fn(async () => false),
+}));
+
 import { userCanAccessCourseId } from "@startkiter/api/modules/course/lib/course-access";
 import { auth } from "@startkiter/auth";
 import { db } from "@startkiter/database";
