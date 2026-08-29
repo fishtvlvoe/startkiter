@@ -8,7 +8,7 @@
 - [x] 2.2 [P] 撰寫 slug 檢查單元測試，涵蓋落入掛載點衍生黑名單、同語系重複 slug 兩種拒絕情境（對應 Requirement: Slug must not collide with reserved routes or existing content；Decision: slug 保留字用靜態黑名單比對，自動衍生自現有掛載點路由集合）。驗證：新測試檔執行為紅燈
 - [x] 2.3 [P] 撰寫版本復原單元測試，涵蓋有 `previousSnapshot` 可還原、無 snapshot 回 409 兩種情境（對應 Requirement: Buyer can restore the previous version of a content record；Decision: 版本復原採儲存前自動備份上一版的單層快照，不做完整版本歷史表）。驗證：新測試檔執行為紅燈
 - [x] 2.4 [P] 撰寫 Pages CRUD API 整合測試，涵蓋草稿建立、發布後 `publishedAt` 寫入、非 operator 呼叫遭 401/403 拒絕三種情境（對應 Requirement: Buyer can create and edit page or post content；Requirement: Non-operator cannot access the pages management API 相關情境）。驗證：新測試檔執行為紅燈
-- [ ] 2.5 [P] 撰寫 sitemap 整合測試，涵蓋 `PUBLISHED` 內容出現於輸出、`DRAFT`／`ARCHIVED` 內容不出現兩種情境（對應 Requirement: Published content is included in the site's sitemap；Decision: sitemap 改為執行期動態產生，不再是建置期靜態產出）。驗證：新測試檔執行為紅燈
+- [x] 2.5 [P] 撰寫 sitemap 整合測試，涵蓋 `PUBLISHED` 內容出現於輸出、`DRAFT`／`ARCHIVED` 內容不出現兩種情境（對應 Requirement: Published content is included in the site's sitemap；Decision: sitemap 改為執行期動態產生，不再是建置期靜態產出）。驗證：新測試檔執行為紅燈
 - [ ] 2.6 [P] 撰寫 `.mdx` 遷移腳本測試，涵蓋 `--dry-run` 不寫入資料庫、正式執行時 `title`/`date`/`tags`/`published` 正確映射至 `Page` 欄位兩種情境（對應 Requirement: Existing file-based content can be migrated into the database）。驗證：新測試檔執行為紅燈
 - [ ] 2.7 執行一次 2.1 至 2.6 全部新增測試檔，確認全部為紅燈失敗（尚無對應實作），記錄每個失敗訊息，供第 3 節逐項核對是否已修正為綠燈
 
