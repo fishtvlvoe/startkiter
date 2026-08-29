@@ -17,7 +17,7 @@
 
 ## 4. 講師端設定與生成介面
 
-- [ ] 4.1 [P] 在既有後台設定選單新增「Gemini API Key」設定頁（比照 einvoice／checkout-gateway 設定頁模式），呼叫 2.3 的函式讀寫。驗證：ego-browser 走一次「講師登入→設定頁面輸入 API Key→儲存成功→重新整理後顯示已設定狀態（不顯示明文 Key）」的完整畫面流程並截圖存證
+- [x] 4.1 [P] 在既有後台設定選單新增「Gemini API Key」設定頁（比照 einvoice／checkout-gateway 設定頁模式），呼叫 2.3 的函式讀寫。驗證：ego-browser 走一次「講師登入→設定頁面輸入 API Key→儲存成功→重新整理後顯示已設定狀態（不顯示明文 Key）」的完整畫面流程並截圖存證
 - [ ] 4.2 [P] 建立 `apps/saas/modules/shared/components/AiNotesDialog.tsx`（對應 Decision: 生成內容是草稿，講師手動確認才寫入 Lesson.content，不自動覆蓋）：上傳 .srt 檔案、呼叫 3.2 的生成 API、串流即時顯示生成內容、可編輯內容與標題、「存檔」才寫入 `Lesson.content`、「取消」不影響既有內容（對應 Requirement: Generated content requires explicit instructor confirmation before it overwrites lesson content）。驗證：撰寫元件測試涵蓋「存檔寫入編輯後內容」「取消不變更內容」兩種情境並轉綠燈
 - [ ] 4.3 在課程管理後台單元編輯區塊新增「AI 生成講義」按鈕，開啟 4.2 的對話框；未設定 API Key 時按鈕點擊顯示提示並連結到 4.1 的設定頁，不嘗試呼叫生成 API。驗證：ego-browser 走一次「未設定 Key 時點擊看到提示→設定完成後點擊能正常開啟對話框→上傳字幕檔看到串流生成→編輯後存檔→重新整理頁面確認內容真的存進去」的完整畫面流程並截圖存證
 

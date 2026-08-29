@@ -21,7 +21,7 @@ vi.mock("@startkiter/platform", () => ({
 	srtToText: vi.fn((value: string) => value),
 }));
 
-vi.mock("ai", () => ({
+vi.mock("../../../../../../packages/ai", () => ({
 	streamText: vi.fn(),
 }));
 
