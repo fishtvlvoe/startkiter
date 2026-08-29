@@ -6,6 +6,7 @@ import { createProcedureClient, ORPCError } from "@orpc/server";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { courseRouter } from "@startkiter/api/modules/course/router";
+import { buildLessonToolEmbedPath } from "@startkiter/platform/src/lesson-tool/embed-path";
 import { AcademyClassroomClient } from "./classroom-client";
 import { OnboardingSurveyModal } from "./onboarding-survey-modal";
 
@@ -24,6 +25,8 @@ interface LessonData {
 	aiContext: string;
 	courseTitle: string;
 	watermarkSetting: Omit<WatermarkPlayerSettings, "email" | "courseTitle"> | null;
+	toolTitle?: string;
+	toolEmbedHref?: string;
 }
 
 interface ChapterData {
@@ -66,7 +69,27 @@ function stripSensitiveFields(lesson: LessonData): LessonData {
 		videoUrl: "",
 		content: "",
 		aiContext: "",
+		toolTitle: "",
+		toolEmbedHref: "",
 	};
+}
+
+async function buildToolEmbed(
+	lessonId: string,
+	toolUrl: string | null,
+	userId: string | undefined,
+): Promise<{ toolEmbedHref: string }> {
+	if (!toolUrl || !userId) {
+		return { toolEmbedHref: "" };
+	}
+
+	const issued = await buildLessonToolEmbedPath({ lessonId, userId, toolUrl });
+	if (!issued) {
+		return { toolEmbedHref: "" };
+	}
+
+	// 原始 toolUrl 不送到瀏覽器；iframe 只走受通行證保護的路徑
+	return { toolEmbedHref: issued.path };
 }
 
 export default async function LessonPage({ params }: LessonPageProps) {
@@ -123,6 +146,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
 	for (const ch of chaptersFromDb) {
 		const chapterLessons: LessonData[] = [];
 		for (const l of ch.lessons) {
+			const embed = await buildToolEmbed(l.id, l.toolUrl, session?.user?.id);
 			const baseLesson: LessonData = {
 				id: l.id,
 				title: l.title,
@@ -134,6 +158,8 @@ export default async function LessonPage({ params }: LessonPageProps) {
 				aiContext: l.aiContext || "",
 				courseTitle: ch.course.title,
 				watermarkSetting: normalizeWatermarkSetting(ch.course.watermarkSetting),
+				toolTitle: l.toolTitle || "",
+				toolEmbedHref: embed.toolEmbedHref,
 			};
 
 			try {

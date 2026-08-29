@@ -16,6 +16,7 @@ import { orpc } from "@shared/lib/orpc-query-utils";
 
 import { LessonCommentsPanel } from "./lesson-comments-panel";
 import { LessonMessagesPanel } from "./lesson-messages-panel";
+import { LessonToolEmbed } from "./lesson-tool-embed";
 
 interface LessonData {
 	id: string;
@@ -28,6 +29,8 @@ interface LessonData {
 	aiContext: string;
 	courseTitle: string;
 	watermarkSetting: Omit<WatermarkPlayerSettings, "email" | "courseTitle"> | null;
+	toolTitle?: string;
+	toolEmbedHref?: string;
 }
 
 interface ChapterData {
@@ -286,6 +289,11 @@ export function AcademyClassroomClient({
 								/>
 							</div>
 						</Card>
+
+						<LessonToolEmbed
+							title={currentLesson.toolTitle ?? ""}
+							embedHref={currentLesson.toolEmbedHref}
+						/>
 
 						<div className="border-b border-neutral-800 pb-4">
 							<div className="flex items-center gap-3">

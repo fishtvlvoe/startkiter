@@ -33,6 +33,8 @@ interface LessonItem {
 	provider?: ProviderType;
 	content: string;
 	aiContext: string;
+	toolUrl: string;
+	toolTitle: string;
 	/** API／資料庫位置；有值時採 0-based，第一個單元是 0。 */
 	order?: number;
 }
@@ -73,6 +75,8 @@ interface StudioLessonResponse {
 	videoUrl: string | null;
 	videoDuration: string | null;
 	aiContext: string | null;
+	toolUrl: string | null;
+	toolTitle: string | null;
 }
 
 interface StudioInstructorResponse {
@@ -238,6 +242,8 @@ export default function CourseAdminStudioPage() {
 				provider: lesson.videoProvider || undefined,
 				content: lesson.content || "",
 				aiContext: lesson.aiContext || "",
+				toolUrl: lesson.toolUrl || "",
+				toolTitle: lesson.toolTitle || "",
 				order: lesson.order,
 			})),
 		}));
@@ -472,6 +478,8 @@ export default function CourseAdminStudioPage() {
 				provider: result.data.lesson.videoProvider || undefined,
 				content: result.data.lesson.content || "# 新單元",
 				aiContext: result.data.lesson.aiContext || "",
+				toolUrl: result.data.lesson.toolUrl || "",
+				toolTitle: result.data.lesson.toolTitle || "",
 			};
 			setChapters(
 				chapters.map((c) =>
@@ -560,6 +568,32 @@ export default function CourseAdminStudioPage() {
 		};
 
 		try {
+			const toolResponse = await fetch("/api/lesson-tool/config", {
+				method: "PATCH",
+				credentials: "include",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({
+					lessonId: updated.id,
+					toolUrl: updated.toolUrl,
+					toolTitle: updated.toolTitle,
+				}),
+			});
+			const toolPayload = (await toolResponse.json().catch(() => ({}))) as {
+				error?: string;
+				toolUrl?: string | null;
+				toolTitle?: string | null;
+			};
+			if (!toolResponse.ok) {
+				const toolError =
+					toolPayload.error === "TOOL_URL_PRIVATE"
+						? "這個工具網址指向內網或本機位址，無法儲存"
+						: toolPayload.error === "TOOL_URL_INVALID"
+							? "只允許 http 或 https 開頭的工具網址"
+							: "內嵌工具設定儲存失敗";
+				showMessage("error", `${toolError}。標題／影片／講義尚未儲存`);
+				return;
+			}
+
 			const result = await callStudio("update_lesson", {
 				id: updated.id,
 				title: updated.title,
@@ -570,18 +604,27 @@ export default function CourseAdminStudioPage() {
 				aiContext: updated.aiContext,
 			});
 
-			if (result.ok) {
-				setSelectedLesson(updated);
-				setChapters((prev) =>
-					prev.map((ch) => ({
-						...ch,
-						lessons: ch.lessons.map((l) => (l.id === updated.id ? updated : l)),
-					})),
+			if (!result.ok) {
+				showMessage(
+					"error",
+					`工具網址已儲存，但標題／影片／講義儲存失敗：${getCourseStudioErrorMessage(result.data)}`,
 				);
-				showMessage("success", "單元變更已成功持久化至 PostgreSQL 資料庫");
-				} else {
-					showMessage("error", getCourseStudioErrorMessage(result.data));
-				}
+				return;
+			}
+
+			const saved = {
+				...updated,
+				toolUrl: toolPayload.toolUrl ?? "",
+				toolTitle: toolPayload.toolTitle ?? "",
+			};
+			setSelectedLesson(saved);
+			setChapters((prev) =>
+				prev.map((ch) => ({
+					...ch,
+					lessons: ch.lessons.map((l) => (l.id === saved.id ? saved : l)),
+				})),
+			);
+			showMessage("success", "單元變更已成功持久化至 PostgreSQL 資料庫");
 		} catch (e) {
 			showMessage("error", "儲存發生錯誤: " + String(e));
 		}
@@ -1163,6 +1206,35 @@ export default function CourseAdminStudioPage() {
 										</span>
 									</div>
 								)}
+							</Card>
+
+							<Card className="space-y-4 p-4">
+								<div className="flex items-center justify-between gap-3">
+									<h2 className="text-base font-semibold text-neutral-200">內嵌工具（選填）</h2>
+									<span className="text-xs text-amber-300">這是外部工具，請確認來源可信</span>
+								</div>
+								<div className="grid grid-cols-2 gap-4">
+									<div>
+										<Label htmlFor="lesson-tool-url">工具網址</Label>
+										<Input
+											id="lesson-tool-url"
+											value={selectedLesson.toolUrl}
+											onChange={(e) => setSelectedLesson({ ...selectedLesson, toolUrl: e.target.value })}
+											placeholder="https://tools.example.com/whiteboard"
+											className="mt-1"
+										/>
+									</div>
+									<div>
+										<Label htmlFor="lesson-tool-title">工具標題</Label>
+										<Input
+											id="lesson-tool-title"
+											value={selectedLesson.toolTitle}
+											onChange={(e) => setSelectedLesson({ ...selectedLesson, toolTitle: e.target.value })}
+											placeholder="白板練習"
+											className="mt-1"
+										/>
+									</div>
+								</div>
 							</Card>
 
 							{/* MDX 講義內容與 AI Context */}

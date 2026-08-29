@@ -895,6 +895,8 @@ model Lesson {
   videoDuration String?
   aiPrompt      String?        @db.Text
   aiContext     String?        @db.Text
+  toolUrl       String?
+  toolTitle     String?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
