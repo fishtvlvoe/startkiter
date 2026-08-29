@@ -1,4 +1,5 @@
 import { SessionProvider } from "@auth/components/SessionProvider";
+import { canAccessPagesCmsAdmin } from "@startkiter/api/modules/pages-cms/access";
 import { sessionQueryKey } from "@auth/lib/api";
 import { getOrganizationList, getSession } from "@auth/lib/server";
 import { ActiveOrganizationProvider } from "@organizations/components/ActiveOrganizationProvider";
@@ -16,6 +17,7 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
 import { findBuyerDeploymentsForUser } from "@startkiter/platform";
 import { SupportWidget } from "@deployment/components/SupportWidget";
+import { PagesCmsAccessProvider } from "@shared/components/PagesCmsAccessProvider";
 import type { PropsWithChildren } from "react";
 
 import { ChatwootScript } from "./ChatwootScript";
@@ -68,6 +70,7 @@ export default async function AuthenticatedLayout({ children }: PropsWithChildre
 		});
 	}
 
+	const canAccessPagesCms = canAccessPagesCmsAdmin(session, process.env.ADMIN_EMAIL);
 	const buyerDeployments = await findBuyerDeploymentsForUser(session.user.id);
 	const deployments = buyerDeployments.map((d) => ({
 		id: d.id,
@@ -79,13 +82,15 @@ export default async function AuthenticatedLayout({ children }: PropsWithChildre
 		<HydrationBoundary state={dehydrate(queryClient)}>
 			<SessionProvider>
 				<PermixProvider state={permix.dehydrate()}>
-					<ActiveOrganizationProvider>
-						<ConfirmationAlertProvider>
-							{children}
-							<ChatwootScript deployments={deployments} />
-							<SupportWidget deployments={deployments} />
-						</ConfirmationAlertProvider>
-					</ActiveOrganizationProvider>
+					<PagesCmsAccessProvider canAccessPagesCms={canAccessPagesCms}>
+						<ActiveOrganizationProvider>
+							<ConfirmationAlertProvider>
+								{children}
+								<ChatwootScript deployments={deployments} />
+								<SupportWidget deployments={deployments} />
+							</ConfirmationAlertProvider>
+						</ActiveOrganizationProvider>
+					</PagesCmsAccessProvider>
 				</PermixProvider>
 			</SessionProvider>
 		</HydrationBoundary>

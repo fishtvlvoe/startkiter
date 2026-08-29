@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MOUNT_POINTS } from "@startkiter/platform";
 import { iconMap, NavBar, resolveIcon } from "./NavBar";
+import { PagesCmsAccessProvider } from "./PagesCmsAccessProvider";
 
 let mockPathname = "/";
 let mockIsCollapsed = false;
@@ -179,6 +180,24 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 
 		expect(html).toContain("md:w-14");
 		expect(html).not.toContain("md:w-[80px]");
+	});
+
+	it("hides 頁面管理 for role=admin when pages-cms access is false", () => {
+		mockCanAccessAdmin = true;
+		const html = renderToStaticMarkup(<NavBar />);
+		expect(html).toContain("課程綁定包");
+		expect(html).not.toContain("頁面管理");
+	});
+
+	it("shows 頁面管理 when canAccessPagesCmsAdmin is true even without admin.access", () => {
+		mockCanAccessAdmin = false;
+		const html = renderToStaticMarkup(
+			<PagesCmsAccessProvider canAccessPagesCms={true}>
+				<NavBar />
+			</PagesCmsAccessProvider>,
+		);
+		expect(html).toContain("頁面管理");
+		expect(html).not.toContain("課程綁定包");
 	});
 
 	it("45.2b 單一分組可獨立收折，跟整體側邊欄收折狀態互不影響", () => {

@@ -37,13 +37,18 @@ function isMenuActive(pathname: string, href: string): boolean {
 export function getMountMenuItems({
 	pathname,
 	isOperator,
+	canAccessPagesCms = false,
 }: {
 	pathname: string;
 	isOperator: boolean;
+	canAccessPagesCms?: boolean;
 }): MountMenuItem[] {
 	return MOUNT_POINTS.filter((plugin): plugin is PluginManifest & { mount: { menu: NonNullable<PluginManifest["mount"]["menu"]> } } => {
 		if (!plugin.mount.menu) {
 			return false;
+		}
+		if (plugin.id === "pages-cms") {
+			return canAccessPagesCms;
 		}
 		if (plugin.mount.menu.requiresOperator && !isOperator) {
 			return false;

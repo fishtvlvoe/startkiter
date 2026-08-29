@@ -35,6 +35,7 @@ import {
 } from "@startkiter/ui/components/tooltip";
 import { LocaleSwitch } from "@shared/components/LocaleSwitch";
 import { NotificationCenter } from "@shared/components/NotificationCenter";
+import { useCanAccessPagesCmsAdmin } from "@shared/components/PagesCmsAccessProvider";
 import { usePermissions } from "@shared/components/PermixProvider";
 import { UserMenu } from "@shared/components/UserMenu";
 import {
@@ -596,6 +597,7 @@ export function NavBar() {
 	const isMobile = useIsMobile();
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 	const canAccessAdmin = check("admin.access");
+	const canAccessPagesCms = useCanAccessPagesCmsAdmin();
 	const canManageOrganization = check("organization.manage");
 	const canManageOrganizationBilling = check("organization.manageBilling");
 	/** Avoid double-toggle when a pointer gesture fires both `pointerup` and `click`. */
@@ -638,8 +640,13 @@ export function NavBar() {
 	const basePath = activeOrganization ? `/${activeOrganization.slug}` : "";
 
 	const mountMenuItems = useMemo(
-		() => getMountMenuItems({ pathname, isOperator: canAccessAdmin }),
-		[canAccessAdmin, pathname],
+		() =>
+			getMountMenuItems({
+				pathname,
+				isOperator: canAccessAdmin,
+				canAccessPagesCms,
+			}),
+		[canAccessAdmin, canAccessPagesCms, pathname],
 	);
 
 	const { fixed: tabBarFixed, overflow: tabBarOverflow } = useMemo(

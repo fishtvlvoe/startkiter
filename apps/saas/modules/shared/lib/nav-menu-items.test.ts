@@ -6,7 +6,11 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 	describe("Task 5.1 / 5.2 / 5.3: sidebar items from MOUNT_POINTS", () => {
 		it("renders all MOUNT_POINTS menu items sorted by order", () => {
 			const learnerItems = getMountMenuItems({ pathname: "/course", isOperator: false });
-			const operatorItems = getMountMenuItems({ pathname: "/course", isOperator: true });
+			const operatorItems = getMountMenuItems({
+				pathname: "/course",
+				isOperator: true,
+				canAccessPagesCms: true,
+			});
 
 			// Learner should see every non-operator-only menu item, sorted by order.
 			expect(learnerItems.map((item) => item.label)).toEqual(["開始", "課程", "客服", "帳號設定"]);
@@ -33,9 +37,33 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 			}
 		});
 
+		it("hides 頁面管理 from role=admin when canAccessPagesCms is false", () => {
+			const items = getMountMenuItems({
+				pathname: "/",
+				isOperator: true,
+				canAccessPagesCms: false,
+			});
+			expect(items.some((item) => item.id === "pages-cms")).toBe(false);
+			expect(items.some((item) => item.href === "/admin/bundles")).toBe(true);
+		});
+
+		it("shows 頁面管理 for ADMIN_EMAIL even when isOperator is false", () => {
+			const items = getMountMenuItems({
+				pathname: "/",
+				isOperator: false,
+				canAccessPagesCms: true,
+			});
+			expect(items.some((item) => item.id === "pages-cms")).toBe(true);
+			expect(items.some((item) => item.href === "/admin/bundles")).toBe(false);
+		});
+
 		it("5.3 hides operator-only menu items from learners", () => {
 			const learnerItems = getMountMenuItems({ pathname: "/", isOperator: false });
-			const operatorItems = getMountMenuItems({ pathname: "/", isOperator: true });
+			const operatorItems = getMountMenuItems({
+				pathname: "/",
+				isOperator: true,
+				canAccessPagesCms: true,
+			});
 
 			expect(learnerItems.some((item) => item.href === "/admin/bundles")).toBe(false);
 			expect(operatorItems.some((item) => item.href === "/admin/bundles")).toBe(true);
@@ -90,7 +118,9 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 		});
 
 		it("9.2 More drawer contains admin settings for operators only", () => {
-			const operatorOverflow = getTabBarItems(getMountMenuItems({ pathname: "/", isOperator: true })).overflow;
+			const operatorOverflow = getTabBarItems(
+				getMountMenuItems({ pathname: "/", isOperator: true, canAccessPagesCms: true }),
+			).overflow;
 			const learnerOverflow = getTabBarItems(getMountMenuItems({ pathname: "/", isOperator: false })).overflow;
 
 			expect(operatorOverflow[0]?.subItems?.some((item) => item.href === "/admin/bundles")).toBe(true);
