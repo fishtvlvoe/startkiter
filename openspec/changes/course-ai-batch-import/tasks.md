@@ -11,7 +11,7 @@
 
 ## 3. 個別重試與批次寫入 API
 
-- [ ] 3.1 撰寫批次寫入 API 紅燈測試（對應 Decision: 部分失敗採逐筆狀態追蹤，批次寫入資料庫的動作延後到全部單元處理完成、講師確認之後），涵蓋確認匯入後正確建立對應筆數的 Chapter/Lesson 紀錄、取消（未呼叫確認）不建立任何紀錄、其中一筆寫入失敗時已成功的紀錄保留且明確列出失敗項目三種情境（對應 Requirement: Database write only happens after explicit instructor confirmation of the full batch）。驗證：新測試檔執行為紅燈
+- [x] 3.1 撰寫批次寫入 API 紅燈測試（對應 Decision: 部分失敗採逐筆狀態追蹤，批次寫入資料庫的動作延後到全部單元處理完成、講師確認之後），涵蓋確認匯入後正確建立對應筆數的 Chapter/Lesson 紀錄、取消（未呼叫確認）不建立任何紀錄、其中一筆寫入失敗時已成功的紀錄保留且明確列出失敗項目三種情境（對應 Requirement: Database write only happens after explicit instructor confirmation of the full batch）。驗證：`pnpm --filter saas exec vitest run app/api/course/batch-import/create-curriculum/route.test.ts` 紅燈，route 不存在、`0 test`
 - [ ] 3.2 實作 `apps/saas/app/api/course/batch-import/create-curriculum/route.ts`，讓 3.1 測試轉綠燈。驗證：`pnpm --filter saas test` 全綠
 - [ ] 3.3 在前端狀態機中實作單一單元失敗後的個別重試邏輯（對應 Requirement: Failed lessons can be retried individually without reprocessing the batch），重試只重跑該單元，不影響其他已完成單元的狀態。驗證：撰寫前端邏輯測試涵蓋「重試一個失敗單元時其他已完成單元狀態不變」並轉綠燈
 
