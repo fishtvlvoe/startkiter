@@ -1,6 +1,20 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("node:dns/promises", () => ({
+	resolve4: vi.fn(async (hostname: string) => {
+		if (hostname === "tools.example.com") return ["93.184.216.34"];
+		const error = new Error("ENOTFOUND") as NodeJS.ErrnoException;
+		error.code = "ENOTFOUND";
+		throw error;
+	}),
+	resolve6: vi.fn(async () => {
+		const error = new Error("ENODATA") as NodeJS.ErrnoException;
+		error.code = "ENODATA";
+		throw error;
+	}),
+}));
+
 vi.mock("@startkiter/auth", () => ({
 	auth: {
 		api: {
@@ -131,13 +145,13 @@ describe("GET /lesson-tool/[lessonId]/[encodedOrigin] (Requirement: New-tab entr
 		expect(html).toContain("工具目前無法使用，請重新整理頁面");
 	});
 
-	it("refuses to issue a token when assembling a proxy path for a private URL", () => {
-		expect(
+	it("refuses to issue a token when assembling a proxy path for a private URL", async () => {
+		await expect(
 			buildLessonToolEmbedPath({
 				lessonId: "lesson-1",
 				userId: "user-1",
 				toolUrl: "http://10.1.2.3/internal",
 			}),
-		).toBeNull();
+		).resolves.toBeNull();
 	});
 });

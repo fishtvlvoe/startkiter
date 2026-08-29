@@ -29,7 +29,6 @@ interface LessonData {
 	aiContext: string;
 	courseTitle: string;
 	watermarkSetting: Omit<WatermarkPlayerSettings, "email" | "courseTitle"> | null;
-	toolUrl?: string;
 	toolTitle?: string;
 	toolEmbedHref?: string;
 }
@@ -293,8 +292,7 @@ export function AcademyClassroomClient({
 
 						<LessonToolEmbed
 							title={currentLesson.toolTitle ?? ""}
-							toolUrl={currentLesson.toolUrl}
-							newTabHref={currentLesson.toolEmbedHref}
+							embedHref={currentLesson.toolEmbedHref}
 						/>
 
 						<div className="border-b border-neutral-800 pb-4">

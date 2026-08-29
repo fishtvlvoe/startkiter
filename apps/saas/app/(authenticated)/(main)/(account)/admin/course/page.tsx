@@ -565,21 +565,6 @@ export default function CourseAdminStudioPage() {
 		};
 
 		try {
-			const result = await callStudio("update_lesson", {
-				id: updated.id,
-				title: updated.title,
-				videoUrl: updated.videoUrl,
-				videoDuration: updated.duration,
-				isFreePreview: updated.isFreePreview,
-				content: updated.content,
-				aiContext: updated.aiContext,
-			});
-
-			if (!result.ok) {
-				showMessage("error", getCourseStudioErrorMessage(result.data));
-				return;
-			}
-
 			const toolResponse = await fetch("/api/lesson-tool/config", {
 				method: "PATCH",
 				credentials: "include",
@@ -596,11 +581,30 @@ export default function CourseAdminStudioPage() {
 				toolTitle?: string | null;
 			};
 			if (!toolResponse.ok) {
-				showMessage(
-					"error",
+				const toolError =
 					toolPayload.error === "TOOL_URL_PRIVATE"
 						? "這個工具網址指向內網或本機位址，無法儲存"
-						: "內嵌工具設定儲存失敗",
+						: toolPayload.error === "TOOL_URL_INVALID"
+							? "只允許 http 或 https 開頭的工具網址"
+							: "內嵌工具設定儲存失敗";
+				showMessage("error", `${toolError}。標題／影片／講義尚未儲存`);
+				return;
+			}
+
+			const result = await callStudio("update_lesson", {
+				id: updated.id,
+				title: updated.title,
+				videoUrl: updated.videoUrl,
+				videoDuration: updated.duration,
+				isFreePreview: updated.isFreePreview,
+				content: updated.content,
+				aiContext: updated.aiContext,
+			});
+
+			if (!result.ok) {
+				showMessage(
+					"error",
+					`工具網址已儲存，但標題／影片／講義儲存失敗：${getCourseStudioErrorMessage(result.data)}`,
 				);
 				return;
 			}

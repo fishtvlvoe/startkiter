@@ -11,7 +11,7 @@ import {
 	encodeLessonToolOrigin,
 } from "@startkiter/platform/src/lesson-tool/embed-path";
 import { verifyLessonToolToken } from "@startkiter/platform/src/lesson-tool/token";
-import { isPrivateOrLocalUrl } from "@startkiter/platform/src/lesson-tool/url-safety";
+import { checkLessonToolUrl } from "@startkiter/platform/src/lesson-tool/url-safety";
 
 export const dynamic = "force-dynamic";
 
@@ -64,7 +64,8 @@ export default async function LessonToolPage({ params, searchParams }: LessonToo
 		return unavailable();
 	}
 
-	if (isPrivateOrLocalUrl(lesson.toolUrl)) {
+	const urlCheck = await checkLessonToolUrl(lesson.toolUrl);
+	if (!urlCheck.ok) {
 		return unavailable();
 	}
 

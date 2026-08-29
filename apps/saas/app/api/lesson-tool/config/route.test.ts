@@ -1,5 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("node:dns/promises", () => ({
+	resolve4: vi.fn(async (hostname: string) => {
+		if (hostname === "tools.example.com") return ["93.184.216.34"];
+		const error = new Error("ENOTFOUND") as NodeJS.ErrnoException;
+		error.code = "ENOTFOUND";
+		throw error;
+	}),
+	resolve6: vi.fn(async () => {
+		const error = new Error("ENODATA") as NodeJS.ErrnoException;
+		error.code = "ENODATA";
+		throw error;
+	}),
+}));
+
 vi.mock("@startkiter/auth", () => ({
 	auth: {
 		api: {
@@ -110,6 +124,20 @@ describe("PATCH /api/lesson-tool/config (Requirement: Instructor can configure a
 
 		expect(response.status).toBe(400);
 		await expect(response.json()).resolves.toMatchObject({ error: "TOOL_URL_PRIVATE" });
+		expect(db.lesson.update).not.toHaveBeenCalled();
+	});
+
+	it("returns 400 TOOL_URL_INVALID for a non-http(s) scheme and does not persist it", async () => {
+		const response = await PATCH(
+			configRequest({
+				lessonId: "lesson-1",
+				toolUrl: "javascript:alert(1)",
+				toolTitle: "惡意",
+			}),
+		);
+
+		expect(response.status).toBe(400);
+		await expect(response.json()).resolves.toMatchObject({ error: "TOOL_URL_INVALID" });
 		expect(db.lesson.update).not.toHaveBeenCalled();
 	});
 });

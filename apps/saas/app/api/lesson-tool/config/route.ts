@@ -5,7 +5,7 @@ import { auth } from "@startkiter/auth";
 import { canManageCourse } from "@startkiter/api/modules/course/lib/course-instructor-access";
 import { isCourseOperator } from "@startkiter/api/modules/course/lib/course-operator";
 import { db } from "@startkiter/database";
-import { isPrivateOrLocalUrl } from "@startkiter/platform/src/lesson-tool/url-safety";
+import { checkLessonToolUrl } from "@startkiter/platform/src/lesson-tool/url-safety";
 
 const bodySchema = z.object({
 	lessonId: z.string().trim().min(1),
@@ -56,8 +56,11 @@ export async function PATCH(request: Request) {
 	const normalizedUrl = toolUrl.trim() || null;
 	const normalizedTitle = toolTitle.trim() || null;
 
-	if (normalizedUrl && isPrivateOrLocalUrl(normalizedUrl)) {
-		return NextResponse.json({ error: "TOOL_URL_PRIVATE" }, { status: 400 });
+	if (normalizedUrl) {
+		const check = await checkLessonToolUrl(normalizedUrl);
+		if (!check.ok) {
+			return NextResponse.json({ error: check.code }, { status: 400 });
+		}
 	}
 
 	const updated = await db.lesson.update({

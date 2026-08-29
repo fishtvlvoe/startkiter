@@ -1,4 +1,4 @@
-import { isPrivateOrLocalUrl } from "./url-safety";
+import { checkLessonToolUrl, type AddressLookup } from "./url-safety";
 import { signLessonToolToken } from "./token";
 
 export function encodeLessonToolOrigin(origin: string): string {
@@ -14,13 +14,15 @@ export function decodeLessonToolOrigin(encodedOrigin: string): string | null {
 	}
 }
 
-export function buildLessonToolEmbedPath(input: {
+export async function buildLessonToolEmbedPath(input: {
 	lessonId: string;
 	userId: string;
 	toolUrl: string;
-}): { path: string; token: string } | null {
-	// 組裝代理路徑當下再檢查一次，避免儲存後 DNS／網址變成內網才被利用
-	if (isPrivateOrLocalUrl(input.toolUrl)) {
+	lookup?: AddressLookup;
+}): Promise<{ path: string; token: string } | null> {
+	// 組裝代理路徑當下重新解析檢查，避免儲存後 DNS 改指向內網
+	const check = await checkLessonToolUrl(input.toolUrl, input.lookup);
+	if (!check.ok) {
 		return null;
 	}
 

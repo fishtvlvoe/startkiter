@@ -25,7 +25,6 @@ interface LessonData {
 	aiContext: string;
 	courseTitle: string;
 	watermarkSetting: Omit<WatermarkPlayerSettings, "email" | "courseTitle"> | null;
-	toolUrl?: string;
 	toolTitle?: string;
 	toolEmbedHref?: string;
 }
@@ -70,26 +69,27 @@ function stripSensitiveFields(lesson: LessonData): LessonData {
 		videoUrl: "",
 		content: "",
 		aiContext: "",
-		toolUrl: "",
 		toolTitle: "",
 		toolEmbedHref: "",
 	};
 }
 
-function buildToolEmbed(lessonId: string, toolUrl: string | null, userId: string | undefined): {
-	toolUrl: string;
-	toolEmbedHref: string;
-} {
+async function buildToolEmbed(
+	lessonId: string,
+	toolUrl: string | null,
+	userId: string | undefined,
+): Promise<{ toolEmbedHref: string }> {
 	if (!toolUrl || !userId) {
-		return { toolUrl: "", toolEmbedHref: "" };
+		return { toolEmbedHref: "" };
 	}
 
-	const issued = buildLessonToolEmbedPath({ lessonId, userId, toolUrl });
+	const issued = await buildLessonToolEmbedPath({ lessonId, userId, toolUrl });
 	if (!issued) {
-		return { toolUrl: "", toolEmbedHref: "" };
+		return { toolEmbedHref: "" };
 	}
 
-	return { toolUrl, toolEmbedHref: issued.path };
+	// 原始 toolUrl 不送到瀏覽器；iframe 只走受通行證保護的路徑
+	return { toolEmbedHref: issued.path };
 }
 
 export default async function LessonPage({ params }: LessonPageProps) {
@@ -146,7 +146,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
 	for (const ch of chaptersFromDb) {
 		const chapterLessons: LessonData[] = [];
 		for (const l of ch.lessons) {
-			const embed = buildToolEmbed(l.id, l.toolUrl, session?.user?.id);
+			const embed = await buildToolEmbed(l.id, l.toolUrl, session?.user?.id);
 			const baseLesson: LessonData = {
 				id: l.id,
 				title: l.title,
@@ -158,7 +158,6 @@ export default async function LessonPage({ params }: LessonPageProps) {
 				aiContext: l.aiContext || "",
 				courseTitle: ch.course.title,
 				watermarkSetting: normalizeWatermarkSetting(ch.course.watermarkSetting),
-				toolUrl: embed.toolUrl,
 				toolTitle: l.toolTitle || "",
 				toolEmbedHref: embed.toolEmbedHref,
 			};
