@@ -25,6 +25,10 @@ vi.mock("ai", () => ({
 	streamText: vi.fn(),
 }));
 
+vi.mock("@ai-sdk/openai", () => ({
+	createOpenAI: vi.fn(() => vi.fn()),
+}));
+
 import { auth } from "@startkiter/auth";
 import { canManageCourse } from "@startkiter/api/modules/course/lib/course-instructor-access";
 import { readGeminiApiKey } from "@startkiter/api/modules/course/lib/gemini-settings";
