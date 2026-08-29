@@ -28,7 +28,7 @@ export function BatchImportDialog({ courseId, onClose, onImported }: { courseId:
 	async function processLesson(lessonId: string) {
 		const chapter = chapters.find((item) => item.lessons.some((lesson) => lesson.id === lessonId));
 		const lesson = chapter?.lessons.find((item) => item.id === lessonId);
-		if (!lesson) return { status: "error" as const, error: "LESSON_NOT_FOUND" };
+		if (!lesson || !chapter) return { status: "error" as const, error: "LESSON_NOT_FOUND" };
 		setChapters((current) => current.map((chapter) => ({ ...chapter, lessons: chapter.lessons.map((item) => item.id === lessonId ? { ...item, status: "uploading" } : item) })));
 		try {
 			if (!lesson.video) throw new Error("MISSING_VIDEO");
