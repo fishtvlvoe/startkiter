@@ -22,6 +22,6 @@
 
 ## 5. 整合驗證與交付
 
-- [x] 5.1 執行全域測試（`platform`／`api`／`saas` 三個 package 的 `pnpm test`）與 `pnpm type-check`，全部通過。驗證：platform 19 files/92 tests passed；api 52 files/230 tests passed；saas 44 files/217 tests passed；`pnpm type-check` 27 successful/27 total（api/saas 使用 `pnpm exec dotenv -c --` 載入既有 `.env`）
+- [x] 5.1 執行全域測試（`platform`／`api`／`saas` 三個 package 的 `pnpm test`）與 `pnpm type-check`，全部通過。驗證：platform 19 files/93 tests passed；api 52 files/230 tests passed；saas 44 files/218 tests passed；`pnpm type-check` 27 successful/27 total（api/saas 使用 `pnpm exec dotenv -c --` 載入既有 `.env`）
 - [ ] 5.2 由不同於本次實作的 CLI 或 agent 執行一次獨立 code review，檢查 Critical／High 發現數為 0；若有發現，送回修復後回到 5.1 重新驗證。驗證：code review 報告存為 `openspec/changes/course-ai-batch-import/code-review.md`
 - [x] 5.3 用真實測試帳號走一次端對端：準備一個小型測試資料夾（2 章節、每章 2 單元，附小測試影片與字幕），完整走過拖入→預覽→處理→個別重試一個故意失敗的單元→確認匯入，資料庫查詢確認課程結構正確建立。驗證：使用新註冊並 emailVerified=true 的測試帳號，ego-browser 實測拖入 8 個檔案、預覽 2 章節各 2 單元、處理時 4 次 `POST /api/course/batch-import/upload-video` 均回 503，重試其中一個單元再回 503；因本機沒有真實 Bunny 帳號，流程在 Bunny API 前停止，未執行資料庫匯入，Bunny 邏輯由 mock 測試驗證。截圖：`/tmp/course-ai-batch-import-flow.png`。全域測試與 type-check 輸出附最終驗收報告
