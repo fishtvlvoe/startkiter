@@ -18,7 +18,7 @@
 ## 4. 講師端精靈介面
 
 - [x] 4.1 [P] 建立 `apps/saas/modules/shared/components/BatchImportDialog.tsx`：拖拉資料夾（`webkitdirectory`）、呼叫 1.2 的解析函式顯示章節/單元結構預覽（含缺件警示、可調整標題）、「開始處理」觸發 2.2/2.3 的上傳與生成、即時顯示每個單元狀態（等待中／上傳中／生成中／已完成／失敗）、失敗單元可點擊重試（呼叫 3.3 邏輯）、「確認匯入」呼叫 3.2 寫入資料庫。驗證：ego-browser 實測 8 個測試檔案解析為 2 章節各 2 單元，開始處理後 4 個單元顯示 `失敗：BUNNY_CONFIG_MISSING`；點擊其中一個「重試」後再次收到 503。因本機沒有真實 Bunny 帳號，流程停在 Bunny API 前，Bunny 邏輯另由 mock 測試驗證；截圖：`/tmp/course-ai-batch-import-flow.png`
-- [ ] 4.2 在課程管理後台新增「批次匯入」入口按鈕，開啟 4.1 的對話框；畫面明確標示「僅支援 Chrome/Edge 瀏覽器」提示（對應 Non-Goals: 不支援 Safari 等不支援 webkitdirectory 的瀏覽器）。驗證：ego-browser 截圖確認提示文字存在
+- [x] 4.2 在課程管理後台新增「批次匯入」入口按鈕，開啟 4.1 的對話框；畫面明確標示「僅支援 Chrome/Edge 瀏覽器」提示（對應 Non-Goals: 不支援 Safari 等不支援 webkitdirectory 的瀏覽器）。驗證：ego-browser 截圖確認後台顯示「批次匯入」按鈕與「僅支援 Chrome/Edge 瀏覽器」提示；截圖：`/tmp/course-ai-batch-import-flow.png`
 
 ## 5. 整合驗證與交付
 
