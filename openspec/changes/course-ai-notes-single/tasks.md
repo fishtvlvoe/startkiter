@@ -6,7 +6,7 @@
 
 ## 2. 核心邏輯實作
 
-- [ ] 2.1 [P] 實作 `packages/platform/src/course-ai-notes/srt-parser.ts` 的 `srtToText`，讓 1.1 測試轉綠燈。驗證：`pnpm --filter platform test` 全綠
+- [x] 2.1 [P] 實作 `packages/platform/src/course-ai-notes/srt-parser.ts` 的 `srtToText`，讓 1.1 測試轉綠燈。驗證：`pnpm --filter platform test` 全綠
 - [ ] 2.2 [P] 實作 `packages/platform/src/course-ai-notes/rate-limiter.ts` 的 `checkRateLimit`，讓 1.2 測試轉綠燈。驗證：`pnpm --filter platform test` 全綠
 - [ ] 2.3 [P] 實作 `packages/api/modules/course/lib/gemini-settings.ts`，比照 `apps/saas/lib/site-settings.ts` 複用 `encryptSettingsJson`／`decryptSettingsJson`，讓 1.3 測試轉綠燈。驗證：`pnpm --filter api test` 全綠
 
