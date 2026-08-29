@@ -12,7 +12,7 @@
 ## 3. 講師設定 API 與紅燈測試
 
 - [x] 3.1 撰寫 `PATCH /api/lesson-tool/config` 整合測試，涵蓋有管理權限的講師儲存成功、無管理權限的使用者收到 403 且 `Lesson.toolUrl` 未被寫入、網址命中內網黑名單回傳 400 `TOOL_URL_PRIVATE` 三種情境（對應 Requirement: Instructor can configure an embedded tool for a lesson；Requirement: Non-manager cannot configure a tool 相關情境）。驗證：新測試檔執行為紅燈
-- [ ] 3.2 實作 `apps/saas/app/api/lesson-tool/config/route.ts`，呼叫既有 `canManageCourse` 做權限檢查、呼叫 2.1 的 `isPrivateOrLocalUrl` 做網址檢查，讓 3.1 測試轉綠燈。驗證：`pnpm --filter saas test` 全綠
+- [x] 3.2 實作 `apps/saas/app/api/lesson-tool/config/route.ts`，呼叫既有 `canManageCourse` 做權限檢查、呼叫 2.1 的 `isPrivateOrLocalUrl` 做網址檢查，讓 3.1 測試轉綠燈。驗證：`pnpm --filter saas test` 全綠
 
 ## 4. 新分頁進入頁與存取重新驗證
 

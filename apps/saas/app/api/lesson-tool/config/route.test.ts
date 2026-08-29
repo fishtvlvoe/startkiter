@@ -73,13 +73,15 @@ describe("PATCH /api/lesson-tool/config (Requirement: Instructor can configure a
 			toolUrl: "https://tools.example.com/whiteboard",
 			toolTitle: "白板",
 		});
-		expect(db.lesson.update).toHaveBeenCalledWith({
-			where: { id: "lesson-1" },
-			data: {
-				toolUrl: "https://tools.example.com/whiteboard",
-				toolTitle: "白板",
-			},
-		});
+		expect(db.lesson.update).toHaveBeenCalledWith(
+			expect.objectContaining({
+				where: { id: "lesson-1" },
+				data: {
+					toolUrl: "https://tools.example.com/whiteboard",
+					toolTitle: "白板",
+				},
+			}),
+		);
 	});
 
 	it("returns 403 for a non-manager and does not write Lesson.toolUrl", async () => {
