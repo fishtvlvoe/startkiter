@@ -80,7 +80,7 @@ export async function POST(request: Request) {
 		name: "gemini",
 	});
 	const result = streamText({
-		model: gemini("gemini-2.5-flash"),
+		model: gemini.chat("gemini-2.5-flash"),
 		system: [
 			"你是課程講義編輯助手。請只根據字幕內容整理教學講義，不要捏造字幕沒有的事實。",
 			"使用多個 Markdown H1 分段，每段結尾加入對應影片時間軸連結，格式為 [MM:SS](#t=秒數)。",
