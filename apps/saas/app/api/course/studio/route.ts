@@ -398,8 +398,10 @@ export async function POST(request: Request) {
 
 		return NextResponse.json({ error: COURSE_STUDIO_ERROR_CODES.UNKNOWN_ACTION }, { status: 400 });
 	} catch (error) {
+		const correlationId = crypto.randomUUID();
+		console.error(`[course-studio] correlationId=${correlationId}`, error);
 		return NextResponse.json(
-			{ error: COURSE_STUDIO_ERROR_CODES.INTERNAL_ERROR, details: String(error) },
+			{ error: COURSE_STUDIO_ERROR_CODES.INTERNAL_ERROR, correlationId },
 			{ status: 500 },
 		);
 	}
