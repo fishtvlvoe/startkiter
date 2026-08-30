@@ -12,7 +12,8 @@ vi.mock("../../../../lib/rate-limit", () => ({
 			.split(",")
 			.map((part) => part.trim())
 			.filter(Boolean);
-		return parts[parts.length - 1] ?? "unknown";
+		const trustedProxyCount = 1;
+		return parts[Math.max(0, parts.length - trustedProxyCount)] ?? "unknown";
 	}),
 }));
 

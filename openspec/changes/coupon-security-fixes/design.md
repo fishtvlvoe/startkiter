@@ -17,7 +17,7 @@
 ## Decisions
 
 1. **Coupon兌換次數修復**：在checkout建立訂單的同一DB transaction內，用悲觀鎖（`SELECT ... FOR UPDATE`或Prisma等效機制）讀取coupon目前`timesRedeemed`，檢查未超過`maxRedemptions`才允許繼續，訂單寫入時同時遞增並保存coupon關聯，確保原子性。
-2. **Rate-limit修復**：不直接信任完整的`x-forwarded-for`字串（可能是逗號分隔多層代理，客戶端可在最前面插入任意偽造值）。改為只信任反向代理（Traefik/nginx等）設定過的可信header或直接使用`request.ip`（若部署環境有正確設定`trust proxy`層級）。若無法明確判斷可信代理層數，暫時方案：取`x-forwarded-for`最右側（最接近伺服器、由代理自己附加，客戶端無法覆寫的那一段），需先確認部署環境（Zeabur/Traefik）的實際header注入行為，不可憑空假設。
+2. **Rate-limit修復**：不直接信任完整的`x-forwarded-for`字串（可能是逗號分隔多層代理，客戶端可在最前面插入任意偽造值）。以環境變數`TRUSTED_PROXY_COUNT`（預設`1`，對應 Coolify+Traefik 單層）從右往左數固定跳數取可信段；左側偽造前綴忽略。代理架構變更只改設定、不改代碼。前提：流量必須經過那 N 層會 append 的代理；app 被直連時 header 整條仍可偽造（網路層責任，非本函式可獨力保證）。
 3. **錯誤訊息修復**：course studio的catch block不再把`String(error)`塞進JSON response，改成固定訊息，完整內容用現有logger（若無則加最小log呼叫）記錄，附加可追蹤的correlation id方便事後查log。
 
 ## Implementation Contract

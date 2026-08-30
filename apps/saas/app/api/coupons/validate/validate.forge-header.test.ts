@@ -5,9 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
  * 匿名客戶端每次換不同 x-forwarded-for（左側偽造 + 右側真實 IP）不得繞過 20/min。
  * 現行 route 把完整 header 當 rate-limit key，偽造左側即可開新桶。
  *
- * 部署假設（Phase 2 依 task 1.1 定案）：Coolify + Traefik 會把連線 IP append 到
- * X-Forwarded-For 右側；Cloudflare 目前灰雲 DNS only，不依賴 cf-connecting-ip。
- * 可信段應為最右側。
+ * 部署假設（Phase 2 依 task 1.1 定案；Codex 補強後）：`TRUSTED_PROXY_COUNT` 預設 1
+ * （Coolify + Traefik 單層）。從右往左數 N 段；Cloudflare 目前灰雲，不依賴 cf-connecting-ip。
  */
 
 vi.mock("@startkiter/coupons", () => ({

@@ -2,6 +2,8 @@
 
 - [x] 1.1 讀 `docs/deploy-and-public-url.md` 與現有部署設定，確認Zeabur/反向代理實際如何注入`x-forwarded-for`（是否只附加一段、client能否在前面插入偽造值），若文件不足以判斷則寫紅燈測試模擬多層代理情境驗證假設。驗證：能明確寫出「本專案部署環境下，x-forwarded-for的哪一段可信」的結論，並附證據來源。
 
+結論（PM 2026-08-31 確認；Codex 審查後 2026-08-31 補強）：不以「無條件最後一段」當契約，改為固定代理跳數 `TRUSTED_PROXY_COUNT`（預設 `1`＝現行 Coolify + Traefik 單層）。從右往左數 N 段取可信 IP；左側客戶端可偽造。證據／拓樸：`docs/vps-deployment-sop.md`、`docs/discuss/2026-08-22-platform-positioning-infra-alignment.md`；Cloudflare 目前灰雲 DNS only，不依賴 `cf-connecting-ip`。代理層數變了必須改 env；app 不可外網直連繞過 Traefik。
+
 ## 2. Coupon兌換次數原子性修復
 
 - [x] 2.1 紅燈測試：`packages/coupons/src/validate.ts`或對應checkout測試新增並行競態測試，模擬同一coupon code在`maxRedemptions=1`情況下同時發送2個以上checkout請求，驗證修復前會超過上限（測試應先失敗）。驗證：測試檔案存在，跑起來會fail（紅燈）。

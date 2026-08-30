@@ -1,11 +1,46 @@
 const hits = new Map<string, { count: number; windowStart: number }>();
 
+/** Coolify + Traefik 單層反向代理；代理架構變了要同步改 env。 */
+const DEFAULT_TRUSTED_PROXY_COUNT = 1;
+
 /**
- * Coolify / Traefik 會把真實連線 IP append 到 X-Forwarded-For 最右側。
- * 最左側（含整串）可被客戶端偽造；rate-limit 只信任最右側。
+ * 解析 TRUSTED_PROXY_COUNT。缺值／非負整數以外的字串都回退預設 1（fail closed 到已知拓樸）。
+ * 設 0 = 完全不信任 X-Forwarded-For。
  */
-export function resolveTrustedClientIp(forwardedFor: string | null | undefined): string {
+export function getTrustedProxyCount(
+	envValue: string | undefined = process.env.TRUSTED_PROXY_COUNT,
+): number {
+	if (envValue === undefined || envValue.trim() === "") {
+		return DEFAULT_TRUSTED_PROXY_COUNT;
+	}
+
+	const parsed = Number.parseInt(envValue, 10);
+
+	if (!Number.isFinite(parsed) || parsed < 0 || String(parsed) !== envValue.trim()) {
+		return DEFAULT_TRUSTED_PROXY_COUNT;
+	}
+
+	return parsed;
+}
+
+/**
+ * 依固定代理跳數解析 X-Forwarded-For 的可信 client IP。
+ *
+ * 每層可信代理會把「它看到的連線 IP」append 到鏈尾。從右往左數
+ * `TRUSTED_PROXY_COUNT` 段，取那一段；左側客戶端可偽造的前綴一律忽略。
+ *
+ * 拓樸假設（預設 1）：流量一定經過 Coolify Traefik 再進 app。若 app 可被直接連到、
+ * 或中間多加 CDN／代理卻沒改這個數字，判斷會錯。這不是 header 解析能獨自保證的。
+ */
+export function resolveTrustedClientIp(
+	forwardedFor: string | null | undefined,
+	trustedProxyCount: number = getTrustedProxyCount(),
+): string {
 	if (!forwardedFor || forwardedFor.trim() === "") {
+		return "unknown";
+	}
+
+	if (trustedProxyCount <= 0) {
 		return "unknown";
 	}
 
@@ -14,7 +49,12 @@ export function resolveTrustedClientIp(forwardedFor: string | null | undefined):
 		.map((part) => part.trim())
 		.filter((part) => part.length > 0);
 
-	return parts[parts.length - 1] ?? "unknown";
+	if (parts.length === 0) {
+		return "unknown";
+	}
+
+	const index = Math.max(0, parts.length - trustedProxyCount);
+	return parts[index] ?? "unknown";
 }
 
 /**

@@ -127,6 +127,7 @@
 | `SHOPLINE_TEST_MODE` | Shopline mode flag |
 | `COOLIFY_PROJECT_UUID`, `COOLIFY_APP_REPO_URL`, `COOLIFY_APP_GIT_BRANCH` | 部署目標識別資料 |
 | `CI` | CI 行為設定 |
+| `TRUSTED_PROXY_COUNT` | Rate-limit 解析 `X-Forwarded-For` 時信任的代理跳數。預設 `1`＝假設流量只經過 Coolify Traefik 單層（Traefik append 真實連線 IP 在鏈尾）。從右往左數 N 段取可信 client IP；左側客戶端可偽造。若前面再加 CDN／橘雲／第二層代理，必須改成實際跳數。設 `0`＝完全不信任該 header。應用容器不應可被外網直連繞過 Traefik，否則整條鏈仍可被偽造。 |
 
 上表中若某 provider 對識別資料也要求保密，Coolify 可直接將該欄位升級標記為 Secret；最低要求是不把 credential 值寫進 repo。未列於本表的新變數，加入 resource 前先補進分類表。
 
