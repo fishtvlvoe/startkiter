@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { checkRateLimit } from "./rate-limit";
+import { checkRateLimit, resolveTrustedClientIp } from "./rate-limit";
 
 describe("checkRateLimit (Requirement: Rate limit protects against brute-force enumeration)", () => {
 	it("allows requests under the limit", () => {
@@ -25,5 +25,16 @@ describe("checkRateLimit (Requirement: Rate limit protects against brute-force e
 			checkRateLimit(keyA, { limit: 5, windowMs: 60_000 });
 		}
 		expect(checkRateLimit(keyB, { limit: 5, windowMs: 60_000 })).toBe(true);
+	});
+});
+
+describe("resolveTrustedClientIp", () => {
+	it("uses the right-most x-forwarded-for hop (proxy-appended)", () => {
+		expect(resolveTrustedClientIp("198.51.100.1, 203.0.113.50")).toBe("203.0.113.50");
+	});
+
+	it("returns unknown when the header is missing", () => {
+		expect(resolveTrustedClientIp(null)).toBe("unknown");
+		expect(resolveTrustedClientIp("")).toBe("unknown");
 	});
 });

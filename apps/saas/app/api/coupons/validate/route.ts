@@ -2,14 +2,14 @@ import { validateCoupon } from "@startkiter/coupons";
 import { MVP_SKU, getProduct } from "@startkiter/payments";
 import { NextResponse } from "next/server";
 
-import { checkRateLimit } from "../../../../lib/rate-limit";
+import { checkRateLimit, resolveTrustedClientIp } from "../../../../lib/rate-limit";
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function clientIdentifier(request: Request) {
-	return request.headers.get("x-forwarded-for") ?? "unknown";
+	return resolveTrustedClientIp(request.headers.get("x-forwarded-for"));
 }
 
 export async function POST(request: Request) {

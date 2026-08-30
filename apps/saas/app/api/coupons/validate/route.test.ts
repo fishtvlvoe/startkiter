@@ -6,6 +6,14 @@ vi.mock("@startkiter/coupons", () => ({
 
 vi.mock("../../../../lib/rate-limit", () => ({
 	checkRateLimit: vi.fn(() => true),
+	resolveTrustedClientIp: vi.fn((forwardedFor: string | null) => {
+		if (!forwardedFor || forwardedFor.trim() === "") return "unknown";
+		const parts = forwardedFor
+			.split(",")
+			.map((part) => part.trim())
+			.filter(Boolean);
+		return parts[parts.length - 1] ?? "unknown";
+	}),
 }));
 
 import { validateCoupon } from "@startkiter/coupons";
