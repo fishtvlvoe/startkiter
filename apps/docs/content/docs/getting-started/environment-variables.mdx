@@ -148,6 +148,7 @@ StartKiter 的環境變數範例來自 `apps/saas/.env.example`。請複製一�
 | `PORT` | 選填 | HTTP port，預設為 3000。 |
 | `NODE_ENV` | 選填 | 執行環境，範例預設為 development。 |
 | `CI` | 選填 | CI 執行環境標記。 |
+| `TRUSTED_PROXY_COUNT` | 選填 | Rate-limit 解析 X-Forwarded-For 時信任的代理跳數，預設 1（對應單層 Traefik）。若前方再加一層 CDN／代理需調高；設 0 則完全不信任該 header。應用容器不應可被外網直連繞過反向代理，否則整條鏈仍可被偽造。 |
 
 ## 安全提醒
 

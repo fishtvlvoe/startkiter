@@ -18,7 +18,7 @@ describe("buyer docs content contract", () => {
 				.match(/^\| `([A-Z0-9_]+)` \|/gm)
 			?.map((row) => row.match(/`([A-Z0-9_]+)`/)?.[1]);
 
-		expect(sourceNames).toHaveLength(88);
+		expect(sourceNames).toHaveLength(89);
 		expect(documentedNames).toEqual(sourceNames);
 	});
 
