@@ -187,6 +187,6 @@ describe("POST /api/checkout coupon integration", () => {
 		const response = await POST(jsonRequest({ userId: "someone_else" }));
 
 		expect(response.status).toBe(200);
-		expect(mockedCreatePendingOrder).toHaveBeenCalledWith("user_1", 8800, MVP_SKU, undefined, "payuni");
+		expect(mockedCreatePendingOrder).toHaveBeenCalledWith("user_1", 8800, MVP_SKU, undefined, "payuni", undefined);
 	});
 });
