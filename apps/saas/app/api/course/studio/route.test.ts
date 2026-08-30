@@ -78,6 +78,24 @@ describe("Course Studio API", () => {
 		} as never);
 	});
 
+	it("returns 401 when there is no session", async () => {
+		vi.mocked(auth.api.getSession).mockResolvedValue(null as never);
+
+		const response = await POST(
+			new Request("http://localhost/api/course/studio", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					action: "create_chapter",
+					payload: { courseId: "course-01", title: "不應建立" },
+				}),
+			}),
+		);
+
+		expect(response.status).toBe(401);
+		expect(db.chapter.create).not.toHaveBeenCalled();
+	});
+
 	it("rejects an instructor after an assignment is removed", async () => {
 		vi.mocked(auth.api.getSession).mockResolvedValue({
 			session: { ipAddress: "203.0.113.13" },
