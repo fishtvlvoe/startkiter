@@ -96,7 +96,7 @@ export type AdminLogScalarFieldEnum = z.infer<typeof AdminLogScalarFieldEnumSche
 
 // File: OrderScalarFieldEnum.schema.ts
 
-export const OrderScalarFieldEnumSchema = z.enum(['id', 'orderNo', 'userId', 'organizationId', 'sku', 'amount', 'currency', 'status', 'paymentGateway', 'gatewayTradeNo', 'courseAccess', 'kitClaimEligible', 'paidAt', 'refundedAt', 'refundOperationToken', 'refundOperationStartedAt', 'refundGatewayRefundId', 'refundError', 'refundStatus', 'invoiceType', 'invoiceCarrierType', 'invoiceCarrierId', 'invoiceTaxId', 'invoiceTitle', 'invoiceAddress', 'invoiceLoveCode', 'createdAt', 'updatedAt'])
+export const OrderScalarFieldEnumSchema = z.enum(['id', 'orderNo', 'userId', 'organizationId', 'sku', 'amount', 'currency', 'status', 'paymentGateway', 'gatewayTradeNo', 'courseAccess', 'kitClaimEligible', 'paidAt', 'refundedAt', 'refundOperationToken', 'refundOperationStartedAt', 'refundGatewayRefundId', 'refundError', 'refundStatus', 'invoiceType', 'invoiceCarrierType', 'invoiceCarrierId', 'invoiceTaxId', 'invoiceTitle', 'invoiceAddress', 'invoiceLoveCode', 'couponId', 'couponCode', 'createdAt', 'updatedAt'])
 
 export type OrderScalarFieldEnum = z.infer<typeof OrderScalarFieldEnumSchema>;
 
@@ -822,6 +822,8 @@ export const OrderSchema = z.object({
   invoiceTitle: z.string().nullish(),
   invoiceAddress: z.string().nullish(),
   invoiceLoveCode: z.string().nullish(),
+  couponId: z.string().nullish(),
+  couponCode: z.string().nullish(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
