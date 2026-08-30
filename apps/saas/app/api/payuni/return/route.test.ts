@@ -23,6 +23,31 @@ describe("PAYUNi browser return", () => {
 		expect(response.headers.get("location")).toBe("http://localhost:3001/checkout-return?orderNo=ORDER-1&status=returned");
 	});
 
+	it("redirects to failed without an order number when the signature is tampered", async () => {
+		process.env.BETTER_AUTH_URL = "http://localhost:3001";
+		const credentials = {
+			merchantId: "MERCHANT",
+			hashKey: "12345678901234567890123456789012",
+			hashIV: "1234567890123456",
+			apiUrl: "https://sandbox-api.payuni.com.tw/api/upp",
+		};
+		vi.mocked(loadPayUniCredentials).mockResolvedValue(credentials);
+		const form = new PayUniService(credentials).createFormData({ MerTradeNo: "ORDER-1", Status: "SUCCESS" });
+		const body = new URLSearchParams({
+			EncryptInfo: form.EncryptInfo,
+			HashInfo: "tampered-hash",
+		});
+
+		const response = await POST(new Request("http://localhost:3001/api/payuni/return", {
+			method: "POST",
+			headers: { "content-type": "application/x-www-form-urlencoded" },
+			body,
+		}));
+
+		expect(response.status).toBe(303);
+		expect(response.headers.get("location")).toBe("http://localhost:3001/checkout-return?status=failed");
+	});
+
 	it("decrypts a successful PAYUNi POST and passes its order number forward", async () => {
 		process.env.BETTER_AUTH_URL = "http://localhost:3001";
 		const credentials = {
