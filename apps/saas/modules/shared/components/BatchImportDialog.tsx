@@ -1,7 +1,15 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { generateBatchLessonContent, parseFileList, runWithConcurrency, type ParsedChapter, type ParsedLesson } from "@startkiter/platform";
+import {
+	parseFileList,
+	type ParsedChapter,
+	type ParsedLesson,
+} from "@startkiter/platform/src/course-batch-import/folder-parser";
+import {
+	generateBatchLessonContent,
+	runWithConcurrency,
+} from "@startkiter/platform/src/course-batch-import/concurrency-controller";
 import { Button } from "@startkiter/ui";
 
 import { formatImportFailures, retryFailedLesson, type BatchLessonState } from "../lib/batch-import-state";
