@@ -27,6 +27,7 @@
 | 1 | test-env-database-url | 已封存合併（`openspec/changes/archive/2026-08-30-test-env-database-url/`） |
 | 2 | unify-operator-permission-model | 已封存合併（`openspec/changes/archive/2026-08-30-unify-operator-permission-model/`） |
 | 3 | remove-unused-polar-provider | 已封存合併（`openspec/changes/archive/2026-08-30-remove-unused-polar-provider/`，只涵蓋第5項的 Polar 部分，`PLACEHOLDER_MEDIA` 仍未處理） |
+| 4 | coupon-security-fixes | 已封存合併（`openspec/changes/archive/2026-08-31-coupon-security-fixes/`，commit f5961a93，671 tests 全過） |
 
 ## 額外發現（本次整改過程中新增，未在原盤點報告出現）
 
@@ -38,7 +39,9 @@
 
 route-adapter-security-hardening SR 的 codex 交叉審查（2026-08-30）發現 3 項現有代碼設計漏洞，非本次新增測試造成，但應記錄便於後續修復排程。詳細審查報告：`/tmp/codex-security-review.md`。
 
-1. **[Medium] Coupon 最大兌換次數未被消耗、可重複利用超過限制**
+**✅ 已於 `coupon-security-fixes` SR 修復（commit f5961a93，2026-08-31）**：以下 3 個漏洞全部修好，PM 驗證 + 兩輪交叉審查（cursor-agent 實作、Codex 審查）確認 Confirmed Fixed。
+
+1. **[Medium，已修復] Coupon 最大兌換次數未被消耗、可重複利用超過限制**
    - 程式碼位置：
      - `packages/coupons/src/validate.ts:15-29` — 僅讀取並檢查，未持久化消耗
      - `apps/saas/app/api/checkout/route.ts:63-71, 82-84` — 驗證後未保存 coupon 關聯、未遞增 timesRedeemed
@@ -47,7 +50,7 @@ route-adapter-security-hardening SR 的 codex 交叉審查（2026-08-30）發現
    - 建議修復：訂單保存 coupon 關聯；同一 DB transaction 中原子檢查+遞增兌換次數；失敗/逾時釋放策略；補並行競態測試
    - 審查詳情：`/tmp/codex-security-review.md` L59-84
 
-2. **[Medium] 匿名 Coupon rate-limit 可被偽造 x-forwarded-for 規避、20/min 限制失效**
+2. **[Medium，已修復] 匿名 Coupon rate-limit 可被偽造 x-forwarded-for 規避、20/min 限制失效**
    - 程式碼位置：
      - `apps/saas/app/api/coupons/validate/route.ts:11-17` — 直接把完整 x-forwarded-for 當 rate-limit key
      - `apps/saas/lib/rate-limit.ts:1-24` — 只依傳入字串計數，無可信 proxy 正規化、無伺服器端身分綁定
@@ -56,7 +59,7 @@ route-adapter-security-hardening SR 的 codex 交叉審查（2026-08-30）發現
    - 建議修復：只接受受信 proxy 產生的規範化 client IP；或 ingress 注入不可覆寫 header；改用跨 instance shared limiter；測試走真 limiter 並變更 header 驗證
    - 審查詳情：`/tmp/codex-security-review.md` L76-89
 
-3. **[Low] Course Studio 500 回應洩露內部例外字串**
+3. **[Low，已修復] Course Studio 500 回應洩露內部例外字串**
    - 程式碼位置：
      - `apps/saas/app/api/course/studio/route.ts:400-404` — 將 `String(error)` 放入 JSON response 的 `details` 欄位
    - 洩露內容：Prisma 例外可能含 model、constraint、欄位或資料庫實作資訊
