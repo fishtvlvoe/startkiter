@@ -150,4 +150,22 @@ describe("POST /api/checkout coupon integration", () => {
 		expect(response.status).toBe(404);
 		expect(mockedCreatePendingOrder).not.toHaveBeenCalled();
 	});
+
+	it("returns 401 when there is no session", async () => {
+		mockedGetSession.mockResolvedValue(null as never);
+
+		const response = await POST(jsonRequest({}));
+
+		expect(response.status).toBe(401);
+		expect(mockedCreatePendingOrder).not.toHaveBeenCalled();
+	});
+
+	it("ignores a client-supplied userId and still charges the signed-in user", async () => {
+		mockedCreatePendingOrder.mockResolvedValue(baseOrder(8800));
+
+		const response = await POST(jsonRequest({ userId: "someone_else" }));
+
+		expect(response.status).toBe(200);
+		expect(mockedCreatePendingOrder).toHaveBeenCalledWith("user_1", 8800, MVP_SKU, undefined, "payuni");
+	});
 });

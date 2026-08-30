@@ -68,3 +68,4 @@ route-adapter-security-hardening SR 的 codex 交叉審查（2026-08-30）發現
 **後續決策**：Fish 待判斷修復 SR 優先順序（立刻排進 #8/#9 前，或留給後續排程）。
 
 - 第 4 項（signed-url-access-review）後續強化建議（非本 SR 必須項，可作為下一輪 change 考慮）：image-proxy SSRF 測試目前覆蓋基本繞過（loopback IP、大小寫、百分比編碼），建議後續補充高級攻擊向量測試——DNS rebinding（localhost 解析為攻擊者 IP）、HTTP redirect 繞過（合法 CDN 但 302 跳轉到內網）、IPv6 loopback（::1）與 IPv6-mapped IPv4（::ffff:127.0.0.1）、協議升級嘗試（ws:// 等）。交叉審查確認目前實裝無真實漏洞，上述為「防禦深度」加強項。
+- **2026-08-31 修正記錄**：發現先前 SR#3（route-adapter-security-hardening）的合併是空 merge，代碼從未真正進入 main（`git merge-base --is-ancestor` 驗證確認），總表誤標為「已封存合併」。已補做真正合併，補回 13 個遺漏的測試檔案（bundles/[id]、bundles/admin、checkout、coupons/validate、course/ai-notes/settings、course/lessons、cron 相關、github/claim 相關、mcp/connections、pages-cms 三份、payuni/notify、payuni/return、repo-version）。教訓：合併前只看 commit message／tracker 記錄不夠，要用 `git merge-base --is-ancestor` 或直接 diff stat 驗證內容真的進來了。

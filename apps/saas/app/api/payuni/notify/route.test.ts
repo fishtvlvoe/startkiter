@@ -68,6 +68,21 @@ describe("PAYUNi one-time notify invoice trigger", () => {
 		vi.mocked(sendWelcomeEmailsForOrder).mockResolvedValue(undefined);
 	});
 
+	it("rejects an invalid signature with 400 and does not mark the order paid", async () => {
+		const response = await POST(
+			new Request("https://startkiter.example/api/payuni/notify", {
+				method: "POST",
+				headers: { "content-type": "application/json" },
+				body: JSON.stringify({ EncryptInfo: "tampered", HashInfo: "bad" }),
+			}),
+		);
+
+		expect(response.status).toBe(400);
+		expect(await response.json()).toEqual({ error: "invalid_signature" });
+		expect(findOrderByNo).not.toHaveBeenCalled();
+		expect(markOrderPaid).not.toHaveBeenCalled();
+	});
+
 	it("keeps payment successful with invoicing disabled and creates no invoice", async () => {
 		vi.mocked(triggerInvoiceForOrder).mockResolvedValue(null);
 
