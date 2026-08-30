@@ -14,7 +14,7 @@
   - 交叉審查：codex security-diff-scan，詳細報告 `/tmp/codex-security-review.md`（154 行）；無 Critical，發現 2 個 Medium + 1 個 Low 漏洞（見下方新增項目）
 - [x] 4. Signed URL／image proxy／local upload 覆查 — 跨 user key、過期、撤銷、production fallback（交叉審查完成：✓ 無真實漏洞；10 個新測試檔案驗證了 ownership 綁定、SSRF 基本防護、expiresIn 檢查、local fallback 存取控制；後續強化建議已記錄至「額外發現」）
 - [x] 5. 清理 placeholder／未實作 provider — `PLACEHOLDER_MEDIA`（已處理：`packages/course/catalog.ts` 沒設定 `BUNNY_LIBRARY_ID` 時，production 環境改為 fail-closed 直接拋錯，不再用 demo 影片頂替付費課程內容；dev/test 環境維持 fallback 方便開發，比照結帳金流「沒設定就 503」的既有規則）、Polar `Not implemented`（已刪除，`remove-unused-polar-provider` SR 完成：台灣/國際市場皆用量低，且 `v1-scope-boundary` 早已正式禁止 Polar 收款，代碼本來就是未接線的殘留鷹架，直接整份移除）
-- [ ] 6. 補通知／Email／storage／settings 測試 — notifications 7 source/0 test、mail 25 source/1 test 等缺口
+- [x] 6. 補通知／Email／storage／settings 測試 — notifications 7 source/0 test、mail 25 source/1 test 等缺口（`notification-mail-storage-test-coverage` SR 已封存合併：notifications 9 tests、mail 15 tests、storage 3 tests、settings-crypto 全綠；交叉審查確認 mail mock 未過度、settings-crypto 用 AES-256-GCM 正確實作 IV 隨機生成+認證tag驗證）
 - [ ] 7. Chatwoot 三管道 E2E（`unified-support-desk` task 9.4）— 已由老闆確認暫時擱置，非本輪優先
 - [ ] 8. Real provider acceptance matrix — subscription/period notify/退款/發票要留 webhook+DB+idempotency 證據
 - [ ] 9. Schema/migration rehearsal — 查 redundant index、status/slug contract，乾淨 DB 跑一次 migrate deploy

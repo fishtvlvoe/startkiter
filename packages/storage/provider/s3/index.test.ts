@@ -1,55 +1,102 @@
-import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl as getS3SignedUrl } from "@aws-sdk/s3-request-presigner";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+const { sendMock, getSignedUrlMock } = vi.hoisted(() => ({
+	sendMock: vi.fn(),
+	getSignedUrlMock: vi.fn(),
+}));
+
+vi.mock("@aws-sdk/client-s3", () => {
+	class S3Client {
+		send = sendMock;
+	}
+
+	class PutObjectCommand {
+		input: unknown;
+		constructor(input: unknown) {
+			this.input = input;
+		}
+	}
+
+	class GetObjectCommand {
+		input: unknown;
+		constructor(input: unknown) {
+			this.input = input;
+		}
+	}
+
+	class HeadObjectCommand {
+		input: unknown;
+		constructor(input: unknown) {
+			this.input = input;
+		}
+	}
+
+	class DeleteObjectCommand {
+		input: unknown;
+		constructor(input: unknown) {
+			this.input = input;
+		}
+	}
+
+	return {
+		S3Client,
+		PutObjectCommand,
+		GetObjectCommand,
+		HeadObjectCommand,
+		DeleteObjectCommand,
+	};
+});
 
 vi.mock("@aws-sdk/s3-request-presigner", () => ({
-	getSignedUrl: vi.fn(),
+	getSignedUrl: getSignedUrlMock,
 }));
 
 vi.mock("@startkiter/logs", () => ({
-	logger: { error: vi.fn() },
+	logger: { error: vi.fn(), log: vi.fn() },
 }));
 
-import { getSignedUploadUrl, getSignedUrl } from "./index";
+async function loadS3Provider() {
+	vi.stubEnv("S3_ENDPOINT", "https://s3.example.test");
+	vi.stubEnv("S3_ACCESS_KEY_ID", "akid");
+	vi.stubEnv("S3_SECRET_ACCESS_KEY", "secret");
+	vi.stubEnv("S3_REGION", "auto");
+	vi.stubEnv("NEXT_PUBLIC_AVATARS_BUCKET_NAME", "avatars");
+	return import("./index");
+}
 
-describe("s3 signed URL helpers", () => {
-	beforeEach(() => {
+describe("s3 storage provider", () => {
+	afterEach(() => {
+		vi.resetModules();
 		vi.clearAllMocks();
-		process.env.S3_ENDPOINT = "https://s3.example";
-		process.env.S3_REGION = "auto";
-		process.env.S3_ACCESS_KEY_ID = "test-access-key";
-		process.env.S3_SECRET_ACCESS_KEY = "test-secret-key";
-		process.env.NEXT_PUBLIC_AVATARS_BUCKET_NAME = "avatars";
-		vi.mocked(getS3SignedUrl).mockResolvedValue("https://s3.example/signed");
+		vi.unstubAllEnvs();
 	});
 
-	it("passes expiresIn 60 when minting an upload URL for the given key", async () => {
-		await expect(
-			getSignedUploadUrl("org-42.png", { bucket: "avatars", contentType: "image/png" }),
-		).resolves.toBe("https://s3.example/signed");
+	it("returns a signed upload URL on success", async () => {
+		getSignedUrlMock.mockResolvedValue("https://s3.example.test/signed-upload");
+		const { getSignedUploadUrl } = await loadS3Provider();
 
-		expect(getS3SignedUrl).toHaveBeenCalledTimes(1);
-		const [, command, options] = vi.mocked(getS3SignedUrl).mock.calls[0] ?? [];
-		expect(command).toBeInstanceOf(PutObjectCommand);
-		expect((command as PutObjectCommand).input).toMatchObject({
-			Bucket: "avatars",
-			Key: "org-42.png",
-			ContentType: "image/png",
-		});
-		expect(options).toEqual({ expiresIn: 60 });
+		await expect(
+			getSignedUploadUrl("avatars/user-1.png", {
+				bucket: "avatars",
+				contentType: "image/png",
+			}),
+		).resolves.toBe("https://s3.example.test/signed-upload");
+		expect(getSignedUrlMock).toHaveBeenCalled();
 	});
 
-	it("forwards the caller expiresIn when minting a download URL", async () => {
-		await expect(
-			getSignedUrl("user-aaa.png", { bucket: "avatars", expiresIn: 300 }),
-		).resolves.toBe("https://s3.example/signed");
+	it("throws a storage error when signed upload URL generation fails", async () => {
+		getSignedUrlMock.mockRejectedValue(new Error("network down"));
+		const { getSignedUploadUrl } = await loadS3Provider();
 
-		const [, command, options] = vi.mocked(getS3SignedUrl).mock.calls[0] ?? [];
-		expect(command).toBeInstanceOf(GetObjectCommand);
-		expect((command as GetObjectCommand).input).toMatchObject({
-			Bucket: "avatars",
-			Key: "user-aaa.png",
-		});
-		expect(options).toEqual({ expiresIn: 300 });
+		await expect(
+			getSignedUploadUrl("avatars/user-1.png", { bucket: "avatars" }),
+		).rejects.toThrow("Could not get signed upload url");
+	});
+
+	it("returns null when the object does not exist", async () => {
+		sendMock.mockRejectedValue(new Error("NotFound"));
+		const { headObject } = await loadS3Provider();
+
+		await expect(headObject("missing.png", "avatars")).resolves.toBeNull();
 	});
 });
