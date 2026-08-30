@@ -4,7 +4,9 @@ import { z } from "zod";
 
 import { protectedProcedure } from "../../../orpc/procedures";
 import { userCanAccessCourseId } from "../lib/course-access";
-import { courseOperatorProcedure, isCourseOperator } from "../lib/course-operator";
+import { isOperator } from "@startkiter/permissions";
+
+import { courseOperatorProcedure } from "../lib/course-operator";
 import {
 	buildLessonMessageStorageKey,
 	createLessonMessageUploadToken,
@@ -52,7 +54,7 @@ export const sendLessonMessage = protectedProcedure
 	.route({ method: "POST", path: "/course/lesson-messages", tags: ["Course messages"], summary: "Send a private lesson message" })
 	.input(messageInput)
 	.handler(async ({ input, context }) => {
-		const operator = isCourseOperator(context.user.email, process.env.ADMIN_EMAIL);
+		const operator = isOperator(context.user, process.env.ADMIN_EMAIL);
 		if (input.isFromTeacher && !operator) throw new ORPCError("FORBIDDEN");
 		if (!input.isFromTeacher && input.threadUserId) throw new ORPCError("BAD_REQUEST", { message: "學員不能指定其他私訊串。" });
 

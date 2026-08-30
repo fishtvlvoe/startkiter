@@ -66,7 +66,7 @@ describe("course.updateLesson", () => {
 		expect(db.lesson.update).not.toHaveBeenCalled();
 	});
 
-	it("沿用 REST 的 ADMIN_EMAIL operator 判定，不接受只具 admin role 的其他 email", async () => {
+	it("allows role=admin even when email is not ADMIN_EMAIL", async () => {
 		vi.mocked(auth.api.getSession).mockResolvedValue({
 			user: { id: "admin-01", email: "other-admin@example.com", role: "admin" },
 			session: { id: "session-02", userId: "admin-01" },
@@ -78,9 +78,9 @@ describe("course.updateLesson", () => {
 				{ id: "lesson-01", content: "# 合法內容" },
 				{ context: { headers: new Headers() } },
 			),
-		).rejects.toMatchObject({ code: "FORBIDDEN" });
+		).resolves.toMatchObject({ lesson: { id: "lesson-01" } });
 
-		expect(inspectMdxSource).not.toHaveBeenCalled();
-		expect(db.lesson.update).not.toHaveBeenCalled();
+		expect(inspectMdxSource).toHaveBeenCalled();
+		expect(db.lesson.update).toHaveBeenCalled();
 	});
 });

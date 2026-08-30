@@ -9,7 +9,6 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@startkiter/auth", () => ({ auth: { api: { getSession: mocks.getSession } } }));
 vi.mock("@startkiter/api/modules/course/lib/course-instructor-access", () => ({ canManageCourse: mocks.canManageCourse }));
-vi.mock("@startkiter/api/modules/course/lib/course-operator", () => ({ isCourseOperator: vi.fn(() => false) }));
 vi.mock("@startkiter/database", () => ({
 	db: { chapter: { create: mocks.chapterCreate }, lesson: { create: mocks.lessonCreate } },
 }));

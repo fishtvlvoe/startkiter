@@ -1,7 +1,7 @@
 import { getSession } from "@auth/lib/server";
 import { config } from "@startkiter/auth/config";
 import { hasAnyCourseInstructorAssignment } from "@startkiter/api/modules/course/lib/course-instructor-access";
-import { checkPermission } from "@startkiter/permissions";
+import { isOperator as checkIsOperator } from "@startkiter/permissions";
 import { Logo } from "@startkiter/ui";
 import { SettingsMenu } from "@settings/components/SettingsMenu";
 import { PageHeader } from "@shared/components/PageHeader";
@@ -19,7 +19,7 @@ export default async function AdminLayout({ children }: PropsWithChildren) {
 	}
 
 	// Nested layouts can render before the parent authenticated layout calls setup(), so do not use permix.check here.
-	const isOperator = checkPermission({ user: session.user }, "admin.access");
+	const isOperator = checkIsOperator(session.user, process.env.ADMIN_EMAIL);
 	const isInstructor = !isOperator && (await hasAnyCourseInstructorAssignment(session.user.id));
 	if (!isOperator && !isInstructor) {
 		redirect("/");

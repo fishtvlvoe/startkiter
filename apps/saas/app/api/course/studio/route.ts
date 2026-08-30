@@ -1,13 +1,12 @@
 import { auth } from "@startkiter/auth";
 import { db } from "@startkiter/database";
 import { getClientIp, recordAdminAction } from "@startkiter/platform";
+import { isOperator, type OperatorSession } from "@startkiter/permissions";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { COURSE_STUDIO_ERROR_CODES } from "@startkiter/api/modules/course/errors";
-import { isCourseOperator } from "@startkiter/api/modules/course/lib/course-operator";
 import { canManageCourse } from "@startkiter/api/modules/course/lib/course-instructor-access";
 import { updateLesson } from "@startkiter/api/modules/course/lib/update-lesson";
-import type { OperatorSession } from "../../../../lib/operator";
 
 type StudioAccess = {
 	userId: string;
@@ -35,7 +34,7 @@ function getAuthenticatedStatus(session: OperatorSession): number | StudioAccess
 
 	return {
 		userId: session.user.id,
-		isOperator: isCourseOperator(session.user.email, process.env.ADMIN_EMAIL),
+		isOperator: isOperator(session.user, process.env.ADMIN_EMAIL),
 	};
 }
 

@@ -1,5 +1,5 @@
 import { getSession } from "@auth/lib/server";
-import { isCourseOperator } from "@startkiter/api/modules/course/lib/course-operator";
+import { isOperator } from "@startkiter/permissions";
 import { db } from "@startkiter/database";
 import { Card, CardContent, CardHeader, CardTitle, Input, Label } from "@startkiter/ui";
 import { redirect } from "next/navigation";
@@ -25,7 +25,7 @@ function formatDate(value: Date): string {
 export default async function AuditLogPage({ searchParams }: AuditLogPageProps) {
 	const session = await getSession();
 	if (!session) redirect("/login");
-	if (!isCourseOperator(session.user.email, process.env.ADMIN_EMAIL)) redirect("/");
+	if (!isOperator(session.user, process.env.ADMIN_EMAIL)) redirect("/");
 
 	const params = await searchParams;
 	const email = queryValue(params.email);

@@ -1,5 +1,5 @@
 import { getSession } from "@auth/lib/server";
-import { isCourseOperator } from "@startkiter/api/modules/course/lib/course-operator";
+import { isOperator } from "@startkiter/permissions";
 import { getLessonMessageSignedDownloadUrl } from "@startkiter/api/modules/course/procedures/lesson-message-upload";
 import { db } from "@startkiter/database";
 import { redirect } from "next/navigation";
@@ -9,7 +9,7 @@ import { LessonMessagesOperatorPanel } from "./lesson-messages-operator-panel";
 export default async function LessonMessagesPage() {
 	const session = await getSession();
 	if (!session) redirect("/login");
-	if (!isCourseOperator(session.user.email, process.env.ADMIN_EMAIL)) redirect("/");
+	if (!isOperator(session.user, process.env.ADMIN_EMAIL)) redirect("/");
 
 	const messages = await db.lessonPrivateMessage.findMany({
 		orderBy: { createdAt: "desc" },

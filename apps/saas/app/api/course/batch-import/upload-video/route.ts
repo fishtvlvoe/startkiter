@@ -1,6 +1,6 @@
 import { BUNNY_API_KEY_FIELD } from "@startkiter/course";
 import { canManageCourse } from "@startkiter/api/modules/course/lib/course-instructor-access";
-import { isCourseOperator } from "@startkiter/api/modules/course/lib/course-operator";
+import { isOperator } from "@startkiter/permissions";
 import { auth } from "@startkiter/auth";
 import { uploadVideoToBunny } from "@startkiter/platform";
 import { NextResponse } from "next/server";
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
 	const allowed = await canManageCourse({
 		userId: session.user.id,
 		courseId,
-		isOperator: isCourseOperator(session.user.email, process.env.ADMIN_EMAIL),
+		isOperator: isOperator(session.user, process.env.ADMIN_EMAIL),
 	});
 	if (!allowed) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 	const file = formData.get("file");

@@ -1,5 +1,5 @@
 import { getSession } from "@auth/lib/server";
-import { isCourseOperator } from "@startkiter/api/modules/course/lib/course-operator";
+import { isOperator } from "@startkiter/permissions";
 import { db } from "@startkiter/database";
 import { Card, CardContent, CardHeader, CardTitle } from "@startkiter/ui";
 import { redirect } from "next/navigation";
@@ -11,7 +11,7 @@ function formatDate(value: Date): string {
 export default async function OnboardingSurveysPage() {
 	const session = await getSession();
 	if (!session) redirect("/login");
-	if (!isCourseOperator(session.user.email, process.env.ADMIN_EMAIL)) redirect("/");
+	if (!isOperator(session.user, process.env.ADMIN_EMAIL)) redirect("/");
 
 	const [courses, responses] = await Promise.all([
 		db.course.findMany({

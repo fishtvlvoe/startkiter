@@ -1,5 +1,5 @@
 import { getSession } from "@auth/lib/server";
-import { isCourseOperator } from "@startkiter/api/modules/course/lib/course-operator";
+import { isOperator } from "@startkiter/permissions";
 import { db } from "@startkiter/database";
 import { redirect } from "next/navigation";
 
@@ -8,7 +8,7 @@ import { ReviewAdminPanel } from "./review-admin-panel";
 export default async function ReviewAdminPage() {
 	const session = await getSession();
 	if (!session) redirect("/login");
-	if (!isCourseOperator(session.user.email, process.env.ADMIN_EMAIL)) redirect("/");
+	if (!isOperator(session.user, process.env.ADMIN_EMAIL)) redirect("/");
 
 	const [reviews, comments, reports] = await Promise.all([
 		db.courseReview.findMany({

@@ -15,10 +15,10 @@ import { z } from "zod";
 
 import { protectedProcedure } from "../../orpc/procedures";
 import { userCanAccessCourseId } from "../course/lib/course-access";
-import { isCourseOperator } from "../course/lib/course-operator";
+import { isOperator } from "@startkiter/permissions";
 
 const quizOperatorProcedure = protectedProcedure.use(async ({ context, next }) => {
-	if (!isCourseOperator(context.user.email, process.env.ADMIN_EMAIL)) {
+	if (!isOperator(context.user, process.env.ADMIN_EMAIL)) {
 		throw new ORPCError("FORBIDDEN");
 	}
 

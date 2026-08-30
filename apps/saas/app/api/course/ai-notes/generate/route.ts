@@ -1,6 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { canManageCourse } from "@startkiter/api/modules/course/lib/course-instructor-access";
-import { isCourseOperator } from "@startkiter/api/modules/course/lib/course-operator";
+import { isOperator } from "@startkiter/permissions";
 import { readGeminiApiKey } from "@startkiter/api/modules/course/lib/gemini-settings";
 import { auth } from "@startkiter/auth";
 import { db } from "@startkiter/database";
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
 	const allowed = await canManageCourse({
 		userId: session.user.id,
 		courseId: managedCourseId as string,
-		isOperator: isCourseOperator(session.user.email, process.env.ADMIN_EMAIL),
+		isOperator: isOperator(session.user, process.env.ADMIN_EMAIL),
 	});
 	if (!allowed) {
 		return jsonError("FORBIDDEN", 403);

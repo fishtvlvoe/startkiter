@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { userCanAccessCourseId } from "@startkiter/api/modules/course/lib/course-access";
 import { canManageCourse } from "@startkiter/api/modules/course/lib/course-instructor-access";
-import { isCourseOperator } from "@startkiter/api/modules/course/lib/course-operator";
+import { isOperator } from "@startkiter/permissions";
 import { auth } from "@startkiter/auth";
 import { db } from "@startkiter/database";
 import {
@@ -54,7 +54,7 @@ export default async function LessonToolPage({ params, searchParams }: LessonToo
 	const hasInstructorAccess = await canManageCourse({
 		userId,
 		courseId,
-		isOperator: isCourseOperator(session.user.email, process.env.ADMIN_EMAIL),
+		isOperator: isOperator(session.user, process.env.ADMIN_EMAIL),
 	});
 	if (!hasLearnerAccess && !hasInstructorAccess) {
 		notFound();

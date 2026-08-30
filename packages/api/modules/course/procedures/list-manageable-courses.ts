@@ -1,7 +1,7 @@
 import { db } from "@startkiter/database";
 
 import { protectedProcedure } from "../../../orpc/procedures";
-import { isCourseOperator } from "../lib/course-operator";
+import { isOperator } from "@startkiter/permissions";
 
 export const listManageableCourses = protectedProcedure
 	.route({
@@ -11,9 +11,9 @@ export const listManageableCourses = protectedProcedure
 		summary: "List courses manageable by the current user",
 	})
 	.handler(async ({ context }) => {
-		const isOperator = isCourseOperator(context.user.email, process.env.ADMIN_EMAIL);
+		const operator = isOperator(context.user, process.env.ADMIN_EMAIL);
 		const courses = await db.course.findMany({
-			...(isOperator
+			...(operator
 				? {}
 				: { where: { instructors: { some: { userId: context.user.id } } } }),
 			orderBy: { createdAt: "desc" },

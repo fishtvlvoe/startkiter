@@ -1,6 +1,6 @@
 import { auth } from "@startkiter/auth";
 import { canManageCourse } from "@startkiter/api/modules/course/lib/course-instructor-access";
-import { isCourseOperator } from "@startkiter/api/modules/course/lib/course-operator";
+import { isOperator } from "@startkiter/permissions";
 import { db } from "@startkiter/database";
 import { NextResponse } from "next/server";
 
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
 	const allowed = await canManageCourse({
 		userId: session.user.id,
 		courseId: body.courseId,
-		isOperator: isCourseOperator(session.user.email, process.env.ADMIN_EMAIL),
+		isOperator: isOperator(session.user, process.env.ADMIN_EMAIL),
 	});
 	if (!allowed) return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 

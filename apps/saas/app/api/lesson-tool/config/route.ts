@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { auth } from "@startkiter/auth";
 import { canManageCourse } from "@startkiter/api/modules/course/lib/course-instructor-access";
-import { isCourseOperator } from "@startkiter/api/modules/course/lib/course-operator";
+import { isOperator } from "@startkiter/permissions";
 import { db } from "@startkiter/database";
 import { checkLessonToolUrl } from "@startkiter/platform/src/lesson-tool/url-safety";
 
@@ -47,7 +47,7 @@ export async function PATCH(request: Request) {
 	const allowed = await canManageCourse({
 		userId: session.user.id,
 		courseId: lesson.chapter.courseId,
-		isOperator: isCourseOperator(session.user.email, process.env.ADMIN_EMAIL),
+		isOperator: isOperator(session.user, process.env.ADMIN_EMAIL),
 	});
 	if (!allowed) {
 		return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });

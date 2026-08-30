@@ -1,8 +1,7 @@
 import { auth } from "@startkiter/auth";
 import { deleteBundle, updateBundle } from "@startkiter/bundles";
+import { operatorHttpStatus, type OperatorSession } from "@startkiter/permissions";
 import { NextResponse } from "next/server";
-
-import { operatorHttpStatus, type OperatorSession } from "../../../../lib/operator";
 
 function getOperatorStatus(session: OperatorSession) {
 	return operatorHttpStatus(session, process.env.ADMIN_EMAIL);

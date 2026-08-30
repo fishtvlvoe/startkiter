@@ -171,10 +171,11 @@ describe("Pages CMS HTTP API (Requirement: Buyer can create and edit page or pos
 		expect(mockedUpdate).not.toHaveBeenCalled();
 	});
 
-	it("returns 403 for a role=admin user whose email is not ADMIN_EMAIL", async () => {
+	it("allows a role=admin user even if email is not ADMIN_EMAIL", async () => {
 		mockedGetSession.mockResolvedValue({
 			user: { id: "admin_1", email: "role-admin@example.com", role: "admin" },
 		} as never);
+		mockedCreate.mockResolvedValue(draftPage() as never);
 
 		const response = await POST(
 			jsonRequest("http://localhost/api/pages-cms", "POST", {
@@ -186,8 +187,8 @@ describe("Pages CMS HTTP API (Requirement: Buyer can create and edit page or pos
 			}),
 		);
 
-		expect(response.status).toBe(403);
-		expect(mockedCreate).not.toHaveBeenCalled();
+		expect(response.status).toBe(201);
+		expect(mockedCreate).toHaveBeenCalled();
 	});
 
 	it("allows ADMIN_EMAIL even when role is not admin", async () => {

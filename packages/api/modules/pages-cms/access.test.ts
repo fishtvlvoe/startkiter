@@ -10,14 +10,14 @@ afterEach(() => {
 });
 
 describe("pages-cms shared operator guard (H-1 reverse matrix)", () => {
-	it("denies a role=admin user whose email is not ADMIN_EMAIL", () => {
+	it("allows a role=admin user even if email is not ADMIN_EMAIL", () => {
 		process.env.ADMIN_EMAIL = OPERATOR_EMAIL;
 		const session = {
 			user: { id: "admin_1", email: "role-admin@example.com", role: "admin" },
 		};
 
-		expect(resolvePagesCmsAccess(session, OPERATOR_EMAIL)).toBe(403);
-		expect(canAccessPagesCmsAdmin(session, OPERATOR_EMAIL)).toBe(false);
+		expect(resolvePagesCmsAccess(session, OPERATOR_EMAIL)).toBeNull();
+		expect(canAccessPagesCmsAdmin(session, OPERATOR_EMAIL)).toBe(true);
 	});
 
 	it("allows ADMIN_EMAIL even when role is not admin", () => {

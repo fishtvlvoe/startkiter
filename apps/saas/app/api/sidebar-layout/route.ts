@@ -1,9 +1,8 @@
 import { auth } from "@startkiter/auth";
 import { db } from "@startkiter/database";
 import { MOUNT_POINTS } from "@startkiter/platform/src/mount-points";
+import { operatorHttpStatus } from "@startkiter/permissions";
 import { NextResponse } from "next/server";
-
-import { operatorHttpStatus } from "../../../lib/operator";
 
 const KNOWN_MENU_ITEM_IDS = new Set(MOUNT_POINTS.map((plugin) => plugin.id));
 

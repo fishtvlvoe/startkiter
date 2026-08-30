@@ -28,12 +28,12 @@ describe("pages-cms admin layout uses the shared operator guard (H-1 reverse mat
 		process.env.ADMIN_EMAIL = originalAdminEmail;
 	});
 
-	it("redirects a role=admin user whose email is not ADMIN_EMAIL", async () => {
+	it("allows a role=admin user even if email is not ADMIN_EMAIL", async () => {
 		mockedGetSession.mockResolvedValue({
 			user: { id: "admin_1", email: "role-admin@example.com", role: "admin" },
 		} as never);
 
-		await expect(AdminPagesLayout({ children: "ok" })).rejects.toThrow("REDIRECT:/");
+		await expect(AdminPagesLayout({ children: "ok" })).resolves.toBe("ok");
 	});
 
 	it("renders for ADMIN_EMAIL even when role is not admin", async () => {

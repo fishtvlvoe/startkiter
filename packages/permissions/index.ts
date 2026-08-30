@@ -6,3 +6,9 @@ export {
 	type PermissionUser,
 } from "./create-permission-rules";
 export type { OrganizationMemberRole, PermissionsDefinition } from "./definition";
+export {
+	isOperator,
+	operatorHttpStatus,
+	type OperatorSession,
+	type OperatorUser,
+} from "./is-operator";

@@ -1,4 +1,5 @@
 import { ORPCError } from "@orpc/server";
+import { isOperator } from "@startkiter/permissions";
 
 import { protectedProcedure } from "../../../orpc/procedures";
 
@@ -13,7 +14,7 @@ export function isCourseOperator(
 }
 
 export const courseOperatorProcedure = protectedProcedure.use(async ({ context, next }) => {
-	if (!isCourseOperator(context.user.email, process.env.ADMIN_EMAIL)) {
+	if (!isOperator(context.user, process.env.ADMIN_EMAIL)) {
 		throw new ORPCError("FORBIDDEN");
 	}
 
