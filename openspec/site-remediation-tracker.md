@@ -11,7 +11,7 @@
 - [x] 2. 統一 operator 權限模型（`unify-operator-permission-model` SR）— admin.access / isCourseOperator / Pages CMS 三套邊界收斂
 - [ ] 3. Route adapter 資安補強 — 22 支 SaaS API 缺直接 HTTP 層測試（401/403/404、簽章、ownership）
 - [ ] 4. Signed URL／image proxy／local upload 覆查 — 跨 user key、過期、撤銷、production fallback
-- [ ] 5. 清理 placeholder／未實作 provider — `PLACEHOLDER_MEDIA`、Polar `Not implemented`，要嘛補完要嘛從 UI 排除
+- [~] 5. 清理 placeholder／未實作 provider — `PLACEHOLDER_MEDIA`（未處理）、Polar `Not implemented`（已刪除，`remove-unused-polar-provider` SR 完成：台灣/國際市場皆用量低，且 `v1-scope-boundary` 早已正式禁止 Polar 收款，代碼本來就是未接線的殘留鷹架，直接整份移除）
 - [ ] 6. 補通知／Email／storage／settings 測試 — notifications 7 source/0 test、mail 25 source/1 test 等缺口
 - [ ] 7. Chatwoot 三管道 E2E（`unified-support-desk` task 9.4）— 已由老闆確認暫時擱置，非本輪優先
 - [ ] 8. Real provider acceptance matrix — subscription/period notify/退款/發票要留 webhook+DB+idempotency 證據
@@ -24,6 +24,7 @@
 |---|---|---|
 | 1 | test-env-database-url | 已封存合併（`openspec/changes/archive/2026-08-30-test-env-database-url/`） |
 | 2 | unify-operator-permission-model | 已封存合併（`openspec/changes/archive/2026-08-30-unify-operator-permission-model/`） |
+| 3 | remove-unused-polar-provider | 已封存合併（`openspec/changes/archive/2026-08-30-remove-unused-polar-provider/`，只涵蓋第5項的 Polar 部分，`PLACEHOLDER_MEDIA` 仍未處理） |
 
 ## 額外發現（本次整改過程中新增，未在原盤點報告出現）
 
