@@ -1,0 +1,71 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("@startkiter/api/modules/assignment/assignment-upload", () => ({
+	canAcceptLocalAssignmentUpload: vi.fn(),
+	MAX_LOCAL_ASSIGNMENT_UPLOAD_TOKEN_LENGTH: 4096,
+	recordLocalAssignmentUpload: vi.fn(),
+	verifyLocalAssignmentUploadToken: vi.fn(),
+}));
+
+vi.mock("@startkiter/database", () => ({
+	db: {
+		assignmentUploadIntent: {
+			findFirst: vi.fn(),
+			updateMany: vi.fn(),
+		},
+	},
+}));
+
+import {
+	canAcceptLocalAssignmentUpload,
+	verifyLocalAssignmentUploadToken,
+} from "@startkiter/api/modules/assignment/assignment-upload";
+
+import { PUT } from "./route";
+
+describe("PUT /api/assignment/upload local fallback", () => {
+	const previousNodeEnv = process.env.NODE_ENV;
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+		process.env.NODE_ENV = "test";
+	});
+
+	afterEach(() => {
+		process.env.NODE_ENV = previousNodeEnv;
+	});
+
+	it("is disabled in production even when a token is present", async () => {
+		process.env.NODE_ENV = "production";
+
+		const response = await PUT(
+			new Request("http://localhost/api/assignment/upload?token=guessed-key", { method: "PUT" }),
+		);
+
+		expect(response.status).toBe(404);
+		await expect(response.json()).resolves.toMatchObject({
+			error: "Local assignment uploads are disabled in production.",
+		});
+		expect(verifyLocalAssignmentUploadToken).not.toHaveBeenCalled();
+	});
+
+	it("rejects a guessed path that has no HMAC token", async () => {
+		const response = await PUT(
+			new Request("http://localhost/api/assignment/upload", { method: "PUT" }),
+		);
+
+		expect(response.status).toBe(400);
+		expect(verifyLocalAssignmentUploadToken).not.toHaveBeenCalled();
+	});
+
+	it("rejects a forged token before touching stored objects", async () => {
+		vi.mocked(verifyLocalAssignmentUploadToken).mockReturnValue(null);
+
+		const response = await PUT(
+			new Request("http://localhost/api/assignment/upload?token=forged.token", { method: "PUT" }),
+		);
+
+		expect(response.status).toBe(403);
+		expect(canAcceptLocalAssignmentUpload).not.toHaveBeenCalled();
+	});
+});

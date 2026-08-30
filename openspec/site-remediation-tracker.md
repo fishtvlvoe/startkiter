@@ -12,7 +12,7 @@
 - [x] 3. Route adapter 資安補強 — 22 支 SaaS API 缺直接 HTTP 層測試（401/403/404、簽章、ownership）
   - SR `route-adapter-security-hardening`：5 commits，22 個測試檔（16 新增 + 6 修改），283 tests 全通過
   - 交叉審查：codex security-diff-scan，詳細報告 `/tmp/codex-security-review.md`（154 行）；無 Critical，發現 2 個 Medium + 1 個 Low 漏洞（見下方新增項目）
-- [ ] 4. Signed URL／image proxy／local upload 覆查 — 跨 user key、過期、撤銷、production fallback
+- [x] 4. Signed URL／image proxy／local upload 覆查 — 跨 user key、過期、撤銷、production fallback（交叉審查完成：✓ 無真實漏洞；10 個新測試檔案驗證了 ownership 綁定、SSRF 基本防護、expiresIn 檢查、local fallback 存取控制；後續強化建議已記錄至「額外發現」）
 - [x] 5. 清理 placeholder／未實作 provider — `PLACEHOLDER_MEDIA`（已處理：`packages/course/catalog.ts` 沒設定 `BUNNY_LIBRARY_ID` 時，production 環境改為 fail-closed 直接拋錯，不再用 demo 影片頂替付費課程內容；dev/test 環境維持 fallback 方便開發，比照結帳金流「沒設定就 503」的既有規則）、Polar `Not implemented`（已刪除，`remove-unused-polar-provider` SR 完成：台灣/國際市場皆用量低，且 `v1-scope-boundary` 早已正式禁止 Polar 收款，代碼本來就是未接線的殘留鷹架，直接整份移除）
 - [ ] 6. 補通知／Email／storage／settings 測試 — notifications 7 source/0 test、mail 25 source/1 test 等缺口
 - [ ] 7. Chatwoot 三管道 E2E（`unified-support-desk` task 9.4）— 已由老闆確認暫時擱置，非本輪優先
@@ -66,3 +66,5 @@ route-adapter-security-hardening SR 的 codex 交叉審查（2026-08-30）發現
    - 審查詳情：`/tmp/codex-security-review.md` L91-99
 
 **後續決策**：Fish 待判斷修復 SR 優先順序（立刻排進 #8/#9 前，或留給後續排程）。
+
+- 第 4 項（signed-url-access-review）後續強化建議（非本 SR 必須項，可作為下一輪 change 考慮）：image-proxy SSRF 測試目前覆蓋基本繞過（loopback IP、大小寫、百分比編碼），建議後續補充高級攻擊向量測試——DNS rebinding（localhost 解析為攻擊者 IP）、HTTP redirect 繞過（合法 CDN 但 302 跳轉到內網）、IPv6 loopback（::1）與 IPv6-mapped IPv4（::ffff:127.0.0.1）、協議升級嘗試（ws:// 等）。交叉審查確認目前實裝無真實漏洞，上述為「防禦深度」加強項。

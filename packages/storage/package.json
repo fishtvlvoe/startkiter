@@ -5,6 +5,7 @@
 	"types": "./**/.ts",
 	"scripts": {
 		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"test": "vitest run",
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
@@ -15,6 +16,7 @@
 	"devDependencies": {
 		"@startkiter/tsconfig": "workspace:*",
 		"@types/node": "catalog:",
-		"typescript": "catalog:"
+		"typescript": "catalog:",
+		"vitest": "catalog:"
 	}
 }
