@@ -53,3 +53,30 @@
 - [ ] 8.3 開另一支外部 CLI（與步驟 1-7 實作方不同工具）做交叉審查，聚焦找出「測試涵蓋率夠但邏輯本身有洞」的情況（ownership 檢查抓錯 user id 來源、簽章比對用 `==` 而非 timing-safe 比較）。驗證：審查方產出書面審查記錄，列出檢查過的每支 route 與結論。
 - [ ] 8.4 若審查或測試過程中發現真實安全漏洞，記錄在本 tasks.md 對應項目並標註「⚠️ 發現漏洞，已回報 Fish，未修復」，不得為了讓測試通過而放寬斷言掩蓋問題。驗證：若有此情況，tasks.md 有對應標註且已實際告知 Fish。
 - [ ] 8.5 全部測試通過、審查無 Critical 問題後，更新 `openspec/site-remediation-tracker.md` 第 3 項打勾，執行 `/spectra:archive` 封存本 change，commit + push。驗證：`git log` 有對應 commit，總表檔案已更新。
+
+## ⚠️ 發現的安全漏洞（codex 交叉審查 2026-08-30）
+
+根據 task 8.3 / 8.4：codex 交叉審查產出 3 項發現，其中 2 個 Medium、1 個 Low。均為現有代碼設計缺陷，超出本 SR 補測試的範圍，但應記錄便於後續修復排程。
+
+1. **[Medium] Coupon 最大兌換次數未被消耗**
+   - 位置：packages/coupons/src/validate.ts + apps/saas/app/api/checkout/route.ts + apps/saas/lib/orders.ts
+   - 現象：驗證 coupon 時檢查 timesRedeemed vs maxRedemptions；建立訂單時沒有原子保留兌換次數，導致同一 coupon 可被重複利用超過限制
+   - 風險：已登入買家可無限重複使用受限制的折扣碼，超過 operator 設定上限
+   - 建議修復：訂單表存 coupon 關聯；在同一 DB transaction 中原子檢查並遞增 timesRedeemed；失敗/逾時釋放機制
+   - 審查詳情：/tmp/codex-security-review.md L74-84
+
+2. **[Medium] 匿名 Coupon rate-limit 可被偽造 x-forwarded-for 規避**
+   - 位置：apps/saas/app/api/coupons/validate/route.ts + apps/saas/lib/rate-limit.ts
+   - 現象：rate-limit key 直接用完整 x-forwarded-for header；存在已知 repo 文件表示「v1 已知限制是可被偽造」；測試 mock 掉真正 limiter 無法驗證實際可偽造性
+   - 風險：未登入遠端 caller 每次變更 x-forwarded-for → 每個值產生新 rate-limit key → 20/min 全局限制無法累積 → 可大量猜測 coupon 碼
+   - 建議修復：只接受受信 proxy 產生的規範化 client IP；或由 ingress 注入不可覆寫 header；共享 limiter（非 per-instance map）；測試走真 limiter 並變更 header 驗證
+   - 審查詳情：/tmp/codex-security-review.md L86-96
+
+3. **[Low] Course Studio 500 回應洩露內部例外**
+   - 位置：apps/saas/app/api/course/studio/route.ts:400-404
+   - 現象：將 String(error) 放入 JSON response 的 details 欄位；Prisma 例外可能含 model、constraint、欄位或資料庫實作資訊
+   - 風險：有後台權限的 operator/instructor 觸發例外時可取得內部錯誤字串；目前未證明洩露 secret，定為 Low
+   - 建議修復：response 只回固定 INTERNAL_ERROR；完整例外寫入 server log 附 correlation id
+   - 審查詳情：/tmp/codex-security-review.md L98-104
+
+**結論**：3 項漏洞均為現有生產代碼設計問題，不是本次新增測試造成的缺陷。測試層本身無 Critical 問題，通過交叉審查。後續修復由單獨 SR 排程處理。
