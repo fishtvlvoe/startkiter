@@ -63,6 +63,24 @@ describe("POST /api/coupons/validate", () => {
 		expect(body).toEqual({ valid: false, reason: "not_found" });
 	});
 
+	it("returns 200 with reason expired for an expired code (fail-closed payload, not 4xx)", async () => {
+		mockedValidateCoupon.mockResolvedValue({ valid: false, reason: "expired" });
+
+		const response = await POST(jsonRequest({ code: "EXPIRED1", productId: "startkiter-mvp" }));
+
+		expect(response.status).toBe(200);
+		expect(await response.json()).toEqual({ valid: false, reason: "expired" });
+	});
+
+	it("does not require a session (anonymous validation still rate-limited)", async () => {
+		mockedValidateCoupon.mockResolvedValue({ valid: true, discountAmount: 100, finalAmount: 8700 });
+
+		const response = await POST(jsonRequest({ code: "SAVE100", productId: "startkiter-mvp" }));
+
+		expect(response.status).toBe(200);
+		expect(response.status).not.toBe(401);
+	});
+
 	it("returns 400 for a malformed body without calling validateCoupon", async () => {
 		const response = await POST(jsonRequest({ productId: "startkiter-mvp" }));
 
