@@ -28,3 +28,5 @@
 ## 額外發現（本次整改過程中新增，未在原盤點報告出現）
 
 - Prisma 產生的型別檔案過期：`pnpm --filter api type-check` 有 `PrismaClient` 缺 `page` 屬性、`ContentType`/`ContentStatus` 缺匯出的錯誤，確認是既有問題（改 SR1 前後皆存在，非本次改動造成）。需要另開 SR 處理（跑 `prisma generate` 重新產生型別，或確認 schema 是否同步）。
+- SR2 撰寫過程發現：權限邏輯不是原盤點報告講的 3 套，是 **4 套**（多一個 `apps/saas/lib/operator.ts`，含 1 個死代碼函式），且有 **2 份正式規格文件**（`operator-settings`、`course-instructor-scoped-access`）寫死了舊規則，這次需要一併發 MODIFIED delta 更新，否則規格跟代碼會對不上。已補進 SR2 的 proposal/design/tasks。
+- 買家更新機制盤點（Fish 提問後查證，非缺失，記錄現況）：買家拿到的是 GitHub「用範本建立」的獨立倉庫（等同下載，非 fork，跟我們的乾淨倉庫沒有 git 血緣關係）。更新機制已落地：`STARTKITER_VERSION` 版本比對（`packages/github-kit/repo-version.ts`，有測試）+ `/api/repo-version`（**沒有直接路由測試**，跟第 3 項的 22 支缺測試 API 是同一批缺口）+ `/marketplace` 頁面顯示可複製的同步提示 + 買家自己用本機 AI 工具觸發 `git pull upstream main --rebase`（跟 supastarter 官方文件的更新方式一致，不衝突）。**待辦**：`/api/repo-version` 補一支直接路由測試（併入第 3 項一起做，不用單獨開 SR）。
