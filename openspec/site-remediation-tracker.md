@@ -8,7 +8,7 @@
 狀態符號：`[ ]` 未開始　`[~]` 對應 SR 進行中　`[x]` 對應 SR 已封存合併進 main
 
 - [x] 1. 修測試環境契約（`test-env-database-url` SR）— 測試指令沒 DATABASE_URL 會直接 exit 1，要能自足跑起來
-- [~] 2. 統一 operator 權限模型（`unify-operator-permission-model` SR）— admin.access / isCourseOperator / Pages CMS 三套邊界收斂
+- [x] 2. 統一 operator 權限模型（`unify-operator-permission-model` SR）— admin.access / isCourseOperator / Pages CMS 三套邊界收斂
 - [ ] 3. Route adapter 資安補強 — 22 支 SaaS API 缺直接 HTTP 層測試（401/403/404、簽章、ownership）
 - [ ] 4. Signed URL／image proxy／local upload 覆查 — 跨 user key、過期、撤銷、production fallback
 - [ ] 5. 清理 placeholder／未實作 provider — `PLACEHOLDER_MEDIA`、Polar `Not implemented`，要嘛補完要嘛從 UI 排除
@@ -23,7 +23,7 @@
 | # | SR 名稱 | 狀態 |
 |---|---|---|
 | 1 | test-env-database-url | 已封存合併（`openspec/changes/archive/2026-08-30-test-env-database-url/`） |
-| 2 | unify-operator-permission-model | 撰寫中 |
+| 2 | unify-operator-permission-model | 已封存合併（`openspec/changes/archive/2026-08-30-unify-operator-permission-model/`） |
 
 ## 額外發現（本次整改過程中新增，未在原盤點報告出現）
 
