@@ -29,6 +29,11 @@
 | 3 | remove-unused-polar-provider | 已封存合併（`openspec/changes/archive/2026-08-30-remove-unused-polar-provider/`，只涵蓋第5項的 Polar 部分，`PLACEHOLDER_MEDIA` 仍未處理） |
 | 4 | coupon-security-fixes | 已封存合併（`openspec/changes/archive/2026-08-31-coupon-security-fixes/`，commit f5961a93，671 tests 全過） |
 
+**2026-08-31 真實瀏覽器實測（agy + ego-browser，commit 320d3ca6）**：單元測試全過之後，額外用真實瀏覽器操作驗證 coupon-security-fixes 這批改動，抓到 2 個單元測試測不到的問題並當場修好：
+1. 結帳頁面完全沒有 coupon 輸入框——後端邏輯修好了，但前端從來沒有 UI 讓使用者真的用到，等於功能做完但用戶用不到。已補上輸入框、驗證、即時折扣顯示。
+2. Course Studio 頁面在瀏覽器會直接崩潰（`Module not found: Can't resolve 'dns'`）——`BatchImportDialog.tsx` 從 barrel 檔案匯入，意外拉進了 server-only 的 Prisma/pg 依賴到瀏覽器端。已改成子路徑匯入隔離。
+修復後 rate-limit 實測：18-25 次高頻請求精準觸發 429，正常使用不受影響。666 個既有測試全過，type-check 全綠。
+
 ## 額外發現（本次整改過程中新增，未在原盤點報告出現）
 
 - Prisma 產生的型別檔案過期：`pnpm --filter api type-check` 有 `PrismaClient` 缺 `page` 屬性、`ContentType`/`ContentStatus` 缺匯出的錯誤，確認是既有問題（改 SR1 前後皆存在，非本次改動造成）。需要另開 SR 處理（跑 `prisma generate` 重新產生型別，或確認 schema 是否同步）。
