@@ -24,19 +24,17 @@ import {
 import { PUT } from "./route";
 
 describe("PUT /api/assignment/upload local fallback", () => {
-	const previousNodeEnv = process.env.NODE_ENV;
-
 	beforeEach(() => {
 		vi.clearAllMocks();
-		process.env.NODE_ENV = "test";
+		vi.stubEnv("NODE_ENV", "test");
 	});
 
 	afterEach(() => {
-		process.env.NODE_ENV = previousNodeEnv;
+		vi.unstubAllEnvs();
 	});
 
 	it("is disabled in production even when a token is present", async () => {
-		process.env.NODE_ENV = "production";
+		vi.stubEnv("NODE_ENV", "production");
 
 		const response = await PUT(
 			new Request("http://localhost/api/assignment/upload?token=guessed-key", { method: "PUT" }),
