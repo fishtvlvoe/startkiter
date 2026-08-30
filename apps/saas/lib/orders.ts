@@ -1,3 +1,4 @@
+import { redeemCouponInTransaction } from "@startkiter/coupons";
 import { db } from "@startkiter/database";
 import { handleRefundInvoice } from "@startkiter/api/modules/course/lib/invoice-events";
 import { sendWelcomeEmailsForOrder } from "@startkiter/api/modules/course/lib/send-welcome-email";
@@ -18,46 +19,35 @@ import { loadGatewayCredentials } from "./checkout-gateway-settings";
 
 export { loadPayUniCredentials } from "./payuni-credentials";
 
-export async function createPendingOrderForUser(
-	userId: string,
-	amount: number = MVP_AMOUNT_TWD,
-	sku: string = MVP_SKU,
-	invoicePreference?: InvoicePreferenceInput,
-	paymentGateway: CheckoutGatewayType = "payuni",
-): Promise<OrderRecord> {
-	const pending = buildPendingOrderInput({
-		userId,
-		sku,
-		amount,
-		paymentGateway,
-	});
-	const row = await db.order.create({
-		data: {
-			orderNo: pending.orderNo,
-			userId: pending.userId,
-			sku: pending.sku,
-			amount: pending.amount,
-			currency: pending.currency,
-			status: "pending",
-			paymentGateway,
-			courseAccess: false,
-			kitClaimEligible: false,
-			...(invoicePreference
-				? (() => {
-						const preference = normalizeInvoicePreference(invoicePreference);
-						return {
-							invoiceType: preference.invoiceType,
-							invoiceCarrierType: preference.carrierType,
-							invoiceCarrierId: preference.carrierId || null,
-							invoiceTaxId: preference.taxId || null,
-							invoiceTitle: preference.title || null,
-							invoiceAddress: preference.address || null,
-							invoiceLoveCode: preference.loveCode || null,
-						};
-					})()
-				: {}),
-		},
-	});
+export class CouponCheckoutError extends Error {
+	readonly reason: "not_found" | "expired" | "not_started" | "max_redemptions_reached";
+
+	constructor(reason: CouponCheckoutError["reason"]) {
+		super(`invalid_coupon:${reason}`);
+		this.name = "CouponCheckoutError";
+		this.reason = reason;
+	}
+}
+
+function mapOrderRow(row: {
+	id: string;
+	userId: string;
+	orderNo: string;
+	sku: string;
+	amount: number;
+	currency: string;
+	status: string;
+	paymentGateway: string;
+	gatewayTradeNo: string | null;
+	courseAccess: boolean;
+	kitClaimEligible: boolean;
+	paidAt: Date | null;
+	refundedAt: Date | null;
+	createdAt: Date;
+	updatedAt: Date;
+	couponId?: string | null;
+	couponCode?: string | null;
+}): OrderRecord & { couponId?: string | null; couponCode?: string | null } {
 	return {
 		id: row.id,
 		userId: row.userId,
@@ -65,7 +55,7 @@ export async function createPendingOrderForUser(
 		sku: row.sku,
 		amount: row.amount,
 		currency: row.currency,
-		status: row.status,
+		status: row.status as OrderRecord["status"],
 		paymentGateway: row.paymentGateway as CheckoutGatewayType,
 		gatewayTradeNo: row.gatewayTradeNo,
 		courseAccess: row.courseAccess,
@@ -74,9 +64,89 @@ export async function createPendingOrderForUser(
 		refundedAt: row.refundedAt,
 		createdAt: row.createdAt,
 		updatedAt: row.updatedAt,
+		couponId: row.couponId ?? null,
+		couponCode: row.couponCode ?? null,
 	};
 }
 
+function invoicePreferenceData(invoicePreference?: InvoicePreferenceInput) {
+	if (!invoicePreference) return {};
+	const preference = normalizeInvoicePreference(invoicePreference);
+	return {
+		invoiceType: preference.invoiceType,
+		invoiceCarrierType: preference.carrierType,
+		invoiceCarrierId: preference.carrierId || null,
+		invoiceTaxId: preference.taxId || null,
+		invoiceTitle: preference.title || null,
+		invoiceAddress: preference.address || null,
+		invoiceLoveCode: preference.loveCode || null,
+	};
+}
+
+/**
+ * 建立 pending 訂單。若帶 couponCode，在同一 transaction 內：
+ * 悲觀鎖 coupon → 檢查 timesRedeemed → 遞增 → 寫入 order.couponId/couponCode。
+ */
+export async function createPendingOrderForUser(
+	userId: string,
+	amount: number = MVP_AMOUNT_TWD,
+	sku: string = MVP_SKU,
+	invoicePreference?: InvoicePreferenceInput,
+	paymentGateway: CheckoutGatewayType = "payuni",
+	couponCode?: string,
+): Promise<OrderRecord & { couponId?: string | null; couponCode?: string | null }> {
+	const pending = buildPendingOrderInput({
+		userId,
+		sku,
+		amount,
+		paymentGateway,
+	});
+
+	try {
+		const row = await db.$transaction(
+			async (tx) => {
+				let chargeAmount = pending.amount;
+				let couponId: string | null = null;
+				let storedCouponCode: string | null = null;
+
+				if (couponCode && couponCode.trim() !== "") {
+					const redeemed = await redeemCouponInTransaction(tx, couponCode, amount);
+					if (!redeemed.ok) {
+						throw new CouponCheckoutError(redeemed.reason);
+					}
+					chargeAmount = redeemed.finalAmount;
+					couponId = redeemed.couponId;
+					storedCouponCode = redeemed.couponCode;
+				}
+
+				return tx.order.create({
+					data: {
+						orderNo: pending.orderNo,
+						userId: pending.userId,
+						sku: pending.sku,
+						amount: chargeAmount,
+						currency: pending.currency,
+						status: "pending",
+						paymentGateway,
+						courseAccess: false,
+						kitClaimEligible: false,
+						couponId,
+						couponCode: storedCouponCode,
+						...invoicePreferenceData(invoicePreference),
+					},
+				});
+			},
+			{ maxWait: 10_000, timeout: 30_000 },
+		);
+
+		return mapOrderRow(row);
+	} catch (error) {
+		if (error instanceof CouponCheckoutError) {
+			throw error;
+		}
+		throw error;
+	}
+}
 
 export async function markOrderPaid(
 	orderId: string,

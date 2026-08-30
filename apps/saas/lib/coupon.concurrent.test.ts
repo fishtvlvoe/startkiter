@@ -1,132 +1,114 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 /**
- * Red-light（coupon-security-fixes / task 2.1）：
- * maxRedemptions=1 時，兩個並行 checkout 最多只能成功 1 個。
- * 現行 checkout 只呼叫 validateCoupon、不原子遞增 timesRedeemed，兩個請求都會過。
+ * 並行兌換：maxRedemptions=1 時兩個併發 createPendingOrder 最多成功 1 個。
+ * 用可序列化的 in-memory db mock 模擬 FOR UPDATE 悲觀鎖。
  */
 
-vi.mock("@startkiter/auth", () => ({
-	auth: {
-		api: {
-			getSession: vi.fn(),
+const couponState = {
+	id: "coupon_once",
+	code: "TEST_COUPON_ONCE",
+	discountType: "amount",
+	amountOff: 100,
+	percentOff: null as number | null,
+	maxDiscountAmount: null as number | null,
+	maxRedemptions: 1,
+	timesRedeemed: 0,
+	active: true,
+	startsAt: null as Date | null,
+	expiresAt: null as Date | null,
+};
+
+let transactionTail: Promise<unknown> = Promise.resolve();
+
+function createTx() {
+	return {
+		$executeRaw: vi.fn(async () => 1),
+		coupon: {
+			findUnique: vi.fn(async ({ where }: { where: { code?: string; id?: string } }) => {
+				if (where.code === couponState.code || where.id === couponState.id) {
+					return { ...couponState };
+				}
+				return null;
+			}),
+			update: vi.fn(async ({ data }: { data: { timesRedeemed?: { increment: number } } }) => {
+				if (data.timesRedeemed?.increment) {
+					couponState.timesRedeemed += data.timesRedeemed.increment;
+				}
+				return { ...couponState };
+			}),
+		},
+		order: {
+			create: vi.fn(async ({ data }: { data: Record<string, unknown> }) => {
+				const now = new Date();
+				return {
+					id: `order_${Math.random().toString(36).slice(2, 8)}`,
+					gatewayTradeNo: null,
+					courseAccess: false,
+					kitClaimEligible: false,
+					paidAt: null,
+					refundedAt: null,
+					createdAt: now,
+					updatedAt: now,
+					currency: "TWD",
+					status: "pending",
+					...data,
+				};
+			}),
+		},
+	};
+}
+
+vi.mock("@startkiter/database", () => ({
+	db: {
+		$transaction: vi.fn(async (callback: (tx: ReturnType<typeof createTx>) => Promise<unknown>) => {
+			const run = transactionTail.then(() => callback(createTx()));
+			transactionTail = run.then(
+				() => undefined,
+				() => undefined,
+			);
+			return run;
+		}),
+		coupon: {
+			findUnique: vi.fn(async ({ where }: { where: { code?: string } }) => {
+				if (where.code === couponState.code) return { ...couponState };
+				return null;
+			}),
+		},
+		order: {
+			findUnique: vi.fn(),
+			create: vi.fn(),
 		},
 	},
 }));
 
-vi.mock("@startkiter/coupons", () => ({
-	validateCoupon: vi.fn(),
+vi.mock("@startkiter/api/modules/course/lib/invoice-events", () => ({
+	handleRefundInvoice: vi.fn(),
 }));
 
-vi.mock("./orders", () => ({
-	createPendingOrderForUser: vi.fn(),
-	buildCheckoutSession: vi.fn(),
+vi.mock("@startkiter/api/modules/course/lib/send-welcome-email", () => ({
+	sendWelcomeEmailsForOrder: vi.fn(),
+}));
+
+vi.mock("@startkiter/api/modules/course/lib/order-refunds", () => ({
+	refundOrderThroughGateway: vi.fn(),
+	withOrderStateLock: vi.fn(),
+}));
+
+vi.mock("./payuni-credentials", () => ({
+	loadPayUniCredentials: vi.fn(),
 }));
 
 vi.mock("./checkout-gateway-settings", () => ({
-	loadEnabledGatewayCredentials: vi.fn(),
+	loadGatewayCredentials: vi.fn(),
 }));
 
-vi.mock("./public-base-url", () => ({
-	resolvePublicBaseUrl: vi.fn(() => "https://example.com"),
-}));
-
-vi.mock("@startkiter/payments", async (importOriginal) => {
-	const actual = await importOriginal<typeof import("@startkiter/payments")>();
-	return {
-		...actual,
-		getProduct: vi.fn(),
-	};
-});
-
-import { auth } from "@startkiter/auth";
-import { validateCoupon } from "@startkiter/coupons";
-import { MVP_AMOUNT_TWD, MVP_SKU, getProduct } from "@startkiter/payments";
-
-import { POST } from "../app/api/checkout/route";
-import { buildCheckoutSession, createPendingOrderForUser } from "./orders";
-import { loadEnabledGatewayCredentials } from "./checkout-gateway-settings";
-
-const mockedGetSession = vi.mocked(auth.api.getSession);
-const mockedValidateCoupon = vi.mocked(validateCoupon);
-const mockedLoadCredentials = vi.mocked(loadEnabledGatewayCredentials);
-const mockedCreatePendingOrder = vi.mocked(createPendingOrderForUser);
-const mockedBuildCheckoutSession = vi.mocked(buildCheckoutSession);
-const mockedGetProduct = vi.mocked(getProduct);
-
-const SESSION = { user: { id: "user_concurrent", email: "buyer@example.com" } };
-const MVP_PRODUCT = {
-	productId: MVP_SKU,
-	sku: MVP_SKU,
-	amount: MVP_AMOUNT_TWD,
-	currency: "TWD" as const,
-};
-
-function jsonRequest(body: unknown) {
-	return new Request("http://localhost/api/checkout", {
-		method: "POST",
-		headers: { "content-type": "application/json" },
-		body: JSON.stringify(body),
-	});
-}
-
-function baseOrder(amount: number, orderNo: string) {
-	return {
-		id: `order_${orderNo}`,
-		userId: "user_concurrent",
-		orderNo,
-		sku: MVP_SKU,
-		amount,
-		currency: "TWD",
-		status: "pending" as const,
-		paymentGateway: "payuni" as const,
-		gatewayTradeNo: null,
-		courseAccess: false,
-		kitClaimEligible: false,
-		paidAt: null,
-		refundedAt: null,
-		createdAt: new Date(),
-		updatedAt: new Date(),
-	};
-}
+import { CouponCheckoutError, createPendingOrderForUser } from "./orders";
 
 describe("coupon concurrent checkout redemption (maxRedemptions=1)", () => {
-	const couponState = {
-		code: "TEST_COUPON_ONCE",
-		maxRedemptions: 1,
-		timesRedeemed: 0,
-	};
-
 	beforeEach(() => {
-		vi.clearAllMocks();
 		couponState.timesRedeemed = 0;
-
-		mockedGetSession.mockResolvedValue(SESSION as never);
-		mockedLoadCredentials.mockResolvedValue({ gateway: "payuni", credentials: {} } as never);
-		mockedBuildCheckoutSession.mockResolvedValue({
-			type: "form_post",
-			formData: {},
-			gatewaySessionId: "gw_1",
-		} as never);
-		mockedGetProduct.mockResolvedValue(MVP_PRODUCT);
-
-		// 模擬現行行為：只檢查、不在同一交易內遞增（競態／重複利用窗口）
-		mockedValidateCoupon.mockImplementation(async (code: string) => {
-			if (code.trim().toUpperCase() !== couponState.code) {
-				return { valid: false as const, reason: "not_found" as const };
-			}
-			if (couponState.timesRedeemed >= couponState.maxRedemptions) {
-				return { valid: false as const, reason: "max_redemptions_reached" as const };
-			}
-			return { valid: true as const, discountAmount: 100, finalAmount: 8700 };
-		});
-
-		let orderSeq = 0;
-		mockedCreatePendingOrder.mockImplementation(async () => {
-			orderSeq += 1;
-			// 現行漏洞：建立訂單後沒有原子遞增 timesRedeemed
-			return baseOrder(8700, `SK_CONCURRENT_${orderSeq}`);
-		});
+		transactionTail = Promise.resolve();
 	});
 
 	afterEach(() => {
@@ -134,15 +116,31 @@ describe("coupon concurrent checkout redemption (maxRedemptions=1)", () => {
 	});
 
 	it("rejects at least one of two concurrent checkouts for TEST_COUPON_ONCE", async () => {
-		const [first, second] = await Promise.all([
-			POST(jsonRequest({ couponCode: "TEST_COUPON_ONCE" })),
-			POST(jsonRequest({ couponCode: "TEST_COUPON_ONCE" })),
+		const results = await Promise.allSettled([
+			createPendingOrderForUser("user_a", 8800, "startkiter-mvp", undefined, "payuni", "TEST_COUPON_ONCE"),
+			createPendingOrderForUser("user_b", 8800, "startkiter-mvp", undefined, "payuni", "TEST_COUPON_ONCE"),
 		]);
 
-		const statuses = [first.status, second.status];
-		const successCount = statuses.filter((status) => status === 200).length;
+		const fulfilled = results.filter((result) => result.status === "fulfilled");
+		const rejected = results.filter((result) => result.status === "rejected");
 
-		expect(successCount).toBeLessThanOrEqual(1);
+		expect(fulfilled.length).toBeLessThanOrEqual(1);
+		expect(rejected.length).toBeGreaterThanOrEqual(1);
 		expect(couponState.timesRedeemed).toBeLessThanOrEqual(couponState.maxRedemptions);
+
+		for (const result of rejected) {
+			expect(result.status).toBe("rejected");
+			if (result.status === "rejected") {
+				expect(result.reason).toBeInstanceOf(CouponCheckoutError);
+			}
+		}
+
+		for (const result of fulfilled) {
+			if (result.status === "fulfilled") {
+				expect(result.value.couponId).toBe(couponState.id);
+				expect(result.value.couponCode).toBe(couponState.code);
+				expect(result.value.amount).toBe(8700);
+			}
+		}
 	});
 });

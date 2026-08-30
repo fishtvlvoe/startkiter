@@ -1,3 +1,3 @@
 export type { Coupon } from "./types";
-export { validateCoupon } from "./validate";
-export type { ValidateCouponResult } from "./validate";
+export { redeemCouponInTransaction, validateCoupon } from "./validate";
+export type { RedeemCouponResult, ValidateCouponResult } from "./validate";

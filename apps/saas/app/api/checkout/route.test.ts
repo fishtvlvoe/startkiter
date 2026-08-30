@@ -101,7 +101,14 @@ describe("POST /api/checkout coupon integration", () => {
 		const response = await POST(jsonRequest({ couponCode: "SAVE100" }));
 
 		expect(response.status).toBe(200);
-		expect(mockedCreatePendingOrder).toHaveBeenCalledWith("user_1", 8700, MVP_SKU, undefined, "payuni");
+		expect(mockedCreatePendingOrder).toHaveBeenCalledWith(
+			"user_1",
+			8800,
+			MVP_SKU,
+			undefined,
+			"payuni",
+			"SAVE100",
+		);
 		const body = await response.json();
 		expect(body.amount).toBe(8700);
 	});
@@ -125,7 +132,14 @@ describe("POST /api/checkout coupon integration", () => {
 
 		expect(response.status).toBe(200);
 		expect(mockedValidateCoupon).not.toHaveBeenCalled();
-		expect(mockedCreatePendingOrder).toHaveBeenCalledWith("user_1", 8800, MVP_SKU, undefined, "payuni");
+		expect(mockedCreatePendingOrder).toHaveBeenCalledWith(
+			"user_1",
+			8800,
+			MVP_SKU,
+			undefined,
+			"payuni",
+			undefined,
+		);
 	});
 
 	it("charges the bundle's configured price and stores the bundle id as sku when productId is a bundle (Scenario: Checkout amount for a bundle product uses the bundle's configured price / Created order for a bundle stores the bundle's own product id)", async () => {
@@ -136,7 +150,14 @@ describe("POST /api/checkout coupon integration", () => {
 
 		expect(response.status).toBe(200);
 		expect(mockedGetProduct).toHaveBeenCalledWith("bundle_1");
-		expect(mockedCreatePendingOrder).toHaveBeenCalledWith("user_1", 6000, "bundle_1", undefined, "payuni");
+		expect(mockedCreatePendingOrder).toHaveBeenCalledWith(
+			"user_1",
+			6000,
+			"bundle_1",
+			undefined,
+			"payuni",
+			undefined,
+		);
 		const body = await response.json();
 		expect(body.amount).toBe(6000);
 		expect(body.sku).toBe("bundle_1");
