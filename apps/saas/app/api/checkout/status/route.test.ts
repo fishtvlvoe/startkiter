@@ -16,6 +16,15 @@ describe("checkout order status", () => {
 		vi.clearAllMocks();
 	});
 
+	it("returns 401 when there is no session", async () => {
+		vi.mocked(auth.api.getSession).mockResolvedValue(null as never);
+
+		const response = await GET(new Request("http://localhost:3000/api/checkout/status?orderNo=ORDER-1"));
+
+		expect(response.status).toBe(401);
+		expect(db.order.findFirst).not.toHaveBeenCalled();
+	});
+
 	it("returns only the signed-in user's order status", async () => {
 		vi.mocked(auth.api.getSession).mockResolvedValue({ user: { id: "user-1" } } as never);
 		vi.mocked(db.order.findFirst).mockResolvedValue({ status: "paid" } as never);
