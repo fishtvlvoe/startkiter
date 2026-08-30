@@ -75,6 +75,11 @@ export function resolveLessonMedia(
 			isDemoFallback: false,
 		};
 	}
+	if (env.NODE_ENV === "production") {
+		throw new Error(
+			"BUNNY_LIBRARY_ID 未設定：production 環境不允許用 placeholder 影片頂替付費課程內容",
+		);
+	}
 	return {
 		mediaUrl: PLACEHOLDER_MEDIA,
 		mediaKind: "placeholder",

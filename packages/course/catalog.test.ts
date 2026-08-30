@@ -23,11 +23,26 @@ describe("lesson catalog", () => {
 		);
 	});
 
-	it("falls back to placeholder when Bunny library missing", () => {
-		const lesson = getLesson("lesson-01", {});
+	it("falls back to placeholder when Bunny library missing outside production", () => {
+		const lesson = getLesson("lesson-01", { NODE_ENV: "development" });
 		expect(lesson?.mediaKind).toBe("placeholder");
 		expect(lesson?.isDemoFallback).toBe(true);
 		expect(lesson?.mediaUrl).toContain("flower.mp4");
+	});
+
+	it("fails closed when Bunny library missing in production", () => {
+		expect(() =>
+			resolveLessonMedia(
+				{
+					id: "lesson-01",
+					title: "t",
+					order: 0,
+					description: "d",
+					bunnyVideoId: "guid",
+				},
+				{ NODE_ENV: "production" },
+			),
+		).toThrow(/BUNNY_LIBRARY_ID/);
 	});
 
 	it("allows env override per lesson video id", () => {
