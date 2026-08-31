@@ -214,6 +214,28 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 		expect(html).toContain('data-testid="sidebar-group-g2"');
 		expect(html).toContain('data-sidebar-group-collapsed="false"');
 	});
+
+	it("renders visual section divider for operator items under unassigned list when user is operator", () => {
+		mockIsCollapsed = false;
+		mockCanAccessAdmin = true;
+		const html = renderToStaticMarkup(<NavBar />);
+
+		expect(html).toContain('data-testid="sidebar-group-admin-section"');
+		expect(html).toContain("管理");
+		expect(html).toContain("後台設定");
+		expect(html).toContain("開始");
+	});
+
+	it("does not render operator admin section when user is not operator", () => {
+		mockIsCollapsed = false;
+		mockCanAccessAdmin = false;
+		const html = renderToStaticMarkup(<NavBar />);
+
+		expect(html).not.toContain('data-testid="sidebar-group-admin-section"');
+		expect(html).not.toContain("後台設定");
+		expect(html).toContain("開始");
+		expect(html).toContain("課程");
+	});
 });
 
 describe("NavBar iconMap & resolveIcon coverage", () => {

@@ -62,7 +62,7 @@ import {
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { type DragEvent, type MouseEvent, type PointerEvent, useMemo, useRef, useState } from "react";
+import { type DragEvent, Fragment, type MouseEvent, type PointerEvent, useMemo, useRef, useState } from "react";
 
 import { OrganzationSelect } from "../../organizations/components/OrganizationSelect";
 import { useIsMobile } from "../hooks/use-media-query";
@@ -83,6 +83,7 @@ interface NavMenuItem {
 	icon: React.ComponentType<{ className?: string }>;
 	isActive: boolean;
 	order: number;
+	requiresOperator?: boolean;
 	subItems?: NavSubItem[];
 }
 
@@ -137,7 +138,17 @@ function NavMenuList({
 	return (
 		<TooltipProvider delay={0}>
 			<ul className={listClassName}>
-				{menuItems.map((menuItem) => {
+				{menuItems.map((menuItem, idx) => {
+					const isFirstOperator = menuItem.requiresOperator && (idx === 0 || !menuItems[idx - 1]?.requiresOperator);
+					const divider = isFirstOperator && !isCollapsedEffective ? (
+						<li key="admin-section-divider" className="pt-2 pb-1" data-testid="nav-menu-admin-divider">
+							<div className="border-t border-[#c3c4c7]/15 mb-2" />
+							<div className="px-3 text-[10px] font-semibold uppercase tracking-wider text-[#c3c4c7]/70">
+								管理
+							</div>
+						</li>
+					) : null;
+
 					const parentClasses = cn(
 						"gap-3 px-3 py-2 text-sm flex w-full items-center rounded-lg whitespace-nowrap transition-colors",
 						{
@@ -160,154 +171,165 @@ function NavMenuList({
 						if (isCollapsedEffective) {
 							if (!menuItem.isActive) {
 								return (
-									<li key={menuItem.id}>
-										<Tooltip>
-											<TooltipTrigger
-												render={(props) => (
-													<Link
-														{...props}
-														href={menuItem.href}
-														onClick={(e) => {
-															props.onClick?.(e);
-															onLinkClick?.();
-														}}
-														className={cn(props.className, parentClasses)}
-														prefetch
-													>
-														{parentIcon}
-													</Link>
-												)}
-											/>
-											<TooltipContent side="right">{menuItem.label}</TooltipContent>
-										</Tooltip>
-									</li>
+									<Fragment key={menuItem.id}>
+										{divider}
+										<li>
+											<Tooltip>
+												<TooltipTrigger
+													render={(props) => (
+														<Link
+															{...props}
+															href={menuItem.href}
+															onClick={(e) => {
+																props.onClick?.(e);
+																onLinkClick?.();
+															}}
+															className={cn(props.className, parentClasses)}
+															prefetch
+														>
+															{parentIcon}
+														</Link>
+													)}
+												/>
+												<TooltipContent side="right">{menuItem.label}</TooltipContent>
+											</Tooltip>
+										</li>
+									</Fragment>
 								);
 							}
 
 							return (
-								<li key={menuItem.id} className="w-full">
-									<DropdownMenu>
-										<Tooltip>
-											<TooltipTrigger
-												render={(tp) => (
-													<DropdownMenuTrigger
-														render={(mp) => {
-															const m = mergeTriggerProps(tp, mp);
-															return (
-																<button
-																	{...m}
-																	type="button"
-																	className={cn(m.className as string | undefined, parentClasses)}
-																	aria-label={menuItem.label}
-																>
-																	{parentIcon}
-																</button>
-															);
-														}}
-													/>
-												)}
-											/>
-											<TooltipContent side="right">{menuItem.label}</TooltipContent>
-										</Tooltip>
-										<DropdownMenuContent side="right" align="start" sideOffset={8}>
-											<DropdownMenuGroup>
-												<DropdownMenuLabel className="font-normal text-muted-foreground">
-													{menuItem.label}
-												</DropdownMenuLabel>
-												{menuItem.subItems.map((subItem) => {
-													const subActive = isNavSubItemActive(pathname, subItem.href);
-													return (
-														<DropdownMenuItem
-															key={subItem.href}
-															nativeButton={false}
-															render={(props) => (
-																	<Link
-																		{...props}
-																		href={subItem.href}
-																		className={cn(
-																			props.className,
-																			"flex w-full cursor-pointer items-center",
-																			subActive && "font-semibold",
-																		)}
+								<Fragment key={menuItem.id}>
+									{divider}
+									<li className="w-full">
+										<DropdownMenu>
+											<Tooltip>
+												<TooltipTrigger
+													render={(tp) => (
+														<DropdownMenuTrigger
+															render={(mp) => {
+																const m = mergeTriggerProps(tp, mp);
+																return (
+																	<button
+																		{...m}
+																		type="button"
+																		className={cn(m.className as string | undefined, parentClasses)}
+																		aria-label={menuItem.label}
 																	>
-																		{subItem.label}
-																	</Link>
-															)}
+																		{parentIcon}
+																	</button>
+																);
+															}}
 														/>
-													);
-												})}
-											</DropdownMenuGroup>
-										</DropdownMenuContent>
-									</DropdownMenu>
-								</li>
+													)}
+												/>
+												<TooltipContent side="right">{menuItem.label}</TooltipContent>
+											</Tooltip>
+											<DropdownMenuContent side="right" align="start" sideOffset={8}>
+												<DropdownMenuGroup>
+													<DropdownMenuLabel className="font-normal text-muted-foreground">
+														{menuItem.label}
+													</DropdownMenuLabel>
+													{menuItem.subItems.map((subItem) => {
+														const subActive = isNavSubItemActive(pathname, subItem.href);
+														return (
+															<DropdownMenuItem
+																key={subItem.href}
+																nativeButton={false}
+																render={(props) => (
+																		<Link
+																			{...props}
+																			href={subItem.href}
+																			className={cn(
+																				props.className,
+																				"flex w-full cursor-pointer items-center",
+																				subActive && "font-semibold",
+																			)}
+																		>
+																			{subItem.label}
+																		</Link>
+																)}
+															/>
+														);
+													})}
+												</DropdownMenuGroup>
+											</DropdownMenuContent>
+										</DropdownMenu>
+									</li>
+								</Fragment>
 							);
 						}
 
 						return (
-							<li key={menuItem.id} className="gap-0.5 flex flex-col">
-								<Link href={menuItem.href} onClick={onLinkClick} className={parentClasses} prefetch>
-									{parentIcon}
-									<span
-										className={cn({
-											"text-white": menuItem.isActive,
-											"text-[#c3c4c7]": !menuItem.isActive,
-										})}
-									>
-										{menuItem.label}
-									</span>
-								</Link>
-								{menuItem.isActive && (
-									<div className="mt-1 relative">
-										{/* Vertical guide: aligned with parent icon center; starts below parent row (no overlap with icon) */}
-										<div
-											className="top-0 bottom-0 left-5.5 absolute w-px -translate-x-1/2 bg-border/60"
-											aria-hidden
-										/>
-										<ul className="gap-0.5 pl-9 flex flex-col">
-											{menuItem.subItems.map((subItem) => {
-												const subActive = isNavSubItemActive(pathname, subItem.href);
-												return (
-													<li key={subItem.href}>
-														<Link
-															href={subItem.href}
-															onClick={onLinkClick}
-															className={cn(
-																"py-1.5 pl-2 pr-3 text-sm flex w-full items-center rounded-md text-[#c3c4c7] transition-colors hover:bg-white/5",
-																subActive && "font-semibold text-white",
-															)}
-															prefetch
-														>
-															{subItem.label}
-														</Link>
-													</li>
-												);
+							<Fragment key={menuItem.id}>
+								{divider}
+								<li className="gap-0.5 flex flex-col">
+									<Link href={menuItem.href} onClick={onLinkClick} className={parentClasses} prefetch>
+										{parentIcon}
+										<span
+											className={cn({
+												"text-white": menuItem.isActive,
+												"text-[#c3c4c7]": !menuItem.isActive,
 											})}
-										</ul>
-									</div>
+										>
+											{menuItem.label}
+										</span>
+									</Link>
+									{menuItem.isActive && (
+										<div className="mt-1 relative">
+											{/* Vertical guide: aligned with parent icon center; starts below parent row (no overlap with icon) */}
+											<div
+												className="top-0 bottom-0 left-5.5 absolute w-px -translate-x-1/2 bg-border/60"
+												aria-hidden
+											/>
+											<ul className="gap-0.5 pl-9 flex flex-col">
+												{menuItem.subItems.map((subItem) => {
+													const subActive = isNavSubItemActive(pathname, subItem.href);
+													return (
+														<li key={subItem.href}>
+															<Link
+																href={subItem.href}
+																onClick={onLinkClick}
+																className={cn(
+																	"py-1.5 pl-2 pr-3 text-sm flex w-full items-center rounded-md text-[#c3c4c7] transition-colors hover:bg-white/5",
+																	subActive && "font-semibold text-white",
+																)}
+																prefetch
+															>
+																{subItem.label}
+															</Link>
+														</li>
+													);
+												})}
+											</ul>
+										</div>
 									)}
 								</li>
-							);
-						}
-
-						const menuItemContent = (
-							<Link href={menuItem.href} onClick={onLinkClick} className={parentClasses} prefetch>
-								{parentIcon}
-								{!isCollapsedEffective && (
-									<span
-										className={cn({
-											"text-white": menuItem.isActive,
-											"text-[#c3c4c7]": !menuItem.isActive,
-										})}
-									>
-										{menuItem.label}
-									</span>
-								)}
-							</Link>
+							</Fragment>
 						);
+					}
 
-						if (isCollapsedEffective) {
-							return (
-								<li key={menuItem.id}>
+					const menuItemContent = (
+						<Link href={menuItem.href} onClick={onLinkClick} className={parentClasses} prefetch>
+							{parentIcon}
+							{!isCollapsedEffective && (
+								<span
+									className={cn({
+										"text-white": menuItem.isActive,
+										"text-[#c3c4c7]": !menuItem.isActive,
+									})}
+								>
+									{menuItem.label}
+								</span>
+							)}
+						</Link>
+					);
+
+					if (isCollapsedEffective) {
+						return (
+							<Fragment key={menuItem.id}>
+								{divider}
+								<li>
 									<Tooltip>
 										<TooltipTrigger
 											render={(props) => (
@@ -328,11 +350,17 @@ function NavMenuList({
 										<TooltipContent side="right">{menuItem.label}</TooltipContent>
 									</Tooltip>
 								</li>
-							);
-						}
+							</Fragment>
+						);
+					}
 
-						return <li key={menuItem.id}>{menuItemContent}</li>;
-					})}
+					return (
+						<Fragment key={menuItem.id}>
+							{divider}
+							<li>{menuItemContent}</li>
+						</Fragment>
+					);
+				})}
 				</ul>
 		</TooltipProvider>
 	);
@@ -558,32 +586,54 @@ function SidebarGroupedNav({
 					</div>
 				);
 			})}
-			{unassignedItems.length > 0 && (
-				// biome-ignore lint/a11y/noStaticElementInteractions: 拖曳分組容器不是互動控制項本身，鍵盤操作走各選單連結
-				<div
-					data-testid="sidebar-group-unassigned"
-					onDragOver={(event: DragEvent<HTMLDivElement>) => event.preventDefault()}
-					onDrop={(event: DragEvent<HTMLDivElement>) => {
-						event.preventDefault();
-						if (isSaving) {
-							return;
-						}
-						const menuItemId = event.dataTransfer.getData("text/plain");
-						if (menuItemId) {
-							onDropItem(menuItemId, null);
-						}
-					}}
-				>
-					<div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#c3c4c7]/70">
-						{unassignedLabel}
+			{unassignedItems.length > 0 && (() => {
+				const userUnassigned = unassignedItems.filter((item) => !item.requiresOperator);
+				const operatorUnassigned = unassignedItems.filter((item) => item.requiresOperator);
+
+				return (
+					// biome-ignore lint/a11y/noStaticElementInteractions: 拖曳分組容器不是互動控制項本身，鍵盤操作走各選單連結
+					<div
+						data-testid="sidebar-group-unassigned"
+						onDragOver={(event: DragEvent<HTMLDivElement>) => event.preventDefault()}
+						onDrop={(event: DragEvent<HTMLDivElement>) => {
+							event.preventDefault();
+							if (isSaving) {
+								return;
+							}
+							const menuItemId = event.dataTransfer.getData("text/plain");
+							if (menuItemId) {
+								onDropItem(menuItemId, null);
+							}
+						}}
+						className="gap-3 flex flex-col"
+					>
+						{userUnassigned.length > 0 && (
+							<div>
+								<div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#c3c4c7]/70">
+									{unassignedLabel}
+								</div>
+								<ul className="gap-0.5 flex list-none flex-col">
+									{userUnassigned.map((menuItem) => (
+										<SidebarGroupedNavItem key={menuItem.id} menuItem={menuItem} isSaving={isSaving} />
+									))}
+								</ul>
+							</div>
+						)}
+						{operatorUnassigned.length > 0 && (
+							<div data-testid="sidebar-group-admin-section">
+								<div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#c3c4c7]/70 border-t border-[#c3c4c7]/15 pt-3 mt-1">
+									管理
+								</div>
+								<ul className="gap-0.5 flex list-none flex-col">
+									{operatorUnassigned.map((menuItem) => (
+										<SidebarGroupedNavItem key={menuItem.id} menuItem={menuItem} isSaving={isSaving} />
+									))}
+								</ul>
+							</div>
+						)}
 					</div>
-					<ul className="gap-0.5 flex list-none flex-col">
-						{unassignedItems.map((menuItem) => (
-							<SidebarGroupedNavItem key={menuItem.id} menuItem={menuItem} isSaving={isSaving} />
-						))}
-					</ul>
-				</div>
-			)}
+				);
+			})()}
 		</div>
 	);
 }
@@ -685,6 +735,7 @@ export function NavBar() {
 			icon: resolveIcon(item.icon),
 			isActive: item.isActive,
 			order: item.order,
+			requiresOperator: item.requiresOperator,
 		}));
 
 		const items: NavMenuItem[] = [...coreItems];
