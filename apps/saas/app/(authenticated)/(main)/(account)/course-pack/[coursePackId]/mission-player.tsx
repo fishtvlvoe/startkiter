@@ -30,6 +30,10 @@ function getFormValues(form: HTMLFormElement): Record<string, string> {
 	);
 }
 
+function getStructuredFormElement(blockId: string): HTMLFormElement | null {
+	return document.querySelector<HTMLFormElement>(`form[data-block-id="${blockId}"]`);
+}
+
 export function CoursePackMissionPlayer({ missions }: { missions: LearnerMission[] }) {
 	const [states, setStates] = useState<Record<string, MissionState>>({});
 
@@ -89,18 +93,21 @@ export function CoursePackMissionPlayer({ missions }: { missions: LearnerMission
 						) : (
 							<div className="mt-6 space-y-4">
 								{mission.mission.action.surface === "structured_form" ? (
-									<div
-										onSubmit={(event) => {
-											if (!(event.target instanceof HTMLFormElement)) return;
-											event.preventDefault();
-											void executeMission(mission, getFormValues(event.target));
-										}}
-									>
+									<>
 										<MissionBlockRenderer action={mission.mission.action} blockId={blockId} />
-										<Button type="submit" className="mt-4" loading={state.isSubmitting}>
+										<Button
+											type="button"
+											className="mt-4"
+											loading={state.isSubmitting}
+											onClick={() => {
+												const form = getStructuredFormElement(blockId);
+												if (!form) return;
+												void executeMission(mission, getFormValues(form));
+											}}
+										>
 											送出並檢查
 										</Button>
-									</div>
+									</>
 								) : (
 									<>
 										<MissionBlockRenderer action={mission.mission.action} blockId={blockId} />
