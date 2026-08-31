@@ -31,7 +31,7 @@
 - [ ] 10. Mission／Organization／site-agent（2026-08-31 Fish 已裁決方向，拆成 3 張獨立 SR）
   - [ ] 10a. site-agent 補搬遷（`port-site-agent` SR，已寫完待實作，指派 Grok）
   - [ ] 10b. Mission 補前台入口（`mission-frontend-entry` SR，已寫完待實作，指派 Codex；調查發現 CoursePack 系統前後台完全沒有入口，範圍比預期大）
-  - [ ] 10c. Organization 完整度覆查（`organization-completeness-review` SR，已寫完待實作，指派 cursor-agent；先稽核端對端流程再修復，不是預先寫死改哪些檔案）
+  - [x] 10c. Organization 完整度覆查（`organization-completeness-review` SR，已完成合併，commit 7f94d89a；cursor-agent 完成 Phase 1 稽核+Phase 2 修復：checkout→order.organizationId、成員課程存取、邀請 owner 邊界、錯誤通知、刪 org 政策；687 tests passing）
 - [ ] 11. 群眾模擬壓力測試（2026-08-31 Fish 新增，需求：0元課程 + 真人多方式註冊 + 多支 Agent 模擬使用者高頻互動找 bug，詳見下方「群眾模擬測試計畫」）
 - [ ] 7. Chatwoot 三管道 E2E（`unified-support-desk` task 9.4）— 已由老闆確認暫時擱置，非本輪優先。**排序調整（2026-08-31）**：移到最後，因為老闆需要親自在電腦前操作填信用卡/ATM資訊
 - [ ] 8. Real provider acceptance matrix — subscription/period notify/退款/發票要留 webhook+DB+idempotency 證據。**排序調整（2026-08-31）**：移到最後，同上原因
