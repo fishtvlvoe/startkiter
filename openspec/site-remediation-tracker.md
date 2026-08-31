@@ -30,7 +30,7 @@
 - [ ] 9. Schema/migration rehearsal — 查 redundant index、status/slug contract，乾淨 DB 跑一次 migrate deploy
 - [ ] 10. Mission／Organization／site-agent（2026-08-31 Fish 已裁決方向，拆成 3 張獨立 SR）
   - [x] 10a. site-agent 補搬遷（`port-site-agent` SR 已完成合併，commit 959eeecd；Grok 搬遷代碼，PM 驗證全部任務通過：auth 檢查正確、工具白名單安全、測試全綠）
-  - [ ] 10b. Mission 補前台入口（`mission-frontend-entry` SR，已寫完待實作，指派 Codex；調查發現 CoursePack 系統前後台完全沒有入口，範圍比預期大）
+  - [x] 10b. Mission 補前台入口（`mission-frontend-entry` SR 已完成合併，commit f16d5497；Codex 實作前台頁面，cursor-agent 審查發現 C1 Critical 問題並修正：後台列表+詳情頁、學員端詳情頁、表單提交完整串接；688 tests passing，C1 修正後測試全綠）
   - [x] 10c. Organization 完整度覆查（`organization-completeness-review` SR，已完成合併，commit 7f94d89a；cursor-agent 完成 Phase 1 稽核+Phase 2 修復：checkout→order.organizationId、成員課程存取、邀請 owner 邊界、錯誤通知、刪 org 政策；687 tests passing）
 - [ ] 11. 群眾模擬壓力測試（2026-08-31 Fish 新增，需求：0元課程 + 真人多方式註冊 + 多支 Agent 模擬使用者高頻互動找 bug，詳見下方「群眾模擬測試計畫」）
 - [ ] 7. Chatwoot 三管道 E2E（`unified-support-desk` task 9.4）— 已由老闆確認暫時擱置，非本輪優先。**排序調整（2026-08-31）**：移到最後，因為老闆需要親自在電腦前操作填信用卡/ATM資訊
