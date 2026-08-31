@@ -31,7 +31,7 @@ context: |
   # v1 硬邊界
   - 商品常數：startkiter-mvp 仍固定 8800 TWD 一次買斷；另提供 startkiter-mvp-subscription 訂閱方案（月繳/年繳，同一門課），2026-08-23 由 payuni-recurring-billing change 開放
   - 同一門課支援一次買斷與訂閱制並存，不做三階定價
-  - 不做 Organization / Member / Invitation；帳單掛 user
+  - Organization / Member / Invitation 為必要功能（見 organization-tenancy capability），2026-08-17 由 organization-tenancy change 逆轉先前排除規則；此行原寫「不做」已過期，僅保留紀錄不再適用（2026-08-31 由 Fish 確認以 v1-scope-boundary spec 為準）
   - LINE Login Channel 做登入；學員社群用課程內 LINE 邀請連結，允許客服用途的 LINE Messaging，不做 LIFF / 行銷 Bot，不能靜默入群。客服走 Chatwoot 統一工單（網站/LINE/Telegram）
   - 金鑰填後台、env fallback；沒設金流必須 fail-closed（POST /api/checkout → 503，不是 500）
   - 發票不在 MVP
