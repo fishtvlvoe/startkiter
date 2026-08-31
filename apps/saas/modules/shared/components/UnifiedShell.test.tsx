@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import UserLayout from "../../../app/(authenticated)/(main)/(account)/layout";
-import AgentPage from "../../../app/(authenticated)/(main)/(account)/agent/page";
+import AgentPage from "../../../app/agent/page";
 import AdminSettingsPage from "../../../app/(authenticated)/(main)/(account)/admin/settings/page";
 import CoursePage from "../../../app/(authenticated)/(main)/(account)/course/page";
 import AppPage from "../../../app/(authenticated)/(main)/(account)/app/page";
@@ -108,6 +108,10 @@ vi.mock("@ai/components/AiChat", () => ({
 	AiChat: () => <div data-testid="ai-chat">AI Chat Component</div>,
 }));
 
+vi.mock("../../../app/agent/agent-chat-client", () => ({
+	AgentChatClient: () => <div data-testid="agent-chat">Site Agent Chat</div>,
+}));
+
 describe("Unified Shell covering authenticated routes (Task 5.1 / Task 5.2 / Task 50.1)", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -128,8 +132,7 @@ describe("Unified Shell covering authenticated routes (Task 5.1 / Task 5.2 / Tas
 		// Must contain unified Shell sidebar structure
 		expect(html).toContain("sidebar-user-area");
 		expect(html).toContain("locale-switch");
-		expect(html).toContain("AI Chatbot");
-		expect(html).toContain("data-testid=\"ai-chat\"");
+		expect(html).toContain("站內助手");
 	});
 
 	it("Task 5.2: renders the /admin/settings route inside the unified Shell sidebar structure", async () => {
