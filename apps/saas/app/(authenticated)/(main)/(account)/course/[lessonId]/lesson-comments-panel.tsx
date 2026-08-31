@@ -40,32 +40,32 @@ export function LessonCommentsPanel({ lessonId }: { lessonId: string }) {
 	}
 
 	return (
-		<section className="space-y-4 rounded-xl border border-neutral-800 bg-neutral-900/60 p-5" data-testid="lesson-comments-panel">
+		<section className="space-y-4 rounded-xl border border-border bg-card/60 p-5" data-testid="lesson-comments-panel">
 			<div>
-				<h2 className="text-base font-bold text-neutral-100">單元留言</h2>
-				<p className="mt-1 text-sm text-neutral-400">可以選擇匿名顯示；後台仍保留真實身份。</p>
+				<h2 className="text-base font-bold text-card-foreground">單元留言</h2>
+				<p className="mt-1 text-sm text-muted-foreground">可以選擇匿名顯示；後台仍保留真實身份。</p>
 			</div>
 			<form className="space-y-3" onSubmit={submit} aria-label="lesson-comment-form">
 				<textarea
-					className="min-h-20 w-full rounded-md border border-neutral-700 bg-neutral-950 p-3 text-sm text-neutral-100"
+					className="min-h-20 w-full rounded-md border border-input bg-background p-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 					value={content}
 					onChange={(event) => setContent(event.target.value)}
 					placeholder="寫下你的問題或心得"
 					maxLength={5000}
 					required
 				/>
-				<label className="flex items-center gap-2 text-sm text-neutral-300">
+				<label className="flex items-center gap-2 text-sm text-foreground">
 					<input type="checkbox" checked={isAnonymous} onChange={(event) => setIsAnonymous(event.target.checked)} />
 					匿名顯示
 				</label>
-				<button className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white" type="submit">送出留言</button>
+				<button className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90" type="submit">送出留言</button>
 			</form>
-			{message && <p className="text-sm text-neutral-300" role="status">{message}</p>}
+			{message && <p className="text-sm text-foreground/90" role="status">{message}</p>}
 			<div className="space-y-3" data-testid="lesson-comment-list">
 				{comments.map((comment) => (
-					<article key={comment.id} className="rounded-lg border border-neutral-800 p-3" data-testid="lesson-comment">
-						<p className="text-xs text-neutral-500">{comment.authorName}</p>
-						<p className="mt-1 text-sm text-neutral-300">{comment.content}</p>
+					<article key={comment.id} className="rounded-lg border border-border bg-muted/30 p-3" data-testid="lesson-comment">
+						<p className="text-xs text-muted-foreground">{comment.authorName}</p>
+						<p className="mt-1 text-sm text-foreground/90">{comment.content}</p>
 					</article>
 				))}
 			</div>
