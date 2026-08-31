@@ -63,7 +63,7 @@ describe("createPendingOrderForUser organizationId", () => {
 
 		await createPendingOrderForUser("user-1", 8800, "startkiter-mvp", undefined, "payuni", undefined, "org_a");
 
-		const transactionCallback = vi.mocked(db.$transaction).mock.calls[0]?.[0] as (
+		const transactionCallback = vi.mocked(db.$transaction).mock.calls[0]?.[0] as unknown as (
 			tx: { order: { create: ReturnType<typeof vi.fn> } },
 		) => Promise<unknown>;
 		const tx = { order: { create: vi.fn().mockResolvedValue(createdRow) } };
@@ -108,7 +108,7 @@ describe("createPendingOrderForUser organizationId", () => {
 
 		await createPendingOrderForUser("user-1");
 
-		const transactionCallback = vi.mocked(db.$transaction).mock.calls[0]?.[0] as (
+		const transactionCallback = vi.mocked(db.$transaction).mock.calls[0]?.[0] as unknown as (
 			tx: { order: { create: ReturnType<typeof vi.fn> } },
 		) => Promise<unknown>;
 		const tx = { order: { create: vi.fn().mockResolvedValue(createdRow) } };
