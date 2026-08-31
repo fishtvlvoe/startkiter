@@ -15,13 +15,14 @@
 - [x] 4. Signed URL／image proxy／local upload 覆查 — 跨 user key、過期、撤銷、production fallback（交叉審查完成：✓ 無真實漏洞；10 個新測試檔案驗證了 ownership 綁定、SSRF 基本防護、expiresIn 檢查、local fallback 存取控制；後續強化建議已記錄至「額外發現」）
 - [x] 5. 清理 placeholder／未實作 provider — `PLACEHOLDER_MEDIA`（已處理：`packages/course/catalog.ts` 沒設定 `BUNNY_LIBRARY_ID` 時，production 環境改為 fail-closed 直接拋錯，不再用 demo 影片頂替付費課程內容；dev/test 環境維持 fallback 方便開發，比照結帳金流「沒設定就 503」的既有規則）、Polar `Not implemented`（已刪除，`remove-unused-polar-provider` SR 完成：台灣/國際市場皆用量低，且 `v1-scope-boundary` 早已正式禁止 Polar 收款，代碼本來就是未接線的殘留鷹架，直接整份移除）
 - [x] 6. 補通知／Email／storage／settings 測試 — notifications 7 source/0 test、mail 25 source/1 test 等缺口（`notification-mail-storage-test-coverage` SR 已封存合併：notifications 9 tests、mail 15 tests、storage 3 tests、settings-crypto 全綠；交叉審查確認 mail mock 未過度、settings-crypto 用 AES-256-GCM 正確實作 IV 隨機生成+認證tag驗證）
-- [ ] 7. Chatwoot 三管道 E2E（`unified-support-desk` task 9.4）— 已由老闆確認暫時擱置，非本輪優先
-- [ ] 8. Real provider acceptance matrix — subscription/period notify/退款/發票要留 webhook+DB+idempotency 證據
 - [ ] 9. Schema/migration rehearsal — 查 redundant index、status/slug contract，乾淨 DB 跑一次 migrate deploy
 - [ ] 10. Mission／Organization／site-agent（2026-08-31 Fish 已裁決方向，拆成 3 張獨立 SR）
   - [ ] 10a. site-agent 補搬遷（`legacy/packages/site-agent` 完整代碼在，只是漏搬，537 行含測試；原計畫限定「兩支唯讀工具」不准註冊寫入工具）
   - [ ] 10b. Mission 補前台入口（後台邏輯已有：`run-mission-check.ts`／`submit-mission-form-value.ts`／MDX block 都在，缺學員端頁面讓他們找得到）
-  - [ ] 10c. Organization 完整度覆查（確認為必要功能，UI 元件已有 10 個檔案，需覆查是否真的接完整、覆查權限邊界；`openspec/config.yaml` 舊矛盾規則已修正）
+  - [ ] 10c. Organization 完整度覆查（已定案必要功能，公司行號客戶需要團隊帳號；UI 元件已有 10 個檔案，需覆查是否真的接完整、覆查權限邊界；`openspec/config.yaml` 舊矛盾規則已刪除）
+- [ ] 11. 群眾模擬壓力測試（2026-08-31 Fish 新增，需求：0元課程 + 真人多方式註冊 + 多支 Agent 模擬使用者高頻互動找 bug，詳見下方「群眾模擬測試計畫」）
+- [ ] 7. Chatwoot 三管道 E2E（`unified-support-desk` task 9.4）— 已由老闆確認暫時擱置，非本輪優先。**排序調整（2026-08-31）**：移到最後，因為老闆需要親自在電腦前操作填信用卡/ATM資訊
+- [ ] 8. Real provider acceptance matrix — subscription/period notify/退款/發票要留 webhook+DB+idempotency 證據。**排序調整（2026-08-31）**：移到最後，同上原因
 
 ## 對應 SR 一覽（隨開隨補）
 
@@ -36,6 +37,20 @@
 1. 結帳頁面完全沒有 coupon 輸入框——後端邏輯修好了，但前端從來沒有 UI 讓使用者真的用到，等於功能做完但用戶用不到。已補上輸入框、驗證、即時折扣顯示。
 2. Course Studio 頁面在瀏覽器會直接崩潰（`Module not found: Can't resolve 'dns'`）——`BatchImportDialog.tsx` 從 barrel 檔案匯入，意外拉進了 server-only 的 Prisma/pg 依賴到瀏覽器端。已改成子路徑匯入隔離。
 修復後 rate-limit 實測：18-25 次高頻請求精準觸發 429，正常使用不受影響。666 個既有測試全過，type-check 全綠。
+
+## 群眾模擬測試計畫（2026-08-31 Fish 提出，參考 Nate Herk「Clone Calendly」影片的 agentic swarm testing 模式）
+
+**核心概念**：不是等人工一步步點，是叫多支 AI 代理人假扮成不同使用者，高頻率反覆操作、互相測試、找到 bug 就修，修完繼續測，循環到穩定為止。全程用 `agy`（Antigravity CLI）驅動 `/ego-browser` skill（唯一核准的瀏覽器自動化工具，deny-list.md 硬規則）。
+
+**步驟**：
+1. 建一個 0 元課程（測試用，不涉及真實金流）
+2. 多支 agy + ego-browser 各自扮演不同角色的使用者，用不同方式註冊/登入這個課程
+3. 每個角色驗證：影片播放正常、私訊功能正常、所有課程內功能都可互動
+4. 多輪高頻互動模擬真實使用者亂點的情境（不是照劇本走一次，是重複、隨機、多角度）
+5. 派 3 支平行 agy，各自從不同使用者情境切入（例如：新手第一次用／付費學員／講師視角），同時測試+回報問題
+6. 發現的 UI/邏輯問題直接修，修完同一輪重新驗證
+
+**與參考影片的對照**：影片裡是「50 個 agent 同時衝一個 app 找 bug，修完再測」的循環，我們規模小很多（3 支 agy），但精神一樣——不靠人工一步步點，讓 AI 大量、高頻、多角度地把使用者會做的事都做一遍。
 
 ## 額外發現（本次整改過程中新增，未在原盤點報告出現）
 
