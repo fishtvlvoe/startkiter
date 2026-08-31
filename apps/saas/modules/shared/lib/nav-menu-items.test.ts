@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { MOUNT_POINTS } from "@startkiter/platform";
-import { getMountMenuItems, getTabBarItems, type MountMenuItem } from "./nav-menu-items";
+import { getMountMenuItems, getTabBarItems, isMenuActive, type MountMenuItem } from "./nav-menu-items";
 
 describe("nav-menu-items (Phase 2 shell mount points)", () => {
 	describe("Task 5.1 / 5.2 / 5.3: sidebar items from MOUNT_POINTS", () => {
@@ -16,25 +16,66 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 			expect(learnerItems.map((item) => item.label)).toEqual(["開始", "課程", "客服", "帳號設定"]);
 			expect(learnerItems.find((item) => item.href === "/course")?.isActive).toBe(true);
 
-			// Operator should additionally see the requiresOperator items, sorted by order.
+			// Operator sees course admin children grouped under one「課程」parent.
 			expect(operatorItems.map((item) => item.label)).toEqual([
 				"開始",
 				"課程",
 				"客服",
 				"帳號設定",
 				"後台設定",
+				"課程",
+				"頁面管理",
+				"郵件設定",
+			]);
+			const courseAdminMenu = operatorItems.find((item) => item.id === "course-admin-menu");
+			expect(courseAdminMenu?.requiresOperator).toBe(true);
+			expect(courseAdminMenu?.subItems?.map((item) => item.label)).toEqual([
+				"課程管理",
 				"測驗管理",
 				"評價與留言管理",
 				"作業管理",
-				"頁面管理",
 				"課程綁定包",
 				"新生問卷",
 				"媒體庫",
-				"郵件設定",
+				"CoursePack 任務",
 			]);
 			for (let i = 1; i < operatorItems.length; i++) {
-				expect(operatorItems[i]!.order).toBeGreaterThan(operatorItems[i - 1]!.order);
+				expect(operatorItems[i]!.order).toBeGreaterThanOrEqual(operatorItems[i - 1]!.order);
 			}
+		});
+
+		it("marks 媒體庫 and 郵件設定 active on their routes without false positives", () => {
+			const mediaItems = getMountMenuItems({
+				pathname: "/admin/media",
+				isOperator: true,
+				canAccessPagesCms: true,
+			});
+			const emailItems = getMountMenuItems({
+				pathname: "/admin/email-settings",
+				isOperator: true,
+				canAccessPagesCms: true,
+			});
+
+			const courseAdminOnMedia = mediaItems.find((item) => item.id === "course-admin-menu");
+			expect(courseAdminOnMedia?.isActive).toBe(true);
+			expect(courseAdminOnMedia?.subItems?.find((item) => item.id === "media-library")?.href).toBe(
+				"/admin/media",
+			);
+			expect(mediaItems.filter((item) => item.isActive).map((item) => item.id)).toEqual([
+				"course-admin-menu",
+			]);
+
+			const emailItem = emailItems.find((item) => item.id === "email-settings");
+			expect(emailItem?.isActive).toBe(true);
+			expect(emailItems.filter((item) => item.isActive).map((item) => item.id)).toEqual(["email-settings"]);
+		});
+
+		it("isMenuActive prefers the longest matching admin href (/admin/course-pack vs /admin/course)", () => {
+			const hrefs = ["/admin/course", "/admin/course-pack", "/admin/media", "/admin/email-settings"];
+			expect(isMenuActive("/admin/course-pack", "/admin/course", hrefs)).toBe(false);
+			expect(isMenuActive("/admin/course-pack", "/admin/course-pack", hrefs)).toBe(true);
+			expect(isMenuActive("/admin/media", "/admin/media", hrefs)).toBe(true);
+			expect(isMenuActive("/admin/email-settings", "/admin/email-settings", hrefs)).toBe(true);
 		});
 
 		it("hides 頁面管理 from role=admin when canAccessPagesCms is false", () => {
@@ -44,7 +85,8 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 				canAccessPagesCms: false,
 			});
 			expect(items.some((item) => item.id === "pages-cms")).toBe(false);
-			expect(items.some((item) => item.href === "/admin/bundles")).toBe(true);
+			const courseAdmin = items.find((item) => item.id === "course-admin-menu");
+			expect(courseAdmin?.subItems?.some((item) => item.href === "/admin/bundles")).toBe(true);
 		});
 
 		it("shows 頁面管理 for ADMIN_EMAIL even when isOperator is false", () => {
@@ -65,8 +107,10 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 				canAccessPagesCms: true,
 			});
 
-			expect(learnerItems.some((item) => item.href === "/admin/bundles")).toBe(false);
-			expect(operatorItems.some((item) => item.href === "/admin/bundles")).toBe(true);
+			const learnerCourseAdmin = learnerItems.find((item) => item.id === "course-admin-menu");
+			expect(learnerCourseAdmin).toBeUndefined();
+			const operatorCourseAdmin = operatorItems.find((item) => item.id === "course-admin-menu");
+			expect(operatorCourseAdmin?.subItems?.some((item) => item.href === "/admin/bundles")).toBe(true);
 		});
 
 		it("5.1 / 5.2 includes the unified Shell navigation on /course and /admin/bundles", () => {
@@ -123,7 +167,11 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 			).overflow;
 			const learnerOverflow = getTabBarItems(getMountMenuItems({ pathname: "/", isOperator: false })).overflow;
 
-			expect(operatorOverflow[0]?.subItems?.some((item) => item.href === "/admin/bundles")).toBe(true);
+			expect(
+				operatorOverflow[0]?.subItems?.some(
+					(item) => item.href === "/admin/bundles" || item.label === "課程",
+				),
+			).toBe(true);
 			expect(learnerOverflow.some((entry) => entry.subItems?.some((item) => item.href === "/admin/bundles"))).toBe(
 				false,
 			);

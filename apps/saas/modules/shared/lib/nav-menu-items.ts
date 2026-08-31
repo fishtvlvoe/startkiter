@@ -5,6 +5,11 @@
 import { MOUNT_POINTS } from "@startkiter/platform/src/mount-points";
 import type { PluginManifest } from "@startkiter/platform/src/types";
 
+export interface MountMenuSubItem {
+	id: string;
+	label: string;
+	href: string;
+}
 
 export interface MountMenuItem {
 	id: string;
@@ -14,6 +19,7 @@ export interface MountMenuItem {
 	order: number;
 	isActive: boolean;
 	requiresOperator?: boolean;
+	subItems?: MountMenuSubItem[];
 }
 
 export interface TabBarOverflowItem {
@@ -30,8 +36,86 @@ export interface TabBarItem {
 	subItems?: TabBarOverflowItem[];
 }
 
-function isMenuActive(pathname: string, href: string): boolean {
-	return pathname === href || pathname.startsWith(`${href}/`);
+/** Longest-prefix wins: only mark active when no other menu href is a more specific match. */
+export function isMenuActive(pathname: string, href: string, allHrefs: string[] = []): boolean {
+	if (href === "#") {
+		return false;
+	}
+
+	const matchesPath =
+		pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
+
+	if (!matchesPath) {
+		return false;
+	}
+
+	const hasMoreSpecificMatch = allHrefs.some(
+		(otherHref) =>
+			otherHref !== href &&
+			otherHref.length > href.length &&
+			(pathname === otherHref || pathname.startsWith(`${otherHref}/`)),
+	);
+
+	return !hasMoreSpecificMatch;
+}
+
+const MENU_GROUP_CONFIG: Record<
+	string,
+	{ id: string; label: string; icon: string; requiresOperator: boolean }
+> = {
+	"course-admin": {
+		id: "course-admin-menu",
+		label: "課程",
+		icon: "book-open",
+		requiresOperator: true,
+	},
+};
+
+function groupMountMenuItems(flatItems: MountMenuItem[]): MountMenuItem[] {
+	const topLevel: MountMenuItem[] = [];
+	const groupedItems = new Map<string, MountMenuItem[]>();
+
+	for (const item of flatItems) {
+		const plugin = MOUNT_POINTS.find((entry) => entry.id === item.id);
+		const groupId = plugin?.mount.menu?.groupId;
+
+		if (groupId && MENU_GROUP_CONFIG[groupId]) {
+			const bucket = groupedItems.get(groupId) ?? [];
+			bucket.push(item);
+			groupedItems.set(groupId, bucket);
+			continue;
+		}
+
+		topLevel.push(item);
+	}
+
+	for (const [groupId, items] of groupedItems) {
+		const config = MENU_GROUP_CONFIG[groupId];
+		if (!config || items.length === 0) {
+			continue;
+		}
+
+		const sorted = [...items].sort((a, b) => a.order - b.order);
+		const subItems = sorted.map((entry) => ({
+			id: entry.id,
+			label: entry.label,
+			href: entry.href,
+		}));
+		const parentActive = sorted.some((entry) => entry.isActive);
+
+		topLevel.push({
+			id: config.id,
+			label: config.label,
+			href: sorted[0]?.href ?? "#",
+			icon: config.icon,
+			order: sorted[0]?.order ?? 0,
+			requiresOperator: config.requiresOperator,
+			isActive: parentActive,
+			subItems,
+		});
+	}
+
+	return topLevel.sort((a, b) => a.order - b.order);
 }
 
 export function getMountMenuItems({
@@ -43,7 +127,7 @@ export function getMountMenuItems({
 	isOperator: boolean;
 	canAccessPagesCms?: boolean;
 }): MountMenuItem[] {
-	return MOUNT_POINTS.filter((plugin): plugin is PluginManifest & { mount: { menu: NonNullable<PluginManifest["mount"]["menu"]> } } => {
+	const filtered = MOUNT_POINTS.filter((plugin): plugin is PluginManifest & { mount: { menu: NonNullable<PluginManifest["mount"]["menu"]> } } => {
 		if (!plugin.mount.menu) {
 			return false;
 		}
@@ -54,7 +138,13 @@ export function getMountMenuItems({
 			return false;
 		}
 		return true;
-	})
+	});
+
+	const allHrefs = filtered
+		.map((plugin) => plugin.mount.route?.path)
+		.filter((href): href is string => Boolean(href));
+
+	const flatItems = filtered
 		.sort((a, b) => a.mount.menu.order - b.mount.menu.order)
 		.map((plugin) => {
 			const menu = plugin.mount.menu;
@@ -65,10 +155,12 @@ export function getMountMenuItems({
 				href,
 				icon: menu.icon,
 				order: menu.order,
-				isActive: isMenuActive(pathname, href),
+				isActive: isMenuActive(pathname, href, allHrefs),
 				requiresOperator: menu.requiresOperator,
 			};
 		});
+
+	return groupMountMenuItems(flatItems);
 }
 
 export function getTabBarItems(menuItems: MountMenuItem[]): {

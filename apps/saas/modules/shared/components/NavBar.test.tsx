@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MOUNT_POINTS } from "@startkiter/platform";
 import { iconMap, NavBar, resolveIcon } from "./NavBar";
 import { PagesCmsAccessProvider } from "./PagesCmsAccessProvider";
+import * as navMenuItems from "../lib/nav-menu-items";
 
 let mockPathname = "/";
 let mockIsCollapsed = false;
@@ -184,6 +185,7 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 
 	it("hides 頁面管理 for role=admin when pages-cms access is false", () => {
 		mockCanAccessAdmin = true;
+		mockPathname = "/admin/bundles";
 		const html = renderToStaticMarkup(<NavBar />);
 		expect(html).toContain("課程綁定包");
 		expect(html).not.toContain("頁面管理");
@@ -197,7 +199,7 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 			</PagesCmsAccessProvider>,
 		);
 		expect(html).toContain("頁面管理");
-		expect(html).not.toContain("課程綁定包");
+		expect(html).not.toContain("課程管理");
 	});
 
 	it("45.2b 單一分組可獨立收折，跟整體側邊欄收折狀態互不影響", () => {
@@ -207,7 +209,20 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 			{ id: "g1", title: "SYSTEM", order: 0, isCollapsed: true },
 			{ id: "g2", title: "GENERAL", order: 1, isCollapsed: false },
 		];
+		const flatMenuSpy = vi.spyOn(navMenuItems, "getMountMenuItems").mockReturnValue([
+			{ id: "start", label: "開始", href: "/app", icon: "home", order: 0, isActive: false },
+			{
+				id: "admin",
+				label: "後台設定",
+				href: "/admin/users",
+				icon: "shield-user",
+				order: 4,
+				isActive: false,
+				requiresOperator: true,
+			},
+		]);
 		const html = renderToStaticMarkup(<NavBar />);
+		flatMenuSpy.mockRestore();
 
 		expect(html).toContain('data-testid="sidebar-group-g1"');
 		expect(html).toContain('data-sidebar-group-collapsed="true"');
@@ -215,15 +230,36 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 		expect(html).toContain('data-sidebar-group-collapsed="false"');
 	});
 
-	it("renders visual section divider for operator items under unassigned list when user is operator", () => {
+	it("renders operator admin section divider in NavMenuList when nested course menu is present", () => {
 		mockIsCollapsed = false;
 		mockCanAccessAdmin = true;
 		const html = renderToStaticMarkup(<NavBar />);
 
-		expect(html).toContain('data-testid="sidebar-group-admin-section"');
+		expect(html).toContain('data-testid="nav-menu-admin-divider"');
 		expect(html).toContain("管理");
 		expect(html).toContain("後台設定");
 		expect(html).toContain("開始");
+	});
+
+	it("uses NavMenuList with nested course admin menu for operators (not SidebarGroupedNav)", () => {
+		mockIsCollapsed = false;
+		mockCanAccessAdmin = true;
+		mockPathname = "/admin/media";
+		const html = renderToStaticMarkup(<NavBar />);
+
+		expect(html).toContain("CoursePack 任務");
+		expect(html).not.toContain('data-testid="sidebar-group-unassigned"');
+		expect(html).toContain("媒體庫");
+	});
+
+	it("highlights 郵件設定 on /admin/email-settings via NavMenuList", () => {
+		mockIsCollapsed = false;
+		mockCanAccessAdmin = true;
+		mockPathname = "/admin/email-settings";
+		const html = renderToStaticMarkup(<NavBar />);
+
+		expect(html).toContain("郵件設定");
+		expect(html).toContain("bg-[#2271b1]");
 	});
 
 	it("does not render operator admin section when user is not operator", () => {
