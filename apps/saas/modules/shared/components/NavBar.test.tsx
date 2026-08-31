@@ -214,6 +214,18 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 		expect(html).toContain('data-testid="sidebar-group-g2"');
 		expect(html).toContain('data-sidebar-group-collapsed="false"');
 	});
+
+	it("renders visual separation between general unassigned items and operator unassigned items", () => {
+		mockIsCollapsed = false;
+		mockCanAccessAdmin = true;
+		mockSidebarGroups = [];
+		const html = renderToStaticMarkup(<NavBar />);
+
+		expect(html).toContain('data-testid="sidebar-group-unassigned"');
+		expect(html).toContain('data-testid="sidebar-group-operator"');
+		expect(html).toContain("app.menu.unassignedGroup");
+		expect(html).toContain("app.menu.admin");
+	});
 });
 
 describe("NavBar iconMap & resolveIcon coverage", () => {
