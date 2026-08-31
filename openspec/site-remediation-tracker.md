@@ -38,7 +38,14 @@
   - 3支agy中2支（paid-learner／instructor）獨立做出幾乎相同的側邊欄分區修復，判定後採用paid-learner版本（測試覆蓋較完整），instructor的重複實作未合併（其worktree已捨棄）
   - 額外確認：0元coupon結帳流程（TEST100OFF）在補齊本機PAYUNi Sandbox測試憑證後，正確導向沙箱結帳通道，訂單/課程權限開通正常
   - 最終驗證：700個測試全過（含site-agent 10個），type-check全綠
-- [ ] 12. UI/UX 一致性掃描（`ui-ux-consistency-sweep` SR，已寫完待實作，2026-08-31 Fish 新增：全站整改缺乏UI/UX統一審查，多支CLI各自寫頁面風格不一致；三階段：agy截圖盤點→網頁設計師subagent審查→CLI修復）
+- [x] 12. UI/UX 一致性掃描（`ui-ux-consistency-sweep` SR，已完成合併，commit `0633d9f4`，2026-08-31）— 三階段完成：
+  - Phase 1：PM 用 ego-browser 截圖盤點 20 張（學員端/後台/通用元件）
+  - Phase 2：網頁設計師 subagent 審查，PM 交叉驗證發現子代理原判 2 個 Critical 是截圖流程失誤造成的誤判（深色模式其實跟隨正常、學員側邊欄權限其實正確無外洩），訂正後真正 Critical 只有 1 個：`(operator)` route group（quiz-admin/review-admin/assignment-admin 等）缺 AppWrapper，完全沒有共用 header/側邊欄
+  - Phase 3：cursor-agent 修復並經 PM 親自複驗（328 tests + 28 type-check 全綠，用 ego-browser 建 operator 帳號實測點過三處修復）：
+    - `(operator)/layout.tsx` 補上 AppWrapper，6個後台頁面現在有完整 shell
+    - 課程模組 8 個子功能（課程管理/測驗管理/評價與留言管理/作業管理/課程綁定包/新生問卷/媒體庫/CoursePack任務）收攏成一個「課程」一級選單，側邊欄巢狀展開（方案A），原路徑全部保留，`isOperator` 權限判斷不受影響
+    - 額外發現並修復：側邊欄拖曳自訂分組模式的 isActive 判斷讀取 stale prop，改用 `usePathname()` 即時計算，順帶修好 admin/media、admin/email-settings 選中無高亮的問題
+    - `docs/buyer-extension-convention.md` 補上「側邊欄選單掛載（MOUNT_POINTS）」規範章節，用課程模組整合後的真實代碼當範例，買家未來擴充自己的模組有規範可循
 - [ ] 7. Chatwoot 三管道 E2E（`unified-support-desk` task 9.4）— 已由老闆確認暫時擱置，非本輪優先。**排序調整（2026-08-31）**：移到最後，因為老闆需要親自在電腦前操作填信用卡/ATM資訊
 - [ ] 8. Real provider acceptance matrix — subscription/period notify/退款/發票要留 webhook+DB+idempotency 證據。**排序調整（2026-08-31）**：移到最後，同上原因
 
