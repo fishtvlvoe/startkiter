@@ -18,7 +18,10 @@
 - [ ] 7. Chatwoot 三管道 E2E（`unified-support-desk` task 9.4）— 已由老闆確認暫時擱置，非本輪優先
 - [ ] 8. Real provider acceptance matrix — subscription/period notify/退款/發票要留 webhook+DB+idempotency 證據
 - [ ] 9. Schema/migration rehearsal — 查 redundant index、status/slug contract，乾淨 DB 跑一次 migrate deploy
-- [ ] 10. Mission／Organization／site-agent 去留決策 — 先由老闆做產品取捨，避免多條半完成主線
+- [ ] 10. Mission／Organization／site-agent（2026-08-31 Fish 已裁決方向，拆成 3 張獨立 SR）
+  - [ ] 10a. site-agent 補搬遷（`legacy/packages/site-agent` 完整代碼在，只是漏搬，537 行含測試；原計畫限定「兩支唯讀工具」不准註冊寫入工具）
+  - [ ] 10b. Mission 補前台入口（後台邏輯已有：`run-mission-check.ts`／`submit-mission-form-value.ts`／MDX block 都在，缺學員端頁面讓他們找得到）
+  - [ ] 10c. Organization 完整度覆查（確認為必要功能，UI 元件已有 10 個檔案，需覆查是否真的接完整、覆查權限邊界；`openspec/config.yaml` 舊矛盾規則已修正）
 
 ## 對應 SR 一覽（隨開隨補）
 
