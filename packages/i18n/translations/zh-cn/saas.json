@@ -288,6 +288,7 @@
       "accept": "Accept",
       "decline": "Decline",
       "description": "You have been invited to join the organization {organizationName}. Do you want to accept the invitation and join the organization?",
+      "error": "无法处理邀请，请稍后再试。",
       "title": "Join the organization"
     },
     "organizationSelect": {

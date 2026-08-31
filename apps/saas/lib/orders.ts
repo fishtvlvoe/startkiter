@@ -94,6 +94,7 @@ export async function createPendingOrderForUser(
 	invoicePreference?: InvoicePreferenceInput,
 	paymentGateway: CheckoutGatewayType = "payuni",
 	couponCode?: string,
+	organizationId?: string,
 ): Promise<OrderRecord & { couponId?: string | null; couponCode?: string | null }> {
 	const pending = buildPendingOrderInput({
 		userId,
@@ -123,6 +124,7 @@ export async function createPendingOrderForUser(
 					data: {
 						orderNo: pending.orderNo,
 						userId: pending.userId,
+						...(organizationId ? { organizationId } : {}),
 						sku: pending.sku,
 						amount: chargeAmount,
 						currency: pending.currency,

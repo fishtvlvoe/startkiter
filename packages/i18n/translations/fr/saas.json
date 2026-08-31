@@ -288,6 +288,7 @@
       "accept": "Accepter",
       "decline": "Refuser",
       "description": "Vous avez été invité à rejoindre l'organisation {organizationName}. Souhaitez-vous accepter l'invitation et rejoindre l'organisation ?",
+      "error": "Impossible de traiter l'invitation. Veuillez réessayer.",
       "title": "Rejoindre l'organisation"
     },
     "organizationSelect": {

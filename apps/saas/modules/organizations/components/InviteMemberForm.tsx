@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { OrganizationRoleSelect } from "@organizations/components/OrganizationRoleSelect";
 import { fullOrganizationQueryKey } from "@organizations/lib/api";
+import { inviteMemberFormSchema } from "@organizations/lib/invite-member-form.schema";
 import { authClient } from "@startkiter/auth/client";
 import { Button } from "@startkiter/ui/components/button";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@startkiter/ui/components/form";
@@ -12,22 +13,16 @@ import { SettingsItem } from "@shared/components/SettingsItem";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
-
-const formSchema = z.object({
-	email: z.email(),
-	role: z.enum(["user", "owner", "admin", "instructor"]),
-});
 
 export function InviteMemberForm({ organizationId }: { organizationId: string }) {
 	const t = useTranslations();
 	const queryClient = useQueryClient();
 
 	const form = useForm({
-		resolver: zodResolver(formSchema),
+		resolver: zodResolver(inviteMemberFormSchema),
 		defaultValues: {
 			email: "",
-			role: "user" as z.infer<typeof formSchema>["role"],
+			role: "user" as const,
 		},
 	});
 
@@ -85,7 +80,11 @@ export function InviteMemberForm({ organizationId }: { organizationId: string })
 									<FormItem>
 										<FormLabel>{t("organizations.settings.members.inviteMember.role")}</FormLabel>
 										<FormControl>
-											<OrganizationRoleSelect value={field.value} onSelect={field.onChange} />
+											<OrganizationRoleSelect
+												value={field.value}
+												onSelect={field.onChange}
+												excludeRoles={["owner"]}
+											/>
 										</FormControl>
 									</FormItem>
 								)}

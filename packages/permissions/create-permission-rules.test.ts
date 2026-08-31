@@ -65,6 +65,19 @@ describe("createPermissionRules matrix", () => {
 			},
 		},
 		{
+			label: "organization instructor",
+			user: { role: "user" },
+			membershipRole: "instructor",
+			expected: {
+				adminAccess: false,
+				organizationRead: true,
+				organizationManage: false,
+				organizationDelete: false,
+				organizationManageBilling: false,
+				organizationAccessBillingPortal: false,
+			},
+		},
+		{
 			label: "unauthenticated / no membership",
 			user: null,
 			membershipRole: null,

@@ -12,6 +12,10 @@ vi.mock("@startkiter/coupons", () => ({
 	validateCoupon: vi.fn(),
 }));
 
+vi.mock("@startkiter/database", () => ({
+	isOrganizationMember: vi.fn(),
+}));
+
 vi.mock("../../../lib/orders", () => ({
 	createPendingOrderForUser: vi.fn(),
 	buildCheckoutSession: vi.fn(),
@@ -35,6 +39,7 @@ vi.mock("@startkiter/payments", async (importOriginal) => {
 
 import { auth } from "@startkiter/auth";
 import { validateCoupon } from "@startkiter/coupons";
+import { isOrganizationMember } from "@startkiter/database";
 import { MVP_AMOUNT_TWD, MVP_SKU, createMvpCheckoutGateway, getProduct } from "@startkiter/payments";
 
 import { buildCheckoutSession, createPendingOrderForUser } from "../../../lib/orders";
@@ -43,13 +48,15 @@ import { POST } from "./route";
 
 const mockedGetSession = vi.mocked(auth.api.getSession);
 const mockedValidateCoupon = vi.mocked(validateCoupon);
+const mockedIsOrganizationMember = vi.mocked(isOrganizationMember);
 const mockedLoadCredentials = vi.mocked(loadEnabledGatewayCredentials);
 const mockedCreatePendingOrder = vi.mocked(createPendingOrderForUser);
 const mockedBuildCheckoutSession = vi.mocked(buildCheckoutSession);
 const mockedCreateGateway = vi.mocked(createMvpCheckoutGateway);
 const mockedGetProduct = vi.mocked(getProduct);
 
-const SESSION = { user: { id: "user_1", email: "buyer@example.com" } };
+const SESSION = { user: { id: "user_1", email: "buyer@example.com" }, session: { activeOrganizationId: null } };
+const ORG_ID = "org_a";
 const MVP_PRODUCT = { productId: MVP_SKU, sku: MVP_SKU, amount: MVP_AMOUNT_TWD, currency: "TWD" as const };
 const BUNDLE_PRODUCT = { productId: "bundle_1", sku: "bundle_1", amount: 6000, currency: "TWD" as const };
 
@@ -85,6 +92,7 @@ describe("POST /api/checkout coupon integration", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		mockedGetSession.mockResolvedValue(SESSION as never);
+		mockedIsOrganizationMember.mockResolvedValue(false);
 		mockedLoadCredentials.mockResolvedValue({ gateway: "payuni", credentials: {} } as never);
 		mockedBuildCheckoutSession.mockResolvedValue({ type: "form_post", formData: {}, gatewaySessionId: "order_1" } as never);
 		mockedGetProduct.mockResolvedValue(MVP_PRODUCT);
@@ -108,6 +116,7 @@ describe("POST /api/checkout coupon integration", () => {
 			undefined,
 			"payuni",
 			"SAVE100",
+			undefined,
 		);
 		const body = await response.json();
 		expect(body.amount).toBe(8700);
@@ -139,6 +148,7 @@ describe("POST /api/checkout coupon integration", () => {
 			undefined,
 			"payuni",
 			undefined,
+			undefined,
 		);
 	});
 
@@ -156,6 +166,7 @@ describe("POST /api/checkout coupon integration", () => {
 			"bundle_1",
 			undefined,
 			"payuni",
+			undefined,
 			undefined,
 		);
 		const body = await response.json();
@@ -187,6 +198,82 @@ describe("POST /api/checkout coupon integration", () => {
 		const response = await POST(jsonRequest({ userId: "someone_else" }));
 
 		expect(response.status).toBe(200);
-		expect(mockedCreatePendingOrder).toHaveBeenCalledWith("user_1", 8800, MVP_SKU, undefined, "payuni", undefined);
+		expect(mockedCreatePendingOrder).toHaveBeenCalledWith("user_1", 8800, MVP_SKU, undefined, "payuni", undefined, undefined);
+	});
+});
+
+describe("POST /api/checkout organization identity", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		mockedLoadCredentials.mockResolvedValue({ gateway: "payuni", credentials: {} } as never);
+		mockedBuildCheckoutSession.mockResolvedValue({ type: "form_post", formData: {}, gatewaySessionId: "order_1" } as never);
+		mockedGetProduct.mockResolvedValue(MVP_PRODUCT);
+		mockedIsOrganizationMember.mockResolvedValue(true);
+		mockedCreatePendingOrder.mockResolvedValue(baseOrder(8800));
+	});
+
+	afterEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it.each([
+		["owner", "user_owner"],
+		["admin", "user_admin"],
+		["user", "user_member"],
+	] as const)("passes organizationId when %s checks out with active org", async (_role, userId) => {
+		mockedGetSession.mockResolvedValue({
+			user: { id: userId, email: `${userId}@example.com` },
+			session: { activeOrganizationId: ORG_ID },
+		} as never);
+
+		const response = await POST(jsonRequest({}));
+
+		expect(response.status).toBe(200);
+		expect(mockedIsOrganizationMember).toHaveBeenCalledWith(ORG_ID, userId);
+		expect(mockedCreatePendingOrder).toHaveBeenCalledWith(
+			userId,
+			8800,
+			MVP_SKU,
+			undefined,
+			"payuni",
+			undefined,
+			ORG_ID,
+		);
+	});
+
+	it("returns 403 when activeOrganizationId is set but user is not a member", async () => {
+		mockedGetSession.mockResolvedValue({
+			user: { id: "user_1", email: "buyer@example.com" },
+			session: { activeOrganizationId: ORG_ID },
+		} as never);
+		mockedIsOrganizationMember.mockResolvedValue(false);
+
+		const response = await POST(jsonRequest({}));
+
+		expect(response.status).toBe(403);
+		const body = await response.json();
+		expect(body.error).toBe("organization_access_denied");
+		expect(mockedCreatePendingOrder).not.toHaveBeenCalled();
+	});
+
+	it("creates a personal order without organizationId when no active org is set", async () => {
+		mockedGetSession.mockResolvedValue({
+			user: { id: "user_1", email: "buyer@example.com" },
+			session: { activeOrganizationId: null },
+		} as never);
+
+		const response = await POST(jsonRequest({}));
+
+		expect(response.status).toBe(200);
+		expect(mockedIsOrganizationMember).not.toHaveBeenCalled();
+		expect(mockedCreatePendingOrder).toHaveBeenCalledWith(
+			"user_1",
+			8800,
+			MVP_SKU,
+			undefined,
+			"payuni",
+			undefined,
+			undefined,
+		);
 	});
 });

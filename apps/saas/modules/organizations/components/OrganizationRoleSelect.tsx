@@ -12,12 +12,16 @@ export function OrganizationRoleSelect({
 	value,
 	onSelect,
 	disabled,
+	excludeRoles = [],
 }: {
 	value?: OrganizationMemberRole;
 	onSelect: (value: OrganizationMemberRole) => void;
 	disabled?: boolean;
+	excludeRoles?: OrganizationMemberRole[];
 }) {
-	const roleOptions = useOrganizationMemberRoleOptions();
+	const roleOptions = useOrganizationMemberRoleOptions().filter(
+		(option) => !excludeRoles.includes(option.value),
+	);
 
 	return (
 		<Select

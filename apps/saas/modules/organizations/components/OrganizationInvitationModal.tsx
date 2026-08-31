@@ -2,6 +2,7 @@
 
 import { OrganizationLogo } from "@organizations/components/OrganizationLogo";
 import { organizationListQueryKey } from "@organizations/lib/api";
+import { notifyOrganizationInvitationFailure } from "@organizations/lib/organization-invitation-errors";
 import { authClient } from "@startkiter/auth/client";
 import { Button } from "@startkiter/ui/components/button";
 import { useRouter } from "@shared/hooks/router";
@@ -55,7 +56,7 @@ export function OrganizationInvitationModal({
 				router.replace("/");
 			}
 		} catch {
-			// TODO: handle error
+			notifyOrganizationInvitationFailure(t);
 		} finally {
 			setSubmitting(false);
 		}

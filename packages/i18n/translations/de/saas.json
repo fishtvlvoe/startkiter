@@ -287,6 +287,7 @@
       "accept": "Annehmen",
       "decline": "Ablehnen",
       "description": "Du wurdest eingeladen, der Organisation {organizationName} beizutreten. Möchtest du die Einladung annehmen und der Organisation beitreten?",
+      "error": "Die Einladung konnte nicht verarbeitet werden. Bitte versuche es erneut.",
       "title": "Organisation beitreten"
     },
     "organizationSelect": {

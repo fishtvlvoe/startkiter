@@ -288,6 +288,7 @@
       "accept": "Aceptar",
       "decline": "Rechazar",
       "description": "Has sido invitado a unirte a la organización {organizationName}. ¿Quieres aceptar la invitación y unirte a la organización?",
+      "error": "No se pudo procesar la invitación. Inténtalo de nuevo.",
       "title": "Unirse a la organización"
     },
     "organizationSelect": {

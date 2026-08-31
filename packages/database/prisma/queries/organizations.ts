@@ -100,6 +100,11 @@ export async function getOrganizationMembership(organizationId: string, userId: 
 	});
 }
 
+export async function isOrganizationMember(organizationId: string, userId: string) {
+	const membership = await getOrganizationMembership(organizationId, userId);
+	return membership !== null;
+}
+
 export async function getOrganizationWithPurchasesAndMembersCount(organizationId: string) {
 	const organization = await db.organization.findUnique({
 		where: {

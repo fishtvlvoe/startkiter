@@ -1,5 +1,6 @@
 import { auth } from "@startkiter/auth";
 import { validateCoupon } from "@startkiter/coupons";
+import { isOrganizationMember } from "@startkiter/database";
 import { MVP_SKU, getProduct, invoicePreferenceSchema, type InvoicePreferenceInput } from "@startkiter/payments";
 import { NextResponse } from "next/server";
 
@@ -87,6 +88,17 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: "public_base_url_required" }, { status: 503 });
 	}
 
+	const activeOrganizationId = session.session?.activeOrganizationId ?? null;
+	let organizationId: string | undefined;
+
+	if (activeOrganizationId) {
+		const isMember = await isOrganizationMember(activeOrganizationId, session.user.id);
+		if (!isMember) {
+			return NextResponse.json({ error: "organization_access_denied" }, { status: 403 });
+		}
+		organizationId = activeOrganizationId;
+	}
+
 	let order;
 	try {
 		order = invoicePreference
@@ -97,6 +109,7 @@ export async function POST(request: Request) {
 					invoicePreference,
 					configured.gateway,
 					couponCode,
+					organizationId,
 				)
 			: await createPendingOrderForUser(
 					session.user.id,
@@ -105,6 +118,7 @@ export async function POST(request: Request) {
 					undefined,
 					configured.gateway,
 					couponCode,
+					organizationId,
 				);
 	} catch (error) {
 		if (error instanceof CouponCheckoutError) {
