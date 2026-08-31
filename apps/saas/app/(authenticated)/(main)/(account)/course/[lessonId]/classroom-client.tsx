@@ -162,12 +162,12 @@ export function AcademyClassroomClient({
 	};
 
 	return (
-		<div className="flex h-[calc(100vh-75px)] flex-col overflow-hidden bg-neutral-950 text-neutral-100">
-			<div className="flex h-14 items-center justify-between border-b border-neutral-800 bg-neutral-900/90 px-4 backdrop-blur">
+		<div className="flex h-[calc(100vh-75px)] flex-col overflow-hidden bg-background text-foreground">
+			<div className="flex h-14 items-center justify-between border-b border-border bg-card/90 px-4 backdrop-blur">
 				<div className="flex items-center gap-3">
 					<button
 						onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-						className="flex items-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-2.5 py-1.5 text-xs font-medium text-neutral-200 transition hover:bg-neutral-700"
+						className="flex items-center gap-2 rounded-lg border border-border bg-muted/60 px-2.5 py-1.5 text-xs font-medium text-foreground transition hover:bg-muted"
 						title={isSidebarOpen ? "收折課程大綱" : "展開課程大綱"}
 					>
 						<svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -176,14 +176,14 @@ export function AcademyClassroomClient({
 						<span className="hidden sm:inline">{isSidebarOpen ? "收折大綱" : "展開大綱"}</span>
 					</button>
 
-					<span className="text-sm font-semibold text-neutral-200">
+					<span className="text-sm font-semibold text-foreground">
 						教室 · <span className="text-primary">{currentLesson.title}</span>
 					</span>
 				</div>
 
 				<div className="flex items-center gap-4">
-					<div className="flex items-center gap-2 rounded-full border border-neutral-700 bg-neutral-800 px-3 py-1 text-xs">
-						<svg className="h-3.5 w-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<div className="flex items-center gap-2 rounded-full border border-border bg-muted/60 px-3 py-1 text-xs">
+						<svg className="h-3.5 w-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 							<path
 								strokeLinecap="round"
 								strokeLinejoin="round"
@@ -191,8 +191,8 @@ export function AcademyClassroomClient({
 								d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
 							/>
 						</svg>
-						<span className="font-medium text-neutral-300">
-							學習進度 <strong className="text-emerald-400">{progressPercentage}%</strong> (
+						<span className="font-medium text-muted-foreground">
+							學習進度 <strong className="text-emerald-500 font-bold">{progressPercentage}%</strong> (
 							{completedCount}/{totalCount} 單元)
 						</span>
 					</div>
@@ -214,15 +214,15 @@ export function AcademyClassroomClient({
 
 			<div className="flex flex-1 overflow-hidden">
 				<div
-					className={`flex flex-col border-r border-neutral-800 bg-neutral-900/60 transition-all duration-300 ${
+					className={`flex flex-col border-r border-border bg-card/60 transition-all duration-300 ${
 						isSidebarOpen ? "w-80" : "w-0 overflow-hidden border-none"
 					}`}
 				>
 					<div className="flex-1 overflow-y-auto p-4 space-y-4">
-						<h3 className="text-xs font-bold uppercase tracking-wider text-neutral-400">課程章節大綱</h3>
+						<h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">課程章節大綱</h3>
 						{curriculum.map((chapter) => (
 							<div key={chapter.id} className="space-y-1">
-								<p className="px-2 py-1 text-xs font-semibold text-neutral-300">{chapter.title}</p>
+								<p className="px-2 py-1 text-xs font-semibold text-foreground/80">{chapter.title}</p>
 								<div className="space-y-1">
 									{chapter.lessons.map((lesson) => {
 										const isLessonDone = completedLessonIds.includes(lesson.id);
@@ -234,14 +234,14 @@ export function AcademyClassroomClient({
 												onClick={() => setCurrentLesson(lesson)}
 												className={`flex cursor-pointer items-center justify-between rounded-lg p-2 text-xs transition-colors ${
 													isActive
-														? "bg-primary/20 text-primary font-medium border border-primary/40"
-														: "text-neutral-400 hover:bg-neutral-800/60 hover:text-neutral-200"
+														? "bg-primary/10 text-primary font-medium border border-primary/30"
+														: "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
 												}`}
 											>
 												<div className="flex items-center gap-2 overflow-hidden">
 													{isLessonDone ? (
 														<svg
-															className="h-4 w-4 shrink-0 text-emerald-400"
+															className="h-4 w-4 shrink-0 text-emerald-500"
 															fill="none"
 															viewBox="0 0 24 24"
 															stroke="currentColor"
@@ -254,11 +254,11 @@ export function AcademyClassroomClient({
 															/>
 														</svg>
 													) : (
-														<div className="h-2 w-2 shrink-0 rounded-full bg-neutral-600" />
+														<div className="h-2 w-2 shrink-0 rounded-full bg-muted-foreground/40" />
 													)}
 													<span className="truncate">{lesson.title}</span>
 												</div>
-												<span className="text-[10px] font-mono text-neutral-500">{lesson.duration}</span>
+												<span className="text-[10px] font-mono text-muted-foreground">{lesson.duration}</span>
 											</div>
 										);
 									})}
@@ -270,7 +270,7 @@ export function AcademyClassroomClient({
 
 				<div className="flex flex-1 flex-col overflow-y-auto">
 					<div className="mx-auto w-full max-w-4xl p-6 space-y-6">
-						<Card className="overflow-hidden border-neutral-800 bg-black p-0 shadow-2xl">
+						<Card className="overflow-hidden border-border bg-black p-0 shadow-2xl">
 							<div className="relative aspect-video w-full bg-neutral-900">
 								<FluentPlayer
 									title={currentLesson.title}
@@ -295,21 +295,21 @@ export function AcademyClassroomClient({
 							embedHref={currentLesson.toolEmbedHref}
 						/>
 
-						<div className="border-b border-neutral-800 pb-4">
+						<div className="border-b border-border pb-4">
 							<div className="flex items-center gap-3">
 								<h1 className="text-2xl font-bold">{currentLesson.title}</h1>
 								{currentLesson.isFreePreview && (
-									<span className="rounded bg-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-400">
+									<span className="rounded bg-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
 										開放公開試看
 									</span>
 								)}
 							</div>
-							<p className="mt-1 text-sm text-neutral-400">單元時長：{currentLesson.duration}</p>
+							<p className="mt-1 text-sm text-muted-foreground">單元時長：{currentLesson.duration}</p>
 						</div>
 
-						<div className="space-y-6 text-sm leading-relaxed text-neutral-300">
-							<div className="rounded-lg border border-neutral-800 bg-neutral-900/40 p-5 space-y-4">
-								<h2 className="flex items-center gap-2 text-base font-bold text-neutral-100">
+						<div className="space-y-6 text-sm leading-relaxed text-foreground">
+							<div className="rounded-lg border border-border bg-card/40 p-5 space-y-4">
+								<h2 className="flex items-center gap-2 text-base font-bold text-card-foreground">
 									<BookOpenIcon className="h-4 w-4" />
 									本節講義
 								</h2>
@@ -325,18 +325,18 @@ export function AcademyClassroomClient({
 				</div>
 
 				<div
-					className={`flex flex-col border-l border-neutral-800 bg-neutral-900/80 transition-all duration-300 ${
+					className={`flex flex-col border-l border-border bg-card/80 transition-all duration-300 ${
 						isAiTutorOpen ? "w-80" : "w-0 overflow-hidden border-none"
 					}`}
 				>
-					<div className="flex h-12 items-center justify-between border-b border-neutral-800 px-4">
+					<div className="flex h-12 items-center justify-between border-b border-border px-4">
 						<div className="flex items-center gap-2">
 							<LightbulbIcon className="h-4 w-4 text-primary" />
 							<span className="text-xs font-bold">隨課 AI 助教</span>
 						</div>
 						<button
 							onClick={() => setIsAiTutorOpen(false)}
-							className="text-neutral-500 hover:text-neutral-300"
+							className="text-muted-foreground hover:text-foreground"
 							title="關閉助教"
 							type="button"
 						>
@@ -350,23 +350,23 @@ export function AcademyClassroomClient({
 								key={idx}
 								className={`rounded-lg p-3 text-xs leading-relaxed ${
 									msg.role === "assistant"
-										? "border border-neutral-800 bg-neutral-800/70 text-neutral-200"
-										: "bg-primary text-white ml-4"
+										? "border border-border bg-muted/70 text-card-foreground"
+										: "bg-primary text-primary-foreground ml-4"
 								}`}
 							>
 								{msg.text}
 							</div>
 						))}
-						{isAiLoading && <div className="text-xs text-neutral-500 italic">AI 助教思考中...</div>}
+						{isAiLoading && <div className="text-xs text-muted-foreground italic">AI 助教思考中...</div>}
 					</div>
 
-					<form onSubmit={handleAskAi} className="border-t border-neutral-800 p-3">
+					<form onSubmit={handleAskAi} className="border-t border-border p-3">
 						<div className="flex gap-2">
 							<Input
 								value={inputQuestion}
 								onChange={(event) => setInputQuestion(event.target.value)}
 								placeholder="向助教詢問本單元重點..."
-								className="text-xs"
+								className="text-xs bg-background"
 							/>
 							<Button size="sm" type="submit" disabled={isAiLoading}>
 								發送
