@@ -30,6 +30,11 @@ export default async function AdminLayout({ children }: PropsWithChildren) {
 		href: "/admin/course",
 		icon: <BookOpenIcon className="size-4 opacity-50" />,
 	};
+	const coursePackMenuItem = {
+		title: "CoursePack 任務",
+		href: "/admin/course-pack",
+		icon: <ClipboardListIcon className="size-4 opacity-50" />,
+	};
 	const geminiMenuItem = {
 		title: "Gemini API Key",
 		href: "/admin/settings/gemini",
@@ -50,6 +55,7 @@ export default async function AdminLayout({ children }: PropsWithChildren) {
 						? [courseMenuItem, geminiMenuItem]
 						: [
 							courseMenuItem,
+							coursePackMenuItem,
 							geminiMenuItem,
 							{
 							title: t("menu.users"),
