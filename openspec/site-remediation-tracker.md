@@ -29,7 +29,7 @@
 - [x] 6. 補通知／Email／storage／settings 測試 — notifications 7 source/0 test、mail 25 source/1 test 等缺口（`notification-mail-storage-test-coverage` SR 已封存合併：notifications 9 tests、mail 15 tests、storage 3 tests、settings-crypto 全綠；交叉審查確認 mail mock 未過度、settings-crypto 用 AES-256-GCM 正確實作 IV 隨機生成+認證tag驗證）
 - [ ] 9. Schema/migration rehearsal — 查 redundant index、status/slug contract，乾淨 DB 跑一次 migrate deploy
 - [ ] 10. Mission／Organization／site-agent（2026-08-31 Fish 已裁決方向，拆成 3 張獨立 SR）
-  - [ ] 10a. site-agent 補搬遷（`port-site-agent` SR，已寫完待實作，指派 Grok）
+  - [x] 10a. site-agent 補搬遷（`port-site-agent` SR 已完成合併，commit 959eeecd；Grok 搬遷代碼，PM 驗證全部任務通過：auth 檢查正確、工具白名單安全、測試全綠）
   - [ ] 10b. Mission 補前台入口（`mission-frontend-entry` SR，已寫完待實作，指派 Codex；調查發現 CoursePack 系統前後台完全沒有入口，範圍比預期大）
   - [x] 10c. Organization 完整度覆查（`organization-completeness-review` SR，已完成合併，commit 7f94d89a；cursor-agent 完成 Phase 1 稽核+Phase 2 修復：checkout→order.organizationId、成員課程存取、邀請 owner 邊界、錯誤通知、刪 org 政策；687 tests passing）
 - [ ] 11. 群眾模擬壓力測試（2026-08-31 Fish 新增，需求：0元課程 + 真人多方式註冊 + 多支 Agent 模擬使用者高頻互動找 bug，詳見下方「群眾模擬測試計畫」）
