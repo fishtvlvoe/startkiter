@@ -27,8 +27,8 @@
 - [x] 4. Signed URL／image proxy／local upload 覆查 — 跨 user key、過期、撤銷、production fallback（交叉審查完成：✓ 無真實漏洞；10 個新測試檔案驗證了 ownership 綁定、SSRF 基本防護、expiresIn 檢查、local fallback 存取控制；後續強化建議已記錄至「額外發現」）
 - [x] 5. 清理 placeholder／未實作 provider — `PLACEHOLDER_MEDIA`（已處理：`packages/course/catalog.ts` 沒設定 `BUNNY_LIBRARY_ID` 時，production 環境改為 fail-closed 直接拋錯，不再用 demo 影片頂替付費課程內容；dev/test 環境維持 fallback 方便開發，比照結帳金流「沒設定就 503」的既有規則）、Polar `Not implemented`（已刪除，`remove-unused-polar-provider` SR 完成：台灣/國際市場皆用量低，且 `v1-scope-boundary` 早已正式禁止 Polar 收款，代碼本來就是未接線的殘留鷹架，直接整份移除）
 - [x] 6. 補通知／Email／storage／settings 測試 — notifications 7 source/0 test、mail 25 source/1 test 等缺口（`notification-mail-storage-test-coverage` SR 已封存合併：notifications 9 tests、mail 15 tests、storage 3 tests、settings-crypto 全綠；交叉審查確認 mail mock 未過度、settings-crypto 用 AES-256-GCM 正確實作 IV 隨機生成+認證tag驗證）
-- [ ] 9. Schema/migration rehearsal — 查 redundant index、status/slug contract，乾淨 DB 跑一次 migrate deploy
-- [ ] 10. Mission／Organization／site-agent（2026-08-31 Fish 已裁決方向，拆成 3 張獨立 SR）
+- [x] 9. Schema/migration rehearsal（2026-08-31 PM 完成）— 查出1個 redundant index（`CourseSubscription.userId` 單獨索引被 `[userId, courseId]` 複合索引覆蓋，已移除）；slug 欄位全數有 `@unique`/`@@unique` 約束，無缺口；status 欄位發現型別不一致（部分 model 用 enum、部分用 plain String 且大小寫慣例不一）但屬既有設計、非本輪範圍，記錄備查不強改；用 colima 起乾淨 PostgreSQL 16 容器，42 個 migration 全部 `migrate deploy` 成功且 `migrate status` 確認無 drift；700 tests + type-check 全綠（mail package 在 turbo 平行執行下有既有 env 汙染 flaky，單獨跑 3 次穩定通過，與本次改動無關，不在本輪修復範圍）
+- [x] 10. Mission／Organization／site-agent（2026-08-31 Fish 已裁決方向，拆成 3 張獨立 SR，3 子項全完成）
   - [x] 10a. site-agent 補搬遷（`port-site-agent` SR 已完成合併，commit 959eeecd；Grok 搬遷代碼，PM 驗證全部任務通過：auth 檢查正確、工具白名單安全、測試全綠）
   - [x] 10b. Mission 補前台入口（`mission-frontend-entry` SR 已完成合併，commit f16d5497；Codex 實作前台頁面，cursor-agent 審查發現 C1 Critical 問題並修正：後台列表+詳情頁、學員端詳情頁、表單提交完整串接；688 tests passing，C1 修正後測試全綠）
   - [x] 10c. Organization 完整度覆查（`organization-completeness-review` SR，已完成合併，commit 7f94d89a；cursor-agent 完成 Phase 1 稽核+Phase 2 修復：checkout→order.organizationId、成員課程存取、邀請 owner 邊界、錯誤通知、刪 org 政策；687 tests passing）

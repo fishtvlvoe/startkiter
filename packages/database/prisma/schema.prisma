@@ -709,7 +709,6 @@ model CourseSubscription {
   expirationReminders   CourseExpirationReminder[]
   emailDeliveryLogs     EmailDeliveryLog[]
 
-  @@index([userId])
   @@index([courseId])
   @@index([userId, courseId])
   @@map("course_subscription")
