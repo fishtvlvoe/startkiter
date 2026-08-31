@@ -32,7 +32,12 @@
   - [x] 10a. site-agent 補搬遷（`port-site-agent` SR 已完成合併，commit 959eeecd；Grok 搬遷代碼，PM 驗證全部任務通過：auth 檢查正確、工具白名單安全、測試全綠）
   - [x] 10b. Mission 補前台入口（`mission-frontend-entry` SR 已完成合併，commit f16d5497；Codex 實作前台頁面，cursor-agent 審查發現 C1 Critical 問題並修正：後台列表+詳情頁、學員端詳情頁、表單提交完整串接；688 tests passing，C1 修正後測試全綠）
   - [x] 10c. Organization 完整度覆查（`organization-completeness-review` SR，已完成合併，commit 7f94d89a；cursor-agent 完成 Phase 1 稽核+Phase 2 修復：checkout→order.organizationId、成員課程存取、邀請 owner 邊界、錯誤通知、刪 org 政策；687 tests passing）
-- [~] 11. 群眾模擬壓力測試（2026-08-31 Fish 新增，需求：0元課程 + 真人多方式註冊 + 多支 Agent 模擬使用者高頻互動找 bug，詳見下方「群眾模擬測試計畫」）— 進行中：3支agy平行測試，已抓到2個真實UI bug（教室頁不跟隨主題、側邊欄無分區）
+- [x] 11. 群眾模擬壓力測試（2026-08-31 Fish 新增+完成，commit c766327a）— 3支agy（Antigravity CLI）+ego-browser平行扮演新手學員/付費學員/講師三種角色，高頻互動測試。發現並修復2個真實UI bug：
+  - 課程教室播放頁（classroom-client.tsx等3檔）原本寫死`bg-neutral-950`等硬編碼深色class，不跟隨淺色/深色主題設定；已改用語意化theme token（bg-background/bg-card/text-foreground等），淺色/深色皆正確渲染（crowd-test-newbie實測驗證）
+  - 側邊欄選單「管理」項目與「一般使用者」項目混雜無分區；已加`requiresOperator`旗標+視覺分隔線+「管理」分組標題，一般學員只看到4項基本選單，operator才看到完整管理分區（crowd-test-paid-learner實測驗證，含真實非operator帳號buyer-sandbox@example.com測試）
+  - 3支agy中2支（paid-learner／instructor）獨立做出幾乎相同的側邊欄分區修復，判定後採用paid-learner版本（測試覆蓋較完整），instructor的重複實作未合併（其worktree已捨棄）
+  - 額外確認：0元coupon結帳流程（TEST100OFF）在補齊本機PAYUNi Sandbox測試憑證後，正確導向沙箱結帳通道，訂單/課程權限開通正常
+  - 最終驗證：700個測試全過（含site-agent 10個），type-check全綠
 - [ ] 12. UI/UX 一致性掃描（`ui-ux-consistency-sweep` SR，已寫完待實作，2026-08-31 Fish 新增：全站整改缺乏UI/UX統一審查，多支CLI各自寫頁面風格不一致；三階段：agy截圖盤點→網頁設計師subagent審查→CLI修復）
 - [ ] 7. Chatwoot 三管道 E2E（`unified-support-desk` task 9.4）— 已由老闆確認暫時擱置，非本輪優先。**排序調整（2026-08-31）**：移到最後，因為老闆需要親自在電腦前操作填信用卡/ATM資訊
 - [ ] 8. Real provider acceptance matrix — subscription/period notify/退款/發票要留 webhook+DB+idempotency 證據。**排序調整（2026-08-31）**：移到最後，同上原因
