@@ -66,7 +66,7 @@ import { type DragEvent, Fragment, type MouseEvent, type PointerEvent, useMemo, 
 
 import { OrganzationSelect } from "../../organizations/components/OrganizationSelect";
 import { useIsMobile } from "../hooks/use-media-query";
-import { getMountMenuItems, getTabBarItems } from "../lib/nav-menu-items";
+import { getMountMenuItems, getTabBarItems, isMenuActive } from "../lib/nav-menu-items";
 import { useSidebar } from "../lib/sidebar-context";
 import type { SidebarGroup } from "../lib/sidebar-layout";
 import { useSaveSidebarLayout, useSidebarLayout } from "../lib/sidebar-layout";
@@ -484,6 +484,11 @@ function SidebarGroupedNavItem({
 	menuItem: NavMenuItem;
 	isSaving: boolean;
 }) {
+	const pathname = usePathname();
+	const isActive =
+		isMenuActive(pathname, menuItem.href) ||
+		(menuItem.subItems?.some((subItem) => isNavSubItemActive(pathname, subItem.href)) ?? false);
+
 	return (
 		<li
 			draggable={!isSaving}
@@ -497,14 +502,14 @@ function SidebarGroupedNavItem({
 				aria-disabled={isSaving}
 				className={cn(
 					"gap-3 px-3 py-2 text-sm flex w-full items-center rounded-lg whitespace-nowrap transition-colors cursor-grab",
-					menuItem.isActive ? "bg-[#2271b1] font-semibold text-white" : "hover:bg-white/5",
+					isActive ? "bg-[#2271b1] font-semibold text-white" : "hover:bg-white/5",
 					isSaving && "pointer-events-none opacity-60",
 				)}
 			>
 				<menuItem.icon
-					className={cn("size-5 shrink-0", menuItem.isActive ? "text-white" : "text-[#c3c4c7]/60")}
+					className={cn("size-5 shrink-0", isActive ? "text-white" : "text-[#c3c4c7]/60")}
 				/>
-				<span className={menuItem.isActive ? "text-white" : "text-[#c3c4c7]"}>{menuItem.label}</span>
+				<span className={isActive ? "text-white" : "text-[#c3c4c7]"}>{menuItem.label}</span>
 			</Link>
 		</li>
 	);
@@ -736,6 +741,10 @@ export function NavBar() {
 			isActive: item.isActive,
 			order: item.order,
 			requiresOperator: item.requiresOperator,
+			subItems: item.subItems?.map((subItem) => ({
+				label: subItem.label,
+				href: subItem.href,
+			})),
 		}));
 
 		const items: NavMenuItem[] = [...coreItems];
@@ -883,6 +892,9 @@ export function NavBar() {
 			}
 		: undefined;
 
+	const hasNestedMenuItems = menuItems.some((item) => (item.subItems?.length ?? 0) > 0);
+	const useSidebarGroupedNav = canAccessAdmin && !isCollapsedEffective && !hasNestedMenuItems;
+
 	return (
 		<>
 			<div
@@ -1015,7 +1027,7 @@ export function NavBar() {
 					</div>
 
 					<div className="min-h-0 md:flex hidden flex-1 flex-col overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]">
-						{canAccessAdmin && !isCollapsedEffective ? (
+						{useSidebarGroupedNav ? (
 							<div className="md:mx-0 md:mt-3 md:mb-6">
 								<SidebarGroupedNav
 									groups={groups}

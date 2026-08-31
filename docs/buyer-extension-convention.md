@@ -193,6 +193,40 @@
    - 在倉庫根目錄執行 `pnpm test` 必須通過（根目錄 Vitest 設定會自動發現新模組測試）。
 7. 若 `apps/saas` 要使用此模組，在 `apps/saas/package.json` 的 `dependencies` 加入 `"@startkiter/newsletter": "workspace:*"`，然後 import `@startkiter/newsletter`。
 
+▋ 側邊欄選單掛載（MOUNT_POINTS）
+
+StartKiter 的側邊欄選單由 `packages/platform/src/mount-points.ts` 的 `MOUNT_POINTS` 陣列驅動，NavBar 透過 `apps/saas/modules/shared/lib/nav-menu-items.ts` 的 `getMountMenuItems()` 自動渲染，禁止在 `NavBar.tsx` 硬編碼業務選單項目。
+
+• 一級入口：在 `MOUNT_POINTS` 新增一筆 `PluginManifest`，設定 `mount.route.path`（頁面 URL）與 `mount.menu`（`label`、`icon`、`order`）。範例見同檔案的 `id: "chatbot"`。
+
+• 子功能收攏：在 `mount.menu` 加上 `groupId`（例如 `"course-admin"`），`nav-menu-items.ts` 的 `MENU_GROUP_CONFIG` 會把同組項目合成一個帶 `subItems` 的父項，路由 URL 不變。課程模組現行子項：`course-admin`（課程管理）、`quiz`、`review`、`assignment`、`bundles`、`onboarding-surveys`、`media-library`、`course-pack-admin`。
+
+• 父項權限：父項在 `MENU_GROUP_CONFIG` 標 `requiresOperator: true`；各子項 manifest 也各自保留 `requiresOperator: true`，頁面內 `isOperator` redirect 邏輯不動。
+
+• 權限過濾：`getMountMenuItems({ isOperator, canAccessPagesCms })` 會隱藏 `requiresOperator: true` 的項目（學員看不到），`pages-cms` 另依 `canAccessPagesCms` 判斷。
+
+• 高亮比對：用 `isMenuActive(pathname, href, allHrefs)`，以最長路徑前缀為準，避免 `/admin/course` 誤亮 `/admin/course-pack`。
+
+真實範例（課程子功能 manifest，摘自 `packages/platform/src/mount-points.ts`）：
+
+~~~ts
+{
+  id: "media-library",
+  mount: {
+    route: { path: "/admin/media" },
+    menu: {
+      label: "媒體庫",
+      icon: "image",
+      order: 11,
+      requiresOperator: true,
+      groupId: "course-admin",
+    },
+  },
+}
+~~~
+
+分組邏輯真實路徑：`apps/saas/modules/shared/lib/nav-menu-items.ts`（`groupMountMenuItems`、`MENU_GROUP_CONFIG`）。巢狀展開 UI 複用 `apps/saas/modules/shared/components/NavBar.tsx` 的 `NavMenuList` `subItems` pattern（與 organization-settings 相同）。
+
 ## 禁止事項
 
 - 禁止引入 cordis、unplugin、runtime plugin 載入器等框架。

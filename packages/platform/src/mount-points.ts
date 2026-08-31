@@ -43,12 +43,34 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		dataSpec: "content",
 	},
 	{
+		id: "course-admin",
+		name: "課程管理後台",
+		version: "0.1.0",
+		mount: {
+			route: { path: "/admin/course" },
+			menu: {
+				label: "課程管理",
+				icon: "book-open",
+				order: 5,
+				requiresOperator: true,
+				groupId: "course-admin",
+			},
+		},
+		dataSpec: "none",
+	},
+	{
 		id: "quiz",
 		name: "課後測驗",
 		version: "0.1.0",
 		mount: {
 			route: { path: "/quiz-admin" },
-			menu: { label: "測驗管理", icon: "list-checks", order: 5, requiresOperator: true },
+			menu: {
+				label: "測驗管理",
+				icon: "list-checks",
+				order: 6,
+				requiresOperator: true,
+				groupId: "course-admin",
+			},
 			content: { kind: "auto", boundTo: "/quiz" },
 		},
 		dataSpec: "content",
@@ -59,7 +81,13 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		version: "0.1.0",
 		mount: {
 			route: { path: "/assignment-admin" },
-			menu: { label: "作業管理", icon: "file-pen-line", order: 7, requiresOperator: true },
+			menu: {
+				label: "作業管理",
+				icon: "file-pen-line",
+				order: 8,
+				requiresOperator: true,
+				groupId: "course-admin",
+			},
 			content: { kind: "auto", boundTo: "/assignment" },
 		},
 		dataSpec: "content",
@@ -80,7 +108,13 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		version: "0.1.0",
 		mount: {
 			route: { path: "/review-admin" },
-			menu: { label: "評價與留言管理", icon: "message-square", order: 6, requiresOperator: true },
+			menu: {
+				label: "評價與留言管理",
+				icon: "message-square",
+				order: 7,
+				requiresOperator: true,
+				groupId: "course-admin",
+			},
 		},
 		dataSpec: "none",
 	},
@@ -120,7 +154,13 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		version: "0.1.0",
 		mount: {
 			route: { path: "/admin/bundles" },
-			menu: { label: "課程綁定包", icon: "package", order: 15, requiresOperator: true },
+			menu: {
+				label: "課程綁定包",
+				icon: "package",
+				order: 9,
+				requiresOperator: true,
+				groupId: "course-admin",
+			},
 		},
 		dataSpec: "none",
 	},
@@ -130,7 +170,13 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		version: "0.1.0",
 		mount: {
 			route: { path: "/admin/onboarding-surveys" },
-			menu: { label: "新生問卷", icon: "clipboard-list", order: 16, requiresOperator: true },
+			menu: {
+				label: "新生問卷",
+				icon: "clipboard-list",
+				order: 10,
+				requiresOperator: true,
+				groupId: "course-admin",
+			},
 		},
 		dataSpec: "none",
 	},
@@ -140,7 +186,29 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		version: "0.1.0",
 		mount: {
 			route: { path: "/admin/media" },
-			menu: { label: "媒體庫", icon: "image", order: 17, requiresOperator: true },
+			menu: {
+				label: "媒體庫",
+				icon: "image",
+				order: 11,
+				requiresOperator: true,
+				groupId: "course-admin",
+			},
+		},
+		dataSpec: "none",
+	},
+	{
+		id: "course-pack-admin",
+		name: "CoursePack 任務",
+		version: "0.1.0",
+		mount: {
+			route: { path: "/admin/course-pack" },
+			menu: {
+				label: "CoursePack 任務",
+				icon: "clipboard-list",
+				order: 12,
+				requiresOperator: true,
+				groupId: "course-admin",
+			},
 		},
 		dataSpec: "none",
 	},
