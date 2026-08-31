@@ -3,6 +3,18 @@
 > 這是純追蹤文件，不是 Spectra change（不會出現在 `spectra list`，也不會被 park/unpark 影響）。
 > 每件事項要實作時，開一張獨立的 Spectra change；封存合併進 main 後回來這裡打勾。
 
+## 🎯 里程碑：讓網站完整到可以做「正式金流測試」
+
+**目標**：#10a／#10b／#10c／#11 全部完成，代表網站功能面完整、經過群眾模擬壓力測試站得住，Fish 才進場做 #8（真實金流：訂閱、退款、發票，需要親自在電腦前填信用卡/ATM資訊）跟 #7（Chatwoot 客服）。
+
+**分工（2026-08-31 Fish 定案）**：
+- **開發**：Codex、cursor-agent、Grok 各接一張 SR 動手實作
+  - Codex → `mission-frontend-entry`（範圍最大，需要新增 2 個頁面 + 串接既有 API）
+  - cursor-agent → `organization-completeness-review`（需要細膩的稽核+修復流程）
+  - Grok → `port-site-agent`（範圍最小最機械化，搬遷+調整 import，符合 Grok 目前只接輕量任務的定位）
+- **測試**：agy 用 `/ego-browser` 執行群眾模擬壓力測試（#11）
+- **驗收**：PM（我）親自 grep+重跑測試+走一次流程，不只信 CLI 自報
+
 來源：`openspec/changes/archive/full-site-audit-2026-08-30.md` 第 7 節建議優先順序，PM 抽查驗證過。
 
 狀態符號：`[ ]` 未開始　`[~]` 對應 SR 進行中　`[x]` 對應 SR 已封存合併進 main
@@ -17,9 +29,9 @@
 - [x] 6. 補通知／Email／storage／settings 測試 — notifications 7 source/0 test、mail 25 source/1 test 等缺口（`notification-mail-storage-test-coverage` SR 已封存合併：notifications 9 tests、mail 15 tests、storage 3 tests、settings-crypto 全綠；交叉審查確認 mail mock 未過度、settings-crypto 用 AES-256-GCM 正確實作 IV 隨機生成+認證tag驗證）
 - [ ] 9. Schema/migration rehearsal — 查 redundant index、status/slug contract，乾淨 DB 跑一次 migrate deploy
 - [ ] 10. Mission／Organization／site-agent（2026-08-31 Fish 已裁決方向，拆成 3 張獨立 SR）
-  - [ ] 10a. site-agent 補搬遷（`legacy/packages/site-agent` 完整代碼在，只是漏搬，537 行含測試；原計畫限定「兩支唯讀工具」不准註冊寫入工具）
-  - [ ] 10b. Mission 補前台入口（後台邏輯已有：`run-mission-check.ts`／`submit-mission-form-value.ts`／MDX block 都在，缺學員端頁面讓他們找得到）
-  - [ ] 10c. Organization 完整度覆查（已定案必要功能，公司行號客戶需要團隊帳號；UI 元件已有 10 個檔案，需覆查是否真的接完整、覆查權限邊界；`openspec/config.yaml` 舊矛盾規則已刪除）
+  - [ ] 10a. site-agent 補搬遷（`port-site-agent` SR，已寫完待實作，指派 Grok）
+  - [ ] 10b. Mission 補前台入口（`mission-frontend-entry` SR，已寫完待實作，指派 Codex；調查發現 CoursePack 系統前後台完全沒有入口，範圍比預期大）
+  - [ ] 10c. Organization 完整度覆查（`organization-completeness-review` SR，已寫完待實作，指派 cursor-agent；先稽核端對端流程再修復，不是預先寫死改哪些檔案）
 - [ ] 11. 群眾模擬壓力測試（2026-08-31 Fish 新增，需求：0元課程 + 真人多方式註冊 + 多支 Agent 模擬使用者高頻互動找 bug，詳見下方「群眾模擬測試計畫」）
 - [ ] 7. Chatwoot 三管道 E2E（`unified-support-desk` task 9.4）— 已由老闆確認暫時擱置，非本輪優先。**排序調整（2026-08-31）**：移到最後，因為老闆需要親自在電腦前操作填信用卡/ATM資訊
 - [ ] 8. Real provider acceptance matrix — subscription/period notify/退款/發票要留 webhook+DB+idempotency 證據。**排序調整（2026-08-31）**：移到最後，同上原因
