@@ -46,6 +46,15 @@
 - 或側邊欄本身支援巢狀展開（點「課程」展開子選單，不用跳頁面）
 - 兩種都可以，網頁設計師審查時一併判斷哪種更適合現有的 `AppWrapper`／`NavBar` 架構
 
+## 給買家的架構，不是一次性 UI 補丁（2026-08-31 Fish 追加）
+
+買家買的是代碼包，會拿這份代碼繼續開發自己的模組。這次課程模組選單整合**不能是改完就結束的一次性 UI 修補**，要把整理出來的模式寫進 `docs/buyer-extension-convention.md`，變成買家以後「加自己的模組」時照著做的正式規範。
+
+目前 `docs/buyer-extension-convention.md` 完全沒提到「新模組怎麼掛進側邊欄選單」這件事（已 grep 確認零匹配）。這次順便補上：
+- 一個模組（例如課程）如何註冊一個一級選單入口
+- 底下子功能如何依權限個別顯示/隱藏（比照 `fluent-cart` 的 `PermissionManager::hasPermission()` 模式，StartKiter 這邊對應 `isOperator`／`canManageCourse` 等既有權限函式）
+- 用課程模組整合後的實際代碼當作 `buyer-extension-convention.md` 要求的「真實可運作範例」（該規格本來就要求引用 repo 內真實存在的套件路徑，不能是虛構範例）
+
 ## 影響範圍
 
-Phase 1/2 零風險（只看不改）。Phase 3 修復範圍依審查結果決定，多是 CSS/className 調整，風險低，但要跑完整回歸測試確認沒有動到邏輯。
+Phase 1/2 零風險（只看不改）。Phase 3 修復範圍依審查結果決定，多是 CSS/className 調整，風險低，但要跑完整回歸測試確認沒有動到邏輯。課程模組選單整合本身風險中等（動到 `NavBar.tsx` 共用元件跟路由結構），需要確認每個子功能既有的權限判斷在新結構下依然正確生效。文件同步（`buyer-extension-convention.md`）零風險。
