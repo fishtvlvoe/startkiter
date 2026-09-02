@@ -66,6 +66,14 @@
 
 **客服決策**：見上方第 7 項。
 
+**2026-09-03 更正一筆誤記**：先前 `product-delivery-rollout` task 0.4 記載
+`course-pack-mission-execution` 只做了 7/23、剩 16 項待補。查證後確認是引用到過期快照——
+該 change 封存過兩次，`archive/2026-08-25-...`（7/23）是中途版，`archive/2026-08-28-...`（23/23）
+才是最終版。代碼實證：surface-block-map / check-registry / deployment-heartbeat-fresh /
+bunny-zone-created / run-mission-check 五個檔案皆存在；`packages/course` 測試 109 passed / 0 failed，
+course-pack 相關 5 檔 22 tests 全過。**不需補做、不需 descope，0.4 已改為完成。**
+教訓：同一張 change 若封存多次，引用時要確認取的是最新那份日期目錄。
+
 **新發現的既有問題（未修）**：`packages/api` 有 2 個發票作廢測試把 `invoiceDate` 寫死
 `2026-08-24`，而 `assertInvoiceVoidable` 用真實 `now` 判斷是否跨月，因此 2026-09-01 起
 必然失敗（`invoice-events.test.ts`、`invoice-operations.test.ts`）。非本次改動造成，
