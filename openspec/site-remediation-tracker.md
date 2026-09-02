@@ -74,10 +74,39 @@ bunny-zone-created / run-mission-check 五個檔案皆存在；`packages/course`
 course-pack 相關 5 檔 22 tests 全過。**不需補做、不需 descope，0.4 已改為完成。**
 教訓：同一張 change 若封存多次，引用時要確認取的是最新那份日期目錄。
 
-**新發現的既有問題（未修）**：`packages/api` 有 2 個發票作廢測試把 `invoiceDate` 寫死
+**新發現的既有問題（2026-09-03 已修）**：`packages/api` 有 2 個發票作廢測試把 `invoiceDate` 寫死
 `2026-08-24`，而 `assertInvoiceVoidable` 用真實 `now` 判斷是否跨月，因此 2026-09-01 起
 必然失敗（`invoice-events.test.ts`、`invoice-operations.test.ts`）。非本次改動造成，
 修法應為測試注入固定的 `now` 或改用相對日期。待 Fish 排優先順序。
+
+## 2026-09-03 跨月退款自動折讓（`auto-allowance-on-cross-month-refund`，已封存）
+
+Fish 裁決：退款一律全額，跨月時「開多少折讓」無決策價值，不該每筆都要人進後台按一次。
+
+- 跨月退款由「標記 `REFUND_NEEDS_ALLOWANCE` 等人工」改為自動開立全額折讓（`amount - allowanceTotal`）
+- **不放寬**「跨月不可作廢」的法規界線；不動「void 已送出但成敗未知」的路徑（雙重沖銷風險）
+- 抽出含全部 13 條併發保護的共用核心供 admin 與自動流程共用，不複製第二套
+- 順帶修掉 2 個寫死 `invoiceDate` 導致 9/1 起必然失敗的測試（注入固定 `now`，業務規則未動）
+
+**PM 兩輪攔截（都不是靠測試抓到的，是人工覆核）**：
+1. 實作方在範圍外拿掉 provider allowance 的 `ambiguous` 旗標，理由「與 void 對齊」。覆核不成立：
+   void 重複執行冪等、allowance 重複執行累加金額；且 `FAILED` 狀態在重試路徑無任何檢查
+   （僅擋 `SUCCEEDED`/`PENDING`），逾時將造成雙重折讓。已退回還原並補測試。
+2. 獨立 CR 判 FAIL：併發測試的 `updateMany` mock 不比對 `where`、一律回 `count:1`，
+   樂觀鎖從未被驗證（測試會過是靠業務層短路）。PM 親自改為真比對，改嚴格後 17 tests 仍全過，
+   證實樂觀鎖有效非假 mock 蒙混。
+
+**過程教訓（已記入 pm-evidence.md）**：判斷外部 CLI 是否還在工作，**用量百分比是否上升比畫面
+轉圈動畫可靠**——cursor-agent 卡死時 spinner 仍在轉，但用量 25 分鐘沒動、CPU 掉到 1.3%。
+agy（Antigravity）接獨立審查跑 30 分鐘後 terminal 直接 exited，未產出任何報告，
+畫面在執行中即無法透過 `orca terminal read` 取得完整內容。兩者最後皆由 PM 接手完成。
+
+**已知未涵蓋**：未連真實 DB、未打真實發票商 API。建議正式環境第一筆跨月退款由 Fish 親自確認。
+
+**後續建議（未做，待排序）**：`ALLOWANCE_NEEDS_REVIEW` 狀態缺乏 UI 出口（後台按鈕只解鎖
+`REFUND_NEEDS_ALLOWANCE`、`retryPendingInvoices` 也不掃它）。這是既有缺陷，但本次新增一條
+進入路徑（自動折讓遇 ambiguous）。發生時發票會卡在後台顯示「發票作業待確認」，
+錢已退給客人、僅憑證未沖銷，可見不靜默但需人工介入。
 
 ## 對應 SR 一覽（隨開隨補）
 
