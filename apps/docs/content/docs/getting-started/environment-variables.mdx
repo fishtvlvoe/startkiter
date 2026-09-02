@@ -105,7 +105,9 @@ StartKiter 的環境變數範例來自 `apps/saas/.env.example`。請複製一�
 | `MAIL_PORT` | 選填 | SMTP port，範例預設為 587。 |
 | `MAIL_USER` | 選填 | SMTP 使用者。 |
 | `MAIL_PASS` | 選填 | SMTP 密碼。 |
-| `SUPPORT_EMAIL` | 選填 | 客服收件地址。 |
+| `SUPPORT_EMAIL` | 選填 | 客服收件地址（伺服器端）。 |
+| `NEXT_PUBLIC_SUPPORT_CHANNEL` | 選填 | 客服進線模式：`email`（預設）或 `chatwoot`。`email` 時客服入口開啟 mailto 且不載入 Chatwoot widget。 |
+| `NEXT_PUBLIC_SUPPORT_EMAIL` | 選填 | 客服收件地址（瀏覽器端，供 mailto 連結使用）。 |
 
 ## AI
 
