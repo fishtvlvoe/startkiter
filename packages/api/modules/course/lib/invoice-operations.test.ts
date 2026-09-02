@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { issueInvoiceAllowance, voidInvoice } from "./invoice-operations";
+import { assertInvoiceVoidable, issueInvoiceAllowance, voidInvoice } from "./invoice-operations";
 
 const issuedInvoice = {
 	id: "invoice-1",
@@ -39,6 +39,16 @@ describe("invoice operations", () => {
 			}),
 		).rejects.toThrow(/折讓|跨月/);
 		expect(provider.void).not.toHaveBeenCalled();
+	});
+
+	// 4.3：確認跨月作廢法規界線未被放寬
+	it("assertInvoiceVoidable still rejects after crossing into a later month", () => {
+		expect(() =>
+			assertInvoiceVoidable(issuedInvoice, new Date("2026-09-01T00:00:00.000Z")),
+		).toThrow("發票已跨月，請改用折讓");
+		expect(() =>
+			assertInvoiceVoidable(issuedInvoice, new Date("2026-08-24T00:00:00.000Z")),
+		).not.toThrow();
 	});
 
 	it("accumulates allowance totals for a successful allowance", async () => {

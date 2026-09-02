@@ -4,6 +4,8 @@ import { createDecipheriv, createHash } from "node:crypto";
 
 export const EINVOICE_SETTING_ID = "einvoice";
 export const EINVOICE_OPERATION_LOCK_ID = "startkiter:einvoice-operation";
+/** 發票作業租約（作廢／折讓／開立重試共用），逾時才可搶回 */
+export const INVOICE_OPERATION_LEASE_MS = 60_000;
 const EINVOICE_PROVIDER_TIMEOUT_MS = 15_000;
 
 export type InvoiceProviderName = "ecpay" | "ezpay";

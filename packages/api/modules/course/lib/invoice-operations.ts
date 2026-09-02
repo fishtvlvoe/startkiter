@@ -50,13 +50,23 @@ export async function issueInvoiceAllowance(args: {
 	if (!Number.isSafeInteger(args.amount) || args.amount <= 0) throw new Error("折讓金額必須是正整數");
 	if (!invoice.invoiceNumber) throw new Error("發票缺少發票號碼");
 
-	const result = await args.provider.allowance({
-		invoiceNumber: invoice.invoiceNumber,
-		amount: args.amount,
-		allowanceId: args.allowanceId,
-		invoiceDate: invoice.invoiceDate,
-		taxExclusive: invoice.taxExclusive,
-	});
+	const result = await (async () => {
+		try {
+			return await args.provider.allowance({
+				invoiceNumber: invoice.invoiceNumber!,
+				amount: args.amount,
+				allowanceId: args.allowanceId,
+				invoiceDate: invoice.invoiceDate,
+				taxExclusive: invoice.taxExclusive,
+			});
+		} catch (error) {
+			// provider 拋錯（含逾時）= 結果不明；不可當明確失敗，否則 FAILED 可被重試造成雙重折讓
+			throw new InvoiceAllowanceError(
+				error instanceof Error ? error.message : "開立折讓失敗",
+				true,
+			);
+		}
+	})();
 	if (!result.success) throw new InvoiceAllowanceError(result.error ?? "開立折讓失敗", result.ambiguous === true);
 	return {
 		...invoice,

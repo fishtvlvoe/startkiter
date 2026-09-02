@@ -1,5 +1,5 @@
 import { call } from "@orpc/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@startkiter/auth", () => ({
 	auth: {
@@ -30,6 +30,7 @@ vi.mock("../lib/invoice-settings", () => ({
 	getInvoiceProvider: vi.fn(),
 	isInvoiceProviderName: vi.fn((value: string) => value === "ecpay" || value === "ezpay"),
 	withInvoiceOperationLock: vi.fn(async (callback) => callback(db as never)),
+	INVOICE_OPERATION_LEASE_MS: 60_000,
 }));
 
 vi.mock("@startkiter/platform", () => ({
@@ -63,6 +64,8 @@ const provider = {
 describe("invoice admin audit logging", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date("2026-08-24T12:00:00.000Z"));
 		vi.mocked(auth.api.getSession).mockResolvedValue({
 			session: { id: "session-1", userId: "admin-1", ipAddress: "203.0.113.11" },
 			user: { id: "admin-1", email: "admin@example.com", role: "admin" },
@@ -76,6 +79,10 @@ describe("invoice admin audit logging", () => {
 		vi.mocked(getInvoiceProvider).mockResolvedValue(provider as never);
 		provider.void.mockClear();
 		provider.allowance.mockClear();
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
 	});
 
 	it("records invoice voiding after the provider and database update succeed", async () => {
@@ -130,5 +137,27 @@ describe("invoice admin audit logging", () => {
 			},
 		});
 		expect(provider.allowance).toHaveBeenCalledWith(expect.objectContaining({ taxExclusive: true }));
+	});
+
+	// 1.8 R2：自動折讓進行中（ALLOWANCE_IN_PROGRESS 未過期）時，admin 手動折讓必須被拒絕
+	it("rejects admin allowance while an automatic allowance lease is still active", async () => {
+		vi.mocked(db.invoice.findUnique).mockResolvedValue({
+			...invoice,
+			attentionReason: "ALLOWANCE_IN_PROGRESS",
+			operationToken: "active-token",
+			operationStartedAt: new Date(),
+		} as never);
+		vi.mocked(db.invoiceAllowanceOperation.findUnique).mockResolvedValue({
+			id: "op-1",
+			allowanceId: "ALLOW-invoice-1-300",
+			status: "PENDING",
+		} as never);
+
+		await expect(
+			call(issueInvoiceAllowance, { invoiceId: "invoice-1", amount: 300 }, { context: { headers: new Headers() } as never }),
+		).rejects.toMatchObject({
+			message: expect.stringMatching(/待確認|禁止重送/),
+		});
+		expect(provider.allowance).not.toHaveBeenCalled();
 	});
 });

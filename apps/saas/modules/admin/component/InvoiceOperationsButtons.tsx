@@ -28,7 +28,9 @@ export function InvoiceOperationsButtons({ invoice }: { invoice: { id: string; s
 
 	return (
 		<div className="flex flex-wrap items-center gap-2">
-			{invoice.status === "ISSUED" && !invoice.canVoid && <span className="text-xs text-amber-700">已跨月，請改用折讓。</span>}
+			{invoice.status === "ISSUED" && !invoice.canVoid && (
+				<span className="text-xs text-amber-700">已跨月，無法作廢；若需沖銷請開折讓。</span>
+			)}
 			{invoice.status === "ISSUED" && (
 				confirm === "void" ? (
 					<span className="flex items-center gap-2 text-xs">同月作廢？<Button size="sm" variant="destructive" disabled={voidMutation.isPending} onClick={() => voidMutation.mutate()}>確認作廢</Button><Button size="sm" variant="outline" onClick={() => setConfirm(null)}>取消</Button></span>

@@ -43,7 +43,7 @@ Fish 2026-09-02 裁決：跨月退款改為自動開立全額折讓。
 
 ### Modified Capabilities
 
-- `course-invoicing`（或現行對應 spec）：退款流程在跨月情境的行為由「標記待人工折讓」
+- `einvoice-issuance`：退款流程在跨月情境的行為由「標記待人工折讓」
   改為「自動全額折讓，失敗才退回待人工」
 
 ## Impact

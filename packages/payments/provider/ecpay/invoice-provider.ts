@@ -78,6 +78,7 @@ export function createEcpayInvoiceProvider(config: InvoiceProviderConfig): Invoi
 				);
 				return { success: true, allowanceNumber: result.allowanceNumber };
 			} catch (error) {
+				// 折讓 catch 一律 ambiguous：逾時時供應商端可能已成功，重試會累加折讓額（與 void 冪等不同）
 				return { success: false, ambiguous: true, error: error instanceof Error ? error.message : "ECPay 折讓失敗" };
 			}
 		},

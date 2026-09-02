@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("node:crypto", async (importOriginal) => ({
 	...(await importOriginal<typeof import("node:crypto")>()),
@@ -19,6 +19,7 @@ vi.mock("./invoice-settings", () => ({
 	getInvoiceSettings: vi.fn(),
 	createInvoiceProvider: vi.fn(),
 	withInvoiceOperationLock: vi.fn(async (callback) => callback(db as never)),
+	INVOICE_OPERATION_LEASE_MS: 60_000,
 }));
 vi.mock("./order-refunds", () => ({
 	acquireOrderStateLock: vi.fn(),
@@ -65,6 +66,8 @@ describe("invoice event triggers", () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date("2026-08-24T12:00:00.000Z"));
 		vi.mocked(getInvoiceSettings).mockResolvedValue(settings);
 		vi.mocked(createInvoiceProvider).mockReturnValue(provider as never);
 		vi.mocked(db.order.findUnique).mockResolvedValue(order as never);
@@ -79,6 +82,10 @@ describe("invoice event triggers", () => {
 		vi.mocked(db.invoice.update).mockResolvedValue({ id: "invoice-1", status: "ISSUED" } as never);
 		vi.mocked(db.invoice.updateMany).mockResolvedValue({ count: 1 } as never);
 		provider.void.mockResolvedValue({ success: true });
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
 	});
 
 	it("does not create an invoice while the feature is disabled", async () => {

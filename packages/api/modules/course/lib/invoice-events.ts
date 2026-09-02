@@ -3,8 +3,9 @@ import { randomUUID } from "node:crypto";
 import { buildIssueInput, type InvoiceProvider } from "@startkiter/payments";
 import { db, type Prisma } from "@startkiter/database";
 
-import { createInvoiceProvider, getInvoiceSettings, isInvoiceProviderName, withInvoiceOperationLock } from "./invoice-settings";
+import { createInvoiceProvider, getInvoiceSettings, INVOICE_OPERATION_LEASE_MS, isInvoiceProviderName, withInvoiceOperationLock } from "./invoice-settings";
 import { acquireOrderStateLock } from "./order-refunds";
+import { runInvoiceAllowanceOperation } from "./run-invoice-allowance-operation";
 import { sameTaiwanBillingMonth } from "./taiwan-billing-month";
 
 type InvoiceRecord = Prisma.InvoiceGetPayload<{}>;
@@ -28,12 +29,19 @@ type InvoiceRefundJob = {
 	operationToken: string;
 	recoverBeforeVoid: boolean;
 };
-type InvoiceRefundReservation = { invoice: InvoiceRecord } | { job: InvoiceRefundJob } | null;
-
-const PENDING_INVOICE_RETRY_AFTER_MS = 60_000;
+type InvoiceAutoAllowanceJob = {
+	invoiceId: string;
+	amount: number;
+	operationToken: string;
+};
+type InvoiceRefundReservation =
+	| { invoice: InvoiceRecord }
+	| { job: InvoiceRefundJob }
+	| { autoAllowance: InvoiceAutoAllowanceJob }
+	| null;
 
 function isStaleOperation(invoice: InvoiceRecord, now = Date.now()): boolean {
-	return !invoice.operationStartedAt || now - invoice.operationStartedAt.getTime() >= PENDING_INVOICE_RETRY_AFTER_MS;
+	return !invoice.operationStartedAt || now - invoice.operationStartedAt.getTime() >= INVOICE_OPERATION_LEASE_MS;
 }
 
 function jsonValue(value: unknown): Prisma.InputJsonValue | undefined {
@@ -75,7 +83,7 @@ function isRetryableInvoiceStatus(invoice: InvoiceRecord): boolean {
 	if (invoice.status === "FAILED") return true;
 	if (invoice.status !== "PENDING") return false;
 	if (!invoice.operationToken && !invoice.attentionReason) return true;
-	return Date.now() - invoice.updatedAt.getTime() >= PENDING_INVOICE_RETRY_AFTER_MS;
+	return Date.now() - invoice.updatedAt.getTime() >= INVOICE_OPERATION_LEASE_MS;
 }
 
 async function reserveOrderInvoice(orderId: string): Promise<InvoiceIssueReservation> {
@@ -321,21 +329,88 @@ async function reserveRefundInvoice(
 ): Promise<InvoiceRefundReservation> {
 	return withInvoiceOperationLock(async (tx) => {
 		const invoice = await findInvoice(tx);
-		if (!invoice || invoice.status !== "ISSUED" || !invoice.invoiceNumber) return invoice ? { invoice } : null;
-			const recoverableRefundMarker = ["REFUND_IN_PROGRESS", "VOID_AFTER_REFUND", "VOID_IN_PROGRESS"].includes(invoice.attentionReason ?? "");
-			const staleRefund = recoverableRefundMarker && isStaleOperation(invoice);
-			if (recoverableRefundMarker && !staleRefund) {
-				return { invoice };
-			}
+		if (!invoice || !invoice.invoiceNumber) return invoice ? { invoice } : null;
+		if (invoice.status !== "ISSUED" && invoice.status !== "ALLOWANCE") return { invoice };
 
-			if (invoice.attentionReason && !recoverableRefundMarker) return { invoice };
+		const recoverableRefundMarker = ["REFUND_IN_PROGRESS", "VOID_AFTER_REFUND", "VOID_IN_PROGRESS"].includes(invoice.attentionReason ?? "");
+		const staleRefund = recoverableRefundMarker && isStaleOperation(invoice);
+		if (recoverableRefundMarker && !staleRefund) {
+			return { invoice };
+		}
+
+		if (invoice.attentionReason && !recoverableRefundMarker) return { invoice };
 		const settings = await getInvoiceSettings(tx);
 		const provider = isInvoiceProviderName(invoice.provider) && settings.provider === invoice.provider ? createInvoiceProvider(settings) : null;
-		if (!provider || !invoice.invoiceDate || !sameTaiwanBillingMonth(invoice.invoiceDate, now)) {
+		if (!provider || !invoice.invoiceDate) {
 			return { invoice: await tx.invoice.update({
 				where: { id: invoice.id },
 				data: { attentionReason: "REFUND_NEEDS_ALLOWANCE" },
 			}) };
+		}
+
+		const crossMonth = !sameTaiwanBillingMonth(invoice.invoiceDate, now);
+		// R6：void／退款結果未知（含 stale）不得改走自動折讓，避免雙重沖銷
+		if (recoverableRefundMarker && staleRefund) {
+			if (crossMonth || invoice.status === "ALLOWANCE") {
+				return {
+					invoice: await tx.invoice.update({
+						where: { id: invoice.id },
+						data: {
+							attentionReason: "REFUND_NEEDS_ALLOWANCE",
+							operationToken: null,
+							operationStartedAt: null,
+							failReason: "作廢結果待查，已跨月或已折讓，請改用折讓",
+						},
+					}),
+				};
+			}
+			const operationToken = randomUUID();
+			await tx.invoice.update({
+				where: { id: invoice.id },
+				data: { attentionReason: "REFUND_IN_PROGRESS", operationToken, operationStartedAt: new Date(), failReason: null },
+			});
+			return {
+				job: {
+					invoiceId: invoice.id,
+					provider,
+					invoiceNumber: invoice.invoiceNumber,
+					randomCode: invoice.randomCode,
+					invoiceDate: invoice.invoiceDate,
+					operationToken,
+					recoverBeforeVoid: true,
+				},
+			};
+		}
+
+		// 跨月，或發票已是 ALLOWANCE（只能折讓剩餘額）：自動全額折讓
+		if (crossMonth || invoice.status === "ALLOWANCE") {
+			const remaining = invoice.amount - invoice.allowanceTotal;
+			if (remaining <= 0) {
+				return {
+					invoice: await tx.invoice.update({
+						where: { id: invoice.id },
+						data: { attentionReason: null, failReason: null },
+					}),
+				};
+			}
+			const operationToken = randomUUID();
+			const claimed = await tx.invoice.updateMany({
+				where: {
+					id: invoice.id,
+					status: { in: ["ISSUED", "ALLOWANCE"] },
+					attentionReason: invoice.attentionReason,
+				},
+				data: {
+					attentionReason: "ALLOWANCE_IN_PROGRESS",
+					operationToken,
+					operationStartedAt: new Date(),
+					failReason: null,
+				},
+			});
+			if (claimed.count !== 1) {
+				return { invoice };
+			}
+			return { autoAllowance: { invoiceId: invoice.id, amount: remaining, operationToken } };
 		}
 
 		const operationToken = randomUUID();
@@ -351,7 +426,7 @@ async function reserveRefundInvoice(
 				randomCode: invoice.randomCode,
 				invoiceDate: invoice.invoiceDate,
 				operationToken,
-				recoverBeforeVoid: staleRefund,
+				recoverBeforeVoid: false,
 			},
 		};
 	});
@@ -374,6 +449,22 @@ async function finalizeInvoiceRefund(invoiceId: string, operationToken: string, 
 
 async function runInvoiceRefund(reservation: InvoiceRefundReservation): Promise<InvoiceRecord | null> {
 	if (!reservation) return null;
+	if ("autoAllowance" in reservation) {
+		try {
+			const result = await runInvoiceAllowanceOperation({
+				invoiceId: reservation.autoAllowance.invoiceId,
+				amount: reservation.autoAllowance.amount,
+				definiteFailureAttentionReason: "REFUND_NEEDS_ALLOWANCE",
+				systemTrigger: "auto-cross-month-refund",
+				resumeOperationToken: reservation.autoAllowance.operationToken,
+			});
+			return result.invoice;
+		} catch {
+			return withInvoiceOperationLock(async (tx) =>
+				tx.invoice.findUnique({ where: { id: reservation.autoAllowance.invoiceId } }),
+			);
+		}
+	}
 	if ("invoice" in reservation) return reservation.invoice;
 	try {
 		if (reservation.job.recoverBeforeVoid) {
@@ -397,9 +488,14 @@ async function runInvoiceRefund(reservation: InvoiceRefundReservation): Promise<
 	}
 }
 
+const refundInvoiceInclude = {
+	order: { select: { invoiceType: true } },
+	subscription: { select: { invoiceType: true } },
+} as const;
+
 export async function handleRefundInvoice(orderId: string, now = new Date()): Promise<InvoiceRecord | null> {
 	return runInvoiceRefund(await reserveRefundInvoice(
-		(tx) => tx.invoice.findUnique({ where: { orderId } }),
+		(tx) => tx.invoice.findUnique({ where: { orderId }, include: refundInvoiceInclude }),
 		now,
 	));
 }
@@ -410,8 +506,9 @@ export async function handleRefundInvoiceForSubscription(
 ): Promise<InvoiceRecord | null> {
 	return runInvoiceRefund(await reserveRefundInvoice(
 		(tx) => tx.invoice.findFirst({
-			where: { subscriptionId, status: "ISSUED" },
+			where: { subscriptionId, status: { in: ["ISSUED", "ALLOWANCE"] } },
 			orderBy: { periodNumber: "desc" },
+			include: refundInvoiceInclude,
 		}),
 		now,
 	));
@@ -430,7 +527,7 @@ async function recoverStaleAllowance(invoiceId: string): Promise<InvoiceRecord |
 		const provider = settings.provider === invoice.provider ? createInvoiceProvider(settings) : null;
 		const operationToken = randomUUID();
 		const claimed = await tx.invoice.updateMany({
-			where: { id: invoice.id, attentionReason: "ALLOWANCE_IN_PROGRESS", OR: [{ operationStartedAt: null }, { operationStartedAt: { lte: new Date(Date.now() - PENDING_INVOICE_RETRY_AFTER_MS) } }] },
+			where: { id: invoice.id, attentionReason: "ALLOWANCE_IN_PROGRESS", OR: [{ operationStartedAt: null }, { operationStartedAt: { lte: new Date(Date.now() - INVOICE_OPERATION_LEASE_MS) } }] },
 			data: { operationToken, operationStartedAt: new Date() },
 		});
 		if (claimed.count !== 1) return null;
@@ -465,7 +562,19 @@ async function recoverStaleAllowance(invoiceId: string): Promise<InvoiceRecord |
 					where: { id: job.invoiceId, status: { in: ["ISSUED", "ALLOWANCE"] }, attentionReason: "ALLOWANCE_IN_PROGRESS", operationToken: job.operationToken },
 					data: { status: "ALLOWANCE", allowanceTotal: { increment: (await tx.invoiceAllowanceOperation.findUnique({ where: { allowanceId: job.allowanceId } }))?.amount ?? 0 }, attentionReason: null, operationToken: null, operationStartedAt: null, failReason: null },
 				});
-				if (updated.count === 1) await tx.invoiceAllowanceOperation.update({ where: { allowanceId: job.allowanceId }, data: { status: "SUCCEEDED", allowanceNumber: queried.allowanceNumber, errorMessage: null } });
+				if (updated.count === 1) {
+					const existing = await tx.invoiceAllowanceOperation.findUnique({ where: { allowanceId: job.allowanceId } });
+					const preservedTrigger =
+						existing?.errorMessage?.startsWith("[trigger:system:") ? existing.errorMessage : null;
+					await tx.invoiceAllowanceOperation.update({
+						where: { allowanceId: job.allowanceId },
+						data: {
+							status: "SUCCEEDED",
+							allowanceNumber: queried.allowanceNumber,
+							errorMessage: preservedTrigger,
+						},
+					});
+				}
 			} else {
 				await tx.invoice.updateMany({ where: { id: job.invoiceId, attentionReason: "ALLOWANCE_IN_PROGRESS", operationToken: job.operationToken }, data: { attentionReason: "ALLOWANCE_NEEDS_REVIEW", operationToken: null, operationStartedAt: null, failReason: queried.error ?? "折讓結果待查" } });
 				await tx.invoiceAllowanceOperation.updateMany({ where: { invoiceId: job.invoiceId, allowanceId: job.allowanceId, status: "PENDING" }, data: { status: "UNKNOWN", errorMessage: queried.error ?? "折讓結果待查" } });
@@ -482,7 +591,7 @@ async function recoverStaleAllowance(invoiceId: string): Promise<InvoiceRecord |
 }
 
 export async function retryPendingInvoices(limit = 50): Promise<{ scanned: number; issued: number; failed: number }> {
-	const cutoff = new Date(Date.now() - PENDING_INVOICE_RETRY_AFTER_MS);
+	const cutoff = new Date(Date.now() - INVOICE_OPERATION_LEASE_MS);
 	const pending = await db.invoice.findMany({
 		where: {
 			OR: [
