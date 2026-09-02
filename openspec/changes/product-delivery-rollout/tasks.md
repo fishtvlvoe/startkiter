@@ -6,9 +6,9 @@
 - [x] 0.2 `subscriptions-invoice` 22/22 完成。第 6 輪全新獨立 CR：Critical 0、High 0、Medium 0，PASS。API 209/209、Payments 76/76、SaaS 196/196 全綠。ezPay 正式帳號真實開票（DQ70632357）→作廢已驗證。commit 01045ae2 已 push。**兩張皆保持開啟未 archive（Fish 裁決先不封存，等本 change 全部子項完成後一次檢視）。**
 - [x] 0.3a `unified-support-desk` 4.5 LINE Messaging API Channel：確認 Fish 已建立既有 Channel「StartKiter 客服」（@958ghjex，Channel ID 2011202536，Provider「1-開發」）。PM 取得 Channel access token（long-lived），呼叫 `getBotInfo` 驗證回傳 200 + Bot 資訊，已寫入 `apps/saas/.env`（`LINE_MESSAGING_CHANNEL_ID`、`LINE_MESSAGING_CHANNEL_ACCESS_TOKEN`）。
 - [x] 0.3b `unified-support-desk` 4.6 Telegram Bot：確認 Fish 已於 2026-08-22 透過 @BotFather 建立既有 Bot `@Start_Kiter_bot`。PM 取得 Bot Token，呼叫 `getMe` 驗證回傳 `ok:true`，已寫入 `apps/saas/.env`（`TELEGRAM_BOT_TOKEN`）。
-- [ ] 0.3c `unified-support-desk` 9.4：三管道（網站/LINE/Telegram）端對端驗證能成功建立工單並在 Chatwoot 收件匣看到。前置條件（4.5/4.6）已補齊，交 Codex 完成 Chatwoot 串接與端對端驗證。
+- [x] 0.3c `unified-support-desk` 9.4：**2026-09-02 Fish 裁決以「不做」結案**。Chatwoot webhook 派送不穩定屬第三方軟體自身問題，產品尚未開賣、無真實客戶進線，不值得修（路 A）或自建客服後台（路 B）。改走 email 客服（路 C）：新開並封存 `support-email-fallback`，新增 `NEXT_PUBLIC_SUPPORT_CHANNEL` 開關（預設 email），客服入口改開 mailto（收件 fish@fishot.com）。Chatwoot／LINE／Telegram 程式碼與測試全數保留，設 `=chatwoot` 即可切回並補做本項。`unified-support-desk` 已達 55/55 並封存。驗證：apps/saas 346 tests 全過、type-check exit 0、ego-browser 實測 mailto 導航正確。
 - [ ] 0.4 **`course-pack-mission-execution`（顯示已封存但實際只做了 7/23，剩 16 項）**：核實這是「課神匯入教案的互動關卡執行系統」，屬於進階教學功能，不是本次「把產品交付上線」必要路徑。**判斷：本次不排入交付隊列，不擋主線，待 5 張新交付 change 全部完成後再回頭問 Fish 要不要補或明確 descope。**
-- [ ] 0.5 每次本 change 的 task 有進度更新時，順手跑一次「幽靈狀態檢查」：`spectra list` 顯示的完成度是否跟 `git log`／`openspec/changes/archive/` 實際狀態一致，若發現「已封存但 spectra list 誤顯示進行中」的純顯示同步問題可用 `spectra archive <name> -y` 修復（僅限確認 archive/ 目錄已存在的情況）；若發現「顯示封存但實際任務未完成」比照 0.4 回報 Fish，不擅自處理
+- [x] 0.5（2026-09-02 執行一次，抓到 3 張）每次本 change 的 task 有進度更新時，順手跑一次「幽靈狀態檢查」：`spectra list` 顯示的完成度是否跟 `git log`／`openspec/changes/archive/` 實際狀態一致，若發現「已封存但 spectra list 誤顯示進行中」的純顯示同步問題可用 `spectra archive <name> -y` 修復（僅限確認 archive/ 目錄已存在的情況）；若發現「顯示封存但實際任務未完成」比照 0.4 回報 Fish，不擅自處理
 
 ### 1. 新開的 5 張交付 change（依序 apply）
 
@@ -28,3 +28,6 @@
 - [x] 5.2 Fish 同意，已 `spectra archive course-lifecycle-email` → `openspec/changes/archive/2026-08-28-course-lifecycle-email`。另從一個孤兒 orca worktree 中救回一份未提交的送達記錄 type/status 篩選功能（對應舊 CR 的 M3 發現），已補進 commit `fac83b24` 並 push。
 
 - [x] 6.1 五張子 change 全數完成，已更新 `docs/discuss/2026-08-27-product-delivery-master-roadmap.md` 反映最終狀態（五張皆完成並封存、`course-pack-mission-execution`／Chatwoot 9.4 為已知未完成項）。`spectra list` 確認僅剩 `product-delivery-rollout`（本身）與 `unified-support-desk`（51/55，卡在 9.4 待 Chatwoot 新家決定）。
+
+- [x] 0.5a（2026-09-02 幽靈狀態檢查結果）`spectra list` 顯示 `port-site-agent` 0/7、`mission-frontend-entry` 0/7，但 `git log -- <path>` 證實實作 commit（493c3a4e、b167a273）早已在 main，只是勾選 commit 留在未合併的 `fishtvlvoe/port-site-agent` 分支。PM 重跑驗證後補齊勾選並封存三張（含 `organization-completeness-review` 17/17 只差封存）。另補勾 `unified-support-desk` 4.5／4.6（實際已於本 change 0.3a／0.3b 驗證完成，該檔漏勾）。`spectra list` 由 5 張降為 1 張。
+- [ ] 0.6（2026-09-02 新發現，待 Fish 排序）`packages/api` 有 2 個發票作廢測試把 `invoiceDate` 寫死 `2026-08-24`，而 `assertInvoiceVoidable` 用真實 `now` 判斷跨月，故 2026-09-01 起必然失敗（`invoice-events.test.ts`、`invoice-operations.test.ts`，250 passed / 2 failed）。非任何近期改動造成，修法應為測試注入固定 `now` 或改用相對日期。
