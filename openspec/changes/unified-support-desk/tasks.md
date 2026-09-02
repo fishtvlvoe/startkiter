@@ -30,8 +30,8 @@ TDD：每個功能群組先列紅燈測試 task，再列實作 task。
 - [x] 4.2 撰寫紅燈測試：`TELEGRAM_BOT_TOKEN` 未設定時，Telegram 頻道不出現在任何買家介面選項中，對應 Requirement「Telegram channel ingestion」Scenario「Telegram Bot not configured」，驗證方式同 4.1
 - [x] 4.3 撰寫紅燈測試：LINE webhook 簽章驗證失敗回傳 401 且不建立/修改 `SupportTicket`，對應 Requirement「LINE channel ingestion」Scenario「Invalid LINE webhook signature」，驗證方式為 API 測試斷言回應碼與資料庫無異動
 - [x] 4.4 撰寫紅燈測試：Telegram webhook secret 驗證失敗回傳 401 且不建立/修改 `SupportTicket`，對應 Requirement「Telegram channel ingestion」Scenario「Invalid Telegram webhook secret」，驗證方式同 4.3
-- [ ] 4.5（2026-08-19 修正：非阻塞項，免審核）在 StartKiter 既有 LINE Developers Provider 底下建立 Messaging API Channel（一般帳號，建立後立即可用，不需等待審核），驗證方式為 LINE Developers 後台顯示 Channel 已建立，且用 Channel Access Token 呼叫 LINE Messaging API 的 `getBotInfo` 端點成功回傳 Bot 資訊
-- [ ] 4.6 申請 Telegram Bot（`@BotFather` `/newbot`），驗證方式為取得 Bot Token 並成功呼叫 `getMe` API 回傳 Bot 資訊
+- [x] 4.5（2026-08-19 修正：非阻塞項，免審核）在 StartKiter 既有 LINE Developers Provider 底下建立 Messaging API Channel（一般帳號，建立後立即可用，不需等待審核），驗證方式為 LINE Developers 後台顯示 Channel 已建立，且用 Channel Access Token 呼叫 LINE Messaging API 的 `getBotInfo` 端點成功回傳 Bot 資訊（2026-09-02 PM 補勾：實際已於 product-delivery-rollout task 0.3a 完成驗證——Channel「StartKiter 客服」@958ghjex／Channel ID 2011202536 已建立，long-lived access token 呼叫 `getBotInfo` 回 200 + Bot 資訊，已寫入 `apps/saas/.env` 的 `LINE_MESSAGING_CHANNEL_ID`／`LINE_MESSAGING_CHANNEL_ACCESS_TOKEN`。本檔漏勾。）
+- [x] 4.6 申請 Telegram Bot（`@BotFather` `/newbot`），驗證方式為取得 Bot Token 並成功呼叫 `getMe` API 回傳 Bot 資訊（2026-09-02 PM 補勾：實際已於 product-delivery-rollout task 0.3b 完成驗證——Bot `@Start_Kiter_bot` 已於 2026-08-22 建立，Bot Token 呼叫 `getMe` 回 `ok:true`，已寫入 `apps/saas/.env` 的 `TELEGRAM_BOT_TOKEN`。本檔漏勾。）
 - [x] 4.7 實作 LINE Messaging Webhook 接收邏輯（簽章驗證 + 訊息轉發進 Chatwoot），使第 4.1、4.3 節測試轉綠燈，對應 Requirement「LINE channel ingestion」Scenario「Buyer sends a LINE message」，驗證方式為 `pnpm test` 全綠 + 手動發送一則 LINE 訊息確認出現在 Chatwoot 收件匣
 - [x] 4.8 實作 Telegram Bot Webhook 接收邏輯（secret 驗證 + 訊息轉發進 Chatwoot），使第 4.2、4.4 節測試轉綠燈，對應 Requirement「Telegram channel ingestion」Scenario「Buyer sends a Telegram message」，驗證方式同 4.7 但改用 Telegram 手動測試
 
