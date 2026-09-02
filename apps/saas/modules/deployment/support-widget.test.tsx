@@ -10,6 +10,8 @@ import {
 describe("SupportWidget - 前端客服入口與部署選擇邏輯 (Tasks 7.1-7.4)", () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
+		// 本檔驗證 Chatwoot 路徑；預設模式已改為 email（support-email-fallback），需明確宣告
+		vi.stubEnv("NEXT_PUBLIC_SUPPORT_CHANNEL", "chatwoot");
 		(globalThis as unknown as { window: unknown }).window = {
 			$chatwoot: {
 				setUser: vi.fn(),

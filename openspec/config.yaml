@@ -3,7 +3,7 @@ context: |
   # 產品定位與現行狀態
   StartKiter（對外課名可用「開站包」）是課 + 終身代碼包。MVP 用這包自己的站賣課；課程是模組，不是整站唯一長相。
   結帳金額鎖 8800 TWD（不是區間）。主金流只接通 PAYUNi，一次買斷 TWD。付款後站內領 GitHub 組織私人倉庫只讀。
-  站內 agent 可接模型，v1 只掛兩支唯讀工具。付費學員在課程內加入 LINE 交流群；客服走 Chatwoot 統一工單（網站/LINE/Telegram）。
+  站內 agent 可接模型，v1 只掛兩支唯讀工具。付費學員在課程內加入 LINE 交流群；客服走 email（`NEXT_PUBLIC_SUPPORT_CHANNEL=email`，收件 SUPPORT_EMAIL）；Chatwoot 統一工單（網站/LINE/Telegram）已實作完成但暫停啟用，改設 chatwoot 即啟用。
   不是 libon.me 的一部分。
   `mvp-test-scope`、`extract-shell-auth`、`extract-payuni-checkout`、`extract-course-module`、`test-to-clean-package-promotion` 皆已封存。
   MVP extract 佇列已清空（site-agent／line／kit 皆封存）。`bootstrap-test-startkiter`／`mvp-sell-flow-usable` 已封存。TEST HTTPS：https://test-startkiter.vercel.app（Neon via Vercel；Git auto-deploy 已接通）。kit 真測需 GITHUB_KIT_ORG／REPO／完整 PEM。
@@ -32,7 +32,7 @@ context: |
   - 商品常數：startkiter-mvp 仍固定 8800 TWD 一次買斷；另提供 startkiter-mvp-subscription 訂閱方案（月繳/年繳，同一門課），2026-08-23 由 payuni-recurring-billing change 開放
   - 同一門課支援一次買斷與訂閱制並存，不做三階定價
   - Organization / Member / Invitation 為必要功能（公司行號客戶需要團隊帳號）；見 organization-tenancy capability
-  - LINE Login Channel 做登入；學員社群用課程內 LINE 邀請連結，允許客服用途的 LINE Messaging，不做 LIFF / 行銷 Bot，不能靜默入群。客服走 Chatwoot 統一工單（網站/LINE/Telegram）
+  - LINE Login Channel 做登入；學員社群用課程內 LINE 邀請連結，允許客服用途的 LINE Messaging，不做 LIFF / 行銷 Bot，不能靜默入群。客服走 email（`NEXT_PUBLIC_SUPPORT_CHANNEL=email`，收件 SUPPORT_EMAIL）；Chatwoot 統一工單（網站/LINE/Telegram）已實作完成但暫停啟用，改設 chatwoot 即啟用
   - 金鑰填後台、env fallback；沒設金流必須 fail-closed（POST /api/checkout → 503，不是 500）
   - 發票不在 MVP
 
@@ -47,7 +47,7 @@ context: |
   - 「現行待施工 extract-payuni-checkout」已廢：該 change 已封存
   - 「現行待施工 extract-course-module」已廢：該 change 已封存
   - 「i18n 只留 zh-TW」已廢：多語系已起跳，zh-tw 是 fallback 不是唯一語言
-  - 「客服走 email」「不做 Messaging」已廢：已由 unified-support-desk 改為 Chatwoot 統一工單（網站/LINE/Telegram）與客服用途 LINE Messaging
+  - unified-support-desk 已實作 Chatwoot 統一工單與客服用途 LINE Messaging（程式碼保留），但 2026-09-02 Fish 裁決暫停啟用，v1 客服實際走 email；LINE Messaging 的客服用途授權維持有效
 
   # 程式碼規範
   - 程式碼英文、註解繁中

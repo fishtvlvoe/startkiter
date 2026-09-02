@@ -8,6 +8,8 @@ import {
 describe("ChatwootScript - SDK Initialization & User Sync", () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
+		// 本檔驗證 Chatwoot 路徑；預設模式已改為 email（support-email-fallback），需明確宣告
+		vi.stubEnv("NEXT_PUBLIC_SUPPORT_CHANNEL", "chatwoot");
 		// Mock DOM environment for unit testing
 		const mockScripts: Record<string, unknown> = {};
 		const mockBody = {

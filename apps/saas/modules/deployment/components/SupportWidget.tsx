@@ -12,6 +12,13 @@ import {
 import { Headphones, MessageSquare, Globe } from "lucide-react";
 import React, { useState } from "react";
 
+import {
+	buildDeploymentSupportBody,
+	buildSupportMailto,
+	isEmailSupportMode,
+	SUPPORT_MAIL_SUBJECT,
+} from "../support-channel";
+
 export interface SupportDeployment {
 	id: string;
 	name?: string | null;
@@ -30,11 +37,31 @@ export interface OpenSupportChatResult {
 	selectedId: string | null;
 }
 
+/** email 模式：開啟預填部署資訊的信件，取代 Chatwoot 對話框 */
+function openSupportMail(deployment?: SupportDeployment | null): void {
+	const href = buildSupportMailto({
+		subject: SUPPORT_MAIL_SUBJECT,
+		body: buildDeploymentSupportBody({
+			deploymentId: deployment?.id,
+			publicUrl: deployment?.publicUrl,
+		}),
+	});
+
+	if (href && typeof window !== "undefined") {
+		window.location.href = href;
+	}
+}
+
 export function openSupportChat(options: OpenSupportChatOptions = {}): OpenSupportChatResult {
 	const { deployments, selectedDeploymentId, onRequireSelection } = options;
+	const emailMode = isEmailSupportMode();
 
 	// 無部署記錄時：直接開啟客服框，不設定 buyerDeploymentId
 	if (!deployments || deployments.length === 0) {
+		if (emailMode) {
+			openSupportMail(null);
+			return { needsSelection: false, selectedId: null };
+		}
 		if (typeof window !== "undefined" && window.$chatwoot) {
 			window.$chatwoot.toggle("open");
 		}
@@ -44,6 +71,10 @@ export function openSupportChat(options: OpenSupportChatOptions = {}): OpenSuppo
 	// 剛好一個部署：自動帶入
 	if (deployments.length === 1 && deployments[0]) {
 		const depId = deployments[0].id;
+		if (emailMode) {
+			openSupportMail(deployments[0]);
+			return { needsSelection: false, selectedId: depId };
+		}
 		if (typeof window !== "undefined" && window.$chatwoot) {
 			window.$chatwoot.setCustomAttributes({
 				buyerDeploymentId: depId,
@@ -60,6 +91,10 @@ export function openSupportChat(options: OpenSupportChatOptions = {}): OpenSuppo
 	}
 
 	// 多個部署且已選擇：設定 custom attributes 並開啟
+	if (emailMode) {
+		openSupportMail(deployments.find((d) => d.id === selectedDeploymentId) ?? null);
+		return { needsSelection: false, selectedId: selectedDeploymentId };
+	}
 	if (typeof window !== "undefined" && window.$chatwoot) {
 		window.$chatwoot.setCustomAttributes({
 			buyerDeploymentId: selectedDeploymentId,

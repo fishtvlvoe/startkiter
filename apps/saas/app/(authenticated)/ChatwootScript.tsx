@@ -1,6 +1,7 @@
 "use client";
 
 import { useSession } from "@auth/hooks/use-session";
+import { isEmailSupportMode } from "@deployment/support-channel";
 import { useEffect } from "react";
 
 declare global {
@@ -47,6 +48,11 @@ export interface ChatwootDeployment {
 }
 
 export function initChatwootSdk(options: { websiteToken?: string; baseUrl?: string }): boolean {
+	// email 模式不載入 Chatwoot SDK（少一支第三方 script）
+	if (isEmailSupportMode()) {
+		return false;
+	}
+
 	if (!options.websiteToken || typeof window === "undefined") {
 		return false;
 	}
@@ -134,7 +140,7 @@ export function ChatwootScript({
 	const { user } = useSession();
 
 	useEffect(() => {
-		if (!websiteToken || typeof window === "undefined") {
+		if (isEmailSupportMode() || !websiteToken || typeof window === "undefined") {
 			return;
 		}
 
@@ -152,10 +158,6 @@ export function ChatwootScript({
 			window.removeEventListener("chatwoot:ready", handleSync);
 		};
 	}, [websiteToken, baseUrl, user, deployments, selectedDeploymentId]);
-
-	if (!websiteToken) {
-		return null;
-	}
 
 	return null;
 }

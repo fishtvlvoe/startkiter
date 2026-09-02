@@ -70,7 +70,7 @@ Changes can be parked（暫存）— temporarily moved out of `openspec/changes/
 1. **`platform-shell-plugin-architecture`：129/129，已於 2026-08-23 archive**（`openspec/changes/archive/2026-08-23-platform-shell-plugin-architecture/`）。WordPress 式可擴充骨架（Mount Points、Marketplace、WordPress 視覺後台外殼、買家專屬 write repo 履約、MCP Gateway）已全部完成並驗證，這是 StartKiter 的產品地基，不用再回頭動，除非發現新缺口才另開 change。
 2. **`course-studio-upgrade`：26/26，已於 2026-08-23 archive**（`openspec/changes/archive/2026-08-23-course-studio-upgrade/`）。課程管理後台編輯器（章節/單元 CRUD、講義編輯器、block schema registry、WebContainer 沙盒、即時預覽、拖曳排序）已完成並經 CR + 真實瀏覽器 E2E 驗收（PR #3，2026-08-23）。CR 揪出 8 個 Medium 問題已修復；E2E 過程額外發現「新增章節/單元/資料夾」用原生 `window.prompt()` 會凍結頁面（CDP 都打不進去），已改成 Dialog 元件並重新驗證通過。核心流程（登入、CRUD、MDX 編輯+即時預覽、WebContainerSandbox 過關/失敗兩路徑、debounce 自動存檔、拖曳排序+持久化）皆實測正常。
 3. **`core-module-bundles-coupons`（55/56）**：剩最後一項已裁決本輪不做（等買家播放頁做出來才接），這張視同完成，不用再動，等播放頁那張新 SR 立案後才回頭接。
-4. **`unified-support-desk`（51/55）**：Chatwoot 真實 webhook 送達不穩定的疑難雜症已擱置（老闆裁決優先度排最後）；LINE/Telegram 帳號申請不卡人，隨時可做。
+4. **`unified-support-desk`（53/55，2026-09-02 暫停啟用並封存）**：Chatwoot 真實 webhook 派送不穩定（task 3.6）本次不修。Fish 裁決改走 email 客服（`support-email-fallback`），Chatwoot／LINE／Telegram 程式碼與測試全數保留，設 `NEXT_PUBLIC_SUPPORT_CHANNEL=chatwoot` 即可切回。
 5. **`notifications` 缺 spec（2026-08-23 盤點發現）**：`packages/notifications/` 有實作（catalog、create-notification、welcome 等）但 `openspec/specs/` 沒有對應規格，已裁決開新 SR 補齊，走完整 discuss/propose 流程。分支 `fishtvlvoe/task-notifications-spec-backfill` 已產出 proposal/design/spec/tasks 並 `spectra validate` 通過，尚未 apply/archive。
 
 下一步該做的：review `notifications-spec-backfill`（worktree `~/orca/workspaces/startkiter/task-notifications-spec-backfill`）決定是否 apply；或推進 `unified-support-desk` 剩的項目。
@@ -136,7 +136,7 @@ GitHub kit 邀請已封存（GitHub App + 站內 OAuth）。本刀不做 kit 履
 
 不做 Organization 多租戶。帳單掛 user。
 
-LINE Login Channel 做登入。學員社群用課程內 LINE 邀請連結，不能靜默入群；允許客服用途的 LINE Messaging。客服走 Chatwoot 統一工單（網站/LINE/Telegram）。不做 SKOOL。
+LINE Login Channel 做登入。學員社群用課程內 LINE 邀請連結，不能靜默入群；允許客服用途的 LINE Messaging。客服走 email（`NEXT_PUBLIC_SUPPORT_CHANNEL=email`，收件 SUPPORT_EMAIL）；Chatwoot 統一工單（網站/LINE/Telegram）已實作完成但暫停啟用，改設 chatwoot 即啟用。不做 SKOOL。
 
 金鑰填後台，env fallback。沒設金流 fail-closed。
 
