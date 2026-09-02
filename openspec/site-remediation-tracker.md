@@ -46,8 +46,30 @@
     - 課程模組 8 個子功能（課程管理/測驗管理/評價與留言管理/作業管理/課程綁定包/新生問卷/媒體庫/CoursePack任務）收攏成一個「課程」一級選單，側邊欄巢狀展開（方案A），原路徑全部保留，`isOperator` 權限判斷不受影響
     - 額外發現並修復：側邊欄拖曳自訂分組模式的 isActive 判斷讀取 stale prop，改用 `usePathname()` 即時計算，順帶修好 admin/media、admin/email-settings 選中無高亮的問題
     - `docs/buyer-extension-convention.md` 補上「側邊欄選單掛載（MOUNT_POINTS）」規範章節，用課程模組整合後的真實代碼當範例，買家未來擴充自己的模組有規範可循
-- [ ] 7. Chatwoot 三管道 E2E（`unified-support-desk` task 9.4）— 已由老闆確認暫時擱置，非本輪優先。**排序調整（2026-08-31）**：移到最後，因為老闆需要親自在電腦前操作填信用卡/ATM資訊
+- [x] 7. Chatwoot 三管道 E2E（`unified-support-desk` task 9.4）— **2026-09-02 Fish 裁決「路 C：先不做客服，用 email 頂著」，本項以「不做」結案**：Chatwoot webhook 派送不穩定（3.6）是第三方軟體自身問題，產品尚未開賣、無真實客戶進線，不值得修或自建客服後台。
+  - 已開 `support-email-fallback` SR 並封存：新增 `NEXT_PUBLIC_SUPPORT_CHANNEL` 開關（預設 email），客服入口改開 mailto（收件 fish@fishot.com），不載入 Chatwoot widget
+  - Chatwoot／LINE／Telegram 程式碼、資料表與測試全數保留，設 `NEXT_PUBLIC_SUPPORT_CHANNEL=chatwoot` 即可切回，屆時再補做三管道 E2E
+  - `unified-support-desk` 已達 55/55 並封存（`archive/2026-09-02-unified-support-desk/`）
+  - 驗證：apps/saas 346 tests 全過、type-check exit 0、ego-browser 實測 mailto 導航正確
 - [ ] 8. Real provider acceptance matrix — subscription/period notify/退款/發票要留 webhook+DB+idempotency 證據。**排序調整（2026-08-31）**：移到最後，同上原因
+
+## 2026-09-02 SR 狀態校正與客服決策
+
+**幽靈狀態修正**：`spectra list` 顯示 `port-site-agent` 0/7、`mission-frontend-entry` 0/7，
+實際上代碼早已合併進 main（493c3a4e、b167a273），只是勾選 commit 留在未合併的
+`fishtvlvoe/port-site-agent` 分支上。PM 親自重跑驗證後補齊勾選並封存：
+- `2026-09-02-port-site-agent`（site-agent 測試 10/10；ego-browser 實測未登入導向 /login、
+  登入後對話只查得到自己的訂單）
+- `2026-09-02-mission-frontend-entry`（course-pack 測試 10/10；ego-browser 實測後台權限擋下、
+  學員端 5 個 Mission 渲染、表單送出、檢查結果）
+- `2026-09-02-organization-completeness-review`（17/17 早已完成，只差封存）
+
+**客服決策**：見上方第 7 項。
+
+**新發現的既有問題（未修）**：`packages/api` 有 2 個發票作廢測試把 `invoiceDate` 寫死
+`2026-08-24`，而 `assertInvoiceVoidable` 用真實 `now` 判斷是否跨月，因此 2026-09-01 起
+必然失敗（`invoice-events.test.ts`、`invoice-operations.test.ts`）。非本次改動造成，
+修法應為測試注入固定的 `now` 或改用相對日期。待 Fish 排優先順序。
 
 ## 對應 SR 一覽（隨開隨補）
 
