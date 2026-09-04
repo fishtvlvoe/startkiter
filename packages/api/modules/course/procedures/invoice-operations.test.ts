@@ -18,8 +18,10 @@ vi.mock("@startkiter/database", () => ({
 		},
 		invoiceAllowanceOperation: {
 			findUnique: vi.fn(),
+			findFirst: vi.fn(),
 			create: vi.fn(),
 			update: vi.fn(),
+			updateMany: vi.fn(),
 		},
 		$executeRaw: vi.fn(),
 		$transaction: vi.fn(),
@@ -42,7 +44,7 @@ import { auth } from "@startkiter/auth";
 import { db } from "@startkiter/database";
 import { recordAdminAction } from "@startkiter/platform";
 import { getInvoiceProvider } from "../lib/invoice-settings";
-import { issueInvoiceAllowance, voidInvoice } from "./invoice-operations";
+import { issueInvoiceAllowance, resolveInvoiceReview, voidInvoice } from "./invoice-operations";
 
 const invoice = {
 	id: "invoice-1",
@@ -159,5 +161,169 @@ describe("invoice admin audit logging", () => {
 			message: expect.stringMatching(/待確認|禁止重送/),
 		});
 		expect(provider.allowance).not.toHaveBeenCalled();
+	});
+});
+
+describe("resolveInvoiceReview", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		vi.mocked(auth.api.getSession).mockResolvedValue({
+			session: { id: "session-1", userId: "admin-1", ipAddress: "203.0.113.11" },
+			user: { id: "admin-1", email: "admin@example.com", role: "admin" },
+		} as never);
+		vi.mocked(db.$transaction).mockImplementation(async (callback) => callback(db as never) as never);
+	});
+
+	it("resolves ALLOWANCE_NEEDS_REVIEW as SUCCEEDED and increments allowanceTotal by the UNKNOWN operation amount", async () => {
+		vi.mocked(db.invoice.updateMany).mockResolvedValue({ count: 1 } as never);
+		vi.mocked(db.invoiceAllowanceOperation.findFirst).mockResolvedValue({
+			id: "op-1",
+			allowanceId: "ALLOW-invoice-1-300",
+			amount: 300,
+			status: "UNKNOWN",
+		} as never);
+		vi.mocked(db.invoice.findUnique).mockResolvedValue({
+			...invoice,
+			status: "ALLOWANCE",
+			allowanceTotal: 300,
+			attentionReason: null,
+		} as never);
+
+		const result = await call(
+			resolveInvoiceReview,
+			{ invoiceId: "invoice-1", attentionReason: "ALLOWANCE_NEEDS_REVIEW", outcome: "SUCCEEDED" },
+			{ context: { headers: new Headers() } as never },
+		);
+
+		expect(db.invoice.updateMany).toHaveBeenCalledWith(
+			expect.objectContaining({
+				where: expect.objectContaining({ id: "invoice-1", attentionReason: "ALLOWANCE_NEEDS_REVIEW" }),
+				data: expect.objectContaining({ status: "ALLOWANCE", attentionReason: null }),
+			}),
+		);
+		expect(db.invoiceAllowanceOperation.update).toHaveBeenCalledWith(
+			expect.objectContaining({
+				where: { allowanceId: "ALLOW-invoice-1-300" },
+				data: expect.objectContaining({ status: "SUCCEEDED" }),
+			}),
+		);
+		expect(result.invoice.status).toBe("ALLOWANCE");
+	});
+
+	it("resolves ALLOWANCE_NEEDS_REVIEW as FAILED and clears attentionReason without changing allowanceTotal", async () => {
+		vi.mocked(db.invoice.updateMany).mockResolvedValue({ count: 1 } as never);
+		vi.mocked(db.invoiceAllowanceOperation.findFirst).mockResolvedValue({
+			id: "op-1",
+			allowanceId: "ALLOW-invoice-1-300",
+			amount: 300,
+			status: "UNKNOWN",
+		} as never);
+		vi.mocked(db.invoice.findUnique).mockResolvedValue({
+			...invoice,
+			status: "ISSUED",
+			attentionReason: null,
+		} as never);
+
+		await call(
+			resolveInvoiceReview,
+			{ invoiceId: "invoice-1", attentionReason: "ALLOWANCE_NEEDS_REVIEW", outcome: "FAILED" },
+			{ context: { headers: new Headers() } as never },
+		);
+
+		expect(db.invoice.updateMany).toHaveBeenCalledWith(
+			expect.objectContaining({
+				data: expect.objectContaining({ attentionReason: null }),
+			}),
+		);
+		const updateManyData = vi.mocked(db.invoice.updateMany).mock.calls[0]?.[0]?.data as Record<string, unknown>;
+		expect(updateManyData.status).toBeUndefined();
+		expect(updateManyData.allowanceTotal).toBeUndefined();
+		expect(db.invoiceAllowanceOperation.update).toHaveBeenCalledWith(
+			expect.objectContaining({
+				where: { allowanceId: "ALLOW-invoice-1-300" },
+				data: expect.objectContaining({ status: "FAILED" }),
+			}),
+		);
+	});
+
+	it("resolves VOID_NEEDS_REVIEW as SUCCEEDED and sets status to VOIDED", async () => {
+		vi.mocked(db.invoice.updateMany).mockResolvedValue({ count: 1 } as never);
+		vi.mocked(db.invoice.findUnique).mockResolvedValue({ ...invoice, status: "VOIDED", attentionReason: null } as never);
+
+		const result = await call(
+			resolveInvoiceReview,
+			{ invoiceId: "invoice-1", attentionReason: "VOID_NEEDS_REVIEW", outcome: "SUCCEEDED" },
+			{ context: { headers: new Headers() } as never },
+		);
+
+		expect(db.invoice.updateMany).toHaveBeenCalledWith(
+			expect.objectContaining({
+				where: expect.objectContaining({ id: "invoice-1", attentionReason: "VOID_NEEDS_REVIEW" }),
+				data: expect.objectContaining({ status: "VOIDED", attentionReason: null }),
+			}),
+		);
+		expect(result.invoice.status).toBe("VOIDED");
+	});
+
+	it("resolves VOID_NEEDS_REVIEW as FAILED and clears attentionReason, leaving status ISSUED", async () => {
+		vi.mocked(db.invoice.updateMany).mockResolvedValue({ count: 1 } as never);
+		vi.mocked(db.invoice.findUnique).mockResolvedValue({ ...invoice, status: "ISSUED", attentionReason: null } as never);
+
+		const result = await call(
+			resolveInvoiceReview,
+			{ invoiceId: "invoice-1", attentionReason: "VOID_NEEDS_REVIEW", outcome: "FAILED" },
+			{ context: { headers: new Headers() } as never },
+		);
+
+		const updateManyData = vi.mocked(db.invoice.updateMany).mock.calls[0]?.[0]?.data as Record<string, unknown>;
+		expect(updateManyData.status).toBeUndefined();
+		expect(result.invoice.status).toBe("ISSUED");
+		expect(result.invoice.attentionReason).toBeNull();
+	});
+
+	it("rejects SUCCEEDED resolution for ALLOWANCE_NEEDS_REVIEW when no UNKNOWN operation exists", async () => {
+		vi.mocked(db.invoiceAllowanceOperation.findFirst).mockResolvedValue(null);
+
+		await expect(
+			call(
+				resolveInvoiceReview,
+				{ invoiceId: "invoice-1", attentionReason: "ALLOWANCE_NEEDS_REVIEW", outcome: "SUCCEEDED" },
+				{ context: { headers: new Headers() } as never },
+			),
+		).rejects.toThrow();
+		expect(db.invoice.updateMany).not.toHaveBeenCalled();
+	});
+
+	it("fails the second concurrent resolveInvoiceReview call on the same invoice and does not double-apply", async () => {
+		vi.mocked(db.invoiceAllowanceOperation.findFirst).mockResolvedValue({
+			id: "op-1",
+			allowanceId: "ALLOW-invoice-1-300",
+			amount: 300,
+			status: "UNKNOWN",
+		} as never);
+		vi.mocked(db.invoice.updateMany)
+			.mockResolvedValueOnce({ count: 1 } as never)
+			.mockResolvedValueOnce({ count: 0 } as never);
+		vi.mocked(db.invoice.findUnique).mockResolvedValue({
+			...invoice,
+			status: "ALLOWANCE",
+			allowanceTotal: 300,
+			attentionReason: null,
+		} as never);
+
+		await call(
+			resolveInvoiceReview,
+			{ invoiceId: "invoice-1", attentionReason: "ALLOWANCE_NEEDS_REVIEW", outcome: "SUCCEEDED" },
+			{ context: { headers: new Headers() } as never },
+		);
+		await expect(
+			call(
+				resolveInvoiceReview,
+				{ invoiceId: "invoice-1", attentionReason: "ALLOWANCE_NEEDS_REVIEW", outcome: "SUCCEEDED" },
+				{ context: { headers: new Headers() } as never },
+			),
+		).rejects.toThrow();
+
+		expect(db.invoice.updateMany).toHaveBeenCalledTimes(2);
 	});
 });

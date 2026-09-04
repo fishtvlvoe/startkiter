@@ -14,7 +14,7 @@ import { updateLesson } from "./lib/update-lesson";
 import { resolveVideoSource } from "./lib/video-resolver";
 import { cancelCourseSubscription } from "./procedures/cancel-course-subscription";
 import { createSubscriptionCheckout } from "./procedures/create-subscription-checkout";
-import { issueInvoiceAllowance, voidInvoice } from "./procedures/invoice-operations";
+import { issueInvoiceAllowance, resolveInvoiceReview, voidInvoice } from "./procedures/invoice-operations";
 import { refundOrder } from "./procedures/refund-order";
 import {
 	createCourseInvite,
@@ -294,6 +294,7 @@ export const courseRouter = publicProcedure.router({
 	cancelCourseSubscription,
 	voidInvoice,
 	issueInvoiceAllowance,
+	resolveInvoiceReview,
 	refundOrder,
 	createCourseInvite,
 	listCourseInvites,

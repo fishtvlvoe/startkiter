@@ -75,6 +75,7 @@ export default async function AdminOrdersPage() {
 													invoiceDate: invoice.invoiceDate,
 									canVoid,
 									attentionReason: invoice.attentionReason,
+												failReason: invoice.failReason,
 												}}
 											/>
 										</div>
@@ -114,6 +115,7 @@ export default async function AdminOrdersPage() {
 											sameTaiwanBillingMonth(invoice.invoiceDate, new Date()),
 										),
 										attentionReason: invoice.attentionReason,
+										failReason: invoice.failReason,
 										}}
 									/>
 								</div>

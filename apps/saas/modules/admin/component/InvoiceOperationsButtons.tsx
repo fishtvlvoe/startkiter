@@ -7,7 +7,53 @@ import { useState } from "react";
 import { orpcClient } from "@shared/lib/orpc-client";
 import { useMutation } from "@tanstack/react-query";
 
-export function InvoiceOperationsButtons({ invoice }: { invoice: { id: string; status: string; amount: number; allowanceTotal: number; invoiceDate: Date | null; canVoid: boolean; attentionReason: string | null } }) {
+const REVIEWABLE_ATTENTION_REASONS = ["ALLOWANCE_NEEDS_REVIEW", "VOID_NEEDS_REVIEW"] as const;
+
+function InvoiceReviewResolutionActions({
+	invoiceId,
+	attentionReason,
+	failReason,
+}: {
+	invoiceId: string;
+	attentionReason: "ALLOWANCE_NEEDS_REVIEW" | "VOID_NEEDS_REVIEW";
+	failReason?: string | null;
+}) {
+	const router = useRouter();
+	const [allowanceNumber, setAllowanceNumber] = useState("");
+	const resolveMutation = useMutation({
+		mutationFn: (outcome: "SUCCEEDED" | "FAILED") =>
+			orpcClient.course.resolveInvoiceReview({
+				invoiceId,
+				attentionReason,
+				outcome,
+				allowanceNumber: outcome === "SUCCEEDED" && allowanceNumber ? allowanceNumber : undefined,
+			}),
+		onSuccess: () => router.refresh(),
+	});
+
+	return (
+		<div className="flex flex-wrap items-center gap-2">
+			<span className="text-xs text-amber-700">發票作業待確認：{failReason ?? attentionReason}</span>
+			{attentionReason === "ALLOWANCE_NEEDS_REVIEW" && (
+				<input
+					className="h-8 w-32 rounded-md border px-2 text-xs"
+					placeholder="折讓單號（選填）"
+					value={allowanceNumber}
+					onChange={(event) => setAllowanceNumber(event.target.value)}
+				/>
+			)}
+			<Button size="sm" disabled={resolveMutation.isPending} onClick={() => resolveMutation.mutate("SUCCEEDED")}>
+				確認已完成
+			</Button>
+			<Button size="sm" variant="outline" disabled={resolveMutation.isPending} onClick={() => resolveMutation.mutate("FAILED")}>
+				確認未完成，解除卡住
+			</Button>
+			{resolveMutation.isError && <span className="text-xs text-destructive">處理失敗</span>}
+		</div>
+	);
+}
+
+export function InvoiceOperationsButtons({ invoice }: { invoice: { id: string; status: string; amount: number; allowanceTotal: number; invoiceDate: Date | null; canVoid: boolean; attentionReason: string | null; failReason?: string | null } }) {
 	const router = useRouter();
 	const [confirm, setConfirm] = useState<"void" | "allowance" | null>(null);
 	const [amount, setAmount] = useState(Math.max(0, invoice.amount - invoice.allowanceTotal));
@@ -21,6 +67,15 @@ export function InvoiceOperationsButtons({ invoice }: { invoice: { id: string; s
 	});
 
 	if (!["ISSUED", "ALLOWANCE"].includes(invoice.status)) return null;
+	if (REVIEWABLE_ATTENTION_REASONS.includes(invoice.attentionReason as (typeof REVIEWABLE_ATTENTION_REASONS)[number])) {
+		return (
+			<InvoiceReviewResolutionActions
+				invoiceId={invoice.id}
+				attentionReason={invoice.attentionReason as "ALLOWANCE_NEEDS_REVIEW" | "VOID_NEEDS_REVIEW"}
+				failReason={invoice.failReason}
+			/>
+		);
+	}
 	const allowanceAllowedDuringAttention = invoice.attentionReason === "REFUND_NEEDS_ALLOWANCE";
 	if (invoice.attentionReason && !allowanceAllowedDuringAttention) {
 		return <span className="text-xs text-amber-700">發票作業待確認：{invoice.attentionReason}</span>;

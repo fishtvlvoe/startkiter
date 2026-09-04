@@ -119,6 +119,87 @@ export const voidInvoice = adminProcedure
 		}
 	});
 
+export const resolveInvoiceReview = adminProcedure
+	.route({ method: "POST", path: "/course/invoices/resolve-review", tags: ["Course"], summary: "Resolve an invoice stuck in *_NEEDS_REVIEW" })
+	.input(
+		z.object({
+			invoiceId: z.string().min(1),
+			attentionReason: z.enum(["ALLOWANCE_NEEDS_REVIEW", "VOID_NEEDS_REVIEW"]),
+			outcome: z.enum(["SUCCEEDED", "FAILED"]),
+			allowanceNumber: z.string().min(1).optional(),
+		}),
+	)
+	.handler(async ({ input, context }) => {
+		try {
+			const result = await withInvoiceOperationLock(async (tx) => {
+				if (input.attentionReason === "VOID_NEEDS_REVIEW") {
+					const updated = await tx.invoice.updateMany({
+						where: { id: input.invoiceId, attentionReason: "VOID_NEEDS_REVIEW" },
+						data:
+							input.outcome === "SUCCEEDED"
+								? { status: "VOIDED", attentionReason: null, failReason: null }
+								: { attentionReason: null, failReason: null },
+					});
+					if (updated.count !== 1) throw new Error("發票目前不是待確認狀態，可能已被處理過");
+					const invoice = await tx.invoice.findUnique({ where: { id: input.invoiceId } });
+					if (!invoice) throw new ORPCError("NOT_FOUND");
+					return { invoice, operationAmount: input.outcome === "SUCCEEDED" ? invoice.amount : null, allowanceNumber: null as string | null };
+				}
+
+				const operation = await tx.invoiceAllowanceOperation.findFirst({
+					where: { invoiceId: input.invoiceId, status: "UNKNOWN" },
+					orderBy: { createdAt: "desc" },
+				});
+				if (input.outcome === "SUCCEEDED" && !operation) {
+					throw new Error("找不到待確認的折讓紀錄，無法標記為已完成");
+				}
+
+				const updated = await tx.invoice.updateMany({
+					where: { id: input.invoiceId, attentionReason: "ALLOWANCE_NEEDS_REVIEW" },
+					data:
+						input.outcome === "SUCCEEDED" && operation
+							? { status: "ALLOWANCE", allowanceTotal: { increment: operation.amount }, attentionReason: null, failReason: null }
+							: { attentionReason: null, failReason: null },
+				});
+				if (updated.count !== 1) throw new Error("發票目前不是待確認狀態，可能已被處理過");
+
+				if (operation) {
+					await tx.invoiceAllowanceOperation.update({
+						where: { allowanceId: operation.allowanceId },
+						data:
+							input.outcome === "SUCCEEDED"
+								? { status: "SUCCEEDED", allowanceNumber: input.allowanceNumber ?? null }
+								: { status: "FAILED" },
+					});
+				}
+
+				const invoice = await tx.invoice.findUnique({ where: { id: input.invoiceId } });
+				if (!invoice) throw new ORPCError("NOT_FOUND");
+				return {
+					invoice,
+					operationAmount: operation?.amount ?? null,
+					allowanceNumber: input.outcome === "SUCCEEDED" ? (input.allowanceNumber ?? null) : null,
+				};
+			});
+			await recordAdminAction(
+				context.user.id,
+				"RESOLVE_INVOICE_REVIEW",
+				{ type: "Invoice", id: result.invoice.id },
+				{
+					attentionReason: input.attentionReason,
+					outcome: input.outcome,
+					amount: result.operationAmount,
+					allowanceNumber: result.allowanceNumber,
+				},
+				context.session?.ipAddress ?? getClientIp(context.headers),
+			);
+			return { invoice: result.invoice };
+		} catch (error) {
+			if (error instanceof ORPCError && error.code === "NOT_FOUND") throw error;
+			throw new ORPCError("BAD_REQUEST", { message: error instanceof Error ? error.message : "處理待確認發票失敗。" });
+		}
+	});
+
 export const issueInvoiceAllowance = adminProcedure
 	.route({ method: "POST", path: "/course/invoices/allowance", tags: ["Course"], summary: "Issue an invoice allowance" })
 	.input(z.object({ invoiceId: z.string().min(1), amount: z.number().int().positive() }))

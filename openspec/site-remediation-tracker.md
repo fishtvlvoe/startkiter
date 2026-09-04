@@ -103,10 +103,13 @@ agy（Antigravity）接獨立審查跑 30 分鐘後 terminal 直接 exited，未
 
 **已知未涵蓋**：未連真實 DB、未打真實發票商 API。建議正式環境第一筆跨月退款由 Fish 親自確認。
 
-**後續建議（未做，待排序）**：`ALLOWANCE_NEEDS_REVIEW` 狀態缺乏 UI 出口（後台按鈕只解鎖
-`REFUND_NEEDS_ALLOWANCE`、`retryPendingInvoices` 也不掃它）。這是既有缺陷，但本次新增一條
-進入路徑（自動折讓遇 ambiguous）。發生時發票會卡在後台顯示「發票作業待確認」，
-錢已退給客人、僅憑證未沖銷，可見不靜默但需人工介入。
+**後續建議 → 已完成（2026-09-04，`allowance-needs-review-admin-action` SR）**：
+`ALLOWANCE_NEEDS_REVIEW`／`VOID_NEEDS_REVIEW` 後台補上「確認已完成」「確認未完成，
+解除卡住」兩顆按鈕，operator 查過供應商後台後回來人工登記結果。獨立審查（資安稽核師
+子代理）未發現 Critical/High 漏洞；ego-browser 實測兩條路徑並用 SQL 直接讀 DB 驗證
+`allowanceTotal`／`status`／`attentionReason` 皆正確；273 + 349 tests 全綠，type-check
+全綠。已知限制：這是「人工判斷後補登記」，系統不驗證 operator 講的是否屬實
+（跟現有「開立折讓」讓 operator 自己輸入金額同一個信任前提）。
 
 ## 對應 SR 一覽（隨開隨補）
 
