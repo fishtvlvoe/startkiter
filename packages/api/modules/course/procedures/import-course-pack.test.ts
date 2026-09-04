@@ -27,7 +27,7 @@ import { importCoursePack } from "./import-course-pack";
 
 const fixture = JSON.parse(
 	readFileSync(
-		"/Users/fishtv/Development/Awesome-Koson/src/fixtures/saas-payment-course-pack.json",
+		"/Users/fishtv/Development/A-神系列/Awesome-Koson/src/fixtures/saas-payment-course-pack.json",
 		"utf8",
 	),
 );
