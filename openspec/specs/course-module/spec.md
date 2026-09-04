@@ -929,6 +929,8 @@ tests:
 
 系統必須以 `LessonProgress` 記錄目前使用者完成的已發布單元。頂部常駐進度列必須顯示 `round(100 * completed / total)` 與 `completed/total`，例如完成 3 個共 8 個已發布單元時顯示 `38% · 3/8 單元`。完成標記必須 idempotent，不能由 client 傳入百分比或其他 userId。
 
+單元內容含至少一個互動積木（`blockId`）時，完成請求必須附上屬於該單元的合法 `blockId`，伺服器必須重新解析單元內容驗證這個 `blockId` 確實存在，防止偽造完成事件。單元內容不含任何互動積木時（純文字或純影片單元），系統必須允許使用者直接標記完成，不得要求一個實際上不存在的 `blockId`。
+
 #### Scenario: 學員完成單元後立即看見一致進度
 
 - **WHEN** 有課程權限的使用者將 `lesson-03` 標記完成
@@ -940,185 +942,15 @@ tests:
 - user A 再次送出 `lesson-03` 完成請求
 - `LessonProgress(user A, lesson-03)` 仍只有一筆，畫面仍顯示 `38% · 3/8 單元`
 
+#### Scenario: 沒有互動積木的單元可以直接標記完成
 
-<!-- @trace
-source: interactive-learning-system
-updated: 2026-08-21
-code:
-  - docs/startkiter-development-sop.md
-  - packages/support/index.ts
-  - docs/tutorials/puter-serverless-mvp/presentation-kimi-prompt.md
-  - docs/dispatch-board.md
-  - config/modules.ts
-  - docs/discuss/2026-08-17-supastarter-gap-risk-report.md
-  - packages/api/modules/deployment/router.ts
-  - apps/saas/app/(authenticated)/(main)/(account)/admin/course/page.tsx
-  - apps/saas/tsconfig.json
-  - packages/api/index.ts
-  - packages/platform/src/deployment/coolify-client.ts
-  - packages/platform/src/deployment/status.ts
-  - packages/support/src/chatwoot-signature.ts
-  - apps/saas/modules/shared/components/AuthWrapper.tsx
-  - apps/saas/modules/deployment/components/ReportIssueButton.tsx
-  - packages/course/package.json
-  - apps/saas/modules/shared/components/NavBar.tsx
-  - apps/marketing/modules/course/components/CourseBuyCta.tsx
-  - packages/database/prisma/seed-course.ts
-  - packages/support/src/copilot.ts
-  - packages/course/index.ts
-  - apps/saas/modules/shared/components/UserMenu.tsx
-  - docs/demo/course-demo-2-manual.html
-  - apps/saas/vitest.config.ts
-  - docs/coolify-vps-setup-runbook.md
-  - docs/discuss/2026-08-17-supastarter-source-correction.md
-  - packages/course/src/mdx/LessonMdx.tsx
-  - packages/api/package.json
-  - packages/database/package.json
-  - apps/saas/AGENTS.md
-  - apps/marketing/modules/course/lib/public-curriculum.ts
-  - packages/platform/src/deployment/credentials.ts
-  - docs/discuss/2026-08-17-landing-signup-visual-feedback.md
-  - packages/platform/src/deployment/types.ts
-  - packages/platform/vitest.config.ts
-  - apps/saas/app/api/course/studio/route.ts
-  - packages/platform/src/mount-points.ts
-  - packages/course/src/config/modules.ts
-  - packages/github-kit/index.ts
-  - packages/github-kit/provision-buyer-repo.ts
-  - packages/api/modules/course/router.ts
-  - apps/saas/package.json
-  - apps/marketing/app/[locale]/course/preview/[lessonId]/page.tsx
-  - docs/gaishen-workflow-demo.html
-  - apps/saas/modules/deployment/constants.ts
-  - packages/api/modules/deployment/procedures/provision-server.ts
-  - packages/platform/tsconfig.json
-  - docs/demo/course-sales-page-powercourse.html
-  - packages/github-kit/repo-version.ts
-  - packages/github-kit/types.ts
-  - docs/tutorials/puter-serverless-mvp/README.md
-  - docs/为什么叫QQ – 你的AI编程总是翻车？因为你少做了一步：设计隔离  拆解 Grill-me，Superpowers，Openspec 的第一步.md
-  - packages/github-kit/revoke.ts
-  - packages/support/src/chatwoot-payload.ts
-  - docs/discuss/2026-08-21-buyer-dev-onboarding-guide-idea.md
-  - docs/discuss/2026-08-21-thetu-core-modules-architecture.html
-  - README.md
-  - docs/gaishen-orca-workflow.md
-  - packages/support/src/ticket-status.ts
-  - apps/saas/lib/operator.ts
-  - packages/api/modules/support/lib/chatwoot-client.ts
-  - packages/course/src/components/interactive/WorkflowSorter.tsx
-  - packages/course/src/mdx/extract-lesson-block-ids.ts
-  - packages/support/package.json
-  - docs/discuss/2026-08-17-wp-frontend-mount-research.md
-  - packages/support/src/generate-diagnosis.ts
-  - apps/saas/app/api/mcp/lib/config.ts
-  - packages/api/modules/support/procedures/chatwoot-webhook.ts
-  - .spectra.yaml
-  - packages/github-kit/github-app-client.ts
-  - apps/saas/modules/deployment/components/ManagedVpsGuide.tsx
-  - packages/course/src/components/interactive/MicroSandbox.tsx
-  - packages/platform/package.json
-  - packages/api/modules/support/router.ts
-  - apps/saas/app/api/mcp/connections/[id]/route.ts
-  - packages/support/vitest.config.ts
-  - apps/saas/app/api/mcp/connections/route.ts
-  - apps/saas/app/api/mcp/lib/handler.ts
-  - packages/course/src/components/interactive/TimelineSync.tsx
-  - packages/database/prisma/migrations/20260819120000_add_studio_folder_collapse_state/migration.sql
-  - apps/saas/app/api/repo-version/route.ts
-  - docs/demo/course-frontend-landing-demo.html
-  - packages/platform/src/deployment/db.ts
-  - apps/saas/app/api/github/claim/route.ts
-  - AGENTS.md
-  - apps/saas/app/api/mcp/lib/guard.ts
-  - apps/saas/app/api/course/ai/route.ts
-  - apps/saas/CLAUDE.md
-  - packages/platform/src/deployment/fleet.ts
-  - packages/platform/src/deployment/tiers.ts
-  - packages/course/src/components/interactive/DialogueWindow.tsx
-  - packages/github-kit/config.ts
-  - docs/demo/course-admin-studio-demo.html
-  - packages/course/src/components/interactive/ConceptCompare.tsx
-  - packages/database/prisma/zod/index.ts
-  - docs/dispatch-board.html
-  - docs/deploy-and-public-url.md
-  - packages/course/src/player/FluentPlayer.tsx
-  - docs/demo/course-demo-3-supastarter-ai.html
-  - apps/saas/modules/deployment/components/DeploymentStatusPanel.tsx
-  - packages/course/src/components/interactive/InstantQuiz.tsx
-  - apps/saas/lib/github-kit.ts
-  - apps/saas/modules/shared/lib/nav-menu-items.ts
-  - packages/course/vitest.config.ts
-  - packages/platform/src/types.ts
-  - apps/marketing/modules/course/lib/duration.ts
-  - docs/tutorials/puter-serverless-mvp/demo/index.html
-  - packages/course/src/components/interactive/TeacherAvatar.tsx
-  - packages/api/orpc/router.ts
-  - packages/course/src/hooks/use-time-sync.ts
-  - docs/demo/course-demo-1-split.html
-  - packages/api/modules/deployment/procedures/get-status.ts
-  - docs/demo/StartKiter-成果儀表板.html
-  - packages/database/prisma/schema.prisma
-  - apps/saas/modules/deployment/components/TierSelector.tsx
-  - packages/course/src/mdx/allowed-components.ts
-  - packages/database/prisma/index.ts
-  - packages/platform/index.ts
-  - docs/demo/course-demo-3-workspace.html
-  - docs/demo/buyer-status-panel-demo.html
-  - packages/database/prisma/migrations/20260820032747_add_plugin_content/migration.sql
-  - docs/startkiter開發討論.md
-  - packages/database/prisma/migrations/20260820033416_add_mcp_connection/migration.sql
-  - packages/api/modules/course/lib/video-resolver.ts
-  - packages/course/tsconfig.json
-  - apps/saas/app/api/mcp/route.ts
-  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/page.tsx
-  - docs/discuss/2026-08-17-hyperagent-reference.md
-  - apps/marketing/app/[locale]/course/page.tsx
-  - packages/support/tsconfig.json
-  - packages/api/modules/deployment/procedures/submit-credential.ts
-  - packages/course/src/components/interactive/index.ts
-  - packages/database/prisma/migrations/migration_lock.toml
-  - apps/saas/app/(authenticated)/ChatwootScript.tsx
-  - packages/course/src/mdx/inspect-mdx-source.ts
-  - apps/saas/app/(authenticated)/layout.tsx
-  - apps/saas/app/(authenticated)/(main)/(account)/deployment/page.tsx
-  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/classroom-client.tsx
-  - packages/api/orpc/procedures.ts
-  - docs/demo/puter-todo-app.html
-  - packages/github-kit/claim.ts
-tests:
-  - packages/api/modules/course/toggle-lesson-progress.test.ts
-  - packages/database/src/plugin-content/plugin-content.test.ts
-  - packages/platform/src/types.test.ts
-  - packages/support/src/copilot.test.ts
-  - packages/api/modules/course/course.test.ts
-  - apps/saas/modules/deployment/deployment-status.test.ts
-  - packages/platform/src/deployment/tiers.test.ts
-  - packages/api/modules/support/procedures/chatwoot-webhook.test.ts
-  - apps/saas/modules/shared/lib/nav-menu-items.test.ts
-  - packages/platform/src/deployment/fleet.test.ts
-  - packages/platform/src/deployment/status.test.ts
-  - packages/course/src/mdx/extract-lesson-block-ids.test.ts
-  - packages/platform/src/deployment/coolify-client.test.ts
-  - apps/saas/modules/deployment/chatwoot-script.test.ts
-  - packages/support/src/chatwoot-signature.test.ts
-  - apps/marketing/modules/course/lib/duration.test.ts
-  - packages/api/modules/deployment/procedures/deployment-procedures.test.ts
-  - packages/support/src/ticket-status.test.ts
-  - apps/saas/modules/shared/components/NavBar.test.tsx
-  - packages/course/src/config/modules.test.ts
-  - packages/course/src/components/interactive/interactive.test.tsx
-  - packages/github-kit/config.test.ts
-  - packages/github-kit/claim.test.ts
-  - apps/saas/modules/deployment/report-issue-button.test.tsx
-  - packages/database/src/support/ticket.test.ts
-  - packages/platform/src/deployment/credentials.test.ts
-  - packages/github-kit/repo-version.test.ts
-  - packages/platform/src/mount-points.test.ts
-  - packages/course/src/mdx/inspect-mdx-source.test.ts
-  - apps/saas/app/api/mcp/route.test.ts
-  - packages/github-kit/revoke.test.ts
--->
+- **WHEN** 使用者對一個內容裡沒有任何互動積木的單元送出完成請求（不附 `blockId`）
+- **THEN** 系統必須持久化完成狀態，不得因為缺少 `blockId` 而拒絕請求
+
+#### Scenario: 有互動積木的單元仍必須驗證 blockId 才能完成
+
+- **WHEN** 使用者對一個內容裡含有互動積木的單元送出完成請求，但沒有附上 `blockId`，或附上的 `blockId` 不屬於該單元
+- **THEN** 系統必須拒絕請求，不得持久化完成狀態
 
 ---
 ### Requirement: 課綱側欄可收折且不破壞學習狀態
