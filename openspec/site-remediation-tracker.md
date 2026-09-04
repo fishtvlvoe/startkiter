@@ -139,6 +139,26 @@ agy（Antigravity）接獨立審查跑 30 分鐘後 terminal 直接 exited，未
 
 **與參考影片的對照**：影片裡是「50 個 agent 同時衝一個 app 找 bug，修完再測」的循環，我們規模小很多（3 支 agy），但精神一樣——不靠人工一步步點，讓 AI 大量、高頻、多角度地把使用者會做的事都做一遍。
 
+## 2026-09-04 第二輪群眾測試（打正式站 startkiter.dev / app.startkiter.dev）
+
+3 支 agy 分別扮演全新訪客／付費學員／管理員，打**剛部署完成的正式網站**（非本機）。金流仍為
+sandbox 測試模式，安全無真實扣款風險。
+
+**發現並修復（`lesson-completion-without-blocks` SR，已封存）**：
+- 🔴 純文字/影片型態課程單元，學員點「標記為完成」完全無反應，進度永遠卡 0%。根因不只
+  前端：`toggleLessonProgress` 後端本身要求 `blockId` 必填並驗證，但無互動積木的單元從
+  `extractLessonBlockIds` 拿到的永遠是空陣列，前後端從設計上就卡死，非漏寫判斷式。
+  修法：`blockId` 改選填，僅當單元真的含積木（`allowedBlockIds.length > 0`）才要求並驗證，
+  防偽造機制對含積木單元原樣保留。ego-browser 實測：0% → 25%、按鈕變綠、`lesson_progress`
+  資料表確認真的寫入。順手把 cursor-agent 原本寫的前端測試（沒有真的 render 元件、自己測
+  自己）改成 `@vitest-environment jsdom` 真實渲染 + 真實點擊。
+
+**待排序（非本次修復範圍，記錄備查）**：
+- 🟡 `/app` 首頁載入 16 秒偏慢
+- 🟡 缺日文語系（`/ja` 404）、缺獨立「關於」頁面（`/about` 404，已用 curl 驗證為真）
+- 🟡 中文法律頁（隱私權/條款）內文仍是英文
+- 🟢 部分頁面殘留 supastarter 範本標題與頁尾連結、註冊按鈕缺 `type="submit"`
+
 ## 額外發現（本次整改過程中新增，未在原盤點報告出現）
 
 - Prisma 產生的型別檔案過期：`pnpm --filter api type-check` 有 `PrismaClient` 缺 `page` 屬性、`ContentType`/`ContentStatus` 缺匯出的錯誤，確認是既有問題（改 SR1 前後皆存在，非本次改動造成）。需要另開 SR 處理（跑 `prisma generate` 重新產生型別，或確認 schema 是否同步）。

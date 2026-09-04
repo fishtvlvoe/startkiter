@@ -101,11 +101,7 @@ export function AcademyClassroomClient({
 
 		const [blockId] = extractLessonBlockIds(currentLesson.content);
 
-		if (!blockId) {
-			return;
-		}
-
-		toggleProgress.mutate({ lessonId: currentLesson.id, blockId });
+		toggleProgress.mutate({ lessonId: currentLesson.id, blockId: blockId || undefined });
 	};
 
 	const markLessonCompleteFromBlock = (blockId: string) => {

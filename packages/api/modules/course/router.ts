@@ -169,7 +169,7 @@ export const courseRouter = publicProcedure.router({
 		.input(
 			z.object({
 				lessonId: z.string(),
-				blockId: z.string().min(1),
+				blockId: z.string().min(1).optional(),
 			}),
 		)
 		.handler(async ({ input, context }) => {
@@ -184,11 +184,15 @@ export const courseRouter = publicProcedure.router({
 
 			const allowedBlockIds = extractLessonBlockIds(lesson.content ?? "");
 
-			if (!allowedBlockIds.includes(input.blockId)) {
-				throw new ORPCError("FORBIDDEN", {
-					message: "這個積木不屬於目前單元，完成事件已被拒絕。",
-				});
+			// 如果單元有積木，blockId 必填且必須驗證屬於該單元
+			if (allowedBlockIds.length > 0) {
+				if (!input.blockId || !allowedBlockIds.includes(input.blockId)) {
+					throw new ORPCError("FORBIDDEN", {
+						message: "這個積木不屬於目前單元，完成事件已被拒絕。",
+					});
+				}
 			}
+			// 如果單元沒有積木，不要求 blockId，直接視為合法完成請求
 
 			const existing = await db.lessonProgress.findUnique({
 				where: {
