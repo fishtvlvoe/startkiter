@@ -4,13 +4,12 @@ import { getUniqueBasePaths } from "@shared/lib/content";
 import { allLegalPages, allPosts } from "content-collections";
 import type { MetadataRoute } from "next";
 
-import {
-	SITEMAP_REVALIDATE_SECONDS,
-	mergeSitemapUrls,
-	type DatabasePageSitemapEntry,
-} from "./sitemap-entries";
+import { mergeSitemapUrls, type DatabasePageSitemapEntry } from "./sitemap-entries";
 
-export const revalidate = SITEMAP_REVALIDATE_SECONDS;
+// Next.js 靜態解析 sitemap.ts 的 revalidate 匯出，必須是字面量，不能引用外部常數
+// （引用會讓 Turbopack 靜默建置失敗；webpack 會明確報錯 "Unknown identifier"）。
+// SITEMAP_REVALIDATE_SECONDS 仍從 sitemap-entries.ts 匯出供測試核對這個數字。
+export const revalidate = 300;
 
 const baseUrl = getBaseUrl();
 const locales = Object.keys(i18nConfig.locales);
