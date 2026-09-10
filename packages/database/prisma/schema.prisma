@@ -747,6 +747,7 @@ model CourseWelcomeEmail {
   enabled          Boolean  @default(false)
   subjectTemplate  String
   markdownTemplate String   @db.Text
+  contentJson      String?  @db.Text
   updatedAt        DateTime @updatedAt
 
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)

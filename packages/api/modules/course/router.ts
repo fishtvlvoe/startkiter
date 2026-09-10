@@ -44,6 +44,7 @@ import { listCoursePacks } from "./procedures/list-course-packs";
 import { submitMissionFormValue } from "./procedures/submit-mission-form-value";
 import { runMissionCheck } from "./procedures/run-mission-check";
 import { listEmailDeliveryLog } from "./procedures/list-email-delivery-log";
+import { sendWelcomeEmailTest } from "./procedures/send-welcome-email-test";
 import { updateWelcomeEmailSettings } from "./procedures/update-welcome-email-settings";
 
 export const courseRouter = publicProcedure.router({
@@ -314,4 +315,5 @@ export const courseRouter = publicProcedure.router({
 	runMissionCheck,
 	listEmailDeliveryLog,
 	updateWelcomeEmailSettings,
+	sendWelcomeEmailTest,
 });

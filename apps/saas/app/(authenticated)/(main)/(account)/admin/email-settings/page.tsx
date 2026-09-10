@@ -12,7 +12,7 @@ export default async function EmailSettingsPage() {
 			id: true,
 			title: true,
 			welcomeEmail: {
-				select: { enabled: true, subjectTemplate: true, markdownTemplate: true },
+				select: { enabled: true, subjectTemplate: true, markdownTemplate: true, contentJson: true },
 			},
 		},
 	});

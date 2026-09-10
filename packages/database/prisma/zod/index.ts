@@ -186,7 +186,7 @@ export type EmailDeliveryLogScalarFieldEnum = z.infer<typeof EmailDeliveryLogSca
 
 // File: CourseWelcomeEmailScalarFieldEnum.schema.ts
 
-export const CourseWelcomeEmailScalarFieldEnumSchema = z.enum(['id', 'courseId', 'enabled', 'subjectTemplate', 'markdownTemplate', 'updatedAt'])
+export const CourseWelcomeEmailScalarFieldEnumSchema = z.enum(['id', 'courseId', 'enabled', 'subjectTemplate', 'markdownTemplate', 'contentJson', 'updatedAt'])
 
 export type CourseWelcomeEmailScalarFieldEnum = z.infer<typeof CourseWelcomeEmailScalarFieldEnumSchema>;
 
@@ -1097,6 +1097,7 @@ export const CourseWelcomeEmailSchema = z.object({
   enabled: z.boolean(),
   subjectTemplate: z.string(),
   markdownTemplate: z.string(),
+  contentJson: z.string().nullish(),
   updatedAt: z.date(),
 });
 

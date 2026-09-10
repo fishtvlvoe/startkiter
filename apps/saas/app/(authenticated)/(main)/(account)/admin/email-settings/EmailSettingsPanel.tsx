@@ -1,14 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label, Textarea } from "@startkiter/ui";
+import dynamic from "next/dynamic";
+import { useEffect, useMemo, useState } from "react";
+import { Button, Card, CardContent, CardHeader, CardTitle, Input, Label } from "@startkiter/ui";
 
 import { orpcClient } from "@shared/lib/orpc-client";
+
+import type { WelcomeEmailBlock } from "./welcome-email-composer";
+
+const WelcomeEmailComposer = dynamic(() => import("./welcome-email-composer"), {
+	ssr: false,
+	loading: () => <p className="text-sm text-muted-foreground">編輯器載入中…</p>,
+});
 
 type CourseSetting = {
 	enabled: boolean;
 	subjectTemplate: string;
 	markdownTemplate: string;
+	contentJson: string | null;
 };
 
 type Course = {
@@ -30,26 +39,60 @@ type DeliveryLog = {
 
 type DeliveryType = DeliveryLog["type"];
 type DeliveryStatus = DeliveryLog["status"];
+type TestSendStatus = "idle" | "sending" | "success" | "error";
 
 const DEFAULT_SETTING: CourseSetting = {
 	enabled: false,
 	subjectTemplate: "歡迎 {{userName}} 加入 {{courseName}}",
 	markdownTemplate: "歡迎你加入 **{{courseName}}**！\n\n[開始上課]({{courseUrl}})",
+	contentJson: null,
 };
+
+function parseContentJson(raw: string | null): WelcomeEmailBlock[] | null {
+	if (!raw) return null;
+	try {
+		const parsed = JSON.parse(raw) as unknown;
+		return Array.isArray(parsed) ? (parsed as WelcomeEmailBlock[]) : null;
+	} catch {
+		return null;
+	}
+}
+
+function blocksFromMarkdownFallback(markdown: string): WelcomeEmailBlock[] {
+	const text = markdown.trim();
+	if (!text) return [{ type: "paragraph", content: "" }];
+	return text.split(/\n{2,}/).map((paragraph) => ({
+		type: "paragraph" as const,
+		content: paragraph.replace(/\n/g, " "),
+	}));
+}
 
 export default function EmailSettingsPanel({ initialCourses }: { initialCourses: Course[] }) {
 	const [courses, setCourses] = useState(initialCourses);
 	const [selectedCourseId, setSelectedCourseId] = useState(initialCourses[0]?.id ?? "");
 	const [setting, setSetting] = useState<CourseSetting>(initialCourses[0]?.welcomeEmail ?? DEFAULT_SETTING);
+	const [blocks, setBlocks] = useState<WelcomeEmailBlock[]>(() => {
+		const initial = initialCourses[0]?.welcomeEmail ?? DEFAULT_SETTING;
+		return parseContentJson(initial.contentJson) ?? blocksFromMarkdownFallback(initial.markdownTemplate);
+	});
+	const [composerKey, setComposerKey] = useState(initialCourses[0]?.id ?? "empty");
 	const [logs, setLogs] = useState<DeliveryLog[]>([]);
 	const [typeFilter, setTypeFilter] = useState<DeliveryType | "">("");
 	const [statusFilter, setStatusFilter] = useState<DeliveryStatus | "">("");
 	const [saving, setSaving] = useState(false);
 	const [message, setMessage] = useState("");
+	const [testEmail, setTestEmail] = useState("");
+	const [testStatus, setTestStatus] = useState<TestSendStatus>("idle");
+	const [testFeedback, setTestFeedback] = useState("");
 
 	useEffect(() => {
 		const selected = courses.find((course) => course.id === selectedCourseId);
-		setSetting(selected?.welcomeEmail ?? DEFAULT_SETTING);
+		const nextSetting = selected?.welcomeEmail ?? DEFAULT_SETTING;
+		setSetting(nextSetting);
+		setBlocks(parseContentJson(nextSetting.contentJson) ?? blocksFromMarkdownFallback(nextSetting.markdownTemplate));
+		setComposerKey(selectedCourseId || "empty");
+		setTestStatus("idle");
+		setTestFeedback("");
 	}, [courses, selectedCourseId]);
 
 	useEffect(() => {
@@ -66,9 +109,11 @@ export default function EmailSettingsPanel({ initialCourses }: { initialCourses:
 		setSetting((current) => ({ ...current, [key]: value }));
 	}
 
+	const contentJson = useMemo(() => JSON.stringify(blocks), [blocks]);
+
 	async function save() {
 		if (!selectedCourseId || !setting.subjectTemplate.trim()) {
-			setMessage("請選擇課程並填寫郵件主旨。" );
+			setMessage("請選擇課程並填寫郵件主旨。");
 			return;
 		}
 
@@ -80,15 +125,55 @@ export default function EmailSettingsPanel({ initialCourses }: { initialCourses:
 				enabled: setting.enabled,
 				subjectTemplate: setting.subjectTemplate.trim(),
 				markdownTemplate: setting.markdownTemplate,
+				contentJson,
 			});
 			setCourses((current) => current.map((course) =>
-				course.id === selectedCourseId ? { ...course, welcomeEmail: result.setting } : course,
+				course.id === selectedCourseId
+					? {
+							...course,
+							welcomeEmail: {
+								enabled: result.setting.enabled,
+								subjectTemplate: result.setting.subjectTemplate,
+								markdownTemplate: result.setting.markdownTemplate,
+								contentJson: result.setting.contentJson ?? null,
+							},
+						}
+					: course,
 			));
-			setMessage("郵件設定已儲存。" );
+			setMessage("郵件設定已儲存。");
 		} catch {
-			setMessage("郵件設定儲存失敗。" );
+			setMessage("郵件設定儲存失敗。");
 		} finally {
 			setSaving(false);
+		}
+	}
+
+	async function sendTest() {
+		const recipient = testEmail.trim();
+		if (!recipient) {
+			setTestStatus("error");
+			setTestFeedback("請輸入測試收件信箱");
+			return;
+		}
+		if (!selectedCourseId) {
+			setTestStatus("error");
+			setTestFeedback("請先選擇課程");
+			return;
+		}
+
+		setTestStatus("sending");
+		setTestFeedback("寄出中…");
+		try {
+			const result = await orpcClient.course.sendWelcomeEmailTest({
+				courseId: selectedCourseId,
+				toEmail: recipient,
+			});
+			setTestStatus("success");
+			setTestFeedback(`已寄出測試信到 ${result.toEmail}`);
+		} catch (error) {
+			const reason = error instanceof Error ? error.message : "寄送失敗";
+			setTestStatus("error");
+			setTestFeedback(`沒有寄出：${reason}`);
 		}
 	}
 
@@ -120,8 +205,44 @@ export default function EmailSettingsPanel({ initialCourses }: { initialCourses:
 								<p className="text-xs text-muted-foreground">可用變數：&#123;&#123;userName&#125;&#125;、&#123;&#123;courseName&#125;&#125;、&#123;&#123;courseUrl&#125;&#125;</p>
 							</div>
 							<div className="space-y-2">
-								<Label htmlFor="email-markdown">Markdown 內文</Label>
-								<Textarea id="email-markdown" className="min-h-48" value={setting.markdownTemplate} onChange={(event) => updateSetting("markdownTemplate", event.target.value)} />
+								<Label>歡迎信內文</Label>
+								<WelcomeEmailComposer
+									key={composerKey}
+									value={blocks}
+									onChange={setBlocks}
+								/>
+							</div>
+							<div className="space-y-2 rounded-md border p-3">
+								<Label htmlFor="test-email">測試收件信箱</Label>
+								<div className="flex flex-col gap-2 sm:flex-row">
+									<Input
+										id="test-email"
+										type="email"
+										value={testEmail}
+										onChange={(event) => setTestEmail(event.target.value)}
+										placeholder="fish@example.com"
+									/>
+									<Button
+										id="send-test-email"
+										type="button"
+										variant="outline"
+										disabled={testStatus === "sending"}
+										onClick={() => void sendTest()}
+									>
+										寄測試信
+									</Button>
+								</div>
+								{testFeedback && (
+									<p
+										className={`text-sm ${testStatus === "error" ? "text-red-700" : "text-muted-foreground"}`}
+										role="status"
+									>
+										{testFeedback}
+									</p>
+								)}
+								{testStatus === "success" && (
+									<p className="text-xs text-muted-foreground">請到收件匣（含垃圾郵件）確認版面。</p>
+								)}
 							</div>
 							<Button type="button" disabled={saving} onClick={() => void save()}>{saving ? "儲存中…" : "儲存設定"}</Button>
 						</>

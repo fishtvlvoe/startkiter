@@ -104,11 +104,23 @@ export async function sendWelcomeEmail(input: {
 			courseUrl: `${baseUrl()}/course/${encodeURIComponent(course.slug)}`,
 		} satisfies Record<TemplateVariable, string>;
 		const subject = safeSubject(interpolateTemplate(setting.subjectTemplate, values));
-		const rendered = await renderCourseWelcomeEmail({
-			userName: values.userName,
-			courseName: values.courseName,
-			markdown: interpolateTemplate(setting.markdownTemplate, values),
-		});
+		const rendered = setting.contentJson
+			? await renderCourseWelcomeEmail({
+					userName: values.userName,
+					courseName: values.courseName,
+					markdown: setting.markdownTemplate,
+					contentJson: setting.contentJson,
+					courseUrl: values.courseUrl,
+					subject,
+				})
+			: await renderCourseWelcomeEmail({
+					userName: values.userName,
+					courseName: values.courseName,
+					markdown: interpolateTemplate(setting.markdownTemplate, values),
+					contentJson: null,
+					courseUrl: values.courseUrl,
+					subject,
+				});
 
 		const delivery = await reserveWelcomeDelivery({ ...input, toEmail: user.email, subject });
 		if (!delivery) return;
