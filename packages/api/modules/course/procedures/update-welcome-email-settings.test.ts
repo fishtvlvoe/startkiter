@@ -108,4 +108,54 @@ describe("updateWelcomeEmailSettings", () => {
 		});
 		expect(upsertArg?.update).not.toHaveProperty("contentJson");
 	});
+
+	it.each([
+		["not JSON at all", "not-json{{"],
+		["a JSON object without blocks", JSON.stringify({ hello: "world" })],
+		["a JSON string", JSON.stringify("paragraph")],
+	])("rejects malformed contentJson (%s) before touching the database", async (_label, contentJson) => {
+		await expect(
+			call(
+				updateWelcomeEmailSettings,
+				{
+					courseId: "course-1",
+					enabled: true,
+					subjectTemplate: "歡迎",
+					markdownTemplate: "markdown",
+					contentJson,
+				},
+				{ context: { headers: new Headers() } },
+			),
+		).rejects.toThrow(/contentJson|Input validation failed/);
+
+		expect(vi.mocked(db.courseWelcomeEmail.upsert)).not.toHaveBeenCalled();
+	});
+
+	it("accepts a blocks wrapper object and persists it", async () => {
+		const contentJson = JSON.stringify({
+			blocks: [
+				{
+					id: "p1",
+					type: "paragraph",
+					props: {},
+					content: [{ type: "text", text: "wrapped", styles: {} }],
+					children: [],
+				},
+			],
+		});
+
+		const result = await call(
+			updateWelcomeEmailSettings,
+			{
+				courseId: "course-1",
+				enabled: true,
+				subjectTemplate: "歡迎",
+				markdownTemplate: "markdown",
+				contentJson,
+			},
+			{ context: { headers: new Headers() } },
+		);
+
+		expect(result.setting).toEqual(expect.objectContaining({ contentJson }));
+	});
 });

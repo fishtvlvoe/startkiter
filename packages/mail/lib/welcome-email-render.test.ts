@@ -145,8 +145,71 @@ describe("renderWelcomeEmailFromBlocks", () => {
 			courseUrl: "https://startkiter.com/course/abc",
 		});
 
-		expect(rendered.html).toContain("Amy\\_\\[test\\]");
+		expect(rendered.html).toContain("Amy_[test]");
+		expect(rendered.html).not.toContain("Amy\\_\\[test\\]");
 		expect(rendered.html).not.toMatch(/<test>/i);
 		expect(rendered.text).toContain("Amy\\_\\[test\\]");
+	});
+
+	it("does not allow markup re-injection via interpolated variable values", async () => {
+		const contentJson = JSON.stringify([
+			paragraph([{ text: "你好 {{userName}}" }]),
+			ctaButton("前往", "{{courseUrl}}"),
+		]);
+
+		const rendered = await renderWelcomeEmailFromBlocks(contentJson, {
+			userName: '<script>alert(1)</script><img src=x onerror=alert(2)>',
+			courseName: "開站包",
+			courseUrl: 'https://startkiter.com/course/abc" onmouseover="evil',
+		});
+
+		const lower = rendered.html.toLowerCase();
+		expect(lower).not.toContain("<script");
+		expect(lower).not.toContain("onerror");
+		expect(lower).not.toContain("onmouseover");
+		expect(lower).toContain("&lt;script&gt;");
+	});
+
+	it("blocks entity-encoded and whitespace-obfuscated javascript URLs", async () => {
+		const rendered = await renderWelcomeEmailFromBlocks(
+			JSON.stringify([
+				paragraph([{ text: "a", href: "java&#x73;cript:alert(1)" }], "enc"),
+				paragraph([{ text: "b", href: "j a v a s c r i p t:alert(2)" }], "ws"),
+				paragraph([{ text: "c", href: "data:text/html,<script>alert(3)</script>" }], "data"),
+			]),
+			baseContext,
+		);
+
+		expect(rendered.html).not.toContain("java&#x73;cript");
+		expect(rendered.html).not.toContain("alert(1)");
+		expect(rendered.html).not.toContain("alert(2)");
+		expect(rendered.html).not.toContain("data:text/html");
+	});
+
+	it("falls back to the default brand color when an invalid brandColor is supplied", async () => {
+		const contentJson = JSON.stringify([ctaButton("開始上課", "/course/abc")]);
+
+		const rendered = await renderWelcomeEmailFromBlocks(contentJson, {
+			...baseContext,
+			brandColor: 'red;position:fixed;url(javascript:alert(1))',
+		});
+
+		expect(rendered.html).toContain("#365314");
+		expect(rendered.html.toLowerCase()).not.toContain("position:fixed");
+	});
+
+	it("strips position:fixed from inline styles during sanitization", async () => {
+		const contentJson = JSON.stringify([
+			paragraph([{ text: "plain" }]),
+		]);
+
+		const rendered = await renderWelcomeEmailFromBlocks(contentJson, baseContext);
+		const sanitized = rendered.html;
+		expect(sanitized).toContain("plain");
+
+		const { sanitizeEmailHtml } = await import("./welcome-email-render");
+		expect(sanitizeEmailHtml('<div style="position:fixed;top:0">x</div>')).not.toContain("position:fixed");
+		expect(sanitizeEmailHtml('<a href="javascript:alert(1)">x</a>')).not.toContain("javascript:");
+		expect(sanitizeEmailHtml('<a href=javascript:alert(1)>x</a>')).not.toContain("javascript:");
 	});
 });

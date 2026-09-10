@@ -87,16 +87,20 @@ export const sendWelcomeEmailTest = courseOperatorProcedure
 				});
 
 		try {
+			let providerError: unknown = null;
 			const sent = await sendEmail({
 				to: values.toEmail,
 				locale: "zh-tw",
 				subject,
 				html: rendered.html,
 				text: rendered.text,
+				onError: (error) => {
+					providerError = error;
+				},
 			});
 			if (!sent) {
 				throw new ORPCError("INTERNAL_SERVER_ERROR", {
-					message: "Email provider rejected delivery",
+					message: providerError ? errorMessage(providerError) : "Email provider rejected delivery",
 				});
 			}
 		} catch (error) {

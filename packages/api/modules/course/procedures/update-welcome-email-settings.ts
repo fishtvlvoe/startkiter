@@ -5,12 +5,30 @@ import { z } from "zod";
 
 import { courseOperatorProcedure } from "../lib/course-operator";
 
+/** 驗證 contentJson 是合法的 BlockNote 區塊陣列（或含 blocks 陣列的物件），無效回 null */
+function parseBlockJson(value: string): unknown[] | null {
+	try {
+		const parsed = JSON.parse(value) as unknown;
+		if (Array.isArray(parsed)) return parsed as unknown[];
+		if (parsed && typeof parsed === "object" && Array.isArray((parsed as { blocks?: unknown }).blocks)) {
+			return (parsed as { blocks: unknown[] }).blocks;
+		}
+		return null;
+	} catch {
+		return null;
+	}
+}
+
+const blockJsonSchema = z.string().max(500_000).refine((value) => parseBlockJson(value) !== null, {
+	message: "contentJson must be a JSON array of editor blocks",
+});
+
 const input = z.object({
 	courseId: z.string().trim().min(1),
 	enabled: z.boolean(),
 	subjectTemplate: z.string().trim().min(1).max(998),
 	markdownTemplate: z.string().max(50_000),
-	contentJson: z.string().max(500_000).optional(),
+	contentJson: blockJsonSchema.optional(),
 });
 
 export const updateWelcomeEmailSettings = courseOperatorProcedure

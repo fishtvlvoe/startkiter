@@ -11,6 +11,8 @@ export async function sendEmail<T extends TemplateId>(
 		to: string;
 		from?: string;
 		locale?: Locale;
+		/** 寄送失敗時回呼 provider 原始錯誤（sendEmail 仍回傳 false） */
+		onError?: (error: unknown) => void;
 	} & (
 		| {
 				templateId: T;
@@ -23,7 +25,7 @@ export async function sendEmail<T extends TemplateId>(
 		  }
 	),
 ) {
-	const { to, from, locale = config.defaultLocale as Locale } = params;
+	const { to, from, locale = config.defaultLocale as Locale, onError } = params;
 
 	let html: string;
 	let text: string;
@@ -56,6 +58,7 @@ export async function sendEmail<T extends TemplateId>(
 		return true;
 	} catch (e) {
 		logger.error(e);
+		onError?.(e);
 		return false;
 	}
 }

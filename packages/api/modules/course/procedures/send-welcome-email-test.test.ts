@@ -137,4 +137,21 @@ describe("sendWelcomeEmailTest", () => {
 
 		expect(sendEmail).not.toHaveBeenCalled();
 	});
+
+	it("surfaces the provider error message when delivery is rejected", async () => {
+		vi.mocked(sendEmail).mockImplementation(async (args: { onError?: (error: unknown) => void }) => {
+			args.onError?.(new Error("SMTP 550 mailbox unavailable"));
+			return false;
+		});
+
+		await expect(
+			call(
+				sendWelcomeEmailTest,
+				{ courseId: "course-1", toEmail: "fish@example.com" },
+				{ context: { headers: new Headers() } },
+			),
+		).rejects.toThrow(/550 mailbox unavailable/);
+
+		expect(db.emailDeliveryLog.create).not.toHaveBeenCalled();
+	});
 });

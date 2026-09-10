@@ -47,21 +47,42 @@ function safeTemplateValue(value: string): string {
 	return value.replace(/\\/g, "\\\\").replace(/[\[\]()*_`#<>]/g, "\\$&");
 }
 
-function interpolateTemplate(source: string, values: Record<(typeof TEMPLATE_VARIABLES)[number], string>): string {
+function interpolateTemplate(
+	source: string,
+	values: Record<(typeof TEMPLATE_VARIABLES)[number], string>,
+): string {
 	return TEMPLATE_VARIABLES.reduce(
-		(result, variable) => result.split(`{{${variable}}}`).join(safeTemplateValue(values[variable])),
+		(result, variable) => result.split(`{{${variable}}}`).join(values[variable]),
 		source,
 	);
 }
 
+/** 解碼數字字符參照（&#x73; / &#115;），供 URL 協定檢查前還原 */
+function decodeNumericEntities(value: string): string {
+	return value.replace(/&#(x?[0-9a-fA-F]+);?/g, (match, body: string) => {
+		try {
+			const code = body.toLowerCase().startsWith("x") ? parseInt(body.slice(1), 16) : parseInt(body, 10);
+			return Number.isFinite(code) && code >= 0 && code <= 0x10ffff ? String.fromCodePoint(code) : match;
+		} catch {
+			return match;
+		}
+	});
+}
+
 function sanitizeUrl(raw: string, appUrl?: string): string {
 	try {
-		const value = raw.trim();
+		const value = decodeNumericEntities(raw.trim());
 		if (!value) return "#";
 		if (value.startsWith("/")) {
 			return appUrl ? new URL(value, appUrl).toString() : value;
 		}
-		if (value.toLowerCase().startsWith("data:") || value.toLowerCase().startsWith("javascript:")) {
+		const scheme = value.toLowerCase();
+		if (
+			scheme.startsWith("data:") ||
+			scheme.startsWith("javascript:") ||
+			scheme.startsWith("vbscript:") ||
+			/^\s*javascript\s*:/i.test(value)
+		) {
 			return "#";
 		}
 		const url = new URL(value);
@@ -83,10 +104,18 @@ export function sanitizeEmailHtml(html: string): string {
 		.replace(/<form[\s\S]*?>[\s\S]*?<\/form>/gi, "")
 		.replace(/\son[a-z]+\s*=\s*(['"]).*?\1/gi, "")
 		.replace(/\son[a-z]+\s*=\s*[^\s>]+/gi, "")
-		.replace(/\shref\s*=\s*(['"])\s*javascript:[\s\S]*?\1/gi, ' href="#"')
-		.replace(/\ssrc\s*=\s*(['"])\s*javascript:[\s\S]*?\1/gi, ' src=""')
-		.replace(/\shref\s*=\s*(['"])\s*data:[\s\S]*?\1/gi, ' href="#"')
-		.replace(/\ssrc\s*=\s*(['"])\s*data:[\s\S]*?\1/gi, ' src=""')
+		.replace(
+			/\s(href|src)\s*=\s*(["'])\s*[\s\S]*?j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t\s*(?::|&colon;|&#0*58;?|&#x0*3a;?)[\s\S]*?\2/gi,
+			' $1="#"',
+		)
+		.replace(
+			/\s(href|src)\s*=\s*[^\s>"']*j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t\s*(?::|&colon;|&#0*58;?|&#x0*3a;?)[^\s>"']*/gi,
+			' $1="#"',
+		)
+		.replace(/\s(href|src)\s*=\s*(['"])\s*(?:data|vbscript)[\s\S]*?\2/gi, ' $1="#"')
+		.replace(/\s(href|src)\s*=\s*[^\s>]*(?:data|vbscript):[^\s>"]*/gi, ' $1="#"')
+		.replace(/position\s*:\s*fixed/gi, "")
+		.replace(/expression\s*\(/gi, "")
 		.replace(/onerror/gi, "")
 		.replace(/<script/gi, "");
 }
@@ -233,7 +262,10 @@ export async function renderWelcomeEmailFromBlocks(
 	contentJson: string,
 	context: WelcomeEmailRenderContext,
 ): Promise<{ html: string; text: string }> {
-	const brandColor = context.brandColor || DEFAULT_BRAND_COLOR;
+	const brandColor =
+		context.brandColor && /^#[0-9a-fA-F]{3,8}$/.test(context.brandColor)
+			? context.brandColor
+			: DEFAULT_BRAND_COLOR;
 	const appUrl = context.courseUrl ? new URL(context.courseUrl).origin : "";
 	const blocks = parseBlocks(contentJson);
 
@@ -252,23 +284,29 @@ export async function renderWelcomeEmailFromBlocks(
 	}
 
 	const title = escapeHtml(context.subject || context.courseName || "Welcome");
-	const html = sanitizeEmailHtml(
-		`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${title}</title></head><body style="margin:0;padding:20px;background:#F5F5F5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#334155;"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;"><tr><td align="center"><table role="presentation" width="600" cellspacing="0" cellpadding="0" style="width:100%;max-width:600px;border-collapse:collapse;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;"><tr><td style="padding:28px 24px;">${bodyParts.join("") || '<p style="font-size:16px;color:#64748B;">（空白歡迎信）</p>'}</td></tr></table></td></tr></table></body></html>`,
-	);
+	const rawHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${title}</title></head><body style="margin:0;padding:20px;background:#F5F5F5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#334155;"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;"><tr><td align="center"><table role="presentation" width="600" cellspacing="0" cellpadding="0" style="width:100%;max-width:600px;border-collapse:collapse;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;"><tr><td style="padding:28px 24px;">${bodyParts.join("") || '<p style="font-size:16px;color:#64748B;">（空白歡迎信）</p>'}</td></tr></table></td></tr></table></body></html>`;
+
+	// Critical 修正：插值在 sanitize 之前，HTML 路徑用 HTML 跳脫，sanitize 最後把關
+	const htmlValues = {
+		userName: escapeHtml(context.userName),
+		courseName: escapeHtml(context.courseName),
+		courseUrl: escapeHtml(context.courseUrl),
+	};
+	const html = sanitizeEmailHtml(interpolateTemplate(rawHtml, htmlValues));
 
 	const size = assertHtmlSize(html);
 	if (!size.ok) {
 		throw new Error(`Rendered email exceeds the size limit of 256KB (${size.bytes} bytes)`);
 	}
 
-	const values = {
-		userName: context.userName,
-		courseName: context.courseName,
-		courseUrl: context.courseUrl,
+	const textValues = {
+		userName: safeTemplateValue(context.userName),
+		courseName: safeTemplateValue(context.courseName),
+		courseUrl: safeTemplateValue(context.courseUrl),
 	};
 
 	return {
-		html: interpolateTemplate(html, values),
-		text: interpolateTemplate(textParts.filter(Boolean).join("\n\n"), values),
+		html,
+		text: interpolateTemplate(textParts.filter(Boolean).join("\n\n"), textValues),
 	};
 }
