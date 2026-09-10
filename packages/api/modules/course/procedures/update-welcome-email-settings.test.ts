@@ -113,6 +113,8 @@ describe("updateWelcomeEmailSettings", () => {
 		["not JSON at all", "not-json{{"],
 		["a JSON object without blocks", JSON.stringify({ hello: "world" })],
 		["a JSON string", JSON.stringify("paragraph")],
+		["an array of empty objects", JSON.stringify([{}])],
+		["an array with null", JSON.stringify([null])],
 	])("rejects malformed contentJson (%s) before touching the database", async (_label, contentJson) => {
 		await expect(
 			call(

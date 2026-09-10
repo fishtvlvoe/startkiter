@@ -69,6 +69,14 @@ function decodeNumericEntities(value: string): string {
 	});
 }
 
+/** 消毒前正規化：解碼數字字符參照與冒號／空白命名實體，防 token 走私（如 java&#x73;cript:） */
+function canonicalizeEntities(html: string): string {
+	return decodeNumericEntities(html)
+		.replace(/&colon;?/gi, ":")
+		.replace(/&tab;?/gi, "\t")
+		.replace(/&newline;?/gi, "\n");
+}
+
 function sanitizeUrl(raw: string, appUrl?: string): string {
 	try {
 		const value = decodeNumericEntities(raw.trim());
@@ -97,7 +105,7 @@ function sanitizeUrl(raw: string, appUrl?: string): string {
 
 /** 正則消毒：移除 script／事件屬性／javascript:／data: URL（對齊 realms 手法並加強） */
 export function sanitizeEmailHtml(html: string): string {
-	return html
+	return canonicalizeEntities(html)
 		.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
 		.replace(/<style[\s\S]*?>[\s\S]*?<\/style>/gi, "")
 		.replace(/<iframe[\s\S]*?>[\s\S]*?<\/iframe>/gi, "")

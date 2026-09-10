@@ -9,11 +9,16 @@ import { courseOperatorProcedure } from "../lib/course-operator";
 function parseBlockJson(value: string): unknown[] | null {
 	try {
 		const parsed = JSON.parse(value) as unknown;
-		if (Array.isArray(parsed)) return parsed as unknown[];
-		if (parsed && typeof parsed === "object" && Array.isArray((parsed as { blocks?: unknown }).blocks)) {
-			return (parsed as { blocks: unknown[] }).blocks;
-		}
-		return null;
+		const blocks = Array.isArray(parsed)
+			? parsed
+			: parsed && typeof parsed === "object" && Array.isArray((parsed as { blocks?: unknown }).blocks)
+				? (parsed as { blocks: unknown[] }).blocks
+				: null;
+		if (!blocks) return null;
+		// 每個元素必須是含字串 type 的物件（BlockNote 區塊最基本形狀）
+		const isBlockLike = (item: unknown) =>
+			!!item && typeof item === "object" && !Array.isArray(item) && typeof (item as { type?: unknown }).type === "string";
+		return blocks.every(isBlockLike) ? blocks : null;
 	} catch {
 		return null;
 	}

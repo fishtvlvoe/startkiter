@@ -212,4 +212,16 @@ describe("renderWelcomeEmailFromBlocks", () => {
 		expect(sanitizeEmailHtml('<a href="javascript:alert(1)">x</a>')).not.toContain("javascript:");
 		expect(sanitizeEmailHtml('<a href=javascript:alert(1)>x</a>')).not.toContain("javascript:");
 	});
+
+	it("canonicalizes character references before token checks", async () => {
+		const { sanitizeEmailHtml } = await import("./welcome-email-render");
+
+		expect(sanitizeEmailHtml('<a href="java&#x73;cript:alert(1)">x</a>')).not.toContain("javascript:");
+		expect(sanitizeEmailHtml('<a href="j&#97;va&#115;cript&colon;alert(1)">x</a>')).not.toContain("javascript:");
+		expect(sanitizeEmailHtml('<div style="po&#x73;ition:fixed;top:0">x</div>')).not.toContain("position:fixed");
+		expect(sanitizeEmailHtml('<div style="expre&#115;sion(alert(1))">x</div>')).not.toContain("expression(");
+		expect(sanitizeEmailHtml('<img src="d&#x61;ta:text/html,<script>alert(1)</script>">')).not.toContain("data:text/html");
+		// 一般文字內容不受影響
+		expect(sanitizeEmailHtml("<p>5 &lt; 6 &amp; 7 &gt; 4</p>")).toContain("5 &lt; 6 &amp; 7 &gt; 4");
+	});
 });
