@@ -1,5 +1,4 @@
 "use client";
-import { Card } from "@startkiter/ui/components/card";
 import type { ChartConfig } from "@startkiter/ui/components/chart";
 import { StatsTile } from "@shared/components/StatsTile";
 import { StatsTileChart } from "@shared/components/StatsTileChart";
@@ -82,11 +81,6 @@ export default function OrganizationStart() {
 				</StatsTile>
 			</div>
 
-			<Card className="mt-6">
-				<div className="h-64 p-8 flex items-center justify-center text-foreground/60">
-					Place your content here...
-				</div>
-			</Card>
 		</div>
 	);
 }
