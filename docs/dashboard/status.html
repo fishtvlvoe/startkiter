@@ -398,35 +398,44 @@
   </section>
 
   <section>
-    <h2>進行中：4 張施工單</h2>
-    <p class="section-sub">依 tasks.md 打勾數計算，不是猜的</p>
+    <h2>產品主線：已上線（2026-09-11 重新盤點更正）</h2>
+    <p class="section-sub">前一版本此區塊數字過期超過 2 週，2026-09-11 重新核對 archive 資料夾＋commit 紀錄＋實際代碼／網址，全部改正</p>
     <div class="change-list">
 
       <div class="change">
         <div class="change-head">
           <span class="change-name">core-module-bundles-coupons</span>
-          <span class="status-pill ok">98% ・接近完工</span>
+          <span class="status-pill ok">已封存 ・55/56（2026-08-23）</span>
         </div>
-        <div class="bar-track"><div class="bar-fill ok" style="width:98%"></div></div>
-        <p class="change-note">55 / 56。剩 1 項故意延後：<b>bundle 存取權接課程播放頁</b>，因為買家版的課程播放頁根本還沒做出來（目前 <code>/course</code> 只是 3 堂寫死的假課），等那個頁面做出來才回頭接。老闆已裁決本輪不做。</p>
+        <div class="bar-track"><div class="bar-fill ok" style="width:100%"></div></div>
+        <p class="change-note">視同完成，剩 1 項故意延後（bundle 存取權接課程播放頁）。<b>更正</b>：<code>/course</code> 已改為真實查詢資料庫（<code>db.course.findFirst</code>），不再是寫死假課，之前這條筆記已過期。</p>
       </div>
 
       <div class="change">
         <div class="change-head">
           <span class="change-name">platform-shell-plugin-architecture</span>
-          <span class="status-pill warn">70% ・進度最慢</span>
+          <span class="status-pill ok">已封存 ・129/129（2026-08-23）</span>
         </div>
-        <div class="bar-track"><div class="bar-fill warn" style="width:70%"></div></div>
-        <p class="change-note">90 / 129。還有一大段：Shell 統一後的截圖驗證（375px / 1280px）、舊元件測試選擇器更新、marketplace 版本同步提示串接。體量最大的一張，還在正常施工中，沒卡關。</p>
+        <div class="bar-track"><div class="bar-fill ok" style="width:100%"></div></div>
+        <p class="change-note">產品地基，WordPress 式可擴充骨架（Mount Points、Marketplace、後台外殼、買家專屬 write repo、MCP Gateway）全部完成並驗證，不用再回頭動。</p>
       </div>
 
       <div class="change">
         <div class="change-head">
           <span class="change-name">sheets-export-engine</span>
-          <span class="status-pill ok">85% ・快完工</span>
+          <span class="status-pill ok">已封存 ・11/13（2026-08-22）</span>
         </div>
-        <div class="bar-track"><div class="bar-fill ok" style="width:85%"></div></div>
-        <p class="change-note">11 / 13。剩 2 項：AI agent 註冊試算表生成 Tool ＋ 對話式後台即時產出 .xlsx / HTML 預覽。</p>
+        <div class="bar-track"><div class="bar-fill ok" style="width:100%"></div></div>
+        <p class="change-note">視同完成封存。</p>
+      </div>
+
+      <div class="change">
+        <div class="change-head">
+          <span class="change-name">product-delivery-rollout</span>
+          <span class="status-pill ok">已封存 ・20/20（2026-09-04）</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill ok" style="width:100%"></div></div>
+        <p class="change-note">正式上線總控 SR：VPS 部署修復、行銷真實內容、買家文件站、乾淨安裝包、課程生命週期通知全部完成。<b>已驗證</b>：<code>https://startkiter.dev</code> 實測 HTTP 200，網站真的活著。</p>
       </div>
 
       <div class="change">
@@ -436,6 +445,32 @@
         </div>
         <div class="bar-track"><div class="bar-fill ok" style="width:100%"></div></div>
         <p class="change-note">產品程式碼已封存；Chatwoot <b>已裝上 Oracle</b> <code>chatwoot-oracle-01</code>（<code>140.245.55.106</code>），防回收 <code>oci-memhold</code> 常駐。DNS <code>support.startkiter.dev</code> → <code>140.245.55.106</code>。產品通道仍預設 email。細節見 <code>docs/support-runtime-topology.md</code>。</p>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>目前真正在動的（2 張，非產品主線相關）</h2>
+    <p class="section-sub"><code>openspec/changes/</code> 底下扣掉 archive/ 只剩這 2 張，已封存 75 張</p>
+    <div class="change-list">
+
+      <div class="change">
+        <div class="change-head">
+          <span class="change-name">welcome-email-rich-editor-test-send</span>
+          <span class="status-pill ok">13/15 ・已合併 main</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill ok" style="width:86.6%"></div></div>
+        <p class="change-note">剩 Gmail 真人手動驗收（AI 無法代勞）+ 一個既有 database 型別環境坑（跟本次功能無關）。</p>
+      </div>
+
+      <div class="change">
+        <div class="change-head">
+          <span class="change-name">chatwoot-data-access-renewal-and-oauth</span>
+          <span class="status-pill warn">2/7 ・跟產品主線無關</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill warn" style="width:28.6%"></div></div>
+        <p class="change-note"><b>這張不影響 StartKiter 完工判斷</b>：只跟 Fishtv 自己粉專的 Chatwoot 客服後台有關，產品站客服通道預設仍是 email（<code>NEXT_PUBLIC_SUPPORT_CHANNEL=email</code>），不受這張影響。</p>
       </div>
 
     </div>
