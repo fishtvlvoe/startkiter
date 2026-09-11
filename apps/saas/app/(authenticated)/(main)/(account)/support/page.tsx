@@ -5,13 +5,10 @@ import {
 } from "@deployment/support-channel";
 import { PageHeader } from "@shared/components/PageHeader";
 import { Card } from "@startkiter/ui";
-import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata() {
-	const t = await getTranslations("app.menu");
-
 	return {
-		title: t("aiChatbot"),
+		title: "客服",
 	};
 }
 
