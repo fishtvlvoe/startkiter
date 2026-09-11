@@ -98,6 +98,8 @@ MVP extract 佇列已清空：`extract-site-agent`、`extract-line-learner-commu
 
 **部署方向轉彎（2026-08-22 老闆定案）：不再用 Vercel，全部搬到 Coolify + VPS**（`https://test-startkiter.vercel.app` 部署已停止更新）。現有唯一一台 Coolify 伺服器 `startkiter-managed-fleet-01`（Vultr，Ubuntu 26.04、2 vCPU/3.3GB、Docker 29.7.2，2026-08-18 建立，IP `45.76.187.247`）目前由 Coolify 管理 `apps/saas` 與 `apps/marketing`；`app.startkiter.dev` 回 `307` 導向登入，`startkiter.dev` 已於 2026-08-28 修復 standalone runtime 缺少 `@swc/helpers` ESM 檔案造成的 503，follow redirect 回 `200`。正式、可重複的部署流程見 [`docs/vps-deployment-sop.md`](docs/vps-deployment-sop.md)，本次對應 Spectra change `vps-production-deployment`（尚未 archive）。`startkiter.dev` 這個網域已在 Cloudflare 買好、zone 已啟用（zone id `631be2a55e0c1b0a15038ad244b7665d`），Cloudflare 憑證已集中到 `~/.cloudflared/api-tokens.json`：DNS 讀 `.cloudflare.tokens.startkiter_dns`，Pages 讀 `.cloudflare.tokens.pages_deploy`，Worker KV 讀 `.cloudflare.tokens.worker_kv_deploy`；`.env` 不再存 Cloudflare token。
 
+**客服 runtime 雙主機（2026-09-11 現況）**：App 仍在 Vultr；Chatwoot 已裝在 Oracle `chatwoot-oracle-01`（公網 `140.245.55.106`），Always Free 防回收靠 `oci-memhold.service` + Chatwoot 堆疊。`support.startkiter.dev` DNS 已切到 Oracle；NSG 過寬入站規則**尚未**收斂（見 parked `oracle-chatwoot-anti-reclaim-cutover` task 2.3）。細節 SSOT：`docs/support-runtime-topology.md`。產品客服通道預設仍 email。
+
 這是獨立 git repo。零耦合 libon.me。不要改抽取來源。站內 agent／LINE 社群／GitHub kit 履約已封存落地。本階段不以新 extract 白名單為準，而以 `openspec/specs/` 為現行真相。
 
 **專案儀表板**：固定網址的進度儀表板 → `docs/dashboard/README.md`（含目前發布網址、更新 SOP、到期換網址流程）。任何 change 進度或基礎設施決策有變化，照那份 SOP 更新，不要只在對話裡講講就算了。

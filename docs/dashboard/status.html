@@ -432,10 +432,10 @@
       <div class="change">
         <div class="change-head">
           <span class="change-name">unified-support-desk</span>
-          <span class="status-pill blocked">88% ・剩 Chatwoot 沒裝</span>
+          <span class="status-pill ok">已封存 ・runtime 已遷 Oracle</span>
         </div>
-        <div class="bar-track"><div class="bar-fill warn" style="width:88%"></div></div>
-        <p class="change-note">43 / 49。<b>LINE Messaging Channel</b>（「StartKiter 客服」@958ghjex）跟 <b>Telegram Bot</b> 都建好、Token 存進 <code>.env</code>。剩 <b>Chatwoot 還沒裝到 VPS 上</b>——DNS（<code>support.startkiter.dev</code>）已指過去，等 Coolify 裝上服務。</p>
+        <div class="bar-track"><div class="bar-fill ok" style="width:100%"></div></div>
+        <p class="change-note">產品程式碼已封存；Chatwoot <b>已裝上 Oracle</b> <code>chatwoot-oracle-01</code>（<code>140.245.55.106</code>），防回收 <code>oci-memhold</code> 常駐。DNS <code>support.startkiter.dev</code> → <code>140.245.55.106</code>。產品通道仍預設 email。細節見 <code>docs/support-runtime-topology.md</code>。</p>
       </div>
 
     </div>
@@ -443,7 +443,7 @@
 
   <section>
     <h2>基礎設施現況（2026-08-22 定案）</h2>
-    <p class="section-sub">部署方向轉彎：不再用 Vercel，全部搬 Coolify + VPS，單一台機器扛主站+Chatwoot</p>
+    <p class="section-sub">部署方向轉彎：不再用 Vercel。App 在 Vultr Coolify；Chatwoot 在 Oracle Always Free（雙主機）</p>
     <div class="infra-grid">
       <div class="infra-card">
         <h3>Vercel（已停用）</h3>
@@ -453,30 +453,31 @@
         </dl>
       </div>
       <div class="infra-card">
-        <h3>Coolify VPS（定案：只用這一台）</h3>
+        <h3>Coolify VPS（App 機）</h3>
         <dl>
           <dt>名稱</dt><dd>startkiter-managed-fleet-01</dd>
           <dt>規格</dt><dd>Vultr・Ubuntu 26.04・2 vCPU / 3.3GB</dd>
-          <dt>預估用量</dt><dd>主站 ~0.5GB + Chatwoot ~2GB ≈ 2.5GB，剩約 0.8GB</dd>
+          <dt>承載</dt><dd><code>apps/saas</code> + <code>apps/marketing</code>（Chatwoot 已遷走）</dd>
         </dl>
-        <p class="note">不買第二台。之後吃緊再升級規格。</p>
+        <p class="note">Chatwoot 不再塞這台；客服 runtime 見 Oracle。</p>
       </div>
       <div class="infra-card">
-        <h3>Zeabur 東京機器（已否決）</h3>
+        <h3>Oracle Chatwoot（客服 runtime）</h3>
         <dl>
-          <dt>規格</dt><dd>Tencent Cloud Tokyo・2 核 / 7.5GB（有空間）</dd>
-          <dt>結果</dt><dd>老闆確認：那是<b>客戶</b>的正式營運服務，不能碰</dd>
+          <dt>名稱</dt><dd>chatwoot-oracle-01</dd>
+          <dt>公網</dt><dd>140.245.55.106（臨時 ephemeral）</dd>
+          <dt>防回收</dt><dd><code>oci-memhold.service</code> + Chatwoot docker 堆疊</dd>
         </dl>
-        <p class="note">查過但沒用上，維持現有 Vultr VPS 方案。</p>
+        <p class="note">SSOT：<code>docs/support-runtime-topology.md</code>。NSG 過寬規則尚未收斂。</p>
       </div>
       <div class="infra-card">
         <h3>網域規劃（已定案，DNS 已建好）</h3>
         <dl>
           <dt>官網</dt><dd><code>startkiter.dev</code> → 45.76.187.247 ✅（307 → 200）</dd>
           <dt>主站</dt><dd><code>app.startkiter.dev</code> → 45.76.187.247 ✅（307 → /login）</dd>
-          <dt>客服</dt><dd><code>support.startkiter.dev</code> → 45.76.187.247 ✅</dd>
+          <dt>客服</dt><dd><code>support.startkiter.dev</code> → <b>140.245.55.106</b>（Oracle）✅</dd>
         </dl>
-        <p class="note">DNS A 記錄已建立並 dig 驗證解析成功；Coolify resource 已運作，正式站 503 已於 2026-08-28 修復。</p>
+        <p class="note">客服 DNS 已於 2026-09-11 切到 Oracle；HTTPS 由該機 Caddy 簽 Let's Encrypt。</p>
       </div>
       <div class="infra-card">
         <h3>Cloudflare</h3>
