@@ -154,4 +154,66 @@ describe("sendWelcomeEmailTest", () => {
 
 		expect(db.emailDeliveryLog.create).not.toHaveBeenCalled();
 	});
+
+	it("mock end-to-end: contentJson blocks render into html/text with CTA and still skip delivery logs", async () => {
+		const contentJson = JSON.stringify([
+			{
+				type: "heading",
+				props: { level: 1 },
+				content: [{ type: "text", text: "歡迎上船", styles: {} }],
+			},
+			{
+				type: "paragraph",
+				content: [{ type: "text", text: "這是測資段落。", styles: {} }],
+			},
+			{
+				type: "button",
+				props: { text: "開始上課", url: "https://app.startkiter.dev/course/startkiter" },
+			},
+		]);
+
+		vi.mocked(db.courseWelcomeEmail.findUnique).mockResolvedValue({
+			courseId: "course-1",
+			enabled: true,
+			subjectTemplate: "歡迎 {{userName}} 加入 {{courseName}}",
+			markdownTemplate: "舊 markdown 不應被 contentJson 路徑當主來源",
+			contentJson,
+		} as never);
+		vi.mocked(renderCourseWelcomeEmail).mockResolvedValue({
+			html: '<h1>歡迎上船</h1><p>這是測資段落。</p><a href="https://app.startkiter.dev/course/startkiter">開始上課</a>',
+			text: "歡迎上船\n\n這是測資段落。\n\n開始上課 (https://app.startkiter.dev/course/startkiter)",
+		});
+
+		const result = await call(
+			sendWelcomeEmailTest,
+			{ courseId: "course-1", toEmail: "gmail-standin@example.com" },
+			{ context: { headers: new Headers() } },
+		);
+
+		expect(result).toEqual({
+			ok: true,
+			toEmail: "gmail-standin@example.com",
+			subject: "歡迎 測試學員 加入 開站包",
+		});
+		expect(renderCourseWelcomeEmail).toHaveBeenCalledWith(
+			expect.objectContaining({
+				userName: "測試學員",
+				courseName: "開站包",
+				contentJson,
+				courseUrl: "https://app.startkiter.dev/course/startkiter",
+				subject: "歡迎 測試學員 加入 開站包",
+			}),
+		);
+		expect(sendEmail).toHaveBeenCalledWith(
+			expect.objectContaining({
+				to: "gmail-standin@example.com",
+				locale: "zh-tw",
+				subject: "歡迎 測試學員 加入 開站包",
+				html: expect.stringContaining("開始上課"),
+				text: expect.stringContaining("開始上課 (https://app.startkiter.dev/course/startkiter)"),
+			}),
+		);
+		expect(db.emailDeliveryLog.create).not.toHaveBeenCalled();
+		expect(db.emailDeliveryLog.count).not.toHaveBeenCalled();
+	});
 });
