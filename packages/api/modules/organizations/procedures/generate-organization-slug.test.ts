@@ -35,6 +35,15 @@ describe("generateOrganizationSlug", () => {
 		expect(result.slug).toBe("my-test-organization");
 	});
 
+	it("adds a suffix when the generated slug is reserved by auth config", async () => {
+		vi.mocked(getOrganizationBySlug).mockReset();
+		vi.mocked(getOrganizationBySlug).mockResolvedValueOnce(null).mockResolvedValueOnce(null);
+
+		const result = await call(generateOrganizationSlug, { name: "Support" }, ctx);
+
+		expect(result.slug).toBe("support-abc12");
+	});
+
 	it("appends a nanoid suffix when the base slug is taken", async () => {
 		const existingOrg = { id: "org-1", name: "Existing Org" };
 		vi.mocked(getOrganizationBySlug)

@@ -106,7 +106,6 @@
     "menu": {
       "accountSettings": "帳號設定",
       "admin": "管理",
-      "aiChatbot": "AI 助手",
       "collapseSidebar": "收合側欄",
       "expandSidebar": "展開側欄",
       "navigationTitle": "選單",
@@ -666,6 +665,16 @@
   "start": {
     "subtitle": "查看你的業務最新統計資料。",
     "welcome": "歡迎，{name}！"
+  },
+  "support": {
+    "title": "客服",
+    "subtitle": "目前客服透過 email 提供服務。寄信給我們，我們會盡快回覆。",
+    "description": "這不是 Demo 聊天機器人。請使用下方信箱聯繫，並附上你的帳號 email 與問題說明。",
+    "emailLabel": "客服信箱：",
+    "openEmail": "開啟郵件軟體",
+    "notConfigured": "客服信箱尚未設定（缺少 NEXT_PUBLIC_SUPPORT_EMAIL）。請改從網站聯絡我們頁面聯繫。",
+    "mailSubject": "客服諮詢",
+    "mailBody": "請描述你遇到的問題：\n\n"
   },
   "course": {
     "navLabel": "課程",

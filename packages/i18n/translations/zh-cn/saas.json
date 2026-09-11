@@ -106,7 +106,6 @@
     "menu": {
       "accountSettings": "账户设置",
       "admin": "管理",
-      "aiChatbot": "AI 助手",
       "collapseSidebar": "收起侧栏",
       "expandSidebar": "展开侧栏",
       "navigationTitle": "菜单",
@@ -666,6 +665,16 @@
   "start": {
     "subtitle": "查看你的业务最新统计资料。",
     "welcome": "欢迎，{name}！"
+  },
+  "support": {
+    "title": "客服",
+    "subtitle": "目前客服通过 email 提供服务。发送邮件给我们，我们会尽快回复。",
+    "description": "这不是 Demo 聊天机器人。请使用下方邮箱联系，并附上你的账号 email 与问题说明。",
+    "emailLabel": "客服邮箱：",
+    "openEmail": "打开邮件软件",
+    "notConfigured": "客服邮箱尚未设置（缺少 NEXT_PUBLIC_SUPPORT_EMAIL）。请改从网站联系我们页面联系。",
+    "mailSubject": "客服咨询",
+    "mailBody": "请描述你遇到的问题：\n\n"
   },
   "course": {
     "navLabel": "课程",

@@ -1,4 +1,5 @@
 import { ORPCError } from "@orpc/server";
+import { config as authConfig } from "@startkiter/auth/config";
 import { getOrganizationBySlug } from "@startkiter/database";
 import slugify from "@sindresorhus/slugify";
 import { nanoid } from "nanoid";
@@ -34,8 +35,11 @@ export const generateOrganizationSlug = publicProcedure
 
 		for (let attemptIndex = 0; attemptIndex < 3; attemptIndex++) {
 			const existing = await getOrganizationBySlug(slug);
+			const isForbidden = authConfig.organizations.forbiddenOrganizationSlugs.some(
+				(forbiddenSlug) => forbiddenSlug === slug,
+			);
 
-			if (!existing) {
+			if (!existing && !isForbidden) {
 				hasAvailableSlug = true;
 				break;
 			}

@@ -104,10 +104,6 @@ vi.mock("@shared/components/NotificationCenter", () => ({
 	NotificationCenter: () => <div data-testid="notification-center">Notifications</div>,
 }));
 
-vi.mock("@ai/components/AiChat", () => ({
-	AiChat: () => <div data-testid="ai-chat">AI Chat Component</div>,
-}));
-
 vi.mock("../../../app/agent/agent-chat-client", () => ({
 	AgentChatClient: () => <div data-testid="agent-chat">Site Agent Chat</div>,
 }));

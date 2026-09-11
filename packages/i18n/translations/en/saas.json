@@ -106,7 +106,6 @@
     "menu": {
       "accountSettings": "Account settings",
       "admin": "Admin",
-      "aiChatbot": "AI Chatbot",
       "collapseSidebar": "Collapse sidebar",
       "expandSidebar": "Expand sidebar",
       "navigationTitle": "Menu",
@@ -666,6 +665,16 @@
   "start": {
     "subtitle": "See the latest stats of your awesome business.",
     "welcome": "Welcome {name}!"
+  },
+  "support": {
+    "title": "Support",
+    "subtitle": "Customer support is handled by email. Send us a message and we'll reply as soon as possible.",
+    "description": "This is not a demo chatbot. Contact us using the email below and include your account email and a description of the issue.",
+    "emailLabel": "Support email:",
+    "openEmail": "Open email app",
+    "notConfigured": "Support email is not configured (missing NEXT_PUBLIC_SUPPORT_EMAIL). Please contact us through the website contact page.",
+    "mailSubject": "Support request",
+    "mailBody": "Please describe the issue:\n\n"
   },
   "course": {
     "navLabel": "Course",
