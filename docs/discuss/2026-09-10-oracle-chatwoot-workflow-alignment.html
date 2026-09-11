@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oracle Chatwoot × StartKiter — 工作分配對齊</title>
+<style>
+  :root {
+    --color-background: #f8fafc;
+    --color-surface: #ffffff;
+    --color-surface-raised: #f1f5f9;
+    --color-border: #e2e8f0;
+    --color-text: #0f172a;
+    --color-text-secondary: #334155;
+    --color-text-muted: #64748b;
+    --color-primary: #3b82f6;
+    --color-primary-50: #eff6ff;
+    --color-success: #10b981;
+    --color-success-bg: #f0fdf4;
+    --color-warning: #f59e0b;
+    --color-warning-bg: #fffbeb;
+    --color-slate-900: #0f172a;
+    --color-on-dark: #e8eeff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--color-background);
+    color: var(--color-text);
+    font-family: "Fira Sans", "Noto Sans TC", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    padding: 48px 24px 96px;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; }
+  h1 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    margin: 0 0 8px;
+  }
+  .subtitle {
+    color: var(--color-text-muted);
+    font-size: 0.875rem;
+    margin: 0 0 40px;
+  }
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 48px 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--color-border);
+  }
+  h3 { font-size: 0.9375rem; font-weight: 600; margin: 0 0 8px; }
+  p { margin: 0 0 12px; }
+  .card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 12px 0;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 6px;
+    margin-right: 6px;
+  }
+  .b-ok { background: var(--color-success-bg); color: var(--color-success); }
+  .b-warn { background: var(--color-warning-bg); color: var(--color-warning); }
+  .b-info { background: var(--color-primary-50); color: var(--color-primary); }
+  .flow { display: grid; gap: 10px; }
+  .step {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 12px;
+    align-items: start;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .num {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--color-primary-50);
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+  }
+  .step strong { display: block; margin-bottom: 4px; }
+  .step span { color: var(--color-text-muted); font-size: 0.875rem; }
+  .grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 720px) {
+    .grid2 { grid-template-columns: 1fr; }
+  }
+  .mono {
+    font-family: "Fira Code", "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+    font-size: 0.875rem;
+    background: var(--color-surface-raised);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  ul, ol { margin: 8px 0 0; padding-left: 1.25em; }
+  li { margin: 6px 0; }
+  .note {
+    background: var(--color-primary-50);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin: 12px 0;
+  }
+  .note.warn { background: var(--color-warning-bg); }
+  .decision {
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 8px 16px;
+    background: var(--color-surface);
+  }
+  .decision label {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .decision label:last-child { border-bottom: 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: top;
+  }
+  th { color: var(--color-text-muted); font-weight: 600; }
+  pre.topo {
+    margin: 0;
+    white-space: pre-wrap;
+    font-family: "Fira Code", ui-monospace, monospace;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    background: var(--color-slate-900);
+    color: var(--color-on-dark);
+    padding: 16px;
+    border-radius: 12px;
+  }
+  footer {
+    margin-top: 40px;
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Oracle Chatwoot × StartKiter<br>工作分配對齊頁</h1>
+    <p class="subtitle">2026-09-10 · 給老闆看的白話版 · 不是完工報告，是開工前對齊</p>
+
+    <div class="card">
+      <span class="badge b-info">一句話現況</span>
+      <p style="margin-top:10px;margin-bottom:0">Oracle 那台客服機已經能 SSH 進去了。StartKiter 裡也立好一張暫存 SR 叫 <span class="mono">oracle-chatwoot-runtime-topology</span>。但「把環境寫進專案文件」跟「把 Chatwoot 真的搬過去」都還沒開始做。目前只停在 propose（寫規格）＋ park（暫存）。</p>
+    </div>
+
+    <h2>1. 「槓一下」白話是什麼意思？</h2>
+    <div class="card">
+      <p>不是槓老闆。是我自己先抓一個可能講太滿的假設，攤開問你。</p>
+      <div class="note warn">
+        <p><strong>我當時的假設：</strong>你說「把這件事做好，再寫回 StartKiter」，我理解成「文件要寫進 repo」＋「Chatwoot 也要搬到 Oracle、DNS 也要切」。</p>
+        <p><strong>可能其實只是：</strong>先把系統環境寫進專案，讓之後開發知道拓樸；搬機另開一張單也行。</p>
+        <p style="margin-bottom:0"><strong>所以「槓一下」＝</strong>我不想默默替你擴大範圍，先對齊這張 SR 到底要做到哪。</p>
+      </div>
+    </div>
+
+    <h2>2. 我實際做了什麼？還沒做什麼？</h2>
+    <div class="grid2">
+      <div class="card">
+        <span class="badge b-ok">已做</span>
+        <ul>
+          <li>Oracle VM 建好、公網 IP、SSH 通了</li>
+          <li>NSG 開了 TCP 22</li>
+          <li>在 StartKiter 用 Spectra propose 立 SR</li>
+          <li>SR 內容：proposal / design / spec / tasks</li>
+          <li>validate 通過，然後 park（暫存，還沒 apply）</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="badge b-warn">還沒做</span>
+        <ul>
+          <li>還沒改 AGENTS.md / 真正的 runbook 檔</li>
+          <li>還沒開 80/443（給網站用）</li>
+          <li>還沒在 Oracle 裝 Docker / Chatwoot</li>
+          <li>還沒切 <span class="mono">support.startkiter.dev</span></li>
+          <li>產品客服預設仍是 email（這是刻意的）</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>3. 我平常的工作分配流程（這次也照這個）</h2>
+    <div class="flow">
+      <div class="step">
+        <div class="num">1</div>
+        <div>
+          <strong>對焦：這到底要解決什麼</strong>
+          <span>不是先寫設定。先確認「環境真相寫回專案」還是「連搬機一起做」。</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <div>
+          <strong>Propose：先出 SR 規格，不直接改產品碼</strong>
+          <span>Spectra：discuss? → propose → apply → archive。這次已做完 propose，並 park。</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <div>
+          <strong>Apply：才開始改檔／裝機／搬服務</strong>
+          <span>這步才會真正寫 AGENTS.md、docs/support-runtime-topology.md，以及 Oracle 上的 Chatwoot。</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">4</div>
+        <div>
+          <strong>驗收：用證據，不靠嘴說完成</strong>
+          <span>SSH 指令輸出、文件可搜到關鍵字、DNS 指向、健康檢查。可再叫 Codex 當第二雙眼睛。</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="num">5</div>
+        <div>
+          <strong>Archive：規格灌回 openspec/specs</strong>
+          <span>之後新 session 讀 AGENTS／specs 就知道系統環境，不必翻聊天紀錄。</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong>直接回答你的問題：</strong>
+      不是「分析完就先把專案設定改掉」。目前是「分析＋把工單規格立好」。專案設定（AGENTS、runbook）要等你點頭 apply 之後才動手寫進去。
+    </div>
+
+    <h2>4. 現在卡在上面的兩張單</h2>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>SR</th>
+            <th>狀態</th>
+            <th>白話</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="mono">welcome-email-rich-editor-test-send</span></td>
+            <td><span class="badge b-warn">parked / 也顯示 in-progress</span></td>
+            <td>歡迎信編輯器那張，跟 Oracle 客服機無關。狀態看起來有點髒，要不要先放著或清狀態可另決策。</td>
+          </tr>
+          <tr>
+            <td><span class="mono">oracle-chatwoot-runtime-topology</span></td>
+            <td><span class="badge b-info">parked · 0/13</span></td>
+            <td>這次新立的。規格有了，開發還沒開始。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>5. 開發完可不可以叫 Codex 做驗收？</h2>
+    <div class="card">
+      <p><strong>可以。</strong>建議分工：</p>
+      <ul>
+        <li><strong>我（Cursor）：</strong>apply 實作、改文件、SSH 裝機、搬 Chatwoot、切 DNS</li>
+        <li><strong>Codex：</strong>當獨立驗收員——照 tasks／spec 逐條對，跑指令拿證據，抓「文件寫了但機器沒好」「IP 過期沒更新」這類謊報</li>
+      </ul>
+      <p>Codex 適合驗：SSH、文件欄位、<span class="mono">dig</span> DNS、curl 健康檢查、tasks 有沒有偷勾。</p>
+      <p>比較不適合單靠它：Oracle Console 點來點去（那塊仍走 ego-browser）。</p>
+      <div class="note warn">
+        前提：驗收標準要寫死在 SR tasks 裡（這張已經有驗證指令）。不然 Codex 只會給「看起來不錯」這種沒用結論。
+      </div>
+    </div>
+
+    <h2>6. 系統環境一圖（目標拓樸）</h2>
+    <div class="card">
+      <pre class="topo">[你的 Mac]
+   │ SSH opc@公網IP
+   ▼
+[Oracle] chatwoot-oracle-01     ← 客服 Chatwoot（目標）
+  region: ap-singapore-2
+  shape : VM.Standard.A1.Flex (Always Free)
+  現況  : SSH 已通；Chatwoot 尚未搬完
+
+[Vultr] startkiter-managed-fleet-01
+  Coolify 管 apps/saas + marketing
+  ← App 繼續留這裡（這張 SR 不搬 App）
+
+產品預設客服通道：email（先不要自動切回 Chatwoot）</pre>
+    </div>
+
+    <h2>7. 請老闆勾一個範圍（對齊用）</h2>
+    <div class="decision">
+      <label>
+        <input type="radio" name="scope" checked>
+        <div>
+          <strong>A. 小範圍（建議先做）</strong><br>
+          只把環境真相寫進 StartKiter（AGENTS、runbook、spec）。Chatwoot 搬機另開 SR。
+        </div>
+      </label>
+      <label>
+        <input type="radio" name="scope">
+        <div>
+          <strong>B. 這張單做完（目前 SR 寫的內容）</strong><br>
+          文件＋開 80/443＋裝／搬 Chatwoot＋切 DNS。產品通道仍維持 email。
+        </div>
+      </label>
+      <label>
+        <input type="radio" name="scope">
+        <div>
+          <strong>C. 更大</strong><br>
+          B 之外，連產品預設客服也切回 Chatwoot（不建議跟拓樸綁同一張，webhook 舊坑還在）。
+        </div>
+      </label>
+    </div>
+
+    <h2>8. 我建議的開工順序（你選 B 的話）</h2>
+    <div class="card">
+      <ol>
+        <li>先做文件 SSOT（讓下一個 agent 立刻讀得到）</li>
+        <li>補網路 80/443，再裝 Docker／Chatwoot</li>
+        <li>驗證公網可開，再切 DNS</li>
+        <li>我做完後派 Codex 照 tasks 驗收</li>
+        <li>通過再 archive，更新 dashboard</li>
+      </ol>
+      <p style="margin-bottom:0;color:var(--color-text-muted)">若你選 A：只做第 1 步＋dashboard，其餘 tasks 用 ingest 砍掉或另開 change。</p>
+    </div>
+
+    <footer>
+      檔案位置：
+      <span class="mono">docs/discuss/2026-09-10-oracle-chatwoot-workflow-alignment.html</span><br>
+      對應 SR：
+      <span class="mono">oracle-chatwoot-runtime-topology</span>（parked）
+    </footer>
+  </div>
+</body>
+</html>
