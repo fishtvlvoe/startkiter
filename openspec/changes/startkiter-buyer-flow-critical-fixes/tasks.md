@@ -10,7 +10,7 @@
 - [x] 2.1 修改頁面 metadata 設定，交付 Requirement「GitHub login when configured」所在頁面（登入/註冊/結帳/課程等）的 `<title>` 顯示 StartKiter 相關文字：不含 `supastarter for Next.js Demo` 字樣。驗證：`curl -s https://app.startkiter.dev/login | grep -io "supastarter for Next.js Demo"` 無輸出。
 - [x] 2.2 移除登入／註冊頁 footer 元件中的「Built with supastarter」對外連結，交付乾淨買家體驗的行為：該連結不再出現。驗證：`curl -s https://app.startkiter.dev/login | grep -i "supastarter.dev"` 無輸出。
 - [x] 2.3 移除 `app.startkiter.dev` 首頁殘留的英文佔位文字 `Place your content here...`，換成實際內容或移除該區塊，交付首頁不顯示未完工痕跡的行為。驗證：ego-browser 截圖確認該區塊不再顯示佔位字，或改顯示實際內容。
-- [ ] 2.4 修正 App 側邊欄「客服」標籤的連結，交付連結指向真實客服管道（email 相關頁面或說明）而非 `/chatbot` Demo 範例頁的行為。驗證：該連結的 `href` 屬性不含 `/chatbot`，ego-browser 點擊後確認導向內容與「客服」標籤相符。
+- [x] 2.4 修正 App 側邊欄「客服」標籤的連結，交付連結指向真實客服管道（email 相關頁面或說明）而非 `/chatbot` Demo 範例頁的行為。驗證：該連結的 `href` 屬性不含 `/chatbot`，ego-browser 點擊後確認導向內容與「客服」標籤相符。
 
 ## 3. 手機版導航修復
 

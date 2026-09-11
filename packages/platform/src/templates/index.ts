@@ -61,7 +61,7 @@ export const SITE_TEMPLATES: SiteTemplate[] = [
 				name: "客服",
 				version: "0.1.0",
 				mount: {
-					route: { path: "/chatbot" },
+					route: { path: "/support" },
 					menu: { label: "客服", icon: "bot-message-square", order: 2 },
 				},
 				dataSpec: "none",
