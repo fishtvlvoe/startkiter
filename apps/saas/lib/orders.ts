@@ -150,27 +150,97 @@ export async function createPendingOrderForUser(
 	}
 }
 
+function isGatewayTradeNoUniqueConflict(error: unknown): boolean {
+	return typeof error === "object" && error !== null && "code" in error && error.code === "P2002";
+}
+
 export async function markOrderPaid(
 	orderId: string,
 	orderNo: string,
 	gatewayTradeNo: string,
 	paymentGateway?: CheckoutGatewayType,
 ) {
-	const updated = await withOrderStateLock(orderId, async (tx) => {
-		const result = await tx.order.updateMany({
-			where: { id: orderId, orderNo, status: "pending", ...(paymentGateway ? { paymentGateway } : {}) },
-			data: {
-				status: "paid",
-				courseAccess: true,
-				kitClaimEligible: true,
-				gatewayTradeNo,
-				paidAt: new Date(),
-			},
+	try {
+		const updated = await withOrderStateLock(orderId, async (tx) => {
+			const current = await tx.order.findUnique({
+				where: { id: orderId },
+				select: {
+					orderNo: true,
+					status: true,
+					gatewayTradeNo: true,
+					paymentGateway: true,
+				},
+			});
+
+			if (!current || current.orderNo !== orderNo) {
+				return 0;
+			}
+
+			if (paymentGateway && current.paymentGateway !== paymentGateway) {
+				return 0;
+			}
+
+			if (current.status === "paid") {
+				return 0;
+			}
+
+			if (current.status !== "pending") {
+				return 0;
+			}
+
+			try {
+				const result = await tx.order.updateMany({
+					where: {
+						id: orderId,
+						orderNo,
+						status: "pending",
+						...(paymentGateway ? { paymentGateway } : {}),
+					},
+					data: {
+						status: "paid",
+						courseAccess: true,
+						kitClaimEligible: true,
+						gatewayTradeNo,
+						paidAt: new Date(),
+					},
+				});
+				return result.count;
+			} catch (error) {
+				if (!isGatewayTradeNoUniqueConflict(error)) {
+					throw error;
+				}
+
+				const again = await tx.order.findUnique({
+					where: { id: orderId },
+					select: { status: true, gatewayTradeNo: true },
+				});
+
+				if (again?.status === "paid") {
+					return 0;
+				}
+
+				throw error;
+			}
 		});
-		return result.count;
-	});
-	if (updated > 0) void sendWelcomeEmailsForOrder(orderId);
-	return updated;
+
+		if (updated > 0) void sendWelcomeEmailsForOrder(orderId);
+		return updated;
+	} catch (error) {
+		if (!isGatewayTradeNoUniqueConflict(error)) {
+			throw error;
+		}
+
+		const latest = await db.order.findUnique({
+			where: { id: orderId },
+			select: { status: true, orderNo: true },
+		});
+
+		if (latest?.orderNo === orderNo && latest.status === "paid") {
+			return 0;
+		}
+
+		throw error;
+	}
 }
 
 export async function findOrderByNo(orderNo: string) {

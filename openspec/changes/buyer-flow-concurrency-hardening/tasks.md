@@ -1,9 +1,9 @@
 ## 1. PayUni Webhook 併發 idempotent 化（Webhook marks a single order paid）
 
-- [ ] 1.1 定位現有 markOrderPaid 與 gatewayTradeNo 產生邏輯的實際程式碼位置（`apps/saas/app/api/payuni/notify/route.ts` 與其呼叫鏈），寫成簡短筆記記錄目前的併發防護方式（是否有 transaction、是否為 check-then-write），交付：能明確指出目前實作在併發下缺少哪一層保護。驗證：筆記內容能對照 `packages/database/prisma/schema.prisma` 裡 `gatewayTradeNo @unique` 約束，解釋清楚壓測 4/50 UniqueConstraintViolation 的實際觸發路徑。
-- [ ] 1.2 為「Concurrent duplicate notifies do not error or double-grant」寫紅燈測試：同一筆訂單併發呼叫 markOrderPaid（或直接併發呼叫 POST /api/payuni/notify）20 次以上，斷言不能出現非 200 回應、訂單只被標記一次已付款。交付：測試檔案存在且執行後為紅燈（在修復前必然失敗）。驗證：`pnpm --filter <對應套件> test` 執行該測試，觀察到失敗訊息含資料庫唯一鍵衝突或重複入帳斷言失敗。
-- [ ] 1.3 修改 markOrderPaid 邏輯讓併發呼叫具備 idempotent 語意（例如用資料庫層 upsert 或先查詢當前狀態再決定是否寫入，並用 transaction 包住讀寫），交付：Requirement「Webhook marks a single order paid」的 Scenario「Concurrent duplicate notifies do not error or double-grant」行為成立。驗證：1.2 寫的紅燈測試轉綠燈。
-- [ ] 1.4 確認既有的「Duplicate notify does not double-grant」與「Invoice issuance failure does not affect order paid status」兩個 Scenario 仍然成立，沒有被 1.3 的修改破壞，交付：現有測試套件全部通過。驗證：執行 `apps/saas/app/api/payuni/notify/route.test.ts`（或對應測試檔）全數通過。
+- [x] 1.1 定位現有 markOrderPaid 與 gatewayTradeNo 產生邏輯的實際程式碼位置（`apps/saas/app/api/payuni/notify/route.ts` 與其呼叫鏈），寫成簡短筆記記錄目前的併發防護方式（是否有 transaction、是否為 check-then-write），交付：能明確指出目前實作在併發下缺少哪一層保護。驗證：筆記內容能對照 `packages/database/prisma/schema.prisma` 裡 `gatewayTradeNo @unique` 約束，解釋清楚壓測 4/50 UniqueConstraintViolation 的實際觸發路徑。
+- [x] 1.2 為「Concurrent duplicate notifies do not error or double-grant」寫紅燈測試：同一筆訂單併發呼叫 markOrderPaid（或直接併發呼叫 POST /api/payuni/notify）20 次以上，斷言不能出現非 200 回應、訂單只被標記一次已付款。交付：測試檔案存在且執行後為紅燈（在修復前必然失敗）。驗證：`pnpm --filter <對應套件> test` 執行該測試，觀察到失敗訊息含資料庫唯一鍵衝突或重複入帳斷言失敗。
+- [x] 1.3 修改 markOrderPaid 邏輯讓併發呼叫具備 idempotent 語意（例如用資料庫層 upsert 或先查詢當前狀態再決定是否寫入，並用 transaction 包住讀寫），交付：Requirement「Webhook marks a single order paid」的 Scenario「Concurrent duplicate notifies do not error or double-grant」行為成立。驗證：1.2 寫的紅燈測試轉綠燈。
+- [x] 1.4 確認既有的「Duplicate notify does not double-grant」與「Invoice issuance failure does not affect order paid status」兩個 Scenario 仍然成立，沒有被 1.3 的修改破壞，交付：現有測試套件全部通過。驗證：執行 `apps/saas/app/api/payuni/notify/route.test.ts`（或對應測試檔）全數通過。
 
 ## 2. Auth 限流排查（Auth 限流閾值待排查後決定調整方向）
 

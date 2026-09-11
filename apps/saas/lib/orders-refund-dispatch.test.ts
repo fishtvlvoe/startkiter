@@ -43,6 +43,15 @@ describe("database refund gateway dispatch", () => {
 	});
 
 	it("marks payment paid under the same order-state lock used by refunds", async () => {
+		vi.mocked(db.order.findUnique).mockResolvedValue({
+			id: "order-id",
+			orderNo: "ORDER-1",
+			status: "pending",
+			paymentGateway: "payuni",
+			gatewayTradeNo: null,
+			amount: 8800,
+		} as never);
+
 		await expect(markOrderPaid("order-id", "ORDER-1", "PAYMENT-1", "payuni")).resolves.toBe(1);
 
 		expect(db.order.updateMany).toHaveBeenCalledWith(expect.objectContaining({
@@ -51,12 +60,30 @@ describe("database refund gateway dispatch", () => {
 	});
 
 	it("dispatches the welcome email after payment is marked paid", async () => {
+		vi.mocked(db.order.findUnique).mockResolvedValue({
+			id: "order-id",
+			orderNo: "ORDER-1",
+			status: "pending",
+			paymentGateway: "payuni",
+			gatewayTradeNo: null,
+			amount: 8800,
+		} as never);
+
 		await expect(markOrderPaid("order-id", "ORDER-1", "PAYMENT-1", "payuni")).resolves.toBe(1);
 
 		expect(sendWelcomeEmailsForOrder).toHaveBeenCalledWith("order-id");
 	});
 
 	it("does not couple payment success to invoice intent persistence", async () => {
+		vi.mocked(db.order.findUnique).mockResolvedValue({
+			id: "order-id",
+			orderNo: "ORDER-1",
+			status: "pending",
+			paymentGateway: "payuni",
+			gatewayTradeNo: null,
+			amount: 8800,
+		} as never);
+
 		await expect(markOrderPaid("order-id", "ORDER-1", "PAYMENT-1", "payuni")).resolves.toBe(1);
 
 		expect(db.invoice.create).not.toHaveBeenCalled();
