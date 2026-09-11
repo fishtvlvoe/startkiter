@@ -3,7 +3,24 @@ import { Resend } from "resend";
 import { config } from "../config";
 import type { SendEmailHandler } from "../types";
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+let resendClient: Resend | null | undefined;
+
+function getResendClient(): Resend {
+	if (resendClient === undefined) {
+		resendClient = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+	}
+
+	if (!resendClient) {
+		throw new Error("RESEND_API_KEY is required to send email with the Resend provider");
+	}
+
+	return resendClient;
+}
+
+/** 測試用：清掉模組級 client 快取，讓下一輪依當下 env 重建。 */
+export function resetResendClientForTests(): void {
+	resendClient = undefined;
+}
 
 export const send: SendEmailHandler = async ({
 	to,
@@ -15,9 +32,7 @@ export const send: SendEmailHandler = async ({
 	html,
 	text,
 }) => {
-	if (!resend) {
-		throw new Error("RESEND_API_KEY is required to send email with the Resend provider");
-	}
+	const resend = getResendClient();
 
 	await resend.emails.send({
 		from: from ?? config.mailFrom,

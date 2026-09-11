@@ -29,6 +29,8 @@
 
 - [ ] 6.1 全量驗證：`pnpm test`、`pnpm type-check`、`pnpm --filter saas build` 全綠，無新 lint 錯誤。驗證方式：三個指令皆 exit 0。
 - [ ] 6.2 手動驗收：後台編輯器輸入一段文字、一個標題與一個 CTA 按鈕 → 儲存 → 寄測試信到 Gmail → 版面正常、按鈕可點、無原始 HTML 外洩、按鈕下方有已寄出提示。驗證方式：人工在測試環境走一遍並記錄於 PR 描述。
+  - 替代證據（AI）：`send-welcome-email-test.test.ts` 已補 contentJson→CTA html/text→sendEmail 的 mock 端到端案例，且確認不寫 EmailDeliveryLog。
+  - **Gmail 真實帳號手動驗收：需要人工，AI 無法代勞**（本 task 維持未勾）。
 
 ## 7. Code Review
 

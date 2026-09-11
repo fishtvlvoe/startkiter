@@ -1,44 +1,30 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { resendSend } = vi.hoisted(() => ({
-	resendSend: vi.fn(),
+const { providerSend } = vi.hoisted(() => ({
+	providerSend: vi.fn(),
 }));
 
-vi.mock("resend", () => ({
-	Resend: class Resend {
-		emails = { send: resendSend };
-	},
+vi.mock("../provider", () => ({
+	send: providerSend,
 }));
+
+vi.mock("@startkiter/logs", () => ({
+	logger: { error: vi.fn(), log: vi.fn() },
+}));
+
+import { logger } from "@startkiter/logs";
+
+import { sendEmail } from "./send";
 
 describe("sendEmail", () => {
-	afterEach(() => {
-		vi.resetModules();
-		vi.unstubAllEnvs();
-		resendSend.mockReset();
+	beforeEach(() => {
+		providerSend.mockReset();
+		vi.mocked(logger.error).mockReset();
 	});
 
-	it("selects the console provider outside production when RESEND_API_KEY is missing", async () => {
-		vi.stubEnv("RESEND_API_KEY", "");
-		vi.stubEnv("NODE_ENV", "development");
+	it("forwards subject/text/html to the mail provider and returns true", async () => {
+		providerSend.mockResolvedValue(undefined);
 
-		const { sendEmail } = await import("./send");
-		const ok = await sendEmail({
-			to: "learner@example.com",
-			subject: "Dev fallback",
-			text: "Logged locally.",
-		});
-
-		expect(ok).toBe(true);
-		expect(resendSend).not.toHaveBeenCalled();
-	});
-
-	it("selects Resend when RESEND_API_KEY is set", async () => {
-		resendSend.mockResolvedValue({ id: "email-1" });
-		vi.stubEnv("RESEND_API_KEY", "re_test_key");
-		vi.stubEnv("NODE_ENV", "production");
-		vi.stubEnv("MAIL_FROM", "StartKiter <noreply@startkiter.test>");
-
-		const { sendEmail } = await import("./send");
 		const ok = await sendEmail({
 			to: "learner@example.com",
 			subject: "Prod send",
@@ -47,20 +33,36 @@ describe("sendEmail", () => {
 		});
 
 		expect(ok).toBe(true);
-		expect(resendSend).toHaveBeenCalledWith(
+		expect(providerSend).toHaveBeenCalledWith(
 			expect.objectContaining({
-				to: ["learner@example.com"],
+				to: "learner@example.com",
 				subject: "Prod send",
 				text: "Delivered by Resend.",
+				html: "<p>Delivered by Resend.</p>",
 			}),
 		);
 	});
 
-	it("returns false when required send fields are missing and the provider rejects", async () => {
-		vi.stubEnv("RESEND_API_KEY", "");
-		vi.stubEnv("NODE_ENV", "production");
+	it("returns false and invokes onError when the provider rejects", async () => {
+		const rejection = new Error("RESEND_API_KEY is required");
+		providerSend.mockRejectedValue(rejection);
+		const onError = vi.fn();
 
-		const { sendEmail } = await import("./send");
+		const ok = await sendEmail({
+			to: "learner@example.com",
+			subject: "Dev fallback",
+			text: "Logged locally.",
+			onError,
+		});
+
+		expect(ok).toBe(false);
+		expect(onError).toHaveBeenCalledWith(rejection);
+		expect(logger.error).toHaveBeenCalled();
+	});
+
+	it("returns false when required send fields are missing and the provider rejects", async () => {
+		providerSend.mockRejectedValue(new Error("invalid payload"));
+
 		const ok = await sendEmail({
 			to: "",
 			subject: "",
@@ -68,5 +70,6 @@ describe("sendEmail", () => {
 		} as never);
 
 		expect(ok).toBe(false);
+		expect(providerSend).toHaveBeenCalled();
 	});
 });

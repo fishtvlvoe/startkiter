@@ -1,9 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 describe("mail provider without a Resend key", () => {
-	afterEach(() => {
+	afterEach(async () => {
 		vi.resetModules();
 		vi.unstubAllEnvs();
+		// resend.ts 用 lazy client；清掉快取避免 env stub 被上一輪綁死
+		const { resetResendClientForTests } = await import("./provider/resend");
+		resetResendClientForTests();
 	});
 
 	it("loads a send handler instead of throwing during module evaluation", async () => {
