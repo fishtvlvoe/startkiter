@@ -1,6 +1,6 @@
 ## 1. OAuth Redirect URI 修復（致命阻擋）
 
-- [ ] 1.1 依 Decision: OAuth redirect URI 修復走 ego-browser 直接操作外部後台，不走 API，用 ego-browser 登入 GitHub OAuth App（Client ID `Ov23liN07Ec8UuJAAJtb`）後台設定頁，交付 Requirement「OAuth provider redirect URI matches the deployed domain」的 GitHub 情境：新增 Authorization callback URL `https://app.startkiter.dev/api/auth/callback/github`（保留既有值不刪除）。驗證：ego-browser 實測完整 GitHub 登入流程，截圖顯示成功回到 `app.startkiter.dev` 並建立 session，不是 `Invalid Redirect URI` 錯誤頁。
+- [x] 1.1 依 Decision: OAuth redirect URI 修復走 ego-browser 直接操作外部後台，不走 API，用 ego-browser 登入 GitHub OAuth App（Client ID `Ov23liN07Ec8UuJAAJtb`）後台設定頁，交付 Requirement「OAuth provider redirect URI matches the deployed domain」的 GitHub 情境：新增 Authorization callback URL `https://app.startkiter.dev/api/auth/callback/github`（保留既有值不刪除）。驗證：ego-browser 實測完整 GitHub 登入流程，截圖顯示成功回到 `app.startkiter.dev` 並建立 session，不是 `Invalid Redirect URI` 錯誤頁。
 - [ ] 1.2 用 ego-browser 登入 Google Cloud Console 該 OAuth 2.0 用戶端（Client ID `101278174843-...`）設定頁，交付 Requirement「OAuth provider redirect URI matches the deployed domain」的 Google 情境：新增已授權的重新導向 URI `https://app.startkiter.dev/api/auth/callback/google`（保留既有值不刪除）。驗證：ego-browser 實測完整 Google 登入流程，截圖顯示成功回到 `app.startkiter.dev` 並建立 session，不是 `redirect_uri_mismatch` 錯誤頁。
 
 ## 2. 品牌殘留與佔位文字清理
