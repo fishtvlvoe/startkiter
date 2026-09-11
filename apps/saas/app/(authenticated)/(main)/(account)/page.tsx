@@ -1,7 +1,6 @@
 import { getOrganizationList, getSession } from "@auth/lib/server";
 import { OrganizationsGrid } from "@organizations/components/OrganizationsGrid";
 import { config } from "@startkiter/auth/config";
-import { Card } from "@startkiter/ui";
 import { PageHeader } from "@shared/components/PageHeader";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
@@ -43,12 +42,6 @@ export default async function AppStartPage() {
 
 			<div>
 				{config.organizations.enable && !config.organizations.hideOrganization && <OrganizationsGrid />}
-
-				<Card className="mt-6">
-					<div className="h-64 p-8 flex items-center justify-center text-foreground/60">
-						Place your content here...
-					</div>
-				</Card>
 			</div>
 		</div>
 	);
