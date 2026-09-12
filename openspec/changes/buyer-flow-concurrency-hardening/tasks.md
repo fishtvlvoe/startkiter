@@ -18,5 +18,5 @@
 
 ## 4. Review
 
-- [ ] 4.1 Review：另一個 CLI（非實作 1-3 的那個）針對本次改動做獨立 code review，聚焦併發正確性（idempotent 邏輯有沒有 race condition 沒堵住）與是否有遺漏的邊界情況，交付：審查報告列出發現或明講「審查通過，無發現」。驗證：審查報告存在且已回覆到 PM。
-- [ ] 4.2 重跑一次買家流程壓力測試（規模可先縮小到 20 人驗證修復有效，確認後再跑滿 50 人），交付：驗證 Success Criteria 三項指標（PayUni 併發 500 錯誤數為 0、auth 併發成功率達標、course 頁面 p95 反應時間改善）。驗證：新的壓測報告數據對比這次 `/tmp/sk-stress-test/FINAL-REPORT.json` 的原始數據，顯示明確改善。
+- [x] 4.1 Review：另一個 CLI（非實作 1-3 的那個）針對本次改動做獨立 code review，聚焦併發正確性（idempotent 邏輯有沒有 race condition 沒堵住）與是否有遺漏的邊界情況，交付：審查報告列出發現或明講「審查通過，無發現」。驗證：審查報告存在且已回覆到 PM。（Grok CR 抓到 P1：同一 interactive transaction 內 catch P2002 後又查詢會因 Postgres transaction abort 語意收到 25P02 而非原始 P2002，導致外層判斷失效；commit b4e93ea5 已修正並補測試，PM 已驗證 356 tests 全過）
+- [x] 4.2 重跑一次買家流程壓力測試（規模可先縮小到 20 人驗證修復有效，確認後再跑滿 50 人），交付：驗證 Success Criteria 三項指標（PayUni 併發 500 錯誤數為 0、auth 併發成功率達標、course 頁面 p95 反應時間改善）。驗證：新的壓測報告數據對比這次 `/tmp/sk-stress-test/FINAL-REPORT.json` 的原始數據，顯示明確改善。（20 併發重複 notify 打同一筆訂單：20/20 HTTP 200、0 個 500，只寫入一次已付款，PayUni idempotent 修復驗證通過；auth 限流維持現狀符合預期（3/20+17 個 429）；course 頁面效能優化留給下輪 change，本次只記錄 baseline p50=2644ms/p95=2702ms 供對照。測試資料已清理，20 users/20 orders 歸零，真實用戶數維持 6 個未受影響）
