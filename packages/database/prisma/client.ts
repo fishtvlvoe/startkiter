@@ -44,4 +44,8 @@ if (process.env.NODE_ENV !== "production") {
 	globalThis.prisma = prisma;
 }
 
-export { prisma as db };
+// Extension only adds query middleware (cache generation bump) and does not
+// change the client API. Keep the public type as PrismaClient so callers that
+// expect Prisma.TransactionClient / fluent-free delegates stay compatible —
+// $extends otherwise produces structurally incompatible transaction + mock types.
+export const db = prisma as unknown as PrismaClient;

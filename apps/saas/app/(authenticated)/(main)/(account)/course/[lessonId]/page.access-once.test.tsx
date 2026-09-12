@@ -119,10 +119,10 @@ describe("LessonPage course access fan-out", () => {
 		vi.mocked(getCachedPublishedLessonById).mockImplementation(async (id: string) => {
 			return publishedLesson(id) as never;
 		});
-		vi.mocked(db.lesson.findUnique).mockImplementation(async ({ where }) => {
+		vi.mocked(db.lesson.findUnique).mockImplementation((async ({ where }: { where: { id?: unknown } }) => {
 			const id = String(where?.id ?? "");
 			return publishedLesson(id) as never;
-		});
+		}) as unknown as typeof db.lesson.findUnique);
 	});
 
 	it("calls userCanAccessCourseId only once for the same courseId across multiple lessons", async () => {

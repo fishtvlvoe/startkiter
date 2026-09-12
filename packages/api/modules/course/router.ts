@@ -156,7 +156,8 @@ export const courseRouter = publicProcedure.router({
 
 				const courseId = lesson.chapter.courseId;
 				const allowed =
-					verifiedCourseAccessById && Object.hasOwn(verifiedCourseAccessById, courseId)
+					verifiedCourseAccessById &&
+					Object.prototype.hasOwnProperty.call(verifiedCourseAccessById, courseId)
 						? verifiedCourseAccessById[courseId]!
 						: await userCanAccessCourseId(user.id, courseId);
 				if (!allowed) {

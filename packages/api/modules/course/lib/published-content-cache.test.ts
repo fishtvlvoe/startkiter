@@ -147,7 +147,7 @@ describe("published content server cache", () => {
 	});
 
 	it("does not write stale DB results back after invalidate races the in-flight read", async () => {
-		vi.mocked(db.lesson.findUnique).mockImplementation(async () => {
+		vi.mocked(db.lesson.findUnique).mockImplementation((async () => {
 			// Invalidate while the DB read is in flight (generation moves forward).
 			invalidatePublishedContentCache();
 			return {
@@ -156,7 +156,7 @@ describe("published content server cache", () => {
 				content: "# stale-after-race",
 				chapter: { courseId: "course-1" },
 			} as never;
-		});
+		}) as unknown as typeof db.lesson.findUnique);
 
 		const raced = await getCachedPublishedLessonById("lesson-1");
 		expect(raced?.content).toBe("# stale-after-race");
@@ -184,7 +184,7 @@ describe("published content server cache", () => {
 	});
 
 	it("evicts the oldest lesson entries when the cache exceeds the max size", async () => {
-		vi.mocked(db.lesson.findUnique).mockImplementation(async ({ where }) => {
+		vi.mocked(db.lesson.findUnique).mockImplementation((async ({ where }: { where: { id?: unknown } }) => {
 			const id = where.id as string;
 			return {
 				id,
@@ -192,7 +192,7 @@ describe("published content server cache", () => {
 				content: `# ${id}`,
 				chapter: { courseId: "course-1" },
 			} as never;
-		});
+		}) as unknown as typeof db.lesson.findUnique);
 
 		for (let i = 0; i < PUBLISHED_LESSON_CACHE_MAX_ENTRIES + 3; i += 1) {
 			await getCachedPublishedLessonById(`lesson-${i}`);
