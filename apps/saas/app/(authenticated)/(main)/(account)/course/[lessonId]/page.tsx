@@ -1,6 +1,7 @@
 import { auth } from "@startkiter/auth";
 import type { WatermarkPlayerSettings } from "@startkiter/course";
 import { userCanAccessCourseId } from "@startkiter/api/modules/course/lib/course-access";
+import { getCachedPublishedCurriculum } from "@startkiter/api/modules/course/lib/published-content-cache";
 import { db } from "@startkiter/database";
 import { createProcedureClient, ORPCError } from "@orpc/server";
 import { headers } from "next/headers";
@@ -97,48 +98,33 @@ export default async function LessonPage({ params }: LessonPageProps) {
 	const requestHeaders = await headers();
 	const session = await auth.api.getSession({ headers: requestHeaders });
 
-	// 從 PostgreSQL 資料庫真實讀取已發布課綱
-	const chaptersFromDb = await db.chapter.findMany({
-		where: {
-			course: { status: "PUBLISHED" },
-		},
-		orderBy: { order: "asc" },
-		include: {
-			course: {
-				select: {
-					title: true,
-					watermarkSetting: {
-						select: {
-							enabled: true,
-							showEmail: true,
-							showCourseTitle: true,
-							showTimestamp: true,
-							emailDisplayMode: true,
-							opacityPercent: true,
-							textSize: true,
-							movementMode: true,
-							moveIntervalSec: true,
-							tamperPauseEnabled: true,
-						},
-					},
-				},
-			},
-			lessons: {
-				where: { status: "PUBLISHED" },
-				orderBy: { order: "asc" },
-			},
-		},
-	});
+	// 從 PostgreSQL 資料庫真實讀取已發布課綱（有明確 TTL 的 server 端快取）
+	const chaptersFromDb = await getCachedPublishedCurriculum();
 
 	if (!chaptersFromDb.length) {
 		notFound();
 	}
 
-	// 使用 oRPC getLessonDetail 逐單元驗證觀看權限
+	// 同一個 request 內，每個 courseId 的存取判斷只做一次，結果供課綱與問卷共用
+	const verifiedCourseAccessById: Record<string, boolean> = {};
+	if (session?.user?.id) {
+		const uniqueCourseIds = [...new Set(chaptersFromDb.map((chapter) => chapter.courseId))];
+		for (const courseId of uniqueCourseIds) {
+			verifiedCourseAccessById[courseId] = await userCanAccessCourseId(
+				session.user.id,
+				courseId,
+			);
+		}
+	}
+
+	// 使用 oRPC getLessonDetail 逐單元驗證觀看權限（沿用上面已判斷的 course access）
 	const getLessonDetail = createProcedureClient(courseRouter.getLessonDetail, {
 		context: {
 			headers: requestHeaders,
-			...(session?.user?.id ? { user: { id: session.user.id } } : {}),
+			preloadedAuth: true,
+			session: session?.session ?? null,
+			user: session?.user ?? null,
+			verifiedCourseAccessById,
 		} as any,
 	});
 
@@ -193,17 +179,14 @@ export default async function LessonPage({ params }: LessonPageProps) {
 	);
 	const courseId = currentChapter?.courseId;
 	let showOnboardingSurvey = false;
-	if (session?.user?.id && courseId) {
-		const hasCourseAccess = await userCanAccessCourseId(session.user.id, courseId);
-		if (hasCourseAccess) {
-			const existingSurvey = await db.courseOnboardingSurveyResponse.findUnique({
-				where: {
-					userId_courseId: { userId: session.user.id, courseId },
-				},
-				select: { id: true },
-			});
-			showOnboardingSurvey = !existingSurvey;
-		}
+	if (session?.user?.id && courseId && verifiedCourseAccessById[courseId]) {
+		const existingSurvey = await db.courseOnboardingSurveyResponse.findUnique({
+			where: {
+				userId_courseId: { userId: session.user.id, courseId },
+			},
+			select: { id: true },
+		});
+		showOnboardingSurvey = !existingSurvey;
 	}
 
 	return (

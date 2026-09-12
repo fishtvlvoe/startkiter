@@ -1,5 +1,5 @@
 import { call, ORPCError } from "@orpc/server";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@startkiter/auth", () => ({
 	auth: {
@@ -25,6 +25,10 @@ describe("publicProcedure", () => {
 });
 
 describe("publicProcedureWithSession", () => {
+	beforeEach(() => {
+		vi.mocked(auth.api.getSession).mockReset();
+	});
+
 	it("passes null user and session to unauthenticated handlers", async () => {
 		vi.mocked(auth.api.getSession).mockResolvedValueOnce(null);
 		let capturedContext: unknown;
@@ -36,6 +40,53 @@ describe("publicProcedureWithSession", () => {
 		await call(testProcedure, undefined, { context: { headers: new Headers() } });
 
 		expect(capturedContext).toMatchObject({ user: null, session: null });
+	});
+
+	it("reuses a caller-provided verified session without calling getSession", async () => {
+		const preloadedUser = { id: "user-1", email: "user@example.com", role: "user" };
+		const preloadedSession = { id: "session-1", userId: "user-1" };
+		let capturedContext: unknown;
+		const testProcedure = publicProcedureWithSession.handler(async ({ context }) => {
+			capturedContext = context;
+			return { success: true };
+		});
+
+		await call(testProcedure, undefined, {
+			context: {
+				headers: new Headers(),
+				preloadedAuth: true,
+				user: preloadedUser,
+				session: preloadedSession,
+			} as never,
+		});
+
+		expect(auth.api.getSession).not.toHaveBeenCalled();
+		expect(capturedContext).toMatchObject({
+			user: preloadedUser,
+			session: preloadedSession,
+		});
+	});
+
+	it("still calls getSession when the caller does not preload auth", async () => {
+		const fetchedUser = { id: "user-2", email: "fetched@example.com", role: "user" };
+		const fetchedSession = { id: "session-2", userId: "user-2" };
+		vi.mocked(auth.api.getSession).mockResolvedValueOnce({
+			user: fetchedUser,
+			session: fetchedSession,
+		} as never);
+		let capturedContext: unknown;
+		const testProcedure = publicProcedureWithSession.handler(async ({ context }) => {
+			capturedContext = context;
+			return { success: true };
+		});
+
+		await call(testProcedure, undefined, { context: { headers: new Headers() } });
+
+		expect(auth.api.getSession).toHaveBeenCalledTimes(1);
+		expect(capturedContext).toMatchObject({
+			user: fetchedUser,
+			session: fetchedSession,
+		});
 	});
 });
 

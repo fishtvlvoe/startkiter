@@ -43,6 +43,7 @@ import { auth } from "@startkiter/auth";
 import { db, getCourseAccessOrdersForUser } from "@startkiter/database";
 
 import { createPrismaBundleCourseAccessReader } from "./lib/course-access";
+import { invalidatePublishedContentCache } from "./lib/published-content-cache";
 import { resolveVideoSource } from "./lib/video-resolver";
 import { courseRouter } from "./router";
 
@@ -109,6 +110,7 @@ function paidLesson(courseId: string) {
 describe("getLessonDetail bundle-aware access", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		invalidatePublishedContentCache();
 		vi.mocked(auth.api.getSession).mockResolvedValue(authenticatedSession as never);
 		vi.mocked(db.lesson.findUnique).mockResolvedValue(paidLesson("course-a") as never);
 		vi.mocked(db.order.findFirst).mockResolvedValue({ id: "legacy-paid-order" } as never);
@@ -173,6 +175,47 @@ describe("getLessonDetail bundle-aware access", () => {
 		expect(result.lesson.isFreePreview).toBe(true);
 		expect(db.order.findMany).not.toHaveBeenCalled();
 		expect(db.bundle.findUnique).not.toHaveBeenCalled();
+	});
+
+	it("reuses verifiedCourseAccessById from context instead of re-querying orders", async () => {
+		vi.mocked(getCourseAccessOrdersForUser).mockClear();
+		vi.mocked(db.order.findFirst).mockClear();
+
+		const result = await call(
+			courseRouter.getLessonDetail,
+			{ lessonId: "lesson-paid" },
+			{
+				context: {
+					headers: new Headers(),
+					preloadedAuth: true,
+					user: authenticatedSession.user,
+					session: authenticatedSession.session,
+					verifiedCourseAccessById: { "course-a": true },
+				} as never,
+			},
+		);
+
+		expect(result.lesson.content).toBe("# paid lesson");
+		expect(getCourseAccessOrdersForUser).not.toHaveBeenCalled();
+		expect(db.order.findFirst).not.toHaveBeenCalled();
+	});
+
+	it("still rejects when verifiedCourseAccessById marks the course as forbidden", async () => {
+		await expect(
+			call(
+				courseRouter.getLessonDetail,
+				{ lessonId: "lesson-paid" },
+				{
+					context: {
+						headers: new Headers(),
+						preloadedAuth: true,
+						user: authenticatedSession.user,
+						session: authenticatedSession.session,
+						verifiedCourseAccessById: { "course-a": false },
+					} as never,
+				},
+			),
+		).rejects.toMatchObject({ code: "FORBIDDEN" });
 	});
 
 	it("uses the buyer-scoped order and bundle query shape", async () => {

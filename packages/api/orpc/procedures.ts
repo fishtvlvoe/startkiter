@@ -4,13 +4,31 @@ import { createPermissionRules } from "@startkiter/permissions";
 
 import { permix } from "./permix";
 
-export const publicProcedure = os.$context<{
+export type ProcedureAuthContext = {
 	headers: Headers;
 	rawBody?: string;
 	url?: string;
-}>();
+	/** When true, middleware trusts caller-provided session/user and skips getSession. */
+	preloadedAuth?: boolean;
+	session?: unknown;
+	user?: unknown;
+	/** Request-scoped course access decisions keyed by courseId (server context only). */
+	verifiedCourseAccessById?: Record<string, boolean>;
+};
+
+export const publicProcedure = os.$context<ProcedureAuthContext>();
 
 export const publicProcedureWithSession = publicProcedure.use(async ({ context, next }) => {
+	if (context.preloadedAuth) {
+		return await next({
+			context: {
+				session: context.session ?? null,
+				user: context.user ?? null,
+				verifiedCourseAccessById: context.verifiedCourseAccessById,
+			},
+		});
+	}
+
 	const session = await auth.api.getSession({
 		headers: context.headers,
 	});
@@ -19,6 +37,7 @@ export const publicProcedureWithSession = publicProcedure.use(async ({ context, 
 		context: {
 			session: session?.session || null,
 			user: session?.user || null,
+			verifiedCourseAccessById: context.verifiedCourseAccessById,
 		},
 	});
 });

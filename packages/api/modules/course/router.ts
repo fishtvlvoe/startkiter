@@ -10,6 +10,7 @@ import {
 } from "../../orpc/procedures";
 import { courseOperatorProcedure } from "./lib/course-operator";
 import { userCanAccessCourseId } from "./lib/course-access";
+import { getCachedPublishedLessonById } from "./lib/published-content-cache";
 import { updateLesson } from "./lib/update-lesson";
 import { resolveVideoSource } from "./lib/video-resolver";
 import { cancelCourseSubscription } from "./procedures/cancel-course-subscription";
@@ -140,11 +141,8 @@ export const courseRouter = publicProcedure.router({
 	// 3. 取得單元詳情與媒體內容 (Protected / Public preview)
 	getLessonDetail: publicProcedureWithSession
 		.input(z.object({ lessonId: z.string() }))
-		.handler(async ({ input, context: { user } }) => {
-			const lesson = await db.lesson.findUnique({
-				where: { id: input.lessonId },
-				include: { chapter: true },
-			});
+		.handler(async ({ input, context: { user, verifiedCourseAccessById } }) => {
+			const lesson = await getCachedPublishedLessonById(input.lessonId);
 
 			if (!lesson || lesson.status !== "PUBLISHED") {
 				throw new ORPCError("NOT_FOUND");
@@ -156,7 +154,11 @@ export const courseRouter = publicProcedure.router({
 					throw new ORPCError("UNAUTHORIZED");
 				}
 
-				const allowed = await userCanAccessCourseId(user.id, lesson.chapter.courseId);
+				const courseId = lesson.chapter.courseId;
+				const allowed =
+					verifiedCourseAccessById && Object.hasOwn(verifiedCourseAccessById, courseId)
+						? verifiedCourseAccessById[courseId]!
+						: await userCanAccessCourseId(user.id, courseId);
 				if (!allowed) {
 					throw new ORPCError("FORBIDDEN");
 				}

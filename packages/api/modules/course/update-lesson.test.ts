@@ -28,11 +28,16 @@ vi.mock("./lib/video-resolver", () => ({
 	resolveVideoSource: vi.fn(),
 }));
 
+vi.mock("./lib/published-content-cache", () => ({
+	invalidatePublishedContentCache: vi.fn(),
+}));
+
 import { auth } from "@startkiter/auth";
 import { inspectMdxSource } from "@startkiter/course";
 import { db } from "@startkiter/database";
 
 import { COURSE_STUDIO_ERROR_CODES } from "./errors";
+import { invalidatePublishedContentCache } from "./lib/published-content-cache";
 import { courseRouter } from "./router";
 
 describe("course.updateLesson", () => {
@@ -82,5 +87,6 @@ describe("course.updateLesson", () => {
 
 		expect(inspectMdxSource).toHaveBeenCalled();
 		expect(db.lesson.update).toHaveBeenCalled();
+		expect(invalidatePublishedContentCache).toHaveBeenCalledTimes(1);
 	});
 });

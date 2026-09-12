@@ -2,6 +2,7 @@ import { inspectMdxSource } from "@startkiter/course";
 import { db, VideoProvider } from "@startkiter/database";
 
 import { COURSE_STUDIO_ERROR_CODES } from "../errors";
+import { invalidatePublishedContentCache } from "./published-content-cache";
 import { resolveVideoSource } from "./video-resolver";
 
 export type UpdateLessonInput = {
@@ -44,6 +45,8 @@ export async function updateLesson(input: UpdateLessonInput) {
 			...(videoProvider ? { videoProvider } : {}),
 		},
 	});
+
+	invalidatePublishedContentCache();
 
 	return { ok: true as const, lesson };
 }
