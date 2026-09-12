@@ -61,7 +61,10 @@ function installRacingOrderState() {
 		kitClaimEligible: state.status === "paid",
 	});
 
-	vi.mocked(db.order.findUnique).mockImplementation(async () => orderSnapshot());
+	// Prisma findUnique 回傳 Prisma__OrderClient（Thenable + relation getters），測試只需要純資料。
+	vi.mocked(db.order.findUnique).mockImplementation(
+		(() => Promise.resolve(orderSnapshot())) as unknown as typeof db.order.findUnique,
+	);
 
 	vi.mocked(withOrderStateLock).mockImplementation(async (_orderId, callback) => {
 		let aborted = false;
