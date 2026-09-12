@@ -10,6 +10,10 @@ vi.mock("@startkiter/auth", () => ({
 
 vi.mock("@startkiter/database", () => ({
 	VideoProvider: {},
+	bumpPublishedContentCacheGeneration: vi.fn(),
+	getPublishedContentCacheGeneration: vi.fn(() => 0),
+	isCourseContentWrite: vi.fn(() => false),
+	resetPublishedContentCacheGenerationForTests: vi.fn(),
 	db: {
 		course: {
 			delete: vi.fn(),
