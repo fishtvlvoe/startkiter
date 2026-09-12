@@ -14,5 +14,11 @@ export {
 	SupportTicketStatus,
 	VideoProvider,
 } from "./generated/client";
+export {
+	bumpPublishedContentCacheGeneration,
+	getPublishedContentCacheGeneration,
+	isCourseContentWrite,
+	resetPublishedContentCacheGenerationForTests,
+} from "./published-content-cache-generation";
 export * from "./queries";
 export * from "./zod";

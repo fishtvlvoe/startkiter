@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const generationState = { value: 0 };
+
 vi.mock("@startkiter/database", () => ({
 	db: {
 		lesson: {
@@ -9,6 +11,11 @@ vi.mock("@startkiter/database", () => ({
 			findMany: vi.fn(),
 		},
 	},
+	getPublishedContentCacheGeneration: () => generationState.value,
+	bumpPublishedContentCacheGeneration: () => {
+		generationState.value += 1;
+		return generationState.value;
+	},
 }));
 
 import { db } from "@startkiter/database";
@@ -16,14 +23,18 @@ import { db } from "@startkiter/database";
 import {
 	getCachedPublishedLessonById,
 	getCachedPublishedCurriculum,
+	getPublishedLessonCacheSizeForTests,
 	invalidatePublishedContentCache,
 	PUBLISHED_CONTENT_CACHE_TTL_MS,
+	PUBLISHED_LESSON_CACHE_MAX_ENTRIES,
 } from "./published-content-cache";
 
 describe("published content server cache", () => {
 	beforeEach(() => {
 		vi.useRealTimers();
+		generationState.value = 0;
 		invalidatePublishedContentCache();
+		generationState.value = 0;
 		vi.clearAllMocks();
 	});
 
@@ -109,5 +120,89 @@ describe("published content server cache", () => {
 
 		vi.advanceTimersByTime(PUBLISHED_CONTENT_CACHE_TTL_MS + 1);
 		expect((await getCachedPublishedLessonById("lesson-1"))?.content).toBe("# after-edit");
+	});
+
+	it("refetches after generation bump from a content write (central invalidation)", async () => {
+		vi.mocked(db.lesson.findUnique)
+			.mockResolvedValueOnce({
+				id: "lesson-1",
+				status: "PUBLISHED",
+				content: "# v1",
+				chapter: { courseId: "course-1" },
+			} as never)
+			.mockResolvedValueOnce({
+				id: "lesson-1",
+				status: "PUBLISHED",
+				content: "# v2",
+				chapter: { courseId: "course-1" },
+			} as never);
+
+		expect((await getCachedPublishedLessonById("lesson-1"))?.content).toBe("# v1");
+
+		// Prisma write extension bumps generation — no per-route invalidate required
+		generationState.value += 1;
+
+		expect((await getCachedPublishedLessonById("lesson-1"))?.content).toBe("# v2");
+		expect(db.lesson.findUnique).toHaveBeenCalledTimes(2);
+	});
+
+	it("does not write stale DB results back after invalidate races the in-flight read", async () => {
+		vi.mocked(db.lesson.findUnique).mockImplementation(async () => {
+			// Invalidate while the DB read is in flight (generation moves forward).
+			invalidatePublishedContentCache();
+			return {
+				id: "lesson-1",
+				status: "PUBLISHED",
+				content: "# stale-after-race",
+				chapter: { courseId: "course-1" },
+			} as never;
+		});
+
+		const raced = await getCachedPublishedLessonById("lesson-1");
+		expect(raced?.content).toBe("# stale-after-race");
+		expect(getPublishedLessonCacheSizeForTests()).toBe(0);
+
+		vi.mocked(db.lesson.findUnique).mockResolvedValue({
+			id: "lesson-1",
+			status: "PUBLISHED",
+			content: "# fresh",
+			chapter: { courseId: "course-1" },
+		} as never);
+
+		expect((await getCachedPublishedLessonById("lesson-1"))?.content).toBe("# fresh");
+		expect(db.lesson.findUnique).toHaveBeenCalledTimes(2);
+	});
+
+	it("does not cache null / missing lessons", async () => {
+		vi.mocked(db.lesson.findUnique).mockResolvedValue(null);
+
+		await expect(getCachedPublishedLessonById("missing-1")).resolves.toBeNull();
+		await expect(getCachedPublishedLessonById("missing-1")).resolves.toBeNull();
+
+		expect(getPublishedLessonCacheSizeForTests()).toBe(0);
+		expect(db.lesson.findUnique).toHaveBeenCalledTimes(2);
+	});
+
+	it("evicts the oldest lesson entries when the cache exceeds the max size", async () => {
+		vi.mocked(db.lesson.findUnique).mockImplementation(async ({ where }) => {
+			const id = where.id as string;
+			return {
+				id,
+				status: "PUBLISHED",
+				content: `# ${id}`,
+				chapter: { courseId: "course-1" },
+			} as never;
+		});
+
+		for (let i = 0; i < PUBLISHED_LESSON_CACHE_MAX_ENTRIES + 3; i += 1) {
+			await getCachedPublishedLessonById(`lesson-${i}`);
+		}
+
+		expect(getPublishedLessonCacheSizeForTests()).toBe(PUBLISHED_LESSON_CACHE_MAX_ENTRIES);
+
+		// Oldest keys were evicted — fetching them hits the DB again.
+		vi.mocked(db.lesson.findUnique).mockClear();
+		await getCachedPublishedLessonById("lesson-0");
+		expect(db.lesson.findUnique).toHaveBeenCalledTimes(1);
 	});
 });

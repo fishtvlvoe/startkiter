@@ -9,20 +9,28 @@ vi.mock("@startkiter/auth", () => ({
 	},
 }));
 
-vi.mock("@startkiter/database", () => ({
-	VideoProvider: {},
-	db: {
-		bundle: { findUnique: vi.fn() },
-		course: { findFirst: vi.fn(), findMany: vi.fn() },
-		lesson: { findUnique: vi.fn() },
-		lessonProgress: { findMany: vi.fn(), findUnique: vi.fn(), create: vi.fn() },
-	order: { findFirst: vi.fn(), findMany: vi.fn() },
-	courseSubscription: { findFirst: vi.fn() },
-		courseInviteRedemption: { findUnique: vi.fn() },
-		studioFolder: { findMany: vi.fn() },
-	},
-	getCourseAccessOrdersForUser: vi.fn(),
-}));
+vi.mock("@startkiter/database", () => {
+	let generation = 0;
+	return {
+		VideoProvider: {},
+		db: {
+			bundle: { findUnique: vi.fn() },
+			course: { findFirst: vi.fn(), findMany: vi.fn() },
+			lesson: { findUnique: vi.fn() },
+			lessonProgress: { findMany: vi.fn(), findUnique: vi.fn(), create: vi.fn() },
+			order: { findFirst: vi.fn(), findMany: vi.fn() },
+			courseSubscription: { findFirst: vi.fn() },
+			courseInviteRedemption: { findUnique: vi.fn() },
+			studioFolder: { findMany: vi.fn() },
+		},
+		getCourseAccessOrdersForUser: vi.fn(),
+		getPublishedContentCacheGeneration: () => generation,
+		bumpPublishedContentCacheGeneration: () => {
+			generation += 1;
+			return generation;
+		},
+	};
+});
 
 vi.mock("@startkiter/course", () => ({
 	canAccessCourseId: vi.fn(async (userId: string, courseId: string, reader: {
