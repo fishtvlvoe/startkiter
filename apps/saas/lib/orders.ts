@@ -151,7 +151,25 @@ export async function createPendingOrderForUser(
 }
 
 function isGatewayTradeNoUniqueConflict(error: unknown): boolean {
-	return typeof error === "object" && error !== null && "code" in error && error.code === "P2002";
+	if (typeof error !== "object" || error === null || !("code" in error) || error.code !== "P2002") {
+		return false;
+	}
+
+	const meta = "meta" in error ? error.meta : undefined;
+	if (typeof meta !== "object" || meta === null || !("target" in meta)) {
+		return false;
+	}
+
+	const target = meta.target;
+	if (Array.isArray(target)) {
+		return target.includes("gatewayTradeNo");
+	}
+
+	if (typeof target === "string") {
+		return target.includes("gatewayTradeNo");
+	}
+
+	return false;
 }
 
 export async function markOrderPaid(
@@ -188,39 +206,25 @@ export async function markOrderPaid(
 				return 0;
 			}
 
-			try {
-				const result = await tx.order.updateMany({
-					where: {
-						id: orderId,
-						orderNo,
-						status: "pending",
-						...(paymentGateway ? { paymentGateway } : {}),
-					},
-					data: {
-						status: "paid",
-						courseAccess: true,
-						kitClaimEligible: true,
-						gatewayTradeNo,
-						paidAt: new Date(),
-					},
-				});
-				return result.count;
-			} catch (error) {
-				if (!isGatewayTradeNoUniqueConflict(error)) {
-					throw error;
-				}
-
-				const again = await tx.order.findUnique({
-					where: { id: orderId },
-					select: { status: true, gatewayTradeNo: true },
-				});
-
-				if (again?.status === "paid") {
-					return 0;
-				}
-
-				throw error;
-			}
+			// P2002 不可在同一 interactive transaction 內再查：Postgres 已 aborted，
+			// 後續語句會變 25P02，外層 isGatewayTradeNoUniqueConflict 會失效。
+			// 唯一鍵衝突直接往外拋，交給 transaction 外的 catch（新連線）處理。
+			const result = await tx.order.updateMany({
+				where: {
+					id: orderId,
+					orderNo,
+					status: "pending",
+					...(paymentGateway ? { paymentGateway } : {}),
+				},
+				data: {
+					status: "paid",
+					courseAccess: true,
+					kitClaimEligible: true,
+					gatewayTradeNo,
+					paidAt: new Date(),
+				},
+			});
+			return result.count;
 		});
 
 		if (updated > 0) void sendWelcomeEmailsForOrder(orderId);

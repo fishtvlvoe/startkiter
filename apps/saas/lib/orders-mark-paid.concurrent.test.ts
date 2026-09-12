@@ -28,7 +28,9 @@ vi.mock("@startkiter/payments", async (importOriginal) => ({
 	createMvpCheckoutGateway: vi.fn(),
 }));
 
+import { db } from "@startkiter/database";
 import { withOrderStateLock } from "@startkiter/api/modules/course/lib/order-refunds";
+import { sendWelcomeEmailsForOrder } from "@startkiter/api/modules/course/lib/send-welcome-email";
 
 import { markOrderPaid } from "./orders";
 
@@ -36,6 +38,9 @@ import { markOrderPaid } from "./orders";
  * 模擬「advisory lock 失效／跨請求競態」下的唯一鍵衝突：
  * 兩個 pending 檢查都通過後，第二個寫入同一 gatewayTradeNo 會丟 P2002。
  * 這對應 schema `gatewayTradeNo @unique` 與壓測 UniqueConstraintViolation 路徑。
+ *
+ * 關鍵：P2002 之後同一 tx 進入 aborted（SQLSTATE 25P02），後續同 tx 查詢必須失敗；
+ * 冪等讀取只能走 transaction 外的 `db.order.findUnique`（新連線）。
  */
 function installRacingOrderState() {
 	const state = {
@@ -46,19 +51,41 @@ function installRacingOrderState() {
 
 	const claimedTradeNos = new Set<string>();
 
+	const orderSnapshot = () => ({
+		id: "order-id",
+		orderNo: "ORDER-1",
+		status: state.status,
+		gatewayTradeNo: state.gatewayTradeNo,
+		paymentGateway: "payuni",
+		courseAccess: state.status === "paid",
+		kitClaimEligible: state.status === "paid",
+	});
+
+	vi.mocked(db.order.findUnique).mockImplementation(async () => orderSnapshot());
+
 	vi.mocked(withOrderStateLock).mockImplementation(async (_orderId, callback) => {
+		let aborted = false;
+
+		const assertTransactionActive = () => {
+			if (!aborted) {
+				return;
+			}
+
+			throw Object.assign(
+				new Error("current transaction is aborted, commands ignored until end of transaction block"),
+				{ code: "25P02" },
+			);
+		};
+
 		const tx = {
 			order: {
-				findUnique: vi.fn(async () => ({
-					id: "order-id",
-					orderNo: "ORDER-1",
-					status: state.status,
-					gatewayTradeNo: state.gatewayTradeNo,
-					paymentGateway: "payuni",
-					courseAccess: state.status === "paid",
-					kitClaimEligible: state.status === "paid",
-				})),
+				findUnique: vi.fn(async () => {
+					assertTransactionActive();
+					return orderSnapshot();
+				}),
 				updateMany: vi.fn(async ({ where, data }: { where: { status?: string }; data: { status?: string; gatewayTradeNo?: string } }) => {
+					assertTransactionActive();
+
 					// TOCTOU：先通過 pending 檢查再 yield，模擬併發下多個 writer 同時通過條件更新。
 					if (where.status !== "pending" || state.status !== "pending") {
 						return { count: 0 };
@@ -68,6 +95,7 @@ function installRacingOrderState() {
 
 					const tradeNo = data.gatewayTradeNo;
 					if (tradeNo && claimedTradeNos.has(tradeNo)) {
+						aborted = true;
 						const error = Object.assign(new Error("Unique constraint failed on the fields: (`gatewayTradeNo`)"), {
 							code: "P2002",
 							meta: { target: ["gatewayTradeNo"] },
@@ -117,5 +145,7 @@ describe("Concurrent duplicate notifies do not error or double-grant", () => {
 		expect(state.paidTransitions).toBe(1);
 		expect(state.status).toBe("paid");
 		expect(state.gatewayTradeNo).toBe(gatewayTradeNo);
+		expect(sendWelcomeEmailsForOrder).toHaveBeenCalledTimes(1);
+		expect(sendWelcomeEmailsForOrder).toHaveBeenCalledWith("order-id");
 	});
 });
