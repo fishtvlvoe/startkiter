@@ -4,6 +4,9 @@ import { createPermissionRules } from "@startkiter/permissions";
 
 import { permix } from "./permix";
 
+/** Minimal shape callers preload for `preloadedAuth`; matches better-auth's session user at the fields procedures rely on. */
+export type PreloadedSessionUser = { id: string } & Record<string, unknown>;
+
 export type ProcedureAuthContext = {
 	headers: Headers;
 	rawBody?: string;
@@ -11,7 +14,7 @@ export type ProcedureAuthContext = {
 	/** When true, middleware trusts caller-provided session/user and skips getSession. */
 	preloadedAuth?: boolean;
 	session?: unknown;
-	user?: unknown;
+	user?: PreloadedSessionUser | null;
 	/** Request-scoped course access decisions keyed by courseId (server context only). */
 	verifiedCourseAccessById?: Record<string, boolean>;
 };
