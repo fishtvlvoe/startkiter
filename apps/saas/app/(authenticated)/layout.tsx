@@ -32,46 +32,55 @@ export default async function AuthenticatedLayout({ children }: PropsWithChildre
 		redirect("/login");
 	}
 
-	let membershipRole: string | null = null;
+	const queryClient = getServerQueryClient();
 
-	if (session.session.activeOrganizationId) {
-		const membership = await getOrganizationMembership(
-			session.session.activeOrganizationId,
-			session.user.id,
-		);
-		membershipRole = membership?.role ?? null;
-	}
+	const membershipPromise = session.session.activeOrganizationId
+		? getOrganizationMembership(
+				session.session.activeOrganizationId,
+				session.user.id,
+			)
+		: Promise.resolve(null);
+
+	const sessionPrefetchPromise = queryClient.prefetchQuery({
+		queryKey: sessionQueryKey,
+		queryFn: () => session,
+	});
+
+	const orgListPrefetchPromise = authConfig.organizations.enable
+		? queryClient.prefetchQuery({
+				queryKey: organizationListQueryKey,
+				queryFn: getOrganizationList,
+			})
+		: Promise.resolve();
+
+	const purchasesPrefetchPromise =
+		paymentsConfig.billingAttachedTo === "user"
+			? queryClient.prefetchQuery({
+					queryKey: orpc.payments.listPurchases.queryKey({
+						input: {},
+					}),
+					queryFn: () => listPurchases(),
+				})
+			: Promise.resolve();
+
+	const buyerDeploymentsPromise = findBuyerDeploymentsForUser(session.user.id);
+
+	const [membership, , , , buyerDeployments] = await Promise.all([
+		membershipPromise,
+		sessionPrefetchPromise,
+		orgListPrefetchPromise,
+		purchasesPrefetchPromise,
+		buyerDeploymentsPromise,
+	]);
+
+	const membershipRole = membership?.role ?? null;
 
 	setupPermissions({
 		user: session.user,
 		membershipRole,
 	});
 
-	const queryClient = getServerQueryClient();
-
-	await queryClient.prefetchQuery({
-		queryKey: sessionQueryKey,
-		queryFn: () => session,
-	});
-
-	if (authConfig.organizations.enable) {
-		await queryClient.prefetchQuery({
-			queryKey: organizationListQueryKey,
-			queryFn: getOrganizationList,
-		});
-	}
-
-	if (paymentsConfig.billingAttachedTo === "user") {
-		await queryClient.prefetchQuery({
-			queryKey: orpc.payments.listPurchases.queryKey({
-				input: {},
-			}),
-			queryFn: () => listPurchases(),
-		});
-	}
-
 	const canAccessPagesCms = canAccessPagesCmsAdmin(session, process.env.ADMIN_EMAIL);
-	const buyerDeployments = await findBuyerDeploymentsForUser(session.user.id);
 	const deployments = buyerDeployments.map((d) => ({
 		id: d.id,
 		publicUrl: d.publicUrl,
