@@ -18,12 +18,12 @@ export default async function CoursePage() {
 
 	const [entitled, courseResult] = await Promise.all([
 		userHasCourseAccess(session.user.id),
-		db.course?.findFirst
-			? db.course.findFirst({
-					where: { status: "PUBLISHED", chapters: { some: { lessons: { some: { status: "PUBLISHED" } } } } },
-					select: { id: true, coverImageUrl: true },
-				})
-			: Promise.resolve(null),
+		db.course
+			.findFirst({
+				where: { status: "PUBLISHED", chapters: { some: { lessons: { some: { status: "PUBLISHED" } } } } },
+				select: { id: true, coverImageUrl: true },
+			})
+			.catch(() => null),
 	]);
 	const course = entitled ? courseResult : null;
 	const t = await getTranslations("course");

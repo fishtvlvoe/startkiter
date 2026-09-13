@@ -13,6 +13,7 @@ const prismaClientSingleton = () => {
 
 	const adapter = new PrismaPg({
 		connectionString: process.env.DATABASE_URL,
+		max: process.env.DATABASE_POOL_MAX ? parseInt(process.env.DATABASE_POOL_MAX, 10) : 25,
 	});
 
 	return new PrismaClient({ adapter }).$extends({

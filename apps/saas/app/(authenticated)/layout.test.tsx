@@ -88,8 +88,9 @@ vi.mock("./ChatwootScript", () => ({
 	ChatwootScript: () => null,
 }));
 
-import { getSession } from "@auth/lib/server";
+import { getOrganizationList, getSession } from "@auth/lib/server";
 import { getOrganizationMembership } from "@startkiter/database";
+import { listPurchases } from "@payments/lib/server";
 import { findBuyerDeploymentsForUser } from "@startkiter/platform";
 import { setupPermissions } from "@shared/lib/permix";
 import AuthenticatedLayout from "./layout";
@@ -99,16 +100,25 @@ const mockSession = {
 	session: { id: "session-123", activeOrganizationId: "org-123" },
 };
 
-describe("AuthenticatedLayout (5.1 & 5.3)", () => {
+describe("AuthenticatedLayout (5.1, 5.2, 5.3)", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		for (const key of Object.keys(callTimestamps)) {
 			delete callTimestamps[key];
 		}
 		vi.mocked(getSession).mockResolvedValue(mockSession as never);
+		vi.mocked(getOrganizationMembership).mockResolvedValue({ role: "member" } as never);
+		vi.mocked(getOrganizationList).mockResolvedValue([{ id: "org-1", name: "Org 1" }] as never);
+		vi.mocked(listPurchases).mockResolvedValue([{ id: "pur-1" }] as never);
+		vi.mocked(findBuyerDeploymentsForUser).mockResolvedValue([] as never);
+		mockPrefetchQuery.mockImplementation(async (options: { queryFn?: () => unknown }) => {
+			if (options.queryFn) {
+				return await options.queryFn();
+			}
+		});
 	});
 
-	it("5.1: 驗證 getOrganizationMembership、getOrganizationList預取、listPurchases預取、findBuyerDeploymentsForUser 為平行發出而非序列 await", async () => {
+	it("5.1: 驗證 getOrganizationMembership、getOrganizationList預取、listPurchases預取、findBuyerDeploymentsForUser 為平行發出而非序列 await，且 prefetchQuery 實際呼叫 queryFn", async () => {
 		const delayMs = 40;
 		const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -118,14 +128,28 @@ describe("AuthenticatedLayout (5.1 & 5.3)", () => {
 			return { role: "admin" } as never;
 		});
 
-		mockPrefetchQuery.mockImplementation(async (options: { queryKey: unknown }) => {
+		vi.mocked(getOrganizationList).mockImplementation(async () => {
+			callTimestamps.orgList = Date.now();
+			await delay(delayMs);
+			return [{ id: "org-1", name: "Org 1" }] as never;
+		});
+
+		vi.mocked(listPurchases).mockImplementation(async () => {
+			callTimestamps.purchases = Date.now();
+			await delay(delayMs);
+			return [{ id: "pur-1" }] as never;
+		});
+
+		mockPrefetchQuery.mockImplementation(async (options: { queryKey: unknown; queryFn?: () => unknown }) => {
 			const keyStr = JSON.stringify(options.queryKey);
-			if (keyStr.includes("organizations")) {
-				callTimestamps.orgList = Date.now();
-				await delay(delayMs);
-			} else if (keyStr.includes("listPurchases")) {
-				callTimestamps.purchases = Date.now();
-				await delay(delayMs);
+			if (keyStr.includes("organizations") && options.queryFn) {
+				return await options.queryFn();
+			}
+			if (keyStr.includes("listPurchases") && options.queryFn) {
+				return await options.queryFn();
+			}
+			if (options.queryFn) {
+				return await options.queryFn();
 			}
 		});
 
@@ -141,6 +165,10 @@ describe("AuthenticatedLayout (5.1 & 5.3)", () => {
 		expect(callTimestamps.orgList).toBeDefined();
 		expect(callTimestamps.purchases).toBeDefined();
 		expect(callTimestamps.deployments).toBeDefined();
+
+		// 驗證 prefetchQuery 確實呼叫了 queryFn，且回傳預期的結果
+		expect(getOrganizationList).toHaveBeenCalled();
+		expect(listPurchases).toHaveBeenCalled();
 
 		const timestamps = [
 			callTimestamps.membership,
@@ -163,7 +191,6 @@ describe("AuthenticatedLayout (5.1 & 5.3)", () => {
 			role: "owner",
 			createdAt: new Date(),
 		} as never);
-		mockPrefetchQuery.mockResolvedValue(undefined);
 		vi.mocked(findBuyerDeploymentsForUser).mockResolvedValue([
 			{
 				id: "dep-1",
@@ -184,13 +211,69 @@ describe("AuthenticatedLayout (5.1 & 5.3)", () => {
 		expect(result).toBeDefined();
 	});
 
-	it("5.3: 任一查詢 reject 時（fail-fast），layout render 整體拋出例外", async () => {
-		vi.mocked(getOrganizationMembership).mockResolvedValue({ role: "member" } as never);
-		mockPrefetchQuery.mockResolvedValue(undefined);
-		vi.mocked(findBuyerDeploymentsForUser).mockRejectedValue(new Error("Deployments DB connection error"));
+	it("5.2 (順序保證): setupPermissions 必須在 Promise.all 全部 resolve 之後才被呼叫", async () => {
+		let membershipResolved = false;
+		let deploymentsResolved = false;
+		let permissionsCalledAfterResolves = false;
 
-		await expect(AuthenticatedLayout({ children: "child content" })).rejects.toThrow(
-			"Deployments DB connection error",
-		);
+		const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+		vi.mocked(getOrganizationMembership).mockImplementation(async () => {
+			await delay(30);
+			membershipResolved = true;
+			return { role: "admin" } as never;
+		});
+
+		vi.mocked(findBuyerDeploymentsForUser).mockImplementation(async () => {
+			await delay(30);
+			deploymentsResolved = true;
+			return [] as never;
+		});
+
+		vi.mocked(setupPermissions).mockImplementation(() => {
+			if (membershipResolved && deploymentsResolved) {
+				permissionsCalledAfterResolves = true;
+			}
+		});
+
+		await AuthenticatedLayout({ children: "child content" });
+
+		expect(permissionsCalledAfterResolves).toBe(true);
+	});
+
+	describe("5.3: 四個查詢各自 reject 時（fail-fast），layout render 整體拋出例外", () => {
+		it.each([
+			{
+				name: "getOrganizationMembership",
+				setup: () => {
+					vi.mocked(getOrganizationMembership).mockRejectedValue(new Error("Membership DB error"));
+				},
+				expectedError: "Membership DB error",
+			},
+			{
+				name: "getOrganizationList (prefetchQuery queryFn)",
+				setup: () => {
+					vi.mocked(getOrganizationList).mockRejectedValue(new Error("OrgList fetch error"));
+				},
+				expectedError: "OrgList fetch error",
+			},
+			{
+				name: "listPurchases (prefetchQuery queryFn)",
+				setup: () => {
+					vi.mocked(listPurchases).mockRejectedValue(new Error("Purchases fetch error"));
+				},
+				expectedError: "Purchases fetch error",
+			},
+			{
+				name: "findBuyerDeploymentsForUser",
+				setup: () => {
+					vi.mocked(findBuyerDeploymentsForUser).mockRejectedValue(new Error("Deployments DB error"));
+				},
+				expectedError: "Deployments DB error",
+			},
+		])("$name 失敗時整體 fail-fast 拋出例外", async ({ setup, expectedError }) => {
+			setup();
+			await expect(AuthenticatedLayout({ children: "child content" })).rejects.toThrow(expectedError);
+		});
 	});
 });

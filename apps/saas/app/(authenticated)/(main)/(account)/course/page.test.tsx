@@ -142,4 +142,20 @@ describe("CoursePage (6.1 & 6.2)", () => {
 		expect(html).toContain('data-testid="course-review-panel"');
 		expect(html).toContain("Review for course-123");
 	});
+
+	it("6.2 (情境 4): db.course.findFirst reject 時，無權限使用者仍然看到 lockedNotice，不會整頁噴錯", async () => {
+		vi.mocked(userHasCourseAccess).mockResolvedValue(false);
+		vi.mocked(db.course.findFirst).mockRejectedValue(new Error("Database transient error"));
+
+		const jsx = await CoursePage();
+		const html = renderToStaticMarkup(jsx);
+
+		// 無權限使用者依舊正常渲染鎖定頁面，不噴 500
+		expect(html).toContain("[t:lockedDescription]");
+		expect(html).toContain("[t:lockedNotice]");
+		expect(html).toContain('href="/checkout"');
+		expect(html).toContain("[t:lockedPlayback]");
+		expect(html).not.toContain('data-testid="course-cover-image"');
+		expect(html).not.toContain('data-testid="course-review-panel"');
+	});
 });
