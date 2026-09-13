@@ -16,13 +16,16 @@ export default async function CoursePage() {
 		redirect("/login");
 	}
 
-	const entitled = await userHasCourseAccess(session.user.id);
-	const course = entitled
-		? await db.course.findFirst({
+	const [entitled, courseResult] = await Promise.all([
+		userHasCourseAccess(session.user.id),
+		db.course
+			.findFirst({
 				where: { status: "PUBLISHED", chapters: { some: { lessons: { some: { status: "PUBLISHED" } } } } },
 				select: { id: true, coverImageUrl: true },
 			})
-		: null;
+			.catch(() => null),
+	]);
+	const course = entitled ? courseResult : null;
 	const t = await getTranslations("course");
 	const rawLessons = listLessons();
 	const lessons = rawLessons.map((lesson) => localizeLesson(lesson, t));
