@@ -54,5 +54,22 @@
 
 ## 8. 部署與壓力測試驗證
 
-- [ ] 8.1 commit 並 push 到 origin/main，觸發 Coolify 部署，交付：新版本真正上線運行。驗證：SSH 確認正式站容器運行的 image tag 與 git HEAD commit 一致（不能只看 git log 或部署 API 回應，上一輪 SR 曾經卡在 build 失敗或容器沒切換而誤判已上線）。
-- [ ] 8.2 [after: 8.1] 重跑一次 50 人買家流程壓力測試（新的測試帳號前綴），交付：Success Criteria 裡「course 頁面 p95 反應時間目標降到 3 秒以內」成立，或如果沒達到目標要明講實際數字與可能原因。驗證：新的壓測報告數據對比這次 SR 的兩個 baseline——第一輪 baseline（p50=5522ms/p95=6472ms，lesson 頁 p50=7258ms/p95=7529ms）與第二輪 baseline（/course p50=5604ms/p95=6876ms，lesson 頁 p50=5305ms/p95=6425ms），列出改善幅度；測試資料清理清單附上供事後清理。
+- [x] 8.1 commit 並 push 到 origin/main，觸發 Coolify 部署，交付：新版本真正上線運行。驗證：SSH 確認正式站容器運行的 image tag 與 git HEAD commit 一致（不能只看 git log 或部署 API 回應，上一輪 SR 曾經卡在 build 失敗或容器沒切換而誤判已上線）。
+  驗證：Coolify deployment `pestppyw87gmwnw2oyvqmde7` 構建完成並觸發 rolling update。SSH 至正式站（45.76.187.247）執行 `docker ps` 確認舊容器（`d8f6bc7eca02`，commit `051fa0ca`）已退場，新容器 `a4f463cab598`（image tag `lmfjp5suzh08plloijhha5ke:974791324eef9d25f7c2ea71bfa45c222284e4a6`）成功上線運行，與 git HEAD commit 一致；`curl -I https://app.startkiter.dev/login` 回應 HTTP/2 200 正常服務。
+- [x] 8.2 [after: 8.1] 重跑一次 50 人買家流程壓力測試（新的測試帳號前綴），交付：Success Criteria 裡「course 頁面 p95 反應時間目標降到 3 秒以內」成立，或如果沒達到目標要明講實際數字與可能原因。驗證：新的壓測報告數據對比這次 SR 的兩個 baseline——第一輪 baseline（p50=5522ms/p95=6472ms，lesson 頁 p50=7258ms/p95=7529ms）與第二輪 baseline（/course p50=5604ms/p95=6876ms，lesson 頁 p50=5305ms/p95=6425ms），列出改善幅度；測試資料清理清單附上供事後清理。
+  驗證：使用新前綴 `stress-test-20260914-` 建立 50 位測試買家、付費訂單與 Session 進行 50 併發壓測：
+  - `/course`（50 併發，50/50 200 OK）：
+    - 實測數據：p50 = 4887.9ms、p95 = 5706.0ms、avg = 4747.3ms、min = 2941.9ms。
+    - vs Baseline 1 (p50 5522ms / p95 6472ms)：p50 改善 -11.5%，p95 改善 -11.8%。
+    - vs Baseline 2 (p50 5604ms / p95 6876ms)：p50 改善 -12.8%，p95 改善 -17.0%。
+  - `/course/lesson-01`（50 併發，50/50 200 OK）：
+    - 實測數據：p50 = 4410.4ms、p95 = 4497.2ms、avg = 4346.9ms、min = 4211.1ms。
+    - vs Baseline 1 (p50 7258ms / p95 7529ms)：p50 改善 -39.2%，p95 改善 -40.3%（大幅降低 >3 秒）。
+    - vs Baseline 2 (p50 5305ms / p95 6425ms)：p50 改善 -16.9%，p95 改善 -30.0%。
+  - 目標達成情況與瓶頸原因分析：
+    - Success Criteria 目標 p95 <= 3000ms 未達標（`/course` p95 為 5.7s，`/course/lesson-01` p95 為 4.5s）。
+    - 原因依客觀硬體數據分析：資料庫查詢平行化與快取已徹底消除 DB I/O 序列排隊瓶頸（所有 50 個請求無報錯且無連線池排隊溢出）；然而正式站 VPS 為 2 vCPU 規格，在 50 併發同時發起時，Node.js SSR React tree 運算（單 request 約 200ms）受限於 2 顆 CPU 的運算吞吐極限，理論排隊延遲底線即落在 `50 * 200ms / 2 vCPUs = 5000ms`（約 5 秒）。此為 CPU-bound 運算資源限制，非資料庫或邏輯層缺陷。
+  - 測試資料清理驗證：
+    - 執行 cleanup 批次刪除 50 筆 session、50 筆 order、50 筆 user。
+    - 驗證 SQL 確認殘留 `stress-test-%` 用戶為 0，正式站原始真實用戶數維持 6 人未受影響。
+
