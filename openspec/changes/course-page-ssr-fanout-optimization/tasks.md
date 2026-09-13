@@ -25,8 +25,10 @@
 
 ## 4. Review
 
-- [ ] 4.1 Review：另一個 CLI（非實作 2-3 的那個）針對本次改動做獨立 code review，聚焦安全性（存取判斷有沒有因為避免重複查詢而意外繞過權限檢查）與快取失效邏輯正確性，交付：審查報告列出發現或明講「審查通過，無發現」。驗證：審查報告存在且已回覆到 PM。
-- [ ] 4.2 全部確認沒問題後，跑一次完整測試套件（pnpm --filter saas test 與 pnpm --filter api test）確認沒有破壞其他功能，交付：測試全數通過。驗證：測試輸出顯示 0 failed。
+- [x] 4.1 Review：另一個 CLI（非實作 2-3 的那個）針對本次改動做獨立 code review，聚焦安全性（存取判斷有沒有因為避免重複查詢而意外繞過權限檢查）與快取失效邏輯正確性，交付：審查報告列出發現或明講「審查通過，無發現」。驗證：審查報告存在且已回覆到 PM。
+  驗證：Codex（非實作 2-3、5-7 的 Agy）對 commit c26f4f6c 做獨立 review，聚焦安全性與 fail-fast 行為，結論「未發現 Critical，發現 4 個 Warning」；4 個 Warning（pg.Pool connection_limit 無效、無權限使用者可用性倒退、optional chaining 靜默吞錯、測試覆蓋度不足）已於 commit 47e1f333 全數修復並重新跑測試驗證。
+- [x] 4.2 全部確認沒問題後，跑一次完整測試套件（pnpm --filter saas test 與 pnpm --filter api test）確認沒有破壞其他功能，交付：測試全數通過。驗證：測試輸出顯示 0 failed。
+  驗證：`pnpm --filter saas test`（87 files / 369 tests passed, 0 failed）、`pnpm --filter api test`（62 files / 304 tests passed, 0 failed）。
 
 ## 5.（本次追加）authenticated layout 序列查詢平行化
 
