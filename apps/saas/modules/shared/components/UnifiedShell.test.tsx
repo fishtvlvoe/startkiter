@@ -85,6 +85,9 @@ vi.mock("@startkiter/database", () => ({
 		course: {
 			findFirst: async () => null,
 		},
+		user: {
+			findUnique: async () => null,
+		},
 	},
 	getCourseAccessOrdersForUser: async () => [],
 }));

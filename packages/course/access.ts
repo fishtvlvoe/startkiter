@@ -7,12 +7,17 @@ export type CourseAccessOrderRow = {
 
 export type CourseAccessReader = {
 	findOrdersForUser: (userId: string) => Promise<CourseAccessOrderRow[]>;
+	/** 該使用者目前的角色（如 "admin"／"user"），查不到時回傳 null。role="admin" 時直接放行，不查訂單。 */
+	getUserRole: (userId: string) => Promise<string | null>;
 };
 
-/** Entitlement：至少一筆 sku=startkiter-mvp 且 courseAccess=true。 */
+/** Entitlement：role=admin 直接放行；否則至少一筆 sku=startkiter-mvp 且 courseAccess=true。 */
 export async function canAccessCourse(userId: string, reader: CourseAccessReader): Promise<boolean> {
 	if (!userId) {
 		return false;
+	}
+	if ((await reader.getUserRole(userId)) === "admin") {
+		return true;
 	}
 	const rows = await reader.findOrdersForUser(userId);
 	return rows.some((row) => row.sku === MVP_SKU && row.courseAccess === true);
@@ -36,11 +41,13 @@ export type BundleCourseAccessReader = {
 	hasActiveSubscription: (userId: string, courseId: string) => Promise<boolean>;
 	/** 查詢指定使用者是否已兌換該課程的邀請連結。 */
 	hasRedeemedInvite: (userId: string, courseId: string) => Promise<boolean>;
+	/** 該使用者目前的角色（如 "admin"／"user"），查不到時回傳 null。role="admin" 時直接放行，不查訂單/bundle/訂閱/邀請。 */
+	getUserRole: (userId: string) => Promise<string | null>;
 };
 
 /**
- * 判斷 buyer 對指定 courseId 是否有存取權：買家名下任一 courseAccess=true 的訂單，
- * 若該訂單 sku 對應的 bundle 包含這個 courseId，即視為有存取權。
+ * 判斷 buyer 對指定 courseId 是否有存取權：role=admin 直接放行；否則買家名下任一
+ * courseAccess=true 的訂單，若該訂單 sku 對應的 bundle 包含這個 courseId，即視為有存取權。
  */
 export async function canAccessCourseId(
 	userId: string,
@@ -49,6 +56,9 @@ export async function canAccessCourseId(
 ): Promise<boolean> {
 	if (!userId || !courseId) {
 		return false;
+	}
+	if ((await reader.getUserRole(userId)) === "admin") {
+		return true;
 	}
 	const grantedSkus = await reader.findGrantedSkusForUser(userId);
 	for (const sku of grantedSkus) {

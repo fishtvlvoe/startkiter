@@ -38,6 +38,10 @@ function createDbBundleCourseAccessReader(): BundleCourseAccessReader {
 		},
 		hasActiveSubscription: async () => false,
 		hasRedeemedInvite: async () => false,
+		getUserRole: async (userId) => {
+			const user = await db.user.findUnique({ where: { id: userId }, select: { role: true } });
+			return user?.role ?? null;
+		},
 	};
 }
 
