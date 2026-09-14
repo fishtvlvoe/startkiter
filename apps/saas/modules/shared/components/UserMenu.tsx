@@ -85,7 +85,7 @@ export function UserMenu({ showUserName }: { showUserName?: boolean }) {
 				<DropdownMenuGroup>
 					<DropdownMenuLabel>
 						{name}
-						<span className="font-normal text-xs block opacity-70 text-[#c3c4c7]">
+						<span className="font-normal text-xs block opacity-70 text-muted-foreground">
 							{email}
 						</span>
 					</DropdownMenuLabel>
