@@ -69,6 +69,12 @@ const MENU_GROUP_CONFIG: Record<
 		icon: "book-open",
 		requiresOperator: true,
 	},
+	"admin-settings": {
+		id: "admin-settings-menu",
+		label: "系統設定",
+		icon: "settings",
+		requiresOperator: true,
+	},
 };
 
 function groupMountMenuItems(flatItems: MountMenuItem[]): MountMenuItem[] {

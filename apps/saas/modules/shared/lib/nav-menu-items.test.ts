@@ -2,7 +2,66 @@ import { describe, expect, it } from "vitest";
 import { MOUNT_POINTS } from "@startkiter/platform";
 import { getMountMenuItems, getTabBarItems, isMenuActive, type MountMenuItem } from "./nav-menu-items";
 
+function collectMenuHrefs(items: MountMenuItem[]): string[] {
+	const hrefs: string[] = [];
+	for (const item of items) {
+		hrefs.push(item.href);
+		for (const sub of item.subItems ?? []) {
+			hrefs.push(sub.href);
+		}
+	}
+	return hrefs;
+}
+
 describe("nav-menu-items (Phase 2 shell mount points)", () => {
+	describe("admin-nav-orphan-pages-wireup: orphan admin pages in sidebar", () => {
+		it("1.1 isOperator=true includes organizations/orders/revenue/checkout-gateway/einvoice/gemini hrefs", () => {
+			const items = getMountMenuItems({
+				pathname: "/",
+				isOperator: true,
+				canAccessPagesCms: true,
+			});
+			const hrefs = collectMenuHrefs(items);
+
+			expect(hrefs).toContain("/admin/organizations");
+			expect(hrefs).toContain("/admin/orders");
+			expect(hrefs).toContain("/admin/revenue");
+			expect(hrefs).toContain("/admin/settings/checkout-gateway");
+			expect(hrefs).toContain("/admin/settings/einvoice");
+			expect(hrefs).toContain("/admin/settings/gemini");
+		});
+
+		it("1.2 checkout-gateway/einvoice/gemini collapse under admin-settings-menu", () => {
+			const items = getMountMenuItems({
+				pathname: "/",
+				isOperator: true,
+				canAccessPagesCms: true,
+			});
+			const adminSettings = items.find((item) => item.id === "admin-settings-menu");
+
+			expect(adminSettings).toBeDefined();
+			expect(adminSettings?.label).toBe("系統設定");
+			expect(adminSettings?.subItems?.map((item) => item.href)).toEqual([
+				"/admin/settings/checkout-gateway",
+				"/admin/settings/einvoice",
+				"/admin/settings/gemini",
+			]);
+		});
+
+		it("3.2 isOperator=false hides the six orphan admin pages and admin-settings group", () => {
+			const items = getMountMenuItems({ pathname: "/", isOperator: false });
+			const hrefs = collectMenuHrefs(items);
+
+			expect(items.some((item) => item.id === "admin-settings-menu")).toBe(false);
+			expect(hrefs).not.toContain("/admin/organizations");
+			expect(hrefs).not.toContain("/admin/orders");
+			expect(hrefs).not.toContain("/admin/revenue");
+			expect(hrefs).not.toContain("/admin/settings/checkout-gateway");
+			expect(hrefs).not.toContain("/admin/settings/einvoice");
+			expect(hrefs).not.toContain("/admin/settings/gemini");
+		});
+	});
+
 	describe("Task 5.1 / 5.2 / 5.3: sidebar items from MOUNT_POINTS", () => {
 		it("renders all MOUNT_POINTS menu items sorted by order", () => {
 			const learnerItems = getMountMenuItems({ pathname: "/course", isOperator: false });
@@ -17,6 +76,7 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 			expect(learnerItems.find((item) => item.href === "/course")?.isActive).toBe(true);
 
 			// Operator sees course admin children grouped under one「課程」parent.
+			// New orphan admin pages append after email-settings (orders 19–24).
 			expect(operatorItems.map((item) => item.label)).toEqual([
 				"開始",
 				"課程",
@@ -26,6 +86,10 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 				"課程",
 				"頁面管理",
 				"郵件設定",
+				"組織管理",
+				"訂單管理",
+				"營收報表",
+				"系統設定",
 			]);
 			const courseAdminMenu = operatorItems.find((item) => item.id === "course-admin-menu");
 			expect(courseAdminMenu?.requiresOperator).toBe(true);
