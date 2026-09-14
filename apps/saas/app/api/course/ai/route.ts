@@ -1,4 +1,4 @@
-import { generateText, textModel } from "../../../../../../packages/ai";
+import { generateText, resolveTextModel } from "../../../../../../packages/ai";
 import { auth } from "@startkiter/auth";
 import { userCanAccessCourseId } from "@startkiter/api/modules/course/lib/course-access";
 import { db } from "@startkiter/database";
@@ -86,7 +86,7 @@ export async function POST(request: Request) {
 		}
 
 		const { text } = await generateText({
-			model: textModel,
+			model: await resolveTextModel(),
 			prompt: [
 				"你是這門課的隨課助教。只能根據下方「目前授權單元」的講義與助教脈絡回答。",
 				"不可以推測或引用其他單元、其他學員資料，也不可以呼叫任何外部工具。",

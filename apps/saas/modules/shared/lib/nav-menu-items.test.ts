@@ -15,7 +15,7 @@ function collectMenuHrefs(items: MountMenuItem[]): string[] {
 
 describe("nav-menu-items (Phase 2 shell mount points)", () => {
 	describe("admin-nav-orphan-pages-wireup: orphan admin pages in sidebar", () => {
-		it("1.1 isOperator=true includes organizations/orders/revenue/checkout-gateway/einvoice/gemini hrefs", () => {
+		it("1.1 isOperator=true includes organizations/orders/revenue/checkout-gateway/einvoice/gemini/ai-provider hrefs", () => {
 			const items = getMountMenuItems({
 				pathname: "/",
 				isOperator: true,
@@ -29,9 +29,10 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 			expect(hrefs).toContain("/admin/settings/checkout-gateway");
 			expect(hrefs).toContain("/admin/settings/einvoice");
 			expect(hrefs).toContain("/admin/settings/gemini");
+			expect(hrefs).toContain("/admin/settings/ai-provider");
 		});
 
-		it("1.2 checkout-gateway/einvoice/gemini collapse under admin-settings-menu", () => {
+		it("1.2 checkout-gateway/einvoice/gemini/ai-provider collapse under admin-settings-menu", () => {
 			const items = getMountMenuItems({
 				pathname: "/",
 				isOperator: true,
@@ -45,10 +46,11 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 				"/admin/settings/checkout-gateway",
 				"/admin/settings/einvoice",
 				"/admin/settings/gemini",
+				"/admin/settings/ai-provider",
 			]);
 		});
 
-		it("3.2 isOperator=false hides the six orphan admin pages and admin-settings group", () => {
+		it("3.2 isOperator=false hides the orphan admin pages and admin-settings group", () => {
 			const items = getMountMenuItems({ pathname: "/", isOperator: false });
 			const hrefs = collectMenuHrefs(items);
 
@@ -59,6 +61,7 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 			expect(hrefs).not.toContain("/admin/settings/checkout-gateway");
 			expect(hrefs).not.toContain("/admin/settings/einvoice");
 			expect(hrefs).not.toContain("/admin/settings/gemini");
+			expect(hrefs).not.toContain("/admin/settings/ai-provider");
 		});
 	});
 

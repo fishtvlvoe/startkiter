@@ -3,9 +3,9 @@ import { eventIterator, ORPCError } from "@orpc/server";
 import {
 	convertToModelMessages,
 	createGenerateSpreadsheetTool,
+	resolveTextModel,
 	safeValidateUIMessages,
 	streamText,
-	textModel,
 	type UIMessageChunk,
 } from "@startkiter/ai";
 import { z } from "zod";
@@ -50,7 +50,7 @@ export const streamMessage = protectedProcedure
 		}
 
 		const response = streamText({
-			model: textModel,
+			model: await resolveTextModel(),
 			messages: await convertToModelMessages(validatedMessages.data),
 			tools: {
 				generateSpreadsheet: createGenerateSpreadsheetTool(context.user),
