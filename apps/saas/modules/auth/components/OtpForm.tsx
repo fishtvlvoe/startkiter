@@ -21,7 +21,7 @@ import {
 	InputOTPSlot,
 } from "@startkiter/ui/components/input-otp";
 import { useRouter } from "@shared/hooks/router";
-import { getSafeRedirectPath } from "@shared/lib/redirect";
+import { getLoginReturnPath } from "@shared/lib/redirect";
 import { AlertTriangleIcon, ArrowLeftIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
@@ -40,11 +40,10 @@ export function OtpForm() {
 	const searchParams = useSearchParams();
 
 	const invitationId = searchParams.get("invitationId");
-	const redirectTo = searchParams.get("redirectTo");
 
 	const redirectPath = invitationId
 		? `/organization-invitation/${invitationId}`
-		: getSafeRedirectPath(redirectTo, config.redirectAfterSignIn);
+		: getLoginReturnPath(searchParams, config.redirectAfterSignIn);
 
 	const form = useForm({
 		resolver: zodResolver(formSchema),

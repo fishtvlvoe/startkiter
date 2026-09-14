@@ -12,8 +12,10 @@ import { ConfirmationAlertProvider } from "@shared/components/ConfirmationAlertP
 import { PermixProvider } from "@shared/components/PermixProvider";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { setupPermissions, permix } from "@shared/lib/permix";
+import { buildLoginRedirectUrl } from "@shared/lib/redirect";
 import { getServerQueryClient } from "@shared/lib/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { findBuyerDeploymentsForUser } from "@startkiter/platform";
 import { SupportWidget } from "@deployment/components/SupportWidget";
@@ -29,7 +31,8 @@ export default async function AuthenticatedLayout({ children }: PropsWithChildre
 	const session = await getSession();
 
 	if (!session) {
-		redirect("/login");
+		const pathname = (await headers()).get("x-pathname");
+		redirect(buildLoginRedirectUrl(pathname));
 	}
 
 	const queryClient = getServerQueryClient();

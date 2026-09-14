@@ -1,11 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { InvoicePreferenceFields, DEFAULT_INVOICE_PREFERENCE } from "@payments/components/InvoicePreferenceFields";
 import type { CheckoutPaymentSessionResult, InvoicePreferenceInput } from "@startkiter/payments";
 import { Button, Input } from "@startkiter/ui";
+import { buildLoginRedirectUrl } from "@shared/lib/redirect";
 
 function checkoutErrorMessage(status: number, code?: string, reason?: string) {
 	if (code === "invalid_coupon") {
@@ -45,6 +46,7 @@ export type CheckoutProduct = {
 
 export function CheckoutButton({ product }: { product: CheckoutProduct }) {
 	const router = useRouter();
+	const pathname = usePathname();
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [invoicePreference, setInvoicePreference] = useState<InvoicePreferenceInput>(DEFAULT_INVOICE_PREFERENCE);
@@ -130,7 +132,7 @@ export function CheckoutButton({ product }: { product: CheckoutProduct }) {
 			});
 
 			if (response.status === 401) {
-				router.push("/login?next=/checkout");
+				router.push(buildLoginRedirectUrl(pathname));
 				return;
 			}
 

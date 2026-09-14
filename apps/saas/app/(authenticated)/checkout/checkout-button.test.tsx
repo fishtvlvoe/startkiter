@@ -5,6 +5,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const pushMock = vi.hoisted(() => vi.fn());
+const usePathnameMock = vi.hoisted(() => vi.fn(() => "/bundles/combo-a"));
 
 vi.mock("next/navigation", () => ({
 	useRouter: () => ({
@@ -12,6 +13,7 @@ vi.mock("next/navigation", () => ({
 		replace: vi.fn(),
 		refresh: vi.fn(),
 	}),
+	usePathname: () => usePathnameMock(),
 }));
 
 vi.mock("@payments/components/InvoicePreferenceFields", () => ({
@@ -97,5 +99,33 @@ describe("CheckoutButton product prop", () => {
 		const body = JSON.parse(String(init.body)) as Record<string, unknown>;
 		expect(body.productId).toBe("combo-a");
 		expect(body).not.toHaveProperty("sku");
+	});
+
+	it("on 401 redirects to login with next set to the current pathname", async () => {
+		usePathnameMock.mockReturnValue("/bundles/combo-a");
+		vi.stubGlobal(
+			"fetch",
+			vi.fn().mockResolvedValue({
+				ok: false,
+				status: 401,
+				json: async () => ({}),
+			}),
+		);
+
+		const container = await render(
+			<CheckoutButton
+				product={{ productId: "combo-a", title: "測試組合", amount: 5000 }}
+			/>,
+		);
+
+		const buyButton = Array.from(container.querySelectorAll("button")).find((button) =>
+			button.textContent?.includes("購買"),
+		);
+
+		await act(async () => {
+			buyButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+		});
+
+		expect(pushMock).toHaveBeenCalledWith("/login?next=%2Fbundles%2Fcombo-a");
 	});
 });
