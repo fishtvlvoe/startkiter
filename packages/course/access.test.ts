@@ -13,8 +13,8 @@ function readerWith(
 	role: string | null = null,
 ): CourseAccessReader {
 	return {
-		findOrdersForUser: async () => rows,
-		getUserRole: async () => role,
+		findOrdersForUser: vi.fn(async () => rows),
+		getUserRole: vi.fn(async () => role),
 	};
 }
 
@@ -64,10 +64,11 @@ describe("canAccessCourse", () => {
 		expect(ok).toBe(false);
 	});
 
-	it("allows an admin role user with no orders at all", async () => {
+	it("allows an admin role user with no orders at all, without querying orders", async () => {
 		const reader = readerWith([], "admin");
 		const ok = await canAccessCourse("user_admin", reader);
 		expect(ok).toBe(true);
+		expect(reader.findOrdersForUser).not.toHaveBeenCalled();
 	});
 
 	it("still denies a non-admin role user with no orders", async () => {
@@ -202,6 +203,9 @@ describe("canAccessCourseId (Requirement: Bundle purchase grants access to all i
 
 		await expect(canAccessCourseId("user_admin", "course-a", reader)).resolves.toBe(true);
 		expect(reader.findGrantedSkusForUser).not.toHaveBeenCalled();
+		expect(reader.findBundleCourseIds).not.toHaveBeenCalled();
+		expect(reader.hasActiveSubscription).not.toHaveBeenCalled();
+		expect(reader.hasRedeemedInvite).not.toHaveBeenCalled();
 	});
 
 	it("still denies a non-admin role user with no other entitlement", async () => {
