@@ -78,7 +78,7 @@ const DropdownMenuContent = ({
 		>
 			<DropdownMenuPrimitive.Popup
 				className={cn(
-					"p-2 shadow-xl shadow-black/3 z-50 min-w-[8rem] overflow-hidden rounded-xl border bg-popover text-popover-foreground",
+						"isolate p-2 shadow-xl shadow-black/3 z-50 min-w-[8rem] overflow-hidden rounded-xl border bg-popover/100 text-popover-foreground",
 					"data-[closed]:fade-out-0 data-[open]:fade-in-0 data-[closed]:zoom-out-95 data-[open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-[closed]:animate-out data-[open]:animate-in",
 					className,
 				)}

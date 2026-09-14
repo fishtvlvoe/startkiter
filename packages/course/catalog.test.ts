@@ -27,7 +27,7 @@ describe("lesson catalog", () => {
 		const lesson = getLesson("lesson-01", { NODE_ENV: "development" });
 		expect(lesson?.mediaKind).toBe("placeholder");
 		expect(lesson?.isDemoFallback).toBe(true);
-		expect(lesson?.mediaUrl).toContain("flower.mp4");
+		expect(lesson?.mediaUrl).toBe("/api/course/demo-video");
 	});
 
 	it("fails closed when Bunny library missing in production", () => {

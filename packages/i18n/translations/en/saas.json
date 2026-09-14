@@ -747,6 +747,7 @@
     "signOut": "Log out"
   },
   "pricing": {
+    "checkoutError": "Could not create the checkout link. Please try again later.",
     "products": {
       "startkiter-mvp": {
         "title": "StartKiter package",

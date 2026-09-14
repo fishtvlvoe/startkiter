@@ -8,12 +8,24 @@ export type ResolvedVideoSource =
 	| {
 			ok: false;
 			error: string;
-	  };
+		};
+
+const LEGACY_DEMO_VIDEO_URL =
+	"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4";
+const SAME_ORIGIN_DEMO_VIDEO_URL = "/api/course/demo-video";
 
 export function resolveVideoSource(inputUrl: string): ResolvedVideoSource {
 	const trimmed = inputUrl.trim();
 	if (!trimmed.startsWith("https://")) {
 		return { ok: false, error: "Only secure HTTPS URLs are allowed." };
+	}
+
+	if (trimmed === LEGACY_DEMO_VIDEO_URL) {
+		return {
+			ok: true,
+			provider: "CUSTOM_MP4",
+			url: SAME_ORIGIN_DEMO_VIDEO_URL,
+		};
 	}
 
 	try {

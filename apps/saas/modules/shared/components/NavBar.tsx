@@ -93,6 +93,7 @@ interface NavMenuListProps {
 	isCollapsedEffective: boolean;
 	listClassName?: string;
 	onLinkClick?: () => void;
+	tone?: "dark" | "surface";
 }
 
 export const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -129,23 +130,34 @@ function isNavSubItemActive(pathname: string, href: string): boolean {
 	return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function NavMenuList({
+export function NavMenuList({
 	menuItems,
 	isCollapsedEffective,
 	listClassName,
 	onLinkClick,
+	tone = "dark",
 }: NavMenuListProps) {
 	const pathname = usePathname();
+	const mutedTextClass = tone === "surface" ? "text-muted-foreground" : "text-[#c3c4c7]";
+	const mutedIconClass = tone === "surface" ? "text-muted-foreground" : "text-[#c3c4c7]/60";
+	const hoverClass = tone === "surface" ? "hover:bg-accent/50" : "hover:bg-white/5";
+	const activeTextClass = "text-white";
+	const activeSubTextClass = tone === "surface" ? "text-foreground" : "text-white";
 
 	return (
 		<TooltipProvider delay={0}>
-			<ul className={listClassName}>
+			<ul className={listClassName} data-sidebar-variant={tone}>
 				{menuItems.map((menuItem, idx) => {
 					const isFirstOperator = menuItem.requiresOperator && (idx === 0 || !menuItems[idx - 1]?.requiresOperator);
 					const divider = isFirstOperator && !isCollapsedEffective ? (
 						<li key="admin-section-divider" className="pt-2 pb-1" data-testid="nav-menu-admin-divider">
-							<div className="border-t border-[#c3c4c7]/15 mb-2" />
-							<div className="px-3 text-[10px] font-semibold uppercase tracking-wider text-[#c3c4c7]/70">
+							<div
+								className={cn(
+									"mb-2 border-t",
+									tone === "surface" ? "border-border" : "border-[#c3c4c7]/15",
+								)}
+							/>
+							<div className={cn("px-3 text-[10px] font-semibold uppercase tracking-wider", mutedTextClass)}>
 								管理
 							</div>
 						</li>
@@ -155,7 +167,7 @@ function NavMenuList({
 						"gap-3 px-3 py-2 text-sm flex w-full items-center rounded-lg whitespace-nowrap transition-colors",
 						{
 							"font-semibold bg-[#2271b1] text-white": menuItem.isActive,
-							"hover:bg-white/5": !menuItem.isActive,
+							[hoverClass]: !menuItem.isActive,
 							"md:justify-center md:px-2": isCollapsedEffective,
 						},
 					);
@@ -164,7 +176,7 @@ function NavMenuList({
 						<menuItem.icon
 							className={cn(
 								"size-5 shrink-0",
-								menuItem.isActive ? "text-white" : "text-[#c3c4c7]/60",
+								menuItem.isActive ? "text-white" : mutedIconClass,
 							)}
 						/>
 					);
@@ -270,8 +282,8 @@ function NavMenuList({
 										{parentIcon}
 										<span
 											className={cn({
-												"text-white": menuItem.isActive,
-												"text-[#c3c4c7]": !menuItem.isActive,
+												[activeTextClass]: menuItem.isActive,
+												[mutedTextClass]: !menuItem.isActive,
 											})}
 										>
 											{menuItem.label}
@@ -292,10 +304,13 @@ function NavMenuList({
 															<Link
 																href={subItem.href}
 																onClick={onLinkClick}
-																className={cn(
-																	"py-1.5 pl-2 pr-3 text-sm flex w-full items-center rounded-md text-[#c3c4c7] transition-colors hover:bg-white/5",
-																	subActive && "font-semibold text-white",
-																)}
+											className={cn(
+												"py-1.5 pl-2 pr-3 text-sm flex w-full items-center rounded-md transition-colors",
+												tone === "surface"
+													? "text-muted-foreground hover:bg-accent/50"
+													: "text-[#c3c4c7] hover:bg-white/5",
+												subActive && cn("font-semibold", activeSubTextClass),
+																																				)}
 																prefetch
 															>
 																{subItem.label}
@@ -317,8 +332,8 @@ function NavMenuList({
 							{!isCollapsedEffective && (
 								<span
 									className={cn({
-										"text-white": menuItem.isActive,
-										"text-[#c3c4c7]": !menuItem.isActive,
+										[activeTextClass]: menuItem.isActive,
+										[mutedTextClass]: !menuItem.isActive,
 									})}
 								>
 									{menuItem.label}
@@ -930,11 +945,12 @@ export function NavBar() {
 							<div className="min-h-0 px-4 pb-4 flex flex-1 flex-col">
 								<div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]">
 									<NavMenuList
-										menuItems={menuItems}
-										isCollapsedEffective={false}
-										listClassName="flex list-none flex-col flex-nowrap items-stretch gap-1 px-0"
-										onLinkClick={() => setMobileMenuOpen(false)}
-									/>
+											menuItems={menuItems}
+											isCollapsedEffective={false}
+											listClassName="flex list-none flex-col flex-nowrap items-stretch gap-1 px-0"
+											onLinkClick={() => setMobileMenuOpen(false)}
+											tone="surface"
+										/>
 								</div>
 							</div>
 						</SheetContent>
@@ -980,17 +996,7 @@ export function NavBar() {
 										className="hidden shrink-0 md:flex"
 										data-testid="notification-center"
 									/>
-									<div data-testid="color-mode-toggle">
-										<ColorModeToggle
-											modes={["system", "light", "dark"]}
-											labels={{
-												system: t("common.colorMode.system"),
-												light: t("common.colorMode.light"),
-												dark: t("common.colorMode.dark"),
-											}}
-										/>
-									</div>
-								</div>
+														</div>
 							</div>
 
 							{authConfig.organizations.enable && !authConfig.organizations.hideOrganization && (

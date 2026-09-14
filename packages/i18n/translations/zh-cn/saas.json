@@ -747,6 +747,7 @@
     "signOut": "退出登录"
   },
   "pricing": {
+    "checkoutError": "建立结账链接失败，请稍后再试。",
     "products": {
       "startkiter-mvp": {
         "title": "StartKiter 开站包",

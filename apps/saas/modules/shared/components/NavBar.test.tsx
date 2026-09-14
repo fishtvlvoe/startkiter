@@ -2,7 +2,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MOUNT_POINTS } from "@startkiter/platform";
-import { iconMap, NavBar, resolveIcon } from "./NavBar";
+import { iconMap, NavBar, NavMenuList, resolveIcon } from "./NavBar";
 import { PagesCmsAccessProvider } from "./PagesCmsAccessProvider";
 import * as navMenuItems from "../lib/nav-menu-items";
 
@@ -120,6 +120,30 @@ describe("NavBar shell layout (Phase 2)", () => {
 		expect(topBarHtml).toContain("color-mode-toggle");
 		expect(topBarHtml).not.toContain("locale-switch");
 	});
+
+	it("renders one theme switch and uses surface colors in the mobile drawer", () => {
+		const html = renderToStaticMarkup(<NavBar />);
+		const drawerHtml = renderToStaticMarkup(
+			<NavMenuList
+				menuItems={[{
+					id: "course",
+					label: "課程",
+					href: "/course",
+					icon: iconMap["book-open"],
+					isActive: false,
+					order: 0,
+				}]}
+				isCollapsedEffective={false}
+				listClassName="flex list-none flex-col"
+				tone="surface"
+			/>,
+		);
+
+		expect(html.match(/data-testid="color-mode-toggle"/g)).toHaveLength(1);
+		expect(drawerHtml).toContain('data-sidebar-variant="surface"');
+		expect(drawerHtml).toContain("text-muted-foreground");
+		expect(drawerHtml).toContain("hover:bg-accent/50");
+});
 
 	it("9.3 renders sidebar navigation at 1280px wide viewport and does not render active tab bar (md:hidden)", () => {
 		mockIsMobile = false;
