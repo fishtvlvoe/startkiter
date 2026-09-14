@@ -8,9 +8,13 @@ import {
 	type CourseAccessReader,
 } from "./access";
 
-function readerWith(rows: { sku: string; courseAccess: boolean }[]): CourseAccessReader {
+function readerWith(
+	rows: { sku: string; courseAccess: boolean }[],
+	role: string | null = null,
+): CourseAccessReader {
 	return {
-		findOrdersForUser: async () => rows,
+		findOrdersForUser: vi.fn(async () => rows),
+		getUserRole: vi.fn(async () => role),
 	};
 }
 
@@ -19,12 +23,14 @@ function bundleReaderWith(args: {
 	bundleCourseIdsBySku: Record<string, string[]>;
 	hasActiveSubscription?: boolean;
 	hasRedeemedInvite?: boolean;
+	role?: string | null;
 }): BundleCourseAccessReader {
 	return {
-		findGrantedSkusForUser: async () => args.grantedSkus,
-		findBundleCourseIds: async (sku) => args.bundleCourseIdsBySku[sku] ?? null,
-		hasActiveSubscription: async () => args.hasActiveSubscription ?? false,
+		findGrantedSkusForUser: vi.fn(async () => args.grantedSkus),
+		findBundleCourseIds: vi.fn(async (sku) => args.bundleCourseIdsBySku[sku] ?? null),
+		hasActiveSubscription: vi.fn(async () => args.hasActiveSubscription ?? false),
 		hasRedeemedInvite: vi.fn(async () => args.hasRedeemedInvite ?? false),
+		getUserRole: vi.fn(async () => args.role ?? null),
 	} as BundleCourseAccessReader;
 }
 
@@ -55,6 +61,19 @@ describe("canAccessCourse", () => {
 			"user_other",
 			readerWith([{ sku: "other-sku", courseAccess: true }]),
 		);
+		expect(ok).toBe(false);
+	});
+
+	it("allows an admin role user with no orders at all, without querying orders", async () => {
+		const reader = readerWith([], "admin");
+		const ok = await canAccessCourse("user_admin", reader);
+		expect(ok).toBe(true);
+		expect(reader.findOrdersForUser).not.toHaveBeenCalled();
+	});
+
+	it("still denies a non-admin role user with no orders", async () => {
+		const reader = readerWith([], "user");
+		const ok = await canAccessCourse("user_plain", reader);
 		expect(ok).toBe(false);
 	});
 });
@@ -171,5 +190,41 @@ describe("canAccessCourseId (Requirement: Bundle purchase grants access to all i
 		});
 
 		await expect(canAccessCourseId("user_not_invited", "course-a", reader)).resolves.toBe(false);
+	});
+
+	it("allows an admin role user with no order, bundle, subscription, or invite records", async () => {
+		const reader = bundleReaderWith({
+			grantedSkus: [],
+			bundleCourseIdsBySku: {},
+			hasActiveSubscription: false,
+			hasRedeemedInvite: false,
+			role: "admin",
+		});
+
+		await expect(canAccessCourseId("user_admin", "course-a", reader)).resolves.toBe(true);
+		expect(reader.findGrantedSkusForUser).not.toHaveBeenCalled();
+		expect(reader.findBundleCourseIds).not.toHaveBeenCalled();
+		expect(reader.hasActiveSubscription).not.toHaveBeenCalled();
+		expect(reader.hasRedeemedInvite).not.toHaveBeenCalled();
+	});
+
+	it("still denies a non-admin role user with no other entitlement", async () => {
+		const reader = bundleReaderWith({
+			grantedSkus: [],
+			bundleCourseIdsBySku: {},
+			role: "user",
+		});
+
+		await expect(canAccessCourseId("user_plain", "course-a", reader)).resolves.toBe(false);
+	});
+
+	it("still denies when getUserRole resolves null", async () => {
+		const reader = bundleReaderWith({
+			grantedSkus: [],
+			bundleCourseIdsBySku: {},
+			role: null,
+		});
+
+		await expect(canAccessCourseId("user_norole", "course-a", reader)).resolves.toBe(false);
 	});
 });

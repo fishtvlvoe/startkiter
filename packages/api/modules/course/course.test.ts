@@ -22,6 +22,7 @@ vi.mock("@startkiter/database", () => {
 			courseSubscription: { findFirst: vi.fn() },
 			courseInviteRedemption: { findUnique: vi.fn() },
 			studioFolder: { findMany: vi.fn() },
+			user: { findUnique: vi.fn() },
 		},
 		getCourseAccessOrdersForUser: vi.fn(),
 		getPublishedContentCacheGeneration: () => generation,
@@ -138,6 +139,24 @@ describe("getLessonDetail bundle-aware access", () => {
 		);
 
 		expect(result.lesson.content).toBe("# paid lesson");
+	});
+
+	it("allows an admin role user to open a paid lesson with no order, bundle, subscription, or invite records", async () => {
+		const adminSession = {
+			session: { id: "session-admin", userId: "admin-a" },
+			user: { id: "admin-a", email: "admin-a@example.com", role: "admin" },
+		};
+		vi.mocked(auth.api.getSession).mockResolvedValue(adminSession as never);
+		vi.mocked(db.user.findUnique).mockResolvedValueOnce({ role: "admin" } as never);
+
+		const result = await call(
+			courseRouter.getLessonDetail,
+			{ lessonId: "lesson-paid" },
+			{ context: { headers: new Headers(), user: adminSession.user } as never },
+		);
+
+		expect(result.lesson.content).toBe("# paid lesson");
+		expect(getCourseAccessOrdersForUser).not.toHaveBeenCalled();
 	});
 
 	it("rejects a paid lesson outside the buyer's bundle", async () => {
