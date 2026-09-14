@@ -72,7 +72,13 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 			});
 
 			// Learner should see every non-operator-only menu item, sorted by order.
-			expect(learnerItems.map((item) => item.label)).toEqual(["開始", "課程", "客服", "帳號設定"]);
+			expect(learnerItems.map((item) => item.label)).toEqual([
+				"開始",
+				"課程",
+				"客服",
+				"AI 助手",
+				"帳號設定",
+			]);
 			expect(learnerItems.find((item) => item.href === "/course")?.isActive).toBe(true);
 
 			// Operator sees course admin children grouped under one「課程」parent.
@@ -81,6 +87,7 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 				"開始",
 				"課程",
 				"客服",
+				"AI 助手",
 				"帳號設定",
 				"後台設定",
 				"課程",
