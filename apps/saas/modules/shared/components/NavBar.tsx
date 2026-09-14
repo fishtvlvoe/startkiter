@@ -996,6 +996,16 @@ export function NavBar() {
 										className="hidden shrink-0 md:flex"
 										data-testid="notification-center"
 									/>
+								<div className="hidden shrink-0 md:block" data-testid="color-mode-toggle">
+									<ColorModeToggle
+										modes={["system", "light", "dark"]}
+										labels={{
+											system: t("common.colorMode.system"),
+											light: t("common.colorMode.light"),
+											dark: t("common.colorMode.dark"),
+										}}
+									/>
+								</div>
 														</div>
 							</div>
 

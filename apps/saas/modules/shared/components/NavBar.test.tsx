@@ -121,7 +121,7 @@ describe("NavBar shell layout (Phase 2)", () => {
 		expect(topBarHtml).not.toContain("locale-switch");
 	});
 
-	it("renders one theme switch and uses surface colors in the mobile drawer", () => {
+	it("renders exactly one theme switch per breakpoint (desktop + mobile, not duplicated within either) and uses surface colors in the mobile drawer", () => {
 		const html = renderToStaticMarkup(<NavBar />);
 		const drawerHtml = renderToStaticMarkup(
 			<NavMenuList
@@ -139,7 +139,22 @@ describe("NavBar shell layout (Phase 2)", () => {
 			/>,
 		);
 
-		expect(html.match(/data-testid="color-mode-toggle"/g)).toHaveLength(1);
+		// Exactly two instances total: one desktop-only wrapper, one mobile-only wrapper. This mirrors the
+		// existing NotificationCenter/Logo pattern in this file — each breakpoint gets its own DOM node toggled
+		// by CSS, not JS. The original BUG-05 duplicate was two toggles visible within the SAME (mobile)
+		// breakpoint at once; that is what this test guards against, not the normal one-per-breakpoint
+		// responsive split.
+		const toggleCount = (html.match(/data-testid="color-mode-toggle"/g) ?? []).length;
+		expect(toggleCount).toBe(2);
+
+		const desktopWrapperEnd = html.indexOf('data-testid="color-mode-toggle"');
+		const desktopWrapperStart = html.lastIndexOf("<div", desktopWrapperEnd);
+		expect(html.slice(desktopWrapperStart, desktopWrapperEnd)).toContain("md:block");
+
+		const mobileWrapperEnd = html.lastIndexOf('data-testid="color-mode-toggle"');
+		const mobileSectionStart = html.lastIndexOf("md:hidden", mobileWrapperEnd);
+		expect(mobileSectionStart).toBeGreaterThan(desktopWrapperEnd);
+
 		expect(drawerHtml).toContain('data-sidebar-variant="surface"');
 		expect(drawerHtml).toContain("text-muted-foreground");
 		expect(drawerHtml).toContain("hover:bg-accent/50");
