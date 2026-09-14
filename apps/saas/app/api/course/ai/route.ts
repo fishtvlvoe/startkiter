@@ -20,10 +20,6 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 
 export async function POST(request: Request) {
 	try {
-		if (!process.env.OPENAI_API_KEY?.trim()) {
-			return unavailable();
-		}
-
 		let body: Record<string, unknown> = {};
 
 		try {

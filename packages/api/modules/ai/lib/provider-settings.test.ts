@@ -9,17 +9,30 @@ import { db } from "@startkiter/database";
 import { encryptSettingsJson } from "../../course/lib/settings-crypto";
 import {
 	AI_PROVIDER_SETTING_ID,
-	loadAiProviderResolution,
 	readAiProviderSettings,
 	writeAiProviderSettings,
 } from "./provider-settings";
+
+function siteSettingRow(ciphertext: string) {
+	return {
+		id: AI_PROVIDER_SETTING_ID,
+		ciphertext,
+		updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+		updatedBy: null,
+	};
+}
+
+type UpsertArgs = {
+	create: { ciphertext: string };
+	update: { ciphertext?: string };
+};
 
 describe("ai provider settings", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		process.env.SETTINGS_ENCRYPTION_KEY = "ai-provider-test-secret";
 		vi.mocked(db.siteSetting.findUnique).mockResolvedValue(null);
-		vi.mocked(db.siteSetting.upsert).mockResolvedValue({} as never);
+		vi.mocked(db.siteSetting.upsert).mockResolvedValue(siteSettingRow("ciphertext") as never);
 	});
 
 	it("returns OpenAI gpt-4o-mini defaults when no setting row exists", async () => {
@@ -31,16 +44,14 @@ describe("ai provider settings", () => {
 	});
 
 	it("round-trips an OpenAI provider/model selection", async () => {
-		let storedCiphertext: string | null = null;
-		vi.mocked(db.siteSetting.upsert).mockImplementation(async ({ create, update }) => {
-			storedCiphertext = (update as { ciphertext: string }).ciphertext ?? create.ciphertext;
-			return {} as never;
-		});
-		vi.mocked(db.siteSetting.findUnique).mockImplementation(async () =>
-			storedCiphertext
-				? ({ id: AI_PROVIDER_SETTING_ID, ciphertext: storedCiphertext } as never)
-				: null,
-		);
+		let storedCiphertext = "";
+		vi.mocked(db.siteSetting.upsert).mockImplementation((async ({ create, update }: UpsertArgs) => {
+			storedCiphertext = update.ciphertext ?? create.ciphertext;
+			return siteSettingRow(storedCiphertext);
+		}) as never);
+		vi.mocked(db.siteSetting.findUnique).mockImplementation((async () =>
+			storedCiphertext ? siteSettingRow(storedCiphertext) : null
+		) as never);
 
 		await expect(
 			writeAiProviderSettings({ provider: "openai", model: "gpt-4o" }),
@@ -54,16 +65,14 @@ describe("ai provider settings", () => {
 	});
 
 	it("stores a Gemini key encrypted and only exposes hasGeminiKey", async () => {
-		let storedCiphertext: string | null = null;
-		vi.mocked(db.siteSetting.upsert).mockImplementation(async ({ create, update }) => {
-			storedCiphertext = (update as { ciphertext: string }).ciphertext ?? create.ciphertext;
-			return {} as never;
-		});
-		vi.mocked(db.siteSetting.findUnique).mockImplementation(async () =>
-			storedCiphertext
-				? ({ id: AI_PROVIDER_SETTING_ID, ciphertext: storedCiphertext } as never)
-				: null,
-		);
+		let storedCiphertext = "";
+		vi.mocked(db.siteSetting.upsert).mockImplementation((async ({ create, update }: UpsertArgs) => {
+			storedCiphertext = update.ciphertext ?? create.ciphertext;
+			return siteSettingRow(storedCiphertext);
+		}) as never);
+		vi.mocked(db.siteSetting.findUnique).mockImplementation((async () =>
+			storedCiphertext ? siteSettingRow(storedCiphertext) : null
+		) as never);
 
 		await expect(
 			writeAiProviderSettings({
@@ -95,14 +104,13 @@ describe("ai provider settings", () => {
 			secret,
 		);
 		let storedCiphertext = initialCiphertext;
-		vi.mocked(db.siteSetting.findUnique).mockImplementation(async () => ({
-			id: AI_PROVIDER_SETTING_ID,
-			ciphertext: storedCiphertext,
+		vi.mocked(db.siteSetting.findUnique).mockImplementation((async () =>
+			siteSettingRow(storedCiphertext)
+		) as never);
+		vi.mocked(db.siteSetting.upsert).mockImplementation((async ({ create, update }: UpsertArgs) => {
+			storedCiphertext = update.ciphertext ?? create.ciphertext;
+			return siteSettingRow(storedCiphertext);
 		}) as never);
-		vi.mocked(db.siteSetting.upsert).mockImplementation(async ({ create, update }) => {
-			storedCiphertext = (update as { ciphertext: string }).ciphertext ?? create.ciphertext;
-			return {} as never;
-		});
 
 		await expect(
 			writeAiProviderSettings({
@@ -125,21 +133,31 @@ describe("ai provider settings", () => {
 		});
 	});
 
-	it("returns null from resolution when SETTINGS_ENCRYPTION_KEY no longer matches", async () => {
-		const ciphertext = encryptSettingsJson(
-			JSON.stringify({
-				provider: "gemini",
-				model: "gemini-1.5-flash",
-				geminiApiKey: "secret-gemini-key",
-			}),
-			"original-secret",
-		);
-		vi.mocked(db.siteSetting.findUnique).mockResolvedValue({
-			id: AI_PROVIDER_SETTING_ID,
-			ciphertext,
-		} as never);
-		process.env.SETTINGS_ENCRYPTION_KEY = "rotated-secret";
+	it("rejects unknown model ids on write", async () => {
+		await expect(
+			writeAiProviderSettings({ provider: "openai", model: "not-a-real-model" }),
+		).resolves.toEqual({ ok: false, error: "invalid_model" });
+		expect(db.siteSetting.upsert).not.toHaveBeenCalled();
+	});
 
-		await expect(loadAiProviderResolution()).resolves.toBeNull();
+	it("treats a stored unknown model as invalid and falls back on read", async () => {
+		const secret = process.env.SETTINGS_ENCRYPTION_KEY!;
+		vi.mocked(db.siteSetting.findUnique).mockResolvedValue(
+			siteSettingRow(
+				encryptSettingsJson(
+					JSON.stringify({
+						provider: "openai",
+						model: "gpt-totally-fake",
+					}),
+					secret,
+				),
+			) as never,
+		);
+
+		await expect(readAiProviderSettings()).resolves.toEqual({
+			provider: "openai",
+			model: "gpt-4o-mini",
+			hasGeminiKey: false,
+		});
 	});
 });

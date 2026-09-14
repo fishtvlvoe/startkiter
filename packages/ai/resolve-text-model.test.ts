@@ -4,33 +4,34 @@ const openaiMock = vi.hoisted(() =>
 	vi.fn((modelId: string) => ({ provider: "openai.responses", modelId })),
 );
 
-const loadAiProviderResolutionMock = vi.hoisted(() => vi.fn());
-
 vi.mock("@startkiter/database", () => ({
-	db: { order: { findMany: vi.fn() }, siteSetting: { findUnique: vi.fn() } },
+	db: {
+		order: { findMany: vi.fn() },
+		siteSetting: { findUnique: vi.fn(), upsert: vi.fn() },
+	},
 }));
 
 vi.mock("@ai-sdk/openai", () => ({
 	openai: openaiMock,
 }));
 
-vi.mock("../api/modules/ai/lib/provider-settings", () => ({
-	loadAiProviderResolution: loadAiProviderResolutionMock,
-}));
+import { db } from "@startkiter/database";
+
+import { encryptSettingsJson } from "../api/modules/course/lib/settings-crypto";
 
 describe("resolveTextModel", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.resetModules();
+		process.env.SETTINGS_ENCRYPTION_KEY = "ai-provider-test-secret";
 		openaiMock.mockImplementation((modelId: string) => ({
 			provider: "openai.responses",
 			modelId,
 		}));
-		loadAiProviderResolutionMock.mockResolvedValue(null);
+		vi.mocked(db.siteSetting.findUnique).mockResolvedValue(null);
 	});
 
 	it("falls back to openai gpt-4o-mini when no configuration exists", async () => {
-		loadAiProviderResolutionMock.mockResolvedValue(null);
 		const { resolveTextModel } = await import("./index");
 
 		const model = await resolveTextModel();
@@ -40,9 +41,21 @@ describe("resolveTextModel", () => {
 	});
 
 	it("falls back to openai gpt-4o-mini without throwing when Gemini key decryption fails", async () => {
-		// Decryption failure is surfaced as null from loadAiProviderResolution
-		// (wrong SETTINGS_ENCRYPTION_KEY / corrupt ciphertext).
-		loadAiProviderResolutionMock.mockResolvedValue(null);
+		vi.mocked(db.siteSetting.findUnique).mockResolvedValue({
+			id: "ai-provider-config",
+			ciphertext: encryptSettingsJson(
+				JSON.stringify({
+					provider: "gemini",
+					model: "gemini-1.5-flash",
+					geminiApiKey: "secret-gemini-key",
+				}),
+				"original-secret",
+			),
+			updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+			updatedBy: null,
+		} as never);
+		process.env.SETTINGS_ENCRYPTION_KEY = "rotated-secret";
+
 		const { resolveTextModel } = await import("./index");
 
 		await expect(resolveTextModel()).resolves.toEqual({
@@ -52,11 +65,41 @@ describe("resolveTextModel", () => {
 	});
 
 	it("falls back when Gemini is selected but the decrypted key is missing", async () => {
-		loadAiProviderResolutionMock.mockResolvedValue({
-			provider: "gemini",
-			model: "gemini-1.5-flash",
-			geminiApiKey: null,
+		vi.mocked(db.siteSetting.findUnique).mockResolvedValue({
+			id: "ai-provider-config",
+			ciphertext: encryptSettingsJson(
+				JSON.stringify({
+					provider: "gemini",
+					model: "gemini-1.5-flash",
+				}),
+				process.env.SETTINGS_ENCRYPTION_KEY!,
+			),
+			updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+			updatedBy: null,
+		} as never);
+
+		const { resolveTextModel } = await import("./index");
+
+		await expect(resolveTextModel()).resolves.toEqual({
+			provider: "openai.responses",
+			modelId: "gpt-4o-mini",
 		});
+	});
+
+	it("falls back when the stored model is not in the known allowlist", async () => {
+		vi.mocked(db.siteSetting.findUnique).mockResolvedValue({
+			id: "ai-provider-config",
+			ciphertext: encryptSettingsJson(
+				JSON.stringify({
+					provider: "openai",
+					model: "gpt-totally-fake",
+				}),
+				process.env.SETTINGS_ENCRYPTION_KEY!,
+			),
+			updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+			updatedBy: null,
+		} as never);
+
 		const { resolveTextModel } = await import("./index");
 
 		await expect(resolveTextModel()).resolves.toEqual({
@@ -66,7 +109,7 @@ describe("resolveTextModel", () => {
 	});
 
 	it("does not throw when the settings loader itself rejects", async () => {
-		loadAiProviderResolutionMock.mockRejectedValue(new Error("db down"));
+		vi.mocked(db.siteSetting.findUnique).mockRejectedValue(new Error("db down"));
 		const { resolveTextModel } = await import("./index");
 
 		await expect(resolveTextModel()).resolves.toEqual({

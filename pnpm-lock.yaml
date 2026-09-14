@@ -496,6 +496,9 @@ importers:
       '@prisma/nextjs-monorepo-workaround-plugin':
         specifier: 'catalog:'
         version: 7.9.1
+      '@startkiter/ai':
+        specifier: workspace:*
+        version: link:../../packages/ai
       '@startkiter/api':
         specifier: workspace:*
         version: link:../../packages/api
