@@ -65,7 +65,9 @@ export function UserMenu({ showUserName }: { showUserName?: boolean }) {
 							{showUserName && (
 								<span className="leading-tight text-left">
 									<span className="font-medium text-sm">{name}</span>
-									<span className="text-xs block opacity-70">{email}</span>
+									<span className="text-xs block opacity-70 text-[#c3c4c7]">
+										{email}
+									</span>
 								</span>
 							)}
 						</span>
@@ -83,7 +85,9 @@ export function UserMenu({ showUserName }: { showUserName?: boolean }) {
 				<DropdownMenuGroup>
 					<DropdownMenuLabel>
 						{name}
-						<span className="font-normal text-xs block opacity-70">{email}</span>
+						<span className="font-normal text-xs block opacity-70 text-muted-foreground">
+							{email}
+						</span>
 					</DropdownMenuLabel>
 				</DropdownMenuGroup>
 

@@ -745,5 +745,18 @@
     "enterCourse": "Open course",
     "buyCourse": "Buy the StartKiter package NT$8,800",
     "signOut": "Log out"
+  },
+  "pricing": {
+    "products": {
+      "startkiter-mvp": {
+        "title": "StartKiter package",
+        "description": "Take the course and lifetime GitHub code package with you, then add modules as you need them.",
+        "features": {
+          "course": "Complete launch course",
+          "code": "Lifetime GitHub code package",
+          "modules": "Platform shell with mount points"
+        }
+      }
+    }
   }
 }

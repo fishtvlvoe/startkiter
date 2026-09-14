@@ -745,5 +745,18 @@
     "enterCourse": "进入课程",
     "buyCourse": "购买开站包 NT$8,800",
     "signOut": "退出登录"
+  },
+  "pricing": {
+    "products": {
+      "startkiter-mvp": {
+        "title": "StartKiter 开站包",
+        "description": "课程与终身 GitHub 代码包一次带走，之后可按需要挂上模块。",
+        "features": {
+          "course": "完整开站课程",
+          "code": "GitHub 终身代码包",
+          "modules": "可挂载模块的平台骨架"
+        }
+      }
+    }
   }
 }
