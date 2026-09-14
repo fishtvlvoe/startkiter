@@ -57,6 +57,7 @@ import {
 	PenIcon,
 	SettingsIcon,
 	ShieldUserIcon,
+	SparklesIcon,
 	UserCogIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -108,6 +109,7 @@ export const iconMap: Record<string, React.ComponentType<{ className?: string }>
 	image: ImageIcon,
 	mail: MailIcon,
 	"shield-user": ShieldUserIcon,
+	sparkles: SparklesIcon,
 	"user-cog": UserCogIcon,
 	ellipsis: EllipsisIcon,
 	"📚": BookOpenIcon,

@@ -79,6 +79,18 @@ describe("MOUNT_POINTS operator-only menu filtering (Task 3.3)", () => {
 	});
 });
 
+describe("ai-assistant mount point (ai-chatbot-frontend-wireup)", () => {
+	it("registers AI 助手 for all signed-in users without requiresOperator", () => {
+		const aiAssistant = MOUNT_POINTS.find((plugin) => plugin.id === "ai-assistant");
+		expect(aiAssistant).toBeDefined();
+		expect(aiAssistant?.mount.route?.path).toBe("/ai");
+		expect(aiAssistant?.mount.menu?.label).toBe("AI 助手");
+		expect(aiAssistant?.mount.menu?.requiresOperator).not.toBe(true);
+		expect(aiAssistant?.mount.menu?.requiresOperator).toBeUndefined();
+		expect(aiAssistant?.dataSpec).toBe("none");
+	});
+});
+
 describe("pages-cms Core mount point (Requirement: This capability is a fixed Core capability, not a replaceable Plugin)", () => {
 	it("registers pages-cms as an operator-only Core menu item", () => {
 		const pagesCms = MOUNT_POINTS.find((plugin) => plugin.id === "pages-cms");

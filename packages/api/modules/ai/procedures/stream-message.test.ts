@@ -83,4 +83,26 @@ describe("streamMessage", () => {
 			call(streamMessage, { messages: [] }, { context: { headers: new Headers() } }),
 		).rejects.toBeDefined();
 	});
+
+	it("rejects an unauthenticated request before invoking the model", async () => {
+		vi.mocked(auth.api.getSession).mockResolvedValue(null);
+
+		await expect(
+			call(
+				streamMessage,
+				{
+					messages: [
+						{
+							id: "msg-1",
+							role: "user",
+							parts: [{ type: "text", text: "hello" }],
+						},
+					],
+				},
+				{ context: { headers: new Headers() } },
+			),
+		).rejects.toMatchObject({
+			code: "UNAUTHORIZED",
+		});
+	});
 });

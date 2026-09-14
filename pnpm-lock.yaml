@@ -457,6 +457,9 @@ importers:
       '@ai-sdk/openai':
         specifier: 'catalog:'
         version: 4.0.42(zod@4.4.3)
+      '@ai-sdk/react':
+        specifier: 'catalog:'
+        version: 4.0.69(react@19.2.8)(zod@4.4.3)
       '@blocknote/core':
         specifier: 0.51.4
         version: 0.51.4(@types/hast@3.0.5)
