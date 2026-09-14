@@ -1,10 +1,10 @@
-"use client";
-
 import { config } from "@config";
 import { authClient } from "@startkiter/auth/client";
 import { Button } from "@startkiter/ui/components/button";
 import { toastError } from "@startkiter/ui/components/toast";
+import { getLoginReturnPath } from "@shared/lib/redirect";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { parseAsString, useQueryState } from "nuqs";
 
 import { oAuthProviders } from "../constants/oauth-providers";
@@ -17,12 +17,13 @@ export function SocialSigninButton({
 	className?: string;
 }) {
 	const t = useTranslations();
+	const searchParams = useSearchParams();
 	const [invitationId] = useQueryState("invitationId", parseAsString);
 	const providerData = oAuthProviders[provider];
 
 	const redirectPath = invitationId
 		? `/organization-invitation/${invitationId}`
-		: config.redirectAfterSignIn;
+		: getLoginReturnPath(searchParams, config.redirectAfterSignIn);
 
 	const onSignin = async () => {
 		const callbackURL = new URL(redirectPath, window.location.origin);

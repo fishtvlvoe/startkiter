@@ -52,7 +52,15 @@ vi.mock("@startkiter/api/modules/pages-cms/access", () => ({
 }));
 
 vi.mock("next/navigation", () => ({
-	redirect: vi.fn(),
+	redirect: vi.fn((url: string) => {
+		throw new Error(`REDIRECT:${url}`);
+	}),
+}));
+
+vi.mock("next/headers", () => ({
+	headers: vi.fn(async () => ({
+		get: (name: string) => (name === "x-pathname" ? "/bundles/combo-a" : null),
+	})),
 }));
 
 vi.mock("@tanstack/react-query", () => ({
@@ -93,6 +101,7 @@ import { getOrganizationMembership } from "@startkiter/database";
 import { listPurchases } from "@payments/lib/server";
 import { findBuyerDeploymentsForUser } from "@startkiter/platform";
 import { setupPermissions } from "@shared/lib/permix";
+import { headers } from "next/headers";
 import AuthenticatedLayout from "./layout";
 
 const mockSession = {
@@ -111,11 +120,22 @@ describe("AuthenticatedLayout (5.1, 5.2, 5.3)", () => {
 		vi.mocked(getOrganizationList).mockResolvedValue([{ id: "org-1", name: "Org 1" }] as never);
 		vi.mocked(listPurchases).mockResolvedValue([{ id: "pur-1" }] as never);
 		vi.mocked(findBuyerDeploymentsForUser).mockResolvedValue([] as never);
+		vi.mocked(headers).mockResolvedValue({
+			get: (name: string) => (name === "x-pathname" ? "/bundles/combo-a" : null),
+		} as never);
 		mockPrefetchQuery.mockImplementation(async (options: { queryFn?: () => unknown }) => {
 			if (options.queryFn) {
 				return await options.queryFn();
 			}
 		});
+	});
+
+	it("unauthenticated visitor redirects to /login with next from x-pathname", async () => {
+		vi.mocked(getSession).mockResolvedValue(null as never);
+
+		await expect(AuthenticatedLayout({ children: "child content" })).rejects.toThrow(
+			"REDIRECT:/login?next=%2Fbundles%2Fcombo-a",
+		);
 	});
 
 	it("5.1: 驗證 getOrganizationMembership、getOrganizationList預取、listPurchases預取、findBuyerDeploymentsForUser 為平行發出而非序列 await，且 prefetchQuery 實際呼叫 queryFn", async () => {

@@ -12,7 +12,7 @@ import { Button } from "@startkiter/ui/components/button";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@startkiter/ui/components/form";
 import { Input } from "@startkiter/ui/components/input";
 import { useRouter } from "@shared/hooks/router";
-import { getSafeRedirectPath } from "@shared/lib/redirect";
+import { getLoginReturnPath } from "@shared/lib/redirect";
 import { useQueryClient } from "@tanstack/react-query";
 import {
 	AlertTriangleIcon,
@@ -58,7 +58,6 @@ export function LoginForm() {
 	const [showPassword, setShowPassword] = useState(false);
 	const invitationId = searchParams.get("invitationId");
 	const email = searchParams.get("email");
-	const redirectTo = searchParams.get("redirectTo");
 
 	const form = useForm({
 		resolver: zodResolver(formSchema),
@@ -71,7 +70,7 @@ export function LoginForm() {
 
 	const redirectPath = invitationId
 		? `/organization-invitation/${invitationId}`
-		: getSafeRedirectPath(redirectTo, config.redirectAfterSignIn);
+		: getLoginReturnPath(searchParams, config.redirectAfterSignIn);
 
 	useEffect(() => {
 		if (sessionLoaded && user) {

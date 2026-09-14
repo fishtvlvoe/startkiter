@@ -1,11 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { InvoicePreferenceFields, DEFAULT_INVOICE_PREFERENCE } from "@payments/components/InvoicePreferenceFields";
 import type { CheckoutPaymentSessionResult, InvoicePreferenceInput } from "@startkiter/payments";
 import { Button, Input } from "@startkiter/ui";
+import { buildLoginRedirectUrl } from "@shared/lib/redirect";
 
 function checkoutErrorMessage(status: number, code?: string, reason?: string) {
 	if (code === "invalid_coupon") {
@@ -37,8 +38,15 @@ type AppliedCoupon = {
 	finalAmount: number;
 };
 
-export function CheckoutButton() {
+export type CheckoutProduct = {
+	productId: string;
+	title: string;
+	amount: number;
+};
+
+export function CheckoutButton({ product }: { product: CheckoutProduct }) {
 	const router = useRouter();
+	const pathname = usePathname();
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [invoicePreference, setInvoicePreference] = useState<InvoicePreferenceInput>(DEFAULT_INVOICE_PREFERENCE);
@@ -61,7 +69,7 @@ export function CheckoutButton() {
 			const res = await fetch("/api/coupons/validate", {
 				method: "POST",
 				headers: { "content-type": "application/json" },
-				body: JSON.stringify({ code, productId: "startkiter-mvp" }),
+				body: JSON.stringify({ code, productId: product.productId }),
 			});
 			if (!res.ok) {
 				if (res.status === 429) {
@@ -117,14 +125,14 @@ export function CheckoutButton() {
 				method: "POST",
 				headers: { "content-type": "application/json" },
 				body: JSON.stringify({
-					sku: "startkiter-mvp",
+					productId: product.productId,
 					invoicePreference,
 					couponCode: appliedCoupon?.code,
 				}),
 			});
 
 			if (response.status === 401) {
-				router.push("/login?next=/checkout");
+				router.push(buildLoginRedirectUrl(pathname));
 				return;
 			}
 
@@ -148,7 +156,7 @@ export function CheckoutButton() {
 		}
 	}
 
-	const displayAmount = appliedCoupon ? appliedCoupon.finalAmount : 8800;
+	const displayAmount = appliedCoupon ? appliedCoupon.finalAmount : product.amount;
 
 	return (
 		<div className="space-y-4">
@@ -205,7 +213,7 @@ export function CheckoutButton() {
 				disabled={loading}
 				onClick={() => void startCheckout()}
 			>
-				{loading ? "建立訂單中…" : `購買開站包 NT$${displayAmount.toLocaleString()}`}
+				{loading ? "建立訂單中…" : `購買${product.title} NT$${displayAmount.toLocaleString()}`}
 			</button>
 			{error ? <p className="text-sm text-destructive">{error}</p> : null}
 		</div>

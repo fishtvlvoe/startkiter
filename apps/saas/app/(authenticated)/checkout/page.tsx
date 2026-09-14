@@ -1,5 +1,6 @@
 import { getSession } from "@auth/lib/server";
 import { AuthWrapper } from "@shared/components/AuthWrapper";
+import { MVP_AMOUNT_TWD, MVP_SKU } from "@startkiter/payments";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@startkiter/ui";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -45,7 +46,9 @@ export default async function CheckoutPage() {
 							<div className="rounded-2xl border border-foreground/10 bg-muted/30 p-4 text-sm text-muted-foreground">
 								付完款即可看課；代碼包要再到課程頁綁定 GitHub 後領取。
 							</div>
-							<CheckoutButton />
+							<CheckoutButton
+								product={{ productId: MVP_SKU, title: "開站包", amount: MVP_AMOUNT_TWD }}
+							/>
 						</>
 					)}
 
