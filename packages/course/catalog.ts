@@ -19,8 +19,8 @@ type LessonSeed = LessonSummary & {
 	bunnyVideoId: string;
 };
 
-const PLACEHOLDER_MEDIA =
-	"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4";
+/** Same-origin proxy keeps the demo video compatible with the app's COEP header. */
+const PLACEHOLDER_MEDIA = "/api/course/demo-video";
 
 /**
  * MVP 靜態目錄。Bunny guid 可用 env 覆寫：BUNNY_LESSON_01_VIDEO_ID …

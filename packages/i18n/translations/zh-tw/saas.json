@@ -747,6 +747,7 @@
     "signOut": "登出"
   },
   "pricing": {
+    "checkoutError": "建立結帳連結失敗，請稍後再試。",
     "products": {
       "startkiter-mvp": {
         "title": "StartKiter 開站包",

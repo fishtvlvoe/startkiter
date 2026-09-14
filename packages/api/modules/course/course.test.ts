@@ -92,6 +92,14 @@ describe("Course Video Resolver (Fluent Player)", () => {
 		}
 	});
 
+	it("rewrites the legacy external demo video to the same-origin proxy", () => {
+		const res = resolveVideoSource(
+			"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+		);
+
+		expect(res).toEqual({ ok: true, provider: "CUSTOM_MP4", url: "/api/course/demo-video" });
+	});
+
 	it("rejects unknown or insecure HTTP URLs (fail-closed)", () => {
 		const insecureRes = resolveVideoSource("http://example.com/video.mp4");
 		expect(insecureRes.ok).toBe(false);

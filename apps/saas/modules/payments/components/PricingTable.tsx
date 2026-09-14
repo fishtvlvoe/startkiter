@@ -10,12 +10,18 @@ import { Tabs, TabsList, TabsTrigger } from "@startkiter/ui/components/tabs";
 import { useLocaleCurrency } from "@shared/hooks/locale-currency";
 import { useRouter } from "@shared/hooks/router";
 import { orpc } from "@shared/lib/orpc-query-utils";
+import { toastError } from "@startkiter/ui/components/toast";
 import { useMutation } from "@tanstack/react-query";
 import { ArrowRightIcon, BadgePercentIcon, CheckIcon, StarIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
 
 const plans = paymentsConfig.plans;
+
+export function notifyCheckoutError(message: string, error: unknown) {
+	console.error(error);
+	toastError(message);
+}
 
 interface PlanSelection {
 	type: "one-time" | "subscription";
@@ -71,7 +77,7 @@ export function PricingTable({
 
 			window.location.href = checkoutLink;
 		} catch (error) {
-			console.error(error);
+			notifyCheckoutError(t("pricing.checkoutError"), error);
 		} finally {
 			setLoading(false);
 		}
