@@ -268,13 +268,13 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		dataSpec: "none",
 	},
 	{
-		id: "admin-checkout-gateway",
-		name: "金流設定",
+		id: "admin-gateway-config",
+		name: "收款閘道設定",
 		version: "0.1.0",
 		mount: {
 			route: { path: "/admin/settings/checkout-gateway" },
 			menu: {
-				label: "金流設定",
+				label: "收款閘道設定",
 				icon: "settings",
 				order: 22,
 				requiresOperator: true,
