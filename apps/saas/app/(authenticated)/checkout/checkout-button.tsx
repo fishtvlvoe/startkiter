@@ -37,7 +37,13 @@ type AppliedCoupon = {
 	finalAmount: number;
 };
 
-export function CheckoutButton() {
+export type CheckoutProduct = {
+	productId: string;
+	title: string;
+	amount: number;
+};
+
+export function CheckoutButton({ product }: { product: CheckoutProduct }) {
 	const router = useRouter();
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
@@ -61,7 +67,7 @@ export function CheckoutButton() {
 			const res = await fetch("/api/coupons/validate", {
 				method: "POST",
 				headers: { "content-type": "application/json" },
-				body: JSON.stringify({ code, productId: "startkiter-mvp" }),
+				body: JSON.stringify({ code, productId: product.productId }),
 			});
 			if (!res.ok) {
 				if (res.status === 429) {
@@ -117,7 +123,7 @@ export function CheckoutButton() {
 				method: "POST",
 				headers: { "content-type": "application/json" },
 				body: JSON.stringify({
-					sku: "startkiter-mvp",
+					productId: product.productId,
 					invoicePreference,
 					couponCode: appliedCoupon?.code,
 				}),
@@ -148,7 +154,7 @@ export function CheckoutButton() {
 		}
 	}
 
-	const displayAmount = appliedCoupon ? appliedCoupon.finalAmount : 8800;
+	const displayAmount = appliedCoupon ? appliedCoupon.finalAmount : product.amount;
 
 	return (
 		<div className="space-y-4">
@@ -205,7 +211,7 @@ export function CheckoutButton() {
 				disabled={loading}
 				onClick={() => void startCheckout()}
 			>
-				{loading ? "建立訂單中…" : `購買開站包 NT$${displayAmount.toLocaleString()}`}
+				{loading ? "建立訂單中…" : `購買${product.title} NT$${displayAmount.toLocaleString()}`}
 			</button>
 			{error ? <p className="text-sm text-destructive">{error}</p> : null}
 		</div>
