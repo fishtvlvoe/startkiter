@@ -9,6 +9,7 @@
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@ai-sdk/google": "catalog:",
 		"@ai-sdk/openai": "catalog:",
 		"@ai-sdk/react": "catalog:",
 		"@startkiter/database": "workspace:*",

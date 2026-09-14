@@ -18,7 +18,7 @@ vi.mock("@startkiter/database", () => ({
 
 vi.mock("../../../../../../packages/ai", () => ({
 	generateText: vi.fn(),
-	textModel: {},
+	resolveTextModel: vi.fn(async () => ({})),
 }));
 
 vi.mock("@startkiter/api/modules/course/lib/course-access", () => ({

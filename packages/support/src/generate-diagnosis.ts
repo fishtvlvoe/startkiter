@@ -1,4 +1,4 @@
-import { generateText, textModel } from "@startkiter/ai";
+import { generateText, resolveTextModel } from "@startkiter/ai";
 
 import type { Diagnosis, GenerateDiagnosis } from "./copilot";
 
@@ -6,7 +6,7 @@ const DIAGNOSIS_TIMEOUT_MS = 15_000;
 
 export const defaultGenerateDiagnosis: GenerateDiagnosis = async (input) => {
 	const { text } = await generateText({
-		model: textModel,
+		model: await resolveTextModel(),
 		abortSignal: AbortSignal.timeout(DIAGNOSIS_TIMEOUT_MS),
 		prompt: [
 			"You are a StartKiter support diagnostic copilot.",

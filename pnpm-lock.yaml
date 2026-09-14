@@ -6,6 +6,9 @@ settings:
 
 catalogs:
   default:
+    '@ai-sdk/google':
+      specifier: ^4.0.42
+      version: 4.0.69
     '@ai-sdk/openai':
       specifier: ^4.0.42
       version: 4.0.42
@@ -493,6 +496,9 @@ importers:
       '@prisma/nextjs-monorepo-workaround-plugin':
         specifier: 'catalog:'
         version: 7.9.1
+      '@startkiter/ai':
+        specifier: workspace:*
+        version: link:../../packages/ai
       '@startkiter/api':
         specifier: workspace:*
         version: link:../../packages/api
@@ -671,6 +677,9 @@ importers:
 
   packages/ai:
     dependencies:
+      '@ai-sdk/google':
+        specifier: 'catalog:'
+        version: 4.0.69(zod@4.4.3)
       '@ai-sdk/openai':
         specifier: 'catalog:'
         version: 4.0.42(zod@4.4.3)
@@ -1513,6 +1522,12 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
+  '@ai-sdk/google@4.0.69':
+    resolution: {integrity: sha512-clIivD3RQwutykzKQ8CV+BXIA6EX3xcrfJyXXvAni2SlR9JVATSRbu+JFK/j25a330aZ6WiDwbGyD/u951qXOg==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
   '@ai-sdk/mcp@2.0.32':
     resolution: {integrity: sha512-NkXUnIEUmOmjD42LGpXGdHPULYvAV4SYUojutqw5YVNmQA7g64YRv3NLOaST21b2vIScUAah4qWchi62iUpQdA==}
     engines: {node: '>=22'}
@@ -1530,6 +1545,16 @@ packages:
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/provider-utils@5.0.40':
+    resolution: {integrity: sha512-zsXPwSAQ9mRJ2hvyITaLOYUyuGrBmzFhJXOg4mllGmla1PfNxZcm4GwqMiV2xQaDgcgBMdUGxXkp9xekZZNIkg==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/provider@4.0.14':
+    resolution: {integrity: sha512-yukP2tbcQQErG5gLCMBGvpvb/rM3D3KlTKG6eKKOdNHLHqtNNDEeBxdYrY/JL+O76B2ig5dXY19H/f1HFSvRiQ==}
+    engines: {node: '>=22'}
 
   '@ai-sdk/provider@4.0.7':
     resolution: {integrity: sha512-6or44XprPzKbr8zkmzosowSE0pxkvJcoojBL+mCZvPUt3kvXp3XSNqeVun9golb1acEfSo6yaEBRT18h2VU+1Q==}
@@ -8129,6 +8154,12 @@ snapshots:
       '@vercel/oidc': 3.2.0
       zod: 4.4.3
 
+  '@ai-sdk/google@4.0.69(zod@4.4.3)':
+    dependencies:
+      '@ai-sdk/provider': 4.0.14
+      '@ai-sdk/provider-utils': 5.0.40(zod@4.4.3)
+      zod: 4.4.3
+
   '@ai-sdk/mcp@2.0.32(zod@4.4.3)':
     dependencies:
       '@ai-sdk/provider': 4.0.7
@@ -8150,6 +8181,19 @@ snapshots:
       eventsource-parser: 3.1.1
       undici: 7.29.0
       zod: 4.4.3
+
+  '@ai-sdk/provider-utils@5.0.40(zod@4.4.3)':
+    dependencies:
+      '@ai-sdk/provider': 4.0.14
+      '@standard-schema/spec': 1.1.0
+      '@workflow/serde': 4.1.0
+      eventsource-parser: 3.1.1
+      undici: 7.29.0
+      zod: 4.4.3
+
+  '@ai-sdk/provider@4.0.14':
+    dependencies:
+      json-schema: 0.4.0
 
   '@ai-sdk/provider@4.0.7':
     dependencies:

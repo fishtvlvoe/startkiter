@@ -40,6 +40,11 @@ export default async function AdminLayout({ children }: PropsWithChildren) {
 		href: "/admin/settings/gemini",
 		icon: <ClipboardListIcon className="size-4 opacity-50" />,
 	};
+	const aiProviderMenuItem = {
+		title: "AI 助手模型",
+		href: "/admin/settings/ai-provider",
+		icon: <ClipboardListIcon className="size-4 opacity-50" />,
+	};
 
 	return (
 		<>
@@ -57,6 +62,7 @@ export default async function AdminLayout({ children }: PropsWithChildren) {
 							courseMenuItem,
 							coursePackMenuItem,
 							geminiMenuItem,
+							aiProviderMenuItem,
 							{
 							title: t("menu.users"),
 								href: "/admin/users",

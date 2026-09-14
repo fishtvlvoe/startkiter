@@ -38,7 +38,7 @@ vi.mock("@startkiter/ai", () => ({
 	generateText: vi.fn().mockResolvedValue({
 		text: '{"confidence":"low","buyerReply":null,"remediationSuggestion":null,"appearsResolved":false}',
 	}),
-	textModel: {},
+	resolveTextModel: vi.fn(async () => ({})),
 }));
 
 vi.mock("@startkiter/platform", () => ({

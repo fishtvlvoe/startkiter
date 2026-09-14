@@ -325,4 +325,20 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		},
 		dataSpec: "none",
 	},
+	{
+		id: "admin-ai-provider",
+		name: "AI 助手模型設定",
+		version: "0.1.0",
+		mount: {
+			route: { path: "/admin/settings/ai-provider" },
+			menu: {
+				label: "AI 助手模型",
+				icon: "bot-message-square",
+				order: 25,
+				requiresOperator: true,
+				groupId: "admin-settings",
+			},
+		},
+		dataSpec: "none",
+	},
 ];
