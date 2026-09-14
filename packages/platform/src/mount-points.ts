@@ -222,4 +222,97 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		},
 		dataSpec: "none",
 	},
+	{
+		id: "admin-organizations",
+		name: "組織管理",
+		version: "0.1.0",
+		mount: {
+			route: { path: "/admin/organizations" },
+			menu: {
+				label: "組織管理",
+				icon: "user-cog",
+				order: 19,
+				requiresOperator: true,
+			},
+		},
+		dataSpec: "none",
+	},
+	{
+		id: "admin-orders",
+		name: "訂單管理",
+		version: "0.1.0",
+		mount: {
+			route: { path: "/admin/orders" },
+			menu: {
+				label: "訂單管理",
+				icon: "package",
+				order: 20,
+				requiresOperator: true,
+			},
+		},
+		dataSpec: "none",
+	},
+	{
+		id: "admin-revenue",
+		name: "營收報表",
+		version: "0.1.0",
+		mount: {
+			route: { path: "/admin/revenue" },
+			menu: {
+				label: "營收報表",
+				icon: "clipboard-list",
+				order: 21,
+				requiresOperator: true,
+			},
+		},
+		dataSpec: "none",
+	},
+	{
+		id: "admin-checkout-gateway",
+		name: "金流設定",
+		version: "0.1.0",
+		mount: {
+			route: { path: "/admin/settings/checkout-gateway" },
+			menu: {
+				label: "金流設定",
+				icon: "settings",
+				order: 22,
+				requiresOperator: true,
+				groupId: "admin-settings",
+			},
+		},
+		dataSpec: "none",
+	},
+	{
+		id: "admin-einvoice",
+		name: "發票設定",
+		version: "0.1.0",
+		mount: {
+			route: { path: "/admin/settings/einvoice" },
+			menu: {
+				label: "發票設定",
+				icon: "file-text",
+				order: 23,
+				requiresOperator: true,
+				groupId: "admin-settings",
+			},
+		},
+		dataSpec: "none",
+	},
+	{
+		id: "admin-gemini",
+		name: "Gemini 設定",
+		version: "0.1.0",
+		mount: {
+			route: { path: "/admin/settings/gemini" },
+			menu: {
+				label: "Gemini 設定",
+				icon: "bot-message-square",
+				order: 24,
+				requiresOperator: true,
+				groupId: "admin-settings",
+			},
+		},
+		dataSpec: "none",
+	},
 ];
