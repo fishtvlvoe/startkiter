@@ -1,4 +1,4 @@
-<!-- SPECTRA:START v1.0.2 -->
+<!-- SPECTRA:START v1.3.0 -->
 
 # Spectra Instructions
 
@@ -6,58 +6,31 @@ This project uses Spectra for Spec-Driven Development(SDD). Specs live in `opens
 
 ## Use `$spectra-*` skills when:
 
-- A discussion needs structure before coding → `$spectra-discuss`
-- User wants to plan, propose, or design a change → `$spectra-propose`
-- Tasks are ready to implement → `$spectra-apply`
-- There's an in-progress change to continue → `$spectra-ingest`
-- User asks about specs or how something works → `$spectra-ask`
+- An explicitly requested Spectra decision needs structure → `$spectra-discuss`
+- User explicitly requests a Spectra change proposal → `$spectra-propose`
+- Continue tasks for an identified change → `$spectra-apply`
+- Update requirements or plans for an identified change → `$spectra-ingest`
+- Check implementation matches artifacts → `$spectra-verify`
+- Review implementation quality and logic issues → `$spectra-review`
+- Analyze artifact consistency before coding → `$spectra-analyze`
+- Audit security sharp edges → `$spectra-audit`
+- Check stale changes before resuming → `$spectra-drift`
+- Debug a concrete bug systematically → `$spectra-debug`
 - Implementation is done → `$spectra-archive`
 - Commit only files related to a specific change → `$spectra-commit`
 
+Explicit skill invocation takes precedence. Apply existing authorization within its unchanged scope.
+
 ## Workflow
 
-discuss? → propose → apply ⇄ ingest → archive
+discuss? → propose → apply ⇄ ingest → verify / review → archive
 
 - `discuss` is optional — skip if requirements are clear
-- Requirements change mid-work? `ingest` → resume `apply`
-
-## Apply gate（StartKiter 強制）
-
-每張 change 落地順序固定，不准跳步：
-
-1. Artifact 寫完（proposal／design／specs／tasks）→ 派 **Claude Code** 做一致性分析（`spectra analyze` + `validate`＋語意對照）。有阻塞問題先改 artifact，等 Claude 明確 OK。
-2. 通過後才由本 session／Cursor **寫程式**（`spectra-apply`）。
-3. 程式寫完 → 派 **Codex** 做 Code Review（不是 Codeless）；Critical 修完再收尾／archive。
-4. Critical 修完 → **再派／再收** Codex（或至少重跑 test＋對照 Critical 清單），確認無新 Critical 才 archive。
-5. archive 後自動進入下一張待施工 change（或 propose 下一張），直到佇列清空或卡在老闆才能解的密鑰／決策。
-
-### 外出／自治合約（主控必須做得到）
-
-老闆外出或說「一鼓作氣做完」時，主控 **SHALL** 自己跑滿閉環，不准等下一句話才繼續：
-
-1. `orca terminal send` 派 Claude／Codex 後，立刻進入監工：`orca terminal wait --for tui-idle` → `orca terminal read` 收全文結論。
-2. 有 Critical → 本 session 修 → test／type-check → 必要時再派 CR；不准只回報「還在跑」就結束 turn。
-3. 對話進行中仍並行監工；抽樣一眼就停 = 流程違規 = 不配當主控。
-4. 卡關條件只有：缺老闆才能給的密鑰／ORG／REPO／產品決策、或來源 repo 禁改衝突。卡關要寫進 handoff，其餘自己往下做。
-
-一致性分析調度規則：
-
-- 直接對 **main 工作樹上既有的 Claude Code 視窗**下指令（例如 `orca terminal send` 到該 terminal）。
-- **不准**為一致性分析另開 git worktree／子視窗再等它跑回來。Worktree 隔離只留給真的要平行改應用程式碼、怕弄髒 main 的場景。
-- 若 main 上 Claude 還沒起來，在同一 main 路徑啟動 Claude 後下指令即可，仍不要開 analyze 專用 worktree。
-
-結構／部署類對焦：一律先文字＋圖解（見 `docs/deploy-and-public-url.md`），確認後再動手；測試站 repo 命名 `test-<專案名>`，與正式乾淨安裝包、學員 kit 分開。晉升規則見同一文件。外出自治閉環見 `docs/autonomous-apply-loop.md`。
-
-派 Claude／Codex 做一致性分析或 Code Review 後：
-
-- **回覆老闆或接下一動之前，必須先 `orca terminal read`（必要時先 `wait`）把結果收齊。**
-- **不准等老闆提醒「跑完了你怎麼不看」。** 忘了收結果＝流程違規。
-- **老闆在跟本 session 講話、交代新事情時，仍要並行盯其它代理的進度**；對話進行中 ≠ 暫停監工，不准因此漏收 Claude／Codex 結果。
-- **不准只抽樣看一眼就結束 turn**：必須 `wait` 到代理 idle、讀完結論；有 Critical 就接著修。不准把「等老闆下一句」當唯一觸發器。
+- Requirements change mid-work? Plan mode (`/plan`) → `ingest` → resume `apply`
 
 ## Parked Changes
 
-Changes can be parked（暫存）— temporarily moved out of `openspec/changes/`. Parked changes won't appear in `spectra list` but can be found with `spectra list --parked`. To restore: `spectra unpark <name>`. The `$spectra-apply` and `$spectra-ingest` skills handle parked changes automatically.
+Changes can be parked（暫存）— temporarily moved out of `openspec/changes/`. Parked changes won't appear in `spectra list` but can be found with `spectra list --parked`. To restore: `spectra unpark <name>`. The `$spectra-apply` and `$spectra-ingest` skills disclose parking and restore when the named operation is already explicitly requested; respect a known refusal, otherwise ask for missing authorization.
 
 <!-- SPECTRA:END -->
 
@@ -168,5 +141,5 @@ Rules:
 - For relationship questions, prefer `graphify query`, `graphify path`, or `graphify explain` against this project's local `graphify-out/graph.json`.
 - Do not inspect unrelated sibling projects unless the user explicitly asks for cross-project context.
 - The workspace-level project index is `/Users/fishtv/Development/graphify-projects.json`.
-- Maintained by `/Users/fishtv/Development/batch-graphify.sh` for `products/startkiter`.
+- Maintained by `/Users/fishtv/Development/batch-graphify.sh` for `B-產品/products/startkiter`.
 <!-- graphify:auto:end -->
