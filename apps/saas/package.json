@@ -17,6 +17,7 @@
 	},
 	"dependencies": {
 		"@ai-sdk/openai": "catalog:",
+		"@ai-sdk/react": "catalog:",
 		"@blocknote/core": "0.51.4",
 		"@blocknote/mantine": "0.51.4",
 		"@blocknote/react": "0.51.4",

@@ -29,6 +29,7 @@ export default defineConfig({
 			"@deployment": path.resolve(import.meta.dirname, "./modules/deployment"),
 			"@settings": path.resolve(import.meta.dirname, "./modules/settings"),
 			"@course": path.resolve(import.meta.dirname, "./modules/course"),
+			"@ai": path.resolve(import.meta.dirname, "./modules/ai"),
 		},
 	},
 });

@@ -129,6 +129,16 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		dataSpec: "none",
 	},
 	{
+		id: "ai-assistant",
+		name: "AI 助手",
+		version: "0.1.0",
+		mount: {
+			route: { path: "/ai" },
+			menu: { label: "AI 助手", icon: "sparkles", order: 2.5 },
+		},
+		dataSpec: "none",
+	},
+	{
 		id: "settings",
 		name: "帳號設定",
 		version: "0.1.0",
