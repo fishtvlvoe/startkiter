@@ -1,16 +1,70 @@
-import { send as consoleSend } from "./console";
-import { send as resendSend } from "./resend";
-import type { SendEmailHandler } from "../types";
+import { logger } from "@startkiter/logs";
 
-/**
- * Local builds and development servers can render email flows without a
- * provider key. Production still fails at send time instead of silently
- * discarding email when RESEND_API_KEY is missing.
- */
-export const send: SendEmailHandler = async (params) => {
-	if (!process.env.RESEND_API_KEY && process.env.NODE_ENV !== "production") {
-		return consoleSend(params);
+import type { SendEmailHandler } from "../types";
+import { send as consoleSend } from "./console";
+import { send as nodemailerSend } from "./nodemailer";
+import { send as resendSend } from "./resend";
+import { send as tosendSend } from "./tosend";
+import { send as zsendSend } from "./zsend";
+
+type ProviderName = "resend" | "smtp" | "zsend" | "tosend" | "console";
+
+type ProviderDefinition = {
+	name: ProviderName;
+	envKey: string;
+	send: SendEmailHandler;
+};
+
+const fallbackProviders: ProviderDefinition[] = [
+	{ name: "zsend", envKey: "ZSEND_API_KEY", send: zsendSend },
+	{ name: "tosend", envKey: "TOSEND_API_KEY", send: tosendSend },
+	{ name: "resend", envKey: "RESEND_API_KEY", send: resendSend },
+	{ name: "smtp", envKey: "SMTP_HOST", send: nodemailerSend },
+];
+
+function getRequestedProvider(): ProviderName | undefined {
+	const requestedProvider = process.env.EMAIL_PROVIDER?.trim().toLowerCase();
+	return fallbackProviders.find(({ name }) => name === requestedProvider)?.name;
+}
+
+function hasCredential(envKey: string): boolean {
+	return Boolean(process.env[envKey]?.trim());
+}
+
+function getEmailProvider(): ProviderDefinition {
+	const requestedProvider = getRequestedProvider();
+	const explicitlyRequested = requestedProvider
+		? fallbackProviders.find(({ name }) => name === requestedProvider)
+		: undefined;
+
+	if (explicitlyRequested && hasCredential(explicitlyRequested.envKey)) {
+		return explicitlyRequested;
 	}
 
-	return resendSend(params);
+	const selectedProvider = fallbackProviders.find(({ envKey }) => hasCredential(envKey));
+	if (selectedProvider) {
+		if (explicitlyRequested && selectedProvider.name !== explicitlyRequested.name) {
+			logger.warn(
+				`Email provider "${explicitlyRequested.name}" is unavailable; falling back to "${selectedProvider.name}"`,
+			);
+		}
+
+		return selectedProvider;
+	}
+
+	if (process.env.NODE_ENV !== "production") {
+		return {
+			name: "console",
+			envKey: "",
+			send: consoleSend,
+		};
+	}
+
+	throw new Error(
+		"No email provider is configured (checked EMAIL_PROVIDER, TOSEND_API_KEY, ZSEND_API_KEY, RESEND_API_KEY, SMTP_HOST); RESEND_API_KEY is required by the legacy production guard",
+	);
+}
+
+export const send: SendEmailHandler = async (params) => {
+	return getEmailProvider().send(params);
 };

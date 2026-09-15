@@ -14,11 +14,12 @@ export const send: SendEmailHandler = async ({
 	html,
 }) => {
 	const transporter = nodemailer.createTransport({
-		host: process.env.MAIL_HOST as string,
-		port: Number.parseInt(process.env.MAIL_PORT as string, 10),
+		host: process.env.SMTP_HOST as string,
+		port: Number.parseInt(process.env.SMTP_PORT || "587", 10),
+		secure: process.env.SMTP_SECURE === "true",
 		auth: {
-			user: process.env.MAIL_USER as string,
-			pass: process.env.MAIL_PASS as string,
+			user: process.env.SMTP_USER as string,
+			pass: process.env.SMTP_PASS as string,
 		},
 	});
 
