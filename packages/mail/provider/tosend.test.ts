@@ -17,6 +17,9 @@ describe("ToSend provider", () => {
 		await send({
 			from: '"StartKiter" <sender@example.com>',
 			to: "Learner <learner@example.com>",
+			cc: ["Support <support@example.com>", "audit@example.com"],
+			bcc: ["Archive <archive@example.com>"],
+			replyTo: "reply@example.com",
 			subject: "Welcome",
 			text: "Welcome to StartKiter.",
 			html: "<p>Welcome to StartKiter.</p>",
@@ -31,6 +34,12 @@ describe("ToSend provider", () => {
 			body: JSON.stringify({
 				from: { name: "StartKiter", email: "sender@example.com" },
 				to: [{ name: "Learner", email: "learner@example.com" }],
+				cc: [
+					{ name: "Support", email: "support@example.com" },
+					{ email: "audit@example.com" },
+				],
+				bcc: [{ name: "Archive", email: "archive@example.com" }],
+				replyTo: "reply@example.com",
 				subject: "Welcome",
 				text: "Welcome to StartKiter.",
 				html: "<p>Welcome to StartKiter.</p>",

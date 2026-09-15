@@ -16,6 +16,9 @@ describe("ZSend provider", () => {
 		await send({
 			from: "sender@example.com",
 			to: "learner@example.com",
+			cc: ["cc@example.com", "cc-two@example.com"],
+			bcc: ["bcc@example.com"],
+			replyTo: "reply@example.com",
 			subject: "Welcome",
 			text: "Welcome to StartKiter.",
 			html: "<p>Welcome to StartKiter.</p>",
@@ -30,6 +33,9 @@ describe("ZSend provider", () => {
 			body: JSON.stringify({
 				from: "sender@example.com",
 				to: ["learner@example.com"],
+				cc: ["cc@example.com", "cc-two@example.com"],
+				bcc: ["bcc@example.com"],
+				replyTo: "reply@example.com",
 				subject: "Welcome",
 				text: "Welcome to StartKiter.",
 				html: "<p>Welcome to StartKiter.</p>",

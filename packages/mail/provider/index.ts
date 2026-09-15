@@ -19,6 +19,7 @@ const fallbackProviders: ProviderDefinition[] = [
 	{ name: "zsend", envKey: "ZSEND_API_KEY", send: zsendSend },
 	{ name: "tosend", envKey: "TOSEND_API_KEY", send: tosendSend },
 	{ name: "resend", envKey: "RESEND_API_KEY", send: resendSend },
+	// 允許無帳密的開放 relay；缺 SMTP_USER/PASS 會在 nodemailer 送信時才報錯。
 	{ name: "smtp", envKey: "SMTP_HOST", send: nodemailerSend },
 ];
 
@@ -61,7 +62,7 @@ function getEmailProvider(): ProviderDefinition {
 	}
 
 	throw new Error(
-		"No email provider is configured (checked EMAIL_PROVIDER, TOSEND_API_KEY, ZSEND_API_KEY, RESEND_API_KEY, SMTP_HOST); RESEND_API_KEY is required by the legacy production guard",
+		"No email provider is configured (checked EMAIL_PROVIDER, TOSEND_API_KEY, ZSEND_API_KEY, RESEND_API_KEY, SMTP_HOST)",
 	);
 }
 

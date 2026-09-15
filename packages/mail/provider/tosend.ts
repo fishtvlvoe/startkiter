@@ -19,6 +19,9 @@ function parseEmailAddress(value: string): { name?: string; email: string } {
 export const send: SendEmailHandler = async ({
 	to,
 	from,
+	cc,
+	bcc,
+	replyTo,
 	subject,
 	text,
 	html,
@@ -35,6 +38,9 @@ export const send: SendEmailHandler = async ({
 		body: JSON.stringify({
 			from: parseEmailAddress(sender),
 			to: [parseEmailAddress(to)],
+			cc: cc?.map(parseEmailAddress),
+			bcc: bcc?.map(parseEmailAddress),
+			replyTo,
 			subject,
 			text,
 			html,

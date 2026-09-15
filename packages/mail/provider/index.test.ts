@@ -177,7 +177,9 @@ describe("mail provider selection", () => {
 
 		const { send } = await import("./index");
 
-		await expect(send(params)).rejects.toThrow("No email provider is configured");
+		await expect(send(params)).rejects.toThrow(
+			"No email provider is configured (checked EMAIL_PROVIDER, TOSEND_API_KEY, ZSEND_API_KEY, RESEND_API_KEY, SMTP_HOST)",
+		);
 		expect(handlers.consoleSend).not.toHaveBeenCalled();
 	});
 });

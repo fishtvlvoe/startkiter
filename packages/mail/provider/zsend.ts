@@ -6,6 +6,9 @@ const ZSEND_API_ENDPOINT = "https://api.zeabur.com/api/v1/zsend/emails";
 export const send: SendEmailHandler = async ({
 	to,
 	from,
+	cc,
+	bcc,
+	replyTo,
 	subject,
 	text,
 	html,
@@ -19,6 +22,9 @@ export const send: SendEmailHandler = async ({
 		body: JSON.stringify({
 			from: from ?? config.mailFrom,
 			to: [to],
+			cc,
+			bcc,
+			replyTo,
 			subject,
 			text,
 			html,

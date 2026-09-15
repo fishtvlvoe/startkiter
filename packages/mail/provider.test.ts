@@ -42,6 +42,8 @@ describe("mail provider without a Resend key", () => {
 				subject: "Provider fallback",
 				text: "This email must not be silently discarded.",
 			}),
-		).rejects.toThrow("RESEND_API_KEY is required");
+		).rejects.toThrow(
+			"No email provider is configured (checked EMAIL_PROVIDER, TOSEND_API_KEY, ZSEND_API_KEY, RESEND_API_KEY, SMTP_HOST)",
+		);
 	});
 });
