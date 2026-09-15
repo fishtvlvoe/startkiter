@@ -6,10 +6,14 @@ import { ChangePlan } from "@payments/components/ChangePlan";
 import { listPurchases } from "@payments/lib/server";
 import { createPurchasesHelper } from "@startkiter/payments/lib/helper";
 import { PageHeader } from "@shared/components/PageHeader";
+import { SettingsItem } from "@shared/components/SettingsItem";
 import { SettingsList } from "@shared/components/SettingsList";
 import { orpc } from "@shared/lib/orpc-query-utils";
 import { getServerQueryClient } from "@shared/lib/server";
 import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+
+import { userHasCourseAccess } from "../../../../../../lib/course-access";
 
 export async function generateMetadata() {
 	const t = await getTranslations("settings.billing");
@@ -41,6 +45,8 @@ export default async function BillingSettingsPage() {
 
 	const { activePlan } = createPurchasesHelper(purchases);
 
+	const entitled = session ? await userHasCourseAccess(session.user.id) : false;
+
 	const t = await getTranslations("settings.billing");
 
 	return (
@@ -59,7 +65,26 @@ export default async function BillingSettingsPage() {
 						status: subscription.status,
 					}))}
 				/>
-				<ChangePlan userId={session?.user.id} activePlanId={activePlan?.id} />
+				{entitled ? (
+					<SettingsItem
+						title={t("changePlan.title")}
+						description={t("changePlan.description")}
+					>
+						<div className="space-y-4" data-testid="billing-owned-state">
+							<p className="text-sm text-muted-foreground">
+								你已擁有開站包，可直接進入課程與領取代碼包。
+							</p>
+							<Link
+								className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-9 items-center justify-center rounded-full px-4 text-sm font-semibold transition-colors"
+								href="/course"
+							>
+								進入課程
+							</Link>
+						</div>
+					</SettingsItem>
+				) : (
+					<ChangePlan userId={session?.user.id} activePlanId={activePlan?.id} />
+				)}
 			</SettingsList>
 		</>
 	);
