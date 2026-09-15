@@ -1,6 +1,7 @@
 import { auth } from "@startkiter/auth";
 import { validateCoupon } from "@startkiter/coupons";
 import { isOrganizationMember } from "@startkiter/database";
+import { recordMarketingConsent } from "@startkiter/newsletter";
 import { MVP_SKU, getProduct, invoicePreferenceSchema, type InvoicePreferenceInput } from "@startkiter/payments";
 import { NextResponse } from "next/server";
 
@@ -72,6 +73,8 @@ export async function POST(request: Request) {
 	const couponCode =
 		typeof body.couponCode === "string" && body.couponCode.trim() !== "" ? body.couponCode.trim() : undefined;
 
+	const marketingConsentGranted = body.marketingConsent === true;
+
 	// 先做唯讀預檢（快速 fail-closed）；真正扣兌換次數在 createPendingOrder 的同一 transaction。
 	if (couponCode) {
 		const couponResult = await validateCoupon(couponCode, product.amount);
@@ -128,6 +131,17 @@ export async function POST(request: Request) {
 			return NextResponse.json({ error: "checkout_busy", retry: true }, { status: 503 });
 		}
 		throw error;
+	}
+
+	if (marketingConsentGranted) {
+		const forwarded = request.headers.get("x-forwarded-for");
+		const ip = forwarded?.split(",")[0]?.trim() || null;
+		await recordMarketingConsent({
+			userId: session.user.id,
+			source: "checkout",
+			granted: true,
+			ip,
+		});
 	}
 
 	let payment;

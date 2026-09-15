@@ -12,32 +12,32 @@
 
 ### 紅燈測試
 
-- [ ] 2.1 在 `packages/newsletter/lib/email-consent.test.ts` 寫紅燈測試涵蓋「Unified consent gate assertEmailConsent」全部場景（transactional 永遠允許、hard-bounce 擋 transactional、marketing 需明確 true、general 預設允許）與「Consent gate is not embedded in the mail transport layer」（斷言 `packages/mail` 的 provider 路由代碼不 import `assertEmailConsent`），確認測試先失敗（函式尚未存在）
-- [ ] 2.2 在 `packages/newsletter/lib/unsubscribe-token.test.ts` 寫紅燈測試涵蓋「HMAC unsubscribe token」（token scope 綁進簽章、換 scope 驗算失敗）與「退訂 token 用獨立環境變數 NEWSLETTER_UNSUBSCRIBE_SECRET」Decision（斷言簽章函式讀取 `NEWSLETTER_UNSUBSCRIBE_SECRET` 而非 `BETTER_AUTH_SECRET`）
-- [ ] 2.3 在 `apps/saas/app/(main)/unsubscribe/page.test.tsx` 與對應 API route 測試檔寫紅燈測試涵蓋「Unsubscribe page separates read from write」（GET 請求不寫 DB、POST 才生效）與「General unsubscribe does not affect marketing or transactional consent」場景
+- [x] 2.1 在 `packages/newsletter/lib/email-consent.test.ts` 寫紅燈測試涵蓋「Unified consent gate assertEmailConsent」全部場景（transactional 永遠允許、hard-bounce 擋 transactional、marketing 需明確 true、general 預設允許）與「Consent gate is not embedded in the mail transport layer」（斷言 `packages/mail` 的 provider 路由代碼不 import `assertEmailConsent`），確認測試先失敗（函式尚未存在）
+- [x] 2.2 在 `packages/newsletter/lib/unsubscribe-token.test.ts` 寫紅燈測試涵蓋「HMAC unsubscribe token」（token scope 綁進簽章、換 scope 驗算失敗）與「退訂 token 用獨立環境變數 NEWSLETTER_UNSUBSCRIBE_SECRET」Decision（斷言簽章函式讀取 `NEWSLETTER_UNSUBSCRIBE_SECRET` 而非 `BETTER_AUTH_SECRET`）
+- [x] 2.3 在 `apps/saas/app/(main)/unsubscribe/page.test.tsx` 與對應 API route 測試檔寫紅燈測試涵蓋「Unsubscribe page separates read from write」（GET 請求不寫 DB、POST 才生效）與「General unsubscribe does not affect marketing or transactional consent」場景
 
 ### 實作
 
-- [ ] 2.4 新增 `packages/newsletter/lib/email-consent.ts` 實作 `assertEmailConsent(userId, type)`（依 Decision「assertEmailConsent 插入點在業務層，不碰 packages/mail provider 層」，此函式放在 `packages/newsletter` 而非 `packages/mail`），含「Consent audit log」寫入 `EmailConsentLog`；跑 2.1 的測試轉綠燈
-- [ ] 2.5 新增 `packages/newsletter/lib/unsubscribe-token.ts` 實作 HMAC token 產生與驗算；跑 2.2 的測試轉綠燈
-- [ ] 2.6 新增 `apps/saas/app/(main)/unsubscribe/page.tsx`（偏好中心頁：促銷／一般／全部三個開關）與對應 POST API route；跑 2.3 的測試轉綠燈
-- [ ] 2.7 在既有結帳流程與註冊流程新增行銷同意 checkbox（預設不勾，對應「Consent audit log」的 `source="checkout"`／`source="register"` 場景），提交時呼叫 `EmailConsentLog` 寫入；補對應測試
-- [ ] 2.8 新增「Compliant footer with sender address gate」：在既有 `SiteSetting` 機制新增寄件人實體地址設定欄位，新增檢查函式在促銷 campaign 啟動前呼叫；寫測試涵蓋「地址未填阻擋啟動」場景
+- [x] 2.4 新增 `packages/newsletter/lib/email-consent.ts` 實作 `assertEmailConsent(userId, type)`（依 Decision「assertEmailConsent 插入點在業務層，不碰 packages/mail provider 層」，此函式放在 `packages/newsletter` 而非 `packages/mail`），含「Consent audit log」寫入 `EmailConsentLog`；跑 2.1 的測試轉綠燈
+- [x] 2.5 新增 `packages/newsletter/lib/unsubscribe-token.ts` 實作 HMAC token 產生與驗算；跑 2.2 的測試轉綠燈
+- [x] 2.6 新增 `apps/saas/app/(main)/unsubscribe/page.tsx`（偏好中心頁：促銷／一般／全部三個開關）與對應 POST API route；跑 2.3 的測試轉綠燈
+- [x] 2.7 在既有結帳流程與註冊流程新增行銷同意 checkbox（預設不勾，對應「Consent audit log」的 `source="checkout"`／`source="register"` 場景），提交時呼叫 `EmailConsentLog` 寫入；補對應測試
+- [x] 2.8 新增「Compliant footer with sender address gate」：在既有 `SiteSetting` 機制新增寄件人實體地址設定欄位，新增檢查函式在促銷 campaign 啟動前呼叫；寫測試涵蓋「地址未填阻擋啟動」場景
 
 ## 3. Wave 1B：發送引擎（可與 Wave 1A 平行，依賴 Wave 0，對應 capability `newsletter-send-engine`）
 
 ### 紅燈測試
 
-- [ ] 3.1 在 `packages/newsletter/lib/send-engine.test.ts` 寫紅燈測試涵蓋「Campaign state machine with atomic transitions」（雙擊立即發送只成功一次、終態不可回退）
-- [ ] 3.2 補紅燈測試涵蓋「Idempotent recipient dispatch with resume」（模擬容器重啟後從斷點續發，不重寄已完成筆數）與「Pause, resume, and cancel」
-- [ ] 3.3 補紅燈測試涵蓋「Rate-limited dispatch」（跨批次窗速率節流）、「Consent re-checked at dispatch time, not at campaign creation」（發送當下重查同意狀態）、「Zero eligible recipients blocks send」、「Sender configuration snapshot locked at send time」
-- [ ] 3.4 在 `apps/saas/app/api/cron/newsletter-dispatch/route.test.ts` 寫紅燈測試涵蓋「Cron performs only atomic scheduling transitions」（近同時兩次觸發只轉換一次狀態），比照既有 `apps/saas/app/api/cron/course-expiration/route.test.ts` 的測試模式
+- [x] 3.1 在 `packages/newsletter/lib/send-engine.test.ts` 寫紅燈測試涵蓋「Campaign state machine with atomic transitions」（雙擊立即發送只成功一次、終態不可回退）
+- [x] 3.2 補紅燈測試涵蓋「Idempotent recipient dispatch with resume」（模擬容器重啟後從斷點續發，不重寄已完成筆數）與「Pause, resume, and cancel」
+- [x] 3.3 補紅燈測試涵蓋「Rate-limited dispatch」（跨批次窗速率節流）、「Consent re-checked at dispatch time, not at campaign creation」（發送當下重查同意狀態）、「Zero eligible recipients blocks send」、「Sender configuration snapshot locked at send time」
+- [x] 3.4 在 `apps/saas/app/api/cron/newsletter-dispatch/route.test.ts` 寫紅燈測試涵蓋「Cron performs only atomic scheduling transitions」（近同時兩次觸發只轉換一次狀態），比照既有 `apps/saas/app/api/cron/course-expiration/route.test.ts` 的測試模式
 
 ### 實作
 
-- [ ] 3.5 新增 `packages/newsletter/lib/send-engine.ts` 實作 Campaign 狀態機（原子 DB 轉換）與斷點續發批次處理邏輯；跑 3.1／3.2 的測試轉綠燈
-- [ ] 3.6 在 `send-engine.ts` 實作 Token Bucket 速率節流、發送當下同意重查（呼叫 Wave 1A 的 `assertEmailConsent`，此任務需等 2.4 完成或先用已定案的函式簽章 mock）、零收件人阻擋、`senderSnapshot` 鎖定；跑 3.3 的測試轉綠燈
-- [ ] 3.7 新增 `apps/saas/app/api/cron/newsletter-dispatch/route.ts`（對應 Decision「發送引擎排程觸發：沿用既有 /api/cron/* + CRON_SECRET 模式」，比照 `course-expiration/route.ts` 的 `CRON_SECRET` 驗證與批次處理模式）；跑 3.4 的測試轉綠燈
+- [x] 3.5 新增 `packages/newsletter/lib/send-engine.ts` 實作 Campaign 狀態機（原子 DB 轉換）與斷點續發批次處理邏輯；跑 3.1／3.2 的測試轉綠燈
+- [x] 3.6 在 `send-engine.ts` 實作 Token Bucket 速率節流、發送當下同意重查（呼叫 Wave 1A 的 `assertEmailConsent`，此任務需等 2.4 完成或先用已定案的函式簽章 mock）、零收件人阻擋、`senderSnapshot` 鎖定；跑 3.3 的測試轉綠燈
+- [x] 3.7 新增 `apps/saas/app/api/cron/newsletter-dispatch/route.ts`（對應 Decision「發送引擎排程觸發：沿用既有 /api/cron/* + CRON_SECRET 模式」，比照 `course-expiration/route.ts` 的 `CRON_SECRET` 驗證與批次處理模式）；跑 3.4 的測試轉綠燈
 
 ## 4. Wave 1 收斂
 

@@ -37,6 +37,7 @@ const formSchema = z.object({
 	email: z.email(),
 	name: z.string().min(1),
 	password: passwordSchema,
+	marketingConsent: z.boolean().default(false),
 });
 
 export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
@@ -56,6 +57,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 			name: "",
 			email: prefillEmail ?? email ?? "",
 			password: "",
+			marketingConsent: false,
 		},
 	});
 
@@ -71,7 +73,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 		}
 	}, [user, sessionLoaded]); // oxlint-disable-line eslint-plugin-react-hooks/exhaustive-deps
 
-	const onSubmit = form.handleSubmit(async ({ email, password, name }) => {
+	const onSubmit = form.handleSubmit(async ({ email, password, name, marketingConsent }) => {
 		try {
 			const { error } = await (authConfig.enablePasswordLogin
 				? await authClient.signUp.email({
@@ -88,6 +90,14 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 
 			if (error) {
 				throw error;
+			}
+
+			if (marketingConsent) {
+				await fetch("/api/newsletter/consent", {
+					method: "POST",
+					headers: { "content-type": "application/json" },
+					body: JSON.stringify({ source: "register", granted: true }),
+				}).catch(() => undefined);
 			}
 
 			if (invitationOnlyMode) {
@@ -183,6 +193,26 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 									)}
 								/>
 							)}
+
+							<FormField
+								control={form.control}
+								name="marketingConsent"
+								render={({ field }) => (
+									<FormItem className="flex flex-row items-start gap-2 space-y-0">
+										<FormControl>
+											<input
+												type="checkbox"
+												className="mt-1"
+												checked={Boolean(field.value)}
+												onChange={(e) => field.onChange(e.target.checked)}
+											/>
+										</FormControl>
+										<FormLabel className="font-normal text-muted-foreground">
+											我同意收到促銷電子報與優惠資訊（可隨時退訂；預設不勾選）
+										</FormLabel>
+									</FormItem>
+								)}
+							/>
 
 							<Button variant="primary" loading={form.formState.isSubmitting}>
 								{t("auth.signup.submit")}

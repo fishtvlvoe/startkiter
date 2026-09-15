@@ -28,6 +28,10 @@ vi.mock("../../../lib/public-base-url", () => ({
 	resolvePublicBaseUrl: vi.fn(() => "https://example.com"),
 }));
 
+vi.mock("@startkiter/newsletter", () => ({
+	recordMarketingConsent: vi.fn(),
+}));
+
 vi.mock("@startkiter/payments", async (importOriginal) => {
 	const actual = await importOriginal<typeof import("@startkiter/payments")>();
 	return {
@@ -40,6 +44,7 @@ vi.mock("@startkiter/payments", async (importOriginal) => {
 import { auth } from "@startkiter/auth";
 import { validateCoupon } from "@startkiter/coupons";
 import { isOrganizationMember } from "@startkiter/database";
+import { recordMarketingConsent } from "@startkiter/newsletter";
 import { MVP_AMOUNT_TWD, MVP_SKU, createMvpCheckoutGateway, getProduct } from "@startkiter/payments";
 
 import { buildCheckoutSession, createPendingOrderForUser } from "../../../lib/orders";
@@ -254,6 +259,22 @@ describe("POST /api/checkout organization identity", () => {
 		const body = await response.json();
 		expect(body.error).toBe("organization_access_denied");
 		expect(mockedCreatePendingOrder).not.toHaveBeenCalled();
+	});
+
+	it("records marketing consent audit when marketingConsent=true is submitted", async () => {
+		mockedCreatePendingOrder.mockResolvedValue(baseOrder(8800));
+		vi.mocked(recordMarketingConsent).mockResolvedValue(undefined);
+
+		const response = await POST(jsonRequest({ marketingConsent: true }));
+
+		expect(response.status).toBe(200);
+		expect(recordMarketingConsent).toHaveBeenCalledWith(
+			expect.objectContaining({
+				userId: "user_1",
+				source: "checkout",
+				granted: true,
+			}),
+		);
 	});
 
 	it("creates a personal order without organizationId when no active org is set", async () => {

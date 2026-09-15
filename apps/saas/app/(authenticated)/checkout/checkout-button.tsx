@@ -55,6 +55,7 @@ export function CheckoutButton({ product }: { product: CheckoutProduct }) {
 	const [couponValidating, setCouponValidating] = useState(false);
 	const [couponMessage, setCouponMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 	const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+	const [marketingConsent, setMarketingConsent] = useState(false);
 
 	async function handleApplyCoupon() {
 		const code = couponInput.trim();
@@ -128,6 +129,7 @@ export function CheckoutButton({ product }: { product: CheckoutProduct }) {
 					productId: product.productId,
 					invoicePreference,
 					couponCode: appliedCoupon?.code,
+					marketingConsent,
 				}),
 			});
 
@@ -206,6 +208,16 @@ export function CheckoutButton({ product }: { product: CheckoutProduct }) {
 					</p>
 				) : null}
 			</div>
+
+			<label className="flex items-start gap-2 text-sm text-muted-foreground">
+				<input
+					type="checkbox"
+					className="mt-1"
+					checked={marketingConsent}
+					onChange={(e) => setMarketingConsent(e.target.checked)}
+				/>
+				<span>我同意收到促銷電子報與優惠資訊（可隨時退訂；預設不勾選）</span>
+			</label>
 
 			<button
 				className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-9 items-center justify-center rounded-full px-4 text-sm font-semibold transition-colors disabled:pointer-events-none disabled:opacity-50 w-full"
