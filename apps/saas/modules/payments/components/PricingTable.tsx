@@ -1,7 +1,6 @@
 "use client";
 
 import { usePlanData } from "@payments/hooks/plan-data";
-import type { PlanId } from "@payments/types";
 import { config as paymentsConfig } from "@startkiter/payments/config";
 import type { PaidPlan } from "@startkiter/payments/types";
 import { cn } from "@startkiter/ui";
@@ -9,24 +8,12 @@ import { Button } from "@startkiter/ui/components/button";
 import { Tabs, TabsList, TabsTrigger } from "@startkiter/ui/components/tabs";
 import { useLocaleCurrency } from "@shared/hooks/locale-currency";
 import { useRouter } from "@shared/hooks/router";
-import { orpc } from "@shared/lib/orpc-query-utils";
-import { toastError } from "@startkiter/ui/components/toast";
-import { useMutation } from "@tanstack/react-query";
 import { ArrowRightIcon, BadgePercentIcon, CheckIcon, StarIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
+import Link from "next/link";
 import { useState } from "react";
 
 const plans = paymentsConfig.plans;
-
-export function notifyCheckoutError(message: string, error: unknown) {
-	console.error(error);
-	toastError(message);
-}
-
-interface PlanSelection {
-	type: "one-time" | "subscription";
-	interval?: "month" | "year";
-}
 
 export function PricingTable({
 	className,
@@ -43,45 +30,9 @@ export function PricingTable({
 	const format = useFormatter();
 	const router = useRouter();
 	const localeCurrency = useLocaleCurrency();
-	const [loading, setLoading] = useState<PlanId | false>(false);
 	const [interval, setInterval] = useState<"month" | "year">("month");
 
 	const { planData } = usePlanData();
-
-	const createCheckoutLinkMutation = useMutation(
-		orpc.payments.createCheckoutLink.mutationOptions(),
-	);
-
-	const onSelectPlan = async (planId: PlanId, selection?: PlanSelection) => {
-		if (!(userId || organizationId)) {
-			router.push("/signup");
-			return;
-		}
-
-		if (!selection) {
-			return;
-		}
-
-		setLoading(planId);
-
-		try {
-			const { checkoutLink } = await createCheckoutLinkMutation.mutateAsync({
-				planId,
-				type: selection.type,
-				interval: selection.interval,
-				organizationId,
-				redirectUrl: organizationId
-					? `${window.location.origin}/checkout-return?organizationId=${organizationId}`
-					: `${window.location.origin}/checkout-return`,
-			});
-
-			window.location.href = checkoutLink;
-		} catch (error) {
-			notifyCheckoutError(t("pricing.checkoutError"), error);
-		} finally {
-			setLoading(false);
-		}
-	};
 
 	const filteredPlans = Object.entries(plans).filter(([planId]) => planId !== activePlanId);
 
@@ -90,6 +41,8 @@ export function PricingTable({
 			? (plan as PaidPlan).prices.some((price) => price.type === "subscription")
 			: false,
 	);
+
+	const canPurchase = Boolean(userId || organizationId);
 
 	return (
 		<div className={cn("@container", className)}>
@@ -220,25 +173,27 @@ export function PricingTable({
 										</strong>
 									)}
 
-									<Button
-										className="mt-4 w-full"
-										variant={recommended ? "primary" : "secondary"}
-										onClick={() =>
-											onSelectPlan(
-												planId as PlanId,
-												price
-													? {
-															type: price.type === "one-time" ? "one-time" : "subscription",
-															interval: price.type === "subscription" ? price.interval : undefined,
-														}
-													: undefined,
-											)
-										}
-										loading={loading === planId}
-									>
-										{userId || organizationId ? t("pricing.choosePlan") : t("pricing.getStarted")}
-										<ArrowRightIcon className="ml-2 size-4" />
-									</Button>
+									{canPurchase ? (
+										<Button
+											className="mt-4 w-full"
+											variant={recommended ? "primary" : "secondary"}
+											render={(props) => (
+												<Link {...props} href="/checkout">
+													{t("pricing.choosePlan")}
+													<ArrowRightIcon className="ml-2 size-4" />
+												</Link>
+											)}
+										/>
+									) : (
+										<Button
+											className="mt-4 w-full"
+											variant={recommended ? "primary" : "secondary"}
+											onClick={() => router.push("/signup")}
+										>
+											{t("pricing.getStarted")}
+											<ArrowRightIcon className="ml-2 size-4" />
+										</Button>
+									)}
 								</div>
 							</div>
 						</div>

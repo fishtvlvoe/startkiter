@@ -1,23 +1,48 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+// @vitest-environment jsdom
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { NextIntlClientProvider } from "next-intl";
+import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@startkiter/ui/components/toast", () => ({
-	toastError: vi.fn(),
+import { getMessagesForLocale } from "@startkiter/i18n";
+
+vi.mock("@shared/hooks/router", () => ({
+	useRouter: () => ({ push: vi.fn() }),
 }));
 
-import { toastError } from "@startkiter/ui/components/toast";
+vi.mock("@shared/hooks/locale-currency", () => ({
+	useLocaleCurrency: () => "TWD",
+}));
 
-import { notifyCheckoutError } from "./PricingTable";
+vi.mock("next/link", () => ({
+	default: ({
+		href,
+		children,
+		...props
+	}: {
+		href: string;
+		children?: React.ReactNode;
+	}) => (
+		<a href={href} {...props}>
+			{children}
+		</a>
+	),
+}));
 
-describe("PricingTable checkout errors", () => {
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
+import { PricingTable } from "./PricingTable";
 
-	it("shows a user-visible error when checkout link creation fails", () => {
-		const error = new Error("NOT_FOUND");
+describe("PricingTable purchase entry", () => {
+	it("routes signed-in users to /checkout instead of calling createCheckoutLink", async () => {
+		const messages = await getMessagesForLocale("zh-tw", "saas");
 
-		notifyCheckoutError("建立結帳連結失敗，請稍後再試。", error);
+		const html = renderToStaticMarkup(
+			<NextIntlClientProvider locale="zh-tw" messages={messages}>
+				<PricingTable userId="user-1" />
+			</NextIntlClientProvider>,
+		);
 
-		expect(toastError).toHaveBeenCalledWith("建立結帳連結失敗，請稍後再試。");
+		expect(html).toContain('href="/checkout"');
+		expect(html).toContain('data-test="price-table-plan"');
+		expect(html).not.toContain("createCheckoutLink");
 	});
 });
