@@ -10,6 +10,7 @@ import {
 export const BATCH_SIZE = 500;
 
 const RATE_WINDOW_MS = 60_000;
+const PROCESSING_TIMEOUT_MS = 5 * 60_000;
 
 const TERMINAL_STATUSES = new Set(["SENT", "PARTIAL_FAILED", "FAILED", "CANCELLED"]);
 
@@ -320,6 +321,21 @@ async function remainingRateCapacity(
 	return Math.max(0, ratePerMinute - sentInWindow);
 }
 
+async function reclaimStaleProcessingRecipients(
+	campaignId: string,
+	lastHeartbeatAt: Date | null,
+	now: Date,
+): Promise<void> {
+	if (!lastHeartbeatAt || now.getTime() - lastHeartbeatAt.getTime() <= PROCESSING_TIMEOUT_MS) {
+		return;
+	}
+
+	await db.newsletterRecipient.updateMany({
+		where: { campaignId, status: "PROCESSING" },
+		data: { status: "PENDING" },
+	});
+}
+
 async function finalizeCampaignIfDone(campaignId: string): Promise<boolean> {
 	const pending = await db.newsletterRecipient.count({
 		where: {
@@ -397,6 +413,8 @@ export async function dispatchCampaignBatch(
 		campaign = await loadCampaign(campaignId);
 	}
 
+	await reclaimStaleProcessingRecipients(campaignId, campaign.lastHeartbeatAt, now);
+
 	const capacity = await remainingRateCapacity(campaignId, campaign.ratePerMinute, now);
 	if (capacity <= 0) {
 		await db.newsletterCampaign.updateMany({
@@ -442,28 +460,34 @@ export async function dispatchCampaignBatch(
 			continue;
 		}
 
+		let skipReason: string | undefined;
 		if (recipient.userId) {
 			const consent = await assertEmailConsent(recipient.userId, consentType);
 			if (!consent.allowed) {
-				await db.newsletterRecipient.update({
-					where: { id: recipient.id },
-					data: {
-						status: "SKIPPED",
-						skipReason: consent.reason ?? "consent_denied",
-					},
-				});
-				const current = await loadCampaign(campaignId);
-				await db.newsletterCampaign.update({
-					where: { id: campaignId },
-					data: {
-						skippedCount: current.skippedCount + 1,
-						sentCursor: current.sentCursor + 1,
-						lastHeartbeatAt: now,
-					},
-				});
-				skipped += 1;
-				continue;
+				skipReason = consent.reason ?? "consent_denied";
 			}
+		} else {
+			skipReason = "missing_user_id";
+		}
+
+		if (skipReason) {
+			await db.newsletterRecipient.update({
+				where: { id: recipient.id },
+				data: {
+					status: "SKIPPED",
+					skipReason,
+				},
+			});
+			await db.newsletterCampaign.update({
+				where: { id: campaignId },
+				data: {
+					skippedCount: { increment: 1 },
+					sentCursor: { increment: 1 },
+					lastHeartbeatAt: now,
+				},
+			});
+			skipped += 1;
+			continue;
 		}
 
 		const accepted = await sendEmail({
@@ -483,12 +507,11 @@ export async function dispatchCampaignBatch(
 					errorMessage: null,
 				},
 			});
-			const current = await loadCampaign(campaignId);
 			await db.newsletterCampaign.update({
 				where: { id: campaignId },
 				data: {
-					sentCount: current.sentCount + 1,
-					sentCursor: current.sentCursor + 1,
+					sentCount: { increment: 1 },
+					sentCursor: { increment: 1 },
 					lastHeartbeatAt: now,
 				},
 			});
@@ -501,12 +524,11 @@ export async function dispatchCampaignBatch(
 					errorMessage: "Email provider rejected delivery",
 				},
 			});
-			const current = await loadCampaign(campaignId);
 			await db.newsletterCampaign.update({
 				where: { id: campaignId },
 				data: {
-					failedCount: current.failedCount + 1,
-					sentCursor: current.sentCursor + 1,
+					failedCount: { increment: 1 },
+					sentCursor: { increment: 1 },
 					lastHeartbeatAt: now,
 				},
 			});

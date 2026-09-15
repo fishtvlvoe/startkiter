@@ -35,6 +35,36 @@ type CampaignRecord = {
 	errorMessage: string | null;
 };
 
+type CampaignUpdateData = Omit<
+	Partial<CampaignRecord>,
+	"sentCursor" | "sentCount" | "failedCount" | "skippedCount"
+> & {
+	sentCursor?: number | { increment: number };
+	sentCount?: number | { increment: number };
+	failedCount?: number | { increment: number };
+	skippedCount?: number | { increment: number };
+};
+
+const COUNTER_FIELDS = ["sentCursor", "sentCount", "failedCount", "skippedCount"] as const;
+
+function applyCampaignUpdate(campaign: CampaignRecord, data: CampaignUpdateData) {
+	const normalized: Record<string, unknown> = { ...data };
+
+	for (const field of COUNTER_FIELDS) {
+		const update = normalized[field];
+		if (
+			typeof update === "object" &&
+			update !== null &&
+			"increment" in update &&
+			typeof update.increment === "number"
+		) {
+			normalized[field] = campaign[field] + update.increment;
+		}
+	}
+
+	Object.assign(campaign, normalized);
+}
+
 type RecipientRecord = {
 	id: string;
 	campaignId: string;
@@ -90,7 +120,7 @@ async function applyCampaignUpdateMany({
 	data,
 }: {
 	where: { id?: string; status?: CampaignStatus | { in: CampaignStatus[] } };
-	data: Partial<CampaignRecord>;
+	data: CampaignUpdateData;
 }) {
 	let count = 0;
 
@@ -103,7 +133,7 @@ async function applyCampaignUpdateMany({
 			continue;
 		}
 
-		Object.assign(campaign, data);
+		applyCampaignUpdate(campaign, data);
 		count += 1;
 	}
 
@@ -146,14 +176,14 @@ vi.mock("@startkiter/database", () => ({
 					data,
 				}: {
 					where: { id: string };
-					data: Partial<CampaignRecord>;
+					data: CampaignUpdateData;
 				}) => {
 					const campaign = dbState.campaigns.get(where.id);
 					if (!campaign) {
 						throw new Error(`Campaign ${where.id} not found`);
 					}
 
-					Object.assign(campaign, data);
+					applyCampaignUpdate(campaign, data);
 					return cloneCampaign(campaign);
 				},
 			),
@@ -514,6 +544,37 @@ describe("newsletter send engine", () => {
 			expect(resent).toHaveLength(0);
 			expect(dbState.campaigns.get("campaign-1")?.sentCount).toBe(350);
 		});
+
+		it("reclaims a stale PROCESSING recipient after a dispatch crash", async () => {
+			seedCampaign({
+				status: "SENDING",
+				totalRecipients: 1,
+				senderSnapshot: { provider: "tosend", mailFrom: "noreply@example.com" },
+				lastHeartbeatAt: new Date("2026-09-16T00:00:00.000Z"),
+				ratePerMinute: 60,
+			});
+			const [recipient] = seedRecipients("campaign-1", 1);
+
+			sendEmail.mockRejectedValueOnce(new Error("simulated process crash"));
+			await expect(
+				dispatch("campaign-1", {
+					batchSize: 1,
+					now: new Date("2026-09-16T01:00:00.000Z"),
+				}),
+			).rejects.toThrow("simulated process crash");
+			expect(dbState.recipients.get(recipient!.id)?.status).toBe("PROCESSING");
+
+			const resumed = await dispatch("campaign-1", {
+				batchSize: 1,
+				now: new Date("2026-09-16T01:06:00.000Z"),
+			});
+
+			expect(resumed.sent).toBe(1);
+			expect(resumed.completed).toBe(true);
+			expect(dbState.recipients.get(recipient!.id)?.status).toBe("SENT");
+			expect(dbState.campaigns.get("campaign-1")?.status).toBe("SENT");
+			expect(sendEmail).toHaveBeenCalledTimes(2);
+		});
 	});
 
 	describe("Pause, resume, and cancel", () => {
@@ -658,6 +719,115 @@ describe("newsletter send engine", () => {
 			expect(dbState.recipients.get("recipient-0002")?.status).toBe("SKIPPED");
 			expect(sendEmail).toHaveBeenCalledTimes(1);
 			expect(sendEmail.mock.calls[0]?.[0]?.to).toBe("user1@example.com");
+		});
+
+		it("skips a recipient without a userId instead of sending without consent", async () => {
+			seedCampaign({
+				status: "SENDING",
+				totalRecipients: 1,
+				senderSnapshot: { provider: "tosend", mailFrom: "noreply@example.com" },
+				ratePerMinute: 60,
+			});
+			const [recipient] = seedRecipients("campaign-1", 1);
+			recipient!.userId = null;
+
+			const result = await dispatch("campaign-1", {
+				batchSize: 1,
+				now: new Date("2026-09-16T03:06:00.000Z"),
+			});
+
+			expect(result.sent).toBe(0);
+			expect(result.skipped).toBe(1);
+			expect(dbState.recipients.get(recipient!.id)).toMatchObject({
+				status: "SKIPPED",
+				skipReason: "missing_user_id",
+			});
+			expect(result.completed).toBe(true);
+			expect(assertEmailConsent).not.toHaveBeenCalled();
+			expect(sendEmail).not.toHaveBeenCalled();
+		});
+	});
+
+	describe("Atomic campaign counters", () => {
+		it("preserves both sentCount increments for overlapping dispatches", async () => {
+			seedCampaign({
+				status: "SENDING",
+				totalRecipients: 2,
+				senderSnapshot: { provider: "tosend", mailFrom: "noreply@example.com" },
+				ratePerMinute: 60,
+			});
+			seedRecipients("campaign-1", 2);
+
+			const recipients = [...dbState.recipients.values()].sort((a, b) => a.id.localeCompare(b.id));
+			vi.mocked(db.newsletterRecipient.findMany)
+				.mockImplementationOnce(
+					(async () => (recipients[0] ? [{ ...recipients[0] }] : [])) as never,
+				)
+				.mockImplementationOnce(
+					(async () => (recipients[1] ? [{ ...recipients[1] }] : [])) as never,
+				);
+
+			let releaseSends!: () => void;
+			const sendsReady = new Promise<void>((resolve) => {
+				releaseSends = resolve;
+			});
+			let sendsStarted = 0;
+			sendEmail.mockImplementation(async () => {
+				sendsStarted += 1;
+				if (sendsStarted === 2) {
+					releaseSends();
+				}
+				await sendsReady;
+				return true;
+			});
+
+			let releaseUpdates!: () => void;
+			const updatesReady = new Promise<void>((resolve) => {
+				releaseUpdates = resolve;
+			});
+			const applyCounterUpdate = ({
+				where,
+				data,
+			}: {
+				where: { id: string };
+				data: CampaignUpdateData;
+			}) => {
+				const campaign = dbState.campaigns.get(where.id);
+				if (!campaign) {
+					throw new Error(`Campaign ${where.id} not found`);
+				}
+
+				applyCampaignUpdate(campaign, data);
+				return cloneCampaign(campaign);
+			};
+			vi.mocked(db.newsletterCampaign.update)
+				.mockImplementationOnce(
+					(async (args: { where: { id: string }; data: CampaignUpdateData }) => {
+						await updatesReady;
+						return applyCounterUpdate(args);
+					}) as never,
+				)
+				.mockImplementationOnce(
+					(async (args: { where: { id: string }; data: CampaignUpdateData }) => {
+						releaseUpdates();
+						return applyCounterUpdate(args);
+					}) as never,
+				);
+
+			const [first, second] = await Promise.all([
+				dispatch("campaign-1", {
+					batchSize: 1,
+					now: new Date("2026-09-16T04:00:00.000Z"),
+				}),
+				dispatch("campaign-1", {
+					batchSize: 1,
+					now: new Date("2026-09-16T04:00:00.000Z"),
+				}),
+			]);
+
+			expect(first.sent + second.sent).toBe(2);
+			expect(dbState.campaigns.get("campaign-1")?.sentCount).toBe(2);
+			expect(dbState.campaigns.get("campaign-1")?.sentCursor).toBe(2);
 		});
 	});
 
