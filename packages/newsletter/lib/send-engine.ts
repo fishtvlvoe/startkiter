@@ -45,6 +45,15 @@ export const sendEngineClock = {
 	now: (): Date => new Date(),
 };
 
+/**
+ * provider timeout 必須短於 recipient lease；send 期間靠 heartbeat 刷新租約。
+ * 測試可覆寫數值。
+ */
+export const sendEngineConfig = {
+	providerSendTimeoutMs: 30_000,
+	leaseHeartbeatIntervalMs: 15_000,
+};
+
 function now() {
 	return sendEngineClock.now();
 }
@@ -210,6 +219,7 @@ async function claimNextRecipient(campaignId: string): Promise<{
 			OR: [
 				{ status: "PENDING" },
 				{ status: "PROCESSING", updatedAt: { lt: staleRecipient } },
+				{ status: "FAILED", errorMessage: "provider_send_timeout" },
 			],
 		},
 		orderBy: { createdAt: "asc" },
@@ -223,12 +233,14 @@ async function claimNextRecipient(campaignId: string): Promise<{
 			OR: [
 				{ status: "PENDING" },
 				{ status: "PROCESSING", updatedAt: { lt: staleRecipient } },
+				{ status: "FAILED", errorMessage: "provider_send_timeout" },
 			],
 		},
 		data: {
 			status: "PROCESSING",
 			attemptToken,
 			errorMessage: null,
+			skipReason: null,
 			attemptCount: { increment: 1 },
 		},
 	});
@@ -259,6 +271,122 @@ async function completeClaimedRecipient(params: {
 	return updated.count === 1;
 }
 
+/** 刷新 recipient 租約與 campaign heartbeat，避免 in-flight 被當成 stale。 */
+async function touchInFlightLease(params: {
+	recipientId: string;
+	attemptToken: string;
+	campaignId: string;
+}): Promise<void> {
+	const touchedAt = now();
+	await db.newsletterRecipient.updateMany({
+		where: {
+			id: params.recipientId,
+			status: "PROCESSING",
+			attemptToken: params.attemptToken,
+		},
+		data: { updatedAt: touchedAt },
+	});
+	await db.newsletterCampaign.update({
+		where: { id: params.campaignId },
+		data: { lastHeartbeatAt: touchedAt },
+	});
+}
+
+/**
+ * 帶 AbortSignal timeout 的寄信；期間定期 heartbeat。
+ * timeout 後標 FAILED（當前 attemptToken），不坐等 hung provider。
+ */
+async function sendEmailWithLeaseGuard(params: {
+	campaignId: string;
+	recipientId: string;
+	attemptToken: string;
+	to: string;
+	from: string;
+	subject: string;
+	html?: string;
+	text?: string;
+}): Promise<"sent" | "failed" | "timeout" | "lost_claim"> {
+	const controller = new AbortController();
+	const timeoutMs = sendEngineConfig.providerSendTimeoutMs;
+	const heartbeatMs = sendEngineConfig.leaseHeartbeatIntervalMs;
+
+	const timeoutId = setTimeout(() => {
+		controller.abort();
+	}, timeoutMs);
+
+	const heartbeatId = setInterval(() => {
+		void touchInFlightLease({
+			recipientId: params.recipientId,
+			attemptToken: params.attemptToken,
+			campaignId: params.campaignId,
+		});
+	}, heartbeatMs);
+
+	// 立刻碰一次，避免剛 claim 後長時間無刷新
+	await touchInFlightLease({
+		recipientId: params.recipientId,
+		attemptToken: params.attemptToken,
+		campaignId: params.campaignId,
+	});
+
+	try {
+		const sendPromise = sendEmail({
+			to: params.to,
+			from: params.from,
+			subject: params.subject,
+			html: params.html,
+			text: params.text,
+		});
+
+		const abortPromise = new Promise<"aborted">((resolve) => {
+			if (controller.signal.aborted) {
+				resolve("aborted");
+				return;
+			}
+			controller.signal.addEventListener(
+				"abort",
+				() => {
+					resolve("aborted");
+				},
+				{ once: true },
+			);
+		});
+
+		const raced = await Promise.race([
+			sendPromise.then((ok) => (ok ? ("sent" as const) : ("failed" as const))),
+			abortPromise,
+		]);
+
+		if (raced === "aborted") {
+			const closed = await completeClaimedRecipient({
+				id: params.recipientId,
+				attemptToken: params.attemptToken,
+				data: { status: "FAILED", errorMessage: "provider_send_timeout" },
+			});
+			return closed ? "timeout" : "lost_claim";
+		}
+
+		if (raced === "sent") {
+			const closed = await completeClaimedRecipient({
+				id: params.recipientId,
+				attemptToken: params.attemptToken,
+				data: { status: "SENT", sentAt: now(), errorMessage: null },
+			});
+			return closed ? "sent" : "lost_claim";
+		}
+
+		const closed = await completeClaimedRecipient({
+			id: params.recipientId,
+			attemptToken: params.attemptToken,
+			data: { status: "FAILED", errorMessage: "send_failed" },
+		});
+		return closed ? "failed" : "lost_claim";
+	} finally {
+		clearTimeout(timeoutId);
+		clearInterval(heartbeatId);
+	}
+}
+
 async function finalizeCampaignIfDone(campaignId: string): Promise<boolean> {
 	const activeProcessing = await db.newsletterRecipient.count({
 		where: {
@@ -274,6 +402,16 @@ async function finalizeCampaignIfDone(campaignId: string): Promise<boolean> {
 		where: { campaignId, isTest: false, status: "PENDING" },
 	});
 	if (pending > 0) return false;
+
+	const retryableTimeouts = await db.newsletterRecipient.count({
+		where: {
+			campaignId,
+			isTest: false,
+			status: "FAILED",
+			errorMessage: "provider_send_timeout",
+		},
+	});
+	if (retryableTimeouts > 0) return false;
 
 	const counts = await db.newsletterRecipient.groupBy({
 		by: ["status"],
@@ -378,7 +516,10 @@ export async function processCampaignDispatch(
 			continue;
 		}
 
-		const ok = await sendEmail({
+		const outcome = await sendEmailWithLeaseGuard({
+			campaignId,
+			recipientId: claimed.id,
+			attemptToken: claimed.attemptToken,
 			to: claimed.toEmail,
 			from: snapshot.fromEmail,
 			subject: campaign.subject,
@@ -386,36 +527,22 @@ export async function processCampaignDispatch(
 			text: campaign.bodyText ?? undefined,
 		});
 
-		if (ok) {
-			const closed = await completeClaimedRecipient({
-				id: claimed.id,
-				attemptToken: claimed.attemptToken,
-				data: { status: "SENT", sentAt: now(), errorMessage: null },
+		if (outcome === "sent") {
+			sent += 1;
+			await db.newsletterCampaign.update({
+				where: { id: campaignId },
+				data: {
+					sentCount: { increment: 1 },
+					sentCursor: { increment: 1 },
+					lastHeartbeatAt: now(),
+				},
 			});
-			if (closed) {
-				sent += 1;
-				await db.newsletterCampaign.update({
-					where: { id: campaignId },
-					data: {
-						sentCount: { increment: 1 },
-						sentCursor: { increment: 1 },
-						lastHeartbeatAt: now(),
-					},
-				});
-			}
-		} else {
-			const closed = await completeClaimedRecipient({
-				id: claimed.id,
-				attemptToken: claimed.attemptToken,
-				data: { status: "FAILED", errorMessage: "send_failed" },
+		} else if (outcome === "failed" || outcome === "timeout") {
+			failed += 1;
+			await db.newsletterCampaign.update({
+				where: { id: campaignId },
+				data: { failedCount: { increment: 1 }, lastHeartbeatAt: now() },
 			});
-			if (closed) {
-				failed += 1;
-				await db.newsletterCampaign.update({
-					where: { id: campaignId },
-					data: { failedCount: { increment: 1 }, lastHeartbeatAt: now() },
-				});
-			}
 		}
 	}
 

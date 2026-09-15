@@ -170,6 +170,9 @@ vi.mock("@startkiter/database", () => ({
 							if (clause.status === "PROCESSING" && clause.updatedAt && typeof clause.updatedAt === "object" && "lt" in (clause.updatedAt as object)) {
 								return r.status === "PROCESSING" && r.updatedAt < (clause.updatedAt as { lt: Date }).lt;
 							}
+							if (clause.status === "FAILED" && clause.errorMessage === "provider_send_timeout") {
+								return r.status === "FAILED" && r.errorMessage === "provider_send_timeout";
+							}
 							return r.status === clause.status;
 						}),
 					);
@@ -197,6 +200,7 @@ vi.mock("@startkiter/database", () => ({
 				let rows = [...store.recipients.values()].filter((r) => r.campaignId === where.campaignId);
 				if (where.isTest === false) rows = rows.filter((r) => !r.isTest);
 				if (where.status) rows = rows.filter((r) => r.status === where.status);
+				if (where.errorMessage) rows = rows.filter((r) => r.errorMessage === where.errorMessage);
 				if (where.updatedAt && typeof where.updatedAt === "object" && "gte" in (where.updatedAt as object)) {
 					const gte = (where.updatedAt as { gte: Date }).gte;
 					rows = rows.filter((r) => r.updatedAt >= gte);
@@ -237,6 +241,9 @@ vi.mock("@startkiter/database", () => ({
 									row.status === "PROCESSING" &&
 									row.updatedAt < (clause.updatedAt as { lt: Date }).lt
 								);
+							}
+							if (clause.status === "FAILED" && clause.errorMessage === "provider_send_timeout") {
+								return row.status === "FAILED" && row.errorMessage === "provider_send_timeout";
 							}
 							return row.status === clause.status;
 						});
@@ -335,8 +342,17 @@ describe("newsletter send-engine", () => {
 		vi.resetModules();
 	});
 
-	afterEach(() => {
+	afterEach(async () => {
+		vi.useRealTimers();
 		vi.resetModules();
+		try {
+			const engine = await import("./send-engine");
+			engine.sendEngineConfig.providerSendTimeoutMs = 30_000;
+			engine.sendEngineConfig.leaseHeartbeatIntervalMs = 15_000;
+			engine.sendEngineClock.now = () => new Date();
+		} catch {
+			// module may already be torn down
+		}
 	});
 
 	describe("Campaign state machine with atomic transitions", () => {
@@ -681,6 +697,93 @@ describe("newsletter send-engine", () => {
 			});
 			expect(lateUpdate.count).toBe(0);
 			expect(store.campaigns.get("camp_stale")?.sentCount).toBe(1);
+		});
+	});
+
+	describe("Critical: in-flight provider call must not be reclaimed", () => {
+		it("keeps lease alive via heartbeat past 2 minutes, times out send, then allows one reclaim send", async () => {
+			vi.useFakeTimers();
+			try {
+				seedCampaign({
+					id: "camp_inflight",
+					status: "SENDING",
+					senderSnapshot: snapshot,
+					ratePerMinute: 100,
+					totalRecipients: 1,
+					sentCount: 0,
+					failedCount: 0,
+				});
+				seedRecipient({
+					id: "inflight_r",
+					campaignId: "camp_inflight",
+					userId: "u_inflight",
+					status: "PENDING",
+					createdAt: nowRef.current,
+				});
+
+				let sendCalls = 0;
+				sendEmailMock.mockImplementation(
+					() =>
+						new Promise<boolean>(() => {
+							sendCalls += 1;
+						}),
+				);
+
+				const engine = await import("./send-engine");
+				engine.sendEngineClock.now = () => nowRef.current;
+				engine.sendEngineConfig.providerSendTimeoutMs = 30_000;
+				engine.sendEngineConfig.leaseHeartbeatIntervalMs = 10_000;
+
+				const workerA = engine.processCampaignDispatch("camp_inflight", { maxSends: 1 });
+
+				await vi.advanceTimersByTimeAsync(0);
+				await Promise.resolve();
+				await Promise.resolve();
+
+				expect(store.recipients.get("inflight_r")?.status).toBe("PROCESSING");
+				expect(sendCalls).toBe(1);
+				const tokenA = store.recipients.get("inflight_r")?.attemptToken;
+				expect(tokenA).toBeTruthy();
+
+				nowRef.current = new Date(nowRef.current.getTime() + 3 * 60_000);
+				await vi.advanceTimersByTimeAsync(10_000);
+				await Promise.resolve();
+
+				expect(store.recipients.get("inflight_r")?.updatedAt.getTime()).toBe(
+					nowRef.current.getTime(),
+				);
+
+				const workerBDuringA = await engine.processCampaignDispatch("camp_inflight", {
+					maxSends: 1,
+				});
+				expect(workerBDuringA.sent).toBe(0);
+				expect(workerBDuringA.failed).toBe(0);
+				expect(sendCalls).toBe(1);
+				expect(store.recipients.get("inflight_r")?.attemptToken).toBe(tokenA);
+
+				await vi.advanceTimersByTimeAsync(30_000);
+				const aResult = await workerA;
+				expect(aResult.failed).toBe(1);
+				expect(store.recipients.get("inflight_r")?.status).toBe("FAILED");
+				expect(store.recipients.get("inflight_r")?.errorMessage).toBe("provider_send_timeout");
+
+				sendEmailMock.mockImplementation(async () => {
+					sendCalls += 1;
+					return true;
+				});
+				const workerBAfter = await engine.processCampaignDispatch("camp_inflight", {
+					maxSends: 1,
+				});
+				expect(workerBAfter.sent).toBe(1);
+				expect(sendCalls).toBe(2);
+				expect(store.recipients.get("inflight_r")?.status).toBe("SENT");
+				expect(store.campaigns.get("camp_inflight")?.sentCount).toBe(1);
+			} finally {
+				vi.useRealTimers();
+				const engine = await import("./send-engine");
+				engine.sendEngineConfig.providerSendTimeoutMs = 30_000;
+				engine.sendEngineConfig.leaseHeartbeatIntervalMs = 15_000;
+			}
 		});
 	});
 });
