@@ -1,5 +1,11 @@
-import { db } from "@startkiter/database";
+import { db, type Prisma } from "@startkiter/database";
 import { sendEmail as defaultSendEmail } from "@startkiter/mail";
+
+import {
+	assertEmailConsent as defaultAssertEmailConsent,
+	type AssertEmailConsentResult,
+	type EmailConsentType,
+} from "./email-consent";
 
 export const BATCH_SIZE = 500;
 
@@ -25,13 +31,6 @@ export type CampaignStatus =
 	| "PARTIAL_FAILED"
 	| "FAILED"
 	| "CANCELLED";
-
-export type EmailConsentType = "transactional" | "marketing" | "general";
-
-export type AssertEmailConsentResult = {
-	allowed: boolean;
-	reason?: string;
-};
 
 export type AssertEmailConsentFn = (
 	userId: string,
@@ -99,22 +98,6 @@ export async function captureSenderSnapshot(): Promise<SenderSnapshot> {
 		mailFrom: process.env.MAIL_FROM?.trim() || null,
 		capturedAt: new Date().toISOString(),
 	};
-}
-
-async function resolveAssertEmailConsent(
-	override?: AssertEmailConsentFn,
-): Promise<AssertEmailConsentFn> {
-	if (override) {
-		return override;
-	}
-
-	const mod = (await import(
-		/* webpackIgnore: true */ "./email-consent" as string
-	)) as {
-		assertEmailConsent: AssertEmailConsentFn;
-	};
-
-	return mod.assertEmailConsent;
 }
 
 function consentTypeForCampaign(type: string): EmailConsentType {
@@ -311,7 +294,7 @@ async function claimQueuedForSending(
 		where: { id: campaignId, status: "QUEUED" },
 		data: {
 			status: "SENDING",
-			senderSnapshot: snapshot,
+			senderSnapshot: snapshot as Prisma.InputJsonValue,
 			snapshotAt: now,
 			lastHeartbeatAt: now,
 		},
@@ -375,7 +358,7 @@ export async function dispatchCampaignBatch(
 	const now = options.now ?? new Date();
 	const batchSize = options.batchSize ?? BATCH_SIZE;
 	const sendEmail = options.sendEmail ?? defaultSendEmail;
-	const assertEmailConsent = await resolveAssertEmailConsent(options.assertEmailConsent);
+	const assertEmailConsent = options.assertEmailConsent ?? defaultAssertEmailConsent;
 	const captureSnapshot = options.captureSenderSnapshot ?? captureSenderSnapshot;
 
 	let campaign = await loadCampaign(campaignId);
@@ -401,9 +384,13 @@ export async function dispatchCampaignBatch(
 	if (!campaign.senderSnapshot) {
 		const snapshot = await captureSnapshot();
 		await db.newsletterCampaign.updateMany({
-			where: { id: campaignId, status: "SENDING", senderSnapshot: null },
+			where: {
+				id: campaignId,
+				status: "SENDING",
+				senderSnapshot: null as unknown as Prisma.JsonNullableFilter,
+			},
 			data: {
-				senderSnapshot: snapshot,
+				senderSnapshot: snapshot as Prisma.InputJsonValue,
 				snapshotAt: now,
 			},
 		});

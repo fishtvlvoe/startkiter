@@ -294,6 +294,10 @@ vi.mock("@startkiter/mail", () => ({
 	sendEmail,
 }));
 
+vi.mock("./email-consent", () => ({
+	assertEmailConsent,
+}));
+
 import { db } from "@startkiter/database";
 
 import {
@@ -390,7 +394,7 @@ describe("newsletter send engine", () => {
 		dbState.recipients.clear();
 		sendEmail.mockResolvedValue(true);
 		assertEmailConsent.mockResolvedValue({ allowed: true });
-		vi.mocked(db.newsletterCampaign.updateMany).mockImplementation(applyCampaignUpdateMany);
+		vi.mocked(db.newsletterCampaign.updateMany).mockImplementation(applyCampaignUpdateMany as never);
 	});
 
 	describe("Campaign state machine with atomic transitions", () => {
@@ -407,7 +411,7 @@ describe("newsletter send engine", () => {
 			});
 
 			vi.mocked(db.newsletterCampaign.updateMany).mockImplementation(
-				async ({
+				(async ({
 					where,
 					data,
 				}: {
@@ -432,7 +436,7 @@ describe("newsletter send engine", () => {
 
 					Object.assign(campaign, data);
 					return { count: 1 };
-				},
+				}) as never,
 			);
 
 			const [first, second] = await Promise.allSettled([
@@ -606,6 +610,25 @@ describe("newsletter send engine", () => {
 	});
 
 	describe("Consent re-checked at dispatch time", () => {
+		it("uses the business-layer consent gate by default", async () => {
+			seedCampaign({
+				type: "PROMO",
+				status: "SENDING",
+				totalRecipients: 1,
+				senderSnapshot: { provider: "tosend", mailFrom: "noreply@example.com" },
+				ratePerMinute: 60,
+			});
+			seedRecipients("campaign-1", 1);
+
+			const result = await dispatchCampaignBatch("campaign-1", {
+				batchSize: 1,
+				now: new Date("2026-09-16T02:59:00.000Z"),
+			});
+
+			expect(result.sent).toBe(1);
+			expect(assertEmailConsent).toHaveBeenCalledWith("user-1", "marketing");
+		});
+
 		it("skips a recipient who loses consent after queueing", async () => {
 			seedCampaign({
 				type: "PROMO",
@@ -698,7 +721,7 @@ describe("queueDueScheduledCampaigns", () => {
 		vi.clearAllMocks();
 		dbState.campaigns.clear();
 		dbState.recipients.clear();
-		vi.mocked(db.newsletterCampaign.updateMany).mockImplementation(applyCampaignUpdateMany);
+		vi.mocked(db.newsletterCampaign.updateMany).mockImplementation(applyCampaignUpdateMany as never);
 	});
 
 	it("atomically queues a due SCHEDULED campaign only once under concurrent triggers", async () => {
@@ -718,7 +741,7 @@ describe("queueDueScheduledCampaigns", () => {
 		});
 
 		vi.mocked(db.newsletterCampaign.updateMany).mockImplementation(
-			async ({
+			(async ({
 				where,
 				data,
 			}: {
@@ -743,7 +766,7 @@ describe("queueDueScheduledCampaigns", () => {
 
 				Object.assign(campaign, data);
 				return { count: 1 };
-			},
+			}) as never,
 		);
 
 		const now = new Date("2026-09-16T05:00:01.000Z");

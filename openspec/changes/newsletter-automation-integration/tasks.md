@@ -41,7 +41,7 @@
 
 ## 4. Wave 1 收斂
 
-- [ ] 4.1 確認 Wave 1A（`assertEmailConsent` 簽章）與 Wave 1B（`send-engine.ts` 對它的呼叫）介面一致，跑 `packages/newsletter` 全套測試（`pnpm --filter @startkiter/newsletter test`）確認整合後全綠
+- [x] 4.1 確認 Wave 1A（`assertEmailConsent` 簽章）與 Wave 1B（`send-engine.ts` 對它的呼叫）介面一致，跑 `packages/newsletter` 全套測試（`pnpm --filter @startkiter/newsletter test`）確認整合後全綠
 - [ ] 4.2 派一個不同於 Wave 1A／1B 實作者的代理做 Code Review（correctness／security／performance），聚焦「Consent gate is not embedded in the mail transport layer」是否真的沒有被繞過、HMAC 驗算是否用固定時間比對；Critical 清零才進 Wave 2
 
 ## 5. Wave 2C：撰寫器（design.md「並行執行結構」章節定義的 Wave 2（可 2 個代理平行，依賴 Wave 1 兩者皆完成）之一，可與 Wave 2D 平行，依賴 Wave 1 收斂完成，對應 capability `newsletter-composer`；建議代理分派見 design.md「建議代理分派（呼應 Fish 要求的多代理＋Codex 加速）」）
