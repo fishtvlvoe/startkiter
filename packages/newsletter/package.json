@@ -1,0 +1,25 @@
+{
+	"name": "@startkiter/newsletter",
+	"version": "0.0.0",
+	"main": "./index.ts",
+	"types": "./index.ts",
+	"exports": {
+		".": "./index.ts",
+		"./lib/send-engine": "./lib/send-engine.ts"
+	},
+	"scripts": {
+		"clean": "git clean -xdf .cache .turbo dist node_modules",
+		"test": "vitest run",
+		"type-check": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@startkiter/database": "workspace:*",
+		"@startkiter/mail": "workspace:*"
+	},
+	"devDependencies": {
+		"@startkiter/tsconfig": "workspace:*",
+		"@types/node": "catalog:",
+		"typescript": "catalog:",
+		"vitest": "catalog:"
+	}
+}

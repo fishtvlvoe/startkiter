@@ -28,16 +28,16 @@
 
 ### 紅燈測試
 
-- [ ] 3.1 在 `packages/newsletter/lib/send-engine.test.ts` 寫紅燈測試涵蓋「Campaign state machine with atomic transitions」（雙擊立即發送只成功一次、終態不可回退）
-- [ ] 3.2 補紅燈測試涵蓋「Idempotent recipient dispatch with resume」（模擬容器重啟後從斷點續發，不重寄已完成筆數）與「Pause, resume, and cancel」
-- [ ] 3.3 補紅燈測試涵蓋「Rate-limited dispatch」（跨批次窗速率節流）、「Consent re-checked at dispatch time, not at campaign creation」（發送當下重查同意狀態）、「Zero eligible recipients blocks send」、「Sender configuration snapshot locked at send time」
-- [ ] 3.4 在 `apps/saas/app/api/cron/newsletter-dispatch/route.test.ts` 寫紅燈測試涵蓋「Cron performs only atomic scheduling transitions」（近同時兩次觸發只轉換一次狀態），比照既有 `apps/saas/app/api/cron/course-expiration/route.test.ts` 的測試模式
+- [x] 3.1 在 `packages/newsletter/lib/send-engine.test.ts` 寫紅燈測試涵蓋「Campaign state machine with atomic transitions」（雙擊立即發送只成功一次、終態不可回退）
+- [x] 3.2 補紅燈測試涵蓋「Idempotent recipient dispatch with resume」（模擬容器重啟後從斷點續發，不重寄已完成筆數）與「Pause, resume, and cancel」
+- [x] 3.3 補紅燈測試涵蓋「Rate-limited dispatch」（跨批次窗速率節流）、「Consent re-checked at dispatch time, not at campaign creation」（發送當下重查同意狀態）、「Zero eligible recipients blocks send」、「Sender configuration snapshot locked at send time」
+- [x] 3.4 在 `apps/saas/app/api/cron/newsletter-dispatch/route.test.ts` 寫紅燈測試涵蓋「Cron performs only atomic scheduling transitions」（近同時兩次觸發只轉換一次狀態），比照既有 `apps/saas/app/api/cron/course-expiration/route.test.ts` 的測試模式
 
 ### 實作
 
-- [ ] 3.5 新增 `packages/newsletter/lib/send-engine.ts` 實作 Campaign 狀態機（原子 DB 轉換）與斷點續發批次處理邏輯；跑 3.1／3.2 的測試轉綠燈
-- [ ] 3.6 在 `send-engine.ts` 實作 Token Bucket 速率節流、發送當下同意重查（呼叫 Wave 1A 的 `assertEmailConsent`，此任務需等 2.4 完成或先用已定案的函式簽章 mock）、零收件人阻擋、`senderSnapshot` 鎖定；跑 3.3 的測試轉綠燈
-- [ ] 3.7 新增 `apps/saas/app/api/cron/newsletter-dispatch/route.ts`（對應 Decision「發送引擎排程觸發：沿用既有 /api/cron/* + CRON_SECRET 模式」，比照 `course-expiration/route.ts` 的 `CRON_SECRET` 驗證與批次處理模式）；跑 3.4 的測試轉綠燈
+- [x] 3.5 新增 `packages/newsletter/lib/send-engine.ts` 實作 Campaign 狀態機（原子 DB 轉換）與斷點續發批次處理邏輯；跑 3.1／3.2 的測試轉綠燈
+- [x] 3.6 在 `send-engine.ts` 實作 Token Bucket 速率節流、發送當下同意重查（呼叫 Wave 1A 的 `assertEmailConsent`，此任務需等 2.4 完成或先用已定案的函式簽章 mock）、零收件人阻擋、`senderSnapshot` 鎖定；跑 3.3 的測試轉綠燈
+- [x] 3.7 新增 `apps/saas/app/api/cron/newsletter-dispatch/route.ts`（對應 Decision「發送引擎排程觸發：沿用既有 /api/cron/* + CRON_SECRET 模式」，比照 `course-expiration/route.ts` 的 `CRON_SECRET` 驗證與批次處理模式）；跑 3.4 的測試轉綠燈
 
 ## 4. Wave 1 收斂
 
