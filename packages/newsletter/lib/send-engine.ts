@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { db } from "@startkiter/database";
 import { sendEmail } from "@startkiter/mail";
 
@@ -197,8 +199,10 @@ async function claimNextRecipient(campaignId: string): Promise<{
 	id: string;
 	userId: string | null;
 	toEmail: string;
+	attemptToken: string;
 } | null> {
 	const staleRecipient = new Date(now().getTime() - RECIPIENT_LEASE_MS);
+	const attemptToken = randomUUID();
 	const candidate = await db.newsletterRecipient.findFirst({
 		where: {
 			campaignId,
@@ -223,6 +227,7 @@ async function claimNextRecipient(campaignId: string): Promise<{
 		},
 		data: {
 			status: "PROCESSING",
+			attemptToken,
 			errorMessage: null,
 			attemptCount: { increment: 1 },
 		},
@@ -233,7 +238,25 @@ async function claimNextRecipient(campaignId: string): Promise<{
 		id: candidate.id,
 		userId: candidate.userId ?? null,
 		toEmail: candidate.toEmail,
+		attemptToken,
 	};
+}
+
+/** 僅持有相同 attemptToken 的 worker 可把 PROCESSING 收成終態。 */
+async function completeClaimedRecipient(params: {
+	id: string;
+	attemptToken: string;
+	data: Record<string, unknown>;
+}): Promise<boolean> {
+	const updated = await db.newsletterRecipient.updateMany({
+		where: {
+			id: params.id,
+			status: "PROCESSING",
+			attemptToken: params.attemptToken,
+		},
+		data: params.data,
+	});
+	return updated.count === 1;
 }
 
 async function finalizeCampaignIfDone(campaignId: string): Promise<boolean> {
@@ -319,23 +342,40 @@ export async function processCampaignDispatch(
 			break;
 		}
 
-		if (claimed.userId) {
-			const consent = await assertEmailConsent(
-				claimed.userId,
-				consentTypeForCampaign(campaign.type),
-			);
-			if (!consent.allowed) {
-				await db.newsletterRecipient.updateMany({
-					where: { id: claimed.id, status: "PROCESSING" },
-					data: { status: "SKIPPED", skipReason: consent.reason ?? "consent_denied" },
-				});
+		if (!claimed.userId) {
+			const closed = await completeClaimedRecipient({
+				id: claimed.id,
+				attemptToken: claimed.attemptToken,
+				data: { status: "SKIPPED", skipReason: "missing_user_identity" },
+			});
+			if (closed) {
 				skipped += 1;
 				await db.newsletterCampaign.update({
 					where: { id: campaignId },
 					data: { skippedCount: { increment: 1 }, lastHeartbeatAt: now() },
 				});
-				continue;
 			}
+			continue;
+		}
+
+		const consent = await assertEmailConsent(
+			claimed.userId,
+			consentTypeForCampaign(campaign.type),
+		);
+		if (!consent.allowed) {
+			const closed = await completeClaimedRecipient({
+				id: claimed.id,
+				attemptToken: claimed.attemptToken,
+				data: { status: "SKIPPED", skipReason: consent.reason ?? "consent_denied" },
+			});
+			if (closed) {
+				skipped += 1;
+				await db.newsletterCampaign.update({
+					where: { id: campaignId },
+					data: { skippedCount: { increment: 1 }, lastHeartbeatAt: now() },
+				});
+			}
+			continue;
 		}
 
 		const ok = await sendEmail({
@@ -347,29 +387,35 @@ export async function processCampaignDispatch(
 		});
 
 		if (ok) {
-			await db.newsletterRecipient.updateMany({
-				where: { id: claimed.id, status: "PROCESSING" },
+			const closed = await completeClaimedRecipient({
+				id: claimed.id,
+				attemptToken: claimed.attemptToken,
 				data: { status: "SENT", sentAt: now(), errorMessage: null },
 			});
-			sent += 1;
-			await db.newsletterCampaign.update({
-				where: { id: campaignId },
-				data: {
-					sentCount: { increment: 1 },
-					sentCursor: { increment: 1 },
-					lastHeartbeatAt: now(),
-				},
-			});
+			if (closed) {
+				sent += 1;
+				await db.newsletterCampaign.update({
+					where: { id: campaignId },
+					data: {
+						sentCount: { increment: 1 },
+						sentCursor: { increment: 1 },
+						lastHeartbeatAt: now(),
+					},
+				});
+			}
 		} else {
-			await db.newsletterRecipient.updateMany({
-				where: { id: claimed.id, status: "PROCESSING" },
+			const closed = await completeClaimedRecipient({
+				id: claimed.id,
+				attemptToken: claimed.attemptToken,
 				data: { status: "FAILED", errorMessage: "send_failed" },
 			});
-			failed += 1;
-			await db.newsletterCampaign.update({
-				where: { id: campaignId },
-				data: { failedCount: { increment: 1 }, lastHeartbeatAt: now() },
-			});
+			if (closed) {
+				failed += 1;
+				await db.newsletterCampaign.update({
+					where: { id: campaignId },
+					data: { failedCount: { increment: 1 }, lastHeartbeatAt: now() },
+				});
+			}
 		}
 	}
 

@@ -41,6 +41,7 @@ type RecipientRow = {
 	skipReason: string | null;
 	errorMessage: string | null;
 	attemptCount: number;
+	attemptToken: string | null;
 	sentAt: Date | null;
 	updatedAt: Date;
 	createdAt: Date;
@@ -244,6 +245,10 @@ vi.mock("@startkiter/database", () => ({
 						continue;
 					}
 
+					if (typeof where.attemptToken === "string" && row.attemptToken !== where.attemptToken) {
+						continue;
+					}
+
 					for (const [key, value] of Object.entries(data)) {
 						if (key === "attemptCount") {
 							row.attemptCount = applyIncrement(row.attemptCount, value);
@@ -295,12 +300,13 @@ function seedRecipient(overrides: Partial<RecipientRow> & { id: string }): Recip
 	const row: RecipientRow = {
 		id: overrides.id,
 		campaignId: overrides.campaignId ?? "camp_1",
-		userId: overrides.userId ?? `user_${overrides.id}`,
+		userId: "userId" in overrides ? overrides.userId ?? null : `user_${overrides.id}`,
 		toEmail: overrides.toEmail ?? `${overrides.id}@example.com`,
 		status: overrides.status ?? "PENDING",
 		skipReason: overrides.skipReason ?? null,
 		errorMessage: overrides.errorMessage ?? null,
 		attemptCount: overrides.attemptCount ?? 0,
+		attemptToken: overrides.attemptToken ?? null,
 		sentAt: overrides.sentAt ?? null,
 		updatedAt: overrides.updatedAt ?? nowRef.current,
 		createdAt: overrides.createdAt ?? nowRef.current,
@@ -570,6 +576,111 @@ describe("newsletter send-engine", () => {
 			const [a, b] = await Promise.all([queueDueCampaigns(), queueDueCampaigns()]);
 			expect(a.queued + b.queued).toBe(1);
 			expect(store.campaigns.get("camp_sched")?.status).toBe("QUEUED");
+		});
+	});
+
+	describe("Critical: null userId and attempt lease token", () => {
+		it("fail-closes non-test recipients with null userId without calling sendEmail", async () => {
+			seedCampaign({
+				id: "camp_null_user",
+				status: "SENDING",
+				senderSnapshot: snapshot,
+				ratePerMinute: 100,
+				totalRecipients: 1,
+			});
+			seedRecipient({
+				id: "anon",
+				campaignId: "camp_null_user",
+				userId: null,
+				toEmail: "unconsented@example.com",
+				isTest: false,
+			});
+
+			const { processCampaignDispatch } = await import("./send-engine");
+			const result = await processCampaignDispatch("camp_null_user", { maxSends: 5 });
+
+			expect(sendEmailMock).not.toHaveBeenCalled();
+			expect(assertConsentMock).not.toHaveBeenCalled();
+			expect(result.skipped).toBe(1);
+			expect(result.sent).toBe(0);
+			expect(store.recipients.get("anon")?.status).toBe("SKIPPED");
+			expect(store.recipients.get("anon")?.skipReason).toBe("missing_user_identity");
+		});
+
+		it("does not reclaim a PROCESSING recipient before the lease expires", async () => {
+			seedCampaign({
+				id: "camp_lease_fresh",
+				status: "SENDING",
+				senderSnapshot: snapshot,
+				ratePerMinute: 100,
+				totalRecipients: 1,
+				sentCount: 0,
+			});
+			seedRecipient({
+				id: "leased",
+				campaignId: "camp_lease_fresh",
+				userId: "u1",
+				status: "PROCESSING",
+				attemptToken: "token-worker-a",
+				attemptCount: 1,
+				updatedAt: nowRef.current,
+			});
+
+			sendEmailMock.mockImplementation(async () => {
+				throw new Error("should not send");
+			});
+
+			const engine = await import("./send-engine");
+			engine.sendEngineClock.now = () => nowRef.current;
+			const result = await engine.processCampaignDispatch("camp_lease_fresh", { maxSends: 5 });
+
+			expect(result.sent).toBe(0);
+			expect(sendEmailMock).not.toHaveBeenCalled();
+			expect(store.recipients.get("leased")?.attemptToken).toBe("token-worker-a");
+			expect(store.campaigns.get("camp_lease_fresh")?.sentCount).toBe(0);
+		});
+
+		it("stale-lease reclaim uses a new attemptToken so the old worker cannot double-count sentCount", async () => {
+			seedCampaign({
+				id: "camp_stale",
+				status: "SENDING",
+				senderSnapshot: snapshot,
+				ratePerMinute: 100,
+				totalRecipients: 1,
+				sentCount: 0,
+			});
+			const staleAt = new Date(nowRef.current.getTime() - 3 * 60_000);
+			seedRecipient({
+				id: "stale_r",
+				campaignId: "camp_stale",
+				userId: "u_stale",
+				status: "PROCESSING",
+				attemptToken: "token-old",
+				attemptCount: 1,
+				updatedAt: staleAt,
+				createdAt: staleAt,
+			});
+
+			const engine = await import("./send-engine");
+			engine.sendEngineClock.now = () => nowRef.current;
+
+			const result = await engine.processCampaignDispatch("camp_stale", { maxSends: 1 });
+			expect(result.sent).toBe(1);
+			expect(sendEmailMock).toHaveBeenCalledTimes(1);
+			expect(store.recipients.get("stale_r")?.status).toBe("SENT");
+			expect(store.recipients.get("stale_r")?.attemptToken).not.toBe("token-old");
+			expect(store.campaigns.get("camp_stale")?.sentCount).toBe(1);
+
+			// 舊 worker 以舊 token 嘗試 finalize → no-op，不可再加 sentCount
+			const late = await store.recipients.get("stale_r")!;
+			const lateUpdate = await (
+				await import("@startkiter/database")
+			).db.newsletterRecipient.updateMany({
+				where: { id: late.id, status: "PROCESSING", attemptToken: "token-old" },
+				data: { status: "SENT", sentAt: nowRef.current },
+			});
+			expect(lateUpdate.count).toBe(0);
+			expect(store.campaigns.get("camp_stale")?.sentCount).toBe(1);
 		});
 	});
 });

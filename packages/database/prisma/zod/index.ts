@@ -402,7 +402,7 @@ export type NewsletterCampaignScalarFieldEnum = z.infer<typeof NewsletterCampaig
 
 // File: NewsletterRecipientScalarFieldEnum.schema.ts
 
-export const NewsletterRecipientScalarFieldEnumSchema = z.enum(['id', 'campaignId', 'userId', 'toEmail', 'toName', 'status', 'skipReason', 'bounceType', 'providerMessageId', 'attemptCount', 'errorMessage', 'openedAt', 'firstClickedAt', 'unsubscribedAt', 'isTest', 'sentAt', 'createdAt', 'updatedAt'])
+export const NewsletterRecipientScalarFieldEnumSchema = z.enum(['id', 'campaignId', 'userId', 'toEmail', 'toName', 'status', 'skipReason', 'bounceType', 'providerMessageId', 'attemptCount', 'attemptToken', 'errorMessage', 'openedAt', 'firstClickedAt', 'unsubscribedAt', 'isTest', 'sentAt', 'createdAt', 'updatedAt'])
 
 export type NewsletterRecipientScalarFieldEnum = z.infer<typeof NewsletterRecipientScalarFieldEnumSchema>;
 
@@ -1858,6 +1858,7 @@ export const NewsletterRecipientSchema = z.object({
   bounceType: z.string().nullish(),
   providerMessageId: z.string().nullish(),
   attemptCount: z.number().int(),
+  attemptToken: z.string().nullish(),
   errorMessage: z.string().nullish(),
   openedAt: z.date().nullish(),
   firstClickedAt: z.date().nullish(),
