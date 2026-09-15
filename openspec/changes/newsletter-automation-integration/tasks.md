@@ -4,9 +4,9 @@
 
 ## 1. Wave 0：資料模型（單一代理，其他 Wave 前置依賴，對應 Decision「資料模型命名直接採用 woomin PRD §2.1 仲裁結果，不重新設計」）
 
-- [ ] 1.1 在 `packages/database/prisma/schema.prisma` 新增 `NewsletterCampaign`／`NewsletterRecipient`／`NewsletterTemplate`／`NewsletterLink`／`EmailConsentLog`／`NewsletterAlert` 六個 model（欄位對齊 woomin schema 1225-1392 行），並在 `User` model 新增 `marketingConsent`／`marketingConsentAt`／`marketingConsentSource`／`marketingConsentIp`／`generalEmailConsent`／`generalEmailConsentAt`／`unsubscribedAt`／`emailInvalidAt`／`emailBounceState`／`emailBounceCount` 欄位（對應 Requirement「User consent fields as single source of truth」）；跑 `pnpm --filter @startkiter/database generate` 確認 Prisma client 產生無錯
-- [ ] 1.2 新增 `NewsletterAutomation`／`NewsletterAutomationStep`／`NewsletterAutomationEnrollment`／`NewsletterAutomationDelivery`／`NewsletterAutomationOpen`／`NewsletterAutomationClick` 六個 model（欄位對齊 woomin schema 1377-1480 行），並在 `Order` model 新增 `newsletterCampaignId` 欄位；跑 `pnpm --filter @startkiter/database generate` 確認無錯
-- [ ] 1.3 產生 migration（`pnpm --filter @startkiter/database migrate dev --name add_newsletter_automation`），本機資料庫跑過 migration 無報錯，確認既有資料表與資料不受影響（`git diff` 檢查 migration SQL 只有 `CREATE TABLE`／`ALTER TABLE ADD COLUMN`，沒有任何 `DROP`／`ALTER COLUMN TYPE`）
+- [x] 1.1 在 `packages/database/prisma/schema.prisma` 新增 `NewsletterCampaign`／`NewsletterRecipient`／`NewsletterTemplate`／`NewsletterLink`／`EmailConsentLog`／`NewsletterAlert` 六個 model（欄位對齊 woomin schema 1225-1392 行），並在 `User` model 新增 `marketingConsent`／`marketingConsentAt`／`marketingConsentSource`／`marketingConsentIp`／`generalEmailConsent`／`generalEmailConsentAt`／`unsubscribedAt`／`emailInvalidAt`／`emailBounceState`／`emailBounceCount` 欄位（對應 Requirement「User consent fields as single source of truth」）；跑 `pnpm --filter @startkiter/database generate` 確認 Prisma client 產生無錯
+- [x] 1.2 新增 `NewsletterAutomation`／`NewsletterAutomationStep`／`NewsletterAutomationEnrollment`／`NewsletterAutomationDelivery`／`NewsletterAutomationOpen`／`NewsletterAutomationClick` 六個 model（欄位對齊 woomin schema 1377-1480 行），並在 `Order` model 新增 `newsletterCampaignId` 欄位；跑 `pnpm --filter @startkiter/database generate` 確認無錯
+- [x] 1.3 產生 migration（`pnpm --filter @startkiter/database migrate dev --name add_newsletter_automation`），本機資料庫跑過 migration 無報錯，確認既有資料表與資料不受影響（`git diff` 檢查 migration SQL 只有 `CREATE TABLE`／`ALTER TABLE ADD COLUMN`，沒有任何 `DROP`／`ALTER COLUMN TYPE`）
 
 ## 2. Wave 1A：法遵地基（可與 Wave 1B 平行，依賴 Wave 0，對應 capability `newsletter-consent-compliance`）
 
