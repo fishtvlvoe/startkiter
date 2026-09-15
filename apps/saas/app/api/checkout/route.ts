@@ -1,6 +1,7 @@
 import { auth } from "@startkiter/auth";
 import { validateCoupon } from "@startkiter/coupons";
 import { isOrganizationMember } from "@startkiter/database";
+import { recordEmailConsent } from "@startkiter/newsletter";
 import { MVP_SKU, getProduct, invoicePreferenceSchema, type InvoicePreferenceInput } from "@startkiter/payments";
 import { NextResponse } from "next/server";
 
@@ -50,6 +51,16 @@ export async function POST(request: Request) {
 		if (typeof body.sku !== "string" || body.sku !== MVP_SKU) {
 			return NextResponse.json({ error: "invalid_sku" }, { status: 400 });
 		}
+	}
+
+	if (body.marketingConsent === true) {
+		await recordEmailConsent({
+			userId: session.user.id,
+			consentType: "MARKETING",
+			action: "GRANTED",
+			source: "checkout",
+			ip: request.headers.get("x-forwarded-for")?.split(",", 1)[0]?.trim() ?? null,
+		});
 	}
 
 	let invoicePreference: InvoicePreferenceInput | undefined;

@@ -37,6 +37,7 @@ const formSchema = z.object({
 	email: z.email(),
 	name: z.string().min(1),
 	password: passwordSchema,
+	marketingConsent: z.boolean().default(false),
 });
 
 export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
@@ -56,6 +57,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 			name: "",
 			email: prefillEmail ?? email ?? "",
 			password: "",
+			marketingConsent: false,
 		},
 	});
 
@@ -71,7 +73,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 		}
 	}, [user, sessionLoaded]); // oxlint-disable-line eslint-plugin-react-hooks/exhaustive-deps
 
-	const onSubmit = form.handleSubmit(async ({ email, password, name }) => {
+	const onSubmit = form.handleSubmit(async ({ email, password, name, marketingConsent }) => {
 		try {
 			const { error } = await (authConfig.enablePasswordLogin
 				? await authClient.signUp.email({
@@ -79,12 +81,14 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 						password,
 						name,
 						callbackURL: redirectPath,
+						marketingConsent,
 					})
 				: authClient.signIn.magicLink({
 						email,
 						name,
 						callbackURL: redirectPath,
-					}));
+						marketingConsent,
+				} as Parameters<typeof authClient.signIn.magicLink>[0]));
 
 			if (error) {
 				throw error;
@@ -163,7 +167,7 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 								)}
 							/>
 
-							{authConfig.enablePasswordLogin && (
+			{authConfig.enablePasswordLogin && (
 								<FormField
 									control={form.control}
 									name="password"
@@ -182,9 +186,33 @@ export function SignupForm({ prefillEmail }: { prefillEmail?: string }) {
 										</FormItem>
 									)}
 								/>
-							)}
+			)}
 
-							<Button variant="primary" loading={form.formState.isSubmitting}>
+			<FormField
+				control={form.control}
+				name="marketingConsent"
+				render={({ field }) => (
+					<FormItem>
+						<FormControl>
+							<label className="flex items-start gap-2 text-sm" htmlFor="marketing-consent">
+								<input
+									id="marketing-consent"
+									type="checkbox"
+									name={field.name}
+									ref={field.ref}
+									checked={field.value}
+									onBlur={field.onBlur}
+									onChange={(event) => field.onChange(event.target.checked)}
+									defaultChecked={false}
+								/>
+								<span>我同意接收 StartKiter 的促銷優惠電子報（可隨時退訂）。</span>
+							</label>
+						</FormControl>
+					</FormItem>
+				)}
+			/>
+
+			<Button variant="primary" loading={form.formState.isSubmitting}>
 								{t("auth.signup.submit")}
 							</Button>
 						</form>

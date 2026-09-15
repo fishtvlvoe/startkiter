@@ -128,4 +128,31 @@ describe("CheckoutButton product prop", () => {
 
 		expect(pushMock).toHaveBeenCalledWith("/login?next=%2Fbundles%2Fcombo-a");
 	});
+
+	it("sends an explicitly checked marketing consent to checkout", async () => {
+		const container = await render(
+			<CheckoutButton
+				product={{ productId: "combo-a", title: "測試組合", amount: 5000 }}
+			/>,
+		);
+		const consent = container.querySelector<HTMLInputElement>("#marketing-consent");
+		expect(consent).toBeTruthy();
+		expect(consent?.checked).toBe(false);
+
+		await act(async () => {
+			consent?.click();
+		});
+		const buyButton = Array.from(container.querySelectorAll("button")).find((button) =>
+			button.textContent?.includes("購買"),
+		);
+		await act(async () => {
+			buyButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+		});
+
+		const checkoutCall = vi
+			.mocked(fetch)
+			.mock.calls.find(([url]) => String(url) === "/api/checkout");
+		const body = JSON.parse(String((checkoutCall?.[1] as RequestInit).body)) as Record<string, unknown>;
+		expect(body.marketingConsent).toBe(true);
+	});
 });

@@ -12,17 +12,17 @@
 
 ### 紅燈測試
 
-- [ ] 2.1 在 `packages/newsletter/lib/email-consent.test.ts` 寫紅燈測試涵蓋「Unified consent gate assertEmailConsent」全部場景（transactional 永遠允許、hard-bounce 擋 transactional、marketing 需明確 true、general 預設允許）與「Consent gate is not embedded in the mail transport layer」（斷言 `packages/mail` 的 provider 路由代碼不 import `assertEmailConsent`），確認測試先失敗（函式尚未存在）
-- [ ] 2.2 在 `packages/newsletter/lib/unsubscribe-token.test.ts` 寫紅燈測試涵蓋「HMAC unsubscribe token」（token scope 綁進簽章、換 scope 驗算失敗）與「退訂 token 用獨立環境變數 NEWSLETTER_UNSUBSCRIBE_SECRET」Decision（斷言簽章函式讀取 `NEWSLETTER_UNSUBSCRIBE_SECRET` 而非 `BETTER_AUTH_SECRET`）
-- [ ] 2.3 在 `apps/saas/app/(main)/unsubscribe/page.test.tsx` 與對應 API route 測試檔寫紅燈測試涵蓋「Unsubscribe page separates read from write」（GET 請求不寫 DB、POST 才生效）與「General unsubscribe does not affect marketing or transactional consent」場景
+- [x] 2.1 在 `packages/newsletter/lib/email-consent.test.ts` 寫紅燈測試涵蓋「Unified consent gate assertEmailConsent」全部場景（transactional 永遠允許、hard-bounce 擋 transactional、marketing 需明確 true、general 預設允許）與「Consent gate is not embedded in the mail transport layer」（斷言 `packages/mail` 的 provider 路由代碼不 import `assertEmailConsent`），確認測試先失敗（函式尚未存在）
+- [x] 2.2 在 `packages/newsletter/lib/unsubscribe-token.test.ts` 寫紅燈測試涵蓋「HMAC unsubscribe token」（token scope 綁進簽章、換 scope 驗算失敗）與「退訂 token 用獨立環境變數 NEWSLETTER_UNSUBSCRIBE_SECRET」Decision（斷言簽章函式讀取 `NEWSLETTER_UNSUBSCRIBE_SECRET` 而非 `BETTER_AUTH_SECRET`）
+- [x] 2.3 在 `apps/saas/app/(main)/unsubscribe/page.test.tsx` 與對應 API route 測試檔寫紅燈測試涵蓋「Unsubscribe page separates read from write」（GET 請求不寫 DB、POST 才生效）與「General unsubscribe does not affect marketing or transactional consent」場景
 
 ### 實作
 
-- [ ] 2.4 新增 `packages/newsletter/lib/email-consent.ts` 實作 `assertEmailConsent(userId, type)`（依 Decision「assertEmailConsent 插入點在業務層，不碰 packages/mail provider 層」，此函式放在 `packages/newsletter` 而非 `packages/mail`），含「Consent audit log」寫入 `EmailConsentLog`；跑 2.1 的測試轉綠燈
-- [ ] 2.5 新增 `packages/newsletter/lib/unsubscribe-token.ts` 實作 HMAC token 產生與驗算；跑 2.2 的測試轉綠燈
-- [ ] 2.6 新增 `apps/saas/app/(main)/unsubscribe/page.tsx`（偏好中心頁：促銷／一般／全部三個開關）與對應 POST API route；跑 2.3 的測試轉綠燈
-- [ ] 2.7 在既有結帳流程與註冊流程新增行銷同意 checkbox（預設不勾，對應「Consent audit log」的 `source="checkout"`／`source="register"` 場景），提交時呼叫 `EmailConsentLog` 寫入；補對應測試
-- [ ] 2.8 新增「Compliant footer with sender address gate」：在既有 `SiteSetting` 機制新增寄件人實體地址設定欄位，新增檢查函式在促銷 campaign 啟動前呼叫；寫測試涵蓋「地址未填阻擋啟動」場景
+- [x] 2.4 新增 `packages/newsletter/lib/email-consent.ts` 實作 `assertEmailConsent(userId, type)`（依 Decision「assertEmailConsent 插入點在業務層，不碰 packages/mail provider 層」，此函式放在 `packages/newsletter` 而非 `packages/mail`），含「Consent audit log」寫入 `EmailConsentLog`；跑 2.1 的測試轉綠燈
+- [x] 2.5 新增 `packages/newsletter/lib/unsubscribe-token.ts` 實作 HMAC token 產生與驗算；跑 2.2 的測試轉綠燈
+- [x] 2.6 新增 `apps/saas/app/(main)/unsubscribe/page.tsx`（偏好中心頁：促銷／一般／全部三個開關）與對應 POST API route；跑 2.3 的測試轉綠燈
+- [x] 2.7 在既有結帳流程與註冊流程新增行銷同意 checkbox（預設不勾，對應「Consent audit log」的 `source="checkout"`／`source="register"` 場景），提交時呼叫 `EmailConsentLog` 寫入；補對應測試
+- [x] 2.8 新增「Compliant footer with sender address gate」：在既有 `SiteSetting` 機制新增寄件人實體地址設定欄位，新增檢查函式在促銷 campaign 啟動前呼叫；寫測試涵蓋「地址未填阻擋啟動」場景
 
 ## 3. Wave 1B：發送引擎（可與 Wave 1A 平行，依賴 Wave 0，對應 capability `newsletter-send-engine`）
 

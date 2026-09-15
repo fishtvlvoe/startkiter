@@ -50,6 +50,7 @@ export function CheckoutButton({ product }: { product: CheckoutProduct }) {
 	const [error, setError] = useState<string | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [invoicePreference, setInvoicePreference] = useState<InvoicePreferenceInput>(DEFAULT_INVOICE_PREFERENCE);
+	const [marketingConsent, setMarketingConsent] = useState(false);
 
 	const [couponInput, setCouponInput] = useState("");
 	const [couponValidating, setCouponValidating] = useState(false);
@@ -128,6 +129,7 @@ export function CheckoutButton({ product }: { product: CheckoutProduct }) {
 					productId: product.productId,
 					invoicePreference,
 					couponCode: appliedCoupon?.code,
+					marketingConsent,
 				}),
 			});
 
@@ -207,6 +209,16 @@ export function CheckoutButton({ product }: { product: CheckoutProduct }) {
 				) : null}
 			</div>
 
+			<label className="flex items-start gap-2 text-sm" htmlFor="marketing-consent">
+				<input
+					id="marketing-consent"
+					type="checkbox"
+					checked={marketingConsent}
+					onChange={(event) => setMarketingConsent(event.target.checked)}
+				/>
+				<span>我同意接收 StartKiter 的促銷優惠電子報（可隨時退訂）。</span>
+			</label>
+
 			<button
 				className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-9 items-center justify-center rounded-full px-4 text-sm font-semibold transition-colors disabled:pointer-events-none disabled:opacity-50 w-full"
 				type="button"
@@ -219,4 +231,3 @@ export function CheckoutButton({ product }: { product: CheckoutProduct }) {
 		</div>
 	);
 }
-

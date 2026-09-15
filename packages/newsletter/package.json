@@ -5,6 +5,9 @@
 	"types": "./index.ts",
 	"exports": {
 		".": "./index.ts",
+		"./lib/email-consent": "./lib/email-consent.ts",
+		"./lib/unsubscribe-token": "./lib/unsubscribe-token.ts",
+		"./lib/compliance": "./lib/compliance.ts",
 		"./lib/send-engine": "./lib/send-engine.ts"
 	},
 	"scripts": {

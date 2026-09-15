@@ -73,6 +73,36 @@ export const auth = betterAuth({
 						return;
 					}
 					try {
+						const consentUser = createdUser as typeof createdUser & { marketingConsent?: boolean | null };
+						if (consentUser.marketingConsent === true) {
+							const now = new Date();
+							await db.$transaction([
+								db.user.update({
+									where: { id: createdUser.id },
+									data: {
+										marketingConsent: true,
+										marketingConsentAt: now,
+										marketingConsentSource: "register",
+									},
+								}),
+								db.emailConsentLog.create({
+									data: {
+										userId: createdUser.id,
+										email: createdUser.email,
+										consentType: "MARKETING",
+										action: "GRANTED",
+										source: "register",
+									},
+								}),
+							]);
+						}
+					} catch (error) {
+						logger.error(error, {
+							ctx: "recordSignupMarketingConsent",
+							userId: createdUser.id,
+						});
+					}
+					try {
 						await createWelcomeNotification(createdUser.id);
 					} catch (error) {
 						logger.error(error, {
@@ -197,8 +227,12 @@ export const auth = betterAuth({
 				type: "string",
 				required: false,
 			},
-			lastActiveOrganizationId: {
-				type: "string",
+							lastActiveOrganizationId: {
+								type: "string",
+								required: false,
+							},
+			marketingConsent: {
+				type: "boolean",
 				required: false,
 			},
 		},
