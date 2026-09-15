@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 
 import { config } from "../config";
+import { rejectWhenAborted } from "../lib/abort";
 import type { SendEmailHandler } from "../types";
 
 export const send: SendEmailHandler = async ({
@@ -12,6 +13,7 @@ export const send: SendEmailHandler = async ({
 	replyTo,
 	text,
 	html,
+	signal,
 }) => {
 	const transporter = nodemailer.createTransport({
 		host: process.env.SMTP_HOST as string,
@@ -23,14 +25,18 @@ export const send: SendEmailHandler = async ({
 		},
 	});
 
-	await transporter.sendMail({
-		to,
-		from: from ?? config.mailFrom,
-		cc,
-		bcc,
-		replyTo,
-		subject,
-		text,
-		html,
-	});
+	// nodemailer 無法真正 abort socket；signal abort 時至少 reject 結束 await
+	await rejectWhenAborted(
+		transporter.sendMail({
+			to,
+			from: from ?? config.mailFrom,
+			cc,
+			bcc,
+			replyTo,
+			subject,
+			text,
+			html,
+		}),
+		signal,
+	);
 };

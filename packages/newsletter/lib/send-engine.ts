@@ -330,34 +330,17 @@ async function sendEmailWithLeaseGuard(params: {
 	});
 
 	try {
-		const sendPromise = sendEmail({
+		const ok = await sendEmail({
 			to: params.to,
 			from: params.from,
 			subject: params.subject,
 			html: params.html,
 			text: params.text,
+			signal: controller.signal,
 		});
 
-		const abortPromise = new Promise<"aborted">((resolve) => {
-			if (controller.signal.aborted) {
-				resolve("aborted");
-				return;
-			}
-			controller.signal.addEventListener(
-				"abort",
-				() => {
-					resolve("aborted");
-				},
-				{ once: true },
-			);
-		});
-
-		const raced = await Promise.race([
-			sendPromise.then((ok) => (ok ? ("sent" as const) : ("failed" as const))),
-			abortPromise,
-		]);
-
-		if (raced === "aborted") {
+		// abort 優先：就算 provider 回 false，timeout 路徑一律標 provider_send_timeout
+		if (controller.signal.aborted) {
 			const closed = await completeClaimedRecipient({
 				id: params.recipientId,
 				attemptToken: params.attemptToken,
@@ -366,7 +349,7 @@ async function sendEmailWithLeaseGuard(params: {
 			return closed ? "timeout" : "lost_claim";
 		}
 
-		if (raced === "sent") {
+		if (ok) {
 			const closed = await completeClaimedRecipient({
 				id: params.recipientId,
 				attemptToken: params.attemptToken,

@@ -120,4 +120,47 @@ describe("ToSend provider", () => {
 			}),
 		).resolves.toBeUndefined();
 	});
+
+	it("forwards AbortSignal to fetch and rejects when aborted while hung", async () => {
+		vi.stubEnv("TOSEND_API_KEY", "ts_test_key");
+		vi.stubEnv("MAIL_FROM", "noreply@example.com");
+
+		const fetchMock = vi.fn((_url: string, init?: RequestInit) => {
+			return new Promise<Response>((_resolve, reject) => {
+				const signal = init?.signal;
+				if (!signal) {
+					return;
+				}
+				if (signal.aborted) {
+					reject(new DOMException("The operation was aborted.", "AbortError"));
+					return;
+				}
+				signal.addEventListener(
+					"abort",
+					() => {
+						reject(new DOMException("The operation was aborted.", "AbortError"));
+					},
+					{ once: true },
+				);
+			});
+		});
+		vi.stubGlobal("fetch", fetchMock);
+
+		const { send } = await import("./tosend");
+		const controller = new AbortController();
+		const pending = send({
+			to: "learner@example.com",
+			subject: "Hi",
+			text: "Hi",
+			signal: controller.signal,
+		});
+
+		expect(fetchMock).toHaveBeenCalledTimes(1);
+		expect(fetchMock.mock.calls[0]?.[1]?.signal).toBe(controller.signal);
+
+		controller.abort();
+		await expect(pending).rejects.toMatchObject({ name: "AbortError" });
+		expect(controller.signal.aborted).toBe(true);
+		expect(fetchMock).toHaveBeenCalledTimes(1);
+	});
 });

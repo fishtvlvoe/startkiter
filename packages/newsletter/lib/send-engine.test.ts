@@ -701,7 +701,7 @@ describe("newsletter send-engine", () => {
 	});
 
 	describe("Critical: in-flight provider call must not be reclaimed", () => {
-		it("keeps lease alive via heartbeat past 2 minutes, times out send, then allows one reclaim send", async () => {
+		it("aborts hung sendEmail via signal, blocks reclaim until abort, then allows one retry send", async () => {
 			vi.useFakeTimers();
 			try {
 				seedCampaign({
@@ -722,10 +722,26 @@ describe("newsletter send-engine", () => {
 				});
 
 				let sendCalls = 0;
+				let lastSignal: AbortSignal | undefined;
 				sendEmailMock.mockImplementation(
-					() =>
-						new Promise<boolean>(() => {
+					(params: { signal?: AbortSignal }) =>
+						new Promise<boolean>((resolve) => {
 							sendCalls += 1;
+							lastSignal = params.signal;
+							if (!params.signal) {
+								return;
+							}
+							if (params.signal.aborted) {
+								resolve(false);
+								return;
+							}
+							params.signal.addEventListener(
+								"abort",
+								() => {
+									resolve(false);
+								},
+								{ once: true },
+							);
 						}),
 				);
 
@@ -742,6 +758,8 @@ describe("newsletter send-engine", () => {
 
 				expect(store.recipients.get("inflight_r")?.status).toBe("PROCESSING");
 				expect(sendCalls).toBe(1);
+				expect(lastSignal).toBeDefined();
+				expect(lastSignal?.aborted).toBe(false);
 				const tokenA = store.recipients.get("inflight_r")?.attemptToken;
 				expect(tokenA).toBeTruthy();
 
@@ -760,15 +778,19 @@ describe("newsletter send-engine", () => {
 				expect(workerBDuringA.failed).toBe(0);
 				expect(sendCalls).toBe(1);
 				expect(store.recipients.get("inflight_r")?.attemptToken).toBe(tokenA);
+				expect(lastSignal?.aborted).toBe(false);
 
 				await vi.advanceTimersByTimeAsync(30_000);
 				const aResult = await workerA;
 				expect(aResult.failed).toBe(1);
+				expect(lastSignal?.aborted).toBe(true);
 				expect(store.recipients.get("inflight_r")?.status).toBe("FAILED");
 				expect(store.recipients.get("inflight_r")?.errorMessage).toBe("provider_send_timeout");
+				expect(sendCalls).toBe(1);
 
-				sendEmailMock.mockImplementation(async () => {
+				sendEmailMock.mockImplementation(async (params: { signal?: AbortSignal }) => {
 					sendCalls += 1;
+					lastSignal = params.signal;
 					return true;
 				});
 				const workerBAfter = await engine.processCampaignDispatch("camp_inflight", {

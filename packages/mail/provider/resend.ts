@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 
 import { config } from "../config";
+import { rejectWhenAborted } from "../lib/abort";
 import type { SendEmailHandler } from "../types";
 
 let resendClient: Resend | null | undefined;
@@ -31,17 +32,22 @@ export const send: SendEmailHandler = async ({
 	replyTo,
 	html,
 	text,
+	signal,
 }) => {
 	const resend = getResendClient();
 
-	await resend.emails.send({
-		from: from ?? config.mailFrom,
-		to: [to],
-		cc,
-		bcc,
-		replyTo,
-		subject,
-		html,
-		text,
-	});
+	// Resend SDK 無 AbortSignal；以競速確保 timeout 能 reject
+	await rejectWhenAborted(
+		resend.emails.send({
+			from: from ?? config.mailFrom,
+			to: [to],
+			cc,
+			bcc,
+			replyTo,
+			subject,
+			html,
+			text,
+		}),
+		signal,
+	);
 };

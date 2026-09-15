@@ -10,6 +10,7 @@ export const send: SendEmailHandler = async ({
 	text,
 	html,
 	replyTo,
+	signal,
 }) => {
 	const apiKey = process.env.ZSEND_API_KEY;
 
@@ -27,6 +28,7 @@ export const send: SendEmailHandler = async ({
 			text,
 			replyTo,
 		}),
+		signal,
 	});
 
 	if (!response.ok) {

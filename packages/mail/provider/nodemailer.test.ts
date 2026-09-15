@@ -63,4 +63,31 @@ describe("SMTP provider connection configuration", () => {
 			}),
 		);
 	});
+
+	it("rejects when AbortSignal aborts while sendMail is hung", async () => {
+		vi.stubEnv("SMTP_HOST", "smtp.example.com");
+		vi.stubEnv("SMTP_PORT", "587");
+		vi.stubEnv("SMTP_USER", "user");
+		vi.stubEnv("SMTP_PASS", "pass");
+
+		sendMail.mockImplementation(
+			() =>
+				new Promise(() => {
+					/* hung SMTP */
+				}),
+		);
+
+		const { send } = await import("./nodemailer");
+		const controller = new AbortController();
+		const pending = send({
+			to: "learner@example.com",
+			subject: "SMTP",
+			text: "Body",
+			signal: controller.signal,
+		});
+
+		controller.abort();
+		await expect(pending).rejects.toMatchObject({ name: "AbortError" });
+		expect(sendMail).toHaveBeenCalledTimes(1);
+	});
 });

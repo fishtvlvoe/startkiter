@@ -24,6 +24,7 @@ export const send: SendEmailHandler = async ({
 	subject,
 	text,
 	html,
+	signal,
 }) => {
 	const apiKey = process.env.TOSEND_API_KEY;
 	const baseUrl = (process.env.TOSEND_API_BASE_URL || DEFAULT_TOSEND_API_BASE_URL).replace(
@@ -45,6 +46,7 @@ export const send: SendEmailHandler = async ({
 			html,
 			text,
 		}),
+		signal,
 	});
 
 	if (!response.ok) {
