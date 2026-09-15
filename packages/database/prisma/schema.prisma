@@ -31,6 +31,17 @@ model User {
   locale                             String?
   twoFactorEnabled                   Boolean?
   lastActiveOrganizationId           String?
+  // 電子報同意與退訂狀態（行銷信以 NULL 視為未同意）
+  marketingConsent                   Boolean?
+  marketingConsentAt                 DateTime?
+  marketingConsentSource             String?
+  marketingConsentIp                 String?
+  generalEmailConsent                Boolean                          @default(true)
+  generalEmailConsentAt              DateTime?
+  unsubscribedAt                     DateTime?
+  emailInvalidAt                     DateTime?
+  emailBounceState                   EmailBounceState                 @default(NONE)
+  emailBounceCount                   Int                              @default(0)
   sessions                           Session[]
   accounts                           Account[]
   passkeys                           Passkey[]
@@ -68,8 +79,16 @@ model User {
   createdCourseInstructorAssignments CourseInstructor[]               @relation("CourseInstructorCreator")
   adminLogs                          AdminLog[]                       @relation("AdminLogAdmin")
   mcpConnections                     McpConnection[]
+  newsletterCampaigns                NewsletterCampaign[]             @relation("NewsletterCreatedBy")
+  newsletterRecipients               NewsletterRecipient[]
+  newsletterTemplates                NewsletterTemplate[]
+  emailConsentLogs                   EmailConsentLog[]
+  newsletterAutomationEnrollments    NewsletterAutomationEnrollment[]
+  newsletterAutomationOpens          NewsletterAutomationOpen[]
+  newsletterAutomationClicks         NewsletterAutomationClick[]
 
   @@unique([email])
+  @@index([marketingConsent])
   @@map("user")
 }
 
@@ -337,19 +356,23 @@ model Order {
   invoiceTitle       String?
   invoiceAddress     String?
   invoiceLoveCode    String?
-  couponId           String?
-  couponCode         String?
-  createdAt          DateTime    @default(now())
-  updatedAt          DateTime    @updatedAt
-  user               User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization       Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
-  coupon             Coupon?     @relation(fields: [couponId], references: [id], onDelete: SetNull)
-  invoice            Invoice?
-  emailDeliveryLogs  EmailDeliveryLog[]
+  couponId             String?
+  couponCode           String?
+  newsletterCampaignId String?
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+  user                 User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization         Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  coupon               Coupon?     @relation(fields: [couponId], references: [id], onDelete: SetNull)
+  newsletterCampaign   NewsletterCampaign? @relation(fields: [newsletterCampaignId], references: [id], onDelete: SetNull)
+  invoice              Invoice?
+  emailDeliveryLogs    EmailDeliveryLog[]
+  newsletterAutomationEnrollments NewsletterAutomationEnrollment[]
 
   @@index([userId])
   @@index([organizationId])
   @@index([couponId])
+  @@index([newsletterCampaignId])
   @@map("order")
 }
 
@@ -546,6 +569,7 @@ model Course {
   onboardingSurveyResponses CourseOnboardingSurveyResponse[]
   instructors               CourseInstructor[]
   watermarkSetting          CourseVideoWatermarkSetting?
+  newsletterAutomation      NewsletterAutomation?
 
   @@map("course")
 }
@@ -1335,6 +1359,7 @@ model Coupon {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
   orders            Order[]
+  newsletterCampaigns NewsletterCampaign[]
 
   @@index([active])
 }
@@ -1361,3 +1386,311 @@ model Page {
   @@index([status, type, locale], map: "page_status_type_locale_idx")
   @@map("page")
 }
+
+enum EmailBounceState {
+  NONE
+  SOFT_SUSPENDED
+  HARD_BOUNCED
+  COMPLAINED
+}
+
+enum NewsletterType {
+  GENERAL
+  PROMO
+}
+
+enum NewsletterStatus {
+  DRAFT
+  SCHEDULED
+  QUEUED
+  SENDING
+  PAUSED
+  SENT
+  PARTIAL_FAILED
+  FAILED
+  CANCELLED
+}
+
+enum NewsletterRecipientStatus {
+  PENDING
+  PROCESSING
+  SENT
+  FAILED
+  SKIPPED
+  BOUNCED
+}
+
+enum NewsletterAutomationDeliveryStatus {
+  PENDING
+  PROCESSING
+  SENT
+  FAILED
+  SKIPPED
+}
+
+enum EmailConsentType {
+  GENERAL
+  MARKETING
+}
+
+enum EmailConsentAction {
+  GRANTED
+  REVOKED
+}
+
+enum NewsletterAlertType {
+  INFO
+  WARNING
+  ERROR
+}
+
+model NewsletterCampaign {
+  id                    String           @id @default(cuid())
+  type                  NewsletterType   @default(GENERAL)
+  name                  String
+  subject               String
+  preheader             String?
+  contentJson           Json
+  bodyHtml              String?          @db.Text
+  bodyText              String?          @db.Text
+  templateId            String?
+  status                NewsletterStatus @default(DRAFT)
+  scheduledAt           DateTime?
+  timezone              String           @default("Asia/Taipei")
+  senderName            String?
+  replyTo               String?
+  segmentJson           Json?
+  couponId              String?
+  attributionWindowDays Int              @default(7)
+  ratePerMinute         Int              @default(60)
+  senderSnapshot        Json?
+  sentCursor            Int              @default(0)
+  totalRecipients       Int              @default(0)
+  sentCount             Int              @default(0)
+  failedCount           Int              @default(0)
+  skippedCount          Int              @default(0)
+  openCount             Int              @default(0)
+  clickCount            Int              @default(0)
+  unsubCount            Int              @default(0)
+  lastHeartbeatAt       DateTime?
+  snapshotAt            DateTime?
+  errorMessage          String?          @db.Text
+  createdById           String
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  createdBy   User                  @relation("NewsletterCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  template    NewsletterTemplate?   @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  coupon      Coupon?               @relation(fields: [couponId], references: [id], onDelete: SetNull)
+  recipients  NewsletterRecipient[]
+  links       NewsletterLink[]
+  consentLogs EmailConsentLog[]
+  orders      Order[]
+  alerts      NewsletterAlert[]
+
+  @@index([status, scheduledAt])
+  @@index([createdById, createdAt])
+  @@index([type, status])
+  @@index([updatedAt])
+}
+
+model NewsletterRecipient {
+  id                String                    @id @default(cuid())
+  campaignId        String
+  userId            String?
+  toEmail           String
+  toName            String?
+  status            NewsletterRecipientStatus @default(PENDING)
+  skipReason        String?
+  bounceType        String?
+  providerMessageId String?
+  attemptCount      Int                       @default(0)
+  errorMessage      String?                   @db.Text
+  openedAt          DateTime?
+  firstClickedAt    DateTime?
+  unsubscribedAt    DateTime?
+  isTest            Boolean                   @default(false)
+  sentAt            DateTime?
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @updatedAt
+
+  campaign NewsletterCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  user     User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  links    NewsletterLink[]
+
+  @@unique([campaignId, userId])
+  @@unique([campaignId, toEmail])
+  @@index([toEmail, createdAt])
+  @@index([status, createdAt])
+  @@index([providerMessageId])
+}
+
+model NewsletterTemplate {
+  id          String         @id @default(cuid())
+  type        NewsletterType
+  name        String
+  contentJson Json
+  isBuiltIn   Boolean        @default(false)
+  createdById String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  createdBy User?                @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  campaigns NewsletterCampaign[]
+
+  @@index([type, isBuiltIn])
+}
+
+model NewsletterLink {
+  id               String   @id @default(cuid())
+  campaignId       String
+  recipientId      String?
+  token            String   @unique
+  targetUrl        String   @db.Text
+  clickCount       Int      @default(0)
+  uniqueClickCount Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  campaign  NewsletterCampaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  recipient NewsletterRecipient? @relation(fields: [recipientId], references: [id], onDelete: SetNull)
+
+  @@index([campaignId])
+  @@index([recipientId])
+}
+
+model EmailConsentLog {
+  id           String             @id @default(cuid())
+  userId       String?
+  email        String
+  consentType  EmailConsentType
+  action       EmailConsentAction
+  source       String
+  ip           String?
+  market       String?
+  termsVersion String?
+  campaignId   String?
+  createdAt    DateTime           @default(now())
+
+  user     User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  campaign NewsletterCampaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([email, createdAt])
+  @@index([campaignId])
+}
+
+model NewsletterAlert {
+  id         String              @id @default(cuid())
+  type       NewsletterAlertType @default(INFO)
+  title      String
+  message    String              @db.Text
+  campaignId String?
+  readAt     DateTime?
+  createdAt  DateTime            @default(now())
+
+  campaign NewsletterCampaign? @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([readAt, createdAt])
+  @@index([campaignId])
+}
+
+model NewsletterAutomation {
+  id        String   @id @default(cuid())
+  courseId  String   @unique
+  name      String
+  enabled   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course      Course                           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  steps       NewsletterAutomationStep[]
+  enrollments NewsletterAutomationEnrollment[]
+
+  @@index([enabled])
+}
+
+model NewsletterAutomationStep {
+  id              String   @id @default(cuid())
+  automationId    String
+  stepOrder       Int
+  delayDays       Int      @default(0)
+  delayHours      Int      @default(0)
+  subjectTemplate String
+  contentJson     Json
+  enabled         Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  automation NewsletterAutomation           @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  deliveries NewsletterAutomationDelivery[]
+
+  @@unique([automationId, stepOrder])
+  @@index([automationId, enabled, stepOrder])
+}
+
+model NewsletterAutomationEnrollment {
+  id           String   @id @default(cuid())
+  userId       String
+  automationId String
+  orderId      String
+  enrolledAt   DateTime
+
+  user       User                           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  automation NewsletterAutomation           @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  order      Order                          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  deliveries NewsletterAutomationDelivery[]
+
+  @@unique([userId, automationId])
+  @@index([automationId, enrolledAt])
+  @@index([orderId])
+}
+
+model NewsletterAutomationDelivery {
+  id                String                             @id @default(cuid())
+  enrollmentId      String
+  stepId            String?
+  status            NewsletterAutomationDeliveryStatus @default(PENDING)
+  scheduledAt       DateTime
+  sentAt            DateTime?
+  providerMessageId String?
+  errorMessage      String?                            @db.Text
+  createdAt         DateTime                           @default(now())
+  updatedAt         DateTime                           @updatedAt
+
+  enrollment NewsletterAutomationEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  step       NewsletterAutomationStep?      @relation(fields: [stepId], references: [id], onDelete: SetNull)
+  opens      NewsletterAutomationOpen[]
+  clicks     NewsletterAutomationClick[]
+
+  @@unique([enrollmentId, stepId])
+  @@index([status, scheduledAt])
+  @@index([stepId])
+}
+
+model NewsletterAutomationOpen {
+  id         String   @id @default(cuid())
+  deliveryId String
+  userId     String
+  openedAt   DateTime @default(now())
+
+  delivery NewsletterAutomationDelivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+  user     User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([deliveryId, openedAt])
+  @@index([userId, openedAt])
+}
+
+model NewsletterAutomationClick {
+  id         String   @id @default(cuid())
+  deliveryId String
+  userId     String
+  url        String   @db.Text
+  clickedAt  DateTime @default(now())
+
+  delivery NewsletterAutomationDelivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+  user     User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([deliveryId, clickedAt])
+  @@index([userId, clickedAt])
+}
+
