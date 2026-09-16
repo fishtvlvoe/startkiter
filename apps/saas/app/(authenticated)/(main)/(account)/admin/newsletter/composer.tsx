@@ -31,6 +31,11 @@ export type NewsletterTestSendInput = {
 
 export type NewsletterSendInput = { campaignId: string };
 
+export type NewsletterScheduleInput = {
+	campaignId: string;
+	scheduledAt: string;
+};
+
 export type NewsletterAudiencePrepareInput = {
 	campaignId: string;
 	preset: "all" | "manual";
@@ -47,6 +52,7 @@ type NewsletterComposerProps = {
 	onAutosave: (input: NewsletterAutosaveInput) => Promise<ComposerActionResult>;
 	onSendTest: (input: NewsletterTestSendInput) => Promise<ComposerActionResult>;
 	onSend: (input: NewsletterSendInput) => Promise<ComposerActionResult>;
+	onSchedule?: (input: NewsletterScheduleInput) => Promise<ComposerActionResult>;
 	onPrepareAudience?: (
 		input: NewsletterAudiencePrepareInput,
 	) => Promise<NewsletterAudiencePrepareResult>;
@@ -145,6 +151,7 @@ export default function NewsletterComposer({
 	onAutosave,
 	onSendTest,
 	onSend,
+	onSchedule,
 	onPrepareAudience,
 	initialPreview,
 	onRenderPreview,
@@ -157,6 +164,8 @@ export default function NewsletterComposer({
 	const [testState, setTestState] = useState<"idle" | "sending">("idle");
 	const [testError, setTestError] = useState<string | null>(null);
 	const [confirmOpen, setConfirmOpen] = useState(false);
+	const [sendMode, setSendMode] = useState<"immediate" | "scheduled">("immediate");
+	const [scheduledAt, setScheduledAt] = useState("");
 	const [sendState, setSendState] = useState<"idle" | "sending" | "sent">("idle");
 	const [sendError, setSendError] = useState<string | null>(null);
 	const [recipientEstimate, setRecipientEstimate] = useState(initialRecipientEstimate);
@@ -234,11 +243,26 @@ export default function NewsletterComposer({
 
 	async function sendCampaign() {
 		if (sendInFlight.current || sendState !== "idle" || recipientEstimate <= 0 || rendered.isOversized) return;
+		if (sendMode === "scheduled" && !onSchedule) {
+			setSendError("排程功能尚未載入");
+			return;
+		}
+		if (sendMode === "scheduled" && !scheduledAt) {
+			setSendError("請選擇排程時間");
+			return;
+		}
+		const scheduledDate = sendMode === "scheduled" ? new Date(scheduledAt) : null;
+		if (scheduledDate && (!Number.isFinite(scheduledDate.getTime()) || scheduledDate.getTime() <= Date.now())) {
+			setSendError("排程時間必須是未來時間");
+			return;
+		}
 		sendInFlight.current = true;
 		setSendState("sending");
 		setSendError(null);
 		try {
-			const result = await onSend({ campaignId: campaign.id });
+			const result = sendMode === "scheduled"
+				? await onSchedule!({ campaignId: campaign.id, scheduledAt: scheduledDate!.toISOString() })
+				: await onSend({ campaignId: campaign.id });
 			if (result.ok) setSendState("sent");
 			else {
 				sendInFlight.current = false;
@@ -433,9 +457,44 @@ export default function NewsletterComposer({
 							<div className="flex justify-between gap-3"><dt>寄件人</dt><dd>{campaign.senderName || "沿用系統設定"}</dd></div>
 							<div className="flex justify-between gap-3 font-semibold"><dt>預估收件人數</dt><dd>{recipientEstimate}</dd></div>
 						</dl>
+						<fieldset className="space-y-3 rounded-md border p-3">
+							<legend className="px-1 text-sm font-medium">發送方式</legend>
+							<label className="flex items-center gap-2 text-sm">
+								<input
+									id="newsletter-send-mode-immediate"
+									type="radio"
+									name="newsletter-send-mode"
+									checked={sendMode === "immediate"}
+									onChange={() => { setSendMode("immediate"); setSendError(null); }}
+								/>
+								立即發送
+							</label>
+							<label className="flex items-center gap-2 text-sm">
+								<input
+									id="newsletter-send-mode-scheduled"
+									type="radio"
+									name="newsletter-send-mode"
+									checked={sendMode === "scheduled"}
+									onChange={() => { setSendMode("scheduled"); setSendError(null); }}
+								/>
+								排程於指定時間發送
+							</label>
+							{sendMode === "scheduled" && (
+								<label className="grid gap-2 text-sm font-medium" htmlFor="newsletter-scheduled-at">
+									排程時間
+									<input
+										id="newsletter-scheduled-at"
+										type="datetime-local"
+										value={scheduledAt}
+										onChange={(event) => { setScheduledAt(event.target.value); setSendError(null); }}
+										className="h-10 rounded-md border px-3 font-normal"
+									/>
+								</label>
+							)}
+						</fieldset>
 						<div className="flex justify-end gap-2">
 							<button type="button" className="rounded-md border px-4 py-2 text-sm" disabled={sendState === "sending" || sendState === "sent"} onClick={() => setConfirmOpen(false)}>取消</button>
-							<button id="newsletter-confirm-send" type="button" className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground" disabled={sendState !== "idle"} onClick={() => void sendCampaign()}>{sendState === "sending" ? "發送中…" : sendState === "sent" ? "已送出" : "確認發送"}</button>
+							<button id="newsletter-confirm-send" type="button" className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground" disabled={sendState !== "idle"} onClick={() => void sendCampaign()}>{sendState === "sending" ? (sendMode === "scheduled" ? "排程中…" : "發送中…") : sendState === "sent" ? (sendMode === "scheduled" ? "已排程" : "已送出") : (sendMode === "scheduled" ? "確認排程" : "確認發送")}</button>
 						</div>
 					</div>
 				</div>

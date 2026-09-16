@@ -10,6 +10,7 @@ import {
 	PromoAudienceLockError,
 	renderCampaignHtml,
 	requestImmediateSend,
+	scheduleCampaign,
 	sendEmail,
 	type SegmentJson,
 } from "@startkiter/newsletter";
@@ -26,6 +27,7 @@ import type {
 	NewsletterAudiencePrepareResult,
 	NewsletterAutosaveInput,
 	NewsletterSendInput,
+	NewsletterScheduleInput,
 	NewsletterTestSendInput,
 } from "./composer";
 import type { NewsletterContentJson } from "./content-types";
@@ -308,5 +310,62 @@ export async function sendNewsletter(input: NewsletterSendInput): Promise<Compos
 		return { ok: true };
 	} catch (error) {
 		return { ok: false, error: error instanceof Error ? error.message : "電子報發送失敗" };
+	}
+}
+
+export async function scheduleNewsletter(input: NewsletterScheduleInput): Promise<ComposerActionResult> {
+	const scheduledAt = new Date(input.scheduledAt);
+	if (!Number.isFinite(scheduledAt.getTime()) || scheduledAt.getTime() <= Date.now()) {
+		return { ok: false, error: "排程時間必須是未來時間" };
+	}
+
+	const session = await requireComposerAccess();
+	const campaign = await db.newsletterCampaign.findFirst({
+		where: { id: input.campaignId, createdById: session.user.id, status: "DRAFT" },
+		select: { id: true, type: true, contentJson: true, segmentJson: true },
+	});
+	if (!campaign) return { ok: false, error: "找不到電子報草稿" };
+
+	const settings = await getNewsletterSiteSettings();
+	try {
+		assertPromotionalCampaignCanActivate({
+			type: campaign.type,
+			senderPhysicalAddress: settings.senderPhysicalAddress,
+		});
+	} catch (error) {
+		return { ok: false, error: error instanceof Error ? error.message : "寄件人實體地址尚未設定" };
+	}
+
+	const segment = asSegmentJson(campaign.segmentJson);
+	try {
+		assertPromoAudienceLocked({ type: campaign.type, segment });
+	} catch (error) {
+		if (error instanceof PromoAudienceLockError) {
+			return { ok: false, error: error.message };
+		}
+		throw error;
+	}
+
+	const rendered = renderCampaignHtml(asContentJson(campaign.contentJson), {
+		mode: "send",
+		appUrl: getBaseUrl(),
+		senderPhysicalAddress: settings.senderPhysicalAddress,
+		unsubscribeScope: campaign.type === "PROMO" ? "marketing" : "general",
+	});
+	if (rendered.isOversized) return { ok: false, error: rendered.warnings[0] ?? "HTML 超過 102KB" };
+
+	await db.newsletterCampaign.update({
+		where: { id: campaign.id },
+		data: { bodyHtml: rendered.html, bodyText: rendered.text },
+	});
+
+	try {
+		await scheduleCampaign(campaign.id, scheduledAt, {
+			senderPhysicalAddress: settings.senderPhysicalAddress,
+			appUrl: getBaseUrl(),
+		});
+		return { ok: true };
+	} catch (error) {
+		return { ok: false, error: error instanceof Error ? error.message : "電子報排程失敗" };
 	}
 }

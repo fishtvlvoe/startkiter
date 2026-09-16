@@ -8,6 +8,7 @@ const {
 	campaignUpdate,
 	transaction,
 	getNewsletterSiteSettings,
+	scheduleCampaign,
 } = vi.hoisted(() => ({
 	campaignFindFirst: vi.fn(),
 	recipientDeleteMany: vi.fn(),
@@ -16,6 +17,7 @@ const {
 	campaignUpdate: vi.fn(),
 	transaction: vi.fn(),
 	getNewsletterSiteSettings: vi.fn(),
+	scheduleCampaign: vi.fn(),
 }));
 
 vi.mock("@startkiter/database", () => ({
@@ -54,10 +56,11 @@ vi.mock("@startkiter/newsletter", () => ({
 	PromoAudienceLockError: class PromoAudienceLockError extends Error {},
 	renderCampaignHtml: vi.fn(() => ({ html: "", text: "", sizeBytes: 0, isOversized: false, warnings: [] })),
 	requestImmediateSend: vi.fn(),
+	scheduleCampaign,
 	sendEmail: vi.fn(),
 }));
 
-import { prepareNewsletterAudience } from "./actions";
+import { prepareNewsletterAudience, scheduleNewsletter } from "./actions";
 
 describe("prepareNewsletterAudience", () => {
 	beforeEach(() => {
@@ -71,6 +74,7 @@ describe("prepareNewsletterAudience", () => {
 		]);
 		recipientCreateMany.mockResolvedValue({ count: 1 });
 		campaignUpdate.mockResolvedValue({ id: "campaign-1" });
+		scheduleCampaign.mockResolvedValue(undefined);
 		transaction.mockImplementation(async (callback: (tx: unknown) => unknown) => callback({
 			newsletterRecipient: { deleteMany: recipientDeleteMany, findMany: recipientFindMany, createMany: recipientCreateMany },
 			newsletterCampaign: { update: campaignUpdate },
@@ -103,6 +107,49 @@ describe("prepareNewsletterAudience", () => {
 		await expect(sendNewsletter({ campaignId: "campaign-1" })).resolves.toEqual({
 			ok: false,
 			error: expect.stringMatching(/physical sender address/i),
+		});
+	});
+
+	it("schedules a campaign for a future time through the send engine", async () => {
+		campaignFindFirst.mockResolvedValue({
+			id: "campaign-1",
+			type: "GENERAL",
+			contentJson: { blocks: [] },
+			segmentJson: { preset: "all", mode: "AND", rules: [] },
+		});
+		const scheduledAt = new Date(Date.now() + 5 * 60_000).toISOString();
+
+		await expect(scheduleNewsletter({ campaignId: "campaign-1", scheduledAt })).resolves.toEqual({ ok: true });
+
+		expect(scheduleCampaign).toHaveBeenCalledWith("campaign-1", expect.any(Date), expect.any(Object));
+		expect(scheduleCampaign.mock.calls[0][1].toISOString()).toBe(scheduledAt);
+	});
+
+	it("rejects a schedule time in the past", async () => {
+		const scheduledAt = new Date(Date.now() - 60_000).toISOString();
+
+		await expect(scheduleNewsletter({ campaignId: "campaign-1", scheduledAt })).resolves.toEqual({
+			ok: false,
+			error: expect.stringMatching(/未來|future/i),
+		});
+		expect(scheduleCampaign).not.toHaveBeenCalled();
+	});
+
+	it("returns the send engine rejection when no eligible recipients exist", async () => {
+		campaignFindFirst.mockResolvedValue({
+			id: "campaign-1",
+			type: "GENERAL",
+			contentJson: { blocks: [] },
+			segmentJson: { preset: "all", mode: "AND", rules: [] },
+		});
+		scheduleCampaign.mockRejectedValue(new Error("Zero eligible recipients: cannot schedule or send this campaign"));
+
+		await expect(scheduleNewsletter({
+			campaignId: "campaign-1",
+			scheduledAt: new Date(Date.now() + 5 * 60_000).toISOString(),
+		})).resolves.toEqual({
+			ok: false,
+			error: expect.stringMatching(/Zero eligible recipients/),
 		});
 	});
 });

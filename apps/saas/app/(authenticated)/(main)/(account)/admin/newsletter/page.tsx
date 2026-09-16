@@ -26,6 +26,7 @@ export default async function NewsletterListPage() {
 			subject: true,
 			type: true,
 			status: true,
+			scheduledAt: true,
 			updatedAt: true,
 			totalRecipients: true,
 			_count: { select: { recipients: true } },
@@ -55,7 +56,12 @@ export default async function NewsletterListPage() {
 								<tr key={campaign.id} className="border-t">
 									<td className="p-4"><Link className="font-medium text-primary underline-offset-4 hover:underline" href={`/admin/newsletter/${campaign.id}`}>{campaign.name}</Link><p className="mt-1 text-xs text-muted-foreground">{campaign.subject || "（未填主旨）"}</p></td>
 									<td className="p-4">{campaign.type === "PROMO" ? "促銷" : "一般"}</td>
-									<td className="p-4">{campaign.status}</td>
+									<td className="p-4">
+										{campaign.status}
+										{campaign.status === "SCHEDULED" && campaign.scheduledAt && (
+											<p className="mt-1 text-xs text-muted-foreground">排程：{formatDate(campaign.scheduledAt)}</p>
+										)}
+									</td>
 									<td className="p-4">{campaign._count.recipients || campaign.totalRecipients}</td>
 									<td className="p-4 text-muted-foreground">{formatDate(campaign.updatedAt)}</td>
 								</tr>

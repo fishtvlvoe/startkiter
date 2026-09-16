@@ -3,7 +3,7 @@ import { isOperator } from "@startkiter/permissions";
 import { getSession } from "@auth/lib/server";
 import { notFound, redirect } from "next/navigation";
 
-import { autosaveNewsletterDraft, prepareNewsletterAudience, renderNewsletterPreview, sendNewsletter, sendNewsletterTest } from "../actions";
+import { autosaveNewsletterDraft, prepareNewsletterAudience, renderNewsletterPreview, scheduleNewsletter, sendNewsletter, sendNewsletterTest } from "../actions";
 import { renderCampaignHtml } from "@startkiter/newsletter";
 import { getNewsletterSiteSettings } from "../../../../../../../lib/newsletter-settings";
 import { getBaseUrl } from "../../../../../../../modules/shared/lib/base-url";
@@ -68,6 +68,7 @@ export default async function NewsletterComposerPage({ params }: { params: Promi
 				onAutosave={autosaveNewsletterDraft}
 				onSendTest={sendNewsletterTest}
 				onSend={sendNewsletter}
+				onSchedule={scheduleNewsletter}
 				onPrepareAudience={prepareNewsletterAudience}
 				onRenderPreview={renderNewsletterPreview}
 				initialPreview={initialPreview}

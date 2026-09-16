@@ -116,6 +116,36 @@ describe("NewsletterComposer", () => {
 		expect(confirm.disabled).toBe(true);
 	});
 
+	it("schedules instead of sending when a future date is selected", async () => {
+		const send = vi.fn();
+		const schedule = vi.fn().mockResolvedValue({ ok: true });
+		const container = await render(
+			<NewsletterComposer
+				campaign={{ id: "campaign-1", name: "草稿", type: "GENERAL", subject: "主旨", contentJson: { blocks: [] } }}
+				recipientEstimate={42}
+				onAutosave={vi.fn()}
+				onSendTest={vi.fn()}
+				onSend={send}
+				onSchedule={schedule}
+			/>,
+		);
+
+		await act(async () => {
+			container.querySelector("#newsletter-send-campaign")?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+		});
+		const scheduledRadio = container.querySelector("#newsletter-send-mode-scheduled") as HTMLInputElement;
+		scheduledRadio.click();
+		const scheduledAt = container.querySelector("#newsletter-scheduled-at") as HTMLInputElement;
+		setInputValue(scheduledAt, "2030-01-02T03:04");
+
+		await act(async () => {
+			container.querySelector("#newsletter-confirm-send")?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+		});
+
+		expect(send).not.toHaveBeenCalled();
+		expect(schedule).toHaveBeenCalledWith({ campaignId: "campaign-1", scheduledAt: new Date("2030-01-02T03:04").toISOString() });
+	});
+
 	it("keeps promotion fields that come from catalog bindings read-only", async () => {
 		const container = await render(
 			<NewsletterComposer
