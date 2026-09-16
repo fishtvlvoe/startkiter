@@ -1,0 +1,686 @@
+# sr-portfolio-consistency-audit Specification
+
+## Purpose
+
+Keep the recorded completion state of every non-archived SR (its `tasks.md` checkboxes) honest against what actually exists in `main`, so PM and future agents can trust `spectra list` output instead of re-verifying every SR's code from scratch before continuing work on it.
+
+## Requirements
+
+### Requirement: Every non-archived SR's recorded task progress matches its actual code state
+
+For each SR under `openspec/changes/` that is not archived, the checkbox state in `tasks.md` SHALL reflect whether the corresponding code artifact actually exists and is merged, not merely whether the checkbox was manually ticked.
+
+#### Scenario: Merged code with unmatched checkboxes triggers a fix
+
+- **WHEN** an SR's code artifacts (files, schema fields, procedures named in tasks.md) are verified present in the `main` branch
+- **THEN** the SR's `tasks.md` checkboxes for those tasks SHALL be updated to `[x]` and the SR SHALL be archived if all tasks are complete
+
+#### Scenario: Unmerged code keeps checkboxes unchecked
+
+- **WHEN** an SR's code artifacts are not found in `main` for a given task
+- **THEN** that task's checkbox SHALL remain `[ ]` and the SR SHALL NOT be archived
+
+
+<!-- @trace
+source: sr-portfolio-consistency-audit
+updated: 2026-09-17
+code:
+  - apps/saas/app/(authenticated)/layout.tsx
+  - packages/auth/config.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/chatbot/page.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/support/page.tsx
+  - packages/newsletter/index.ts
+  - packages/i18n/translations/fr/saas.json
+  - apps/saas/.env.example
+  - apps/saas/app/api/unsubscribe/route.ts
+  - .github/skills/spectra-audit/SKILL.md
+  - .github/prompts/spectra-debug.prompt.md
+  - apps/saas/app/(authenticated)/checkout/checkout-button.tsx
+  - .agents/skills/spectra-propose/SKILL.md
+  - .agents/skills/spectra-commit/SKILL.md
+  - packages/newsletter/lib/promo-blocks.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/ai/page.tsx
+  - .github/prompts/spectra-archive.prompt.md
+  - packages/newsletter/lib/email-consent.ts
+  - .github/prompts/spectra-propose.prompt.md
+  - packages/newsletter/lib/compliance.ts
+  - .agents/skills/spectra-debug/SKILL.md
+  - apps/saas/modules/shared/components/Footer.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/course/page.tsx
+  - apps/saas/app/(main)/bundles/[slug]/page.tsx
+  - .github/prompts/spectra-discuss.prompt.md
+  - packages/platform/src/mount-points.ts
+  - .cursorrules
+  - .github/prompts/spectra-apply.prompt.md
+  - packages/ai/lib/provider-settings.ts
+  - .github/prompts/spectra-audit.prompt.md
+  - .github/skills/spectra-discuss/SKILL.md
+  - packages/ai/index.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/page.tsx
+  - .agents/skills/spectra-discuss/SKILL.md
+  - apps/saas/app/(authenticated)/(main)/(account)/settings/billing/page.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/composer.tsx
+  - packages/newsletter/lib/unsubscribe-token.ts
+  - .github/prompts/spectra-ingest.prompt.md
+  - packages/database/prisma/index.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/settings/newsletter/page.tsx
+  - packages/api/modules/course/lib/course-access.ts
+  - .github/skills/spectra-review/SKILL.md
+  - .github/prompts/spectra-ask.prompt.md
+  - .github/prompts/spectra-drift.prompt.md
+  - .github/skills/spectra-commit/SKILL.md
+  - .github/skills/spectra-drift/SKILL.md
+  - AGENTS.md
+  - .github/skills/spectra-ask/SKILL.md
+  - packages/api/modules/course/lib/published-content-cache.ts
+  - GEMINI.md
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/content-types.ts
+  - apps/saas/vitest.integration.config.ts
+  - .agents/skills/spectra-review/SKILL.md
+  - .github/skills/spectra-ingest/SKILL.md
+  - packages/mail/provider/nodemailer.ts
+  - packages/api/modules/course/lib/video-resolver.ts
+  - apps/saas/app/api/course/ai/route.ts
+  - .agents/skills/spectra-audit/SKILL.md
+  - apps/saas/lib/course-access.ts
+  - apps/saas/app/api/course/demo-video/route.ts
+  - packages/support/src/generate-diagnosis.ts
+  - apps/saas/app/(authenticated)/checkout/page.tsx
+  - packages/platform/src/templates/index.ts
+  - .agents/skills/spectra-archive/SKILL.md
+  - apps/saas/app/(authenticated)/bundles/page.tsx
+  - .github/skills/spectra-verify/SKILL.md
+  - apps/saas/vitest.config.ts
+  - packages/api/modules/ai/procedures/stream-message.ts
+  - .agents/skills/spectra-drift/SKILL.md
+  - .agents/skills/spectra-verify/SKILL.md
+  - packages/database/prisma/published-content-cache-generation.ts
+  - packages/ui/components/dropdown-menu.tsx
+  - apps/saas/modules/ai/components/AiChat.tsx
+  - .github/skills/spectra-archive/SKILL.md
+  - apps/saas/app/(main)/unsubscribe/page.tsx
+  - apps/saas/modules/organizations/components/OrganizationStart.tsx
+  - .github/skills/spectra-analyze/SKILL.md
+  - .github/prompts/spectra-commit.prompt.md
+  - apps/saas/modules/auth/components/SocialSigninButton.tsx
+  - packages/api/modules/ai/lib/provider-settings.ts
+  - packages/i18n/translations/en/mail.json
+  - packages/newsletter/package.json
+  - packages/api/orpc/handler.ts
+  - packages/newsletter/lib/audience.ts
+  - packages/database/prisma/migrations/20260915221513_add_newsletter_automation/migration.sql
+  - apps/saas/modules/auth/components/OtpForm.tsx
+  - packages/i18n/translations/en/saas.json
+  - packages/newsletter/vitest.config.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/layout.tsx
+  - apps/saas/lib/newsletter-settings.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/page.tsx
+  - packages/newsletter/tsconfig.json
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/actions.ts
+  - apps/saas/app/globals.css
+  - docs/dashboard/status.html
+  - CLAUDE.md
+  - packages/i18n/translations/zh-cn/saas.json
+  - packages/mail/provider/zsend.ts
+  - apps/saas/modules/auth/components/LoginForm.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/[id]/page.tsx
+  - packages/newsletter/lib/render.ts
+  - pnpm-workspace.yaml
+  - packages/mail/provider/tosend.ts
+  - apps/saas/middleware.ts
+  - apps/saas/app/api/cron/newsletter-dispatch/route.ts
+  - packages/api/modules/course/router.ts
+  - docs/reviews/buyer-flow-concurrency-hardening-section-2-3-investigation.md
+  - apps/saas/package.json
+  - packages/i18n/translations/zh-tw/saas.json
+  - apps/saas/modules/shared/lib/nav-menu-items.ts
+  - .github/skills/spectra-propose/SKILL.md
+  - apps/saas/app/api/checkout/route.ts
+  - .agents/skills/spectra-analyze/SKILL.md
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/settings/ai-provider/page.tsx
+  - .github/skills/spectra-apply/SKILL.md
+  - packages/ai/lib/model-options.ts
+  - apps/saas/modules/payments/components/PricingTable.tsx
+  - packages/i18n/translations/zh-tw/mail.json
+  - packages/mail/provider/index.ts
+  - packages/api/modules/course/lib/update-lesson.ts
+  - packages/api/modules/organizations/procedures/generate-organization-slug.ts
+  - packages/course/access.ts
+  - packages/newsletter/lib/send-engine.ts
+  - .agents/skills/spectra-ingest/SKILL.md
+  - apps/saas/config.ts
+  - apps/saas/modules/auth/components/SignupForm.tsx
+  - apps/saas/modules/shared/components/UserMenu.tsx
+  - packages/database/prisma/client.ts
+  - packages/ai/lib/index.ts
+  - packages/i18n/translations/de/saas.json
+  - packages/ai/package.json
+  - packages/i18n/translations/es/saas.json
+  - apps/saas/modules/shared/lib/redirect.ts
+  - packages/api/orpc/procedures.ts
+  - packages/i18n/translations/zh-cn/mail.json
+  - .agents/skills/spectra-apply/SKILL.md
+  - apps/saas/lib/orders.ts
+  - apps/saas/modules/shared/components/NavBar.tsx
+  - packages/database/prisma/schema.prisma
+  - .github/skills/spectra-debug/SKILL.md
+  - apps/saas/app/(authenticated)/bundles/[slug]/page.tsx
+  - packages/course/catalog.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/page.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/new/page.tsx
+  - packages/auth/auth.ts
+tests:
+  - apps/saas/app/(authenticated)/(main)/(account)/course/page.test.tsx
+  - apps/saas/modules/shared/components/NavBar.test.tsx
+  - apps/saas/lib/course-access.test.ts
+  - packages/course/access.test.ts
+  - packages/newsletter/lib/send-engine.test.ts
+  - packages/ai/resolve-text-model.test.ts
+  - packages/newsletter/lib/unsubscribe-token.test.ts
+  - packages/mail/provider/nodemailer.test.ts
+  - packages/api/modules/course/update-lesson.test.ts
+  - packages/mail/provider/zsend.test.ts
+  - packages/newsletter/lib/email-consent.test.ts
+  - packages/newsletter/lib/compliance.test.ts
+  - packages/mail/provider/tosend.test.ts
+  - apps/saas/app/(authenticated)/checkout/checkout-button.test.tsx
+  - apps/saas/modules/shared/lib/redirect.test.ts
+  - apps/saas/lib/orders-refund-dispatch.test.ts
+  - packages/platform/src/mount-points.test.ts
+  - apps/saas/app/(main)/unsubscribe/page.test.tsx
+  - packages/database/prisma/published-content-cache-generation.test.ts
+  - packages/api/modules/ai/procedures/stream-message.test.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/settings/billing/page.test.tsx
+  - apps/saas/modules/auth/components/SignupForm.consent.test.tsx
+  - apps/saas/modules/payments/components/PricingTable.test.tsx
+  - packages/ui/components/dropdown-menu.test.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/page.access-once.test.tsx
+  - packages/api/orpc/procedures.test.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/settings/ai-provider/page.test.tsx
+  - packages/mail/provider.test.ts
+  - apps/saas/app/api/course/studio/route.test.ts
+  - packages/api/modules/course/lib/published-content-cache.test.ts
+  - packages/api/modules/ai/lib/provider-settings.test.ts
+  - apps/saas/app/api/unsubscribe/route.test.ts
+  - apps/saas/app/(authenticated)/bundles/page.test.tsx
+  - apps/saas/app/api/checkout/marketing-consent.test.ts
+  - packages/course/catalog.test.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/composer.test.tsx
+  - packages/api/modules/support/procedures/chatwoot-webhook.test.ts
+  - apps/saas/app/api/course/demo-video/route.test.ts
+  - packages/newsletter/lib/render.test.ts
+  - apps/saas/app/(authenticated)/bundles/[slug]/page.test.tsx
+  - apps/saas/app/api/course/ai/route.test.ts
+  - apps/saas/lib/newsletter-settings.test.ts
+  - apps/saas/modules/shared/lib/nav-menu-items.test.ts
+  - apps/saas/tests/integration/bundle-course-access.test.ts
+  - apps/saas/modules/shared/components/UnifiedShell.test.tsx
+  - apps/saas/modules/payments/hooks/plan-data.test.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/actions.test.ts
+  - packages/ai/openai-models.test.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/ai/page.test.tsx
+  - packages/api/modules/organizations/procedures/generate-organization-slug.test.ts
+  - apps/saas/app/api/cron/newsletter-dispatch/route.test.ts
+  - packages/newsletter/lib/audience.test.ts
+  - apps/saas/lib/orders-mark-paid.concurrent.test.ts
+  - packages/api/modules/course/lib/course-access.test.ts
+  - packages/api/modules/course/course.test.ts
+  - apps/saas/app/(authenticated)/layout.test.tsx
+  - packages/newsletter/lib/promo-blocks.test.ts
+  - packages/mail/provider/index.test.ts
+  - packages/newsletter/lib/wave2-integration.test.ts
+  - apps/saas/modules/ai/components/AiChat.test.tsx
+-->
+
+---
+### Requirement: Independent code review confirms SR-to-code consistency before further development
+
+An agent other than the one that authored the SR's proposal/design/tasks SHALL review each SR's code against its `tasks.md` and produce a report stating, per task, whether the checkbox state matches the observed code.
+
+#### Scenario: Reviewer confirms a match
+
+- **WHEN** the reviewing agent finds the code described by a task exists and behaves as the task's verification target describes
+- **THEN** the report SHALL mark that task as "matched"
+
+#### Scenario: Reviewer finds a mismatch
+
+- **WHEN** the reviewing agent finds a task's checkbox state does not match the observed code (checked but code missing, or unchecked but code present and working)
+- **THEN** the report SHALL mark that task as "mismatch" and state the specific missing or extra artifact
+
+
+<!-- @trace
+source: sr-portfolio-consistency-audit
+updated: 2026-09-17
+code:
+  - apps/saas/app/(authenticated)/layout.tsx
+  - packages/auth/config.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/chatbot/page.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/support/page.tsx
+  - packages/newsletter/index.ts
+  - packages/i18n/translations/fr/saas.json
+  - apps/saas/.env.example
+  - apps/saas/app/api/unsubscribe/route.ts
+  - .github/skills/spectra-audit/SKILL.md
+  - .github/prompts/spectra-debug.prompt.md
+  - apps/saas/app/(authenticated)/checkout/checkout-button.tsx
+  - .agents/skills/spectra-propose/SKILL.md
+  - .agents/skills/spectra-commit/SKILL.md
+  - packages/newsletter/lib/promo-blocks.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/ai/page.tsx
+  - .github/prompts/spectra-archive.prompt.md
+  - packages/newsletter/lib/email-consent.ts
+  - .github/prompts/spectra-propose.prompt.md
+  - packages/newsletter/lib/compliance.ts
+  - .agents/skills/spectra-debug/SKILL.md
+  - apps/saas/modules/shared/components/Footer.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/course/page.tsx
+  - apps/saas/app/(main)/bundles/[slug]/page.tsx
+  - .github/prompts/spectra-discuss.prompt.md
+  - packages/platform/src/mount-points.ts
+  - .cursorrules
+  - .github/prompts/spectra-apply.prompt.md
+  - packages/ai/lib/provider-settings.ts
+  - .github/prompts/spectra-audit.prompt.md
+  - .github/skills/spectra-discuss/SKILL.md
+  - packages/ai/index.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/page.tsx
+  - .agents/skills/spectra-discuss/SKILL.md
+  - apps/saas/app/(authenticated)/(main)/(account)/settings/billing/page.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/composer.tsx
+  - packages/newsletter/lib/unsubscribe-token.ts
+  - .github/prompts/spectra-ingest.prompt.md
+  - packages/database/prisma/index.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/settings/newsletter/page.tsx
+  - packages/api/modules/course/lib/course-access.ts
+  - .github/skills/spectra-review/SKILL.md
+  - .github/prompts/spectra-ask.prompt.md
+  - .github/prompts/spectra-drift.prompt.md
+  - .github/skills/spectra-commit/SKILL.md
+  - .github/skills/spectra-drift/SKILL.md
+  - AGENTS.md
+  - .github/skills/spectra-ask/SKILL.md
+  - packages/api/modules/course/lib/published-content-cache.ts
+  - GEMINI.md
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/content-types.ts
+  - apps/saas/vitest.integration.config.ts
+  - .agents/skills/spectra-review/SKILL.md
+  - .github/skills/spectra-ingest/SKILL.md
+  - packages/mail/provider/nodemailer.ts
+  - packages/api/modules/course/lib/video-resolver.ts
+  - apps/saas/app/api/course/ai/route.ts
+  - .agents/skills/spectra-audit/SKILL.md
+  - apps/saas/lib/course-access.ts
+  - apps/saas/app/api/course/demo-video/route.ts
+  - packages/support/src/generate-diagnosis.ts
+  - apps/saas/app/(authenticated)/checkout/page.tsx
+  - packages/platform/src/templates/index.ts
+  - .agents/skills/spectra-archive/SKILL.md
+  - apps/saas/app/(authenticated)/bundles/page.tsx
+  - .github/skills/spectra-verify/SKILL.md
+  - apps/saas/vitest.config.ts
+  - packages/api/modules/ai/procedures/stream-message.ts
+  - .agents/skills/spectra-drift/SKILL.md
+  - .agents/skills/spectra-verify/SKILL.md
+  - packages/database/prisma/published-content-cache-generation.ts
+  - packages/ui/components/dropdown-menu.tsx
+  - apps/saas/modules/ai/components/AiChat.tsx
+  - .github/skills/spectra-archive/SKILL.md
+  - apps/saas/app/(main)/unsubscribe/page.tsx
+  - apps/saas/modules/organizations/components/OrganizationStart.tsx
+  - .github/skills/spectra-analyze/SKILL.md
+  - .github/prompts/spectra-commit.prompt.md
+  - apps/saas/modules/auth/components/SocialSigninButton.tsx
+  - packages/api/modules/ai/lib/provider-settings.ts
+  - packages/i18n/translations/en/mail.json
+  - packages/newsletter/package.json
+  - packages/api/orpc/handler.ts
+  - packages/newsletter/lib/audience.ts
+  - packages/database/prisma/migrations/20260915221513_add_newsletter_automation/migration.sql
+  - apps/saas/modules/auth/components/OtpForm.tsx
+  - packages/i18n/translations/en/saas.json
+  - packages/newsletter/vitest.config.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/layout.tsx
+  - apps/saas/lib/newsletter-settings.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/page.tsx
+  - packages/newsletter/tsconfig.json
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/actions.ts
+  - apps/saas/app/globals.css
+  - docs/dashboard/status.html
+  - CLAUDE.md
+  - packages/i18n/translations/zh-cn/saas.json
+  - packages/mail/provider/zsend.ts
+  - apps/saas/modules/auth/components/LoginForm.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/[id]/page.tsx
+  - packages/newsletter/lib/render.ts
+  - pnpm-workspace.yaml
+  - packages/mail/provider/tosend.ts
+  - apps/saas/middleware.ts
+  - apps/saas/app/api/cron/newsletter-dispatch/route.ts
+  - packages/api/modules/course/router.ts
+  - docs/reviews/buyer-flow-concurrency-hardening-section-2-3-investigation.md
+  - apps/saas/package.json
+  - packages/i18n/translations/zh-tw/saas.json
+  - apps/saas/modules/shared/lib/nav-menu-items.ts
+  - .github/skills/spectra-propose/SKILL.md
+  - apps/saas/app/api/checkout/route.ts
+  - .agents/skills/spectra-analyze/SKILL.md
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/settings/ai-provider/page.tsx
+  - .github/skills/spectra-apply/SKILL.md
+  - packages/ai/lib/model-options.ts
+  - apps/saas/modules/payments/components/PricingTable.tsx
+  - packages/i18n/translations/zh-tw/mail.json
+  - packages/mail/provider/index.ts
+  - packages/api/modules/course/lib/update-lesson.ts
+  - packages/api/modules/organizations/procedures/generate-organization-slug.ts
+  - packages/course/access.ts
+  - packages/newsletter/lib/send-engine.ts
+  - .agents/skills/spectra-ingest/SKILL.md
+  - apps/saas/config.ts
+  - apps/saas/modules/auth/components/SignupForm.tsx
+  - apps/saas/modules/shared/components/UserMenu.tsx
+  - packages/database/prisma/client.ts
+  - packages/ai/lib/index.ts
+  - packages/i18n/translations/de/saas.json
+  - packages/ai/package.json
+  - packages/i18n/translations/es/saas.json
+  - apps/saas/modules/shared/lib/redirect.ts
+  - packages/api/orpc/procedures.ts
+  - packages/i18n/translations/zh-cn/mail.json
+  - .agents/skills/spectra-apply/SKILL.md
+  - apps/saas/lib/orders.ts
+  - apps/saas/modules/shared/components/NavBar.tsx
+  - packages/database/prisma/schema.prisma
+  - .github/skills/spectra-debug/SKILL.md
+  - apps/saas/app/(authenticated)/bundles/[slug]/page.tsx
+  - packages/course/catalog.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/page.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/new/page.tsx
+  - packages/auth/auth.ts
+tests:
+  - apps/saas/app/(authenticated)/(main)/(account)/course/page.test.tsx
+  - apps/saas/modules/shared/components/NavBar.test.tsx
+  - apps/saas/lib/course-access.test.ts
+  - packages/course/access.test.ts
+  - packages/newsletter/lib/send-engine.test.ts
+  - packages/ai/resolve-text-model.test.ts
+  - packages/newsletter/lib/unsubscribe-token.test.ts
+  - packages/mail/provider/nodemailer.test.ts
+  - packages/api/modules/course/update-lesson.test.ts
+  - packages/mail/provider/zsend.test.ts
+  - packages/newsletter/lib/email-consent.test.ts
+  - packages/newsletter/lib/compliance.test.ts
+  - packages/mail/provider/tosend.test.ts
+  - apps/saas/app/(authenticated)/checkout/checkout-button.test.tsx
+  - apps/saas/modules/shared/lib/redirect.test.ts
+  - apps/saas/lib/orders-refund-dispatch.test.ts
+  - packages/platform/src/mount-points.test.ts
+  - apps/saas/app/(main)/unsubscribe/page.test.tsx
+  - packages/database/prisma/published-content-cache-generation.test.ts
+  - packages/api/modules/ai/procedures/stream-message.test.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/settings/billing/page.test.tsx
+  - apps/saas/modules/auth/components/SignupForm.consent.test.tsx
+  - apps/saas/modules/payments/components/PricingTable.test.tsx
+  - packages/ui/components/dropdown-menu.test.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/page.access-once.test.tsx
+  - packages/api/orpc/procedures.test.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/settings/ai-provider/page.test.tsx
+  - packages/mail/provider.test.ts
+  - apps/saas/app/api/course/studio/route.test.ts
+  - packages/api/modules/course/lib/published-content-cache.test.ts
+  - packages/api/modules/ai/lib/provider-settings.test.ts
+  - apps/saas/app/api/unsubscribe/route.test.ts
+  - apps/saas/app/(authenticated)/bundles/page.test.tsx
+  - apps/saas/app/api/checkout/marketing-consent.test.ts
+  - packages/course/catalog.test.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/composer.test.tsx
+  - packages/api/modules/support/procedures/chatwoot-webhook.test.ts
+  - apps/saas/app/api/course/demo-video/route.test.ts
+  - packages/newsletter/lib/render.test.ts
+  - apps/saas/app/(authenticated)/bundles/[slug]/page.test.tsx
+  - apps/saas/app/api/course/ai/route.test.ts
+  - apps/saas/lib/newsletter-settings.test.ts
+  - apps/saas/modules/shared/lib/nav-menu-items.test.ts
+  - apps/saas/tests/integration/bundle-course-access.test.ts
+  - apps/saas/modules/shared/components/UnifiedShell.test.tsx
+  - apps/saas/modules/payments/hooks/plan-data.test.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/actions.test.ts
+  - packages/ai/openai-models.test.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/ai/page.test.tsx
+  - packages/api/modules/organizations/procedures/generate-organization-slug.test.ts
+  - apps/saas/app/api/cron/newsletter-dispatch/route.test.ts
+  - packages/newsletter/lib/audience.test.ts
+  - apps/saas/lib/orders-mark-paid.concurrent.test.ts
+  - packages/api/modules/course/lib/course-access.test.ts
+  - packages/api/modules/course/course.test.ts
+  - apps/saas/app/(authenticated)/layout.test.tsx
+  - packages/newsletter/lib/promo-blocks.test.ts
+  - packages/mail/provider/index.test.ts
+  - packages/newsletter/lib/wave2-integration.test.ts
+  - apps/saas/modules/ai/components/AiChat.test.tsx
+-->
+
+---
+### Requirement: SR consistency analysis passes before continuing development on a given SR
+
+Before implementation work resumes on any SR still requiring development, `spectra analyze <change-name> --json` SHALL report zero Critical and zero Warning findings for that SR.
+
+#### Scenario: Clean analysis unblocks development
+
+- **WHEN** `spectra analyze` for a given SR returns zero Critical and zero Warning findings
+- **THEN** implementation work on that SR MAY proceed
+
+#### Scenario: Findings block development
+
+- **WHEN** `spectra analyze` for a given SR returns one or more Critical or Warning findings
+- **THEN** implementation work on that SR MUST NOT proceed until those findings are resolved or explicitly accepted with a recorded reason
+
+<!-- @trace
+source: sr-portfolio-consistency-audit
+updated: 2026-09-17
+code:
+  - apps/saas/app/(authenticated)/layout.tsx
+  - packages/auth/config.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/chatbot/page.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/support/page.tsx
+  - packages/newsletter/index.ts
+  - packages/i18n/translations/fr/saas.json
+  - apps/saas/.env.example
+  - apps/saas/app/api/unsubscribe/route.ts
+  - .github/skills/spectra-audit/SKILL.md
+  - .github/prompts/spectra-debug.prompt.md
+  - apps/saas/app/(authenticated)/checkout/checkout-button.tsx
+  - .agents/skills/spectra-propose/SKILL.md
+  - .agents/skills/spectra-commit/SKILL.md
+  - packages/newsletter/lib/promo-blocks.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/ai/page.tsx
+  - .github/prompts/spectra-archive.prompt.md
+  - packages/newsletter/lib/email-consent.ts
+  - .github/prompts/spectra-propose.prompt.md
+  - packages/newsletter/lib/compliance.ts
+  - .agents/skills/spectra-debug/SKILL.md
+  - apps/saas/modules/shared/components/Footer.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/course/page.tsx
+  - apps/saas/app/(main)/bundles/[slug]/page.tsx
+  - .github/prompts/spectra-discuss.prompt.md
+  - packages/platform/src/mount-points.ts
+  - .cursorrules
+  - .github/prompts/spectra-apply.prompt.md
+  - packages/ai/lib/provider-settings.ts
+  - .github/prompts/spectra-audit.prompt.md
+  - .github/skills/spectra-discuss/SKILL.md
+  - packages/ai/index.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/page.tsx
+  - .agents/skills/spectra-discuss/SKILL.md
+  - apps/saas/app/(authenticated)/(main)/(account)/settings/billing/page.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/composer.tsx
+  - packages/newsletter/lib/unsubscribe-token.ts
+  - .github/prompts/spectra-ingest.prompt.md
+  - packages/database/prisma/index.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/settings/newsletter/page.tsx
+  - packages/api/modules/course/lib/course-access.ts
+  - .github/skills/spectra-review/SKILL.md
+  - .github/prompts/spectra-ask.prompt.md
+  - .github/prompts/spectra-drift.prompt.md
+  - .github/skills/spectra-commit/SKILL.md
+  - .github/skills/spectra-drift/SKILL.md
+  - AGENTS.md
+  - .github/skills/spectra-ask/SKILL.md
+  - packages/api/modules/course/lib/published-content-cache.ts
+  - GEMINI.md
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/content-types.ts
+  - apps/saas/vitest.integration.config.ts
+  - .agents/skills/spectra-review/SKILL.md
+  - .github/skills/spectra-ingest/SKILL.md
+  - packages/mail/provider/nodemailer.ts
+  - packages/api/modules/course/lib/video-resolver.ts
+  - apps/saas/app/api/course/ai/route.ts
+  - .agents/skills/spectra-audit/SKILL.md
+  - apps/saas/lib/course-access.ts
+  - apps/saas/app/api/course/demo-video/route.ts
+  - packages/support/src/generate-diagnosis.ts
+  - apps/saas/app/(authenticated)/checkout/page.tsx
+  - packages/platform/src/templates/index.ts
+  - .agents/skills/spectra-archive/SKILL.md
+  - apps/saas/app/(authenticated)/bundles/page.tsx
+  - .github/skills/spectra-verify/SKILL.md
+  - apps/saas/vitest.config.ts
+  - packages/api/modules/ai/procedures/stream-message.ts
+  - .agents/skills/spectra-drift/SKILL.md
+  - .agents/skills/spectra-verify/SKILL.md
+  - packages/database/prisma/published-content-cache-generation.ts
+  - packages/ui/components/dropdown-menu.tsx
+  - apps/saas/modules/ai/components/AiChat.tsx
+  - .github/skills/spectra-archive/SKILL.md
+  - apps/saas/app/(main)/unsubscribe/page.tsx
+  - apps/saas/modules/organizations/components/OrganizationStart.tsx
+  - .github/skills/spectra-analyze/SKILL.md
+  - .github/prompts/spectra-commit.prompt.md
+  - apps/saas/modules/auth/components/SocialSigninButton.tsx
+  - packages/api/modules/ai/lib/provider-settings.ts
+  - packages/i18n/translations/en/mail.json
+  - packages/newsletter/package.json
+  - packages/api/orpc/handler.ts
+  - packages/newsletter/lib/audience.ts
+  - packages/database/prisma/migrations/20260915221513_add_newsletter_automation/migration.sql
+  - apps/saas/modules/auth/components/OtpForm.tsx
+  - packages/i18n/translations/en/saas.json
+  - packages/newsletter/vitest.config.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/layout.tsx
+  - apps/saas/lib/newsletter-settings.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/page.tsx
+  - packages/newsletter/tsconfig.json
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/actions.ts
+  - apps/saas/app/globals.css
+  - docs/dashboard/status.html
+  - CLAUDE.md
+  - packages/i18n/translations/zh-cn/saas.json
+  - packages/mail/provider/zsend.ts
+  - apps/saas/modules/auth/components/LoginForm.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/[id]/page.tsx
+  - packages/newsletter/lib/render.ts
+  - pnpm-workspace.yaml
+  - packages/mail/provider/tosend.ts
+  - apps/saas/middleware.ts
+  - apps/saas/app/api/cron/newsletter-dispatch/route.ts
+  - packages/api/modules/course/router.ts
+  - docs/reviews/buyer-flow-concurrency-hardening-section-2-3-investigation.md
+  - apps/saas/package.json
+  - packages/i18n/translations/zh-tw/saas.json
+  - apps/saas/modules/shared/lib/nav-menu-items.ts
+  - .github/skills/spectra-propose/SKILL.md
+  - apps/saas/app/api/checkout/route.ts
+  - .agents/skills/spectra-analyze/SKILL.md
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/settings/ai-provider/page.tsx
+  - .github/skills/spectra-apply/SKILL.md
+  - packages/ai/lib/model-options.ts
+  - apps/saas/modules/payments/components/PricingTable.tsx
+  - packages/i18n/translations/zh-tw/mail.json
+  - packages/mail/provider/index.ts
+  - packages/api/modules/course/lib/update-lesson.ts
+  - packages/api/modules/organizations/procedures/generate-organization-slug.ts
+  - packages/course/access.ts
+  - packages/newsletter/lib/send-engine.ts
+  - .agents/skills/spectra-ingest/SKILL.md
+  - apps/saas/config.ts
+  - apps/saas/modules/auth/components/SignupForm.tsx
+  - apps/saas/modules/shared/components/UserMenu.tsx
+  - packages/database/prisma/client.ts
+  - packages/ai/lib/index.ts
+  - packages/i18n/translations/de/saas.json
+  - packages/ai/package.json
+  - packages/i18n/translations/es/saas.json
+  - apps/saas/modules/shared/lib/redirect.ts
+  - packages/api/orpc/procedures.ts
+  - packages/i18n/translations/zh-cn/mail.json
+  - .agents/skills/spectra-apply/SKILL.md
+  - apps/saas/lib/orders.ts
+  - apps/saas/modules/shared/components/NavBar.tsx
+  - packages/database/prisma/schema.prisma
+  - .github/skills/spectra-debug/SKILL.md
+  - apps/saas/app/(authenticated)/bundles/[slug]/page.tsx
+  - packages/course/catalog.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/page.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/new/page.tsx
+  - packages/auth/auth.ts
+tests:
+  - apps/saas/app/(authenticated)/(main)/(account)/course/page.test.tsx
+  - apps/saas/modules/shared/components/NavBar.test.tsx
+  - apps/saas/lib/course-access.test.ts
+  - packages/course/access.test.ts
+  - packages/newsletter/lib/send-engine.test.ts
+  - packages/ai/resolve-text-model.test.ts
+  - packages/newsletter/lib/unsubscribe-token.test.ts
+  - packages/mail/provider/nodemailer.test.ts
+  - packages/api/modules/course/update-lesson.test.ts
+  - packages/mail/provider/zsend.test.ts
+  - packages/newsletter/lib/email-consent.test.ts
+  - packages/newsletter/lib/compliance.test.ts
+  - packages/mail/provider/tosend.test.ts
+  - apps/saas/app/(authenticated)/checkout/checkout-button.test.tsx
+  - apps/saas/modules/shared/lib/redirect.test.ts
+  - apps/saas/lib/orders-refund-dispatch.test.ts
+  - packages/platform/src/mount-points.test.ts
+  - apps/saas/app/(main)/unsubscribe/page.test.tsx
+  - packages/database/prisma/published-content-cache-generation.test.ts
+  - packages/api/modules/ai/procedures/stream-message.test.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/settings/billing/page.test.tsx
+  - apps/saas/modules/auth/components/SignupForm.consent.test.tsx
+  - apps/saas/modules/payments/components/PricingTable.test.tsx
+  - packages/ui/components/dropdown-menu.test.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/course/[lessonId]/page.access-once.test.tsx
+  - packages/api/orpc/procedures.test.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/settings/ai-provider/page.test.tsx
+  - packages/mail/provider.test.ts
+  - apps/saas/app/api/course/studio/route.test.ts
+  - packages/api/modules/course/lib/published-content-cache.test.ts
+  - packages/api/modules/ai/lib/provider-settings.test.ts
+  - apps/saas/app/api/unsubscribe/route.test.ts
+  - apps/saas/app/(authenticated)/bundles/page.test.tsx
+  - apps/saas/app/api/checkout/marketing-consent.test.ts
+  - packages/course/catalog.test.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/composer.test.tsx
+  - packages/api/modules/support/procedures/chatwoot-webhook.test.ts
+  - apps/saas/app/api/course/demo-video/route.test.ts
+  - packages/newsletter/lib/render.test.ts
+  - apps/saas/app/(authenticated)/bundles/[slug]/page.test.tsx
+  - apps/saas/app/api/course/ai/route.test.ts
+  - apps/saas/lib/newsletter-settings.test.ts
+  - apps/saas/modules/shared/lib/nav-menu-items.test.ts
+  - apps/saas/tests/integration/bundle-course-access.test.ts
+  - apps/saas/modules/shared/components/UnifiedShell.test.tsx
+  - apps/saas/modules/payments/hooks/plan-data.test.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/actions.test.ts
+  - packages/ai/openai-models.test.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/ai/page.test.tsx
+  - packages/api/modules/organizations/procedures/generate-organization-slug.test.ts
+  - apps/saas/app/api/cron/newsletter-dispatch/route.test.ts
+  - packages/newsletter/lib/audience.test.ts
+  - apps/saas/lib/orders-mark-paid.concurrent.test.ts
+  - packages/api/modules/course/lib/course-access.test.ts
+  - packages/api/modules/course/course.test.ts
+  - apps/saas/app/(authenticated)/layout.test.tsx
+  - packages/newsletter/lib/promo-blocks.test.ts
+  - packages/mail/provider/index.test.ts
+  - packages/newsletter/lib/wave2-integration.test.ts
+  - apps/saas/modules/ai/components/AiChat.test.tsx
+-->

@@ -1,0 +1,23 @@
+## 1. 派工獨立代碼審查
+
+- [x] 1.1 依 Decision: 用 orca worktree 派 Cursor 做獨立代碼審查，不用 PM 自審，開 orca worktree 派 Cursor 審查 `welcome-email-rich-editor-test-send`，交付 Requirement「Independent code review confirms SR-to-code consistency before further development」：逐條核對 tasks.md 15 個 task 對應的檔案／schema／procedure 是否存在於 main，回報「matched／mismatch」清單。驗證：Cursor 回報內容逐條列出 15 個 task 的核對結果，非籠統結論。**實際結果**：Cursor 額度用盡卡死（未動任何檔案），改派 Codex 接手完成審查。真實勾選狀態為 13/15（非清單顯示的模糊數字），已勾選的 13 項逐條核對皆為 matched（範例：1.1 → `packages/mail/lib/welcome-email-render.ts:269-319` 與對應測試 `welcome-email-render.test.ts:70-135`；1.4 → `send-welcome-email-test.ts:34-117` procedure 與 router 掛載皆存在；2.1 → `schema.prisma:768-775` 與 migration 對應）。未勾選的 2 項（6.1 全量驗證、6.2 手動驗收）是真實未完成，非記錄錯誤。
+- [x] 1.2 同一 worktree 派 Cursor 審查 `oracle-chatwoot-anti-reclaim-cutover`（5/7），交付同一 Requirement：核對已勾選的 5 個 task 對應 Oracle NSG／runbook 設定是否真的存在，回報 matched／mismatch。驗證：Cursor 回報列出 5 個已勾選 task 的核對結果。**實際結果**：PM 親自核對（Codex 該段報告因 transcript 過大被截斷，改自行驗證），5 個已勾選項目（1.1 memhold、1.2 Chatwoot compose、1.3 NSG 開通、2.1 文件更新、2.2 DNS 切換）皆有對應設定/文件記錄，判定 matched。2.3（NSG 收斂）、3.1（最終驗收）維持未勾，屬真實未完成事項，非記錄錯誤。
+- [x] 1.3 同一 worktree 派 Cursor 審查 `chatwoot-facebook-pages-messaging-live`（7/8）與 `chatwoot-data-access-renewal-and-oauth`（0/7），交付同一 Requirement：核對 FB SR 已勾選 7 個 task 對應的 webhook／inbox／文件是否存在，data-access SR 因剛 propose 完成僅需確認 0 個已勾選狀態正確。驗證：Cursor 回報涵蓋兩張 SR 的核對結果。**實際結果**：`chatwoot-facebook-pages-messaging-live` PM 親自核對 7 個已勾選項目，皆 matched（`docs/support-runtime-topology.md`、`docs/chatwoot-facebook-messaging.md` 兩份文件皆存在且含必要字樣；3.2 Live mode 切換維持未勾，因等待 Meta 審核，真實未完成）。**`chatwoot-data-access-renewal-and-oauth` 這張 SR 經 PM 確認在 `openspec/changes/`、`openspec/changes/archive/`、`.git/spectra-app/changes/`（park 儲存區）三處皆不存在**，本項無法審查，記錄為落差（見 2.3）。
+
+## 2. 修正紀錄落差
+
+- [x] 2.1 依 Cursor 審查結果，對 Requirement「Every non-archived SR's recorded task progress matches its actual code state」中確認代碼已完整存在的 SR（預期為 `welcome-email-rich-editor-test-send`），補勾 tasks.md 對應 checkbox 為 `[x]`。驗證：`git show main:openspec/changes/welcome-email-rich-editor-test-send/tasks.md \| grep -c '\[x\]'` 等於 15。**實際結果**：不適用——該 SR 真實狀態是 13/15（非 15/15），已勾選的 13 項全部 matched，不需要補勾，剩 2 項（6.1/6.2）是真的還沒做，不應該勾。
+- [x] 2.2 若 2.1 確認全部 15 個 task 皆為 matched，對該 SR 執行 `spectra archive welcome-email-rich-editor-test-send`。驗證：`spectra list` 與 `spectra list --parked` 皆不再出現該 SR 名稱，`openspec/changes/archive/` 下出現對應日期資料夾。**實際結果**：條件不成立（非全部 15 項完成），不執行封存。該 SR 仍需完成 6.1（全量測試）與 6.2（手動驗收）才能封存。
+- [x] 2.3 若 Cursor 審查在其餘 SR 發現 mismatch，在本 SR 的實作紀錄中逐條列出「mismatch task 編號＋缺什麼」，不在本 SR 內修復，交棒回對應 SR 的下一輪 apply。驗證：mismatch 清單存在且每條可對應到原 SR 的具體 task 編號。**實際結果**：三張已審查 SR 的已勾選項目皆無 mismatch。但發現兩個系統性落差，記錄如下，不在本 SR 修復：
+  - **落差 A**：`spectra list --parked` 對 `welcome-email-rich-editor-test-send` 顯示一筆幽靈重複資料（completedTasks=0/totalTasks=15），跟該 SR 實際狀態（in-progress, 13/15）矛盾。研判是 spectra CLI 的 park 索引快取沒有跟實際檔案系統同步（該 SR 從未被真的 park 過，`.openspec.yaml` 沒有 park 標記）。交棒建議：下次遇到 spectra CLI 清單顯示矛盾時，以 `openspec/changes/<name>/tasks.md` 檔案系統實際內容為準，不要相信 `spectra list --parked` 單一來源。
+  - **落差 B**：本 SR（sr-portfolio-consistency-audit）的 tasks.md 第 1.3／3.1 項引用一張 `chatwoot-data-access-renewal-and-oauth`（0/7）SR，但 PM 已確認該 SR 在 `openspec/changes/`、`openspec/changes/archive/`、`.git/spectra-app/changes/`（park 儲存區）三處皆不存在。研判可能是規劃本 SR 時筆誤、或該 SR 從未真正被 propose 出來就被引用。交棒建議：若這是真實需求（Chatwoot 資料存取權限續約／OAuth 重新授權），需要另開一張新的 `/spectra-propose` 走完整流程；若已不需要，此為文件層級的無害筆誤，可忽略。
+- [x] 2.4 依 Decision: 跨 SR 依賴順序以「Meta 外部審核」為分界，不強制序列其他 SR，確認 `welcome-email-rich-editor-test-send` 與 `oracle-chatwoot-anti-reclaim-cutover` 兩張互不相依，可平行繼續各自下一步，不需等 Chatwoot 系列 SR 完成。驗證：本 SR 的完成紀錄中明確寫出這兩張 SR 的下一步不互相阻擋。**實際結果**：確認無相依。`welcome-email-rich-editor-test-send` 下一步是完成 6.1/6.2（本機測試+手動驗收），純前後端代碼工作；`oracle-chatwoot-anti-reclaim-cutover` 下一步是 2.3（NSG 收斂）與 3.1（最終驗收），是雲端基礎設施設定工作。兩者互不碰觸同一份檔案或同一個服務，可平行繼續，不互相阻擋。
+
+## 3. 開發前一致性關卡
+
+- [x] 3.1 對 `chatwoot-data-access-renewal-and-oauth` 執行 `spectra analyze chatwoot-data-access-renewal-and-oauth --json`，交付 Requirement「SR consistency analysis passes before continuing development on a given SR」：確認 Critical／Warning 皆為 0。驗證：指令 JSON 輸出的 Critical 與 Warning 計數皆為 0（Suggestion 不計）。**實際結果**：無法執行——該 SR 不存在（見 2.3 落差 B），本項標記為 blocked，非本 SR 範圍可解決。
+- [x] 3.2 對 `oracle-chatwoot-anti-reclaim-cutover`（若確認要續做）執行 `spectra analyze oracle-chatwoot-anti-reclaim-cutover --json`，交付同一 Requirement。驗證：同上，Critical／Warning 皆為 0。**實際結果**：已執行，`errors: 0`、`warnings: 0`，通過。分析後已將該 SR 重新 park 回原狀態（僅為跑分析暫時 unpark，不代表決定要續做）。
+
+## 4. Review
+
+- [x] 4.1 Review：執行 `spectra analyze sr-portfolio-consistency-audit --json` 確認本 SR 自身內部一致性，交付無 Critical／Warning 的驗證通過行為。驗證：指令輸出不含 Critical／Warning 等級 finding。**實際結果**：執行後發現 1 個 Warning（`specs/sr-portfolio-consistency-audit/spec.md` 缺少 `## Purpose` 段落），已補上 Purpose 段落修正，重新跑確認 Critical=0、Warning=0。
