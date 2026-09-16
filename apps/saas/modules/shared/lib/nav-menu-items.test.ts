@@ -85,7 +85,7 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 			expect(learnerItems.find((item) => item.href === "/course")?.isActive).toBe(true);
 
 			// Operator sees course admin children grouped under one「課程」parent.
-			// New orphan admin pages append after email-settings (orders 19–24).
+			// New orphan admin pages follow their mount-point order.
 			expect(operatorItems.map((item) => item.label)).toEqual([
 				"開始",
 				"課程",
@@ -95,6 +95,7 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 				"後台設定",
 				"課程",
 				"頁面管理",
+				"電子報",
 				"郵件設定",
 				"組織管理",
 				"訂單管理",

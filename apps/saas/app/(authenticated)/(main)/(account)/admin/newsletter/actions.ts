@@ -2,12 +2,24 @@
 
 import { db, type Prisma } from "@startkiter/database";
 import { isOperator } from "@startkiter/permissions";
-import { renderCampaignHtml, requestImmediateSend, sendEmail } from "@startkiter/newsletter";
+import {
+	assertPromoAudienceLocked,
+	estimateAudience,
+	parseSegmentJson,
+	PromoAudienceLockError,
+	renderCampaignHtml,
+	requestImmediateSend,
+	sendEmail,
+	type SegmentJson,
+} from "@startkiter/newsletter";
+import { normalizeEmail } from "@startkiter/newsletter/lib/audience";
 import { getSession } from "@auth/lib/server";
 import { redirect } from "next/navigation";
 
 import type {
 	ComposerActionResult,
+	NewsletterAudiencePrepareInput,
+	NewsletterAudiencePrepareResult,
 	NewsletterAutosaveInput,
 	NewsletterSendInput,
 	NewsletterTestSendInput,
@@ -34,6 +46,10 @@ function asContentJson(value: Prisma.JsonValue): NewsletterContentJson {
 	return { blocks: [] };
 }
 
+function asSegmentJson(value: Prisma.JsonValue | null | undefined): SegmentJson {
+	return parseSegmentJson(value);
+}
+
 export async function renderNewsletterPreview(contentJson: NewsletterContentJson) {
 	await requireComposerAccess();
 	return renderCampaignHtml(contentJson, { mode: "preview" });
@@ -45,7 +61,14 @@ export async function createNewsletterDraft(): Promise<void> {
 		data: {
 			name: "未命名電子報",
 			subject: "",
+			type: "PROMO",
 			contentJson: { blocks: [] },
+			segmentJson: {
+				preset: "manual",
+				mode: "AND",
+				rules: [{ field: "marketingConsent", value: true }],
+				manualEmails: [],
+			},
 			createdById: session.user.id,
 		},
 		select: { id: true },
@@ -67,6 +90,90 @@ export async function autosaveNewsletterDraft(input: NewsletterAutosaveInput): P
 		},
 	});
 	return result.count === 1 ? { ok: true } : { ok: false, error: "草稿不存在或已不在編輯狀態" };
+}
+
+export async function prepareNewsletterAudience(
+	input: NewsletterAudiencePrepareInput,
+): Promise<NewsletterAudiencePrepareResult> {
+	const session = await requireComposerAccess();
+	const campaign = await db.newsletterCampaign.findFirst({
+		where: { id: input.campaignId, createdById: session.user.id, status: "DRAFT" },
+		select: { id: true, type: true },
+	});
+	if (!campaign) return { ok: false, error: "找不到電子報草稿" };
+
+	const segment: SegmentJson =
+		input.preset === "manual"
+			? {
+					preset: "manual",
+					mode: "AND",
+					manualEmails: (input.manualEmails || []).map((email) => email.trim().toLowerCase()).filter(Boolean),
+					rules: campaign.type === "PROMO" ? [{ field: "marketingConsent", value: true }] : [],
+				}
+			: {
+					preset: "all",
+					mode: "AND",
+					rules: campaign.type === "PROMO" ? [{ field: "marketingConsent", value: true }] : [],
+				};
+
+	try {
+		assertPromoAudienceLocked({ type: campaign.type, segment });
+	} catch (error) {
+		if (error instanceof PromoAudienceLockError) {
+			return { ok: false, error: error.message };
+		}
+		throw error;
+	}
+
+	if (input.preset === "manual" && !(segment.manualEmails || []).length) {
+		return { ok: false, error: "請至少填一個手動收件信箱" };
+	}
+
+	const estimate = await estimateAudience({
+		type: campaign.type,
+		segment,
+	});
+
+	await db.$transaction(async (tx) => {
+		await tx.newsletterRecipient.deleteMany({
+			where: { campaignId: campaign.id, isTest: false, status: "PENDING" },
+		});
+		const recipients = estimate.recipients ?? [];
+		if (recipients.length) {
+			const audienceEmails = new Set(recipients.map((recipient) => normalizeEmail(recipient.email)));
+			const existingTestRecipients = await tx.newsletterRecipient.findMany({
+				where: { campaignId: campaign.id, isTest: true },
+				select: { id: true, toEmail: true },
+			});
+			const overlappingTestIds = existingTestRecipients
+				.filter((recipient) => audienceEmails.has(normalizeEmail(recipient.toEmail)))
+				.map((recipient) => recipient.id);
+			if (overlappingTestIds.length) {
+				// The schema has one (campaignId, toEmail) row, so promote an overlapping test row by replacement.
+				await tx.newsletterRecipient.deleteMany({ where: { id: { in: overlappingTestIds } } });
+			}
+			await tx.newsletterRecipient.createMany({
+				data: recipients.map((recipient) => ({
+					campaignId: campaign.id,
+					userId: recipient.id,
+					toEmail: recipient.email,
+					toName: recipient.name,
+					status: "PENDING",
+					isTest: false,
+				})),
+				skipDuplicates: true,
+			});
+		}
+		await tx.newsletterCampaign.update({
+			where: { id: campaign.id },
+			data: {
+				segmentJson: segment as unknown as Prisma.InputJsonValue,
+				totalRecipients: estimate.sendable,
+			},
+		});
+	});
+
+	return { ok: true, recipientEstimate: estimate.sendable };
 }
 
 export async function sendNewsletterTest(input: NewsletterTestSendInput): Promise<ComposerActionResult> {
@@ -117,9 +224,19 @@ export async function sendNewsletter(input: NewsletterSendInput): Promise<Compos
 	const session = await requireComposerAccess();
 	const campaign = await db.newsletterCampaign.findFirst({
 		where: { id: input.campaignId, createdById: session.user.id },
-		select: { id: true, contentJson: true },
+		select: { id: true, type: true, contentJson: true, segmentJson: true },
 	});
 	if (!campaign) return { ok: false, error: "找不到電子報草稿" };
+
+	const segment = asSegmentJson(campaign.segmentJson);
+	try {
+		assertPromoAudienceLocked({ type: campaign.type, segment });
+	} catch (error) {
+		if (error instanceof PromoAudienceLockError) {
+			return { ok: false, error: error.message };
+		}
+		throw error;
+	}
 
 	const rendered = renderCampaignHtml(asContentJson(campaign.contentJson), { mode: "send" });
 	if (rendered.isOversized) return { ok: false, error: rendered.warnings[0] ?? "HTML 超過 102KB" };

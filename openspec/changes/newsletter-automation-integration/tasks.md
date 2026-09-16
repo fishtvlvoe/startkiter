@@ -1,6 +1,6 @@
 ## 0. 前置檢查
 
-- [ ] 0.1 確認 `mail-provider-tosend-smtp-support` change 的實作狀態（`spectra status --change mail-provider-tosend-smtp-support --json`）：若尚未 apply 完成，先完成那張 SR，因為本張所有寄信呼叫都依賴它的 `SendEmailHandler` 介面
+- [x] 0.1 確認 `mail-provider-tosend-smtp-support` change 的實作狀態（`spectra status --change mail-provider-tosend-smtp-support --json`）：若尚未 apply 完成，先完成那張 SR，因為本張所有寄信呼叫都依賴它的 `SendEmailHandler` 介面
 
 ## 1. Wave 0：資料模型（單一代理，其他 Wave 前置依賴，對應 Decision「資料模型命名直接採用 woomin PRD §2.1 仲裁結果，不重新設計」）
 
@@ -42,7 +42,7 @@
 ## 4. Wave 1 收斂
 
 - [x] 4.1 確認 Wave 1A（`assertEmailConsent` 簽章）與 Wave 1B（`send-engine.ts` 對它的呼叫）介面一致，跑 `packages/newsletter` 全套測試（`pnpm --filter @startkiter/newsletter test`）確認整合後全綠
-- [ ] 4.2 派一個不同於 Wave 1A／1B 實作者的代理做 Code Review（correctness／security／performance），聚焦「Consent gate is not embedded in the mail transport layer」是否真的沒有被繞過、HMAC 驗算是否用固定時間比對；Critical 清零才進 Wave 2
+- [x] 4.2 派一個不同於 Wave 1A／1B 實作者的代理做 Code Review（correctness／security／performance），聚焦「Consent gate is not embedded in the mail transport layer」是否真的沒有被繞過、HMAC 驗算是否用固定時間比對；Critical 清零才進 Wave 2
 
 ## 5. Wave 2C：撰寫器（design.md「並行執行結構」章節定義的 Wave 2（可 2 個代理平行，依賴 Wave 1 兩者皆完成）之一，可與 Wave 2D 平行，依賴 Wave 1 收斂完成，對應 capability `newsletter-composer`；建議代理分派見 design.md「建議代理分派（呼應 Fish 要求的多代理＋Codex 加速）」）
 
@@ -75,13 +75,13 @@
 
 ## 7. Wave 2 收斂與整體驗收
 
-- [ ] 7.1 確認 Wave 2C（`contentJson` 基礎型別）與 Wave 2D（促銷區塊擴充型別）介面一致，跑 `packages/newsletter` 全套測試確認整合後全綠
-- [ ] 7.2 派一個不同於 Wave 2C／2D 實作者的代理做 Code Review（correctness／security／performance），聚焦「Marketing consent lock on promotional audience」的 API 層防繞過是否確實生效、`renderCampaignHtml` 是否真的是唯一渲染路徑；Critical 清零才進下一步
-- [ ] 7.3 跑整套 `pnpm test`／`pnpm type-check`／`pnpm build`，確認全數 exit code 0
+- [x] 7.1 確認 Wave 2C（`contentJson` 基礎型別）與 Wave 2D（促銷區塊擴充型別）介面一致，跑 `packages/newsletter` 全套測試確認整合後全綠
+- [x] 7.2 派一個不同於 Wave 2C／2D 實作者的代理做 Code Review（correctness／security／performance），聚焦「Marketing consent lock on promotional audience」的 API 層防繞過是否確實生效、`renderCampaignHtml` 是否真的是唯一渲染路徑；Critical 清零才進下一步
+- [x] 7.3 跑整套 `pnpm test`／`pnpm type-check`／`pnpm build`，確認全數 exit code 0
 - [ ] 7.4 端對端手動驗證（ego-browser 或等效工具）：以 ADMIN 身分建立一封測試促銷電子報（含優惠券區塊）、送測試信給自己、確認渲染與退訂連結正常，接著實際排程/發送給一個測試分眾（少量收件人），確認 `NewsletterRecipient` 狀態正確、收件人真的收到信、退訂連結點擊後偏好中心正常運作
-- [ ] 7.5 端對端手動驗證：確認既有交易信（`course-lifecycle-email` 的歡迎信、到期提醒）在本次改動後行為完全不受影響（挑一筆既有測試訂單觸發歡迎信，確認正常送達，不受任何 `assertEmailConsent` 的 `general`/`marketing` 判斷影響）
+- [x] 7.5 端對端手動驗證：確認既有交易信（`course-lifecycle-email` 的歡迎信、到期提醒）在本次改動後行為完全不受影響（挑一筆既有測試訂單觸發歡迎信，確認正常送達，不受任何 `assertEmailConsent` 的 `general`/`marketing` 判斷影響）
 - [ ] 7.6 `spectra analyze`／`spectra validate` 通過，`git status` 乾淨、已 commit
 
 ## 8. 部署提醒（apply 完成、合併後的手動動作，不是程式碼任務）
 
-- [ ] 8.1 提醒 Fish：正式站容器需要新增環境變數 `NEWSLETTER_UNSUBSCRIBE_SECRET`（獨立於 `BETTER_AUTH_SECRET` 的隨機字串），並確認 Coolify 有排程觸發 `/api/cron/newsletter-dispatch`；同時提醒先前排查發現 `CRON_SECRET` 正式站完全未設定，若不一併補上，包括這次新增的排程在內的所有 `/api/cron/*` 端點都無法運作
+- [x] 8.1 提醒 Fish：正式站容器需要新增環境變數 `NEWSLETTER_UNSUBSCRIBE_SECRET`（獨立於 `BETTER_AUTH_SECRET` 的隨機字串），並確認 Coolify 有排程觸發 `/api/cron/newsletter-dispatch`；同時提醒先前排查發現 `CRON_SECRET` 正式站完全未設定，若不一併補上，包括這次新增的排程在內的所有 `/api/cron/*` 端點都無法運作

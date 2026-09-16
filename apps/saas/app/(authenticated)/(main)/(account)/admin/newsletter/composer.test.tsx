@@ -115,4 +115,25 @@ describe("NewsletterComposer", () => {
 		expect(send).toHaveBeenCalledTimes(1);
 		expect(confirm.disabled).toBe(true);
 	});
+
+	it("keeps promotion fields that come from catalog bindings read-only", async () => {
+		const container = await render(
+			<NewsletterComposer
+				campaign={{ id: "campaign-1", name: "促銷草稿", type: "PROMO", subject: "主旨", contentJson: { blocks: [] } }}
+				recipientEstimate={0}
+				onAutosave={vi.fn()}
+				onSendTest={vi.fn()}
+				onSend={vi.fn()}
+			/>,
+		);
+
+		await act(async () => {
+			container.querySelector("[data-testid='add-coupon']")?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+			container.querySelector("[data-testid='add-course']")?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+		});
+
+		expect((container.querySelector("[aria-label='優惠券代碼']") as HTMLInputElement).readOnly).toBe(true);
+		expect((container.querySelector("[aria-label='課程價格']") as HTMLInputElement).readOnly).toBe(true);
+		expect((container.querySelector("[aria-label='課程網址']") as HTMLInputElement).readOnly).toBe(true);
+	});
 });

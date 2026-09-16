@@ -31,12 +31,25 @@ export type NewsletterTestSendInput = {
 
 export type NewsletterSendInput = { campaignId: string };
 
+export type NewsletterAudiencePrepareInput = {
+	campaignId: string;
+	preset: "all" | "manual";
+	manualEmails?: string[];
+};
+
+export type NewsletterAudiencePrepareResult =
+	| { ok: true; recipientEstimate: number }
+	| { ok: false; error: string };
+
 type NewsletterComposerProps = {
 	campaign: NewsletterCampaignDraft;
 	recipientEstimate: number;
 	onAutosave: (input: NewsletterAutosaveInput) => Promise<ComposerActionResult>;
 	onSendTest: (input: NewsletterTestSendInput) => Promise<ComposerActionResult>;
 	onSend: (input: NewsletterSendInput) => Promise<ComposerActionResult>;
+	onPrepareAudience?: (
+		input: NewsletterAudiencePrepareInput,
+	) => Promise<NewsletterAudiencePrepareResult>;
 	initialPreview?: RenderCampaignResult;
 	onRenderPreview?: (contentJson: NewsletterContentJson) => Promise<RenderCampaignResult>;
 };
@@ -71,6 +84,37 @@ function newBlock(type: NewsletterContentBlock["type"]): NewsletterContentBlock 
 			return { type, props: { title: "影片標題", url: "https://", thumbnailUrl: "" } };
 		case "video":
 			return { type, props: { title: "影片標題", url: "https://" } };
+		case "coupon":
+			return {
+				type,
+				props: {
+					couponId: "manual-coupon",
+					code: "SAVE20",
+					codeReadOnly: true,
+					expiresAt: new Date("2026-12-31T15:59:59.000Z").toISOString(),
+				},
+			};
+		case "course":
+			return {
+				type,
+				props: {
+					courseId: "manual-course",
+					title: "開站包",
+					priceLabel: "NT$8,800",
+					priceReadOnly: true,
+					url: "/courses/startkiter",
+					urlReadOnly: true,
+					imageUrl: "https://cdn.example.com/cover.png",
+				},
+			};
+		case "countdown":
+			return {
+				type,
+				props: {
+					text: "優惠倒數至 2026/10/01 23:59",
+					expiresAt: new Date("2026-10-01T15:59:59.000Z").toISOString(),
+				},
+			};
 		default:
 			return { type: "paragraph", content: "" };
 	}
@@ -97,10 +141,11 @@ function getBlockProps(block: NewsletterContentBlock): Record<string, unknown> {
 
 export default function NewsletterComposer({
 	campaign,
-	recipientEstimate,
+	recipientEstimate: initialRecipientEstimate,
 	onAutosave,
 	onSendTest,
 	onSend,
+	onPrepareAudience,
 	initialPreview,
 	onRenderPreview,
 }: NewsletterComposerProps) {
@@ -114,6 +159,11 @@ export default function NewsletterComposer({
 	const [confirmOpen, setConfirmOpen] = useState(false);
 	const [sendState, setSendState] = useState<"idle" | "sending" | "sent">("idle");
 	const [sendError, setSendError] = useState<string | null>(null);
+	const [recipientEstimate, setRecipientEstimate] = useState(initialRecipientEstimate);
+	const [audiencePreset, setAudiencePreset] = useState<"all" | "manual">("manual");
+	const [manualEmails, setManualEmails] = useState("");
+	const [audienceState, setAudienceState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+	const [audienceError, setAudienceError] = useState<string | null>(null);
 	const firstRender = useRef(true);
 	const sendInFlight = useRef(false);
 	const contentJson = useMemo<NewsletterContentJson>(() => ({ blocks }), [blocks]);
@@ -202,6 +252,31 @@ export default function NewsletterComposer({
 		}
 	}
 
+	async function prepareAudience() {
+		if (!onPrepareAudience) return;
+		setAudienceState("saving");
+		setAudienceError(null);
+		try {
+			const result = await onPrepareAudience({
+				campaignId: campaign.id,
+				preset: audiencePreset,
+				manualEmails: audiencePreset === "manual"
+					? manualEmails.split(/[\s,;]+/).map((value) => value.trim()).filter(Boolean)
+					: undefined,
+			});
+			if (!result.ok) {
+				setAudienceState("error");
+				setAudienceError(result.error);
+				return;
+			}
+			setRecipientEstimate(result.recipientEstimate);
+			setAudienceState("saved");
+		} catch (error) {
+			setAudienceState("error");
+			setAudienceError(error instanceof Error ? error.message : "分眾套用失敗");
+		}
+	}
+
 	return (
 		<div className="space-y-6" data-testid="newsletter-composer">
 			<div className="flex flex-wrap items-center justify-between gap-3">
@@ -226,7 +301,7 @@ export default function NewsletterComposer({
 					</label>
 
 					<div className="flex flex-wrap gap-2" aria-label="新增內容區塊">
-						{(["heading", "paragraph", "image", "button", "divider", "videoCard"] as const).map((type) => (
+						{(["heading", "paragraph", "image", "button", "divider", "videoCard", "coupon", "course", "countdown"] as const).map((type) => (
 							<button key={type} type="button" className="rounded-md border px-3 py-2 text-sm" data-testid={`add-${type}`} onClick={() => setBlocks((current) => [...current, newBlock(type)])}>
 								＋{blockLabel(type)}
 							</button>
@@ -251,6 +326,26 @@ export default function NewsletterComposer({
 										{block.type === "image" && <input className="h-10 rounded-md border px-3" aria-label="圖片替代文字" value={String(props.alt ?? "")} onChange={(event) => updateProp(index, "alt", event.target.value)} placeholder="替代文字" />}
 									</div>
 								)}
+								{block.type === "coupon" && (
+									<div className="grid gap-2 sm:grid-cols-2">
+										<input className="h-10 rounded-md border px-3" aria-label="優惠券代碼" value={String(props.code ?? "")} readOnly={props.codeReadOnly === true} onChange={(event) => updateProp(index, "code", event.target.value)} placeholder="優惠碼" />
+										<input className="h-10 rounded-md border px-3" aria-label="優惠券截止日期" value={String(props.expiresAt ?? "")} onChange={(event) => updateProp(index, "expiresAt", event.target.value)} placeholder="expiresAt ISO" />
+									</div>
+								)}
+								{block.type === "course" && (
+									<div className="grid gap-2 sm:grid-cols-2">
+										<input className="h-10 rounded-md border px-3" aria-label="課程標題" value={String(props.title ?? "")} onChange={(event) => updateProp(index, "title", event.target.value)} placeholder="課程標題" />
+										<input className="h-10 rounded-md border px-3" aria-label="課程價格" value={String(props.priceLabel ?? "")} readOnly={props.priceReadOnly === true} onChange={(event) => updateProp(index, "priceLabel", event.target.value)} placeholder="價格標籤" />
+										<input className="h-10 rounded-md border px-3" aria-label="課程網址" value={String(props.url ?? "")} readOnly={props.urlReadOnly === true} onChange={(event) => updateProp(index, "url", event.target.value)} placeholder="/courses/..." />
+										<input className="h-10 rounded-md border px-3" aria-label="課程封面" value={String(props.imageUrl ?? "")} onChange={(event) => updateProp(index, "imageUrl", event.target.value)} placeholder="封面網址" />
+									</div>
+								)}
+								{block.type === "countdown" && (
+									<div className="grid gap-2 sm:grid-cols-2">
+										<input className="h-10 rounded-md border px-3" aria-label="倒數文字" value={String(props.text ?? "")} onChange={(event) => updateProp(index, "text", event.target.value)} placeholder="倒數文字" />
+										<input className="h-10 rounded-md border px-3" aria-label="倒數截止時間" value={String(props.expiresAt ?? "")} onChange={(event) => updateProp(index, "expiresAt", event.target.value)} placeholder="expiresAt ISO" />
+									</div>
+								)}
 							</article>
 						})}
 					</div>
@@ -268,6 +363,43 @@ export default function NewsletterComposer({
 
 			<section className="space-y-4 rounded-xl border bg-card p-5" aria-label="寄送控制">
 				<h2 className="font-semibold">寄送</h2>
+				{onPrepareAudience && (
+					<div className="space-y-3 rounded-md border p-4" data-testid="newsletter-audience">
+						<p className="text-sm font-medium">分眾</p>
+						<div className="flex flex-wrap gap-3 text-sm">
+							<label className="flex items-center gap-2">
+								<input type="radio" name="audience-preset" checked={audiencePreset === "manual"} onChange={() => setAudiencePreset("manual")} />
+								手動信箱（少量）
+							</label>
+							<label className="flex items-center gap-2">
+								<input type="radio" name="audience-preset" checked={audiencePreset === "all"} onChange={() => setAudiencePreset("all")} />
+								全部收件人
+							</label>
+						</div>
+						{audiencePreset === "manual" && (
+							<input
+								id="newsletter-manual-emails"
+								className="h-10 w-full rounded-md border px-3 text-sm"
+								placeholder="staff@example.com"
+								value={manualEmails}
+								onChange={(event) => setManualEmails(event.target.value)}
+							/>
+						)}
+						<button
+							id="newsletter-prepare-audience"
+							type="button"
+							className="rounded-md border px-3 py-2 text-sm"
+							disabled={audienceState === "saving"}
+							onClick={() => void prepareAudience()}
+						>
+							{audienceState === "saving" ? "套用中…" : "套用分眾並產生收件人"}
+						</button>
+						{audienceError && <p className="text-sm text-destructive" role="alert">{audienceError}</p>}
+						{audienceState === "saved" && !audienceError && (
+							<p className="text-sm text-muted-foreground" role="status">分眾已更新。</p>
+						)}
+					</div>
+				)}
 				<div className="grid gap-4 md:grid-cols-2">
 					<div className="space-y-2">
 						<label className="grid gap-2 text-sm font-medium" htmlFor="newsletter-test-recipient">測試信收件人（僅限內部帳號）</label>
