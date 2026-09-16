@@ -5,6 +5,8 @@ import { notFound, redirect } from "next/navigation";
 
 import { autosaveNewsletterDraft, prepareNewsletterAudience, renderNewsletterPreview, sendNewsletter, sendNewsletterTest } from "../actions";
 import { renderCampaignHtml } from "@startkiter/newsletter";
+import { getNewsletterSiteSettings } from "../../../../../../../lib/newsletter-settings";
+import { getBaseUrl } from "../../../../../../../modules/shared/lib/base-url";
 import NewsletterComposer from "../composer";
 import type { NewsletterContentJson } from "../content-types";
 
@@ -39,7 +41,15 @@ export default async function NewsletterComposerPage({ params }: { params: Promi
 		where: { campaignId: campaign.id, status: "PENDING", isTest: false },
 	});
 	const contentJson = asContentJson(campaign.contentJson);
-	const initialPreview = renderCampaignHtml(contentJson, { mode: "preview" });
+	const settings = await getNewsletterSiteSettings();
+	const initialPreview = renderCampaignHtml(contentJson, {
+		mode: "preview",
+		appUrl: getBaseUrl(),
+		recipientUserId: session.user.id,
+		recipientEmail: session.user.email,
+		senderPhysicalAddress: settings.senderPhysicalAddress,
+		unsubscribeScope: campaign.type === "PROMO" ? "marketing" : "general",
+	});
 
 	return (
 		<div className="mx-auto max-w-7xl p-6">

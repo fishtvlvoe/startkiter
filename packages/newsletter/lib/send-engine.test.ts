@@ -28,6 +28,7 @@ type CampaignRecord = {
 	lastHeartbeatAt: Date | null;
 	snapshotAt: Date | null;
 	subject: string;
+	contentJson?: unknown;
 	bodyHtml: string | null;
 	bodyText: string | null;
 	senderName: string | null;
@@ -322,6 +323,7 @@ vi.mock("@startkiter/database", () => ({
 
 vi.mock("@startkiter/mail", () => ({
 	sendEmail,
+	sanitizeEmailHtml: (html: string) => html,
 }));
 
 vi.mock("./email-consent", () => ({
@@ -340,6 +342,7 @@ import {
 	scheduleCampaign,
 	transitionCampaignStatus,
 } from "./send-engine";
+import { verifyUnsubscribeToken } from "./unsubscribe-token";
 
 const consentFn = assertEmailConsent;
 
@@ -428,6 +431,17 @@ describe("newsletter send engine", () => {
 	});
 
 	describe("Campaign state machine with atomic transitions", () => {
+		it("blocks promotional activation without a sender physical address", async () => {
+			seedCampaign({ type: "PROMO", status: "DRAFT", totalRecipients: 1 });
+			seedRecipients("campaign-1", 1);
+
+			await expect(requestImmediateSend("campaign-1")).rejects.toMatchObject({
+				code: "SENDER_PHYSICAL_ADDRESS_REQUIRED",
+			});
+			expect(dbState.campaigns.get("campaign-1")?.status).toBe("DRAFT");
+			expect(db.newsletterCampaign.updateMany).not.toHaveBeenCalled();
+		});
+
 		it("lets only one concurrent immediate-send claim succeed", async () => {
 			seedCampaign({ status: "DRAFT", totalRecipients: 2 });
 			seedRecipients("campaign-1", 2);
@@ -882,6 +896,45 @@ describe("newsletter send engine", () => {
 
 			expect(dbState.campaigns.get("campaign-1")?.senderSnapshot).toEqual(firstSnapshot);
 			expect(sendEmail.mock.calls[1]?.[0]?.from).toBe("campaign@example.com");
+		});
+	});
+
+	describe("Recipient-specific campaign rendering", () => {
+		it("renders each recipient's signed unsubscribe link during dispatch", async () => {
+			vi.stubEnv("NEWSLETTER_UNSUBSCRIBE_SECRET", "newsletter-secret-2026");
+			seedCampaign({
+				status: "SENDING",
+				totalRecipients: 1,
+				senderSnapshot: {
+					provider: "tosend",
+					mailFrom: "noreply@example.com",
+					senderPhysicalAddress: "台北市中正區測試路 1 號",
+					capturedAt: "2026-09-16T04:00:00.000Z",
+				},
+				contentJson: { blocks: [{ type: "paragraph", content: "Hello" }] },
+			});
+			seedRecipients("campaign-1", 1);
+
+			await dispatch("campaign-1", {
+				batchSize: 1,
+				now: new Date("2026-09-16T04:00:00.000Z"),
+			});
+
+			const message = sendEmail.mock.calls[0]?.[0];
+			const href = (message?.html as string).match(/href="([^"]*\/unsubscribe\?[^\"]+)"/)?.[1]?.replace(/&amp;/g, "&");
+			expect(href).toBeTruthy();
+			const unsubscribeUrl = new URL(href!);
+			const token = unsubscribeUrl.searchParams.get("token");
+			expect(unsubscribeUrl.searchParams.get("userId")).toBe("user-1");
+			expect(unsubscribeUrl.searchParams.get("email")).toBe("user1@example.com");
+			expect(unsubscribeUrl.searchParams.get("scope")).toBe("general");
+			expect(verifyUnsubscribeToken({
+				userId: "user-1",
+				email: "user1@example.com",
+				scope: "general",
+				token: token!,
+			})).toBe(true);
+			expect(message?.html).toContain("台北市中正區測試路 1 號");
 		});
 	});
 });

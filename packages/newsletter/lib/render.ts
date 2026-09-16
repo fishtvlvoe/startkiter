@@ -9,8 +9,12 @@ import {
 	type CouponRecord,
 	type PromoNewsletterBlock,
 } from "./promo-blocks";
+import { NewsletterComplianceError } from "./compliance";
+import { createUnsubscribeToken } from "./unsubscribe-token";
+import type { UnsubscribeScope } from "./email-consent";
 
 export const MAX_CAMPAIGN_HTML_BYTES = 102 * 1024;
+const DEFAULT_SENDER_PHYSICAL_ADDRESS = "台北市信義區市府路 1 號";
 
 export type NewsletterInlineStyles = {
 	bold?: boolean;
@@ -91,6 +95,10 @@ export type RenderCampaignOptions = {
 	siteName?: string;
 	testBanner?: string;
 	mergeValues?: Record<string, string>;
+	recipientUserId?: string;
+	recipientEmail?: string;
+	unsubscribeScope?: UnsubscribeScope;
+	senderPhysicalAddress?: string;
 };
 
 export type RenderCampaignResult = {
@@ -251,6 +259,45 @@ function replaceMergeValues(source: string, values: Record<string, string> | und
 	);
 }
 
+function resolveSenderPhysicalAddress(value: string | undefined): string {
+	return value?.trim() || process.env.NEWSLETTER_SENDER_ADDRESS?.trim() || process.env.SUPPORT_ADDRESS?.trim() || "";
+}
+
+function buildUnsubscribeUrl(options: RenderCampaignOptions, appUrl: string): string | null {
+	if (!options.recipientUserId || !options.recipientEmail) return null;
+	const scope = options.unsubscribeScope ?? "all";
+	const token = createUnsubscribeToken({
+		userId: options.recipientUserId,
+		email: options.recipientEmail,
+		scope,
+	});
+	const unsubscribeUrl = new URL("/unsubscribe", appUrl);
+	unsubscribeUrl.searchParams.set("userId", options.recipientUserId);
+	unsubscribeUrl.searchParams.set("email", options.recipientEmail);
+	unsubscribeUrl.searchParams.set("scope", scope);
+	unsubscribeUrl.searchParams.set("token", token);
+	return unsubscribeUrl.toString();
+}
+
+function renderFooter(options: RenderCampaignOptions, appUrl: string): { html: string; text: string } {
+	const configuredAddress = resolveSenderPhysicalAddress(options.senderPhysicalAddress);
+	if ((options.mode === "send" || options.mode === "test") && options.unsubscribeScope === "marketing" && !configuredAddress) {
+		throw new NewsletterComplianceError();
+	}
+
+	const senderPhysicalAddress = configuredAddress || DEFAULT_SENDER_PHYSICAL_ADDRESS;
+	const unsubscribeUrl = buildUnsubscribeUrl(options, appUrl);
+	const addressText = senderPhysicalAddress;
+	const unsubscribeHtml = unsubscribeUrl
+		? `<a href="${escapeAttr(unsubscribeUrl)}" style="color:#64748B;text-decoration:underline;">取消訂閱</a>`
+		: "";
+	const html = cell(
+		`<div role="contentinfo" style="color:#64748B;font-size:12px;line-height:1.5;text-align:center;"><p style="margin:0;">寄件人地址：${escapeHtml(sanitizeInlineText(addressText))}</p>${unsubscribeHtml ? `<p style="margin:8px 0 0;">${unsubscribeHtml}</p>` : ""}</div>`,
+	);
+	const text = `寄件人地址：${addressText}${unsubscribeUrl ? `\n取消訂閱：${unsubscribeUrl}` : ""}`;
+	return { html, text };
+}
+
 export function htmlToPlainText(html: string): string {
 	return sanitizeInlineText(html).replace(/\s+/g, " ").trim();
 }
@@ -263,6 +310,7 @@ export function renderCampaignHtml(
 	const appUrl = options.baseUrl ?? options.appUrl ?? "https://app.startkiter.dev";
 	const campaignSlug = options.campaignSlug ?? content.meta?.campaignSlug ?? "newsletter";
 	const siteName = options.siteName ?? "StartKiter";
+	const footer = renderFooter(options, appUrl);
 
 	const testBanner =
 		mode === "test"
@@ -284,10 +332,10 @@ export function renderCampaignHtml(
 		})
 		.join("");
 
-	const rawHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${escapeHtml(siteName)}</title></head><body style="margin:0;padding:20px;background:#F5F5F5;"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;"><tr><td align="center"><table role="presentation" width="600" cellspacing="0" cellpadding="0" style="width:100%;max-width:600px;border-collapse:collapse;background:#FFFFFF;border:1px solid #E2E8F0;">${testBanner}${bodyRows || cell('<p style="margin:0;">（空白電子報）</p>')}</table></td></tr></table></body></html>`;
+	const rawHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${escapeHtml(siteName)}</title></head><body style="margin:0;padding:20px;background:#F5F5F5;"><table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;"><tr><td align="center"><table role="presentation" width="600" cellspacing="0" cellpadding="0" style="width:100%;max-width:600px;border-collapse:collapse;background:#FFFFFF;border:1px solid #E2E8F0;">${testBanner}${bodyRows || cell('<p style="margin:0;">（空白電子報）</p>')}${footer.html}</table></td></tr></table></body></html>`;
 	const html = sanitizeEmailHtml(replaceMergeValues(rawHtml, options.mergeValues));
 	const text = htmlToPlainText(
-		replaceMergeValues((content.blocks || []).flatMap(blockToText).join("\n\n").trim() || "（空白電子報）", options.mergeValues),
+		replaceMergeValues(`${(content.blocks || []).flatMap(blockToText).join("\n\n").trim() || "（空白電子報）"}\n\n${footer.text}`, options.mergeValues),
 	) || "（空白電子報）";
 	const sizeBytes = new TextEncoder().encode(html).byteLength;
 	const warnings: string[] = [];

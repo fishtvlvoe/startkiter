@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { renderCampaignHtml, type NewsletterContentJson } from "./render";
+import { verifyUnsubscribeToken } from "./unsubscribe-token";
 
 const campaign: NewsletterContentJson = {
 	blocks: [
@@ -12,6 +13,49 @@ const campaign: NewsletterContentJson = {
 };
 
 describe("renderCampaignHtml", () => {
+	it("adds a signed recipient-specific unsubscribe link and sender address footer", () => {
+		vi.stubEnv("NEWSLETTER_UNSUBSCRIBE_SECRET", "newsletter-secret-2026");
+		const rendered = renderCampaignHtml(campaign, {
+			mode: "send",
+			appUrl: "https://app.startkiter.dev",
+			recipientUserId: "user-1",
+			recipientEmail: "learner@example.com",
+			unsubscribeScope: "marketing",
+			senderPhysicalAddress: "台北市中正區測試路 1 號",
+		});
+
+		const href = rendered.html.match(/href="([^"]*\/unsubscribe\?[^\"]+)"/)?.[1]?.replace(/&amp;/g, "&");
+		expect(href).toBeTruthy();
+		const unsubscribeUrl = new URL(href!);
+		const token = unsubscribeUrl.searchParams.get("token");
+		expect(unsubscribeUrl.searchParams.get("userId")).toBe("user-1");
+		expect(unsubscribeUrl.searchParams.get("email")).toBe("learner@example.com");
+		expect(unsubscribeUrl.searchParams.get("scope")).toBe("marketing");
+		expect(token).toBeTruthy();
+		expect(
+			verifyUnsubscribeToken({
+				userId: "user-1",
+				email: "learner@example.com",
+				scope: "marketing",
+				token: token!,
+			}),
+		).toBe(true);
+		expect(rendered.html).toContain("台北市中正區測試路 1 號");
+	});
+
+	it("blocks a promotional send when the sender physical address is missing", () => {
+		vi.stubEnv("NEWSLETTER_UNSUBSCRIBE_SECRET", "newsletter-secret-2026");
+
+		expect(() =>
+			renderCampaignHtml(campaign, {
+				mode: "send",
+				recipientUserId: "user-1",
+				recipientEmail: "learner@example.com",
+				unsubscribeScope: "marketing",
+			}),
+		).toThrow(/physical sender address/i);
+	});
+
 	it("uses one HTML output for preview, test send, and real send", () => {
 		const preview = renderCampaignHtml(campaign, { mode: "preview" });
 		const testSend = renderCampaignHtml(campaign, { mode: "test" });

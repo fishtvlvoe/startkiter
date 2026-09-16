@@ -3,6 +3,7 @@
 import { db, type Prisma } from "@startkiter/database";
 import { isOperator } from "@startkiter/permissions";
 import {
+	assertPromotionalCampaignCanActivate,
 	assertPromoAudienceLocked,
 	estimateAudience,
 	parseSegmentJson,
@@ -15,6 +16,9 @@ import {
 import { normalizeEmail } from "@startkiter/newsletter/lib/audience";
 import { getSession } from "@auth/lib/server";
 import { redirect } from "next/navigation";
+
+import { getNewsletterSiteSettings } from "../../../../../../lib/newsletter-settings";
+import { getBaseUrl } from "../../../../../../modules/shared/lib/base-url";
 
 import type {
 	ComposerActionResult,
@@ -51,8 +55,16 @@ function asSegmentJson(value: Prisma.JsonValue | null | undefined): SegmentJson 
 }
 
 export async function renderNewsletterPreview(contentJson: NewsletterContentJson) {
-	await requireComposerAccess();
-	return renderCampaignHtml(contentJson, { mode: "preview" });
+	const session = await requireComposerAccess();
+	const settings = await getNewsletterSiteSettings();
+	return renderCampaignHtml(contentJson, {
+		mode: "preview",
+		appUrl: getBaseUrl(),
+		recipientUserId: session.user.id,
+		recipientEmail: session.user.email,
+		senderPhysicalAddress: settings.senderPhysicalAddress,
+		unsubscribeScope: "all",
+	});
 }
 
 export async function createNewsletterDraft(): Promise<void> {
@@ -78,7 +90,15 @@ export async function createNewsletterDraft(): Promise<void> {
 
 export async function autosaveNewsletterDraft(input: NewsletterAutosaveInput): Promise<ComposerActionResult> {
 	const session = await requireComposerAccess();
-	const rendered = renderCampaignHtml(input.contentJson, { mode: "preview" });
+	const settings = await getNewsletterSiteSettings();
+	const rendered = renderCampaignHtml(input.contentJson, {
+		mode: "preview",
+		appUrl: getBaseUrl(),
+		recipientUserId: session.user.id,
+		recipientEmail: session.user.email,
+		senderPhysicalAddress: settings.senderPhysicalAddress,
+		unsubscribeScope: "all",
+	});
 	const result = await db.newsletterCampaign.updateMany({
 		where: { id: input.campaignId, createdById: session.user.id, status: "DRAFT" },
 		data: {
@@ -190,11 +210,27 @@ export async function sendNewsletterTest(input: NewsletterTestSendInput): Promis
 
 	const campaign = await db.newsletterCampaign.findFirst({
 		where: { id: input.campaignId, createdById: session.user.id },
-		select: { id: true, subject: true, contentJson: true },
+		select: { id: true, subject: true, type: true, contentJson: true },
 	});
 	if (!campaign) return { ok: false, error: "找不到電子報草稿" };
 
-	const rendered = renderCampaignHtml(asContentJson(campaign.contentJson), { mode: "test" });
+	const settings = await getNewsletterSiteSettings();
+	try {
+		assertPromotionalCampaignCanActivate({
+			type: campaign.type,
+			senderPhysicalAddress: settings.senderPhysicalAddress,
+		});
+	} catch (error) {
+		return { ok: false, error: error instanceof Error ? error.message : "寄件人實體地址尚未設定" };
+	}
+	const rendered = renderCampaignHtml(asContentJson(campaign.contentJson), {
+		mode: "test",
+		appUrl: getBaseUrl(),
+		recipientUserId: user.id,
+		recipientEmail: user.email,
+		senderPhysicalAddress: settings.senderPhysicalAddress,
+		unsubscribeScope: campaign.type === "PROMO" ? "marketing" : "general",
+	});
 	if (rendered.isOversized) return { ok: false, error: rendered.warnings[0] ?? "HTML 超過 102KB" };
 	const sent = await sendEmail({
 		to: user.email,
@@ -228,6 +264,16 @@ export async function sendNewsletter(input: NewsletterSendInput): Promise<Compos
 	});
 	if (!campaign) return { ok: false, error: "找不到電子報草稿" };
 
+	const settings = await getNewsletterSiteSettings();
+	try {
+		assertPromotionalCampaignCanActivate({
+			type: campaign.type,
+			senderPhysicalAddress: settings.senderPhysicalAddress,
+		});
+	} catch (error) {
+		return { ok: false, error: error instanceof Error ? error.message : "寄件人實體地址尚未設定" };
+	}
+
 	const segment = asSegmentJson(campaign.segmentJson);
 	try {
 		assertPromoAudienceLocked({ type: campaign.type, segment });
@@ -238,7 +284,12 @@ export async function sendNewsletter(input: NewsletterSendInput): Promise<Compos
 		throw error;
 	}
 
-	const rendered = renderCampaignHtml(asContentJson(campaign.contentJson), { mode: "send" });
+	const rendered = renderCampaignHtml(asContentJson(campaign.contentJson), {
+		mode: "send",
+		appUrl: getBaseUrl(),
+		senderPhysicalAddress: settings.senderPhysicalAddress,
+		unsubscribeScope: campaign.type === "PROMO" ? "marketing" : "general",
+	});
 	if (rendered.isOversized) return { ok: false, error: rendered.warnings[0] ?? "HTML 超過 102KB" };
 	const recipientCount = await db.newsletterRecipient.count({
 		where: { campaignId: campaign.id, status: "PENDING", isTest: false },
@@ -250,7 +301,10 @@ export async function sendNewsletter(input: NewsletterSendInput): Promise<Compos
 		data: { bodyHtml: rendered.html, bodyText: rendered.text },
 	});
 	try {
-		await requestImmediateSend(campaign.id);
+		await requestImmediateSend(campaign.id, {
+			senderPhysicalAddress: settings.senderPhysicalAddress,
+			appUrl: getBaseUrl(),
+		});
 		return { ok: true };
 	} catch (error) {
 		return { ok: false, error: error instanceof Error ? error.message : "電子報發送失敗" };

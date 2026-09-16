@@ -6,6 +6,8 @@ import {
 	type AssertEmailConsentResult,
 	type EmailConsentType,
 } from "./email-consent";
+import { assertPromotionalCampaignCanActivate } from "./compliance";
+import { renderCampaignHtml, type NewsletterContentJson } from "./render";
 
 export const BATCH_SIZE = 500;
 
@@ -41,6 +43,8 @@ export type AssertEmailConsentFn = (
 export type SenderSnapshot = {
 	provider: string | null;
 	mailFrom: string | null;
+	senderPhysicalAddress?: string;
+	appUrl?: string;
 	capturedAt: string;
 	[key: string]: unknown;
 };
@@ -94,15 +98,31 @@ function assertNotTerminal(status: string, action: string) {
 }
 
 export async function captureSenderSnapshot(): Promise<SenderSnapshot> {
+	const senderPhysicalAddress =
+		process.env.NEWSLETTER_SENDER_ADDRESS?.trim() || process.env.SUPPORT_ADDRESS?.trim();
 	return {
 		provider: process.env.EMAIL_PROVIDER?.trim() || null,
 		mailFrom: process.env.MAIL_FROM?.trim() || null,
+		...(senderPhysicalAddress ? { senderPhysicalAddress } : {}),
 		capturedAt: new Date().toISOString(),
 	};
 }
 
 function consentTypeForCampaign(type: string): EmailConsentType {
 	return type === "PROMO" ? "marketing" : "general";
+}
+
+function asNewsletterContentJson(value: unknown): NewsletterContentJson | null {
+	if (value && typeof value === "object" && !Array.isArray(value) && "blocks" in value && Array.isArray(value.blocks)) {
+		return value as NewsletterContentJson;
+	}
+	return null;
+}
+
+function asSnapshot(value: unknown): Record<string, unknown> {
+	return value && typeof value === "object" && !Array.isArray(value)
+		? value as Record<string, unknown>
+		: {};
 }
 
 export async function transitionCampaignStatus(
@@ -173,14 +193,33 @@ async function assertHasEligibleRecipients(campaignId: string) {
 	}
 }
 
-export async function requestImmediateSend(campaignId: string): Promise<void> {
+export async function requestImmediateSend(
+	campaignId: string,
+	options: { senderPhysicalAddress?: string; appUrl?: string } = {},
+): Promise<void> {
 	const campaign = await loadCampaign(campaignId);
 	assertNotTerminal(campaign.status, "send now");
+	try {
+		assertPromotionalCampaignCanActivate({
+			type: campaign.type,
+			senderPhysicalAddress: options.senderPhysicalAddress,
+		});
+	} catch (error) {
+		throw new CampaignStateError(
+			error instanceof Error ? error.message : "A physical sender address is required before sending a promotional campaign.",
+			"SENDER_PHYSICAL_ADDRESS_REQUIRED",
+		);
+	}
 	await assertHasEligibleRecipients(campaignId);
+	const senderPhysicalAddress = options.senderPhysicalAddress?.trim();
+	const appUrl = options.appUrl?.trim();
 
 	const result = await db.newsletterCampaign.updateMany({
 		where: { id: campaignId, status: "DRAFT" },
-		data: { status: "QUEUED" },
+		data: {
+			status: "QUEUED",
+			...(senderPhysicalAddress || appUrl ? { senderSnapshot: { ...(senderPhysicalAddress ? { senderPhysicalAddress } : {}), ...(appUrl ? { appUrl } : {}) } } : {}),
+		},
 	});
 
 	if (result.count !== 1) {
@@ -191,16 +230,34 @@ export async function requestImmediateSend(campaignId: string): Promise<void> {
 	}
 }
 
-export async function scheduleCampaign(campaignId: string, scheduledAt: Date): Promise<void> {
+export async function scheduleCampaign(
+	campaignId: string,
+	scheduledAt: Date,
+	options: { senderPhysicalAddress?: string; appUrl?: string } = {},
+): Promise<void> {
 	const campaign = await loadCampaign(campaignId);
 	assertNotTerminal(campaign.status, "schedule");
+	try {
+		assertPromotionalCampaignCanActivate({
+			type: campaign.type,
+			senderPhysicalAddress: options.senderPhysicalAddress,
+		});
+	} catch (error) {
+		throw new CampaignStateError(
+			error instanceof Error ? error.message : "A physical sender address is required before scheduling a promotional campaign.",
+			"SENDER_PHYSICAL_ADDRESS_REQUIRED",
+		);
+	}
 	await assertHasEligibleRecipients(campaignId);
+	const senderPhysicalAddress = options.senderPhysicalAddress?.trim();
+	const appUrl = options.appUrl?.trim();
 
 	const result = await db.newsletterCampaign.updateMany({
 		where: { id: campaignId, status: "DRAFT" },
 		data: {
 			status: "SCHEDULED",
 			scheduledAt,
+			...(senderPhysicalAddress || appUrl ? { senderSnapshot: { ...(senderPhysicalAddress ? { senderPhysicalAddress } : {}), ...(appUrl ? { appUrl } : {}) } } : {}),
 		},
 	});
 
@@ -384,7 +441,8 @@ export async function dispatchCampaignBatch(
 	}
 
 	if (campaign.status === "QUEUED") {
-		const snapshot = campaign.senderSnapshot ?? (await captureSnapshot());
+		const storedSnapshot = asSnapshot(campaign.senderSnapshot);
+		const snapshot = { ...(await captureSnapshot()), ...storedSnapshot };
 		const claimed = await claimQueuedForSending(campaignId, snapshot as SenderSnapshot, now);
 		if (!claimed && !(await loadCampaign(campaignId)).senderSnapshot) {
 			return { sent: 0, skipped: 0, failed: 0, rateLimited: false, completed: false };
@@ -490,12 +548,45 @@ export async function dispatchCampaignBatch(
 			continue;
 		}
 
+		let rendered: ReturnType<typeof renderCampaignHtml> | null = null;
+		const contentJson = asNewsletterContentJson(campaign.contentJson);
+		if (contentJson) {
+			try {
+				rendered = renderCampaignHtml(contentJson, {
+					mode: "send",
+					recipientUserId: recipient.userId ?? undefined,
+					recipientEmail: recipient.toEmail,
+					senderPhysicalAddress: snapshot.senderPhysicalAddress,
+					appUrl: snapshot.appUrl,
+					unsubscribeScope: campaign.type === "PROMO" ? "marketing" : "general",
+				});
+			} catch (error) {
+				await db.newsletterRecipient.update({
+					where: { id: recipient.id },
+					data: {
+						status: "FAILED",
+						errorMessage: error instanceof Error ? error.message : "Newsletter rendering failed",
+					},
+				});
+				await db.newsletterCampaign.update({
+					where: { id: campaignId },
+					data: {
+						failedCount: { increment: 1 },
+						sentCursor: { increment: 1 },
+						lastHeartbeatAt: now,
+					},
+				});
+				failed += 1;
+				continue;
+			}
+		}
+
 		const accepted = await sendEmail({
 			to: recipient.toEmail,
 			from: mailFrom,
 			subject: campaign.subject,
-			html: campaign.bodyHtml ?? undefined,
-			text: campaign.bodyText ?? undefined,
+			html: rendered?.html ?? campaign.bodyHtml ?? undefined,
+			text: rendered?.text ?? campaign.bodyText ?? undefined,
 		});
 
 		if (accepted) {

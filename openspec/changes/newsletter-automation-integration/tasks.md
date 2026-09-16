@@ -78,9 +78,9 @@
 - [x] 7.1 確認 Wave 2C（`contentJson` 基礎型別）與 Wave 2D（促銷區塊擴充型別）介面一致，跑 `packages/newsletter` 全套測試確認整合後全綠
 - [x] 7.2 派一個不同於 Wave 2C／2D 實作者的代理做 Code Review（correctness／security／performance），聚焦「Marketing consent lock on promotional audience」的 API 層防繞過是否確實生效、`renderCampaignHtml` 是否真的是唯一渲染路徑；Critical 清零才進下一步
 - [x] 7.3 跑整套 `pnpm test`／`pnpm type-check`／`pnpm build`，確認全數 exit code 0
-- [ ] 7.4 端對端手動驗證（ego-browser 或等效工具）：以 ADMIN 身分建立一封測試促銷電子報（含優惠券區塊）、送測試信給自己、確認渲染與退訂連結正常，接著實際排程/發送給一個測試分眾（少量收件人），確認 `NewsletterRecipient` 狀態正確、收件人真的收到信、退訂連結點擊後偏好中心正常運作
+- [x] 7.4 端對端手動驗證（ego-browser 或等效工具）：以 ADMIN 身分建立一封測試促銷電子報（含優惠券區塊）、送測試信給自己、確認渲染與退訂連結正常，接著實際排程/發送給一個測試分眾（少量收件人），確認 `NewsletterRecipient` 狀態正確、收件人真的收到信、退訂連結點擊後偏好中心正常運作
 - [x] 7.5 端對端手動驗證：確認既有交易信（`course-lifecycle-email` 的歡迎信、到期提醒）在本次改動後行為完全不受影響（挑一筆既有測試訂單觸發歡迎信，確認正常送達，不受任何 `assertEmailConsent` 的 `general`/`marketing` 判斷影響）
-- [ ] 7.6 `spectra analyze`／`spectra validate` 通過，`git status` 乾淨、已 commit
+- [x] 7.6 `spectra analyze`／`spectra validate` 通過，`git status` 乾淨、已 commit
 
 ## 8. 部署提醒（apply 完成、合併後的手動動作，不是程式碼任務）
 

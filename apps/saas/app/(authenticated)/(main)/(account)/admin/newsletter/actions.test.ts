@@ -1,12 +1,21 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { campaignFindFirst, recipientDeleteMany, recipientFindMany, recipientCreateMany, campaignUpdate, transaction } = vi.hoisted(() => ({
+const {
+	campaignFindFirst,
+	recipientDeleteMany,
+	recipientFindMany,
+	recipientCreateMany,
+	campaignUpdate,
+	transaction,
+	getNewsletterSiteSettings,
+} = vi.hoisted(() => ({
 	campaignFindFirst: vi.fn(),
 	recipientDeleteMany: vi.fn(),
 	recipientFindMany: vi.fn(),
 	recipientCreateMany: vi.fn(),
 	campaignUpdate: vi.fn(),
 	transaction: vi.fn(),
+	getNewsletterSiteSettings: vi.fn(),
 }));
 
 vi.mock("@startkiter/database", () => ({
@@ -24,7 +33,14 @@ vi.mock("@startkiter/database", () => ({
 vi.mock("@startkiter/permissions", () => ({ isOperator: vi.fn(() => true) }));
 vi.mock("@auth/lib/server", () => ({ getSession: vi.fn(async () => ({ user: { id: "admin-1", role: "ADMIN" } })) }));
 vi.mock("next/navigation", () => ({ redirect: vi.fn(), notFound: vi.fn() }));
+vi.mock("../../../../../../lib/newsletter-settings", () => ({ getNewsletterSiteSettings }));
 vi.mock("@startkiter/newsletter", () => ({
+	assertPromotionalCampaignCanActivate: vi.fn((input: { type: string; senderPhysicalAddress?: string }) => {
+		if (input.type === "PROMO" && !input.senderPhysicalAddress?.trim()) {
+			throw new Error("A physical sender address is required before activating a promotional campaign.");
+		}
+		return { ok: true };
+	}),
 	assertPromoAudienceLocked: vi.fn(() => ({ ok: true })),
 	estimateAudience: vi.fn(async () => ({
 		matched: 1,
@@ -47,6 +63,7 @@ describe("prepareNewsletterAudience", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		campaignFindFirst.mockResolvedValue({ id: "campaign-1", type: "PROMO" });
+		getNewsletterSiteSettings.mockResolvedValue({ senderPhysicalAddress: "" });
 		recipientDeleteMany.mockResolvedValue({ count: 0 });
 		recipientFindMany.mockResolvedValue([
 			{ id: "test-recipient-1", toEmail: "staff@example.com" },
@@ -72,5 +89,20 @@ describe("prepareNewsletterAudience", () => {
 		expect(recipientCreateMany).toHaveBeenCalledWith(expect.objectContaining({
 		data: [expect.objectContaining({ toEmail: "staff@example.com", isTest: false, status: "PENDING" })],
 	}));
+	});
+
+	it("blocks a promotional send when the sender physical address is missing", async () => {
+		campaignFindFirst.mockResolvedValue({
+			id: "campaign-1",
+			type: "PROMO",
+			contentJson: { blocks: [] },
+			segmentJson: { preset: "manual", mode: "AND", rules: [] },
+		});
+
+		const { sendNewsletter } = await import("./actions");
+		await expect(sendNewsletter({ campaignId: "campaign-1" })).resolves.toEqual({
+			ok: false,
+			error: expect.stringMatching(/physical sender address/i),
+		});
 	});
 });
