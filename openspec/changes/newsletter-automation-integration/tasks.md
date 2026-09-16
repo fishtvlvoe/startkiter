@@ -63,15 +63,15 @@
 
 ### 紅燈測試
 
-- [ ] 6.1 在 `packages/newsletter/lib/audience.test.ts` 寫紅燈測試涵蓋「Single-layer AND/OR audience conditions」、「Live deduplicated recipient estimate」（OR 模式去重人數）、「Automatic exclusion of unsubscribed and invalid recipients」、「Deduplication by recipient email」、「Audience recomputed at dispatch time」
-- [ ] 6.2 補紅燈測試涵蓋「Send to all or manually selected recipients」
-- [ ] 6.3 在對應促銷區塊測試檔寫紅燈測試涵蓋「Coupon block bound to an existing coupon」（券碼欄位唯讀）、「Coupon validity checked before send」（過期券阻擋發送）、「Course/bundle CTA card pulled from catalog data」（價格唯讀）、「Static countdown text」（無 JS 動態計時）、「Automatic UTM tagging on promotional links」、「Marketing consent lock on promotional audience」（API 層繞過 UI 仍被拒）
+- [x] 6.1 在 `packages/newsletter/lib/audience.test.ts` 寫紅燈測試涵蓋「Single-layer AND/OR audience conditions」、「Live deduplicated recipient estimate」（OR 模式去重人數）、「Automatic exclusion of unsubscribed and invalid recipients」、「Deduplication by recipient email」、「Audience recomputed at dispatch time」
+- [x] 6.2 補紅燈測試涵蓋「Send to all or manually selected recipients」
+- [x] 6.3 在對應促銷區塊測試檔寫紅燈測試涵蓋「Coupon block bound to an existing coupon」（券碼欄位唯讀）、「Coupon validity checked before send」（過期券阻擋發送）、「Course/bundle CTA card pulled from catalog data」（價格唯讀）、「Static countdown text」（無 JS 動態計時）、「Automatic UTM tagging on promotional links」、「Marketing consent lock on promotional audience」（API 層繞過 UI 仍被拒）
 
 ### 實作
 
-- [ ] 6.4 新增 `packages/newsletter/lib/audience.ts` 實作分眾條件查詢、即時人數預估（debounce）、去重邏輯；跑 6.1／6.2 的測試轉綠燈
-- [ ] 6.5 依 Wave 2C（5.6）定義的 `contentJson` 基礎區塊型別，擴充促銷專屬區塊型別（課程卡／優惠券／靜態倒數），並在 `render.ts` 新增對應的渲染邏輯（優惠券綁定唯讀、課程卡自動帶價、倒數純文字、UTM 自動標記）；跑 6.3 的測試轉綠燈
-- [ ] 6.6 在分眾 UI／發送 API 實作「促銷模式強制鎖定行銷同意篩選」（對應 `newsletter-promo-campaign` 的 Marketing consent lock 需求），確保 UI 層 disabled 且 API 層有獨立校驗，不只靠前端限制
+- [x] 6.4 新增 `packages/newsletter/lib/audience.ts` 實作分眾條件查詢、即時人數預估（debounce）、去重邏輯；跑 6.1／6.2 的測試轉綠燈
+- [x] 6.5 依 Wave 2C（5.6）定義的 `contentJson` 基礎區塊型別，擴充促銷專屬區塊型別（課程卡／優惠券／靜態倒數），並在 `render.ts` 新增對應的渲染邏輯（優惠券綁定唯讀、課程卡自動帶價、倒數純文字、UTM 自動標記）；跑 6.3 的測試轉綠燈
+- [x] 6.6 在分眾 UI／發送 API 實作「促銷模式強制鎖定行銷同意篩選」（對應 `newsletter-promo-campaign` 的 Marketing consent lock 需求），確保 UI 層 disabled 且 API 層有獨立校驗，不只靠前端限制
 
 ## 7. Wave 2 收斂與整體驗收
 

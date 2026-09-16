@@ -8,7 +8,10 @@
 		"./lib/email-consent": "./lib/email-consent.ts",
 		"./lib/unsubscribe-token": "./lib/unsubscribe-token.ts",
 		"./lib/compliance": "./lib/compliance.ts",
-		"./lib/send-engine": "./lib/send-engine.ts"
+		"./lib/send-engine": "./lib/send-engine.ts",
+		"./lib/audience": "./lib/audience.ts",
+		"./lib/promo-blocks": "./lib/promo-blocks.ts",
+		"./lib/render": "./lib/render.ts"
 	},
 	"scripts": {
 		"clean": "git clean -xdf .cache .turbo dist node_modules",

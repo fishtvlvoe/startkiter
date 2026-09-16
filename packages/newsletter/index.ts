@@ -41,3 +41,53 @@ export type {
 	CampaignActivationInput,
 	NewsletterSiteSettings,
 } from "./lib/compliance";
+export {
+	buildAudienceWhere,
+	countSelectedRecipients,
+	createDebouncedAudienceEstimator,
+	enforcePromoAudienceSegment,
+	estimateAudience,
+	getAudienceUsers,
+	parseSegmentJson,
+	PromoAudienceLockError,
+	resolveDispatchRecipients,
+	segmentHasMarketingConsentLock,
+} from "./lib/audience";
+export type {
+	AudienceEstimate,
+	AudienceRecipient,
+	AudienceUserRow,
+	NewsletterAudienceType,
+	SegmentJson,
+	SegmentRule,
+} from "./lib/audience";
+export {
+	assertCouponValidForSend,
+	assertPromoAudienceLocked,
+	bindBundleCardBlock,
+	bindCountdownBlock,
+	bindCouponBlock,
+	bindCourseCardBlock,
+	getPromoAudienceUiState,
+	renderPromoBlockHtml,
+	withUtmParams,
+} from "./lib/promo-blocks";
+export type {
+	CatalogBundle,
+	CatalogCourse,
+	CouponRecord,
+	PromoAudienceUiState,
+	PromoNewsletterBlock,
+} from "./lib/promo-blocks";
+export {
+	createPromoCountdownBlock,
+	createPromoCouponBlock,
+	createPromoCourseBlock,
+	renderCampaignHtml,
+} from "./lib/render";
+export type {
+	NewsletterContentBlock,
+	NewsletterContentJson,
+	RenderCampaignOptions,
+	RenderCampaignResult,
+} from "./lib/render";
