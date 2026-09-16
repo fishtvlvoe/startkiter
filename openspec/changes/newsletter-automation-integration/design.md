@@ -63,6 +63,8 @@ PRD 花了完整一個 Phase（Phase 0）解決 8 個對弈主題互相衝突的
 **Alternatives Considered**：
 1. 直接指定用 `sanitize-html` npm 套件——否決，還沒確認 StartKiter 現有代碼庫是否已有等效工具，先加任務查證比直接引入新依賴更保守。
 
+**Apply 結果（2026-09-16）**：`packages/mail/lib/welcome-email-render.ts` 已提供並由 `@startkiter/mail` 匯出的 server-side `sanitizeEmailHtml`，涵蓋 `<script>`、`<style>`、`<iframe>`、`<form>`、`on*` 事件屬性與危險 URL；`packages/newsletter` 直接複用此函式，不新增 sanitizer 套件。
+
 ## Implementation Contract
 
 **行為**：

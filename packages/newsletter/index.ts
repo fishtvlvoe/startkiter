@@ -88,6 +88,16 @@ export {
 export type {
 	NewsletterContentBlock,
 	NewsletterContentJson,
+	NewsletterBlockContent,
+	NewsletterButtonBlock,
+	NewsletterDividerBlock,
+	NewsletterHeadingBlock,
+	NewsletterImageBlock,
+	NewsletterInlineNode,
+	NewsletterInlineStyles,
+	NewsletterParagraphBlock,
+	NewsletterVideoCardBlock,
 	RenderCampaignOptions,
 	RenderCampaignResult,
 } from "./lib/render";
+export { sendEmail } from "@startkiter/mail";

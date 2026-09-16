@@ -176,6 +176,7 @@ describe("marketing consent lock on promotional audience", () => {
 	it("disables non-consent audience options in promo UI state", () => {
 		const ui = getPromoAudienceUiState("PROMO");
 		expect(ui.forceMarketingConsent).toBe(true);
+		if (!("disabledPresets" in ui)) throw new Error("PROMO UI state must lock consent");
 		expect(ui.disabledPresets).toEqual(expect.arrayContaining(["all"]));
 		expect(ui.lockedRule).toEqual({ field: "marketingConsent", value: true });
 		expect(ui.canEditMarketingConsentRule).toBe(false);

@@ -233,6 +233,16 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		dataSpec: "none",
 	},
 	{
+		id: "newsletter",
+		name: "電子報",
+		version: "0.1.0",
+		mount: {
+			route: { path: "/admin/newsletter" },
+			menu: { label: "電子報", icon: "mail", order: 17, requiresOperator: true },
+		},
+		dataSpec: "none",
+	},
+	{
 		id: "admin-organizations",
 		name: "組織管理",
 		version: "0.1.0",

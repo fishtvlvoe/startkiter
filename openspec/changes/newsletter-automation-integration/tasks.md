@@ -48,16 +48,16 @@
 
 ### 紅燈測試
 
-- [ ] 5.1 在 `packages/newsletter/lib/render.test.ts` 寫紅燈測試涵蓋「Single rendering path for preview, test send, and real send」（比對兩次渲染輸出除測試 banner 外一致）、「Table-based inline-style HTML output」（斷言輸出不含 `<style>`／`display:flex`／`display:grid`）
-- [ ] 5.2 補紅燈測試涵蓋「HTML size guard」（>102KB 觸發警告）、「Server-side HTML sanitization」（`<script>` 被移除）、「Automatic plain-text alternative」（輸出含非空純文字版）
-- [ ] 5.3 在對應撰寫器 UI 測試檔寫紅燈測試涵蓋「Draft autosave」（idle 後自動儲存）、「Test send restricted to internal accounts」（非內部帳號被拒）、「Send confirmation with recipient estimate」（確認畫面顯示人數、二次提交被擋）
+- [x] 5.1 在 `packages/newsletter/lib/render.test.ts` 寫紅燈測試涵蓋「Single rendering path for preview, test send, and real send」（比對兩次渲染輸出除測試 banner 外一致）、「Table-based inline-style HTML output」（斷言輸出不含 `<style>`／`display:flex`／`display:grid`）
+- [x] 5.2 補紅燈測試涵蓋「HTML size guard」（>102KB 觸發警告）、「Server-side HTML sanitization」（`<script>` 被移除）、「Automatic plain-text alternative」（輸出含非空純文字版）
+- [x] 5.3 在對應撰寫器 UI 測試檔寫紅燈測試涵蓋「Draft autosave」（idle 後自動儲存）、「Test send restricted to internal accounts」（非內部帳號被拒）、「Send confirmation with recipient estimate」（確認畫面顯示人數、二次提交被擋）
 
 ### 實作
 
-- [ ] 5.4 先查證 `packages/mail`／既有 `renderCourseWelcomeEmail` 是否已有可複用的 HTML sanitize 邏輯（對應 Decision「HTML sanitize：apply 階段先確認 packages/mail 現有 sanitizer 可否複用」），有則複用、沒有則評估引入套件，記錄決定
-- [ ] 5.5 新增 `packages/newsletter/lib/render.ts`（單軌渲染器 `renderCampaignHtml`）與純文字轉換邏輯；跑 5.1／5.2 的測試轉綠燈
-- [ ] 5.6 新增 `apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/`（列表頁、撰寫器：區塊編輯、草稿自動儲存、測試信、發送前確認對話框）；跑 5.3 的測試轉綠燈；依 design.md「衝突組細節」的協調點，在此任務中定義並匯出 `contentJson` 基礎區塊型別（標題／段落／圖片／按鈕／分隔線／影片卡），供 Wave 2D 的促銷區塊擴充
-- [ ] 5.7 在 `packages/platform/src/mount-points.ts` 新增 `newsletter` 選單項目，掛載到 `/admin/newsletter`
+- [x] 5.4 先查證 `packages/mail`／既有 `renderCourseWelcomeEmail` 是否已有可複用的 HTML sanitize 邏輯（對應 Decision「HTML sanitize：apply 階段先確認 packages/mail 現有 sanitizer 可否複用」），有則複用、沒有則評估引入套件，記錄決定
+- [x] 5.5 新增 `packages/newsletter/lib/render.ts`（單軌渲染器 `renderCampaignHtml`）與純文字轉換邏輯；跑 5.1／5.2 的測試轉綠燈
+- [x] 5.6 新增 `apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/`（列表頁、撰寫器：區塊編輯、草稿自動儲存、測試信、發送前確認對話框）；跑 5.3 的測試轉綠燈；依 design.md「衝突組細節」的協調點，在此任務中定義並匯出 `contentJson` 基礎區塊型別（標題／段落／圖片／按鈕／分隔線／影片卡），供 Wave 2D 的促銷區塊擴充
+- [x] 5.7 在 `packages/platform/src/mount-points.ts` 新增 `newsletter` 選單項目，掛載到 `/admin/newsletter`
 
 ## 6. Wave 2D：分眾與促銷（可與 Wave 2C 平行，依賴 Wave 1 收斂完成，對應 capability `newsletter-audience-targeting` 與 `newsletter-promo-campaign`）
 
