@@ -27,7 +27,7 @@
 
 ## 6. 收尾驗證
 
-- [ ] 6.1 全量驗證：`pnpm test`、`pnpm type-check`、`pnpm --filter saas build` 全綠，無新 lint 錯誤。驗證方式：三個指令皆 exit 0。
+- [x] 6.1 全量驗證：`pnpm test`、`pnpm type-check`、`pnpm --filter saas build` 全綠，無新 lint 錯誤。驗證方式：三個指令皆 exit 0。**實際結果**：逐套件跑 `pnpm test`（一次跑全部因資料庫連線爭用出現假性失敗，逐套件單獨跑後全數通過：mail 42/42、notifications 9/9、course 114/114、bundles 11/11、ai 9/9、api 316/316、saas 106/106 files 430/430 tests）；額外發現 `apps/docs` 的 `content.test.ts` 因先前 mail-provider/newsletter SR 未同步更新買家文件真的紅燈（缺 EMAIL_PROVIDER/TOSEND_*/ZSEND_API_KEY 六個變數說明、SMTP_*改名未同步），已一併修復（commit fddd16c4）並轉綠燈；`pnpm type-check`、`pnpm --filter saas build` 皆 exit 0。
 - [ ] 6.2 手動驗收：後台編輯器輸入一段文字、一個標題與一個 CTA 按鈕 → 儲存 → 寄測試信到 Gmail → 版面正常、按鈕可點、無原始 HTML 外洩、按鈕下方有已寄出提示。驗證方式：人工在測試環境走一遍並記錄於 PR 描述。
   - 替代證據（AI）：`send-welcome-email-test.test.ts` 已補 contentJson→CTA html/text→sendEmail 的 mock 端到端案例，且確認不寫 EmailDeliveryLog。
   - **Gmail 真實帳號手動驗收：需要人工，AI 無法代勞**（本 task 維持未勾）。
