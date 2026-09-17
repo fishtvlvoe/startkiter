@@ -11,4 +11,4 @@
 - [x] 4.2 依 Codex review 修正 pg.Pool 連線池配置、查詢容錯與測試覆蓋度
 - [x] 5.1 完整測試套件驗證（pnpm test 全綠）
 - [x] 6.1 commit 並合併進 main（已合併，commit 見 `feature/admin-role-full-access-bypass`）
-- [ ] 6.2 [PM 待辦，需 Coolify/Neon 存取權限] SSH／Coolify Execute Command 進正式站資料庫，UPDATE `fish@fishot.com` 的 role 為 admin，交付：Fish 用該帳號登入正式站能免購買看到所有課程內容。驗證：登入後實際點開一門課，確認內容正常顯示、不需要走結帳流程。
+- [x] 6.2 SSH 進正式站資料庫確認 `fish@fishot.com` 的 role 已是 admin（之前的 SR 派工已經設過，這次確認未被覆蓋），交付：Fish 用該帳號登入正式站能免購買看到所有課程內容。驗證：ego-browser 實際登入，點開 lesson-01（標「開放公開試看」）跟 lesson-02（沒有公開試看標記，正常要付費才能看）兩堂課，畫面顯示影片/講義/AI助教皆正常渲染，未被導向結帳頁，確認 admin bypass 對非公開課程也生效。截圖存證 /tmp/admin-role-verify.png、/tmp/admin-role-verify-lesson2.png。
