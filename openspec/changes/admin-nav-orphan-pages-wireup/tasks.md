@@ -22,5 +22,13 @@
 
 ## 5. 部署與手動驗證
 
-- [ ] 5.1 [after: 4.2] commit 並 push 到 origin/main，觸發 Coolify 部署，交付：新版本真正上線運行。驗證：SSH 確認正式站容器運行的 image tag 與 git HEAD commit 一致。
-- [ ] 5.2 [after: 5.1] 以 admin 角色（依 admin-role-full-access-bypass SR 的 6.2 任務把帳號設成 admin 後）登入正式站，手動點擊側邊導覽，依序確認組織管理、訂單管理、營收報表、系統設定群組（展開後三個子項目：金流設定、發票設定、Gemini 設定）全部能正確點擊進入且頁面正常渲染，交付：Success Criteria「這 6 個頁面能被導覽選單找到」成立。驗證：記錄手動驗證的操作步驟與觀察結果。
+- [x] 5.1 [after: 4.2] commit 並 push 到 origin/main，觸發 Coolify 部署，交付：新版本真正上線運行。驗證：SSH `docker ps --filter name=lmfjp5` 確認正式站容器運行的 image tag（`fb4875f7507e43370b390add0b9a245edd9e29e1`）以 `git log --oneline fb4875f7 | grep 6cc226c2` 確認含這次改動的 commit（`6cc226c2 feat(admin): 把 6 個孤兒後台頁註冊進導覽選單`），已上線。
+- [x] 5.2 [after: 5.1] 以 admin 角色登入正式站（`fish@fishot.com`，PM 用 better-auth 官方 `hashPassword` API 補上正式站原本缺少的 credential 登入方式），手動點擊側邊導覽，依序確認組織管理、訂單管理、營收報表、系統設定群組（展開後四個子項目：收款閘道設定、發票設定、Gemini 設定、AI 助手模型）全部能正確點擊進入且頁面正常渲染，交付：Success Criteria「這 6 個頁面能被導覽選單找到」成立。驗證：ego-browser 截圖確認 6 個頁面皆可達，同時發現一個本次驗證前未被抓到的回歸問題（見第 6 節）。
+
+## 6. 修復回歸：新增 admin-settings 群組意外關閉了既有的拖曳分組側邊欄功能
+
+- [x] 6.1 在 `apps/saas/modules/shared/components/NavBar.test.tsx` 為「Requirement: Drag-and-drop sidebar grouping coexists with subItems-based menu groups」寫紅燈測試：斷言當 `getMountMenuItems()` 回傳結果包含至少一個帶 `subItems` 的項目（例如 admin-settings 群組）、且使用者具備 `admin.access`、側邊欄未收合時，`useSidebarGroupedNav` 仍然評估為 `true`（`SidebarGroupedNav` 會渲染，不會退回 `NavMenuList`），交付：測試檔案存在且執行後為紅燈（目前 `hasNestedMenuItems` 判斷式會讓它變成 `false`）。驗證：跑該測試觀察到失敗，失敗原因是 `useSidebarGroupedNav` 回傳 `false`。
+- [x] 6.2 [after: 6.1] 修改 `NavBar.tsx` 第 912-913 行附近的 `hasNestedMenuItems` / `useSidebarGroupedNav` 判斷邏輯：`SidebarGroupedNav`（拖曳分組介面）與 `subItems`（groupId 收合子選單，如 admin-settings）SHALL 兩者並存，不互斥——拖曳分組的排序/歸屬邏輯需要能正確處理「群組項目本身也帶 subItems」這種巢狀情況（群組整體被拖到某個 SidebarGroup 時，底下的 subItems 跟著走，不能被拆散），交付：「Grouped drag-and-drop nav renders even when a groupId-based subItems group exists」場景成立。驗證：6.1 的紅燈測試轉綠燈。
+- [ ] 6.3 用 ego-browser 登入正式站 admin 帳號，實際測試：把「系統設定」群組拖曳到自訂分組（例如新建一個「系統」分組），重新整理頁面後歸屬與排序持久化正確，且拖曳後系統設定群組展開時 4 個子項目（收款閘道設定/發票設定/Gemini設定/AI助手模型）仍然完整存在、可點擊進入，交付：Decision「拖曳分組功能與 groupId 收合子選單並存」在真實瀏覽器操作下成立。驗證：截圖存證 + `GET /api/sidebar-layout` 回傳內容確認歸屬正確寫入資料庫。
+- [x] 6.4 [after: 6.2] 跑 `pnpm --filter @startkiter/saas test` 確認全數通過（含既有 `NavBar.test.tsx`、`nav-menu-items.test.ts` 既有案例不受影響），交付：本次修復未破壞任何既有測試。驗證：測試輸出顯示 0 failed。
+- [ ] 6.5 commit 並 push 到 origin/main，觸發 Coolify 部署，交付：修復版本真正上線運行。驗證：SSH 確認正式站容器運行的 image tag 與 git HEAD commit 一致，並重新用 ego-browser 截圖確認拖曳分組介面在正式站上正確顯示（不再是攤平清單）。
