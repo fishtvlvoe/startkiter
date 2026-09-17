@@ -6711,3 +6711,343 @@ tests:
   - packages/course/src/line-invite.test.ts
   - apps/saas/lib/auth-providers.test.ts
 -->
+
+---
+### Requirement: Existing orphaned admin pages are registered in the static mount point registry
+
+The `MOUNT_POINTS` array SHALL include entries for `admin/organizations`, `admin/orders`, `admin/revenue`, `admin/settings/checkout-gateway`, `admin/settings/einvoice`, and `admin/settings/gemini`, each with `mount.menu.requiresOperator` set to `true`, so that these previously unregistered pages become reachable from the Shell's navigation for operator users, consistent with the existing "Menu mount points render from a static registry in v1" requirement.
+
+#### Scenario: Operator sees the six newly registered admin pages in navigation
+
+- **WHEN** a signed-in user whose `admin.access` permission is granted (`user.role === "admin"`) renders the Shell navigation
+- **THEN** the rendered navigation MUST include reachable entries whose hrefs resolve to `/admin/organizations`, `/admin/orders`, `/admin/revenue`, `/admin/settings/checkout-gateway`, `/admin/settings/einvoice`, and `/admin/settings/gemini`
+
+##### Example: Admin-settings group collapses three settings pages
+
+- **GIVEN** `mount-points.ts` registers `checkout-gateway`, `einvoice`, and `gemini` entries each with `mount.menu.groupId = "admin-settings"`
+- **WHEN** `getMountMenuItems({ isOperator: true, ... })` is called
+- **THEN** the result MUST contain exactly one top-level item for the `admin-settings` group with three `subItems` whose hrefs resolve to `/admin/settings/checkout-gateway`, `/admin/settings/einvoice`, and `/admin/settings/gemini`
+
+#### Scenario: Non-operator does not see the six admin pages in navigation
+
+- **WHEN** a signed-in user whose `admin.access` permission is not granted renders the Shell navigation
+- **THEN** the rendered navigation MUST NOT include any entry for `admin/organizations`, `admin/orders`, `admin/revenue`, `admin/settings/checkout-gateway`, `admin/settings/einvoice`, or `admin/settings/gemini`
+
+
+<!-- @trace
+source: admin-nav-orphan-pages-wireup
+updated: 2026-09-17
+code:
+  - apps/saas/app/(authenticated)/checkout/page.tsx
+  - packages/api/modules/ai/procedures/stream-message.ts
+  - packages/api/modules/course/lib/video-resolver.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/new/page.tsx
+  - packages/newsletter/lib/render.ts
+  - packages/newsletter/lib/send-engine.ts
+  - packages/i18n/translations/en/saas.json
+  - packages/newsletter/tsconfig.json
+  - apps/saas/app/(authenticated)/(main)/(account)/settings/billing/page.tsx
+  - .github/skills/spectra-archive/SKILL.md
+  - apps/saas/app/(main)/unsubscribe/page.tsx
+  - apps/saas/modules/auth/components/SignupForm.tsx
+  - packages/newsletter/index.ts
+  - apps/saas/modules/auth/components/OtpForm.tsx
+  - apps/saas/app/api/course/demo-video/route.ts
+  - .github/skills/spectra-ask/SKILL.md
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/settings/ai-provider/page.tsx
+  - apps/saas/.env.example
+  - .github/skills/spectra-drift/SKILL.md
+  - packages/ai/lib/provider-settings.ts
+  - .cursorrules
+  - apps/saas/app/(authenticated)/bundles/page.tsx
+  - apps/saas/app/(authenticated)/bundles/[slug]/page.tsx
+  - packages/ai/package.json
+  - .github/skills/spectra-audit/SKILL.md
+  - packages/course/catalog.ts
+  - packages/mail/provider/tosend.ts
+  - packages/mail/provider/zsend.ts
+  - .github/prompts/spectra-commit.prompt.md
+  - apps/saas/app/(authenticated)/(main)/(account)/ai/page.tsx
+  - apps/saas/modules/ai/components/AiChat.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/[id]/page.tsx
+  - .github/prompts/spectra-ask.prompt.md
+  - .github/prompts/spectra-ingest.prompt.md
+  - packages/i18n/translations/zh-tw/saas.json
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/settings/newsletter/page.tsx
+  - apps/saas/modules/auth/components/LoginForm.tsx
+  - packages/api/modules/ai/lib/provider-settings.ts
+  - .github/prompts/spectra-debug.prompt.md
+  - .github/prompts/spectra-audit.prompt.md
+  - apps/saas/app/(main)/bundles/[slug]/page.tsx
+  - packages/ai/lib/model-options.ts
+  - packages/i18n/translations/zh-cn/saas.json
+  - .github/prompts/spectra-discuss.prompt.md
+  - packages/newsletter/package.json
+  - packages/platform/src/mount-points.ts
+  - apps/saas/app/api/cron/newsletter-dispatch/route.ts
+  - GEMINI.md
+  - apps/saas/package.json
+  - .github/prompts/spectra-propose.prompt.md
+  - apps/saas/modules/shared/lib/nav-menu-items.ts
+  - packages/newsletter/lib/email-consent.ts
+  - packages/newsletter/lib/promo-blocks.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/layout.tsx
+  - pnpm-workspace.yaml
+  - apps/saas/modules/shared/components/NavBar.tsx
+  - packages/ai/index.ts
+  - .github/skills/spectra-debug/SKILL.md
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/actions.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/content-types.ts
+  - CLAUDE.md
+  - .github/prompts/spectra-archive.prompt.md
+  - .github/skills/spectra-ingest/SKILL.md
+  - packages/newsletter/lib/compliance.ts
+  - packages/ui/components/dropdown-menu.tsx
+  - packages/mail/provider/index.ts
+  - apps/saas/middleware.ts
+  - apps/saas/vitest.config.ts
+  - apps/saas/app/(authenticated)/checkout/checkout-button.tsx
+  - apps/saas/app/api/checkout/route.ts
+  - apps/saas/modules/shared/lib/redirect.ts
+  - apps/saas/app/(authenticated)/layout.tsx
+  - apps/saas/lib/newsletter-settings.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/page.tsx
+  - .github/prompts/spectra-drift.prompt.md
+  - packages/newsletter/lib/unsubscribe-token.ts
+  - packages/database/prisma/schema.prisma
+  - apps/saas/modules/auth/components/SocialSigninButton.tsx
+  - packages/database/prisma/migrations/20260915221513_add_newsletter_automation/migration.sql
+  - packages/auth/auth.ts
+  - .github/skills/spectra-apply/SKILL.md
+  - .github/prompts/spectra-apply.prompt.md
+  - .github/skills/spectra-propose/SKILL.md
+  - packages/mail/provider/nodemailer.ts
+  - packages/support/src/generate-diagnosis.ts
+  - AGENTS.md
+  - packages/newsletter/vitest.config.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/composer.tsx
+  - apps/saas/app/api/course/ai/route.ts
+  - apps/saas/app/api/unsubscribe/route.ts
+  - .github/skills/spectra-discuss/SKILL.md
+  - apps/saas/modules/payments/components/PricingTable.tsx
+  - apps/saas/modules/shared/components/UserMenu.tsx
+  - .github/skills/spectra-commit/SKILL.md
+  - packages/ai/lib/index.ts
+  - packages/newsletter/lib/audience.ts
+tests:
+  - apps/saas/app/(authenticated)/(main)/(account)/settings/billing/page.test.tsx
+  - packages/api/modules/ai/procedures/stream-message.test.ts
+  - packages/mail/provider/tosend.test.ts
+  - packages/mail/provider/zsend.test.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/composer.test.tsx
+  - apps/saas/modules/auth/components/SignupForm.consent.test.tsx
+  - apps/saas/app/api/cron/newsletter-dispatch/route.test.ts
+  - apps/saas/app/api/course/ai/route.test.ts
+  - apps/saas/app/api/checkout/marketing-consent.test.ts
+  - apps/saas/app/(authenticated)/checkout/checkout-button.test.tsx
+  - packages/newsletter/lib/wave2-integration.test.ts
+  - packages/newsletter/lib/email-consent.test.ts
+  - packages/mail/provider/nodemailer.test.ts
+  - apps/saas/modules/payments/components/PricingTable.test.tsx
+  - packages/newsletter/lib/compliance.test.ts
+  - apps/saas/app/(authenticated)/layout.test.tsx
+  - apps/saas/modules/payments/hooks/plan-data.test.tsx
+  - apps/saas/modules/shared/lib/nav-menu-items.test.ts
+  - apps/saas/modules/ai/components/AiChat.test.tsx
+  - packages/course/catalog.test.ts
+  - apps/saas/app/api/course/demo-video/route.test.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/ai/page.test.tsx
+  - packages/ui/components/dropdown-menu.test.tsx
+  - apps/saas/lib/newsletter-settings.test.ts
+  - packages/api/modules/support/procedures/chatwoot-webhook.test.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/actions.test.ts
+  - apps/saas/app/(authenticated)/bundles/page.test.tsx
+  - packages/newsletter/lib/audience.test.ts
+  - apps/saas/modules/shared/lib/redirect.test.ts
+  - packages/platform/src/mount-points.test.ts
+  - packages/ai/openai-models.test.ts
+  - packages/newsletter/lib/send-engine.test.ts
+  - apps/saas/app/(main)/unsubscribe/page.test.tsx
+  - packages/mail/provider.test.ts
+  - packages/newsletter/lib/render.test.ts
+  - apps/saas/app/(authenticated)/bundles/[slug]/page.test.tsx
+  - packages/newsletter/lib/unsubscribe-token.test.ts
+  - packages/mail/provider/index.test.ts
+  - packages/course/access.test.ts
+  - apps/saas/modules/shared/components/NavBar.test.tsx
+  - packages/api/modules/ai/lib/provider-settings.test.ts
+  - packages/newsletter/lib/promo-blocks.test.ts
+  - apps/saas/app/api/unsubscribe/route.test.ts
+  - apps/saas/lib/course-access.test.ts
+  - packages/ai/resolve-text-model.test.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/settings/ai-provider/page.test.tsx
+  - packages/api/modules/course/course.test.ts
+-->
+
+---
+### Requirement: Drag-and-drop sidebar grouping coexists with subItems-based menu groups
+
+`NavBar.tsx`'s `useSidebarGroupedNav` gate SHALL NOT be disabled solely because one or more menu items carry `subItems` (a `groupId`-based collapsed group such as `admin-settings`). The operator-configurable drag-and-drop grouping feature (persisted via `SidebarGroup`/`SidebarGroupItem`, confirmed against `docs/demo/platform-shell-navbar-demo.html`) SHALL remain available regardless of whether any `MOUNT_POINTS` entry defines a `groupId`.
+
+#### Scenario: Grouped drag-and-drop nav renders even when a groupId-based subItems group exists
+
+- **GIVEN** `MOUNT_POINTS` contains at least one entry with `mount.menu.groupId` set (producing a menu item with non-empty `subItems`, e.g. the `admin-settings` group)
+- **AND** the signed-in user has `admin.access` and the sidebar is not collapsed
+- **WHEN** the Shell navigation renders
+- **THEN** `SidebarGroupedNav` (drag-and-drop persisted grouping) MUST still render instead of falling back to the flat `NavMenuList`
+
+#### Scenario: Existing drag-and-drop persistence regression test guards the gate
+
+- **GIVEN** a test asserts `useSidebarGroupedNav` evaluates `true` for an admin, non-collapsed session whose `getMountMenuItems()` output includes at least one item with `subItems`
+- **WHEN** a future change alters `NavBar.tsx`'s grouped-nav gating condition
+- **THEN** this test MUST fail before the change ships if the alteration would disable grouped-nav for any menu configuration containing `subItems`
+
+<!-- @trace
+source: admin-nav-orphan-pages-wireup
+updated: 2026-09-17
+code:
+  - apps/saas/app/(authenticated)/checkout/page.tsx
+  - packages/api/modules/ai/procedures/stream-message.ts
+  - packages/api/modules/course/lib/video-resolver.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/new/page.tsx
+  - packages/newsletter/lib/render.ts
+  - packages/newsletter/lib/send-engine.ts
+  - packages/i18n/translations/en/saas.json
+  - packages/newsletter/tsconfig.json
+  - apps/saas/app/(authenticated)/(main)/(account)/settings/billing/page.tsx
+  - .github/skills/spectra-archive/SKILL.md
+  - apps/saas/app/(main)/unsubscribe/page.tsx
+  - apps/saas/modules/auth/components/SignupForm.tsx
+  - packages/newsletter/index.ts
+  - apps/saas/modules/auth/components/OtpForm.tsx
+  - apps/saas/app/api/course/demo-video/route.ts
+  - .github/skills/spectra-ask/SKILL.md
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/settings/ai-provider/page.tsx
+  - apps/saas/.env.example
+  - .github/skills/spectra-drift/SKILL.md
+  - packages/ai/lib/provider-settings.ts
+  - .cursorrules
+  - apps/saas/app/(authenticated)/bundles/page.tsx
+  - apps/saas/app/(authenticated)/bundles/[slug]/page.tsx
+  - packages/ai/package.json
+  - .github/skills/spectra-audit/SKILL.md
+  - packages/course/catalog.ts
+  - packages/mail/provider/tosend.ts
+  - packages/mail/provider/zsend.ts
+  - .github/prompts/spectra-commit.prompt.md
+  - apps/saas/app/(authenticated)/(main)/(account)/ai/page.tsx
+  - apps/saas/modules/ai/components/AiChat.tsx
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/[id]/page.tsx
+  - .github/prompts/spectra-ask.prompt.md
+  - .github/prompts/spectra-ingest.prompt.md
+  - packages/i18n/translations/zh-tw/saas.json
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/settings/newsletter/page.tsx
+  - apps/saas/modules/auth/components/LoginForm.tsx
+  - packages/api/modules/ai/lib/provider-settings.ts
+  - .github/prompts/spectra-debug.prompt.md
+  - .github/prompts/spectra-audit.prompt.md
+  - apps/saas/app/(main)/bundles/[slug]/page.tsx
+  - packages/ai/lib/model-options.ts
+  - packages/i18n/translations/zh-cn/saas.json
+  - .github/prompts/spectra-discuss.prompt.md
+  - packages/newsletter/package.json
+  - packages/platform/src/mount-points.ts
+  - apps/saas/app/api/cron/newsletter-dispatch/route.ts
+  - GEMINI.md
+  - apps/saas/package.json
+  - .github/prompts/spectra-propose.prompt.md
+  - apps/saas/modules/shared/lib/nav-menu-items.ts
+  - packages/newsletter/lib/email-consent.ts
+  - packages/newsletter/lib/promo-blocks.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/layout.tsx
+  - pnpm-workspace.yaml
+  - apps/saas/modules/shared/components/NavBar.tsx
+  - packages/ai/index.ts
+  - .github/skills/spectra-debug/SKILL.md
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/actions.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/content-types.ts
+  - CLAUDE.md
+  - .github/prompts/spectra-archive.prompt.md
+  - .github/skills/spectra-ingest/SKILL.md
+  - packages/newsletter/lib/compliance.ts
+  - packages/ui/components/dropdown-menu.tsx
+  - packages/mail/provider/index.ts
+  - apps/saas/middleware.ts
+  - apps/saas/vitest.config.ts
+  - apps/saas/app/(authenticated)/checkout/checkout-button.tsx
+  - apps/saas/app/api/checkout/route.ts
+  - apps/saas/modules/shared/lib/redirect.ts
+  - apps/saas/app/(authenticated)/layout.tsx
+  - apps/saas/lib/newsletter-settings.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/page.tsx
+  - .github/prompts/spectra-drift.prompt.md
+  - packages/newsletter/lib/unsubscribe-token.ts
+  - packages/database/prisma/schema.prisma
+  - apps/saas/modules/auth/components/SocialSigninButton.tsx
+  - packages/database/prisma/migrations/20260915221513_add_newsletter_automation/migration.sql
+  - packages/auth/auth.ts
+  - .github/skills/spectra-apply/SKILL.md
+  - .github/prompts/spectra-apply.prompt.md
+  - .github/skills/spectra-propose/SKILL.md
+  - packages/mail/provider/nodemailer.ts
+  - packages/support/src/generate-diagnosis.ts
+  - AGENTS.md
+  - packages/newsletter/vitest.config.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/composer.tsx
+  - apps/saas/app/api/course/ai/route.ts
+  - apps/saas/app/api/unsubscribe/route.ts
+  - .github/skills/spectra-discuss/SKILL.md
+  - apps/saas/modules/payments/components/PricingTable.tsx
+  - apps/saas/modules/shared/components/UserMenu.tsx
+  - .github/skills/spectra-commit/SKILL.md
+  - packages/ai/lib/index.ts
+  - packages/newsletter/lib/audience.ts
+tests:
+  - apps/saas/app/(authenticated)/(main)/(account)/settings/billing/page.test.tsx
+  - packages/api/modules/ai/procedures/stream-message.test.ts
+  - packages/mail/provider/tosend.test.ts
+  - packages/mail/provider/zsend.test.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/composer.test.tsx
+  - apps/saas/modules/auth/components/SignupForm.consent.test.tsx
+  - apps/saas/app/api/cron/newsletter-dispatch/route.test.ts
+  - apps/saas/app/api/course/ai/route.test.ts
+  - apps/saas/app/api/checkout/marketing-consent.test.ts
+  - apps/saas/app/(authenticated)/checkout/checkout-button.test.tsx
+  - packages/newsletter/lib/wave2-integration.test.ts
+  - packages/newsletter/lib/email-consent.test.ts
+  - packages/mail/provider/nodemailer.test.ts
+  - apps/saas/modules/payments/components/PricingTable.test.tsx
+  - packages/newsletter/lib/compliance.test.ts
+  - apps/saas/app/(authenticated)/layout.test.tsx
+  - apps/saas/modules/payments/hooks/plan-data.test.tsx
+  - apps/saas/modules/shared/lib/nav-menu-items.test.ts
+  - apps/saas/modules/ai/components/AiChat.test.tsx
+  - packages/course/catalog.test.ts
+  - apps/saas/app/api/course/demo-video/route.test.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/ai/page.test.tsx
+  - packages/ui/components/dropdown-menu.test.tsx
+  - apps/saas/lib/newsletter-settings.test.ts
+  - packages/api/modules/support/procedures/chatwoot-webhook.test.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/newsletter/actions.test.ts
+  - apps/saas/app/(authenticated)/bundles/page.test.tsx
+  - packages/newsletter/lib/audience.test.ts
+  - apps/saas/modules/shared/lib/redirect.test.ts
+  - packages/platform/src/mount-points.test.ts
+  - packages/ai/openai-models.test.ts
+  - packages/newsletter/lib/send-engine.test.ts
+  - apps/saas/app/(main)/unsubscribe/page.test.tsx
+  - packages/mail/provider.test.ts
+  - packages/newsletter/lib/render.test.ts
+  - apps/saas/app/(authenticated)/bundles/[slug]/page.test.tsx
+  - packages/newsletter/lib/unsubscribe-token.test.ts
+  - packages/mail/provider/index.test.ts
+  - packages/course/access.test.ts
+  - apps/saas/modules/shared/components/NavBar.test.tsx
+  - packages/api/modules/ai/lib/provider-settings.test.ts
+  - packages/newsletter/lib/promo-blocks.test.ts
+  - apps/saas/app/api/unsubscribe/route.test.ts
+  - apps/saas/lib/course-access.test.ts
+  - packages/ai/resolve-text-model.test.ts
+  - apps/saas/app/(authenticated)/(main)/(account)/admin/settings/ai-provider/page.test.tsx
+  - packages/api/modules/course/course.test.ts
+-->
