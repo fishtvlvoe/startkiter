@@ -15,4 +15,4 @@
 ## 4. 整合驗證
 
 - [x] 4.1 [after: 1.2, 2.2, 3.1] 跑一次 `pnpm --filter saas test` 確認全綠，交付：無失敗案例。驗證：測試輸出顯示 0 failed。
-- [ ] 4.2 [after: 4.1] 另一個 CLI（非實作方）做獨立 code review，聚焦「useChat 串接方式是否符合 apps/saas/modules/ 既有 API 呼叫慣例」「mount-points 新條目是否正確排除 requiresOperator」「錯誤狀態是否真的可見，不是吞掉例外」，交付：審查報告列出發現或明講「審查通過，無發現」。驗證：審查報告存在且已回覆給 PM。
+- [x] 4.2 [after: 4.1] 另一個 CLI（非實作方）做獨立 code review，聚焦「useChat 串接方式是否符合 apps/saas/modules/ 既有 API 呼叫慣例」「mount-points 新條目是否正確排除 requiresOperator」「錯誤狀態是否真的可見，不是吞掉例外」，交付：審查報告列出發現或明講「審查通過，無發現」。驗證：審查報告存在且已回覆給 PM。

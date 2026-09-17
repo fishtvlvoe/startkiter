@@ -24,8 +24,8 @@
 
 ## 6. Review
 
-- [ ] 6.1 Review：另一個 CLI（非實作 2、4、5 的那個）針對本次改動做獨立 code review，聚焦「CheckoutButton 的 productId 傳遞有沒有意外遺漏或寫錯」「已擁有判斷邏輯（4.2）有沒有正確涵蓋 bundle 內所有課程，不是只查第一堂」「/bundles/[slug] 對未發布 bundle 的 404 邊界情境是否確實涵蓋」，交付：審查報告列出發現或明講「審查通過，無發現」。驗證：審查報告存在且已回覆到 PM。
-- [ ] 6.2 全部確認沒問題後，跑一次完整測試套件（pnpm --filter saas test），交付：測試全數通過。驗證：測試輸出顯示 0 failed。
+- [x] 6.1 Review：另一個 CLI（非實作 2、4、5 的那個）針對本次改動做獨立 code review，聚焦「CheckoutButton 的 productId 傳遞有沒有意外遺漏或寫錯」「已擁有判斷邏輯（4.2）有沒有正確涵蓋 bundle 內所有課程，不是只查第一堂」「/bundles/[slug] 對未發布 bundle 的 404 邊界情境是否確實涵蓋」，交付：審查報告列出發現或明講「審查通過，無發現」。驗證：審查報告存在且已回覆到 PM。
+- [x] 6.2 全部確認沒問題後，跑一次完整測試套件（pnpm --filter saas test），交付：測試全數通過。驗證：測試輸出顯示 0 failed。
 
 ## 7. 部署與手動驗證
 

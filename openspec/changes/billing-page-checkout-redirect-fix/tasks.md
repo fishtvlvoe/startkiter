@@ -7,5 +7,5 @@
 
 ## 2. 整合驗證
 
-- [ ] 2.1 [after: 1.2, 1.3] 跑一次 `pnpm test` 確認全域測試全綠，交付：無失敗案例，且不影響 `/checkout` 頁面既有測試。驗證：測試輸出顯示 0 failed。
-- [ ] 2.2 [after: 2.1] 另一個 CLI（非實作方）做獨立 code review，聚焦「導頁邏輯有沒有遺漏某個 entitled/not-entitled 分支」「有沒有不小心動到 /checkout 或 provider 程式碼」，交付：審查報告列出發現或明講「審查通過，無發現」。驗證：審查報告存在且已回覆給 PM。
+- [x] 2.1 [after: 1.2, 1.3] 跑一次 `pnpm test` 確認全域測試全綠，交付：無失敗案例，且不影響 `/checkout` 頁面既有測試。驗證：測試輸出顯示 0 failed。
+- [x] 2.2 [after: 2.1] 另一個 CLI（非實作方）做獨立 code review，聚焦「導頁邏輯有沒有遺漏某個 entitled/not-entitled 分支」「有沒有不小心動到 /checkout 或 provider 程式碼」，交付：審查報告列出發現或明講「審查通過，無發現」。驗證：審查報告存在且已回覆給 PM。
