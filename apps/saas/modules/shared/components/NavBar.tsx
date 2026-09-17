@@ -505,6 +505,7 @@ function SidebarGroupedNavItem({
 	const isActive =
 		isMenuActive(pathname, menuItem.href) ||
 		(menuItem.subItems?.some((subItem) => isNavSubItemActive(pathname, subItem.href)) ?? false);
+	const hasSubItems = (menuItem.subItems?.length ?? 0) > 0;
 
 	return (
 		<li
@@ -528,6 +529,34 @@ function SidebarGroupedNavItem({
 				/>
 				<span className={isActive ? "text-white" : "text-[#c3c4c7]"}>{menuItem.label}</span>
 			</Link>
+			{hasSubItems && isActive && (
+				<div className="mt-1 relative">
+					<div
+						className="top-0 bottom-0 left-5.5 absolute w-px -translate-x-1/2 bg-[#c3c4c7]/30"
+						aria-hidden
+					/>
+					<ul className="gap-0.5 pl-9 flex flex-col">
+						{menuItem.subItems?.map((subItem) => {
+							const subActive = isNavSubItemActive(pathname, subItem.href);
+							return (
+								<li key={subItem.href}>
+									<Link
+										href={subItem.href}
+										className={cn(
+											"py-1.5 pl-2 pr-3 text-sm flex w-full items-center rounded-md transition-colors",
+											"text-[#c3c4c7] hover:bg-white/5",
+											subActive && "font-semibold text-white",
+										)}
+										prefetch
+									>
+										{subItem.label}
+									</Link>
+								</li>
+							);
+						})}
+					</ul>
+				</div>
+			)}
 		</li>
 	);
 }
@@ -909,8 +938,7 @@ export function NavBar() {
 			}
 		: undefined;
 
-	const hasNestedMenuItems = menuItems.some((item) => (item.subItems?.length ?? 0) > 0);
-	const useSidebarGroupedNav = canAccessAdmin && !isCollapsedEffective && !hasNestedMenuItems;
+	const useSidebarGroupedNav = canAccessAdmin && !isCollapsedEffective;
 
 	return (
 		<>

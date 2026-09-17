@@ -269,26 +269,65 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 		expect(html).toContain('data-sidebar-group-collapsed="false"');
 	});
 
-	it("renders operator admin section divider in NavMenuList when nested course menu is present", () => {
+	it("renders operator admin section in grouped sidebar nav when nested course menu is present", () => {
 		mockIsCollapsed = false;
 		mockCanAccessAdmin = true;
 		const html = renderToStaticMarkup(<NavBar />);
 
-		expect(html).toContain('data-testid="nav-menu-admin-divider"');
+		expect(html).toContain('data-testid="sidebar-group-admin-section"');
 		expect(html).toContain("管理");
 		expect(html).toContain("後台設定");
 		expect(html).toContain("開始");
 	});
 
-	it("uses NavMenuList with nested course admin menu for operators (not SidebarGroupedNav)", () => {
+	it("uses SidebarGroupedNav with nested course admin menu for operators", () => {
 		mockIsCollapsed = false;
 		mockCanAccessAdmin = true;
 		mockPathname = "/admin/media";
 		const html = renderToStaticMarkup(<NavBar />);
 
 		expect(html).toContain("CoursePack 任務");
-		expect(html).not.toContain('data-testid="sidebar-group-unassigned"');
+		expect(html).toContain('data-testid="sidebar-group-unassigned"');
 		expect(html).toContain("媒體庫");
+	});
+
+	it("keeps grouped sidebar nav when an operator menu item has subItems", () => {
+		mockIsCollapsed = false;
+		mockCanAccessAdmin = true;
+		mockPathname = "/admin/settings/checkout-gateway";
+		const menuSpy = vi.spyOn(navMenuItems, "getMountMenuItems").mockReturnValue([
+			{
+				id: "start",
+				label: "開始",
+				href: "/app",
+				icon: "home",
+				order: 0,
+				isActive: false,
+			},
+			{
+				id: "admin-settings-menu",
+				label: "系統設定",
+				href: "/admin/settings/checkout-gateway",
+				icon: "settings",
+				order: 1,
+				isActive: false,
+				requiresOperator: true,
+				subItems: [
+					{
+						id: "admin-checkout-gateway",
+						label: "收款閘道設定",
+						href: "/admin/settings/checkout-gateway",
+					},
+				],
+			},
+		]);
+		const html = renderToStaticMarkup(<NavBar />);
+		menuSpy.mockRestore();
+
+		expect(html).toContain('data-testid="sidebar-group-unassigned"');
+		expect(html).toContain('data-testid="sidebar-group-item-admin-settings-menu"');
+		expect(html).toContain("收款閘道設定");
+		expect(html).toContain('href="/admin/settings/checkout-gateway"');
 	});
 
 	it("highlights 郵件設定 on /admin/email-settings via NavMenuList", () => {
