@@ -13,4 +13,4 @@
 ## 3. Review 與收尾
 
 - [x] 3.1 跑一次完整測試套件（pnpm --filter saas test），交付：測試全數通過，確認這次改動沒有破壞其他頁面的翻譯或樣式。驗證：測試輸出顯示 0 failed。
-- [ ] 3.2 [after: 3.1] commit 並 push 到 origin/main，觸發 Coolify 部署，交付：新版本真正上線運行。驗證：SSH 確認正式站容器運行的 image tag 與 git HEAD commit 一致；並在正式站實際造訪 `/settings/billing` 與側邊欄（深色模式）確認兩個 bug 都已修復。
+- [x] 3.2 [after: 3.1] commit 並 push 到 origin/main，觸發 Coolify 部署，交付：新版本真正上線運行。驗證：SSH 確認正式站容器運行的 image tag 與 git HEAD commit 一致；並在正式站實際造訪 `/settings/billing` 與側邊欄（深色模式）確認兩個 bug 都已修復。**實際結果**：代碼早已包含在目前正式站運行的 image（`1da01fde`，經 `git merge-base --is-ancestor` 確認）不需重新部署。ego-browser 實際造訪 `/settings/billing`，方案名稱/說明正常顯示中文文案（無翻譯 key 亂碼），側邊欄帳號區塊 email 文字在深色模式下清楚可讀，兩個 bug 皆確認修復。截圖 /tmp/ui-polish-billing.png。
