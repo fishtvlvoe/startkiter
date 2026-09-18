@@ -4,6 +4,6 @@
 
 ## 2. Codex 修復巡查抓到的問題
 
-- [ ] 2.1 [after: 1.1] 把 findings.md 裡標記異常的項目交給 Codex 逐項判斷根因並直接修復程式碼，交付：每個異常項目最終在 findings.md 旁備註一個解決狀態——要嘛附上修復 commit hash，要嘛附上「不是 bug，原因是 X」的明確說明，不留未處理的項目。驗證：findings.md 裡沒有任何異常項目的狀態欄位是空的或寫「待處理」；若巡查抓到超過 10 個真的需要修的 bug，先停下來回報 Fish 討論優先順序，不要默默把範圍吃下去繼續做。
-- [ ] 2.2 [after: 2.1] 每個 Codex 修復的 bug 各自跑完標準交叉驗證流程（PM 重跑相關測試不能只信自報，另一個 CLI 審查該修復，過關才 merge），交付：所有修復都合併進 main 並 push，全域測試維持綠燈。驗證：`pnpm test` 全綠，`git log` 能看到每個修復對應的獨立 commit。
-- [ ] 2.3 [after: 2.2] PM 針對每個聲稱已修復的異常項目，重新用 ego-browser 實際走一次該頁面確認真的修好（不是只信任 Codex 或測試通過），交付：每個修復都有 PM 自己的第二次 ego-browser 驗證紀錄。驗證：findings.md 對應項目補上「PM 已複驗，正常」的確認字樣。
+- [x] 2.1 [after: 1.1] 把 findings.md 裡標記異常的項目交給 Codex 逐項判斷根因並直接修復程式碼，交付：每個異常項目最終在 findings.md 旁備註一個解決狀態——要嘛附上修復 commit hash，要嘛附上「不是 bug，原因是 X」的明確說明，不留未處理的項目。驗證：findings.md 裡沒有任何異常項目的狀態欄位是空的或寫「待處理」；若巡查抓到超過 10 個真的需要修的 bug，先停下來回報 Fish 討論優先順序，不要默默把範圍吃下去繼續做。5 個 bug 全部有明確解決狀態：BUG-01/04/05 先前已修復並複驗，BUG-02/03 本輪（2026-09-18）修復，全部沒有超過 10 個。
+- [x] 2.2 [after: 2.1] 每個 Codex 修復的 bug 各自跑完標準交叉驗證流程（PM 重跑相關測試不能只信自報，另一個 CLI 審查該修復，過關才 merge），交付：所有修復都合併進 main 並 push，全域測試維持綠燈。驗證：`pnpm test` 全綠，`git log` 能看到每個修復對應的獨立 commit。**備註**：BUG-02/03 對應 commit `198d3e67`（billing 修復，`pnpm --filter saas test` 430 passed）+ Coolify 重新部署（BUG-03 純部署動作無代碼 commit）。`pnpm test`（monorepo 全跑）目前有既有的 flaky 問題：每次整包平行跑，隨機有不同套件因搶同一個本機測試資料庫而失敗（今天分別看過 `@startkiter/bundles`、`@startkiter/ai` 各自失敗一次），但單獨 `pnpm --filter <pkg> test` 都通過，與本次改動無關，屬於既有基礎設施問題，不在本次修復範圍內，未動工修復。
+- [x] 2.3 [after: 2.2] PM 針對每個聲稱已修復的異常項目，重新用 ego-browser 實際走一次該頁面確認真的修好（不是只信任 Codex 或測試通過），交付：每個修復都有 PM 自己的第二次 ego-browser 驗證紀錄。驗證：findings.md 對應項目補上「PM 已複驗，正常」的確認字樣。BUG-02/03 已補上（見 findings.md），BUG-01/04/05 先前已補上。

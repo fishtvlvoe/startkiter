@@ -29,5 +29,5 @@
 
 ## 7. 部署與手動驗證
 
-- [ ] 7.1 [after: 6.2] commit 並 push 到 origin/main，觸發 Coolify 部署，交付：新版本真正上線運行。驗證：SSH 確認正式站容器運行的 image tag 與 git HEAD commit 一致。
+- [x] 7.1 [after: 6.2] commit 並 push 到 origin/main，觸發 Coolify 部署，交付：新版本真正上線運行。驗證：SSH 確認正式站容器運行的 image tag 與 git HEAD commit 一致。程式碼已在較早的 commit 併入 main；2026-09-18 因另一張 SR（site-wide-functional-qa-sweep）觸發的兩次 Coolify 重新部署，確認 Coolify deployment 記錄的 commit（`198d3e6772bb8acdb45c3c2a4074a43fc8de60ac`）與 `git log origin/main` HEAD 一致，正式站容器確實跑最新版本。
 - [ ] 7.2 [after: 7.1] 在正式站後台（`admin/bundles`）建立一個測試用途的 Bundle（明確標註是測試資料，價格可以設低一點方便驗證，狀態設為 published），走一次完整流程：`/bundles` 看得到該 Bundle → 點進 `/bundles/[slug]` 看到詳情與購買按鈕 → 點擊購買完成一次真實或 sandbox 付款 → 付款後回到 `/bundles/[slug]` 看到「已擁有」狀態，交付：Success Criteria「買家能瀏覽、查看詳情並完成購買」成立。驗證：記錄手動驗證的操作步驟與觀察結果，並記錄測試用 Bundle 事後是否需要清理或標記為 archived。
