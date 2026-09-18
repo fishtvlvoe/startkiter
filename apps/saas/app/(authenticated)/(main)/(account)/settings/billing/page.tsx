@@ -2,7 +2,6 @@ import { getSession } from "@auth/lib/server";
 import { SubscriptionCancellationList } from "@payments/components/SubscriptionCancellationList";
 import { db } from "@startkiter/database";
 import { ActivePlan } from "@payments/components/ActivePlan";
-import { ChangePlan } from "@payments/components/ChangePlan";
 import { listPurchases } from "@payments/lib/server";
 import { createPurchasesHelper } from "@startkiter/payments/lib/helper";
 import { PageHeader } from "@shared/components/PageHeader";
@@ -83,7 +82,22 @@ export default async function BillingSettingsPage() {
 						</div>
 					</SettingsItem>
 				) : (
-					<ChangePlan userId={session?.user.id} activePlanId={activePlan?.id} />
+					<SettingsItem
+						title={t("changePlan.title")}
+						description={t("changePlan.description")}
+					>
+						<div className="space-y-4" data-testid="billing-checkout-entry">
+							<p className="text-sm text-muted-foreground">
+								尚未購買開站包，前往結帳頁完成購買即可解鎖課程與代碼包。
+							</p>
+							<Link
+								className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-9 items-center justify-center rounded-full px-4 text-sm font-semibold transition-colors"
+								href="/checkout"
+							>
+								前往結帳
+							</Link>
+						</div>
+					</SettingsItem>
 				)}
 			</SettingsList>
 		</>

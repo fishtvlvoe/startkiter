@@ -75,10 +75,6 @@ vi.mock("@payments/components/SubscriptionCancellationList", () => ({
 	SubscriptionCancellationList: () => <div data-testid="subscription-cancellation-list" />,
 }));
 
-vi.mock("@payments/components/ChangePlan", () => ({
-	ChangePlan: () => <div data-testid="change-plan" />,
-}));
-
 vi.mock("next/link", () => ({
 	default: ({
 		href,
@@ -113,7 +109,8 @@ describe("BillingSettingsPage purchase entry", () => {
 		const jsx = await BillingSettingsPage();
 		const html = renderToStaticMarkup(jsx);
 
-		expect(html).toContain('data-testid="change-plan"');
+		expect(html).toContain('data-testid="billing-checkout-entry"');
+		expect(html).toContain('href="/checkout"');
 		expect(html).not.toContain('data-testid="billing-owned-state"');
 		expect(html).not.toContain('href="/course"');
 	});
@@ -126,6 +123,6 @@ describe("BillingSettingsPage purchase entry", () => {
 
 		expect(html).toContain('data-testid="billing-owned-state"');
 		expect(html).toContain('href="/course"');
-		expect(html).not.toContain('data-testid="change-plan"');
+		expect(html).not.toContain('data-testid="billing-checkout-entry"');
 	});
 });
