@@ -123,7 +123,13 @@ The navigation model MUST represent a first-level item with an ordered `children
 #### Scenario: admin layout does not render a second menu component
 
 - **WHEN** `/admin/course` (or any admin route) renders
-- **THEN** the admin layout does not mount a second, independently-maintained menu component alongside the primary navigation surface, and removing that second component does not remove any route the primary navigation surface already exposes
+- **THEN** the admin layout does not mount a second, independently-maintained menu component alongside the primary navigation surface
+
+##### Example: the shared component is not deleted, only its admin call site
+
+- **GIVEN** the shared `SettingsMenu` component has two call sites — `settings/layout.tsx` (account settings page) and `admin/layout.tsx` (admin pages)
+- **WHEN** this requirement is satisfied
+- **THEN** only the `admin/layout.tsx` call site is removed; the `SettingsMenu` component definition and the `settings/layout.tsx` call site are unchanged, and account settings continues to render `SettingsMenu` as before
 
 #### Scenario: removing the duplicate menu also fixes the mobile overflow it caused
 
@@ -145,19 +151,41 @@ Every `menu.labelKey` in an `AppManifestEntry` MUST be a key resolvable through 
 - **WHEN** a module registers `menu.labelKey` containing a literal Chinese or English phrase instead of a catalog key
 - **THEN** manifest validation fails and reports the module id and the offending value
 
-##### Example: labelKey validation
+##### Example: labelKey validation, using the project's existing namespace conventions
 
 | `menu.labelKey` value | Expected result |
 | --- | --- |
-| `"nav.course.admin"` | accept (resolvable key) |
+| `"course.navLabel"` | accept — existing key in `saas.json`, currently unused by any code (the exact gap this requirement closes) |
+| `"admin.menu.users"` | accept — existing key already referenced via `t("menu.users")` in `admin/layout.tsx` |
 | `"課程管理"` | reject (literal string, not a key) |
 | `""` | reject (empty) |
+| `"nav.course.admin"` | reject — not a resolvable key; the project has no `nav.*` namespace precedent |
 
 #### Scenario: pre-existing hardcoded labels are migrated, not left in parallel
 
 - **GIVEN** `mount-points.ts` previously declared menu labels as literal strings (e.g. `label: "課程管理"`) with no locale key
 - **WHEN** the migration to `AppManifestEntry` completes
 - **THEN** no menu-producing module in the registry still declares a literal display string in place of `labelKey`
+
+### Requirement: Locale catalogs stay key-complete across zh-tw, zh-cn, and en
+
+Every `menu.labelKey` and `displayNameKey` registered by any module MUST resolve to a non-empty value in all three supported locale catalogs (`zh-tw`, `zh-cn`, `en`). A locale-completeness check MUST compare the full set of required paths against each locale's catalog file and fail listing any missing or empty path, following the same pattern as the project's existing `packages/i18n/marketing-pricing-keys.test.ts` required-paths check.
+
+#### Scenario: all three locales have the key
+
+- **WHEN** the locale-completeness check runs against a manifest whose `labelKey` resolves in `zh-tw`, `zh-cn`, and `en`
+- **THEN** the check passes for that key
+
+#### Scenario: a locale is missing the key
+
+- **GIVEN** a module registers `labelKey: "design.navLabel"` and it exists in `zh-tw` and `zh-cn` but not `en`
+- **WHEN** the locale-completeness check runs
+- **THEN** it fails and reports `en:design.navLabel` as missing
+
+#### Scenario: existing locale files remain the baseline
+
+- **WHEN** the locale-completeness check runs against the pre-existing `saas.json` catalogs before any new App is added
+- **THEN** it passes with zero missing keys, matching the confirmed 2026-09-21 baseline (zh-tw, zh-cn, and en key sets are already identical)
 
 ### Requirement: Visible role labels are data-driven and forbid legacy nouns
 
@@ -225,6 +253,12 @@ Every workspace-skeleton change MUST include pure manifest/resolver tests, compo
 
 - **WHEN** deployed browser verification finds a duplicate menu, a workspace boundary violation, or a forbidden legacy noun
 - **THEN** the change is reported as failed and SHALL NOT be marked complete even if the build succeeds
+
+##### Example: a concrete workspace-boundary regression
+
+- **GIVEN** a real, signed-in user account with only `app-user` capability for `course` (no `app-admin` or platform capability in any App)
+- **WHEN** that account opens the course page
+- **THEN** the account sees only the course app-user entry points (learning content, support, AI assistant, personal account); it does NOT see any course admin entry point (e.g. chapter/lesson management, quiz admin, settings), and requesting `/admin/course` directly redirects away rather than rendering the admin surface
 
 #### Scenario: visible navigation entry is activated
 

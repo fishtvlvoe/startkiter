@@ -93,9 +93,21 @@ StartKiter 是「平台＋多個獨立 App」，不是單一固定功能的 SaaS
 
 `AppManifestEntry.menu.labelKey` 必須是一個可在 `zh-tw`／`zh-cn`／`en` 三份語系 catalog 查到的 key，不得是 `mount-points.ts` 目前的寫法（`label: "課程管理"` 這種直接寫死的繁體中文字串）。resolver 產生 `NavigationModel` 時只輸出 `labelKey`，實際顯示文字由呼叫端在渲染階段用目前 locale 解析；shell 不得把未解析的 raw key 顯示給使用者，也不得在 manifest 階段就把某一種語言的字串當成唯一真相。這條規則直接對應現況盤點第 4 點：目前選單文字完全沒有 i18n key，是英文切換後側欄不跟著變的根因。
 
+#### labelKey 命名沿用既有 namespace 慣例，不新發明一套
+
+2026-09-21 審查 `packages/i18n/translations/{zh-tw,zh-cn,en}/saas.json` 確認：
+
+- 三份語系檔的 key 集合已完全對齊（`zh-tw` 與 `zh-cn`、`en` 皆為 0 個差異），不需要新增第四種語系或另建 catalog 檔案。
+- 既有 admin 子選單已經用 `admin.menu.<key>` 這個 namespace（例：`admin.menu.users` = 「用戶」、`admin.menu.organizations` = 「組織」），且已在 `admin/layout.tsx` 用 `t("menu.users")`／`t("menu.organizations")` 實際引用——這正是本 change 要推廣到全部選單項目的既有慣例，不是新發明。
+- 每個 App 自己的一級選單標籤已有 `<i18nNamespace>.navLabel` 這個既有 key（例：`course.navLabel` = 「課程」），三語系皆已存在，但目前**沒有任何程式碼引用它**——`mount-points.ts` 完全沒用到這個 key，改用寫死字串，等於這個 key 從一開始就是孤兒資料。這是本 change 修正選單 i18n 問題時要接上的既有資源，不是要新造。
+- `app.menu.*`（如 `app.menu.admin` = 「管理」、`app.menu.accountSettings` = 「帳號設定」）是平台層固定文字（非 App 專屬）的既有 namespace，`settings.menu.account.*`／`settings.menu.organization.*` 是帳號設定頁既有的子選單 namespace（`account-settings-theme-language` change 的範圍，本次不動）。
+
+因此 `menu.labelKey` 的命名規則固定為：App 自己的一級選單標籤沿用 `<i18nNamespace>.navLabel`（已存在則接上，不存在則依相同慣例新增）；App 管理員子選單項目沿用 `<i18nNamespace>.menu.<key>` 這個既有 pattern（`admin.menu.users` 即是一例，只是把 namespace 從固定的 `admin` 換成該 App 自己的 `i18nNamespace`）。**不採用先前草稿假設的 `nav.course.admin` 這種格式**，因為專案內查無任何 `nav.*` namespace 先例。
+
 **Alternatives Considered:**
 
 - 允許 `menu.label` 直接放中文字串，日後語系需求另外加 `menu.labelEn`／`menu.labelZhCn` 等額外欄位：否決，會讓每加一種語言就要改一次 manifest 型別，且與既有 `i18nNamespace` 欄位重複；用 `labelKey` 讓語系資料集中在 catalog，manifest 只描述「要查哪個 key」。
+- 為選單另外發明一套獨立 namespace（如 `nav.*`）：否決，專案內已有 `admin.menu.*`、`app.menu.*`、`<app>.navLabel` 三種慣例在用，且三語系已對齊；另立一套只會製造第三種選單 key 慣例，增加維護成本且與既有測試（`packages/i18n/i18n.test.ts`、`marketing-pricing-keys.test.ts`）的既有斷言模式不一致。
 
 ### The demo is an app preview over the same navigation model, not a second implementation
 
@@ -172,7 +184,7 @@ type NavigationModel = {
 - `NavBar` 與 admin layout component tests 證明 `/course`、`/admin/course` 不會同時渲染兩套管理選單，且 `admin/layout.tsx` 不再呼叫 `SettingsMenu` 渲染平行選單。
 - static check 掃描 UI 文案與 demo，確認不出現「平台管理員」「模組管理員」「學員」字面字串；另掃描 `mount-points.ts`／`nav-menu-items.ts` 等選單資料來源，確認 `menu.labelKey` 不含中文或英文顯示字串本身。
 - 切換 `zh-tw`／`zh-cn`／`en` 時，側欄選單標籤與主內容同時切換，不再出現「主內容變英文、側欄仍中文」的既有 bug。
-- 因為移除 `SettingsMenu` 平行選單，`/admin/course` 在 `390px` 手機寬度不再出現水平溢出（既有實測約 730px 內容寬度需降到 `390px` 以內）；以 component test 斷言容器寬度驗證。
+- 因為移除 `admin/layout.tsx` 對 `SettingsMenu` 的呼叫（元件本身與 `settings/layout.tsx` 的呼叫點不動），`/admin/course` 在 `390px` 手機寬度不再出現水平溢出（既有實測約 730px 內容寬度需降到 `390px` 以內）；以 component test 斷言容器寬度驗證。
 - demo 頁面與 runtime navigation model 的 `workspace`、`href`、`labelKey`、`children` 結構比對通過；demo 不再自行維護另一份選單或稱呼文案。
 - 既有 106 個測試檔中，斷言 `isOperator`／`course-admin-menu` 舊模型的測試已改寫為斷言 `WorkspaceContext`／`resolveNavigation` 輸出，不得讓新舊兩套斷言同時留在測試套件裡；改寫後的測試套件需全數通過，且通過數字需附在驗收紀錄中（不得沿用舊的「430 個測試通過」當作本 change 的驗證證據）。
 - ego-browser 桌面 `1440px` 與手機 `390px` 各驗一次角色切換骨架（使用者／App 管理員／總管理員），確認沒有重複選單、越權入口或 raw key；**其中「使用者」（app-user）視角必須用真實非管理員帳號登入驗證，不得只憑型別或 mock capability 推定畫面正確**——這一項在完成前一律標記「未驗證」。完整跨 App／語言／主題的全量驗收留給 `platform-launch-verification-evidence`。
@@ -181,7 +193,7 @@ type NavigationModel = {
 
 In scope: `WorkspaceContext`／App manifest 型別、workspace resolver、NavBar／admin layout 組合、可見稱呼規則（總管理員／{App}管理員／使用者）、demo 對齊、unit／component／基礎 browser tests。
 
-Out of scope: App 如何加入平台與命名規則（`app-extension-contract`）、帳號選單內容與主題／語言（`account-settings-theme-language`）、各 App 實際功能畫面（`app-feature-surfaces`）、跨 App 全量上線驗收（`platform-launch-verification-evidence`）、課程內容資料模型、付款與退款、Email dispatch、GitHub kit 履約、客服通道。
+Out of scope: App 如何加入平台與命名規則（`app-extension-contract`）、帳號選單內容與主題／語言（`account-settings-theme-language`）、各 App 實際功能畫面（`app-feature-surfaces`）、跨 App 全量上線驗收（`platform-launch-verification-evidence`）、課程內容資料模型、付款與退款、Email dispatch、GitHub kit 履約、客服通道、`SettingsMenu.tsx` 元件本身與 `settings/layout.tsx` 呼叫點（不得修改或刪除，帳號設定頁仍需要它）。
 
 ## Risks / Trade-offs
 
@@ -190,14 +202,15 @@ Out of scope: App 如何加入平台與命名規則（`app-extension-contract`�
 - [Risk] Static check 掃描「平台管理員」「模組管理員」「學員」字面字串可能誤傷合法內容（例如引用歷史文件時的說明性文字）→ Mitigation：掃描範圍限定在使用者可見的 UI 文案與 demo 檔案，不掃描 `docs/discuss/`、`openspec/changes/archive/` 等歷史紀錄。
 - [Risk] demo 與 runtime 共用 model 仍可能被 CSS 差異影響 → Mitigation：demo 使用實際 shared components 或同一 token stylesheet，並以 desktop/mobile ego screenshot 做部署後驗收。
 - [Risk] 既有 106 個測試檔、430 個測試以 `isOperator`／`course-admin-menu` 舊模型為主，遷移時若只是「加新測試、留舊測試」，會讓測試套件同時斷言兩套互相矛盾的模型，掩蓋新骨架其實沒有真的接上 → Mitigation：遷移時逐一識別引用 `isOperator`／`course-admin-menu` 的既有測試檔，改寫為斷言 `WorkspaceContext`／`resolveNavigation`，不允許新舊斷言並存；改寫進度列入 tasks 逐項追蹤。
-- [Risk] 「/admin/course 手機寬度溢出」若只當成獨立 CSS bug 修，可能在未清除 `SettingsMenu` 平行選單前就先貼 CSS 補丁，掩蓋真正成因 → Mitigation：驗收順序固定為先移除 `SettingsMenu` 重複渲染，再驗證溢出是否隨之消失；若移除後仍有溢出，才視為獨立的 responsive 問題另外處理。
+- [Risk] 「/admin/course 手機寬度溢出」若只當成獨立 CSS bug 修，可能在未移除 `admin/layout.tsx` 對 `SettingsMenu` 的呼叫前就先貼 CSS 補丁，掩蓋真正成因 → Mitigation：驗收順序固定為先移除 `admin/layout.tsx` 內的 `SettingsMenu` 呼叫（元件與 `settings/layout.tsx` 呼叫點不動），再驗證溢出是否隨之消失；若移除後仍有溢出，才視為獨立的 responsive 問題另外處理。
+- [Risk] 移除重複選單時可能誤刪 `SettingsMenu` 共用元件本身，連帶破壞 `settings/layout.tsx`（帳號設定頁）→ Mitigation：本 change 的範圍明確限定「只移除 `admin/layout.tsx` 的呼叫」，`SettingsMenu.tsx` 元件定義與 `settings/layout.tsx` 呼叫點列為 diff 不得觸碰的檔案，review 時逐一核對。
 - [Risk] 「app-user 視角已驗證」的結論在還沒用真實非管理員帳號登入前可能被誤報為已完成 → Mitigation：驗收紀錄明確區分「型別/單元測試層級已驗證」與「真實帳號瀏覽器驗證」，後者缺席時整體驗收不得標記完成，比照 `platform-launch-verification-evidence` 的 `unresolvedItems` 格式列出。
 
 ## Migration Plan
 
 1. 新增 `WorkspaceContext`、`AppManifestEntry`、`NavigationModel` 型別與 `resolveNavigation`，先保留既有 `MOUNT_POINTS` 輸出作為 adapter，讓 build 與既有功能維持可執行。
 2. 把課程相關 module 逐批映射為 `appId: "course"` 的 App manifest entry（`menu.labelKey` 取代 `mount-points.ts` 現有的硬編碼中文字串），把全站 operator module 映射到 `scope: "platform"`，每批補齊語系 key 與 tests。
-3. 讓 `NavBar` 使用新的 `NavigationModel`，讓 `admin/layout.tsx` 停止呼叫 `SettingsMenu` 渲染第二套平行 menu；保留 route guard 不變。
+3. 讓 `NavBar` 使用新的 `NavigationModel`，讓 `admin/layout.tsx` 停止呼叫 `SettingsMenu` 渲染第二套平行 menu（僅移除這一個呼叫點，`SettingsMenu.tsx` 元件與 `settings/layout.tsx` 的呼叫點保留不動，帳號設定頁仍需要它）；保留 route guard 不變。
 4. 掃描並移除使用者可見文案與 demo 中的「平台管理員」「模組管理員」「學員」字面字串，改用固定稱呼 key。
 5. 逐一改寫既有測試套件中斷言 `isOperator`／`course-admin-menu` 的測試檔，改為斷言 `WorkspaceContext`／`resolveNavigation`，並重跑整套測試建立新的通過基準（不沿用舊的 430 通過數字）。
 6. 將 demo 改成讀取同一 navigation model 或實際 shared component，完成後移除 demo 內重複的選單或稱呼文案。

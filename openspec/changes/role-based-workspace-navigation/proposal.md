@@ -22,6 +22,7 @@
 - 不處理各 App 實際功能畫面（課程以外的 App 介面）——這是 `app-feature-surfaces` change 的範圍。
 - 不處理上線前跨 App 全量驗收與回滾證據——這是 `platform-launch-verification-evidence` change 的範圍。
 - 不在本 change 內處理 PAYUNi、Email、GitHub kit 履約或客服通道。
+- **不刪除或修改 `apps/saas/modules/settings/components/SettingsMenu.tsx` 共用元件本身**——這個元件有兩個正式呼叫者：`apps/saas/app/(authenticated)/(main)/(account)/settings/layout.tsx`（帳號設定頁，保留不動）與 `apps/saas/app/(authenticated)/(main)/(account)/admin/layout.tsx`（管理頁，本 change 只移除這一個呼叫點）。本 change 的範圍僅止於移除 `admin/layout.tsx` 對它的呼叫，不觸碰元件定義或 `settings/layout.tsx` 的呼叫。
 - 不把獨立靜態 HTML 當成最終產品 UI；正式驗收以實際 app 元件與部署後瀏覽器結果為準。
 
 ## Capabilities
@@ -37,7 +38,7 @@
 ## Impact
 
 - Affected specs: 重寫 `openspec/changes/role-based-workspace-navigation/specs/role-based-workspace-navigation/spec.md`（同一 change，非新增）；現有 `platform-mount-points`、`saas-shell`、`sell-flow-ux` 作為相容性依據，不直接改寫其既有需求。
-- Affected code: `apps/saas/modules/shared/components/NavBar.tsx`、`apps/saas/modules/shared/lib/nav-menu-items.ts`、`apps/saas/app/(authenticated)/(main)/(account)/admin/layout.tsx`（移除呼叫 `SettingsMenu`）、`apps/saas/modules/settings/components/SettingsMenu.tsx`（移除平行水平選單掛載）、`packages/platform/src/mount-points.ts`（`menu.label` 硬編碼字串改成 `menu.labelKey`）、及新增的 `packages/platform/src/workspace/`（`WorkspaceContext` 型別與 `resolveNavigation`）。
+- Affected code: `apps/saas/modules/shared/components/NavBar.tsx`、`apps/saas/modules/shared/lib/nav-menu-items.ts`、`apps/saas/app/(authenticated)/(main)/(account)/admin/layout.tsx`（移除對 `SettingsMenu` 的呼叫，其餘 layout 邏輯不變）、`packages/platform/src/mount-points.ts`（`menu.label` 硬編碼字串改成 `menu.labelKey`）、及新增的 `packages/platform/src/workspace/`（`WorkspaceContext` 型別與 `resolveNavigation`）。**不修改** `apps/saas/modules/settings/components/SettingsMenu.tsx`（元件本身）與 `apps/saas/app/(authenticated)/(main)/(account)/settings/layout.tsx`（帳號設定頁的呼叫點）。
 - Dependencies: 不新增套件；沿用現有 Next.js、next-intl、next-themes、UI primitives。
 - Downstream changes：`app-extension-contract`、`account-settings-theme-language`、`app-feature-surfaces`、`platform-launch-verification-evidence` 皆依賴本 change 先固定的 `WorkspaceContext`／`AppManifest`／`resolveNavigation` 介面；型別一旦變動需回頭同步。
 - Environment variables: 不新增環境變數。
