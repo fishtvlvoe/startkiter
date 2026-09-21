@@ -1,69 +1,82 @@
 ## Purpose
 
-StartKiter SHALL provide a typed navigation contract for independently installable UI modules. The contract SHALL keep learner, course-admin, and super-admin workspaces isolated while keeping the shipped developer guidance, runtime shell, demo, and tests aligned.
+StartKiter SHALL provide an App-scoped navigation contract shared by every installable App. The contract SHALL keep the platform (super-admin) workspace and each App's admin/user workspaces isolated, use data-driven visible role labels, and keep the runtime shell and demo aligned.
 
 ## ADDED Requirements
 
-### Requirement: UI modules declare a typed platform manifest
+### Requirement: Workspace is scoped to the platform or to a single App
 
-Every installable UI module MUST declare a manifest containing a unique `id`, route path, workspace, permission, menu metadata when visible in navigation, and an i18n namespace. A menu declaration MUST contain a translation key, icon identifier, and finite order value; a child declaration MUST reference an existing parent module in the same workspace. The platform shell SHALL compose manifests and SHALL NOT require a second hand-written menu entry for the module.
+The system MUST represent the current navigation context as `WorkspaceContext`, a union of `{ scope: "platform" }` and `{ scope: "app"; appId: string; role: "app-admin" | "app-user" }`. The system SHALL NOT represent workspace as a fixed enum of App names; adding a new App MUST NOT require changing the `WorkspaceContext` type definition.
 
-#### Scenario: valid module manifest is accepted
+#### Scenario: platform scope resolves for an operator
 
-- **WHEN** a module declares a unique id, a non-empty route, a supported workspace, a supported permission, an i18n namespace, and valid menu metadata
-- **THEN** the module registry accepts the manifest and the navigation resolver can include it
+- **WHEN** an operator resolves navigation for an administrative platform route
+- **THEN** the result has `{ scope: "platform" }` and the workspace label resolves to the fixed string "總管理員"
 
-#### Scenario: invalid manifest is rejected
+#### Scenario: app scope resolves with the requesting App id
 
-- **WHEN** a module has an empty id, empty route, unsupported workspace, non-finite order, duplicate id, duplicate route, or an unknown parent id
-- **THEN** the type check or manifest validation fails with the module id and the invalid field, and the module is not registered
+- **WHEN** a user resolves navigation for `/course`
+- **THEN** the result has `{ scope: "app", appId: "course", role }` where `role` matches the user's capability for the `course` App
 
-##### Example: invalid manifest cases
+##### Example: adding a new App requires no type change
 
-| Input | Expected result |
+| Change | Required type edit |
 | --- | --- |
-| `id=""` | reject `id` |
-| `route.path=""` | reject `route.path` |
-| `order=Infinity` | reject `order` |
-| `parentId="missing"` | reject `parentId` |
+| Register `design` App in the App registry | none — `appId` is a registry value, not a type literal |
+| Register `community` App in the App registry | none — `appId` is a registry value, not a type literal |
 
-### Requirement: The resolver selects exactly one workspace
+### Requirement: The resolver selects exactly one workspace context
 
-The navigation resolver MUST return exactly one workspace from `learner`, `course-admin`, or `super-admin` for each authenticated navigation request. The resolver SHALL evaluate route context and existing capabilities before filtering modules; it SHALL NOT merge all workspace menus and hide unauthorized items with CSS. The existing route guard SHALL remain the authority for server-side access.
+The navigation resolver MUST return exactly one `WorkspaceContext` for each authenticated navigation request. The resolver SHALL evaluate route context and existing capabilities before filtering modules; it SHALL NOT merge platform and App menus and hide unauthorized items with CSS. The existing route guard SHALL remain the authority for server-side access.
 
-#### Scenario: learner sees learner workspace only
+#### Scenario: app-user sees only that App's user workspace
 
-- **WHEN** a signed-in learner without course-instructor or operator capability resolves navigation for `/course`
-- **THEN** the result has workspace `learner` and contains no course-admin or super-admin menu item
+- **WHEN** a signed-in user without admin capability for `course` resolves navigation for `/course`
+- **THEN** the result has `{ scope: "app", appId: "course", role: "app-user" }` and contains no admin menu item
 
-#### Scenario: course administrator sees course workspace only
+#### Scenario: app-admin sees only that App's admin workspace
 
-- **WHEN** a user with course-instructor capability resolves navigation for a course-admin route
-- **THEN** the result has workspace `course-admin` and contains the course management parent and its permitted children without the parallel super-admin menu
+- **WHEN** a user with admin capability for `course` resolves navigation for a course admin route
+- **THEN** the result has `{ scope: "app", appId: "course", role: "app-admin" }` and contains the course admin parent and its permitted children without the platform menu
 
-#### Scenario: operator enters super-admin workspace
+#### Scenario: super-admin enters platform scope
 
-- **WHEN** an operator resolves navigation for an administrative route
-- **THEN** the result has workspace `super-admin`, and the course entry is a single route to the course-admin workspace rather than a second copy of course children
+- **WHEN** an operator resolves navigation for an administrative platform route
+- **THEN** the result has `{ scope: "platform" }`, and each App is a single entry point into that App's `app-admin` workspace rather than a duplicated child menu
 
 #### Scenario: unauthorized capability does not create a menu entry
 
-- **WHEN** a user lacks the permission declared by a module
+- **WHEN** a user lacks the role required by a module in the current App
 - **THEN** the resolver omits that module from the navigation model and the existing route guard continues to deny direct unauthorized access
 
 ##### Example: permission filtering
 
-- **GIVEN** module `course-editor` requires `course-instructor` and the user has only `signed-in`
+- **GIVEN** module `course-editor` requires `app-admin` in `course` and the user has only `app-user` in `course`
 - **WHEN** the resolver builds navigation
 - **THEN** `course-editor` is absent and a direct unauthorized request remains guarded
+
+### Requirement: A person can hold different roles in different Apps
+
+Role resolution MUST be evaluated per `(userId, appId)` pair, not as a single site-wide role. Platform (`scope: "platform"`) access MUST be an independent site-wide capability that is not tied to any `appId`.
+
+#### Scenario: same person, different App roles
+
+- **GIVEN** a user with `app-admin` capability for `course` and only `app-user` capability for `design`
+- **WHEN** the resolver evaluates navigation for `/course` and then for `/design`
+- **THEN** `/course` resolves `role: "app-admin"` and `/design` resolves `role: "app-user"` in the same session
+
+#### Scenario: super-admin resolves app-admin role inside any App
+
+- **WHEN** an operator resolves navigation for a route inside App `design`
+- **THEN** the result has `{ scope: "app", appId: "design", role: "app-admin" }`, derived without a separately stored per-App role record
 
 ### Requirement: Navigation supports one-level parent and child menus without duplicates
 
 The navigation model MUST represent a first-level item with an ordered `children` collection. A module id, href, or visible menu relationship MUST appear at most once in the resolved model. The shell SHALL render one navigation surface for a workspace; an admin page SHALL NOT render a second parallel menu containing the same routes.
 
-#### Scenario: course menu contains ordered children
+#### Scenario: course App admin menu contains ordered children
 
-- **WHEN** the course workspace resolves course, quiz, assignment, and review modules
+- **WHEN** the `course` App-admin workspace resolves course, quiz, assignment, and review modules
 - **THEN** the model contains one course parent with children ordered by their declared order, and each child has one href
 
 ##### Example: course child ordering
@@ -86,112 +99,61 @@ The navigation model MUST represent a first-level item with an ordered `children
 - **WHEN** the registry validates navigation
 - **THEN** validation reports both ids and produces no rendered navigation model
 
-#### Scenario: empty menu registry is safe
+#### Scenario: course learner route renders no admin menu
 
-- **WHEN** a valid workspace has no visible modules after permission filtering
-- **THEN** the resolver returns an empty `items` array for that workspace and the shell renders no stale menu from another workspace
+- **WHEN** a `course` app-user requests `/course`
+- **THEN** the rendered shell contains only the course App-user navigation surface, and `/admin/course` is not reachable from that surface
 
-### Requirement: Visible navigation uses complete locale catalogs
+#### Scenario: course admin route renders one menu, not two
 
-Every visible module label, workspace heading, and shared theme-control label MUST resolve through the active locale catalog using a registered translation key. The supported locales SHALL include `zh-tw`, `zh-cn`, and `en`; missing module keys SHALL fail validation and SHALL NOT render a raw key at runtime. The existing zh-tw fallback SHALL remain available for runtime resilience.
+- **WHEN** a `course` app-admin requests `/admin/course`
+- **THEN** the rendered shell contains exactly one navigation surface, and no second parallel horizontal admin menu is rendered
 
-#### Scenario: locale switch updates the complete shell
+### Requirement: Visible role labels are data-driven and forbid legacy nouns
 
-- **WHEN** an authenticated user switches between `zh-tw`, `zh-cn`, and `en`
-- **THEN** the workspace heading, first-level labels, child labels, and theme-control labels use the selected locale without leaving the sidebar in a previous locale
+The system MUST resolve visible workspace labels as follows: `{ scope: "platform" }` resolves to the fixed string "總管理員"; `{ scope: "app", role: "app-admin" }` resolves to `"${App.displayName}管理員"` where `displayName` comes from the App registry; `{ scope: "app", role: "app-user" }` resolves to the fixed string "使用者" regardless of `appId`. The system SHALL NOT render "平台管理員", "模組管理員", or "學員" in any user-visible text or in the demo.
 
-#### Scenario: missing locale key is rejected
+#### Scenario: app-admin label uses the App's own name
 
-- **WHEN** a registered module label key is missing from one supported locale catalog
-- **THEN** the locale completeness check fails with the missing key and locale, and the raw key is not displayed as user-facing text
+- **GIVEN** App `course` has `displayName` "課程" and App `design` has `displayName` "設計"
+- **WHEN** an app-admin resolves navigation in each App
+- **THEN** the `course` workspace label is "課程管理員" and the `design` workspace label is "設計管理員"
 
-##### Example: missing English label
+#### Scenario: app-user label ignores the App name
 
-- **GIVEN** `course-admin.label` exists in `zh-tw` and `zh-cn` but not `en`
-- **WHEN** locale completeness validation runs
-- **THEN** validation reports `en:course-admin.label` and runtime does not render that raw key
+- **WHEN** an app-user resolves navigation in any App
+- **THEN** the workspace label is the fixed string "使用者", not the App's `displayName` combined with any role noun
 
-#### Scenario: empty translation value is rejected
+#### Scenario: forbidden legacy nouns are rejected
 
-- **WHEN** a registered label key resolves to an empty or whitespace-only string
-- **THEN** locale validation fails and the module cannot pass the UI contract check
+- **WHEN** a static check scans user-visible UI copy and the demo for "平台管理員", "模組管理員", or "學員"
+- **THEN** the check fails and lists the offending file and string
 
-##### Example: whitespace label
+##### Example: forbidden noun scan scope
 
-- **GIVEN** `admin-settings.label` is `"   "` in `zh-cn`
-- **WHEN** the catalog validator runs
-- **THEN** validation rejects the label as empty
-
-### Requirement: Shared navigation uses semantic theme and responsive contracts
-
-Shared navigation components MUST use semantic tokens for surface, foreground, muted foreground, border, focus, and accent states. They MUST NOT add dark-mode-only hardcoded text colors for shared menu content. The shell SHALL provide readable navigation at desktop width `1440px` and mobile width `390px` without horizontal overflow or content hidden behind the fixed mobile navigation.
-
-#### Scenario: color mode changes preserve readable navigation
-
-- **WHEN** a user switches among dark, light, and system color modes
-- **THEN** the navigation foreground, background, border, active, hover, and focus states resolve from the active semantic token set and remain readable
-
-##### Example: semantic color states
-
-| Mode | Required foreground source |
+| Scanned | Excluded |
 | --- | --- |
-| dark | active semantic foreground token |
-| light | active semantic foreground token |
-| system | resolved system theme semantic foreground token |
-
-#### Scenario: desktop shell fits the viewport
-
-- **WHEN** the shell renders at a `1440px` viewport
-- **THEN** the sidebar, top bar, content region, and visible navigation entries fit without horizontal overflow
-
-#### Scenario: mobile shell fits the viewport
-
-- **WHEN** the shell renders at a `390px` viewport
-- **THEN** the mobile navigation remains usable, content is not covered by it, and the document has no horizontal overflow
-
-### Requirement: The startkiter-dev Skill guides module development from the repository
-
-The repository SHALL ship the existing `.agents/skills/startkiter-dev/SKILL.md` as the single developer Skill entrypoint. The Skill MUST direct the developer or AI to the canonical navigation spec before creating or modifying a UI module, inspect reusable modules first, declare the typed manifest, provide locale keys and semantic tokens, and run the contract checks before browser verification. The project SHALL NOT add a second UI-specific Skill that duplicates these rules.
-
-#### Scenario: new module workflow starts with the contract
-
-- **WHEN** a developer asks the supported development workflow to add a UI module
-- **THEN** the startkiter-dev Skill directs the workflow to read this spec, inspect existing packages, define the module manifest, and identify unit, component, locale, and browser checks before implementation
-
-##### Example: preflight order
-
-- **GIVEN** a request to add `course-feedback`
-- **WHEN** the Skill workflow starts
-- **THEN** it checks reusable packages and the manifest contract before proposing implementation files
-
-#### Scenario: unsupported Skill discovery does not weaken enforcement
-
-- **WHEN** an AI tool does not automatically discover repo-local Skills
-- **THEN** `AGENTS.md`, typed manifest validation, automated tests, and CI checks still provide the contract, and the module cannot pass by relying only on an unverified Skill instruction
-
-#### Scenario: duplicate developer entrypoint is not introduced
-
-- **WHEN** the repository adds guidance for a new UI module
-- **THEN** the guidance extends `startkiter-dev` or links to the canonical spec, and validation fails if a second Skill duplicates the navigation contract
+| `apps/saas/modules/**` UI copy | `openspec/changes/archive/**` |
+| `docs/ux/startkiter-sr-architecture-focus.html` | `docs/discuss/**` |
 
 ### Requirement: The demo and runtime consume one navigation truth
 
-The UX focus demo SHALL either render shared runtime components or consume a serialized fixture generated from the same module registry and navigation resolver. The demo SHALL NOT maintain independent role, route, label, child, or color literals that conflict with the runtime contract.
+The UX focus demo SHALL either render shared runtime components or consume a serialized fixture generated from the same App registry and navigation resolver. The demo SHALL NOT maintain independent App, role, route, label, or child literals that conflict with the runtime contract.
 
 #### Scenario: demo matches the resolved model
 
 - **WHEN** the demo and runtime are evaluated with the same capabilities and locale
-- **THEN** their workspace id, item ids, hrefs, label keys, child order, and visible states match
+- **THEN** their `workspace`, item ids, hrefs, label keys, and child order match
 
-##### Example: learner demo comparison
+##### Example: app-user demo comparison
 
-- **GIVEN** learner capabilities and locale `en`
+- **GIVEN** `course` app-user capabilities and locale `zh-tw`
 - **WHEN** demo and runtime models are compared
-- **THEN** both contain the same workspace id, href list, label keys, and child arrays
+- **THEN** both contain the same workspace label "使用者", href list, and child arrays
 
-#### Scenario: demo has no unregistered module
+#### Scenario: demo has no unregistered App or module
 
-- **WHEN** the demo references a module id or href absent from the registry
+- **WHEN** the demo references an `appId`, module id, or href absent from the registry
 - **THEN** the demo consistency check fails and the demo cannot be treated as the approved UX reference
 
 ##### Example: stale demo entry
@@ -200,33 +162,27 @@ The UX focus demo SHALL either render shared runtime components or consume a ser
 - **WHEN** the consistency check runs
 - **THEN** the check fails with `/legacy-admin`
 
-### Requirement: Navigation changes have layered verification
+### Requirement: Workspace skeleton changes have layered verification
 
-Every navigation contract change MUST include pure manifest/resolver tests, component tests for shell composition, and deployed browser verification. Browser verification MUST cover learner, course-admin, and super-admin contexts; all supported locales; dark, light, and system modes; `1440px` and `390px` viewports; and every visible menu entry. A build-only result SHALL NOT satisfy this requirement.
+Every workspace-skeleton change MUST include pure manifest/resolver tests, component tests for shell composition, and a base browser verification pass. Browser verification for this change MUST cover the three role labels (使用者／{App}管理員／總管理員) at `1440px` and `390px`. A build-only result SHALL NOT satisfy this requirement. Full cross-App, cross-locale, cross-theme verification is out of scope for this requirement and is covered by the `platform-launch-verification-evidence` change.
 
 #### Scenario: pure contract checks pass
 
-- **WHEN** the manifest, resolver, locale, and semantic-token checks run against the registered modules
-- **THEN** they verify workspace isolation, parent-child ordering, duplicate rejection, permission filtering, and locale completeness with zero failures
-
-##### Example: contract check set
-
-- **GIVEN** the registry contains learner, course-admin, and super-admin modules
-- **WHEN** the focused contract command runs
-- **THEN** it reports zero failures only when all three workspaces and all three locales pass
+- **WHEN** the `WorkspaceContext`, resolver, duplicate-menu, and forbidden-noun checks run against the registered Apps
+- **THEN** they verify workspace isolation, parent-child ordering, duplicate rejection, permission filtering, and forbidden-noun absence with zero failures
 
 #### Scenario: browser verification finds a regression
 
-- **WHEN** deployed browser verification finds a raw translation key, 401/500 response, horizontal overflow, unreadable state, duplicate menu, or workspace boundary violation
+- **WHEN** deployed browser verification finds a duplicate menu, a workspace boundary violation, or a forbidden legacy noun
 - **THEN** the change is reported as failed and SHALL NOT be marked complete even if the build succeeds
 
 #### Scenario: visible navigation entry is activated
 
-- **WHEN** browser verification activates each visible menu entry in a supported workspace
-- **THEN** the destination route loads without a duplicate shell, unauthorized admin menu, or unhandled error
+- **WHEN** browser verification activates each visible menu entry in a workspace
+- **THEN** the destination route loads without a duplicate shell or unauthorized admin menu
 
 ##### Example: course child activation
 
-- **GIVEN** course-admin navigation exposes `/quiz-admin`
+- **GIVEN** `course` app-admin navigation exposes `/quiz-admin`
 - **WHEN** browser verification activates the quiz child
-- **THEN** `/quiz-admin` loads with one course-admin shell and no super-admin menu
+- **THEN** `/quiz-admin` loads with one course app-admin shell and no platform menu
