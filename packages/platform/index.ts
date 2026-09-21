@@ -8,6 +8,7 @@ export * from "./src/deployment/coolify-client";
 export * from "./src/deployment/db";
 export * from "./src/types";
 export * from "./src/mount-points";
+export * from "./src/workspace";
 export * from "./src/templates";
 export * from "./src/course-ai-notes/srt-parser";
 export * from "./src/course-ai-notes/rate-limiter";

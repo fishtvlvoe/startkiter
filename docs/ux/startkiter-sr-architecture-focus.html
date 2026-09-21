@@ -1143,10 +1143,8 @@
             <article class="role-controls">
               <div class="app-picker">
                 <span class="control-label">目前 App</span>
-                <div class="segmented" role="group" aria-label="切換目前 App">
-                  <button type="button" data-app="course" aria-pressed="true">課程</button>
-                  <button type="button" data-app="design" aria-pressed="false">設計</button>
-                  <button type="button" data-app="community" aria-pressed="false">社群</button>
+                <div class="segmented" role="group" aria-label="切換目前 App" data-app-picker>
+                  <span class="fixture-loading">讀取已註冊 App…</span>
                 </div>
                 <div class="app-name-row">
                   <input id="app-name-input" value="課程" aria-label="自訂 App 名稱" />
@@ -1320,14 +1318,10 @@
         });
       });
 
-      const appData = {
-        course: "課程",
-        design: "設計",
-        community: "社群"
-      };
-
-      let currentApp = "course";
-      let currentAppName = appData[currentApp];
+      let navigationFixture;
+      let appData = {};
+      let currentApp = "";
+      let currentAppName = "";
       let currentRole = "user";
 
       const roleTitle = document.querySelector("#role-title");
@@ -1360,14 +1354,16 @@
         renderRole();
       }
 
-      document.querySelectorAll("[data-app]").forEach((button) => {
-        button.addEventListener("click", () => {
-          currentApp = button.dataset.app;
-          currentAppName = appData[currentApp];
-          document.querySelectorAll("[data-app]").forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
-          renderApp();
+      function bindAppButtons() {
+        document.querySelectorAll("[data-app]").forEach((button) => {
+          button.addEventListener("click", () => {
+            currentApp = button.dataset.app;
+            currentAppName = appData[currentApp];
+            document.querySelectorAll("[data-app]").forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+            renderApp();
+          });
         });
-      });
+      }
 
       document.querySelector("[data-apply-app-name]").addEventListener("click", () => {
         const nextName = appNameInput.value.trim().replace(/\s+/g, " ");
@@ -1383,7 +1379,30 @@
         });
       });
 
-      renderApp();
+      async function loadRuntimeNavigation() {
+        const response = await fetch("./startkiter-navigation-fixture.json", { cache: "no-store" });
+        if (!response.ok) throw new Error("navigation fixture unavailable");
+        navigationFixture = await response.json();
+        const appEntries = navigationFixture.apps.filter((app) => app.scope === "app");
+        appData = Object.fromEntries(appEntries.map((app) => [app.appId, app.displayName]));
+        const appPicker = document.querySelector("[data-app-picker]");
+        appPicker.replaceChildren(...appEntries.map((app, index) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.dataset.app = app.appId;
+          button.setAttribute("aria-pressed", String(index === 0));
+          button.textContent = app.displayName;
+          return button;
+        }));
+        currentApp = appEntries[0].appId;
+        currentAppName = appData[currentApp];
+        bindAppButtons();
+        renderApp();
+      }
+
+      loadRuntimeNavigation().catch(() => {
+        document.querySelector("[data-app-picker]").textContent = "無法讀取已註冊 App";
+      });
 
       document.querySelectorAll("[data-theme-choice]").forEach((button) => {
         button.addEventListener("click", () => {

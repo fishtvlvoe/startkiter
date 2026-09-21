@@ -1,5 +1,29 @@
 import type { PluginManifest } from "./types";
 
+const COURSE_USER_APP: NonNullable<PluginManifest["app"]> = {
+	appId: "course",
+	scope: "app",
+	displayName: "課程",
+	displayNameKey: "course.navLabel",
+	requiredRole: "app-user",
+};
+
+const COURSE_ADMIN_APP: NonNullable<PluginManifest["app"]> = {
+	appId: "course",
+	scope: "app",
+	displayName: "課程",
+	displayNameKey: "course.navLabel",
+	requiredRole: "app-admin",
+};
+
+const PLATFORM_APP: NonNullable<PluginManifest["app"]> = {
+	appId: "platform",
+	scope: "platform",
+	displayName: "平台",
+	displayNameKey: "admin.navLabel",
+	requiredRole: "platform-admin",
+};
+
 export const CORE_RESERVED_MOUNT_IDS = ["pages-cms"] as const;
 
 export function assertPluginManifestAllowed(manifest: PluginManifest): void {
@@ -25,9 +49,10 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "start",
 		name: "開始",
 		version: "0.1.0",
+		app: COURSE_USER_APP,
 		mount: {
 			route: { path: "/app" },
-			menu: { label: "開始", icon: "home", order: 0 },
+			menu: { labelKey: "app.menu.start", icon: "home", order: 0 },
 		},
 		dataSpec: "none",
 	},
@@ -35,9 +60,10 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "course",
 		name: "課程模組",
 		version: "0.1.0",
+		app: COURSE_USER_APP,
 		mount: {
 			route: { path: "/course" },
-			menu: { label: "課程", icon: "book-open", order: 1 },
+			menu: { labelKey: "course.navLabel", icon: "book-open", order: 1 },
 			content: { kind: "auto", boundTo: "/course" },
 		},
 		dataSpec: "content",
@@ -46,10 +72,11 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "course-admin",
 		name: "課程管理後台",
 		version: "0.1.0",
+		app: COURSE_ADMIN_APP,
 		mount: {
 			route: { path: "/admin/course" },
 			menu: {
-				label: "課程管理",
+				labelKey: "course.navLabel",
 				icon: "book-open",
 				order: 5,
 				requiresOperator: true,
@@ -62,12 +89,13 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "quiz",
 		name: "課後測驗",
 		version: "0.1.0",
+		app: COURSE_ADMIN_APP,
 		mount: {
 			route: { path: "/quiz-admin" },
 			menu: {
-				label: "測驗管理",
+				labelKey: "course.quiz",
 				icon: "list-checks",
-				order: 6,
+				order: 20,
 				requiresOperator: true,
 				groupId: "course-admin",
 			},
@@ -79,12 +107,13 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "assignment",
 		name: "課程作業",
 		version: "0.1.0",
+		app: COURSE_ADMIN_APP,
 		mount: {
 			route: { path: "/assignment-admin" },
 			menu: {
-				label: "作業管理",
+				labelKey: "course.assignment",
 				icon: "file-pen-line",
-				order: 8,
+				order: 30,
 				requiresOperator: true,
 				groupId: "course-admin",
 			},
@@ -96,9 +125,10 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "pages-cms",
 		name: "頁面管理",
 		version: "0.1.0",
+		app: PLATFORM_APP,
 		mount: {
 			route: { path: "/admin/pages" },
-			menu: { label: "頁面管理", icon: "file-text", order: 14, requiresOperator: true },
+			menu: { labelKey: "admin.menu.pages", icon: "file-text", order: 14, requiresOperator: true },
 		},
 		dataSpec: "none",
 	},
@@ -106,12 +136,13 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "review",
 		name: "課程評價與留言",
 		version: "0.1.0",
+		app: COURSE_ADMIN_APP,
 		mount: {
 			route: { path: "/review-admin" },
 			menu: {
-				label: "評價與留言管理",
+				labelKey: "course.review",
 				icon: "message-square",
-				order: 7,
+				order: 40,
 				requiresOperator: true,
 				groupId: "course-admin",
 			},
@@ -122,9 +153,10 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "chatbot",
 		name: "客服",
 		version: "0.1.0",
+		app: COURSE_USER_APP,
 		mount: {
 			route: { path: "/support" },
-			menu: { label: "客服", icon: "bot-message-square", order: 2 },
+			menu: { labelKey: "app.menu.support", icon: "bot-message-square", order: 2 },
 		},
 		dataSpec: "none",
 	},
@@ -132,9 +164,10 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "ai-assistant",
 		name: "AI 助手",
 		version: "0.1.0",
+		app: COURSE_USER_APP,
 		mount: {
 			route: { path: "/ai" },
-			menu: { label: "AI 助手", icon: "sparkles", order: 2.5 },
+			menu: { labelKey: "app.menu.aiAssistant", icon: "sparkles", order: 2.5 },
 		},
 		dataSpec: "none",
 	},
@@ -142,9 +175,10 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "settings",
 		name: "帳號設定",
 		version: "0.1.0",
+		app: COURSE_USER_APP,
 		mount: {
 			route: { path: "/settings/general" },
-			menu: { label: "帳號設定", icon: "settings", order: 3 },
+			menu: { labelKey: "app.menu.accountSettings", icon: "settings", order: 3 },
 		},
 		dataSpec: "none",
 	},
@@ -152,9 +186,10 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "admin",
 		name: "後台設定",
 		version: "0.1.0",
+		app: PLATFORM_APP,
 		mount: {
 			route: { path: "/admin/users" },
-			menu: { label: "後台設定", icon: "shield-user", order: 4, requiresOperator: true },
+			menu: { labelKey: "admin.menu.users", icon: "shield-user", order: 4, requiresOperator: true },
 		},
 		dataSpec: "none",
 	},
@@ -162,12 +197,13 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "bundles",
 		name: "課程綁定包",
 		version: "0.1.0",
+		app: COURSE_ADMIN_APP,
 		mount: {
 			route: { path: "/admin/bundles" },
 			menu: {
-				label: "課程綁定包",
+				labelKey: "course.bundles",
 				icon: "package",
-				order: 9,
+				order: 50,
 				requiresOperator: true,
 				groupId: "course-admin",
 			},
@@ -178,12 +214,13 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "onboarding-surveys",
 		name: "新生問卷",
 		version: "0.1.0",
+		app: COURSE_ADMIN_APP,
 		mount: {
 			route: { path: "/admin/onboarding-surveys" },
 			menu: {
-				label: "新生問卷",
+				labelKey: "course.onboarding",
 				icon: "clipboard-list",
-				order: 10,
+				order: 60,
 				requiresOperator: true,
 				groupId: "course-admin",
 			},
@@ -194,12 +231,13 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "media-library",
 		name: "課程媒體庫",
 		version: "0.1.0",
+		app: COURSE_ADMIN_APP,
 		mount: {
 			route: { path: "/admin/media" },
 			menu: {
-				label: "媒體庫",
+				labelKey: "course.media",
 				icon: "image",
-				order: 11,
+				order: 70,
 				requiresOperator: true,
 				groupId: "course-admin",
 			},
@@ -210,12 +248,13 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "course-pack-admin",
 		name: "CoursePack 任務",
 		version: "0.1.0",
+		app: COURSE_ADMIN_APP,
 		mount: {
 			route: { path: "/admin/course-pack" },
 			menu: {
-				label: "CoursePack 任務",
+				labelKey: "course.coursePack",
 				icon: "clipboard-list",
-				order: 12,
+				order: 80,
 				requiresOperator: true,
 				groupId: "course-admin",
 			},
@@ -226,9 +265,10 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "email-settings",
 		name: "課程郵件",
 		version: "0.1.0",
+		app: PLATFORM_APP,
 		mount: {
 			route: { path: "/admin/email-settings" },
-			menu: { label: "郵件設定", icon: "mail", order: 18, requiresOperator: true },
+			menu: { labelKey: "admin.menu.emailSettings", icon: "mail", order: 18, requiresOperator: true },
 		},
 		dataSpec: "none",
 	},
@@ -236,9 +276,10 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "newsletter",
 		name: "電子報",
 		version: "0.1.0",
+		app: PLATFORM_APP,
 		mount: {
 			route: { path: "/admin/newsletter" },
-			menu: { label: "電子報", icon: "mail", order: 17, requiresOperator: true },
+			menu: { labelKey: "admin.menu.newsletter", icon: "mail", order: 17, requiresOperator: true },
 		},
 		dataSpec: "none",
 	},
@@ -246,10 +287,11 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "admin-organizations",
 		name: "組織管理",
 		version: "0.1.0",
+		app: PLATFORM_APP,
 		mount: {
 			route: { path: "/admin/organizations" },
 			menu: {
-				label: "組織管理",
+				labelKey: "admin.menu.organizations",
 				icon: "user-cog",
 				order: 19,
 				requiresOperator: true,
@@ -261,10 +303,11 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "admin-orders",
 		name: "訂單管理",
 		version: "0.1.0",
+		app: PLATFORM_APP,
 		mount: {
 			route: { path: "/admin/orders" },
 			menu: {
-				label: "訂單管理",
+				labelKey: "admin.menu.orders",
 				icon: "package",
 				order: 20,
 				requiresOperator: true,
@@ -276,10 +319,11 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "admin-revenue",
 		name: "營收報表",
 		version: "0.1.0",
+		app: PLATFORM_APP,
 		mount: {
 			route: { path: "/admin/revenue" },
 			menu: {
-				label: "營收報表",
+				labelKey: "admin.menu.revenue",
 				icon: "clipboard-list",
 				order: 21,
 				requiresOperator: true,
@@ -291,10 +335,11 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "admin-gateway-config",
 		name: "收款閘道設定",
 		version: "0.1.0",
+		app: PLATFORM_APP,
 		mount: {
 			route: { path: "/admin/settings/checkout-gateway" },
 			menu: {
-				label: "收款閘道設定",
+				labelKey: "admin.menu.gateway",
 				icon: "settings",
 				order: 22,
 				requiresOperator: true,
@@ -307,10 +352,11 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "admin-einvoice",
 		name: "發票設定",
 		version: "0.1.0",
+		app: PLATFORM_APP,
 		mount: {
 			route: { path: "/admin/settings/einvoice" },
 			menu: {
-				label: "發票設定",
+				labelKey: "admin.menu.einvoice",
 				icon: "file-text",
 				order: 23,
 				requiresOperator: true,
@@ -323,10 +369,11 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "admin-gemini",
 		name: "Gemini 設定",
 		version: "0.1.0",
+		app: PLATFORM_APP,
 		mount: {
 			route: { path: "/admin/settings/gemini" },
 			menu: {
-				label: "Gemini 設定",
+				labelKey: "admin.menu.gemini",
 				icon: "bot-message-square",
 				order: 24,
 				requiresOperator: true,
@@ -339,10 +386,11 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		id: "admin-ai-provider",
 		name: "AI 助手模型設定",
 		version: "0.1.0",
+		app: PLATFORM_APP,
 		mount: {
 			route: { path: "/admin/settings/ai-provider" },
 			menu: {
-				label: "AI 助手模型",
+				labelKey: "admin.menu.aiProvider",
 				icon: "bot-message-square",
 				order: 25,
 				requiresOperator: true,

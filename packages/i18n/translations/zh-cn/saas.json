@@ -2,7 +2,18 @@
   "admin": {
     "menu": {
       "organizations": "组织",
-      "users": "用户"
+      "users": "用户",
+      "settings": "系统设置",
+      "navLabel": "总管理员",
+      "pages": "页面管理",
+      "emailSettings": "邮件设置",
+      "newsletter": "电子报",
+      "orders": "订单管理",
+      "revenue": "营收报表",
+      "gateway": "金流设置",
+      "einvoice": "发票设置",
+      "gemini": "Gemini 设置",
+      "aiProvider": "AI 助手模型"
     },
     "organizations": {
       "backToList": "Back to organizations",
@@ -100,7 +111,8 @@
       "assignAdminRole": "Assign admin role",
       "removeAdminRole": "Remove admin role"
     },
-    "description": "管理你的应用程序。"
+    "description": "管理你的应用程序。",
+    "navLabel": "总管理员"
   },
   "app": {
     "menu": {
@@ -112,6 +124,9 @@
       "openNavigation": "打开导航",
       "organizationSettings": "组织设置",
       "start": "首页",
+      "support": "客服",
+      "aiAssistant": "AI 助手",
+      "more": "更多",
       "addGroup": "新增分组",
       "renameGroupPrompt": "修改分组名称",
       "newGroupPrompt": "输入新分组名称",
@@ -678,6 +693,14 @@
   },
   "course": {
     "navLabel": "课程",
+    "quiz": "测验管理",
+    "assignment": "作业管理",
+    "review": "评价与留言管理",
+    "bundles": "课程绑定包",
+    "onboarding": "新生问卷",
+    "media": "媒体库",
+    "coursePack": "CoursePack 任务",
+    "content": "课程内容",
     "title": "课程",
     "entitledDescription": "买断后即可观看全部单元。",
     "lockedDescription": "购买开站包后即可解锁全部单元。",

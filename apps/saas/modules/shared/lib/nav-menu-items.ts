@@ -3,17 +3,20 @@
 // 這個檔案被 "use client" 的 NavBar.tsx 引用，整包 barrel 進到 client bundle 會建置失敗
 // （pg 需要 Node 的 util/types，瀏覽器打包解析不到）。
 import { MOUNT_POINTS } from "@startkiter/platform/src/mount-points";
-import type { PluginManifest } from "@startkiter/platform/src/types";
+import { resolveNavigation, type WorkspaceRole } from "@startkiter/platform/src/workspace/navigation";
+import { toAppManifestEntries } from "@startkiter/platform/src/workspace/registry";
 
 export interface MountMenuSubItem {
 	id: string;
 	label: string;
+	labelKey?: string;
 	href: string;
 }
 
 export interface MountMenuItem {
 	id: string;
 	label: string;
+	labelKey?: string;
 	href: string;
 	icon: string;
 	order: number;
@@ -59,117 +62,105 @@ export function isMenuActive(pathname: string, href: string, allHrefs: string[] 
 	return !hasMoreSpecificMatch;
 }
 
-const MENU_GROUP_CONFIG: Record<
-	string,
-	{ id: string; label: string; icon: string; requiresOperator: boolean }
-> = {
-	"course-admin": {
-		id: "course-admin-menu",
-		label: "課程",
-		icon: "book-open",
-		requiresOperator: true,
-	},
-	"admin-settings": {
-		id: "admin-settings-menu",
-		label: "系統設定",
-		icon: "settings",
-		requiresOperator: true,
-	},
-};
+function matchesRoute(pathname: string, routePath: string): boolean {
+	return pathname === routePath || (routePath !== "/" && pathname.startsWith(`${routePath}/`));
+}
 
-function groupMountMenuItems(flatItems: MountMenuItem[]): MountMenuItem[] {
-	const topLevel: MountMenuItem[] = [];
-	const groupedItems = new Map<string, MountMenuItem[]>();
+function getAppRoleForPath(
+	pathname: string,
+	apps: ReturnType<typeof toAppManifestEntries>,
+): { appId: string; role: WorkspaceRole } | undefined {
+	const current = [...apps]
+		.sort((left, right) => right.route.path.length - left.route.path.length)
+		.find((entry) => matchesRoute(pathname, entry.route.path));
 
-	for (const item of flatItems) {
-		const plugin = MOUNT_POINTS.find((entry) => entry.id === item.id);
-		const groupId = plugin?.mount.menu?.groupId;
-
-		if (groupId && MENU_GROUP_CONFIG[groupId]) {
-			const bucket = groupedItems.get(groupId) ?? [];
-			bucket.push(item);
-			groupedItems.set(groupId, bucket);
-			continue;
-		}
-
-		topLevel.push(item);
+	if (!current || current.scope !== "app") {
+		return undefined;
 	}
 
-	for (const [groupId, items] of groupedItems) {
-		const config = MENU_GROUP_CONFIG[groupId];
-		if (!config || items.length === 0) {
-			continue;
-		}
-
-		const sorted = [...items].sort((a, b) => a.order - b.order);
-		const subItems = sorted.map((entry) => ({
-			id: entry.id,
-			label: entry.label,
-			href: entry.href,
-		}));
-		const parentActive = sorted.some((entry) => entry.isActive);
-
-		topLevel.push({
-			id: config.id,
-			label: config.label,
-			href: sorted[0]?.href ?? "#",
-			icon: config.icon,
-			order: sorted[0]?.order ?? 0,
-			requiresOperator: config.requiresOperator,
-			isActive: parentActive,
-			subItems,
-		});
-	}
-
-	return topLevel.sort((a, b) => a.order - b.order);
+	return {
+		appId: current.appId,
+		role: current.requiredRole === "app-admin" ? "app-admin" : "app-user",
+	};
 }
 
 export function getMountMenuItems({
 	pathname,
-	isOperator,
+	platformAdmin,
 	canAccessPagesCms = false,
+	labelForKey = (key: string) => key,
+	workspaceRole,
 }: {
 	pathname: string;
-	isOperator: boolean;
+	platformAdmin: boolean;
 	canAccessPagesCms?: boolean;
+	labelForKey?: (key: string) => string;
+	workspaceRole?: WorkspaceRole;
 }): MountMenuItem[] {
-	const filtered = MOUNT_POINTS.filter((plugin): plugin is PluginManifest & { mount: { menu: NonNullable<PluginManifest["mount"]["menu"]> } } => {
-		if (!plugin.mount.menu) {
-			return false;
-		}
-		if (plugin.id === "pages-cms") {
-			return canAccessPagesCms;
-		}
-		if (plugin.mount.menu.requiresOperator && !isOperator) {
-			return false;
-		}
-		return true;
+	const apps = toAppManifestEntries(MOUNT_POINTS).filter(
+		(entry) => canAccessPagesCms || entry.id !== "pages-cms",
+	);
+	const requestedPath = pathname === "/" ? "/app" : pathname;
+	const requestedEntry = [...apps]
+		.sort((left, right) => right.route.path.length - left.route.path.length)
+		.find((entry) => matchesRoute(requestedPath, entry.route.path));
+	const resolutionPath = requestedEntry
+		? requestedPath
+		: platformAdmin && requestedPath.startsWith("/admin/")
+			? "/admin/users"
+			: "/app";
+	const appRole = getAppRoleForPath(resolutionPath, apps);
+	const currentEntry = [...apps]
+		.sort((left, right) => right.route.path.length - left.route.path.length)
+		.find((entry) => matchesRoute(resolutionPath, entry.route.path));
+	const isPagesCmsOnly = currentEntry?.id === "pages-cms" && canAccessPagesCms && !platformAdmin;
+	const model = resolveNavigation({
+		pathname: resolutionPath,
+		capabilities: {
+			userId: "navigation",
+			platformAdmin: (platformAdmin || isPagesCmsOnly) && apps.some(
+				(entry) => entry.scope === "platform" && matchesRoute(resolutionPath, entry.route.path),
+			),
+			appRoles: appRole
+				? { [appRole.appId]: workspaceRole ?? appRole.role }
+				: {},
+		},
+		apps,
 	});
 
-	const allHrefs = filtered
-		.map((plugin) => plugin.mount.route?.path)
-		.filter((href): href is string => Boolean(href));
+	const entriesById = new Map(apps.map((entry) => [entry.id, entry]));
+	const allHrefs = model.items.flatMap((item) => [item.href, ...item.children.map((child) => child.href)]);
 
-	const flatItems = filtered
-		.sort((a, b) => a.mount.menu.order - b.mount.menu.order)
-		.map((plugin) => {
-			const menu = plugin.mount.menu;
-			const href = plugin.mount.route?.path ?? "#";
-			return {
-				id: plugin.id,
-				label: menu.label,
-				href,
-				icon: menu.icon,
-				order: menu.order,
-				isActive: isMenuActive(pathname, href, allHrefs),
-				requiresOperator: menu.requiresOperator,
-			};
-		});
+	return model.items.filter((item) => !isPagesCmsOnly || item.id === "pages-cms").map((item) => {
+		const children = item.children.map((child) => ({
+			id: child.id,
+			label: labelForKey(child.labelKey),
+			labelKey: child.labelKey,
+			href: child.href,
+		}));
+		const isActive =
+			isMenuActive(pathname, item.href, allHrefs) ||
+			children.some((child) => isMenuActive(pathname, child.href, allHrefs));
+		const entry = entriesById.get(item.id);
 
-	return groupMountMenuItems(flatItems);
+		return {
+			id: item.id,
+			label: labelForKey(item.labelKey),
+			labelKey: item.labelKey,
+			href: item.href,
+			icon: item.icon,
+			order: item.order,
+			isActive,
+			requiresOperator:
+				model.workspace.scope === "platform"
+					? entry?.scope === "platform"
+					: model.workspace.role === "app-admin",
+			subItems: children.length > 0 ? children : undefined,
+		};
+	});
 }
 
-export function getTabBarItems(menuItems: MountMenuItem[]): {
+export function getTabBarItems(menuItems: MountMenuItem[], moreLabel = "更多"): {
 	fixed: TabBarItem[];
 	overflow: TabBarItem[];
 } {
@@ -186,9 +177,9 @@ export function getTabBarItems(menuItems: MountMenuItem[]): {
 	const overflow: TabBarItem[] =
 		remaining.length > 0
 			? [
-					{
-						id: "more",
-						label: "更多",
+				{
+					id: "more",
+					label: moreLabel,
 						href: "#",
 						icon: "ellipsis",
 						isActive: remaining.some((item) => item.isActive),

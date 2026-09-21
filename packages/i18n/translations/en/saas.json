@@ -2,7 +2,18 @@
   "admin": {
     "menu": {
       "organizations": "Organizations",
-      "users": "Users"
+      "users": "Users",
+      "settings": "System settings",
+      "navLabel": "Super Admin",
+      "pages": "Page management",
+      "emailSettings": "Email settings",
+      "newsletter": "Newsletter",
+      "orders": "Order management",
+      "revenue": "Revenue reports",
+      "gateway": "Payment settings",
+      "einvoice": "Invoice settings",
+      "gemini": "Gemini settings",
+      "aiProvider": "AI assistant model"
     },
     "organizations": {
       "backToList": "Back to organizations",
@@ -100,7 +111,8 @@
       "assignAdminRole": "Assign admin role",
       "removeAdminRole": "Remove admin role"
     },
-    "description": "Manage your application."
+    "description": "Manage your application.",
+    "navLabel": "Super Admin"
   },
   "app": {
     "menu": {
@@ -112,6 +124,9 @@
       "openNavigation": "Open navigation",
       "organizationSettings": "Organization settings",
       "start": "Start",
+      "support": "Support",
+      "aiAssistant": "AI assistant",
+      "more": "More",
       "addGroup": "Add group",
       "renameGroupPrompt": "Rename group",
       "newGroupPrompt": "Enter new group name",
@@ -678,6 +693,14 @@
   },
   "course": {
     "navLabel": "Course",
+    "quiz": "Quiz management",
+    "assignment": "Assignment management",
+    "review": "Reviews and comments",
+    "bundles": "Course bundles",
+    "onboarding": "Onboarding survey",
+    "media": "Media library",
+    "coursePack": "CoursePack tasks",
+    "content": "Course content",
     "title": "Course",
     "entitledDescription": "Your purchase unlocks every lesson.",
     "lockedDescription": "Purchase the StartKiter package to unlock every lesson.",

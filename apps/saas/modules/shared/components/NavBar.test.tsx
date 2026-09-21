@@ -132,9 +132,10 @@ describe("NavBar shell layout (Phase 2)", () => {
 					icon: iconMap["book-open"],
 					isActive: false,
 					order: 0,
-				}]}
-				isCollapsedEffective={false}
-				listClassName="flex list-none flex-col"
+					}]}
+					isCollapsedEffective={false}
+					adminSectionLabel="管理"
+					listClassName="flex list-none flex-col"
 				tone="surface"
 			/>,
 		);
@@ -171,6 +172,23 @@ describe("NavBar shell layout (Phase 2)", () => {
 		// Mobile tab bar has md:hidden class to prevent display on wide viewports (1280px)
 		expect(html).toContain("data-testid=\"mobile-tab-bar\"");
 		expect(html).toContain("md:hidden");
+	});
+
+	it("3.3 keeps the admin navigation surfaces within a 390px mobile viewport", () => {
+		const mobileViewportWidth = 390;
+		mockIsMobile = true;
+		const html = renderToStaticMarkup(<NavBar />);
+
+		const sidebarClass = html.match(/<nav[^>]*id="app-sidebar"[^>]*class="([^"]*)"/)?.[1] ?? "";
+
+		// The admin shell is fluid on mobile; the desktop 280px width is breakpoint-scoped.
+		expect(sidebarClass).toContain("w-full");
+		expect(sidebarClass).toContain("md:w-[280px]");
+		expect(sidebarClass).not.toContain("overflow-x");
+		const fixedWidths = [...sidebarClass.matchAll(/(?:^|\s)(?:md:)?w-\[(\d+)px\]/g)].map(([, width]) =>
+			Number(width),
+		);
+		expect(fixedWidths.every((width) => width <= mobileViewportWidth)).toBe(true);
 	});
 
 	it("49.2 renders sidebar edge resize handle with correct positioning and hover visibility classes", () => {
@@ -224,21 +242,22 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 
 	it("hides 頁面管理 for role=admin when pages-cms access is false", () => {
 		mockCanAccessAdmin = true;
-		mockPathname = "/admin/bundles";
+		mockPathname = "/admin/course";
 		const html = renderToStaticMarkup(<NavBar />);
-		expect(html).toContain("課程綁定包");
-		expect(html).not.toContain("頁面管理");
+		expect(html).toContain("course.bundles");
+		expect(html).not.toContain("admin.menu.pages");
 	});
 
 	it("shows 頁面管理 when canAccessPagesCmsAdmin is true even without admin.access", () => {
 		mockCanAccessAdmin = false;
+		mockPathname = "/admin/pages";
 		const html = renderToStaticMarkup(
 			<PagesCmsAccessProvider canAccessPagesCms={true}>
 				<NavBar />
 			</PagesCmsAccessProvider>,
 		);
-		expect(html).toContain("頁面管理");
-		expect(html).not.toContain("課程管理");
+		expect(html).toContain("admin.menu.pages");
+		expect(html).not.toContain("course.navLabel");
 	});
 
 	it("45.2b 單一分組可獨立收折，跟整體側邊欄收折狀態互不影響", () => {
@@ -272,12 +291,13 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 	it("renders operator admin section in grouped sidebar nav when nested course menu is present", () => {
 		mockIsCollapsed = false;
 		mockCanAccessAdmin = true;
+		mockPathname = "/admin/users";
 		const html = renderToStaticMarkup(<NavBar />);
 
 		expect(html).toContain('data-testid="sidebar-group-admin-section"');
-		expect(html).toContain("管理");
-		expect(html).toContain("後台設定");
-		expect(html).toContain("開始");
+		expect(html).toContain("app.menu.admin");
+		expect(html).toContain("admin.menu.users");
+		expect(html).toContain("course.navLabel");
 	});
 
 	it("uses SidebarGroupedNav with nested course admin menu for operators", () => {
@@ -286,9 +306,9 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 		mockPathname = "/admin/media";
 		const html = renderToStaticMarkup(<NavBar />);
 
-		expect(html).toContain("CoursePack 任務");
+		expect(html).toContain("course.coursePack");
 		expect(html).toContain('data-testid="sidebar-group-unassigned"');
-		expect(html).toContain("媒體庫");
+		expect(html).toContain("course.media");
 	});
 
 	it("keeps grouped sidebar nav when an operator menu item has subItems", () => {
@@ -305,8 +325,8 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 				isActive: false,
 			},
 			{
-				id: "admin-settings-menu",
-				label: "系統設定",
+				id: "admin-gateway-config",
+				label: "admin.menu.gateway",
 				href: "/admin/settings/checkout-gateway",
 				icon: "settings",
 				order: 1,
@@ -325,7 +345,7 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 		menuSpy.mockRestore();
 
 		expect(html).toContain('data-testid="sidebar-group-unassigned"');
-		expect(html).toContain('data-testid="sidebar-group-item-admin-settings-menu"');
+		expect(html).toContain('data-testid="sidebar-group-item-admin-gateway-config"');
 		expect(html).toContain("收款閘道設定");
 		expect(html).toContain('href="/admin/settings/checkout-gateway"');
 	});
@@ -336,19 +356,20 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 		mockPathname = "/admin/email-settings";
 		const html = renderToStaticMarkup(<NavBar />);
 
-		expect(html).toContain("郵件設定");
+		expect(html).toContain("admin.menu.emailSettings");
 		expect(html).toContain("bg-[#2271b1]");
 	});
 
 	it("does not render operator admin section when user is not operator", () => {
 		mockIsCollapsed = false;
 		mockCanAccessAdmin = false;
+		mockPathname = "/course";
 		const html = renderToStaticMarkup(<NavBar />);
 
 		expect(html).not.toContain('data-testid="sidebar-group-admin-section"');
-		expect(html).not.toContain("後台設定");
-		expect(html).toContain("開始");
-		expect(html).toContain("課程");
+		expect(html).not.toContain("admin.menu.users");
+		expect(html).toContain("app.menu.start");
+		expect(html).toContain("course.navLabel");
 	});
 });
 
