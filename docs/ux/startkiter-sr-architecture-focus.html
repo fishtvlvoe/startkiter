@@ -1,0 +1,1397 @@
+<!doctype html>
+<html lang="zh-Hant" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="StartKiter 接下來 SR 的產品、模組、權限、UI、Skill、測試與驗收架構對焦頁" />
+    <title>StartKiter SR 全局架構對焦</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --canvas: #101516;
+        --canvas-soft: #151c1e;
+        --panel: #182123;
+        --panel-raised: #202b2e;
+        --panel-quiet: #121a1c;
+        --line: #344246;
+        --line-soft: rgb(148 171 174 / 18%);
+        --text: #f2f7f5;
+        --text-soft: #c2cfcc;
+        --muted: #91a3a2;
+        --muted-strong: #aebdb9;
+        --accent: #a9df74;
+        --accent-strong: #c9f49a;
+        --accent-ink: #10210e;
+        --blue: #9fc9ff;
+        --violet: #cabaff;
+        --orange: #f3bd7d;
+        --danger: #ffaaa0;
+        --shadow: 0 22px 70px rgb(0 0 0 / 24%);
+        --radius: 16px;
+        --radius-small: 10px;
+      }
+
+      :root[data-theme="light"] {
+        color-scheme: light;
+        --canvas: #f1f5f3;
+        --canvas-soft: #e6edeb;
+        --panel: #ffffff;
+        --panel-raised: #f4f8f6;
+        --panel-quiet: #eaf0ee;
+        --line: #c9d6d2;
+        --line-soft: rgb(57 76 78 / 16%);
+        --text: #142021;
+        --text-soft: #405354;
+        --muted: #687c7b;
+        --muted-strong: #4b5e5d;
+        --accent: #3e762d;
+        --accent-strong: #2e5b24;
+        --accent-ink: #ffffff;
+        --blue: #2367ae;
+        --violet: #6a4ac0;
+        --orange: #a45e14;
+        --danger: #b34a40;
+        --shadow: 0 18px 50px rgb(40 62 61 / 12%);
+      }
+
+      * { box-sizing: border-box; }
+
+      html {
+        min-width: 320px;
+        scroll-behavior: smooth;
+        background: var(--canvas);
+      }
+
+      body {
+        min-width: 320px;
+        margin: 0;
+        background:
+          radial-gradient(circle at 86% -8%, rgb(169 223 116 / 10%), transparent 30rem),
+          var(--canvas);
+        color: var(--text);
+        font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.5;
+      }
+
+      button, a { font: inherit; }
+      button { color: inherit; }
+      a { color: inherit; text-decoration: none; }
+
+      button:focus-visible,
+      a:focus-visible {
+        outline: 3px solid var(--accent-strong);
+        outline-offset: 3px;
+      }
+
+      .icon-sprite {
+        position: absolute;
+        width: 0;
+        height: 0;
+        overflow: hidden;
+      }
+
+      .icon {
+        display: inline-block;
+        flex: 0 0 auto;
+        width: 1.1rem;
+        height: 1.1rem;
+        fill: none;
+        stroke: currentColor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.8;
+        vertical-align: -0.18em;
+      }
+
+      .page-shell { min-height: 100dvh; }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        min-height: 72px;
+        padding: 0 1.5rem;
+        border-bottom: 1px solid var(--line);
+        background: color-mix(in srgb, var(--canvas) 92%, transparent);
+        backdrop-filter: blur(16px);
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: .7rem;
+        min-width: 245px;
+        font-size: 1rem;
+        font-weight: 760;
+        letter-spacing: -.02em;
+      }
+
+      .brand-mark {
+        display: inline-flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 3px;
+        width: 24px;
+        height: 24px;
+      }
+
+      .brand-mark i {
+        display: block;
+        height: 4px;
+        border-radius: 999px;
+        background: var(--accent);
+      }
+
+      .brand-mark i:nth-child(1) { width: 10px; margin-left: 7px; }
+      .brand-mark i:nth-child(2) { width: 18px; margin-left: 3px; }
+      .brand-mark i:nth-child(3) { width: 24px; }
+
+      .topnav {
+        display: flex;
+        align-items: center;
+        gap: .2rem;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+
+      .topnav::-webkit-scrollbar { display: none; }
+
+      .topnav a {
+        padding: .55rem .75rem;
+        border-radius: 8px;
+        color: var(--muted-strong);
+        font-size: .82rem;
+        white-space: nowrap;
+      }
+
+      .topnav a:hover,
+      .topnav a[aria-current="true"] {
+        background: var(--panel-raised);
+        color: var(--text);
+      }
+
+      .status-mark {
+        display: inline-flex;
+        align-items: center;
+        gap: .45rem;
+        margin-left: auto;
+        padding: .42rem .7rem;
+        border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
+        border-radius: 999px;
+        color: var(--accent-strong);
+        font-size: .75rem;
+        white-space: nowrap;
+      }
+
+      .status-mark::before {
+        width: .42rem;
+        height: .42rem;
+        border-radius: 999px;
+        background: var(--accent);
+        content: "";
+      }
+
+      .content {
+        width: min(1240px, calc(100% - 3rem));
+        margin: 0 auto;
+        padding: 4.8rem 0 5.5rem;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.16fr) minmax(320px, .84fr);
+        gap: 3.5rem;
+        align-items: end;
+        padding-bottom: 4rem;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: .5rem;
+        margin-bottom: 1.1rem;
+        color: var(--accent-strong);
+        font-size: .72rem;
+        font-weight: 780;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow::before {
+        width: 1.7rem;
+        height: 1px;
+        background: var(--accent);
+        content: "";
+      }
+
+      h1, h2, h3, p { margin-top: 0; }
+
+      h1 {
+        max-width: 760px;
+        margin-bottom: 1.35rem;
+        font-size: clamp(2.7rem, 6.1vw, 5.7rem);
+        letter-spacing: -.07em;
+        line-height: .94;
+      }
+
+      h1 em {
+        color: var(--accent);
+        font-style: normal;
+      }
+
+      .hero-copy {
+        max-width: 690px;
+        margin-bottom: 0;
+        color: var(--text-soft);
+        font-size: clamp(1rem, 1.7vw, 1.22rem);
+        line-height: 1.65;
+      }
+
+      .hero-note {
+        padding: 1.3rem;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: linear-gradient(150deg, var(--panel-raised), var(--panel));
+        box-shadow: var(--shadow);
+      }
+
+      .hero-note .note-label {
+        margin-bottom: .7rem;
+        color: var(--muted);
+        font-size: .76rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      }
+
+      .hero-note strong {
+        display: block;
+        margin-bottom: .65rem;
+        color: var(--text);
+        font-size: 1.25rem;
+        letter-spacing: -.03em;
+      }
+
+      .hero-note p {
+        margin-bottom: 0;
+        color: var(--muted-strong);
+        font-size: .9rem;
+      }
+
+      .rule-strip {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1px;
+        margin-bottom: 5rem;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--line);
+      }
+
+      .rule-strip article {
+        min-height: 130px;
+        padding: 1.35rem;
+        background: var(--panel);
+      }
+
+      .rule-strip .rule-index {
+        display: block;
+        margin-bottom: .85rem;
+        color: var(--accent);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: .72rem;
+      }
+
+      .rule-strip strong {
+        display: block;
+        margin-bottom: .35rem;
+        font-size: .96rem;
+      }
+
+      .rule-strip p {
+        margin-bottom: 0;
+        color: var(--muted);
+        font-size: .83rem;
+      }
+
+      .section {
+        scroll-margin-top: 100px;
+        margin-bottom: 6rem;
+      }
+
+      .section-heading {
+        display: flex;
+        justify-content: space-between;
+        gap: 2rem;
+        align-items: end;
+        margin-bottom: 1.5rem;
+      }
+
+      .section-heading h2 {
+        max-width: 650px;
+        margin-bottom: 0;
+        font-size: clamp(1.8rem, 3vw, 3rem);
+        letter-spacing: -.05em;
+        line-height: 1;
+      }
+
+      .section-heading p {
+        max-width: 430px;
+        margin-bottom: .15rem;
+        color: var(--muted);
+        font-size: .9rem;
+      }
+
+      .flow-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(150px, 1fr));
+        gap: .65rem;
+      }
+
+      .flow-button {
+        position: relative;
+        min-height: 168px;
+        padding: 1rem;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-small);
+        background: var(--panel);
+        color: var(--text);
+        cursor: pointer;
+        text-align: left;
+        transition: transform .2s ease, border-color .2s ease, background .2s ease;
+      }
+
+      .flow-button:not(:last-child)::after {
+        position: absolute;
+        top: 50%;
+        right: -.92rem;
+        z-index: 2;
+        width: 1.2rem;
+        height: 1px;
+        background: var(--accent);
+        content: "";
+        opacity: .7;
+      }
+
+      .flow-button:hover,
+      .flow-button[aria-selected="true"] {
+        transform: translateY(-3px);
+        border-color: var(--accent);
+        background: var(--panel-raised);
+      }
+
+      .flow-number {
+        display: block;
+        margin-bottom: 1.8rem;
+        color: var(--accent);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: .7rem;
+      }
+
+      .flow-button strong {
+        display: block;
+        margin-bottom: .4rem;
+        font-size: .95rem;
+        letter-spacing: -.02em;
+      }
+
+      .flow-button span:last-child {
+        display: block;
+        color: var(--muted);
+        font-size: .78rem;
+        line-height: 1.45;
+      }
+
+      .flow-detail {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 1.2rem;
+        align-items: center;
+        margin-top: .8rem;
+        padding: 1.1rem 1.25rem;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-small);
+        background: var(--panel-quiet);
+      }
+
+      .flow-detail .detail-icon {
+        display: grid;
+        width: 2.8rem;
+        height: 2.8rem;
+        place-items: center;
+        border-radius: 10px;
+        background: color-mix(in srgb, var(--accent) 14%, transparent);
+        color: var(--accent);
+      }
+
+      .flow-detail strong { display: block; margin-bottom: .2rem; }
+      .flow-detail p { margin: 0; color: var(--muted-strong); font-size: .86rem; }
+
+      .detail-tag {
+        padding: .38rem .55rem;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        color: var(--muted);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: .68rem;
+        white-space: nowrap;
+      }
+
+      .architecture {
+        display: grid;
+        grid-template-columns: minmax(0, 1.04fr) minmax(340px, .96fr);
+        gap: 1rem;
+      }
+
+      .architecture-panel {
+        padding: 1.45rem;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel);
+      }
+
+      .architecture-panel h3 {
+        display: flex;
+        align-items: center;
+        gap: .6rem;
+        margin-bottom: 1.2rem;
+        font-size: 1rem;
+      }
+
+      .architecture-panel h3 .icon { color: var(--accent); }
+
+      .layer-list {
+        display: grid;
+        gap: .5rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .layer-list li {
+        display: grid;
+        grid-template-columns: 9rem 1fr;
+        gap: .8rem;
+        padding: .75rem 0;
+        border-bottom: 1px solid var(--line-soft);
+      }
+
+      .layer-list li:last-child { border-bottom: 0; }
+
+      .layer-list b { color: var(--text); font-size: .84rem; }
+      .layer-list span { color: var(--muted); font-size: .83rem; }
+
+      .module-flow {
+        display: grid;
+        gap: .45rem;
+      }
+
+      .module-node {
+        position: relative;
+        display: grid;
+        grid-template-columns: 2.3rem 1fr auto;
+        gap: .75rem;
+        align-items: center;
+        min-height: 57px;
+        padding: .65rem .8rem;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-small);
+        background: var(--panel-raised);
+      }
+
+      .module-node:not(:last-child)::after {
+        position: absolute;
+        bottom: -.47rem;
+        left: 1.25rem;
+        width: 1px;
+        height: .45rem;
+        background: var(--accent);
+        content: "";
+      }
+
+      .module-node .node-icon {
+        display: grid;
+        width: 2.3rem;
+        height: 2.3rem;
+        place-items: center;
+        border-radius: 8px;
+        background: var(--panel-quiet);
+        color: var(--accent);
+      }
+
+      .module-node strong { display: block; font-size: .82rem; }
+      .module-node small { color: var(--muted); font-size: .73rem; }
+
+      .node-tag {
+        color: var(--muted-strong);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: .66rem;
+      }
+
+      .role-grid {
+        display: grid;
+        grid-template-columns: minmax(0, .9fr) minmax(310px, 1.1fr);
+        gap: 1rem;
+      }
+
+      .app-scope {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: .55rem;
+        margin-bottom: 1rem;
+        padding: .85rem 1rem;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-small);
+        background: var(--panel-quiet);
+        color: var(--muted-strong);
+        font-size: .82rem;
+      }
+
+      .app-scope strong {
+        color: var(--text);
+        font-weight: 750;
+      }
+
+      .app-scope .scope-arrow { color: var(--accent); }
+
+      .app-scope .scope-chip {
+        padding: .25rem .45rem;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--panel);
+        color: var(--text-soft);
+        font-size: .75rem;
+      }
+
+      .role-controls,
+      .role-preview {
+        padding: 1.35rem;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel);
+      }
+
+      .control-label {
+        display: block;
+        margin-bottom: .7rem;
+        color: var(--muted);
+        font-size: .76rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      }
+
+      .segmented {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: .25rem;
+        margin-bottom: 1.25rem;
+        padding: .25rem;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--panel-quiet);
+      }
+
+      .segmented button,
+      .theme-control button {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: .35rem;
+        min-height: 38px;
+        padding: .5rem .65rem;
+        border: 0;
+        border-radius: 7px;
+        background: transparent;
+        color: var(--muted);
+        cursor: pointer;
+        font-size: .78rem;
+      }
+
+      .segmented button[aria-pressed="true"],
+      .theme-control button[aria-pressed="true"] {
+        background: var(--accent);
+        color: var(--accent-ink);
+        font-weight: 750;
+      }
+
+      .app-picker { margin-bottom: 1.15rem; }
+
+      .app-picker .segmented { margin-bottom: .6rem; }
+
+      .app-name-row {
+        display: flex;
+        gap: .45rem;
+      }
+
+      .app-name-row input {
+        min-width: 0;
+        flex: 1;
+        min-height: 38px;
+        padding: .5rem .65rem;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        outline: 0;
+        background: var(--panel-quiet);
+        color: var(--text);
+        font: inherit;
+        font-size: .78rem;
+      }
+
+      .app-name-row input:focus { border-color: var(--accent); }
+
+      .app-name-row button {
+        min-height: 38px;
+        padding: .5rem .7rem;
+        border: 1px solid var(--accent);
+        border-radius: 7px;
+        background: var(--accent);
+        color: var(--accent-ink);
+        cursor: pointer;
+        font-size: .76rem;
+        font-weight: 750;
+        white-space: nowrap;
+      }
+
+      .role-explain {
+        min-height: 92px;
+        padding: .95rem;
+        border-left: 2px solid var(--accent);
+        background: var(--panel-quiet);
+      }
+
+      .role-explain strong { display: block; margin-bottom: .3rem; }
+      .role-explain p { margin: 0; color: var(--muted-strong); font-size: .84rem; }
+
+      .preview-window {
+        min-height: 256px;
+        padding: 1rem;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--canvas-soft);
+      }
+
+      .preview-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.4rem;
+        color: var(--muted);
+        font-size: .76rem;
+      }
+
+      .preview-bar strong { color: var(--text); font-size: .84rem; }
+
+      .account-menu {
+        width: min(100%, 280px);
+        margin-left: auto;
+        padding: .75rem;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--panel-raised);
+        box-shadow: var(--shadow);
+      }
+
+      .account-menu .account-item {
+        display: flex;
+        align-items: center;
+        gap: .65rem;
+        min-height: 39px;
+        padding: .45rem .55rem;
+        border-radius: 8px;
+        color: var(--muted-strong);
+        font-size: .84rem;
+      }
+
+      .account-menu .account-item .icon { color: var(--muted); }
+
+      .account-menu .account-item.manager {
+        border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
+        background: color-mix(in srgb, var(--accent) 9%, transparent);
+        color: var(--accent-strong);
+      }
+
+      .account-menu .account-item.manager .icon { color: var(--accent); }
+
+      .account-divider {
+        height: 1px;
+        margin: .45rem .55rem;
+        background: var(--line);
+      }
+
+      .profile-row {
+        display: flex;
+        align-items: center;
+        gap: .7rem;
+        margin-top: .8rem;
+        padding: .8rem .55rem .15rem;
+        border-top: 1px solid var(--line);
+        color: var(--text);
+        font-size: .82rem;
+        font-weight: 720;
+      }
+
+      .avatar {
+        display: grid;
+        width: 2rem;
+        height: 2rem;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: 50%;
+        background: var(--panel-quiet);
+        color: var(--accent);
+        font-size: .7rem;
+      }
+
+      .theme-control {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: .35rem;
+        margin-top: 1rem;
+      }
+
+      .theme-control button { border: 1px solid var(--line); }
+
+      .theme-note {
+        margin-top: .8rem;
+        color: var(--muted);
+        font-size: .76rem;
+      }
+
+      .icon-contract {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+
+      .icon-variant {
+        padding: 1.15rem;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+      }
+
+      .icon-variant.light {
+        background: #f3f7f5;
+        color: #4b5e5d;
+      }
+
+      .icon-variant.dark {
+        background: #151e20;
+        color: #d6e3df;
+      }
+
+      .variant-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        font-size: .76rem;
+        font-weight: 750;
+      }
+
+      .variant-label code {
+        color: color-mix(in srgb, currentColor 68%, transparent);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: .68rem;
+      }
+
+      .icon-samples {
+        display: flex;
+        gap: 1rem;
+        color: currentColor;
+      }
+
+      .icon-samples .sample {
+        display: grid;
+        gap: .45rem;
+        justify-items: center;
+        font-size: .67rem;
+      }
+
+      .icon-samples .icon { width: 1.6rem; height: 1.6rem; }
+
+      .sr-lane {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(150px, 1fr));
+        gap: .65rem;
+      }
+
+      .sr-card {
+        min-height: 198px;
+        padding: 1rem;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-small);
+        background: var(--panel);
+      }
+
+      .sr-card.active {
+        border-color: var(--accent);
+        background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 11%, var(--panel)), var(--panel));
+      }
+
+      .sr-card .sr-status {
+        display: inline-flex;
+        margin-bottom: 1rem;
+        padding: .3rem .45rem;
+        border-radius: 5px;
+        background: var(--panel-raised);
+        color: var(--muted);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: .66rem;
+      }
+
+      .sr-card.active .sr-status {
+        background: var(--accent);
+        color: var(--accent-ink);
+      }
+
+      .sr-card strong { display: block; margin-bottom: .55rem; font-size: .9rem; }
+      .sr-card p { margin-bottom: 0; color: var(--muted); font-size: .78rem; line-height: 1.5; }
+
+      .gate-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: .65rem;
+      }
+
+      .gate {
+        display: grid;
+        grid-template-columns: 1.8rem 1fr;
+        gap: .7rem;
+        align-items: start;
+        padding: .95rem;
+        border: 1px solid var(--line);
+        border-radius: var(--radius-small);
+        background: var(--panel);
+      }
+
+      .gate .icon-wrap {
+        display: grid;
+        width: 1.8rem;
+        height: 1.8rem;
+        place-items: center;
+        border-radius: 7px;
+        background: color-mix(in srgb, var(--accent) 14%, transparent);
+        color: var(--accent);
+      }
+
+      .gate strong { display: block; margin-bottom: .2rem; font-size: .83rem; }
+      .gate p { margin: 0; color: var(--muted); font-size: .77rem; }
+
+      .boundary {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+
+      .boundary-panel {
+        padding: 1.35rem;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel);
+      }
+
+      .boundary-panel h3 { margin-bottom: 1rem; font-size: 1rem; }
+
+      .boundary-panel ul {
+        display: grid;
+        gap: .65rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .boundary-panel li {
+        display: flex;
+        gap: .55rem;
+        color: var(--muted-strong);
+        font-size: .83rem;
+      }
+
+      .boundary-panel li .icon { width: 1rem; height: 1rem; margin-top: .18rem; color: var(--accent); }
+      .boundary-panel.out li .icon { color: var(--danger); }
+
+      .footer-note {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: center;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: .78rem;
+      }
+
+      .footer-note strong { color: var(--accent-strong); }
+
+      @media (max-width: 1060px) {
+        .topnav { display: none; }
+        .flow-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .flow-button:not(:last-child)::after { display: none; }
+        .sr-lane { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      }
+
+      @media (max-width: 760px) {
+        .topbar { padding: 0 1rem; }
+        .brand { min-width: 0; }
+        .brand > span:last-child { display: none; }
+        .status-mark { padding: .35rem .5rem; font-size: .68rem; }
+        .content { width: min(100% - 2rem, 620px); padding-top: 3rem; }
+        .hero,
+        .architecture,
+        .role-grid,
+        .boundary { grid-template-columns: 1fr; }
+        .hero { gap: 2rem; padding-bottom: 3rem; }
+        h1 { font-size: clamp(2.65rem, 14vw, 4.2rem); }
+        .rule-strip { grid-template-columns: 1fr; }
+        .rule-strip article { min-height: 0; }
+        .section { margin-bottom: 4.4rem; }
+        .section-heading { display: block; }
+        .section-heading p { margin-top: .8rem; }
+        .flow-grid,
+        .sr-lane,
+        .gate-grid { grid-template-columns: 1fr; }
+        .icon-contract { grid-template-columns: 1fr; }
+        .flow-button { min-height: 0; }
+        .flow-number { margin-bottom: .8rem; }
+        .flow-detail { grid-template-columns: auto 1fr; }
+        .detail-tag { grid-column: 2; justify-self: start; }
+        .layer-list li { grid-template-columns: 7rem 1fr; }
+        .footer-note { display: block; }
+        .footer-note span { display: block; margin-top: .5rem; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          scroll-behavior: auto !important;
+          transition-duration: .01ms !important;
+          animation-duration: .01ms !important;
+          animation-iteration-count: 1 !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <svg class="icon-sprite" aria-hidden="true" focusable="false">
+      <symbol id="i-stack-light" viewBox="0 0 24 24"><path d="m12 3 8 4-8 4-8-4 8-4Z"/><path d="m4 12 8 4 8-4"/><path d="m4 17 8 4 8-4"/></symbol>
+      <symbol id="i-stack-dark" viewBox="0 0 24 24"><path d="m12 3 8 4-8 4-8-4 8-4Z"/><path d="m4 12 8 4 8-4"/><path d="m4 17 8 4 8-4"/></symbol>
+      <symbol id="i-structure" viewBox="0 0 24 24"><rect x="8" y="3" width="8" height="5" rx="1"/><path d="M12 8v4M4 20h16M4 20v-4h16v4M8 12v4M16 12v4"/></symbol>
+      <symbol id="i-workspace" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.8 12h16.4M12 3.5c2.2 2.3 3.3 5.1 3.3 8.5S14.2 18.2 12 20.5C9.8 18.2 8.7 15.4 8.7 12S9.8 5.8 12 3.5Z"/></symbol>
+      <symbol id="i-flow" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="m7 11 10-4M7 13l10 4"/></symbol>
+      <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.2"/><path d="M5 20c.8-3.1 3.1-4.8 7-4.8s6.2 1.7 7 4.8"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.5 19 6v5.4c0 4.2-2.5 7.6-7 9.1-4.5-1.5-7-4.9-7-9.1V6l7-2.5Z"/><path d="m8.8 12 2.1 2.1 4.5-4.5"/></symbol>
+      <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 13.5a7.3 7.3 0 0 0 0-3l2-1.2-2-3.4-2.2 1a7.5 7.5 0 0 0-2.6-1.5L14 3h-4l-.3 2.4a7.5 7.5 0 0 0-2.6 1.5l-2.2-1-2 3.4 2 1.2a7.3 7.3 0 0 0 0 3l-2 1.2 2 3.4 2.2-1a7.5 7.5 0 0 0 2.6 1.5L10 21h4l.3-2.4a7.5 7.5 0 0 0 2.6-1.5l2.2 1 2-3.4-2.1-1.2Z"/></symbol>
+      <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.8 9.3a2.4 2.4 0 1 1 4.4 1.4c-.7.9-2.2 1.2-2.2 2.7M12 16.7h.01"/></symbol>
+      <symbol id="i-book" viewBox="0 0 24 24"><path d="M5 4.5h10.5A2.5 2.5 0 0 1 18 7v13H7.5A2.5 2.5 0 0 1 5 17.5v-13Z"/><path d="M5 17.5A2.5 2.5 0 0 1 7.5 15H18M9 8h5M9 11h5"/></symbol>
+      <symbol id="i-code" viewBox="0 0 24 24"><path d="m8 8-4 4 4 4M16 8l4 4-4 4M14 5l-4 14"/></symbol>
+      <symbol id="i-test" viewBox="0 0 24 24"><path d="m7 4 10 10M17 4 7 14M5 19h14"/><path d="M6 4h12M6 14h12"/></symbol>
+      <symbol id="i-rocket" viewBox="0 0 24 24"><path d="M14.5 5.5c2.3-2.3 5.1-2.6 5.9-2.4.2.8-.1 3.6-2.4 5.9l-5.5 5.5-3.1-3.1 5.1-5.9Z"/><path d="m9.4 11.4-3.9.7-1.7 3.1 4.2-.5M14.6 16.4l-.7 3.9-3.1 1.7.5-4.2M7.2 17.2l-2.4 2.4M6.2 11.1l-2.5-.5"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="m7 7 10 10M17 7 7 17"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19.5 15.4A7.6 7.6 0 0 1 8.6 4.5 7.7 7.7 0 1 0 19.5 15.4Z"/></symbol>
+      <symbol id="i-logout" viewBox="0 0 24 24"><path d="M10 5H6.5A1.5 1.5 0 0 0 5 6.5v11A1.5 1.5 0 0 0 6.5 19H10M14 8l4 4-4 4M18 12H9"/></symbol>
+    </svg>
+
+    <div class="page-shell">
+      <header class="topbar">
+        <a class="brand" href="#top" aria-label="回到頁面頂端">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>StartKiter · SR 全局架構</span>
+        </a>
+        <nav class="topnav" aria-label="對焦頁索引">
+          <a href="#map">總圖</a>
+          <a href="#architecture">模組骨架</a>
+          <a href="#roles">角色與設定</a>
+          <a href="#sr-lane">SR 順序</a>
+          <a href="#gates">驗收閘門</a>
+        </nav>
+        <span class="status-mark">規則對焦版</span>
+      </header>
+
+      <main id="top" class="content">
+        <section class="hero" aria-labelledby="page-title">
+          <div>
+            <div class="eyebrow">SR architecture focus · 2026.09.21</div>
+            <h1 id="page-title">讓每張 SR 都接在同一條 <em>產品骨架</em> 上</h1>
+            <p class="hero-copy">這不是單純換版面。這張圖先把產品邊界、獨立 App 模組、資料與權限、角色工作區、設定入口、開發 Skill、測試、部署與驗收放回同一張地圖。</p>
+          </div>
+          <aside class="hero-note" aria-label="本次固定規則">
+            <div class="note-label">本次固定規則</div>
+            <strong>管理者設定只對管理者出現</strong>
+            <p>一般使用者只看到自己的設定、幫助、升級與登出。App 管理員與總管理員才多一個管理者設定入口，兩套選單不再混在一起。</p>
+          </aside>
+        </section>
+
+        <section class="rule-strip" aria-label="三個產品判斷">
+          <article>
+            <span class="rule-index">01 / 邊界</span>
+            <strong>每個功能都是獨立 module</strong>
+            <p>模組自帶路由、權限、選單、翻譯、SVG icon 與測試。</p>
+          </article>
+          <article>
+            <span class="rule-index">02 / 組合</span>
+            <strong>平台外殼只負責組合</strong>
+            <p>Shell 不重寫每個功能的畫面，只讀 module contract。</p>
+          </article>
+          <article>
+            <span class="rule-index">03 / 證據</span>
+            <strong>完成不是 build 綠燈</strong>
+            <p>要通過測試、部署後瀏覽器、角色、語系、主題與手機驗收。</p>
+          </article>
+        </section>
+
+        <section id="map" class="section" aria-labelledby="map-title">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow">總架構</div>
+              <h2 id="map-title">一張 SR 從決策走到可賣產品</h2>
+            </div>
+            <p>點擊每一層，查看它負責什麼、不能越界什麼。</p>
+          </div>
+
+          <div class="flow-grid" role="tablist" aria-label="SR 六層架構">
+            <button class="flow-button" type="button" role="tab" aria-selected="true" data-step="0">
+              <span class="flow-number">01</span>
+              <strong>產品邊界</strong>
+              <span>這張 SR 解決什麼，不解決什麼</span>
+            </button>
+            <button class="flow-button" type="button" role="tab" aria-selected="false" data-step="1">
+              <span class="flow-number">02</span>
+              <strong>Module contract</strong>
+              <span>功能如何被平台辨識與掛載</span>
+            </button>
+            <button class="flow-button" type="button" role="tab" aria-selected="false" data-step="2">
+              <span class="flow-number">03</span>
+              <strong>角色工作區</strong>
+              <span>誰看得到什麼，一次只出現一套</span>
+            </button>
+            <button class="flow-button" type="button" role="tab" aria-selected="false" data-step="3">
+              <span class="flow-number">04</span>
+              <strong>資料與權限</strong>
+              <span>畫面隱藏不等於後端授權</span>
+            </button>
+            <button class="flow-button" type="button" role="tab" aria-selected="false" data-step="4">
+              <span class="flow-number">05</span>
+              <strong>使用者體驗</strong>
+              <span>UI、設定、語系、主題、SVG</span>
+            </button>
+            <button class="flow-button" type="button" role="tab" aria-selected="false" data-step="5">
+              <span class="flow-number">06</span>
+              <strong>證明與交付</strong>
+              <span>測試、ego、部署、回滾證據</span>
+            </button>
+          </div>
+          <div class="flow-detail" role="status" aria-live="polite">
+            <span class="detail-icon"><svg class="icon" aria-hidden="true"><use href="#i-structure"></use></svg></span>
+            <div><strong id="step-title">產品邊界</strong><p id="step-copy">先寫清楚這張 SR 的目標、範圍、依賴與不處理的事，避免開發途中把 UI 問題擴成整個平台重做。</p></div>
+            <span id="step-tag" class="detail-tag">proposal / scope</span>
+          </div>
+        </section>
+
+        <section id="architecture" class="section" aria-labelledby="architecture-title">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow">模組骨架</div>
+              <h2 id="architecture-title">功能獨立，平台統一接線</h2>
+            </div>
+            <p>學生新增 App 模組時，知道自己要負責哪一段，也知道不能直接碰哪一段。</p>
+          </div>
+
+          <div class="architecture">
+            <article class="architecture-panel">
+              <h3><svg class="icon" aria-hidden="true"><use href="#i-code"></use></svg>每個 module 自己帶的東西</h3>
+              <ul class="layer-list">
+                <li><b>業務與資料</b><span>自己的 domain、schema、server action 或 API 邊界</span></li>
+                <li><b>路由與權限</b><span>route、capability、route guard，不靠 UI 隱藏保護</span></li>
+                <li><b>選單宣告</b><span>workspace、一級 parent、子級 children、排序與 active route</span></li>
+                <li><b>可見內容</b><span>translation namespace、SVG icon light/dark 版本、semantic token</span></li>
+                <li><b>自己的證據</b><span>unit、component、locale、browser acceptance test</span></li>
+              </ul>
+            </article>
+
+            <article class="architecture-panel">
+              <h3><svg class="icon" aria-hidden="true"><use href="#i-stack-light"></use></svg>平台外殼統一負責的東西</h3>
+              <div class="module-flow">
+                <div class="module-node"><span class="node-icon"><svg class="icon" aria-hidden="true"><use href="#i-stack-light"></use></svg></span><span><strong>Module registry</strong><small>收集並檢查 module manifest</small></span><span class="node-tag">registry</span></div>
+                <div class="module-node"><span class="node-icon"><svg class="icon" aria-hidden="true"><use href="#i-workspace"></use></svg></span><span><strong>Workspace resolver</strong><small>一次只選出一個角色工作區</small></span><span class="node-tag">resolver</span></div>
+                <div class="module-node"><span class="node-icon"><svg class="icon" aria-hidden="true"><use href="#i-structure"></use></svg></span><span><strong>Shell composer</strong><small>產生一級與子級選單，不重複渲染</small></span><span class="node-tag">shell</span></div>
+                <div class="module-node"><span class="node-icon"><svg class="icon" aria-hidden="true"><use href="#i-test"></use></svg></span><span><strong>Acceptance gates</strong><small>把規則變成測試與部署後證據</small></span><span class="node-tag">gates</span></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="roles" class="section" aria-labelledby="roles-title">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow">角色與設定</div>
+              <h2 id="roles-title">設定放在帳號區，管理者才多一個入口</h2>
+            </div>
+            <p>這裡是可操作的對焦示範。切換角色，看每個 App 底下的使用者與管理者如何保持乾淨。</p>
+          </div>
+
+          <div class="app-scope" aria-label="App 與角色的關係">
+            <strong>平台</strong><span class="scope-arrow">→</span><span class="scope-chip" id="app-name-chip">課程 App</span><span class="scope-arrow">→</span><span class="scope-chip">使用者</span><span class="scope-chip">App 管理員</span><span class="scope-arrow">／</span><span class="scope-chip">總管理員管理全部 App</span>
+          </div>
+
+          <div class="role-grid">
+            <article class="role-controls">
+              <div class="app-picker">
+                <span class="control-label">目前 App</span>
+                <div class="segmented" role="group" aria-label="切換目前 App">
+                  <button type="button" data-app="course" aria-pressed="true">課程</button>
+                  <button type="button" data-app="design" aria-pressed="false">設計</button>
+                  <button type="button" data-app="community" aria-pressed="false">社群</button>
+                </div>
+                <div class="app-name-row">
+                  <input id="app-name-input" value="課程" aria-label="自訂 App 名稱" />
+                  <button type="button" data-apply-app-name>套用名稱</button>
+                </div>
+              </div>
+              <span class="control-label">預覽角色</span>
+              <div class="segmented" role="group" aria-label="切換預覽角色">
+                <button type="button" data-role="user" aria-pressed="true">使用者</button>
+                <button type="button" data-role="app-admin" aria-pressed="false">課程管理員</button>
+                <button type="button" data-role="platform-admin" aria-pressed="false">總管理員</button>
+              </div>
+              <div class="role-explain" aria-live="polite">
+                <strong id="role-title">使用者工作區</strong>
+                <p id="role-copy">在目前 App 內只看到使用者功能。帳號選單不出現「管理者設定」。</p>
+              </div>
+              <span class="control-label" style="margin-top: 1.4rem;">預覽主題</span>
+              <div class="theme-control" role="group" aria-label="切換對焦頁預覽主題">
+                <button type="button" data-theme-choice="dark" aria-pressed="true"><svg class="icon" aria-hidden="true"><use href="#i-moon"></use></svg>深色預覽</button>
+                <button type="button" data-theme-choice="light" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-sun"></use></svg>淺色預覽</button>
+              </div>
+              <p class="theme-note">這個主題按鈕只用於對焦頁預覽。正式產品的主題設定放在帳號設定，不放一級選單。</p>
+            </article>
+
+            <article class="role-preview" aria-label="帳號選單預覽">
+              <div class="preview-window">
+                <div class="preview-bar"><strong>左下角帳號選單</strong><span id="preview-role-label">使用者視角</span></div>
+                <div class="account-menu">
+                  <div class="account-item"><svg class="icon" aria-hidden="true"><use href="#i-settings"></use></svg><span>使用者設定</span></div>
+                  <div class="account-item manager" id="manager-setting" hidden><svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg><span id="manager-setting-label">課程管理員設定</span></div>
+                  <div class="account-item"><svg class="icon" aria-hidden="true"><use href="#i-help"></use></svg><span>幫助</span></div>
+                  <div class="account-item"><svg class="icon" aria-hidden="true"><use href="#i-rocket"></use></svg><span>升級</span></div>
+                  <div class="account-divider"></div>
+                  <div class="account-item"><svg class="icon" aria-hidden="true"><use href="#i-logout"></use></svg><span>登出</span></div>
+                  <div class="profile-row"><span class="avatar">F</span><span>余啟彰（Fish）</span></div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="icons" class="section" aria-labelledby="icons-title">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow">視覺契約</div>
+              <h2 id="icons-title">SVG 是 module 的資產，不是頁面臨時畫出來的圖</h2>
+            </div>
+            <p>同一個 icon id 保持幾何一致，淺色與深色各有自己的 SVG 版本。</p>
+          </div>
+
+          <div class="icon-contract">
+            <article class="icon-variant light">
+              <div class="variant-label"><span>淺色版本</span><code>app.light.svg</code></div>
+              <div class="icon-samples">
+                <span class="sample"><svg class="icon" aria-hidden="true"><use href="#i-book"></use></svg><span>App</span></span>
+                <span class="sample"><svg class="icon" aria-hidden="true"><use href="#i-user"></use></svg><span>帳號</span></span>
+                <span class="sample"><svg class="icon" aria-hidden="true"><use href="#i-settings"></use></svg><span>設定</span></span>
+                <span class="sample"><svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg><span>管理</span></span>
+              </div>
+            </article>
+            <article class="icon-variant dark">
+              <div class="variant-label"><span>深色版本</span><code>app.dark.svg</code></div>
+              <div class="icon-samples">
+                <span class="sample"><svg class="icon" aria-hidden="true"><use href="#i-book"></use></svg><span>App</span></span>
+                <span class="sample"><svg class="icon" aria-hidden="true"><use href="#i-user"></use></svg><span>帳號</span></span>
+                <span class="sample"><svg class="icon" aria-hidden="true"><use href="#i-settings"></use></svg><span>設定</span></span>
+                <span class="sample"><svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg><span>管理</span></span>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="sr-lane" class="section" aria-labelledby="sr-title">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow">建議 SR 順序</div>
+              <h2 id="sr-title">先固定骨架，再讓功能一個一個掛上去</h2>
+            </div>
+            <p>每一張 SR 都有自己的完成條件，但不能跳過共同骨架。</p>
+          </div>
+
+          <div class="sr-lane">
+            <article class="sr-card active"><span class="sr-status">現在對焦</span><strong>SR-01 邊界與導航契約</strong><p>固定 workspace、module manifest、一級／子級選單與「只出現一套」的規則。</p></article>
+            <article class="sr-card"><span class="sr-status">依賴 SR-01</span><strong>SR-02 開發 Skill 與模組接線</strong><p>學生安裝後知道怎麼加功能，Skill 引導，型別與測試硬性把關。</p></article>
+            <article class="sr-card"><span class="sr-status">依賴 SR-02</span><strong>SR-03 帳號與偏好設定</strong><p>設定、主題、語系集中在帳號區，管理者設定只對管理者出現。</p></article>
+            <article class="sr-card"><span class="sr-status">依賴前面三張</span><strong>SR-04 真正 App 模組</strong><p>課程、內容、測驗、社群等 App 各自獨立，透過 contract 掛回平台。</p></article>
+            <article class="sr-card"><span class="sr-status">每張都要</span><strong>SR-05 部署與產品證據</strong><p>測試、ego-browser、手機與桌面、語系、主題、錯誤狀態與回滾證據。</p></article>
+          </div>
+        </section>
+
+        <section id="gates" class="section" aria-labelledby="gates-title">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow">完成閘門</div>
+              <h2 id="gates-title">每張 SR 都要留下這些證據</h2>
+            </div>
+            <p>沒有這些證據，只能說完成規劃，不能說功能完成。</p>
+          </div>
+
+          <div class="gate-grid">
+            <article class="gate"><span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-structure"></use></svg></span><div><strong>範圍清楚</strong><p>有目標、非目標、依賴與 rollback，不把未決議題藏在程式碼裡。</p></div></article>
+            <article class="gate"><span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-code"></use></svg></span><div><strong>模組有關聯</strong><p>route、permission、menu、i18n、SVG 與資料流可以從 manifest 找到。</p></div></article>
+            <article class="gate"><span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-user"></use></svg></span><div><strong>角色不越界</strong><p>每個 App 的使用者與該 App 管理員各看自己的工作區，平台層只有總管理員。</p></div></article>
+            <article class="gate"><span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-test"></use></svg></span><div><strong>自動檢查</strong><p>unit、component、locale、token 與 duplicate route 檢查通過。</p></div></article>
+            <article class="gate"><span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-rocket"></use></svg></span><div><strong>真實瀏覽器</strong><p>部署後以 ego-browser 驗證桌面、手機、語系、主題與每個可見入口。</p></div></article>
+            <article class="gate"><span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></span><div><strong>可回報</strong><p>commit、branch、驗證輸出與尚未驗證的部分分開說清楚。</p></div></article>
+          </div>
+        </section>
+
+        <section class="section" aria-labelledby="boundary-title">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow">邊界管理</div>
+              <h2 id="boundary-title">這張對焦頁不把所有事情混成一張 SR</h2>
+            </div>
+            <p>先把相鄰工作標出來，下一張 SR 才不會無意間改到不該改的地方。</p>
+          </div>
+
+          <div class="boundary">
+            <article class="boundary-panel">
+              <h3>本架構會處理</h3>
+              <ul>
+                <li><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg><span>角色工作區與一級／子級選單</span></li>
+                <li><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg><span>module manifest、Skill 與接線規則</span></li>
+                <li><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg><span>設定入口、主題、語系與 SVG icon contract</span></li>
+                <li><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg><span>測試、瀏覽器驗收、部署與回滾證據</span></li>
+              </ul>
+            </article>
+            <article class="boundary-panel out">
+              <h3>不在這張先做</h3>
+              <ul>
+                <li><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg><span>任一 App 的內容資料模型重做</span></li>
+                <li><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg><span>PAYUNi、Email、GitHub kit 履約</span></li>
+                <li><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg><span>學生自訂 CSS 或任意 HTML 注入</span></li>
+                <li><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg><span>把 demo 當成正式 runtime 的第二套真相</span></li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <footer class="footer-note">
+          <strong>對焦結論：先定產品骨架，再做功能。</strong>
+          <span>本頁是 SR 設計對焦稿，不代表正式 app 已完成修改。</span>
+        </footer>
+      </main>
+    </div>
+
+    <script>
+      const root = document.documentElement;
+      const stepData = [
+        ["產品邊界", "先寫清楚這張 SR 的目標、範圍、依賴與不處理的事，避免開發途中把 UI 問題擴成整個平台重做。", "proposal / scope"],
+        ["Module contract", "每個功能宣告自己的 route、workspace、permission、menu、translation namespace 與 SVG icon，不再靠 NavBar 內的手寫清單。", "manifest / contract"],
+        ["角色工作區", "resolver 先判斷 App、角色與路由，再產生唯一的工作區。使用者不看到管理選單，管理者才看到管理者設定。", "workspace / resolver"],
+        ["資料與權限", "UI 隱藏只負責體驗，route guard 與後端權限才負責安全。每個 module 的資料邊界要能被單獨測試。", "guard / data flow"],
+        ["使用者體驗", "設定放帳號區，主題與語系不是一級選單。SVG light/dark 版本由共用 Icon 元件選擇。", "settings / tokens"],
+        ["證明與交付", "測試、部署後 ego-browser、桌面與手機、三語系、三種主題與每個可見入口都要留下可核對證據。", "tests / ego / deploy"]
+      ];
+
+      const stepTitle = document.querySelector("#step-title");
+      const stepCopy = document.querySelector("#step-copy");
+      const stepTag = document.querySelector("#step-tag");
+
+      document.querySelectorAll("[data-step]").forEach((button) => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll("[data-step]").forEach((item) => item.setAttribute("aria-selected", "false"));
+          button.setAttribute("aria-selected", "true");
+          const [title, copy, tag] = stepData[Number(button.dataset.step)];
+          stepTitle.textContent = title;
+          stepCopy.textContent = copy;
+          stepTag.textContent = tag;
+        });
+      });
+
+      const appData = {
+        course: "課程",
+        design: "設計",
+        community: "社群"
+      };
+
+      let currentApp = "course";
+      let currentAppName = appData[currentApp];
+      let currentRole = "user";
+
+      const roleTitle = document.querySelector("#role-title");
+      const roleCopy = document.querySelector("#role-copy");
+      const roleLabel = document.querySelector("#preview-role-label");
+      const managerSetting = document.querySelector("#manager-setting");
+      const managerSettingLabel = document.querySelector("#manager-setting-label");
+      const appNameInput = document.querySelector("#app-name-input");
+      const appNameChip = document.querySelector("#app-name-chip");
+
+      function renderRole() {
+        const isAppAdmin = currentRole === "app-admin";
+        const isPlatformAdmin = currentRole === "platform-admin";
+        const appAdminLabel = `${currentAppName}管理員`;
+        document.querySelector('[data-role="app-admin"]').textContent = appAdminLabel;
+        roleTitle.textContent = isPlatformAdmin ? "總管理員工作區" : isAppAdmin ? `${appAdminLabel}工作區` : "使用者工作區";
+        roleCopy.textContent = isPlatformAdmin
+          ? `管理整個平台與所有 App。進入 ${currentAppName} 時，不把其他 App 的子功能重複塞進來。`
+          : isAppAdmin
+            ? `只看到 ${currentAppName} App 的管理功能。帳號選單出現「${appAdminLabel}設定」，不出現總管理員選單。`
+            : `在 ${currentAppName} App 內只看到使用者功能。帳號選單不出現「管理者設定」。`;
+        roleLabel.textContent = isPlatformAdmin ? "總管理員視角" : isAppAdmin ? `${appAdminLabel}視角` : "使用者視角";
+        managerSetting.hidden = currentRole === "user";
+        managerSettingLabel.textContent = isPlatformAdmin ? "總管理員設定" : `${appAdminLabel}設定`;
+      }
+
+      function renderApp() {
+        appNameInput.value = currentAppName;
+        appNameChip.textContent = `${currentAppName} App`;
+        renderRole();
+      }
+
+      document.querySelectorAll("[data-app]").forEach((button) => {
+        button.addEventListener("click", () => {
+          currentApp = button.dataset.app;
+          currentAppName = appData[currentApp];
+          document.querySelectorAll("[data-app]").forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+          renderApp();
+        });
+      });
+
+      document.querySelector("[data-apply-app-name]").addEventListener("click", () => {
+        const nextName = appNameInput.value.trim().replace(/\s+/g, " ");
+        if (nextName) currentAppName = nextName;
+        renderApp();
+      });
+
+      document.querySelectorAll("[data-role]").forEach((button) => {
+        button.addEventListener("click", () => {
+          currentRole = button.dataset.role;
+          document.querySelectorAll("[data-role]").forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+          renderRole();
+        });
+      });
+
+      renderApp();
+
+      document.querySelectorAll("[data-theme-choice]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const theme = button.dataset.themeChoice;
+          root.dataset.theme = theme;
+          document.querySelectorAll("[data-theme-choice]").forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+        });
+      });
+    </script>
+  </body>
+</html>
