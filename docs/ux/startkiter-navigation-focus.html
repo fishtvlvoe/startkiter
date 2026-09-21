@@ -1,0 +1,781 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>StartKiter 導覽重構 UX 對焦原型</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --canvas: #111516;
+        --panel: #182022;
+        --panel-raised: #202a2d;
+        --panel-soft: #151d1f;
+        --line: #344144;
+        --text: #f4f7f7;
+        --muted: #9aa8aa;
+        --muted-strong: #c0cccd;
+        --accent: #9ed36a;
+        --accent-strong: #b7e985;
+        --accent-ink: #13200e;
+        --blue: #78b9ff;
+        --danger: #ff9b91;
+        --radius: 14px;
+        --shadow: 0 22px 60px rgb(0 0 0 / 24%);
+      }
+
+      * { box-sizing: border-box; }
+
+      html { min-width: 320px; background: var(--canvas); }
+
+      body {
+        min-width: 320px;
+        margin: 0;
+        background:
+          radial-gradient(circle at 80% -10%, rgb(158 211 106 / 8%), transparent 30rem),
+          var(--canvas);
+        color: var(--text);
+        font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.5;
+      }
+
+      button, a { font: inherit; }
+
+      button { color: inherit; }
+
+      a { color: inherit; text-decoration: none; }
+
+      button:focus-visible,
+      a:focus-visible {
+        outline: 3px solid var(--accent-strong);
+        outline-offset: 3px;
+      }
+
+      .prototype {
+        min-height: 100dvh;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        min-height: 72px;
+        padding: 0 1.5rem;
+        border-bottom: 1px solid var(--line);
+        background: rgb(17 21 22 / 92%);
+        backdrop-filter: blur(16px);
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: .7rem;
+        min-width: 180px;
+        font-size: 1.05rem;
+        font-weight: 750;
+        letter-spacing: -.02em;
+      }
+
+      .brand-mark {
+        display: inline-flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 3px;
+        width: 24px;
+        height: 24px;
+      }
+
+      .brand-mark i {
+        display: block;
+        height: 4px;
+        border-radius: 999px;
+        background: var(--accent);
+      }
+
+      .brand-mark i:nth-child(1) { width: 10px; margin-left: 7px; }
+      .brand-mark i:nth-child(2) { width: 18px; margin-left: 3px; }
+      .brand-mark i:nth-child(3) { width: 24px; }
+
+      .prototype-label {
+        color: var(--muted);
+        font-size: .8rem;
+        white-space: nowrap;
+      }
+
+      .role-switch {
+        display: flex;
+        align-items: center;
+        gap: .25rem;
+        margin-left: auto;
+        padding: .25rem;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--panel-soft);
+      }
+
+      .role-switch button {
+        cursor: pointer;
+        border: 0;
+        border-radius: 999px;
+        padding: .5rem .8rem;
+        color: var(--muted-strong);
+        background: transparent;
+        font-size: .8rem;
+        font-weight: 700;
+        transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+      }
+
+      .role-switch button:hover { color: var(--text); }
+      .role-switch button:active { transform: scale(.98); }
+      .role-switch button[aria-selected="true"] {
+        color: var(--accent-ink);
+        background: var(--accent);
+      }
+
+      .mobile-menu {
+        display: none;
+        cursor: pointer;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        padding: .5rem .7rem;
+        background: var(--panel);
+      }
+
+      .mobile-scrim { display: none; }
+
+      .app-frame {
+        display: grid;
+        grid-template-columns: 280px minmax(0, 1fr);
+        min-height: calc(100dvh - 72px);
+      }
+
+      .sidebar {
+        position: sticky;
+        top: 72px;
+        align-self: start;
+        height: calc(100dvh - 72px);
+        overflow-y: auto;
+        padding: 1.25rem 1rem 1.5rem;
+        border-right: 1px solid var(--line);
+        background: rgb(24 32 34 / 82%);
+      }
+
+      .context-card {
+        margin-bottom: 1.25rem;
+        padding: 1rem;
+        border: 1px solid rgb(158 211 106 / 28%);
+        border-radius: var(--radius);
+        background: linear-gradient(145deg, rgb(158 211 106 / 12%), rgb(158 211 106 / 4%));
+      }
+
+      .context-card .eyebrow {
+        margin-bottom: .3rem;
+        color: var(--accent-strong);
+        font-size: .68rem;
+        font-weight: 800;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+      }
+
+      .context-card strong {
+        display: block;
+        font-size: 1.08rem;
+      }
+
+      .context-card p {
+        margin: .35rem 0 0;
+        color: var(--muted);
+        font-size: .82rem;
+      }
+
+      .nav-group + .nav-group { margin-top: 1.25rem; }
+
+      .nav-group-title {
+        margin: 0 .75rem .45rem;
+        color: var(--muted);
+        font-size: .7rem;
+        font-weight: 800;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+      }
+
+      .nav-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem;
+        width: 100%;
+        margin: .18rem 0;
+        padding: .72rem .78rem;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        color: var(--muted-strong);
+        background: transparent;
+        text-align: left;
+        cursor: pointer;
+        transition: background 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease;
+      }
+
+      .nav-link:hover {
+        border-color: var(--line);
+        color: var(--text);
+        background: rgb(255 255 255 / 4%);
+      }
+
+      .nav-link:active { transform: translateY(1px); }
+
+      .nav-link.is-active {
+        border-color: rgb(158 211 106 / 44%);
+        color: var(--accent-strong);
+        background: rgb(158 211 106 / 12%);
+      }
+
+      .nav-link .label-wrap {
+        display: flex;
+        align-items: center;
+        gap: .65rem;
+        min-width: 0;
+      }
+
+      .nav-glyph {
+        display: grid;
+        flex: 0 0 24px;
+        place-items: center;
+        width: 24px;
+        height: 24px;
+        border: 1px solid currentColor;
+        border-radius: 7px;
+        font-size: .63rem;
+        font-weight: 800;
+      }
+
+      .nav-link small {
+        color: var(--muted);
+        font-size: .7rem;
+      }
+
+      .nav-foot {
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--line);
+      }
+
+      .main {
+        min-width: 0;
+        padding: clamp(1.25rem, 4vw, 3.5rem);
+      }
+
+      .main-inner {
+        width: min(100%, 1100px);
+        margin: 0 auto;
+      }
+
+      .breadcrumb {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .45rem;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        color: var(--muted);
+        font-size: .8rem;
+      }
+
+      .breadcrumb span:last-child { color: var(--muted-strong); }
+
+      .page-head {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .page-head h1 {
+        max-width: 760px;
+        margin: 0;
+        font-size: clamp(2rem, 4vw, 3.7rem);
+        line-height: 1.02;
+        letter-spacing: -.055em;
+      }
+
+      .page-head p {
+        max-width: 620px;
+        margin: .85rem 0 0;
+        color: var(--muted);
+        font-size: 1rem;
+      }
+
+      .route-chip {
+        flex: 0 0 auto;
+        padding: .5rem .7rem;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        color: var(--muted);
+        background: var(--panel-soft);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: .72rem;
+      }
+
+      .callout {
+        display: flex;
+        align-items: flex-start;
+        gap: .85rem;
+        margin-bottom: 1.5rem;
+        padding: 1rem 1.1rem;
+        border-left: 3px solid var(--accent);
+        border-radius: 0 var(--radius) var(--radius) 0;
+        background: rgb(158 211 106 / 8%);
+      }
+
+      .callout strong { display: block; margin-bottom: .15rem; }
+      .callout p { margin: 0; color: var(--muted-strong); font-size: .9rem; }
+
+      .section-grid {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 1rem;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: linear-gradient(145deg, var(--panel-raised), var(--panel));
+        box-shadow: var(--shadow);
+      }
+
+      .panel.pad { padding: 1.25rem; }
+      .span-8 { grid-column: span 8; }
+      .span-7 { grid-column: span 7; }
+      .span-6 { grid-column: span 6; }
+      .span-5 { grid-column: span 5; }
+      .span-4 { grid-column: span 4; }
+      .span-3 { grid-column: span 3; }
+      .span-12 { grid-column: 1 / -1; }
+
+      .panel h2,
+      .panel h3 { margin: 0; letter-spacing: -.025em; }
+      .panel h2 { font-size: 1.25rem; }
+      .panel h3 { font-size: 1rem; }
+      .panel p { color: var(--muted); }
+
+      .panel-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .panel-header p { margin: .35rem 0 0; font-size: .86rem; }
+
+      .metric {
+        min-height: 132px;
+        padding: 1.1rem;
+      }
+
+      .metric strong {
+        display: block;
+        margin-top: .8rem;
+        font-size: 1.65rem;
+        letter-spacing: -.04em;
+      }
+
+      .metric span { color: var(--muted); font-size: .8rem; }
+
+      .course-row,
+      .admin-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .course-row:first-of-type,
+      .admin-row:first-of-type { padding-top: 0; border-top: 0; }
+
+      .course-row strong,
+      .admin-row strong { display: block; }
+
+      .course-row p,
+      .admin-row p { margin: .25rem 0 0; font-size: .82rem; }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: .6rem .85rem;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        color: var(--text);
+        background: var(--panel-soft);
+        cursor: pointer;
+        font-size: .82rem;
+        font-weight: 750;
+        transition: background 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease;
+      }
+
+      .button:hover { border-color: var(--accent); background: rgb(158 211 106 / 10%); }
+      .button:active { transform: translateY(1px); }
+      .button.primary { border-color: var(--accent); color: var(--accent-ink); background: var(--accent); }
+      .button.primary:hover { border-color: var(--accent-strong); background: var(--accent-strong); }
+
+      .rule-list {
+        display: grid;
+        gap: .75rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .rule-list li {
+        display: grid;
+        grid-template-columns: 28px 1fr;
+        gap: .7rem;
+        align-items: start;
+        color: var(--muted-strong);
+        font-size: .88rem;
+      }
+
+      .rule-list b {
+        display: grid;
+        place-items: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 8px;
+        color: var(--accent-ink);
+        background: var(--accent);
+        font-size: .75rem;
+      }
+
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: .75rem;
+      }
+
+      .flow-step {
+        position: relative;
+        min-height: 150px;
+        padding: 1rem;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--panel-soft);
+      }
+
+      .flow-step::after {
+        position: absolute;
+        top: 1.4rem;
+        right: -1rem;
+        color: var(--accent);
+        content: ">";
+        font-size: 1.1rem;
+        font-weight: 800;
+      }
+
+      .flow-step:last-child::after { display: none; }
+      .flow-step b { display: block; margin-bottom: .55rem; color: var(--accent-strong); }
+      .flow-step strong { display: block; margin-bottom: .35rem; }
+      .flow-step p { margin: 0; color: var(--muted); font-size: .8rem; }
+
+      .muted { color: var(--muted); }
+      .success { color: var(--accent-strong); }
+      .danger { color: var(--danger); }
+
+      .focus-footer {
+        margin-top: 2rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid var(--line);
+      }
+
+      .focus-footer p { max-width: 720px; margin: .45rem 0 0; color: var(--muted); font-size: .86rem; }
+
+      @media (max-width: 900px) {
+        .topbar { flex-wrap: wrap; padding: .75rem 1rem; }
+        .prototype-label { display: none; }
+        .brand { min-width: auto; }
+        .role-switch { order: 3; width: 100%; margin-left: 0; overflow-x: auto; }
+        .role-switch button { flex: 1 0 auto; }
+        .app-frame { grid-template-columns: 230px minmax(0, 1fr); }
+        .span-8, .span-7, .span-6, .span-5, .span-4, .span-3 { grid-column: span 12; }
+      }
+
+      @media (max-width: 700px) {
+        .topbar { min-height: 64px; }
+        .mobile-menu { display: inline-flex; margin-left: auto; }
+        .app-frame { display: block; min-height: calc(100dvh - 64px); }
+        .sidebar {
+          position: fixed;
+          inset: 64px auto 0 0;
+          z-index: 15;
+          width: min(86vw, 310px);
+          height: calc(100dvh - 64px);
+          background: rgb(24 32 34);
+          transform: translateX(-105%);
+          transition: transform 180ms ease;
+          box-shadow: 20px 0 50px rgb(0 0 0 / 35%);
+        }
+        .sidebar.is-open { transform: translateX(0); }
+        .mobile-scrim {
+          position: fixed;
+          inset: 64px 0 0;
+          z-index: 14;
+          display: block;
+          border: 0;
+          background: rgb(4 8 9 / 90%);
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 180ms ease;
+        }
+        .mobile-scrim.is-open {
+          opacity: 1;
+          pointer-events: auto;
+        }
+        .main { padding: 1.25rem 1rem 2rem; }
+        .page-head { display: block; }
+        .route-chip { display: inline-flex; margin-top: 1rem; }
+        .flow { grid-template-columns: 1fr; }
+        .flow-step::after { top: auto; right: auto; bottom: -.8rem; left: 50%; content: "↓"; }
+        .flow-step:last-child::after { display: none; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          scroll-behavior: auto !important;
+          transition-duration: .01ms !important;
+          animation-duration: .01ms !important;
+          animation-iteration-count: 1 !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="prototype">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="StartKiter UX 原型首頁">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span>StartKiter</span>
+        </a>
+        <span class="prototype-label">導覽重構 UX 對焦原型</span>
+        <div class="role-switch" role="tablist" aria-label="切換角色預覽">
+          <button type="button" role="tab" data-role="learner" aria-selected="true">學員</button>
+          <button type="button" role="tab" data-role="course-admin" aria-selected="false">課程管理員</button>
+          <button type="button" role="tab" data-role="super-admin" aria-selected="false">總管理員</button>
+        </div>
+        <button class="mobile-menu" type="button" aria-expanded="false" aria-controls="sidebar">選單</button>
+      </header>
+
+      <div class="app-frame">
+        <aside class="sidebar" id="sidebar" aria-label="主要導覽"></aside>
+        <button class="mobile-scrim" type="button" aria-label="關閉選單"></button>
+
+        <main class="main">
+          <div class="main-inner">
+            <div class="breadcrumb" id="breadcrumb"></div>
+            <section id="screen" aria-live="polite"></section>
+
+            <section class="focus-footer" aria-label="本次 UX 對焦規則">
+              <h2>這份原型要確認的規則</h2>
+              <p>角色決定看到哪一套選單。工作區決定進入哪一個功能。不要把不同角色、不同層級的功能同時攤在同一個畫面。</p>
+            </section>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      const roles = {
+        learner: {
+          label: "學員",
+          context: "學員工作區",
+          description: "只處理學習，不出現任何管理員選單。",
+          route: "/course",
+          breadcrumb: ["學員工作區", "我的課程"],
+          groups: [
+            { title: "學習", items: [
+              ["首頁", "學", "learner-home"],
+              ["我的課程", "課", "learner-course"],
+              ["客服", "服", "learner-support"],
+              ["AI 助手", "AI", "learner-ai"]
+            ] }
+          ],
+          footer: [["帳號設定", "設", "learner-settings"]]
+        },
+        "course-admin": {
+          label: "課程管理員",
+          context: "課程管理員工作區",
+          description: "只處理課程內容與教學體驗，不攤開總管理員功能。",
+          route: "/admin/course",
+          breadcrumb: ["總管理員", "課程", "課程管理員"],
+          groups: [
+            { title: "課程", items: [
+              ["課程總覽", "總", "course-dashboard"],
+              ["課程內容", "內", "course-content"],
+              ["章節與單元", "章", "course-lessons"],
+              ["課後測驗", "測", "course-quiz"],
+              ["課程作業", "作", "course-assignment"],
+              ["評價與留言", "評", "course-review"],
+              ["媒體庫", "媒", "course-media"]
+            ] },
+            { title: "課程工具", items: [
+              ["預覽學員教室", "預", "course-preview"],
+              ["課程設定", "設", "course-settings"]
+            ] }
+          ],
+          footer: [["返回總管理員", "回", "super-overview", "super-admin"]]
+        },
+        "super-admin": {
+          label: "總管理員",
+          context: "總管理員工作區",
+          description: "只處理全站帳號、交易、組織與系統設定。",
+          route: "/admin",
+          breadcrumb: ["總管理員", "總覽"],
+          groups: [
+            { title: "全站管理", items: [
+              ["總覽", "總", "super-overview"],
+              ["帳號與權限", "帳", "super-users"],
+              ["訂單管理", "單", "super-orders"],
+              ["營收報表", "營", "super-revenue"],
+              ["金流設定", "金", "super-payments"],
+              ["組織管理", "組", "super-organizations"],
+              ["系統設定", "系", "super-settings"]
+            ] },
+            { title: "其他工作區", items: [
+              ["課程管理", "課", "course-dashboard", "course-admin"]
+            ] }
+          ],
+          footer: [["帳號設定", "設", "super-settings"]]
+        }
+      };
+
+      const screens = {
+        "learner-home": {
+          title: "今天從哪一堂開始？",
+          subtitle: "學員登入後只看到學習入口。管理員功能不在這個工作區。",
+          route: "/app",
+          content: `
+            <div class="callout"><div><strong>學員視角</strong><p>這裡沒有「後台設定」、用戶、訂單、營收、金流或組織管理。</p></div></div>
+            <div class="section-grid">
+              <article class="panel pad span-8"><div class="panel-header"><div><h2>我的課程</h2><p>接續上次進度，直接回到教學內容。</p></div><span class="success">可學習</span></div><div class="course-row"><div><strong>開站包是什麼、為什麼要買斷</strong><p>第 1 單元 · 尚未開始</p></div><button class="button primary" data-screen="learner-course">開始學習</button></div><div class="course-row"><div><strong>站殼、登入與結帳路徑</strong><p>第 2 單元 · 尚未開始</p></div><button class="button" data-screen="learner-course">查看課程</button></div></article>
+              <article class="panel pad span-4"><h2>學習入口</h2><ul class="rule-list" style="margin-top:1rem"><li><b>課</b><span>我的課程</span></li><li><b>服</b><span>客服支援</span></li><li><b>AI</b><span>學習助理</span></li></ul></article>
+            </div>
+          `
+        },
+        "learner-course": {
+          title: "我的課程",
+          subtitle: "學員只看課程內容與學習工具。",
+          route: "/course",
+          content: `<div class="section-grid"><article class="panel pad span-8"><div class="panel-header"><div><h2>開站包是什麼、為什麼要買斷</h2><p>3 個單元 · 目前進度 0%</p></div><span class="route-chip">/course</span></div><div class="course-row"><div><strong>1. 開站包是什麼、為什麼要買斷</strong><p>課程定位與產品邊界</p></div><button class="button primary">開始觀看</button></div><div class="course-row"><div><strong>2. 站殼、登入與結帳路徑</strong><p>理解整個產品怎麼運作</p></div><button class="button">查看單元</button></div><div class="course-row"><div><strong>3. 課程模組與權限閘門</strong><p>理解學員與管理員的分工</p></div><button class="button">查看單元</button></div></article><article class="panel pad span-4"><h2>學習提醒</h2><p>完成單元後，才會在這裡看到進度與回饋。</p><button class="button" data-screen="learner-support">需要客服協助</button></article></div>`
+        },
+        "learner-support": {
+          title: "客服",
+          subtitle: "學員只看到支援入口，不看到客服系統管理功能。",
+          route: "/support",
+          content: `<div class="section-grid"><article class="panel pad span-7"><h2>需要協助？</h2><p>描述你在課程或帳號遇到的問題，客服會從這裡接手。</p><button class="button primary">建立客服訊息</button></article><article class="panel pad span-5"><h2>常見入口</h2><ul class="rule-list" style="margin-top:1rem"><li><b>課</b><span>回到我的課程</span></li><li><b>帳</b><span>查看帳號設定</span></li></ul></article></div>`
+        },
+        "learner-ai": { title: "AI 助手", subtitle: "只回答學員自己的訂單與課程進度。", route: "/ai", content: `<article class="panel pad"><h2>學習助理</h2><p>這裡保留 AI 學習問答，不出現任何管理員控制項。</p><div class="callout" style="margin-top:1.2rem;margin-bottom:0"><div><strong>權限邊界</strong><p>只能查自己的資料，不能改課程、訂單或系統設定。</p></div></div></article>` },
+        "learner-settings": { title: "帳號設定", subtitle: "只處理自己的個人資料與安全性。", route: "/settings/general", content: `<article class="panel pad span-7"><h2>你的帳號</h2><div class="admin-row"><div><strong>名稱</strong><p>fish yu</p></div><button class="button">編輯</button></div><div class="admin-row"><div><strong>Email</strong><p>fish@fishot.com</p></div><button class="button">安全性</button></div></article>` },
+        "course-dashboard": {
+          title: "課程管理員",
+          subtitle: "點擊「課程」後只進入這個工作區。總管理員的帳號、訂單、營收、金流與組織功能不在這裡。",
+          route: "/admin/course",
+          content: `<div class="callout"><div><strong>單一功能上下文</strong><p>現在只有課程管理選單。頁面內不再重複一套水平管理選單。</p></div></div><div class="section-grid"><article class="panel pad span-8"><div class="panel-header"><div><h2>管理中的課程</h2><p>課程內容、章節、單元與學習體驗都從這裡進入。</p></div><button class="button primary">新增課程</button></div><div class="course-row"><div><strong>電馭學院官方全套實戰課</strong><p>3 章 · 12 單元 · 已發布</p></div><button class="button" data-screen="course-content">管理課程</button></div></article><article class="panel pad span-4"><h2>課程工作區</h2><ul class="rule-list" style="margin-top:1rem"><li><b>內</b><span>編輯課程內容</span></li><li><b>章</b><span>編排章節與單元</span></li><li><b>預</b><span>預覽學員教室</span></li></ul></article></div>`
+        },
+        "course-content": { title: "課程內容", subtitle: "課程管理員只處理教學內容，不需要穿過總管理員選單。", route: "/admin/course/content", content: `<div class="section-grid"><article class="panel pad span-8"><div class="panel-header"><div><h2>電馭學院官方全套實戰課</h2><p>目前選取：課程內容</p></div><button class="button primary">儲存變更</button></div><div class="course-row"><div><strong>第一章：產品定位</strong><p>4 個單元 · 已發布</p></div><button class="button">編輯章節</button></div><div class="course-row"><div><strong>第二章：站殼與登入</strong><p>4 個單元 · 草稿</p></div><button class="button">編輯章節</button></div><div class="course-row"><div><strong>第三章：權限與模組</strong><p>4 個單元 · 草稿</p></div><button class="button">編輯章節</button></div></article><article class="panel pad span-4"><h2>這裡不出現</h2><p class="danger">帳號與權限、訂單、營收、金流、組織。</p><p>這些屬於總管理員工作區。</p></article></div>` },
+        "course-lessons": { title: "章節與單元", subtitle: "把課程編排工作集中在課程管理員工作區。", route: "/admin/course/lessons", content: `<article class="panel pad"><h2>課程大綱</h2><div class="course-row"><div><strong>第一章：產品定位</strong><p>4 個單元</p></div><button class="button">展開</button></div><div class="course-row"><div><strong>第二章：站殼與登入</strong><p>4 個單元</p></div><button class="button">展開</button></div><div class="course-row"><div><strong>第三章：權限與模組</strong><p>4 個單元</p></div><button class="button">展開</button></div></article>` },
+        "course-quiz": { title: "課後測驗", subtitle: "測驗是課程工具，不需要跳到總管理員介面。", route: "/admin/course/quiz", content: `<article class="panel pad"><div class="panel-header"><div><h2>課後測驗</h2><p>建立與管理課程內的理解檢查。</p></div><button class="button primary">新增測驗</button></div><div class="course-row"><div><strong>第三章課後測驗</strong><p>4 題 · 草稿</p></div><button class="button">編輯</button></div></article>` },
+        "course-assignment": { title: "課程作業", subtitle: "課程作業留在課程管理員工作區。", route: "/admin/course/assignment", content: `<article class="panel pad"><div class="panel-header"><div><h2>課程作業</h2><p>建立、編輯與查看作業回應。</p></div><button class="button primary">新增作業</button></div><div class="course-row"><div><strong>我的第一個開站決策</strong><p>已發布 · 0 份提交</p></div><button class="button">查看</button></div></article>` },
+        "course-review": { title: "評價與留言", subtitle: "只看課程相關的學員回饋。", route: "/admin/course/review", content: `<article class="panel pad"><h2>課程回饋</h2><div class="course-row"><div><strong>目前沒有待處理回饋</strong><p>新評價與留言會在這裡出現。</p></div><span class="success">正常</span></div></article>` },
+        "course-media": { title: "媒體庫", subtitle: "管理課程使用的影片與圖片。", route: "/admin/course/media", content: `<article class="panel pad"><div class="panel-header"><div><h2>課程媒體</h2><p>只顯示課程內容使用中的素材。</p></div><button class="button primary">新增媒體</button></div><div class="course-row"><div><strong>課程封面</strong><p>圖片 · 使用中</p></div><button class="button">查看引用</button></div></article>` },
+        "course-preview": { title: "預覽學員教室", subtitle: "用學員視角檢查課程，不離開課程管理員工作區。", route: "/course/preview", content: `<article class="panel pad"><div class="callout" style="margin-bottom:0"><div><strong>預覽模式</strong><p>右上角仍保留返回課程管理員的單一入口。預覽內容不會出現總管理員選單。</p></div></div></article>` },
+        "course-settings": { title: "課程設定", subtitle: "調整課程顯示與權限，不混入全站設定。", route: "/admin/course/settings", content: `<article class="panel pad"><h2>課程設定</h2><div class="admin-row"><div><strong>課程狀態</strong><p>已發布</p></div><button class="button">變更</button></div><div class="admin-row"><div><strong>課程權限</strong><p>依購買資格開放</p></div><button class="button">檢視</button></div></article>` },
+        "super-overview": { title: "總管理員總覽", subtitle: "全站營運入口。課程是另一個工作區，不把課程子選單攤在這裡。", route: "/admin", content: `<div class="callout"><div><strong>總管理員視角</strong><p>這裡只管理全站。要管理課程，點擊「進入課程管理員」，系統會切換到另一套導覽。</p></div></div><div class="section-grid"><article class="panel pad span-4 metric"><span>帳號與權限</span><strong>12 位使用者</strong><button class="button" style="margin-top:.7rem" data-screen="super-users">管理帳號</button></article><article class="panel pad span-4 metric"><span>交易與營收</span><strong>訂單與報表</strong><button class="button" style="margin-top:.7rem" data-screen="super-orders">查看交易</button></article><article class="panel pad span-4 metric"><span>課程工作區</span><strong>獨立管理</strong><button class="button primary" style="margin-top:.7rem" data-role="course-admin" data-screen="course-dashboard">進入課程管理員</button></article><article class="panel pad span-12"><h2>角色與工作區分開</h2><div class="flow" style="margin-top:1rem"><div class="flow-step"><b>學員</b><strong>只看學習</strong><p>課程、客服、AI、帳號。</p></div><div class="flow-step"><b>課程管理員</b><strong>只看課程</strong><p>內容、章節、測驗、作業、媒體。</p></div><div class="flow-step"><b>總管理員</b><strong>只看全站</strong><p>帳號、訂單、營收、金流、組織。</p></div></div></article></div>` },
+        "super-users": { title: "帳號與權限", subtitle: "總管理員只保留一個帳號入口，角色、權限與成員放在同一個上下文。", route: "/admin/users", content: `<article class="panel pad"><div class="panel-header"><div><h2>成員與權限</h2><p>不再同時出現「後台設定」、「用戶」、「組織管理」等重複入口。</p></div><button class="button primary">新增成員</button></div><div class="admin-row"><div><strong>fish yu</strong><p>總管理員 · fish@fishot.com</p></div><button class="button">查看權限</button></div><div class="admin-row"><div><strong>課程講師</strong><p>課程管理員 · 只可進入課程工作區</p></div><button class="button">查看權限</button></div></article>` },
+        "super-orders": { title: "訂單與營收", subtitle: "交易功能集中在總管理員工作區，不和課程內容混在一起。", route: "/admin/orders", content: `<div class="section-grid"><article class="panel pad span-6"><h2>訂單管理</h2><p>付款狀態、退款與訂單查詢。</p><button class="button primary">查看訂單</button></article><article class="panel pad span-6"><h2>營收報表</h2><p>付款統計與營收結算。</p><button class="button">查看報表</button></article></div>` },
+        "super-revenue": { title: "營收報表", subtitle: "全站營運數據。", route: "/admin/revenue", content: `<article class="panel pad"><h2>營收報表</h2><p>這裡只放總管理員需要的營運資料。</p></article>` },
+        "super-payments": { title: "金流設定", subtitle: "全站結帳與付款服務設定。", route: "/admin/settings/checkout-gateway", content: `<article class="panel pad"><h2>金流設定</h2><p>這是總管理員功能，不會出現在課程管理員介面。</p></article>` },
+        "super-organizations": { title: "組織管理", subtitle: "全站組織與成員範圍。", route: "/admin/organizations", content: `<article class="panel pad"><h2>組織管理</h2><p>這是全站管理功能，與課程內容分開。</p></article>` },
+        "super-settings": { title: "系統設定", subtitle: "全站設定集中在總管理員工作區。", route: "/admin/settings", content: `<article class="panel pad"><h2>系統設定</h2><p>帳號、金流、通知與平台設定從這裡管理，不在課程選單重複出現。</p></article>` }
+      };
+
+      const state = { role: "learner", screen: "learner-home" };
+      const sidebar = document.querySelector("#sidebar");
+      const screen = document.querySelector("#screen");
+      const breadcrumb = document.querySelector("#breadcrumb");
+      const mobileMenu = document.querySelector(".mobile-menu");
+      const mobileScrim = document.querySelector(".mobile-scrim");
+
+      function currentScreen() {
+        return screens[state.screen] || screens[roles[state.role].groups[0].items[0][2]];
+      }
+
+      function setRole(role, screenId) {
+        state.role = role;
+        state.screen = screenId || (role === "learner" ? "learner-home" : role === "course-admin" ? "course-dashboard" : "super-overview");
+        render();
+        sidebar.classList.remove("is-open");
+        mobileScrim.classList.remove("is-open");
+        mobileMenu.setAttribute("aria-expanded", "false");
+      }
+
+      function linkMarkup(item) {
+        const [label, glyph, screenId, role] = item;
+        const active = state.screen === screenId;
+        return `<button class="nav-link${active ? " is-active" : ""}" type="button" data-screen="${screenId}"${role ? ` data-role="${role}"` : ""} aria-current="${active ? "page" : "false"}"><span class="label-wrap"><span class="nav-glyph" aria-hidden="true">${glyph}</span><span>${label}</span></span>${screenId === "course-dashboard" && state.role === "super-admin" ? "<small>切換</small>" : ""}</button>`;
+      }
+
+      function renderSidebar() {
+        const config = roles[state.role];
+        const groups = config.groups.map(group => `<section class="nav-group"><h2 class="nav-group-title">${group.title}</h2>${group.items.map(linkMarkup).join("")}</section>`).join("");
+        const footer = config.footer.map(linkMarkup).join("");
+        sidebar.innerHTML = `<div class="context-card"><div class="eyebrow">目前工作區</div><strong>${config.context}</strong><p>${config.description}</p></div>${groups}<div class="nav-foot">${footer}</div>`;
+      }
+
+      function renderScreen() {
+        const config = roles[state.role];
+        const view = currentScreen();
+        breadcrumb.innerHTML = config.breadcrumb.map((item, index) => `<span>${item}</span>${index < config.breadcrumb.length - 1 ? "<span aria-hidden=\"true\">/</span>" : ""}`).join("");
+        screen.innerHTML = `<div class="page-head"><div><h1>${view.title}</h1><p>${view.subtitle}</p></div><span class="route-chip">${view.route}</span></div>${view.content}`;
+      }
+
+      function renderRoleButtons() {
+        document.querySelectorAll("[data-role]").forEach(button => {
+          if (button.getAttribute("role") !== "tab") return;
+          button.setAttribute("aria-selected", button.dataset.role === state.role ? "true" : "false");
+        });
+      }
+
+      function render() {
+        renderSidebar();
+        renderScreen();
+        renderRoleButtons();
+      }
+
+      document.addEventListener("click", event => {
+        const trigger = event.target.closest("[data-screen], [data-role]");
+        if (!trigger) return;
+        const role = trigger.dataset.role || state.role;
+        setRole(role, trigger.dataset.screen);
+      });
+
+      mobileMenu.addEventListener("click", () => {
+        const open = sidebar.classList.toggle("is-open");
+        mobileScrim.classList.toggle("is-open", open);
+        mobileMenu.setAttribute("aria-expanded", String(open));
+      });
+
+      mobileScrim.addEventListener("click", () => {
+        sidebar.classList.remove("is-open");
+        mobileScrim.classList.remove("is-open");
+        mobileMenu.setAttribute("aria-expanded", "false");
+      });
+
+      render();
+    </script>
+  </body>
+</html>
