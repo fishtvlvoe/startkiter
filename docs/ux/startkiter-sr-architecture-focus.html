@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="StartKiter 接下來 SR 的產品、模組、權限、UI、Skill、測試與驗收架構對焦頁" />
-    <title>StartKiter SR 全局架構對焦</title>
+    <meta name="description" content="StartKiter 接下來 SR 的產品、App、使用者、管理員、設定、測試與上線架構對焦頁" />
+    <title>StartKiter SR 整體架構對焦</title>
     <style>
       :root {
         color-scheme: dark;
@@ -1001,14 +1001,14 @@
       <header class="topbar">
         <a class="brand" href="#top" aria-label="回到頁面頂端">
           <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
-          <span>StartKiter · SR 全局架構</span>
+          <span>StartKiter · SR 整體架構</span>
         </a>
         <nav class="topnav" aria-label="對焦頁索引">
           <a href="#map">總圖</a>
-          <a href="#architecture">模組骨架</a>
+          <a href="#architecture">功能怎麼組合</a>
           <a href="#roles">角色與設定</a>
           <a href="#sr-lane">SR 順序</a>
-          <a href="#gates">驗收閘門</a>
+          <a href="#gates">完成標準</a>
         </nav>
         <span class="status-mark">規則對焦版</span>
       </header>
@@ -1016,9 +1016,9 @@
       <main id="top" class="content">
         <section class="hero" aria-labelledby="page-title">
           <div>
-            <div class="eyebrow">SR architecture focus · 2026.09.21</div>
+            <div class="eyebrow">SR 整體架構對焦 · 2026.09.21</div>
             <h1 id="page-title">讓每張 SR 都接在同一條 <em>產品骨架</em> 上</h1>
-            <p class="hero-copy">這不是單純換版面。這張圖先把產品邊界、獨立 App 模組、資料與權限、角色工作區、設定入口、開發 Skill、測試、部署與驗收放回同一張地圖。</p>
+            <p class="hero-copy">這不是單純換版面。這張圖先把產品邊界、獨立 App 功能、資料與使用資格、角色畫面、設定入口、開發規則、測試、上線與確認放回同一張地圖。</p>
           </div>
           <aside class="hero-note" aria-label="本次固定規則">
             <div class="note-label">本次固定規則</div>
@@ -1030,18 +1030,18 @@
         <section class="rule-strip" aria-label="三個產品判斷">
           <article>
             <span class="rule-index">01 / 邊界</span>
-            <strong>每個功能都是獨立 module</strong>
-            <p>模組自帶路由、權限、選單、翻譯、SVG icon 與測試。</p>
+            <strong>每個 App 功能都能獨立運作</strong>
+            <p>每個功能都有自己的進入位置、使用資格、選單、文字、圖示與檢查。</p>
           </article>
           <article>
             <span class="rule-index">02 / 組合</span>
-            <strong>平台外殼只負責組合</strong>
-            <p>Shell 不重寫每個功能的畫面，只讀 module contract。</p>
+            <strong>平台只負責把功能組合起來</strong>
+            <p>平台不用重做每個功能，只按照共同規則把它接起來。</p>
           </article>
           <article>
             <span class="rule-index">03 / 證據</span>
-            <strong>完成不是 build 綠燈</strong>
-            <p>要通過測試、部署後瀏覽器、角色、語系、主題與手機驗收。</p>
+            <strong>自動檢查通過不代表完成</strong>
+            <p>還要實際操作不同角色、語言、主題與手機畫面。</p>
           </article>
         </section>
 
@@ -1049,7 +1049,7 @@
           <div class="section-heading">
             <div>
               <div class="eyebrow">總架構</div>
-              <h2 id="map-title">一張 SR 從決策走到可賣產品</h2>
+              <h2 id="map-title">一張 SR 從決定走到可以上線</h2>
             </div>
             <p>點擊每一層，查看它負責什麼、不能越界什麼。</p>
           </div>
@@ -1062,65 +1062,65 @@
             </button>
             <button class="flow-button" type="button" role="tab" aria-selected="false" data-step="1">
               <span class="flow-number">02</span>
-              <strong>Module contract</strong>
-              <span>功能如何被平台辨識與掛載</span>
+              <strong>功能共同規則</strong>
+              <span>功能如何加入平台、放在哪裡與確認是否正常</span>
             </button>
             <button class="flow-button" type="button" role="tab" aria-selected="false" data-step="2">
               <span class="flow-number">03</span>
-              <strong>角色工作區</strong>
+              <strong>角色看到的畫面</strong>
               <span>誰看得到什麼，一次只出現一套</span>
             </button>
             <button class="flow-button" type="button" role="tab" aria-selected="false" data-step="3">
               <span class="flow-number">04</span>
-              <strong>資料與權限</strong>
-              <span>畫面隱藏不等於後端授權</span>
+              <strong>資料與使用資格</strong>
+              <span>畫面隱藏不代表資料真的安全</span>
             </button>
             <button class="flow-button" type="button" role="tab" aria-selected="false" data-step="4">
               <span class="flow-number">05</span>
               <strong>使用者體驗</strong>
-              <span>UI、設定、語系、主題、SVG</span>
+              <span>畫面、設定、語言、主題、圖示</span>
             </button>
             <button class="flow-button" type="button" role="tab" aria-selected="false" data-step="5">
               <span class="flow-number">06</span>
               <strong>證明與交付</strong>
-              <span>測試、ego、部署、回滾證據</span>
+              <span>測試、實際操作、上線與退回上一版的紀錄</span>
             </button>
           </div>
           <div class="flow-detail" role="status" aria-live="polite">
             <span class="detail-icon"><svg class="icon" aria-hidden="true"><use href="#i-structure"></use></svg></span>
-            <div><strong id="step-title">產品邊界</strong><p id="step-copy">先寫清楚這張 SR 的目標、範圍、依賴與不處理的事，避免開發途中把 UI 問題擴成整個平台重做。</p></div>
-            <span id="step-tag" class="detail-tag">proposal / scope</span>
+            <div><strong id="step-title">產品邊界</strong><p id="step-copy">先寫清楚這張 SR 的目標、範圍、前後順序與不處理的事，避免開發途中把畫面問題擴成整個平台重做。</p></div>
+            <span id="step-tag" class="detail-tag">範圍</span>
           </div>
         </section>
 
         <section id="architecture" class="section" aria-labelledby="architecture-title">
           <div class="section-heading">
             <div>
-              <div class="eyebrow">模組骨架</div>
-              <h2 id="architecture-title">功能獨立，平台統一接線</h2>
+              <div class="eyebrow">功能怎麼組合</div>
+              <h2 id="architecture-title">功能獨立，平台負責組合</h2>
             </div>
-            <p>學生新增 App 模組時，知道自己要負責哪一段，也知道不能直接碰哪一段。</p>
+            <p>之後新增 App 功能時，知道自己要負責哪一段，也知道不能直接碰哪一段。</p>
           </div>
 
           <div class="architecture">
             <article class="architecture-panel">
-              <h3><svg class="icon" aria-hidden="true"><use href="#i-code"></use></svg>每個 module 自己帶的東西</h3>
+              <h3><svg class="icon" aria-hidden="true"><use href="#i-code"></use></svg>每個 App 功能自己帶的東西</h3>
               <ul class="layer-list">
-                <li><b>業務與資料</b><span>自己的 domain、schema、server action 或 API 邊界</span></li>
-                <li><b>路由與權限</b><span>route、capability、route guard，不靠 UI 隱藏保護</span></li>
-                <li><b>選單宣告</b><span>workspace、一級 parent、子級 children、排序與 active route</span></li>
-                <li><b>可見內容</b><span>translation namespace、SVG icon light/dark 版本、semantic token</span></li>
-                <li><b>自己的證據</b><span>unit、component、locale、browser acceptance test</span></li>
+                <li><b>功能資料</b><span>只負責自己的資料與操作，不和其他 App 混在一起</span></li>
+                <li><b>進入位置與資格</b><span>誰能進入，系統要在真正入口檢查</span></li>
+                <li><b>選單位置</b><span>它要出現在哪個 App、哪個主選單與哪個子選單</span></li>
+                <li><b>文字與圖示</b><span>不同語言、淺色圖示、深色圖示與顏色規則</span></li>
+                <li><b>自己的檢查</b><span>自動檢查與實際操作都要有結果</span></li>
               </ul>
             </article>
 
             <article class="architecture-panel">
-              <h3><svg class="icon" aria-hidden="true"><use href="#i-stack-light"></use></svg>平台外殼統一負責的東西</h3>
+              <h3><svg class="icon" aria-hidden="true"><use href="#i-stack-light"></use></svg>平台統一負責的東西</h3>
               <div class="module-flow">
-                <div class="module-node"><span class="node-icon"><svg class="icon" aria-hidden="true"><use href="#i-stack-light"></use></svg></span><span><strong>Module registry</strong><small>收集並檢查 module manifest</small></span><span class="node-tag">registry</span></div>
-                <div class="module-node"><span class="node-icon"><svg class="icon" aria-hidden="true"><use href="#i-workspace"></use></svg></span><span><strong>Workspace resolver</strong><small>一次只選出一個角色工作區</small></span><span class="node-tag">resolver</span></div>
-                <div class="module-node"><span class="node-icon"><svg class="icon" aria-hidden="true"><use href="#i-structure"></use></svg></span><span><strong>Shell composer</strong><small>產生一級與子級選單，不重複渲染</small></span><span class="node-tag">shell</span></div>
-                <div class="module-node"><span class="node-icon"><svg class="icon" aria-hidden="true"><use href="#i-test"></use></svg></span><span><strong>Acceptance gates</strong><small>把規則變成測試與部署後證據</small></span><span class="node-tag">gates</span></div>
+                <div class="module-node"><span class="node-icon"><svg class="icon" aria-hidden="true"><use href="#i-stack-light"></use></svg></span><span><strong>功能清單</strong><small>收集並檢查所有 App 功能</small></span><span class="node-tag">清單</span></div>
+                <div class="module-node"><span class="node-icon"><svg class="icon" aria-hidden="true"><use href="#i-workspace"></use></svg></span><span><strong>畫面判斷</strong><small>判斷目前使用者該看到哪一套畫面</small></span><span class="node-tag">判斷</span></div>
+                <div class="module-node"><span class="node-icon"><svg class="icon" aria-hidden="true"><use href="#i-structure"></use></svg></span><span><strong>平台組合</strong><small>組合主選單與子選單，不重複出現</small></span><span class="node-tag">組合</span></div>
+                <div class="module-node"><span class="node-icon"><svg class="icon" aria-hidden="true"><use href="#i-test"></use></svg></span><span><strong>完成檢查</strong><small>把共同規則變成可以確認的結果</small></span><span class="node-tag">檢查</span></div>
               </div>
             </article>
           </div>
@@ -1160,7 +1160,7 @@
                 <button type="button" data-role="platform-admin" aria-pressed="false">總管理員</button>
               </div>
               <div class="role-explain" aria-live="polite">
-                <strong id="role-title">使用者工作區</strong>
+                <strong id="role-title">使用者介面</strong>
                 <p id="role-copy">在目前 App 內只看到使用者功能。帳號選單不出現「管理者設定」。</p>
               </div>
               <span class="control-label" style="margin-top: 1.4rem;">預覽主題</span>
@@ -1191,15 +1191,15 @@
         <section id="icons" class="section" aria-labelledby="icons-title">
           <div class="section-heading">
             <div>
-              <div class="eyebrow">視覺契約</div>
-              <h2 id="icons-title">SVG 是 module 的資產，不是頁面臨時畫出來的圖</h2>
+              <div class="eyebrow">圖示規則</div>
+              <h2 id="icons-title">圖示跟著 App 一起管理</h2>
             </div>
-            <p>同一個 icon id 保持幾何一致，淺色與深色各有自己的 SVG 版本。</p>
+            <p>同一個圖示在不同畫面保持一致，淺色和深色各有適合自己的版本。</p>
           </div>
 
           <div class="icon-contract">
             <article class="icon-variant light">
-              <div class="variant-label"><span>淺色版本</span><code>app.light.svg</code></div>
+              <div class="variant-label"><span>淺色圖示</span><code>給淺色畫面使用</code></div>
               <div class="icon-samples">
                 <span class="sample"><svg class="icon" aria-hidden="true"><use href="#i-book"></use></svg><span>App</span></span>
                 <span class="sample"><svg class="icon" aria-hidden="true"><use href="#i-user"></use></svg><span>帳號</span></span>
@@ -1208,7 +1208,7 @@
               </div>
             </article>
             <article class="icon-variant dark">
-              <div class="variant-label"><span>深色版本</span><code>app.dark.svg</code></div>
+              <div class="variant-label"><span>深色圖示</span><code>給深色畫面使用</code></div>
               <div class="icon-samples">
                 <span class="sample"><svg class="icon" aria-hidden="true"><use href="#i-book"></use></svg><span>App</span></span>
                 <span class="sample"><svg class="icon" aria-hidden="true"><use href="#i-user"></use></svg><span>帳號</span></span>
@@ -1223,36 +1223,36 @@
           <div class="section-heading">
             <div>
               <div class="eyebrow">建議 SR 順序</div>
-              <h2 id="sr-title">先固定骨架，再讓功能一個一個掛上去</h2>
+              <h2 id="sr-title">先固定架構，再讓功能一個一個加入</h2>
             </div>
             <p>每一張 SR 都有自己的完成條件，但不能跳過共同骨架。</p>
           </div>
 
           <div class="sr-lane">
-            <article class="sr-card active"><span class="sr-status">現在對焦</span><strong>SR-01 邊界與導航契約</strong><p>固定 workspace、module manifest、一級／子級選單與「只出現一套」的規則。</p></article>
-            <article class="sr-card"><span class="sr-status">依賴 SR-01</span><strong>SR-02 開發 Skill 與模組接線</strong><p>學生安裝後知道怎麼加功能，Skill 引導，型別與測試硬性把關。</p></article>
-            <article class="sr-card"><span class="sr-status">依賴 SR-02</span><strong>SR-03 帳號與偏好設定</strong><p>設定、主題、語系集中在帳號區，管理者設定只對管理者出現。</p></article>
-            <article class="sr-card"><span class="sr-status">依賴前面三張</span><strong>SR-04 真正 App 模組</strong><p>課程、內容、測驗、社群等 App 各自獨立，透過 contract 掛回平台。</p></article>
-            <article class="sr-card"><span class="sr-status">每張都要</span><strong>SR-05 部署與產品證據</strong><p>測試、ego-browser、手機與桌面、語系、主題、錯誤狀態與回滾證據。</p></article>
+            <article class="sr-card active"><span class="sr-status">現在對焦</span><strong>SR-01 名稱與使用範圍</strong><p>固定 App、使用者、App 管理員、總管理員，以及每個人能看到什麼。</p></article>
+            <article class="sr-card"><span class="sr-status">依賴 SR-01</span><strong>SR-02 新增 App 的規則</strong><p>讓拿到程式包的人知道怎麼加入新 App，不會破壞其他功能。</p></article>
+            <article class="sr-card"><span class="sr-status">依賴 SR-02</span><strong>SR-03 帳號與偏好設定</strong><p>設定、主題、語言集中在帳號區，管理者設定只對管理者出現。</p></article>
+            <article class="sr-card"><span class="sr-status">依賴前面三張</span><strong>SR-04 實際 App 功能</strong><p>課程、內容、測驗、社群等 App 各自獨立，再接回平台。</p></article>
+            <article class="sr-card"><span class="sr-status">每張都要</span><strong>SR-05 上線前確認</strong><p>桌機、手機、語言、主題、錯誤狀況與退回上一版都要確認。</p></article>
           </div>
         </section>
 
         <section id="gates" class="section" aria-labelledby="gates-title">
           <div class="section-heading">
             <div>
-              <div class="eyebrow">完成閘門</div>
+              <div class="eyebrow">完成標準</div>
               <h2 id="gates-title">每張 SR 都要留下這些證據</h2>
             </div>
             <p>沒有這些證據，只能說完成規劃，不能說功能完成。</p>
           </div>
 
           <div class="gate-grid">
-            <article class="gate"><span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-structure"></use></svg></span><div><strong>範圍清楚</strong><p>有目標、非目標、依賴與 rollback，不把未決議題藏在程式碼裡。</p></div></article>
-            <article class="gate"><span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-code"></use></svg></span><div><strong>模組有關聯</strong><p>route、permission、menu、i18n、SVG 與資料流可以從 manifest 找到。</p></div></article>
-            <article class="gate"><span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-user"></use></svg></span><div><strong>角色不越界</strong><p>每個 App 的使用者與該 App 管理員各看自己的工作區，平台層只有總管理員。</p></div></article>
-            <article class="gate"><span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-test"></use></svg></span><div><strong>自動檢查</strong><p>unit、component、locale、token 與 duplicate route 檢查通過。</p></div></article>
-            <article class="gate"><span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-rocket"></use></svg></span><div><strong>真實瀏覽器</strong><p>部署後以 ego-browser 驗證桌面、手機、語系、主題與每個可見入口。</p></div></article>
-            <article class="gate"><span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></span><div><strong>可回報</strong><p>commit、branch、驗證輸出與尚未驗證的部分分開說清楚。</p></div></article>
+            <article class="gate"><span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-structure"></use></svg></span><div><strong>範圍清楚</strong><p>有目標、暫時不做的事、前後順序與退回上一版的方法。</p></div></article>
+            <article class="gate"><span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-code"></use></svg></span><div><strong>每個 App 有自己的範圍</strong><p>可以看出 App 名稱、畫面、資料與哪些人能使用。</p></div></article>
+            <article class="gate"><span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-user"></use></svg></span><div><strong>角色不越界</strong><p>每個 App 的使用者與該 App 管理員各看自己的畫面，平台層只有總管理員。</p></div></article>
+            <article class="gate"><span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-test"></use></svg></span><div><strong>自動檢查</strong><p>系統會檢查重複的畫面、錯誤的角色與漏掉的語言文字。</p></div></article>
+            <article class="gate"><span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-rocket"></use></svg></span><div><strong>實際操作</strong><p>上線後用桌機與手機實際點過每個入口。</p></div></article>
+            <article class="gate"><span class="icon-wrap"><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg></span><div><strong>有紀錄</strong><p>清楚留下做了什麼、確認了什麼，還有哪些地方尚未確認。</p></div></article>
           </div>
         </section>
 
@@ -1269,10 +1269,10 @@
             <article class="boundary-panel">
               <h3>本架構會處理</h3>
               <ul>
-                <li><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg><span>角色工作區與一級／子級選單</span></li>
-                <li><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg><span>module manifest、Skill 與接線規則</span></li>
-                <li><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg><span>設定入口、主題、語系與 SVG icon contract</span></li>
-                <li><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg><span>測試、瀏覽器驗收、部署與回滾證據</span></li>
+                <li><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg><span>不同角色的畫面與一級／子級選單</span></li>
+                <li><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg><span>App 功能、開發規則與組合方式</span></li>
+                <li><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg><span>設定入口、主題、語言與圖示規則</span></li>
+                <li><svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg><span>測試、實際操作、上線與退回上一版</span></li>
               </ul>
             </article>
             <article class="boundary-panel out">
@@ -1280,16 +1280,16 @@
               <ul>
                 <li><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg><span>任一 App 的內容資料模型重做</span></li>
                 <li><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg><span>PAYUNi、Email、GitHub kit 履約</span></li>
-                <li><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg><span>學生自訂 CSS 或任意 HTML 注入</span></li>
-                <li><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg><span>把 demo 當成正式 runtime 的第二套真相</span></li>
+                <li><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg><span>任意修改畫面樣式或貼入外部內容</span></li>
+                <li><svg class="icon" aria-hidden="true"><use href="#i-x"></use></svg><span>把對焦頁當成正式系統的另一套版本</span></li>
               </ul>
             </article>
           </div>
         </section>
 
         <footer class="footer-note">
-          <strong>對焦結論：先定產品骨架，再做功能。</strong>
-          <span>本頁是 SR 設計對焦稿，不代表正式 app 已完成修改。</span>
+          <strong>對焦結論：先定產品架構，再做功能。</strong>
+          <span>本頁是 SR 設計對焦稿，不代表正式系統已完成修改。</span>
         </footer>
       </main>
     </div>
@@ -1297,12 +1297,12 @@
     <script>
       const root = document.documentElement;
       const stepData = [
-        ["產品邊界", "先寫清楚這張 SR 的目標、範圍、依賴與不處理的事，避免開發途中把 UI 問題擴成整個平台重做。", "proposal / scope"],
-        ["Module contract", "每個功能宣告自己的 route、workspace、permission、menu、translation namespace 與 SVG icon，不再靠 NavBar 內的手寫清單。", "manifest / contract"],
-        ["角色工作區", "resolver 先判斷 App、角色與路由，再產生唯一的工作區。使用者不看到管理選單，管理者才看到管理者設定。", "workspace / resolver"],
-        ["資料與權限", "UI 隱藏只負責體驗，route guard 與後端權限才負責安全。每個 module 的資料邊界要能被單獨測試。", "guard / data flow"],
-        ["使用者體驗", "設定放帳號區，主題與語系不是一級選單。SVG light/dark 版本由共用 Icon 元件選擇。", "settings / tokens"],
-        ["證明與交付", "測試、部署後 ego-browser、桌面與手機、三語系、三種主題與每個可見入口都要留下可核對證據。", "tests / ego / deploy"]
+        ["產品邊界", "先寫清楚這張 SR 的目標、範圍、前後順序與不處理的事，避免開發途中把畫面問題擴成整個平台重做。", "範圍"],
+        ["功能共同規則", "每個功能說清楚自己的名稱、進入位置、誰能使用、出現在哪個選單，以及需要哪些文字和圖示。", "功能規則"],
+        ["角色看到的畫面", "系統先判斷目前是哪個 App、誰在使用，再只顯示該看到的一套畫面。使用者不看到管理選單。", "畫面"],
+        ["資料與安全", "畫面看不到只是第一步，真正進入和修改資料時還要再次檢查使用資格。", "資料安全"],
+        ["使用者看到的內容", "設定放帳號區，主題與語言不放一級選單。淺色和深色圖示由系統自動選擇。", "設定與畫面"],
+        ["確認與交付", "桌機、手機、不同角色、語言、主題與每個可見入口都要實際確認。", "測試與上線"]
       ];
 
       const stepTitle = document.querySelector("#step-title");
@@ -1343,7 +1343,7 @@
         const isPlatformAdmin = currentRole === "platform-admin";
         const appAdminLabel = `${currentAppName}管理員`;
         document.querySelector('[data-role="app-admin"]').textContent = appAdminLabel;
-        roleTitle.textContent = isPlatformAdmin ? "總管理員工作區" : isAppAdmin ? `${appAdminLabel}工作區` : "使用者工作區";
+        roleTitle.textContent = isPlatformAdmin ? "總管理員介面" : isAppAdmin ? `${appAdminLabel}介面` : "使用者介面";
         roleCopy.textContent = isPlatformAdmin
           ? `管理整個平台與所有 App。進入 ${currentAppName} 時，不把其他 App 的子功能重複塞進來。`
           : isAppAdmin
