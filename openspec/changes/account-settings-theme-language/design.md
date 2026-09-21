@@ -2,6 +2,10 @@
 
 `role-based-workspace-navigation` 已固定「哪個角色看到哪個一級／子級選單」，但帳號選單（螢幕左下角，顯示使用者頭像與名稱的區域）目前沒有統一契約：既有 `NavBar.tsx` 把深色文字寫成 hardcoded class，主題切換不等於整個 UI 使用一致的語意色彩；語言切換後曾出現主內容與側欄不同語系；深色／淺色與語言切換目前散落在一級選單，不是使用者預期的「帳號偏好設定」位置。這些都是每個角色、每天都會碰到的操作，需要一個固定入口與一組可測試的色彩／語言契約，而不是繼續讓每個功能各自處理主題狀態。
 
+### 2026-09-21 現況盤點證據（管理頂列與側欄固定深色）
+
+程式碼審查（`grep` 確認，非推測）：`NavBar.tsx` 多處直接寫固定色碼與 `text-white`，不隨 color mode 變化——例如 `bg-[#1d2327] text-[#c3c4c7]`（頂列容器）、`bg-[#2271b1] text-white`（active 選單項目）、`text-[#c3c4c7]/60`（次要圖示色）。這些是十六進位色碼與白色文字寫死在 className 裡，不是語意 token；即使頁面主要內容區的 color mode 切換了，管理頂列與側欄仍固定顯示同一組深色，這正是 Fish 實測「深色／淺色會改變主要內容區，但管理頂列與側欄仍使用固定深色背景與固定文字色」的直接根因。本 change 的「Semantic tokens replace hardcoded dark-mode text classes」決策即針對這批具體字串。
+
 ## Design Source
 
 - Source: `docs/ux/startkiter-sr-architecture-focus.html`「設定放在帳號區，管理者才多一個入口」「圖示跟著 App 一起管理」段落，以及舊稿 `docs/ux/startkiter-navigation-focus.html` 的視覺 token 對焦值。

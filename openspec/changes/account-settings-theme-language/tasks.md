@@ -15,7 +15,7 @@
 
 - [ ] 2.1 依「Account menu settings entries are derived from WorkspaceContext」與「Interface and data shape」實作 `AccountMenuEntry` 型別與 `ACCOUNT_MENU_ENTRIES`，`visibleWhen` 直接讀 `role-based-workspace-navigation` 的 `WorkspaceContext`；完成後三種角色看到正確入口組合（「Observable behavior」的可見性矩陣），並以 1.1 測試驗證。
 - [ ] 2.2 依「Theme and locale controls live only inside user settings」把既有主題／語言切換元件從一級選單移到使用者設定頁；完成後一級選單不再出現這兩個控制項，並以 1.2 測試驗證。
-- [ ] 2.3 依「Shared navigation and account components use semantic color tokens」移除 `NavBar.tsx` 與帳號選單元件的 hardcoded 深色文字 class，改用語意 token；完成後 static check 通過，並以 1.4 測試驗證。
+- [ ] 2.3 依「Shared navigation and account components use semantic color tokens」（設計決策「2026-09-21 現況盤點證據（管理頂列與側欄固定深色）」）移除 `NavBar.tsx` 內 `bg-[#1d2327]`、`bg-[#2271b1] text-white`、`text-[#c3c4c7]` 等 hardcoded 深色文字／背景 class，改用語意 token；完成後 static check 通過，管理頂列與側欄隨 color mode 切換，並以 1.4 測試驗證。
 
 ## 3. 補齊 icon 資產
 

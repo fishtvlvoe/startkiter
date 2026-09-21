@@ -6,6 +6,28 @@ StartKiter 是「平台＋多個獨立 App」，不是單一固定功能的 SaaS
 
 本 change 的核心是把 `WorkspaceId` 換成「平台／App／角色」的通用結構，讓 course、design、community 等任何 App 都用同一套 resolver 與 manifest 契約決定看得到什麼，不用再為每個新 App 改一次工作區判斷。
 
+### 2026-09-21 現況盤點證據
+
+以下是實際程式碼審查（非推測）確認的問題，逐一對應本 change 要修正的 requirement：
+
+1. **`/course` 在管理員登入狀態下同時看到使用者入口與整批管理入口**：`packages/platform/src/mount-points.ts` 同時定義 `/course`（id `course`）與 `/admin/course`（id `course-admin`）兩個獨立 mount point，`nav-menu-items.ts` 只用單一布林 `isOperator` 過濾整批管理選單（見 `apps/saas/modules/shared/lib/nav-menu-items.ts:129-143`），沒有「目前路由屬於哪個 App、哪個角色視角」的判斷，管理員身分一旦為真，任何路由都會看到管理選單。
+2. **`/admin/course` 同時渲染兩套選單**：`apps/saas/app/(authenticated)/(main)/(account)/admin/layout.tsx` 除了共用 `NavBar`（讀 `mount-points.ts`）以外，另外呼叫 `SettingsMenu`（`apps/saas/modules/settings/components/SettingsMenu.tsx`，水平 flex 選單），`menuItems` 在 `admin/layout.tsx:28-100` 內用第二份完全獨立的字面陣列手動列出（`courseMenuItem`、`coursePackMenuItem` 等），與 `mount-points.ts` 的 menu 定義是兩套互不相干的真相來源。
+3. **選單文字不一致的實例**（`mount-points.ts` 的 `menu.label` vs `admin/layout.tsx` 的 `title`，同一功能兩套字面文字）：
+
+   | 路由 | `mount-points.ts` 標籤 | `admin/layout.tsx` SettingsMenu 標籤 |
+   | --- | --- | --- |
+   | `/admin/course` | 「課程管理」（`mount-points.ts:52`） | 「課程管理」（`admin/layout.tsx:29`，恰好同字但仍是獨立維護的第二份字面值） |
+   | `/admin/users` | 「後台設定」（`mount-points.ts:157`） | `t("menu.users")`（通常渲染「用戶」，`admin/layout.tsx:67`） |
+   | `/admin/orders` | 「訂單管理」（`mount-points.ts:267`） | 「訂單列表」（`admin/layout.tsx:72`） |
+   | `/admin/revenue` | 「營收報表」（`mount-points.ts:282`） | 「營收結算」（`admin/layout.tsx:77`） |
+   | `/admin/organizations` | 「組織管理」（`mount-points.ts:252`） | `t("menu.organizations")`（通常渲染「組織」，`admin/layout.tsx:94`） |
+   | `/admin/settings/checkout-gateway` | 掛在「系統設定」群組下（`mount-points.ts` `MENU_GROUP_CONFIG`） | 「結帳金流」（`admin/layout.tsx:87`） |
+
+4. **選單文字是 100% 硬編碼字串，不是 i18n key**：`grep` 確認 `mount-points.ts`、`nav-menu-items.ts` 全檔沒有任何 `labelKey`、`useTranslations`、`getTranslations` 或 `t("menu...")` 呼叫；所有 `menu.label` 都是寫死的繁體中文字面值（如 `label: "課程管理"`）。這正是「切換 English 後主內容與頁面標題變英文，但側欄仍保留大量中文」的直接根因——側欄文字從來不經過 locale catalog 解析，沒有語言可切換。`NavBar.tsx` 本身有 `useTranslations()`（`NavBar.tsx:693`），但目前只用在少數非選單文字，選單本體繞過了它。
+5. **`/admin/course` 在 390px 手機寬度出現水平溢出**：`SettingsMenu.tsx` 用 `nav className="gap-0 flex"`（`SettingsMenu.tsx:32`）把所有選單項目排成一列，沒有換行或收合機制；當 `admin/layout.tsx` 傳入 9 個項目（含 `coursePackMenuItem`、`geminiMenuItem`、`aiProviderMenuItem` 等）時，水平排列的總寬度遠超過 390px（Fish 實測約 730px）。這個溢出是第二套平行選單存在造成的直接症狀，不是獨立的 CSS 問題——移除 `SettingsMenu` 的重複渲染即可同時解決重複選單與此溢出。
+6. **既有測試仍以舊模型為主**：目前 106 個測試檔、430 個測試通過，但測試斷言仍圍繞 `isOperator`（布林）與 `course-admin-menu` 這個既有選單概念，尚未有任何測試針對「平台／App／角色」的 `WorkspaceContext` 或 `resolveNavigation`。這代表 430 個通過的測試**不構成**本 change 新 requirement 的驗證證據，遷移時必須明確識別並改寫這批測試，不能讓新舊兩套斷言同時留在測試套件裡製造第二個真相來源。
+7. **非管理員真實登入視角尚未驗證**：目前只確認了管理員視角下的重複選單與越權顯示問題；一般使用者（非 operator、非 course-instructor）用真實帳號登入後看到的畫面，尚未經過人工或 ego-browser 驗證。這一項在完成驗收前必須明確標記「未驗證」，不得因為「型別上 app-user 不會拿到管理選單」就推定畫面已經正確。
+
 ## Design Source
 
 - Source: `docs/ux/startkiter-sr-architecture-focus.html`，2026-09-21 對焦稿，覆蓋平台／App／角色骨架、帳號區設定入口邊界、圖示規則、SR 順序與完成標準。
@@ -66,6 +88,14 @@ StartKiter 是「平台＋多個獨立 App」，不是單一固定功能的 SaaS
 **Alternatives Considered:**
 
 - 讓每個 App 自訂管理員稱呼樣板（如「XX 教練」「XX 版主」）：否決，超出本次範圍且會讓角色語意在不同 App 間失去一致性；先固定「{App 名稱}管理員」樣板，未來若要開放自訂樣板另開 change。
+
+### Menu labels are declared as translation keys, never raw display strings
+
+`AppManifestEntry.menu.labelKey` 必須是一個可在 `zh-tw`／`zh-cn`／`en` 三份語系 catalog 查到的 key，不得是 `mount-points.ts` 目前的寫法（`label: "課程管理"` 這種直接寫死的繁體中文字串）。resolver 產生 `NavigationModel` 時只輸出 `labelKey`，實際顯示文字由呼叫端在渲染階段用目前 locale 解析；shell 不得把未解析的 raw key 顯示給使用者，也不得在 manifest 階段就把某一種語言的字串當成唯一真相。這條規則直接對應現況盤點第 4 點：目前選單文字完全沒有 i18n key，是英文切換後側欄不跟著變的根因。
+
+**Alternatives Considered:**
+
+- 允許 `menu.label` 直接放中文字串，日後語系需求另外加 `menu.labelEn`／`menu.labelZhCn` 等額外欄位：否決，會讓每加一種語言就要改一次 manifest 型別，且與既有 `i18nNamespace` 欄位重複；用 `labelKey` 讓語系資料集中在 catalog，manifest 只描述「要查哪個 key」。
 
 ### The demo is an app preview over the same navigation model, not a second implementation
 
@@ -133,15 +163,19 @@ type NavigationModel = {
 - 未知 `appId`、無效 `parentId`、重複 module id 或重複 route：純函式測試失敗，CI 不得通過。
 - 非總管理員直接請求 `scope: "platform"` route，或非該 App 管理員直接請求該 App 的管理 route：沿用現有 route guard，導向安全的 authenticated entry，不因 UI 隱藏而放寬後端權限。
 - `displayNameKey` 缺少對應語系值：runtime 使用既定 zh-tw fallback，但 CI 必須列出缺少的 key 並失敗；不得把 raw key 顯示給使用者。
+- `menu.labelKey` 不是合法 catalog key、或是直接寫死的顯示字串（例如包含中文字元而非 key 格式）：manifest validation 失敗，列出違規 module id 與該欄位的值。
 - module manifest 缺少必要欄位：TypeScript build 失敗；不得以 `as any` 繞過 contract。
 
 ### Acceptance criteria
 
 - `resolveNavigation` 的單元測試通過，涵蓋「使用者」「App 管理員」「總管理員」三種角色、跨 App 角色差異（同一人在 A App 是管理員、在 B App 是使用者）、子選單去重與 active route。
-- `NavBar` 與 admin layout component tests 證明 `/course`、`/admin/course` 不會同時渲染兩套管理選單。
-- static check 掃描 UI 文案與 demo，確認不出現「平台管理員」「模組管理員」「學員」字面字串。
+- `NavBar` 與 admin layout component tests 證明 `/course`、`/admin/course` 不會同時渲染兩套管理選單，且 `admin/layout.tsx` 不再呼叫 `SettingsMenu` 渲染平行選單。
+- static check 掃描 UI 文案與 demo，確認不出現「平台管理員」「模組管理員」「學員」字面字串；另掃描 `mount-points.ts`／`nav-menu-items.ts` 等選單資料來源，確認 `menu.labelKey` 不含中文或英文顯示字串本身。
+- 切換 `zh-tw`／`zh-cn`／`en` 時，側欄選單標籤與主內容同時切換，不再出現「主內容變英文、側欄仍中文」的既有 bug。
+- 因為移除 `SettingsMenu` 平行選單，`/admin/course` 在 `390px` 手機寬度不再出現水平溢出（既有實測約 730px 內容寬度需降到 `390px` 以內）；以 component test 斷言容器寬度驗證。
 - demo 頁面與 runtime navigation model 的 `workspace`、`href`、`labelKey`、`children` 結構比對通過；demo 不再自行維護另一份選單或稱呼文案。
-- ego-browser 桌面 `1440px` 與手機 `390px` 各驗一次角色切換骨架（使用者／App 管理員／總管理員），確認沒有重複選單、越權入口或 raw key；完整跨 App／語言／主題的全量驗收留給 `platform-launch-verification-evidence`。
+- 既有 106 個測試檔中，斷言 `isOperator`／`course-admin-menu` 舊模型的測試已改寫為斷言 `WorkspaceContext`／`resolveNavigation` 輸出，不得讓新舊兩套斷言同時留在測試套件裡；改寫後的測試套件需全數通過，且通過數字需附在驗收紀錄中（不得沿用舊的「430 個測試通過」當作本 change 的驗證證據）。
+- ego-browser 桌面 `1440px` 與手機 `390px` 各驗一次角色切換骨架（使用者／App 管理員／總管理員），確認沒有重複選單、越權入口或 raw key；**其中「使用者」（app-user）視角必須用真實非管理員帳號登入驗證，不得只憑型別或 mock capability 推定畫面正確**——這一項在完成前一律標記「未驗證」。完整跨 App／語言／主題的全量驗收留給 `platform-launch-verification-evidence`。
 
 ### Scope boundaries
 
@@ -155,15 +189,19 @@ Out of scope: App 如何加入平台與命名規則（`app-extension-contract`�
 - [Risk] 「{App 名稱}管理員」樣板寫死，未來若要支援自訂樣板需要再改型別 → Mitigation：先用單一樣板滿足目前已知的課程／設計／社群需求，型別上保留 `displayNameKey` 是獨立欄位，未來擴充樣板不需再動 `WorkspaceContext` 本身。
 - [Risk] Static check 掃描「平台管理員」「模組管理員」「學員」字面字串可能誤傷合法內容（例如引用歷史文件時的說明性文字）→ Mitigation：掃描範圍限定在使用者可見的 UI 文案與 demo 檔案，不掃描 `docs/discuss/`、`openspec/changes/archive/` 等歷史紀錄。
 - [Risk] demo 與 runtime 共用 model 仍可能被 CSS 差異影響 → Mitigation：demo 使用實際 shared components 或同一 token stylesheet，並以 desktop/mobile ego screenshot 做部署後驗收。
+- [Risk] 既有 106 個測試檔、430 個測試以 `isOperator`／`course-admin-menu` 舊模型為主，遷移時若只是「加新測試、留舊測試」，會讓測試套件同時斷言兩套互相矛盾的模型，掩蓋新骨架其實沒有真的接上 → Mitigation：遷移時逐一識別引用 `isOperator`／`course-admin-menu` 的既有測試檔，改寫為斷言 `WorkspaceContext`／`resolveNavigation`，不允許新舊斷言並存；改寫進度列入 tasks 逐項追蹤。
+- [Risk] 「/admin/course 手機寬度溢出」若只當成獨立 CSS bug 修，可能在未清除 `SettingsMenu` 平行選單前就先貼 CSS 補丁，掩蓋真正成因 → Mitigation：驗收順序固定為先移除 `SettingsMenu` 重複渲染，再驗證溢出是否隨之消失；若移除後仍有溢出，才視為獨立的 responsive 問題另外處理。
+- [Risk] 「app-user 視角已驗證」的結論在還沒用真實非管理員帳號登入前可能被誤報為已完成 → Mitigation：驗收紀錄明確區分「型別/單元測試層級已驗證」與「真實帳號瀏覽器驗證」，後者缺席時整體驗收不得標記完成，比照 `platform-launch-verification-evidence` 的 `unresolvedItems` 格式列出。
 
 ## Migration Plan
 
 1. 新增 `WorkspaceContext`、`AppManifestEntry`、`NavigationModel` 型別與 `resolveNavigation`，先保留既有 `MOUNT_POINTS` 輸出作為 adapter，讓 build 與既有功能維持可執行。
-2. 把課程相關 module 逐批映射為 `appId: "course"` 的 App manifest entry，把全站 operator module 映射到 `scope: "platform"`，每批補齊語系 key 與 tests。
-3. 讓 `NavBar` 使用新的 `NavigationModel`，讓 admin layout 停止渲染第二套平行 menu；保留 route guard 不變。
+2. 把課程相關 module 逐批映射為 `appId: "course"` 的 App manifest entry（`menu.labelKey` 取代 `mount-points.ts` 現有的硬編碼中文字串），把全站 operator module 映射到 `scope: "platform"`，每批補齊語系 key 與 tests。
+3. 讓 `NavBar` 使用新的 `NavigationModel`，讓 `admin/layout.tsx` 停止呼叫 `SettingsMenu` 渲染第二套平行 menu；保留 route guard 不變。
 4. 掃描並移除使用者可見文案與 demo 中的「平台管理員」「模組管理員」「學員」字面字串，改用固定稱呼 key。
-5. 將 demo 改成讀取同一 navigation model 或實際 shared component，完成後移除 demo 內重複的選單或稱呼文案。
-6. 在 TEST／preview 部署後用 ego-browser 驗收骨架行為，再推進正式部署。若驗收失敗，回滾到 adapter 仍存在且舊 route 可用的前一個 commit；不得只回滾 CSS 而保留不完整的 resolver。
+5. 逐一改寫既有測試套件中斷言 `isOperator`／`course-admin-menu` 的測試檔，改為斷言 `WorkspaceContext`／`resolveNavigation`，並重跑整套測試建立新的通過基準（不沿用舊的 430 通過數字）。
+6. 將 demo 改成讀取同一 navigation model 或實際 shared component，完成後移除 demo 內重複的選單或稱呼文案。
+7. 在 TEST／preview 部署後用 ego-browser 驗收骨架行為，其中一般使用者視角必須用真實非管理員帳號實測；確認 `/admin/course` 在手機寬度不再溢出、英文切換後側欄同步變化。再推進正式部署。若驗收失敗，回滾到 adapter 仍存在且舊 route 可用的前一個 commit；不得只回滾 CSS 而保留不完整的 resolver。
 
 ## Open Questions
 

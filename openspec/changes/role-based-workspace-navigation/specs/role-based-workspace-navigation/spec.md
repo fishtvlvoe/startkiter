@@ -109,6 +109,56 @@ The navigation model MUST represent a first-level item with an ordered `children
 - **WHEN** a `course` app-admin requests `/admin/course`
 - **THEN** the rendered shell contains exactly one navigation surface, and no second parallel horizontal admin menu is rendered
 
+##### Example: real duplicate-label pairs observed before this change (must not recur)
+
+| Route | Sidebar label (pre-existing `mount-points.ts`) | Parallel horizontal menu label (pre-existing `admin/layout.tsx` + `SettingsMenu`) |
+| --- | --- | --- |
+| `/admin/course` | 課程管理 | 課程管理 |
+| `/admin/users` | 後台設定 | 用戶 |
+| `/admin/orders` | 訂單管理 | 訂單列表 |
+| `/admin/revenue` | 營收報表 | 營收結算 |
+| `/admin/organizations` | 組織管理 | 組織 |
+| `/admin/settings/checkout-gateway` | 系統設定（群組） | 結帳金流 |
+
+#### Scenario: admin layout does not render a second menu component
+
+- **WHEN** `/admin/course` (or any admin route) renders
+- **THEN** the admin layout does not mount a second, independently-maintained menu component alongside the primary navigation surface, and removing that second component does not remove any route the primary navigation surface already exposes
+
+#### Scenario: removing the duplicate menu also fixes the mobile overflow it caused
+
+- **GIVEN** the pre-existing parallel horizontal menu rendered its items in a single non-wrapping row, producing roughly `730px` of content width at a `390px` viewport
+- **WHEN** the parallel menu is removed and `/admin/course` renders only the primary navigation surface
+- **THEN** the admin content area fits within `390px` without horizontal overflow
+
+### Requirement: Menu labels resolve through the active locale catalog, not hardcoded strings
+
+Every `menu.labelKey` in an `AppManifestEntry` MUST be a key resolvable through the active locale catalog for `zh-tw`, `zh-cn`, and `en`. A manifest SHALL NOT declare a literal display string (e.g. a Chinese phrase) as `menu.labelKey`. The rendered navigation label MUST be resolved at render time from the current locale, not baked into the manifest data.
+
+#### Scenario: locale switch updates the sidebar, not only the main content
+
+- **WHEN** an authenticated user switches locale from `zh-tw` to `en`
+- **THEN** the workspace heading and every first-level and child menu label re-resolve to `en` in the same render, matching the main content's language
+
+#### Scenario: hardcoded display string in labelKey is rejected
+
+- **WHEN** a module registers `menu.labelKey` containing a literal Chinese or English phrase instead of a catalog key
+- **THEN** manifest validation fails and reports the module id and the offending value
+
+##### Example: labelKey validation
+
+| `menu.labelKey` value | Expected result |
+| --- | --- |
+| `"nav.course.admin"` | accept (resolvable key) |
+| `"課程管理"` | reject (literal string, not a key) |
+| `""` | reject (empty) |
+
+#### Scenario: pre-existing hardcoded labels are migrated, not left in parallel
+
+- **GIVEN** `mount-points.ts` previously declared menu labels as literal strings (e.g. `label: "課程管理"`) with no locale key
+- **WHEN** the migration to `AppManifestEntry` completes
+- **THEN** no menu-producing module in the registry still declares a literal display string in place of `labelKey`
+
 ### Requirement: Visible role labels are data-driven and forbid legacy nouns
 
 The system MUST resolve visible workspace labels as follows: `{ scope: "platform" }` resolves to the fixed string "總管理員"; `{ scope: "app", role: "app-admin" }` resolves to `"${App.displayName}管理員"` where `displayName` comes from the App registry; `{ scope: "app", role: "app-user" }` resolves to the fixed string "使用者" regardless of `appId`. The system SHALL NOT render "平台管理員", "模組管理員", or "學員" in any user-visible text or in the demo.

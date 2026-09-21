@@ -1,6 +1,6 @@
 ## Why
 
-目前同一個登入後 shell 同時渲染學員入口、總管理員入口、課程管理員入口；`/course` 仍看得到管理功能，`/admin/course` 又額外渲染第二套水平管理選單。既有 `WorkspaceId = "learner" | "course-admin" | "super-admin"` 把工作區寫死成課程專屬三選一，無法表達 StartKiter「平台＋多個獨立 App」的產品定位——課程只是第一個 App，之後會加入設計、社群等其他 App，每個 App 的管理者要用 App 自己的名字稱呼（例如「課程管理員」「設計管理員」），且同一人可以在一個 App 是管理員、在另一個 App 是一般使用者。現在需要先把「平台／App／角色」這層骨架固定成可測試的產品契約，course 只是第一個接入的 App，才不會每加一個新 App 就要重新設計一次工作區判斷。
+目前同一個登入後 shell 同時渲染學員入口、總管理員入口、課程管理員入口；`/course` 仍看得到管理功能，`/admin/course` 又額外渲染第二套水平管理選單。2026-09-21 程式碼審查確認這不是推測：`packages/platform/src/mount-points.ts` 與 `apps/saas/app/(authenticated)/(main)/(account)/admin/layout.tsx`（呼叫 `SettingsMenu`）是兩套互不相干的選單真相來源，`/admin/course`、`/admin/users`、`/admin/orders`、`/admin/revenue`、`/admin/organizations`、`/admin/settings/checkout-gateway` 六個路由都各自出現兩套不一致的中文標籤；選單文字全數是硬編碼中文字串（無任何 `labelKey`／i18n key），導致切換 English 後側欄不跟著變；第二套平行選單在 390px 手機寬度造成約 730px 的水平溢出。既有 `WorkspaceId = "learner" | "course-admin" | "super-admin"` 把工作區寫死成課程專屬三選一，無法表達 StartKiter「平台＋多個獨立 App」的產品定位——課程只是第一個 App，之後會加入設計、社群等其他 App，每個 App 的管理者要用 App 自己的名字稱呼（例如「課程管理員」「設計管理員」），且同一人可以在一個 App 是管理員、在另一個 App 是一般使用者。現在需要先把「平台／App／角色」這層骨架固定成可測試的產品契約，course 只是第一個接入的 App，才不會每加一個新 App 就要重新設計一次工作區判斷。
 
 ## What Changes
 
@@ -37,7 +37,7 @@
 ## Impact
 
 - Affected specs: 重寫 `openspec/changes/role-based-workspace-navigation/specs/role-based-workspace-navigation/spec.md`（同一 change，非新增）；現有 `platform-mount-points`、`saas-shell`、`sell-flow-ux` 作為相容性依據，不直接改寫其既有需求。
-- Affected code: `apps/saas/modules/shared/components/NavBar.tsx`、`apps/saas/modules/shared/lib/nav-menu-items.ts`、`apps/saas/app/(authenticated)/(main)/(account)/admin/layout.tsx`、`packages/platform/src/mount-points.ts`、及新增的 `packages/platform/src/workspace/`（`WorkspaceContext` 型別與 `resolveNavigation`）。
+- Affected code: `apps/saas/modules/shared/components/NavBar.tsx`、`apps/saas/modules/shared/lib/nav-menu-items.ts`、`apps/saas/app/(authenticated)/(main)/(account)/admin/layout.tsx`（移除呼叫 `SettingsMenu`）、`apps/saas/modules/settings/components/SettingsMenu.tsx`（移除平行水平選單掛載）、`packages/platform/src/mount-points.ts`（`menu.label` 硬編碼字串改成 `menu.labelKey`）、及新增的 `packages/platform/src/workspace/`（`WorkspaceContext` 型別與 `resolveNavigation`）。
 - Dependencies: 不新增套件；沿用現有 Next.js、next-intl、next-themes、UI primitives。
 - Downstream changes：`app-extension-contract`、`account-settings-theme-language`、`app-feature-surfaces`、`platform-launch-verification-evidence` 皆依賴本 change 先固定的 `WorkspaceContext`／`AppManifest`／`resolveNavigation` 介面；型別一旦變動需回頭同步。
 - Environment variables: 不新增環境變數。

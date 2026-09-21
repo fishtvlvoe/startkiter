@@ -1,4 +1,4 @@
-updated: 2026-09-21
+updated: 2026-09-21（第二輪：加入實際程式碼盤點證據）
 change: role-based-workspace-navigation, app-extension-contract, account-settings-theme-language, app-feature-surfaces, platform-launch-verification-evidence
 
 ## 這個專案在幹嘛
@@ -19,10 +19,19 @@ StartKiter：課 + 終身代碼包，對外課名「開站包」。產品定位�
 
 關鍵架構決策見 `docs/adr/0001-workspace-context-is-app-scoped-not-a-fixed-enum.md`。
 
+### 2026-09-21 第二輪：實際程式碼盤點證據（已寫入 SR-01／SR-03，非推測）
+
+- `packages/platform/src/mount-points.ts` 與 `apps/saas/app/(authenticated)/(main)/(account)/admin/layout.tsx`（呼叫 `SettingsMenu`）是兩套互不相干的選單真相來源；`/admin/course`、`/admin/users`、`/admin/orders`、`/admin/revenue`、`/admin/organizations`、`/admin/settings/checkout-gateway` 六個路由各自出現兩套不一致的中文標籤（例：`/admin/orders`「訂單管理」vs「訂單列表」）。
+- `mount-points.ts` 的選單文字 100% 是硬編碼中文字串，沒有任何 `labelKey`／i18n key——這是「切換 English 後主內容變英文、側欄仍中文」的根因，已寫入 SR-01 新增的「Menu labels resolve through the active locale catalog」requirement。
+- `SettingsMenu.tsx` 用不換行的水平 flex 排列，在 390px 手機寬度造成約 730px 的水平溢出；預期移除平行選單即可一併解決。
+- `NavBar.tsx` 多處寫死 `bg-[#1d2327]`、`bg-[#2271b1] text-white`、`text-[#c3c4c7]` 等色碼，管理頂列與側欄不隨 color mode 切換——已寫入 SR-03。
+- 既有 106 個測試檔、430 個測試通過，但仍以 `isOperator`／`course-admin-menu` 舊模型為主，尚未驗證新的「平台／App／角色」規則；SR-01 新增 task 0.1／5.1 要求遷移時逐一改寫這批測試，不得新舊斷言並存、不得沿用舊的「430 通過」當作本次驗證證據。
+- 非管理員（app-user）真實登入視角尚未經人工或 ego-browser 驗證；SR-01 spec／design／tasks 已明確標記這項為「未驗證」，禁止用型別正確推定畫面正確。
+
 ## 未解問題
 
 - 無。若 `app-extension-contract` 實作時發現 `displayName` 儲存機制與 `role-based-workspace-navigation` 的型別假設不符，需回頭 `spectra ingest` 同步。
 
 ## 下一步
 
-5 張 SR 文件已全數 `spectra validate` 通過，等 Fish 確認方向後才進入 `spectra apply` 實作；本輪不改任何正式產品程式碼、不部署。
+5 張 SR 文件（含本輪加入的實際程式碼證據）已全數 `spectra validate` 通過，等 Fish 確認方向後才進入 `spectra apply` 實作 SR-01；本輪仍未改動任何正式產品程式碼、未部署。
