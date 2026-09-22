@@ -33,3 +33,21 @@ repo 另有 `tooling/scripts/package.json:5-8` 的 `pnpm --filter @startkiter/sc
 ## 下一步
 
 先修復 TEST 部署；恢復後用專用非管理員 email 走 `/signup`、完成 email verification 與 password login，將帳號密碼放在受控秘密儲存，不寫入 repo。帳號建立及真實登入畫面完成前，task 5.3 必須維持「未驗證」。
+
+## 2026-09-22 更正：查的是已停用的舊 TEST 網址，現行環境其實是活的
+
+上面「TEST 入口回 `DEPLOYMENT_NOT_FOUND`」查的是 `test-startkiter.vercel.app` 與 `startkiter.aiver.me`——這兩個是 2026-08-22 `AGENTS.md` 已明確記錄「不再用 Vercel，全部搬到 Coolify + VPS」後停用的舊 TEST 網址，`curl` 實測皆回 `404`，不是暫時性故障。
+
+2026-09-22 用 `curl -I` 重新確認現行網址，結果與 evidence 前段結論不同：
+
+| 網址 | 狀態 | 備註 |
+| --- | --- | --- |
+| `test-startkiter.vercel.app` | `404` | 已停用（AGENTS.md 2026-08-22 定案） |
+| `startkiter.aiver.me` | `404` | 已停用（同上，更早的 Tunnel 網址） |
+| `app.startkiter.dev` | `200`／`307` 導向登入 | **活的**，與 `AGENTS.md` 記錄的「307 導向登入」一致 |
+| `startkiter.dev` | `200` | 活的（marketing） |
+| `coolify-test.startkiter.dev` | `200` | 活的（同一台 Coolify VPS 上的另一個 resource） |
+
+**新問題，比「TEST 環境掛了」更根本**：`docs/vps-deployment-sop.md` 開頭寫「正式網域：`startkiter.dev`（marketing）、`app.startkiter.dev`（SaaS）」，但 Coolify 的 Project 名稱是 `startkiter-test`（見該文件第 24 行）。也就是說，目前唯一在跑的 SaaS 部署，Project 取名叫「test」，但綁的網域卻是文件自稱的「正式網域」——沒有找到一個獨立於 `app.startkiter.dev` 之外、單純給角色驗證/部署演練用的 TEST 環境。`coolify-test.startkiter.dev` 是 2026-08-18 討論記錄裡「新的模版 demo 展示用途」，跟這次要驗證的 SaaS app 是不同用途，不能拿來當 5.3／6.3 的替代 TEST。
+
+這件事不在本 task 的判斷範圍內，需要 Fish 確認：`app.startkiter.dev` 對這次 SR-01 驗收來說算「可以直接用的 TEST」還是「正式站，不能拿來做角色驗證/部署演練」。在得到明確答覆前，不假設可以直接用它做 5.3 的真實登入驗證或 6.3 的 rollback 排練。
