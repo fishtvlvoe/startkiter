@@ -1,0 +1,22 @@
+{
+	"nav.home": { "light": "/icons/nav/home.light.svg", "dark": "/icons/nav/home.dark.svg" },
+	"nav.book-open": { "light": "/icons/nav/book-open.light.svg", "dark": "/icons/nav/book-open.dark.svg" },
+	"nav.message-square": { "light": "/icons/nav/message-square.light.svg", "dark": "/icons/nav/message-square.dark.svg" },
+	"nav.mail": { "light": "/icons/nav/mail.light.svg", "dark": "/icons/nav/mail.dark.svg" },
+	"nav.package": { "light": "/icons/nav/package.light.svg", "dark": "/icons/nav/package.dark.svg" },
+	"nav.list-checks": { "light": "/icons/nav/list-checks.light.svg", "dark": "/icons/nav/list-checks.dark.svg" },
+	"nav.file-pen-line": { "light": "/icons/nav/file-pen-line.light.svg", "dark": "/icons/nav/file-pen-line.dark.svg" },
+	"nav.file-text": { "light": "/icons/nav/file-text.light.svg", "dark": "/icons/nav/file-text.dark.svg" },
+	"nav.bot-message-square": { "light": "/icons/nav/bot-message-square.light.svg", "dark": "/icons/nav/bot-message-square.dark.svg" },
+	"nav.sparkles": { "light": "/icons/nav/sparkles.light.svg", "dark": "/icons/nav/sparkles.dark.svg" },
+	"nav.settings": { "light": "/icons/nav/settings.light.svg", "dark": "/icons/nav/settings.dark.svg" },
+	"nav.shield-user": { "light": "/icons/nav/shield-user.light.svg", "dark": "/icons/nav/shield-user.dark.svg" },
+	"nav.clipboard-list": { "light": "/icons/nav/clipboard-list.light.svg", "dark": "/icons/nav/clipboard-list.dark.svg" },
+	"nav.image": { "light": "/icons/nav/image.light.svg", "dark": "/icons/nav/image.dark.svg" },
+	"nav.user-cog": { "light": "/icons/nav/user-cog.light.svg", "dark": "/icons/nav/user-cog.dark.svg" },
+	"account.settings": { "light": "/icons/account/settings.light.svg", "dark": "/icons/account/settings.dark.svg" },
+	"account.shield-user": { "light": "/icons/account/shield-user.light.svg", "dark": "/icons/account/shield-user.dark.svg" },
+	"account.bot-message-square": { "light": "/icons/account/bot-message-square.light.svg", "dark": "/icons/account/bot-message-square.dark.svg" },
+	"account.credit-card": { "light": "/icons/account/credit-card.light.svg", "dark": "/icons/account/credit-card.dark.svg" },
+	"account.log-out": { "light": "/icons/account/log-out.light.svg", "dark": "/icons/account/log-out.dark.svg" }
+}

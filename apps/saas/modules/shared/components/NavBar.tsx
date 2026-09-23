@@ -8,7 +8,6 @@ import { resolveNavigation } from "@startkiter/platform/src/workspace/navigation
 import {
 	Button,
 	cn,
-	ColorModeToggle,
 	mergeTriggerProps,
 	Dialog,
 	DialogContent,
@@ -35,11 +34,11 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@startkiter/ui/components/tooltip";
-import { LocaleSwitch } from "@shared/components/LocaleSwitch";
 import { NotificationCenter } from "@shared/components/NotificationCenter";
 import { useCanAccessPagesCmsAdmin } from "@shared/components/PagesCmsAccessProvider";
 import { usePermissions } from "@shared/components/PermixProvider";
 import { UserMenu } from "@shared/components/UserMenu";
+import { ICON_ASSETS, themedIconComponent } from "../lib/icon-assets";
 import {
 	BotMessageSquareIcon,
 	BookOpenIcon,
@@ -104,34 +103,17 @@ interface NavMenuListProps {
 	tone?: "dark" | "surface";
 }
 
-export const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-	home: HomeIcon,
-	"book-open": BookOpenIcon,
-	"bot-message-square": BotMessageSquareIcon,
-	package: PackageIcon,
-	settings: SettingsIcon,
-	"list-checks": ListChecksIcon,
-	"message-square": MessageSquareIcon,
-	"file-pen-line": FilePenLineIcon,
-	"file-text": FileTextIcon,
-	"clipboard-list": ClipboardListIcon,
-	image: ImageIcon,
-	mail: MailIcon,
-	"shield-user": ShieldUserIcon,
-	sparkles: SparklesIcon,
-	"user-cog": UserCogIcon,
-	ellipsis: EllipsisIcon,
-	"📚": BookOpenIcon,
-};
+export const iconMap: Record<string, React.ComponentType<{ className?: string }>> = Object.fromEntries(
+	Object.keys(ICON_ASSETS)
+		.filter((id) => id.startsWith("nav."))
+		.map((id) => [id.slice("nav.".length), themedIconComponent(id.slice("nav.".length))]),
+);
 
 export function resolveIcon(icon: string): React.ComponentType<{ className?: string }> {
 	if (icon && icon in iconMap) {
 		return iconMap[icon];
 	}
-	if (icon && icon.length <= 2) {
-		return () => <span className="size-5 shrink-0 text-center text-xs">{icon}</span>;
-	}
-	return PackageIcon;
+	return iconMap.package;
 }
 
 function isNavSubItemActive(pathname: string, href: string): boolean {
@@ -147,11 +129,11 @@ export function NavMenuList({
 	tone = "dark",
 }: NavMenuListProps) {
 	const pathname = usePathname();
-	const mutedTextClass = tone === "surface" ? "text-muted-foreground" : "text-[#c3c4c7]";
-	const mutedIconClass = tone === "surface" ? "text-muted-foreground" : "text-[#c3c4c7]/60";
-	const hoverClass = tone === "surface" ? "hover:bg-accent/50" : "hover:bg-white/5";
-	const activeTextClass = "text-white";
-	const activeSubTextClass = tone === "surface" ? "text-foreground" : "text-white";
+	const mutedTextClass = "text-muted-foreground";
+	const mutedIconClass = "text-muted-foreground";
+	const hoverClass = "hover:bg-accent/50";
+	const activeTextClass = "text-accent-foreground";
+	const activeSubTextClass = "text-foreground";
 
 	return (
 		<TooltipProvider delay={0}>
@@ -163,7 +145,7 @@ export function NavMenuList({
 							<div
 								className={cn(
 									"mb-2 border-t",
-									tone === "surface" ? "border-border" : "border-[#c3c4c7]/15",
+									"border-border",
 								)}
 							/>
 							<div className={cn("px-3 text-[10px] font-semibold uppercase tracking-wider", mutedTextClass)}>
@@ -175,7 +157,7 @@ export function NavMenuList({
 					const parentClasses = cn(
 						"gap-3 px-3 py-2 text-sm flex w-full items-center rounded-lg whitespace-nowrap transition-colors",
 						{
-							"font-semibold bg-[#2271b1] text-white": menuItem.isActive,
+							"font-semibold bg-accent text-accent-foreground": menuItem.isActive,
 							[hoverClass]: !menuItem.isActive,
 							"md:justify-center md:px-2": isCollapsedEffective,
 						},
@@ -185,7 +167,7 @@ export function NavMenuList({
 						<menuItem.icon
 							className={cn(
 								"size-5 shrink-0",
-								menuItem.isActive ? "text-white" : mutedIconClass,
+																menuItem.isActive ? "text-accent-foreground" : mutedIconClass,
 							)}
 						/>
 					);
@@ -317,7 +299,7 @@ export function NavMenuList({
 												"py-1.5 pl-2 pr-3 text-sm flex w-full items-center rounded-md transition-colors",
 												tone === "surface"
 													? "text-muted-foreground hover:bg-accent/50"
-													: "text-[#c3c4c7] hover:bg-white/5",
+																: "text-muted-foreground hover:bg-accent/50",
 												subActive && cn("font-semibold", activeSubTextClass),
 																																				)}
 																prefetch
@@ -530,19 +512,19 @@ function SidebarGroupedNavItem({
 				aria-disabled={isSaving}
 				className={cn(
 					"gap-3 px-3 py-2 text-sm flex w-full items-center rounded-lg whitespace-nowrap transition-colors cursor-grab",
-					isActive ? "bg-[#2271b1] font-semibold text-white" : "hover:bg-white/5",
+					isActive ? "bg-accent font-semibold text-accent-foreground" : "hover:bg-accent/50",
 					isSaving && "pointer-events-none opacity-60",
 				)}
 			>
 				<menuItem.icon
-					className={cn("size-5 shrink-0", isActive ? "text-white" : "text-[#c3c4c7]/60")}
+					className={cn("size-5 shrink-0", isActive ? "text-accent-foreground" : "text-muted-foreground")}
 				/>
-				<span className={isActive ? "text-white" : "text-[#c3c4c7]"}>{menuItem.label}</span>
+				<span className={isActive ? "text-accent-foreground" : "text-muted-foreground"}>{menuItem.label}</span>
 			</Link>
 			{hasSubItems && isActive && (
 				<div className="mt-1 relative">
 					<div
-						className="top-0 bottom-0 left-5.5 absolute w-px -translate-x-1/2 bg-[#c3c4c7]/30"
+						className="top-0 bottom-0 left-5.5 absolute w-px -translate-x-1/2 bg-border"
 						aria-hidden
 					/>
 					<ul className="gap-0.5 pl-9 flex flex-col">
@@ -554,8 +536,8 @@ function SidebarGroupedNavItem({
 										href={subItem.href}
 										className={cn(
 											"py-1.5 pl-2 pr-3 text-sm flex w-full items-center rounded-md transition-colors",
-											"text-[#c3c4c7] hover:bg-white/5",
-											subActive && "font-semibold text-white",
+																"text-muted-foreground hover:bg-accent/50",
+											subActive && "font-semibold text-foreground",
 										)}
 										prefetch
 									>
@@ -592,7 +574,7 @@ function SidebarGroupedNav({
 				type="button"
 				disabled={isSaving}
 				onClick={onRequestAddGroup}
-				className="gap-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-[#c3c4c7]/70 hover:text-white disabled:opacity-50 flex items-center"
+				className="gap-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground disabled:opacity-50 flex items-center"
 			>
 				+ {addGroupLabel}
 			</button>
@@ -622,7 +604,7 @@ function SidebarGroupedNav({
 								type="button"
 								onClick={() => onToggleGroupCollapse(group.id)}
 								disabled={isSaving}
-								className="gap-1 text-[10px] font-semibold uppercase tracking-wider text-[#c3c4c7]/70 flex flex-1 items-center overflow-hidden disabled:opacity-50"
+								className="gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex flex-1 items-center overflow-hidden disabled:opacity-50"
 							>
 								<ChevronRightIcon
 									className={cn("size-3 shrink-0 transition-transform", !group.isCollapsed && "rotate-90")}
@@ -633,7 +615,7 @@ function SidebarGroupedNav({
 								type="button"
 								disabled={isSaving}
 								onClick={() => onRequestRenameGroup(group.id, group.title)}
-								className="opacity-0 text-[#c3c4c7]/70 group-hover/header:opacity-100 hover:text-white disabled:opacity-50 transition"
+								className="opacity-0 text-muted-foreground group-hover/header:opacity-100 hover:text-foreground disabled:opacity-50 transition"
 							>
 								<PenIcon className="size-3" />
 							</button>
@@ -671,7 +653,7 @@ function SidebarGroupedNav({
 					>
 						{userUnassigned.length > 0 && (
 							<div>
-								<div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#c3c4c7]/70">
+								<div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
 									{unassignedLabel}
 								</div>
 								<ul className="gap-0.5 flex list-none flex-col">
@@ -683,7 +665,7 @@ function SidebarGroupedNav({
 						)}
 						{operatorUnassigned.length > 0 && (
 							<div data-testid="sidebar-group-admin-section">
-								<div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#c3c4c7]/70 border-t border-[#c3c4c7]/15 pt-3 mt-1">
+								<div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground border-t border-border pt-3 mt-1">
 									{adminLabel}
 								</div>
 								<ul className="gap-0.5 flex list-none flex-col">
@@ -783,6 +765,10 @@ export function NavBar() {
 		[canAccessAdmin, canAccessPagesCms, currentUser?.role, navigation, pathname, t],
 	);
 	const workspaceLabel = navigation.model.workspaceLabel;
+	const workspaceAppId = navigation.model.workspace.scope === "app" ? navigation.model.workspace.appId : undefined;
+	const appDisplayName = workspaceAppId
+		? navigation.apps.find((entry) => entry.scope === "app" && entry.appId === workspaceAppId)?.displayName
+		: undefined;
 
 	const { fixed: tabBarFixed, overflow: tabBarOverflow } = useMemo(
 		() => getTabBarItems(mountMenuItems, t("app.menu.more")),
@@ -978,7 +964,7 @@ export function NavBar() {
 		<>
 			<div
 				data-testid="admin-bar"
-				className="h-8 px-2 flex fixed inset-x-0 top-0 z-[60] items-center justify-between bg-[#1d2327] text-[#c3c4c7] text-xs"
+				className="h-8 px-2 flex fixed inset-x-0 top-0 z-[60] items-center justify-between border-b border-border bg-background text-foreground text-xs"
 			>
 				<div className="gap-2 flex items-center">
 					<Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -988,7 +974,7 @@ export function NavBar() {
 									variant="ghost"
 									size="icon"
 									data-testid="admin-bar-hamburger"
-									className="md:hidden size-6 text-[#c3c4c7] hover:bg-white/10 hover:text-white"
+									className="md:hidden size-6 text-muted-foreground hover:bg-accent/50 hover:text-foreground"
 									aria-label={t("app.menu.openNavigation")}
 									type="button"
 								>
@@ -1026,7 +1012,7 @@ export function NavBar() {
 							</div>
 						</SheetContent>
 					</Sheet>
-					<Link href="/" className="gap-1.5 font-bold text-white flex items-center">
+					<Link href="/" className="gap-1.5 font-bold text-foreground flex items-center">
 						<Logo withLabel={false} />
 						<span className="hidden sm:inline">StartKiter</span>
 					</Link>
@@ -1036,7 +1022,7 @@ export function NavBar() {
 				id="app-sidebar"
 				data-collapsed={isCollapsedEffective}
 				className={cn(
-					"md:fixed md:top-8 md:left-0 md:h-[calc(100%-2rem)] md:w-[280px] w-full bg-[#1d2327]",
+					"md:fixed md:top-8 md:left-0 md:h-[calc(100%-2rem)] md:w-[280px] w-full border-r border-border bg-background",
 					isCollapsedEffective && "md:w-14",
 				)}
 			>
@@ -1062,22 +1048,12 @@ export function NavBar() {
 									</Link>
 								</div>
 
-								<div className="gap-2 flex items-center justify-end">
+				<div className="gap-2 flex items-center justify-end">
 									<NotificationCenter
 										className="hidden shrink-0 md:flex"
 										data-testid="notification-center"
 									/>
-								<div className="hidden shrink-0 md:block" data-testid="color-mode-toggle">
-									<ColorModeToggle
-										modes={["system", "light", "dark"]}
-										labels={{
-											system: t("common.colorMode.system"),
-											light: t("common.colorMode.light"),
-											dark: t("common.colorMode.dark"),
-										}}
-									/>
-								</div>
-														</div>
+																</div>
 							</div>
 
 							{authConfig.organizations.enable && !authConfig.organizations.hideOrganization && (
@@ -1101,24 +1077,17 @@ export function NavBar() {
 
 						<div className="mr-0 gap-2 md:hidden ml-auto flex items-center justify-end">
 							<NotificationCenter className="shrink-0" data-testid="notification-center" />
-							<div data-testid="color-mode-toggle">
-								<ColorModeToggle
-									modes={["system", "light", "dark"]}
-									labels={{
-										system: t("common.colorMode.system"),
-										light: t("common.colorMode.light"),
-										dark: t("common.colorMode.dark"),
-									}}
-								/>
-							</div>
-							<UserMenu />
+							<UserMenu
+								workspaceContext={navigation.model.workspace}
+								appDisplayName={appDisplayName}
+							/>
 						</div>
 					</div>
 
 					<div className="min-h-0 md:flex hidden flex-1 flex-col overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]">
 						{workspaceLabel !== "使用者" && (
 							<div
-								className="mb-2 px-3 text-xs font-semibold text-[#c3c4c7]"
+								className="mb-2 px-3 text-xs font-semibold text-muted-foreground"
 								data-testid="sidebar-workspace-label"
 							>
 								{workspaceLabel}
@@ -1172,17 +1141,12 @@ export function NavBar() {
 								"min-w-0 w-full flex-1",
 								isCollapsedEffective && "md:flex md:w-full md:justify-center",
 							)}
-							data-testid="locale-switch"
 						>
-							<LocaleSwitch />
-						</div>
-						<div
-							className={cn(
-								"min-w-0 w-full flex-1",
-								isCollapsedEffective && "md:flex md:w-full md:justify-center",
-							)}
-						>
-							<UserMenu showUserName={!isCollapsedEffective} />
+							<UserMenu
+								showUserName={!isCollapsedEffective}
+								workspaceContext={navigation.model.workspace}
+								appDisplayName={appDisplayName}
+							/>
 						</div>
 					</div>
 				</div>

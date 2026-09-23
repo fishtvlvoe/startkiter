@@ -133,9 +133,11 @@
       "unassignedGroup": "未分组",
       "saveSidebarLayoutError": "保存侧边栏排序失败，请重试"
     },
-    "userMenu": {
-      "accountSettings": "账户设置",
-      "colorMode": "显示模式",
+      "userMenu": {
+        "accountSettings": "账户设置",
+        "appAdminSettings": "{appName}管理员设置",
+        "platformAdminSettings": "总管理员设置",
+        "colorMode": "显示模式",
       "documentation": "文档",
       "home": "首页",
       "learningCenter": "我的学习中心",
@@ -487,6 +489,10 @@
           "success": "语言已更新"
         },
         "title": "你的语言"
+      },
+      "colorMode": {
+        "description": "选择此账号使用的显示模式，变更会立即应用。",
+        "title": "显示模式"
       },
       "security": {
         "activeSessions": {

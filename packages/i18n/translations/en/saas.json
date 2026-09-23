@@ -133,9 +133,11 @@
       "unassignedGroup": "Unassigned",
       "saveSidebarLayoutError": "Failed to save sidebar layout, please try again"
     },
-    "userMenu": {
-      "accountSettings": "Account settings",
-      "colorMode": "Color mode",
+      "userMenu": {
+        "accountSettings": "Account settings",
+        "appAdminSettings": "{appName} admin settings",
+        "platformAdminSettings": "Platform admin settings",
+        "colorMode": "Color mode",
       "documentation": "Documentation",
       "home": "Home",
       "learningCenter": "My learning center",
@@ -487,6 +489,10 @@
           "success": "Language was updated successfully"
         },
         "title": "Your language"
+      },
+      "colorMode": {
+        "description": "Choose the display mode for this account. Changes apply immediately.",
+        "title": "Display mode"
       },
       "security": {
         "activeSessions": {

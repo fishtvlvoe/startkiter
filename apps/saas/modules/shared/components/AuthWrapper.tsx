@@ -1,6 +1,5 @@
 import { config } from "@config";
-import { cn, ColorModeToggle, Logo } from "@startkiter/ui";
-import { getTranslations } from "next-intl/server";
+import { cn, Logo } from "@startkiter/ui";
 import type { PropsWithChildren } from "react";
 
 import { Footer } from "./Footer";
@@ -9,8 +8,6 @@ export async function AuthWrapper({
 	children,
 	contentClass,
 }: PropsWithChildren<{ contentClass?: string }>) {
-	const t = await getTranslations();
-
 	return (
 		<div className="py-6 flex min-h-screen w-full">
 			<div className="gap-8 flex w-full flex-col items-center justify-between">
@@ -19,17 +16,6 @@ export async function AuthWrapper({
 						<a href={config.marketingUrl ?? "/"} className="block">
 							<Logo withLabel={false} />
 						</a>
-
-						<div className="gap-2 flex items-center justify-end">
-							<ColorModeToggle
-								modes={["system", "light", "dark"]}
-								labels={{
-									system: t("common.colorMode.system"),
-									light: t("common.colorMode.light"),
-									dark: t("common.colorMode.dark"),
-								}}
-							/>
-						</div>
 					</div>
 				</div>
 
