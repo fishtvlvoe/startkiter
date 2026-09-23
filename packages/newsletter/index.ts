@@ -1,15 +1,30 @@
+
+export type {
+	AssertEmailConsentFn,
+	CampaignStatus,
+	DispatchBatchOptions,
+	DispatchBatchResult,
+	NewsletterCampaignStatus,
+	SenderSnapshot,
+} from "./lib/send-engine";
 export {
 	BATCH_SIZE,
 	CampaignStateError,
-	cancelCampaign,
 	captureSenderSnapshot,
+	SendEngineError,
+	cancelCampaign,
 	dispatchCampaignBatch,
+	dispatchNewsletters,
 	pauseCampaign,
+	processCampaignDispatch,
+	queueDueCampaigns,
 	queueDueScheduledCampaigns,
 	requestImmediateSend,
 	resumeCampaign,
 	runNewsletterDispatchTick,
 	scheduleCampaign,
+	sendEngineClock,
+	startCampaignSend,
 	transitionCampaignStatus,
 } from "./lib/send-engine";
 export {
@@ -101,3 +116,11 @@ export type {
 	RenderCampaignResult,
 } from "./lib/render";
 export { sendEmail } from "@startkiter/mail";
+
+
+export {
+	NEWSLETTER_SENDER_ADDRESS_SETTING_ID,
+	assertSenderAddressConfigured,
+	getSenderPhysicalAddress,
+	setSenderPhysicalAddress,
+} from "./lib/sender-address";

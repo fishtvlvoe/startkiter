@@ -72,4 +72,23 @@ describe("sendEmail", () => {
 		expect(ok).toBe(false);
 		expect(providerSend).toHaveBeenCalled();
 	});
+
+	it("forwards AbortSignal to the mail provider", async () => {
+		providerSend.mockResolvedValue(undefined);
+		const controller = new AbortController();
+
+		const ok = await sendEmail({
+			to: "learner@example.com",
+			subject: "Abortable",
+			text: "Body",
+			signal: controller.signal,
+		});
+
+		expect(ok).toBe(true);
+		expect(providerSend).toHaveBeenCalledWith(
+			expect.objectContaining({
+				signal: controller.signal,
+			}),
+		);
+	});
 });

@@ -11,6 +11,8 @@ export async function sendEmail<T extends TemplateId>(
 		to: string;
 		from?: string;
 		locale?: Locale;
+		/** 轉傳給 provider；fetch-based 通道可真正取消 in-flight 請求 */
+		signal?: AbortSignal;
 		/** 寄送失敗時回呼 provider 原始錯誤（sendEmail 仍回傳 false） */
 		onError?: (error: unknown) => void;
 	} & (
@@ -25,7 +27,7 @@ export async function sendEmail<T extends TemplateId>(
 		  }
 	),
 ) {
-	const { to, from, locale = config.defaultLocale as Locale, onError } = params;
+	const { to, from, locale = config.defaultLocale as Locale, signal, onError } = params;
 
 	let html: string;
 	let text: string;
@@ -54,6 +56,7 @@ export async function sendEmail<T extends TemplateId>(
 			subject,
 			text,
 			html,
+			signal,
 		});
 		return true;
 	} catch (e) {

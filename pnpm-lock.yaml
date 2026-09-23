@@ -1208,6 +1208,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 26.2.0
+      dotenv-cli:
+        specifier: 'catalog:'
+        version: 11.0.0
       typescript:
         specifier: 'catalog:'
         version: 7.0.2
