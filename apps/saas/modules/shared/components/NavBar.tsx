@@ -3,6 +3,7 @@
 import { useActiveOrganization } from "@organizations/hooks/use-active-organization";
 import { config as authConfig } from "@startkiter/auth/config";
 import { config as paymentsConfig } from "@startkiter/payments/config";
+import { resolveNavigation } from "@startkiter/platform/src/workspace/navigation";
 import {
 	Button,
 	cn,
@@ -69,7 +70,7 @@ import { OrganzationSelect } from "../../organizations/components/OrganizationSe
 import { useIsMobile } from "../hooks/use-media-query";
 import {
 	getMountMenuItems,
-	getMountWorkspaceLabel,
+	getMountNavigationContext,
 	getTabBarItems,
 	isMenuActive,
 } from "../lib/nav-menu-items";
@@ -749,6 +750,24 @@ export function NavBar() {
 
 	const basePath = activeOrganization ? `/${activeOrganization.slug}` : "";
 
+	const navigation = useMemo(
+		() => {
+			const context = getMountNavigationContext({
+				pathname,
+				platformAdmin: canAccessAdmin,
+				canAccessPagesCms,
+			});
+			return {
+				...context,
+				model: resolveNavigation({
+					pathname: context.resolutionPath,
+					capabilities: context.capabilities,
+					apps: context.apps,
+				}),
+			};
+		},
+		[canAccessAdmin, canAccessPagesCms, pathname],
+	);
 	const mountMenuItems = useMemo(
 		() =>
 			getMountMenuItems({
@@ -756,18 +775,11 @@ export function NavBar() {
 				platformAdmin: canAccessAdmin,
 				canAccessPagesCms,
 				labelForKey: t,
+				resolvedNavigation: navigation,
 			}),
-		[canAccessAdmin, canAccessPagesCms, pathname, t],
+		[canAccessAdmin, canAccessPagesCms, navigation, pathname, t],
 	);
-	const workspaceLabel = useMemo(
-		() =>
-			getMountWorkspaceLabel({
-				pathname,
-				platformAdmin: canAccessAdmin,
-				canAccessPagesCms,
-			}),
-		[canAccessAdmin, canAccessPagesCms, pathname],
-	);
+	const workspaceLabel = navigation.model.workspaceLabel;
 
 	const { fixed: tabBarFixed, overflow: tabBarOverflow } = useMemo(
 		() => getTabBarItems(mountMenuItems, t("app.menu.more")),

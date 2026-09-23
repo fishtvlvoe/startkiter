@@ -2,6 +2,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MOUNT_POINTS } from "@startkiter/platform";
+import * as workspaceNavigation from "@startkiter/platform/src/workspace/navigation";
 import { iconMap, NavBar, NavMenuList, resolveIcon } from "./NavBar";
 import { PagesCmsAccessProvider } from "./PagesCmsAccessProvider";
 import * as navMenuItems from "../lib/nav-menu-items";
@@ -251,11 +252,14 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 	it("總管理員進入課程 App 時顯示課程管理員身份", () => {
 		mockCanAccessAdmin = true;
 		mockPathname = "/admin/course";
+		const resolveNavigationSpy = vi.spyOn(workspaceNavigation, "resolveNavigation");
 		const html = renderToStaticMarkup(<NavBar />);
 
 		expect(html).toContain('data-testid="sidebar-workspace-label"');
 		expect(html).toContain("課程管理員");
 		expect(html).toContain("course.bundles");
+		expect(resolveNavigationSpy).toHaveBeenCalledTimes(1);
+		resolveNavigationSpy.mockRestore();
 	});
 
 	it("shows 頁面管理 when canAccessPagesCmsAdmin is true even without admin.access", () => {
