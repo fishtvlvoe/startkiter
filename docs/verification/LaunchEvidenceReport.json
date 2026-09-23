@@ -1,0 +1,1632 @@
+{
+  "changeId": "platform-launch-verification-evidence",
+  "generatedAt": "2026-09-23T18:25:06.321Z",
+  "environment": {
+    "type": "production",
+    "url": "https://app.startkiter.dev",
+    "browser": "ego-browser"
+  },
+  "appIds": [
+    "course"
+  ],
+  "matrix": [
+    {
+      "appId": "course",
+      "role": "app-user",
+      "theme": "dark",
+      "locale": "zh-tw",
+      "viewport": "1440",
+      "status": "verified",
+      "knownIssues": [],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-user_dark_zh-tw_1440",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_dark_zh-tw_1440.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首頁 – StartKiter",
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "accountMenu": true,
+        "navLinkCount": 8,
+        "knownIssues": []
+      }
+    },
+    {
+      "appId": "course",
+      "role": "app-user",
+      "theme": "dark",
+      "locale": "zh-tw",
+      "viewport": "390",
+      "status": "verified",
+      "knownIssues": [],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-user_dark_zh-tw_390",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_dark_zh-tw_390.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首頁 – StartKiter",
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "accountMenu": true,
+        "navLinkCount": 11,
+        "knownIssues": []
+      }
+    },
+    {
+      "appId": "course",
+      "role": "app-user",
+      "theme": "light",
+      "locale": "zh-tw",
+      "viewport": "1440",
+      "status": "verified",
+      "knownIssues": [],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-user_light_zh-tw_1440",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_light_zh-tw_1440.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首頁 – StartKiter",
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "accountMenu": true,
+        "navLinkCount": 8,
+        "knownIssues": []
+      }
+    },
+    {
+      "appId": "course",
+      "role": "app-user",
+      "theme": "light",
+      "locale": "zh-tw",
+      "viewport": "390",
+      "status": "verified",
+      "knownIssues": [],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-user_light_zh-tw_390",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_light_zh-tw_390.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首頁 – StartKiter",
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "accountMenu": true,
+        "navLinkCount": 11,
+        "knownIssues": []
+      }
+    },
+    {
+      "appId": "course",
+      "role": "app-user",
+      "theme": "dark",
+      "locale": "zh-cn",
+      "viewport": "1440",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-user_dark_zh-cn_1440",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_dark_zh-cn_1440.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首页 – StartKiter",
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "accountMenu": true,
+        "navLinkCount": 8,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    },
+    {
+      "appId": "course",
+      "role": "app-user",
+      "theme": "dark",
+      "locale": "zh-cn",
+      "viewport": "390",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-user_dark_zh-cn_390",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_dark_zh-cn_390.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首页 – StartKiter",
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "accountMenu": true,
+        "navLinkCount": 6,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    },
+    {
+      "appId": "course",
+      "role": "app-user",
+      "theme": "light",
+      "locale": "zh-cn",
+      "viewport": "1440",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-user_light_zh-cn_1440",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_light_zh-cn_1440.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首页 – StartKiter",
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "accountMenu": true,
+        "navLinkCount": 8,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    },
+    {
+      "appId": "course",
+      "role": "app-user",
+      "theme": "light",
+      "locale": "zh-cn",
+      "viewport": "390",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-user_light_zh-cn_390",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_light_zh-cn_390.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首页 – StartKiter",
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "accountMenu": true,
+        "navLinkCount": 6,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    },
+    {
+      "appId": "course",
+      "role": "app-user",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": "1440",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-user_dark_en_1440",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_dark_en_1440.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "Start – StartKiter",
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "accountMenu": true,
+        "navLinkCount": 8,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    },
+    {
+      "appId": "course",
+      "role": "app-user",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": "390",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-user_dark_en_390",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_dark_en_390.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "Start – StartKiter",
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "accountMenu": true,
+        "navLinkCount": 11,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    },
+    {
+      "appId": "course",
+      "role": "app-user",
+      "theme": "light",
+      "locale": "en",
+      "viewport": "1440",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-user_light_en_1440",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_light_en_1440.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "Start – StartKiter",
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "accountMenu": true,
+        "navLinkCount": 8,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    },
+    {
+      "appId": "course",
+      "role": "app-user",
+      "theme": "light",
+      "locale": "en",
+      "viewport": "390",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-user_light_en_390",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_light_en_390.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "Start – StartKiter",
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "accountMenu": true,
+        "navLinkCount": 11,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    },
+    {
+      "appId": "course",
+      "role": "app-admin",
+      "theme": "dark",
+      "locale": "zh-tw",
+      "viewport": "1440",
+      "status": "verified",
+      "knownIssues": [],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-admin_dark_zh-tw_1440",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_dark_zh-tw_1440.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首頁 – StartKiter",
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "accountMenu": true,
+        "navLinkCount": 8,
+        "knownIssues": []
+      }
+    },
+    {
+      "appId": "course",
+      "role": "app-admin",
+      "theme": "dark",
+      "locale": "zh-tw",
+      "viewport": "390",
+      "status": "verified",
+      "knownIssues": [],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-admin_dark_zh-tw_390",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_dark_zh-tw_390.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首頁 – StartKiter",
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "accountMenu": true,
+        "navLinkCount": 11,
+        "knownIssues": []
+      }
+    },
+    {
+      "appId": "course",
+      "role": "app-admin",
+      "theme": "light",
+      "locale": "zh-tw",
+      "viewport": "1440",
+      "status": "verified",
+      "knownIssues": [],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-admin_light_zh-tw_1440",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_light_zh-tw_1440.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首頁 – StartKiter",
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "accountMenu": true,
+        "navLinkCount": 8,
+        "knownIssues": []
+      }
+    },
+    {
+      "appId": "course",
+      "role": "app-admin",
+      "theme": "light",
+      "locale": "zh-tw",
+      "viewport": "390",
+      "status": "verified",
+      "knownIssues": [],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-admin_light_zh-tw_390",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_light_zh-tw_390.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首頁 – StartKiter",
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "accountMenu": true,
+        "navLinkCount": 11,
+        "knownIssues": []
+      }
+    },
+    {
+      "appId": "course",
+      "role": "app-admin",
+      "theme": "dark",
+      "locale": "zh-cn",
+      "viewport": "1440",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-admin_dark_zh-cn_1440",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_dark_zh-cn_1440.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首页 – StartKiter",
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "accountMenu": true,
+        "navLinkCount": 8,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    },
+    {
+      "appId": "course",
+      "role": "app-admin",
+      "theme": "dark",
+      "locale": "zh-cn",
+      "viewport": "390",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-admin_dark_zh-cn_390",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_dark_zh-cn_390.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首页 – StartKiter",
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "accountMenu": true,
+        "navLinkCount": 6,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    },
+    {
+      "appId": "course",
+      "role": "app-admin",
+      "theme": "light",
+      "locale": "zh-cn",
+      "viewport": "1440",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-admin_light_zh-cn_1440",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_light_zh-cn_1440.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首页 – StartKiter",
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "accountMenu": true,
+        "navLinkCount": 8,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    },
+    {
+      "appId": "course",
+      "role": "app-admin",
+      "theme": "light",
+      "locale": "zh-cn",
+      "viewport": "390",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-admin_light_zh-cn_390",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_light_zh-cn_390.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首页 – StartKiter",
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "accountMenu": true,
+        "navLinkCount": 6,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    },
+    {
+      "appId": "course",
+      "role": "app-admin",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": "1440",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-admin_dark_en_1440",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_dark_en_1440.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "Start – StartKiter",
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "accountMenu": true,
+        "navLinkCount": 8,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    },
+    {
+      "appId": "course",
+      "role": "app-admin",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": "390",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-admin_dark_en_390",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_dark_en_390.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "Start – StartKiter",
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "accountMenu": true,
+        "navLinkCount": 11,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    },
+    {
+      "appId": "course",
+      "role": "app-admin",
+      "theme": "light",
+      "locale": "en",
+      "viewport": "1440",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-admin_light_en_1440",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_light_en_1440.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "Start – StartKiter",
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "accountMenu": true,
+        "navLinkCount": 8,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    },
+    {
+      "appId": "course",
+      "role": "app-admin",
+      "theme": "light",
+      "locale": "en",
+      "viewport": "390",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#app-admin_light_en_390",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_light_en_390.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "Start – StartKiter",
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "accountMenu": true,
+        "navLinkCount": 11,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    },
+    {
+      "appId": "course",
+      "role": "super-admin",
+      "theme": "dark",
+      "locale": "zh-tw",
+      "viewport": "1440",
+      "status": "verified",
+      "knownIssues": [],
+      "evidencePath": "evidence/launch-matrix-observations.json#super-admin_dark_zh-tw_1440",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_dark_zh-tw_1440.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首頁 – StartKiter",
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "accountMenu": true,
+        "navLinkCount": 9,
+        "knownIssues": []
+      }
+    },
+    {
+      "appId": "course",
+      "role": "super-admin",
+      "theme": "dark",
+      "locale": "zh-tw",
+      "viewport": "390",
+      "status": "verified",
+      "knownIssues": [],
+      "evidencePath": "evidence/launch-matrix-observations.json#super-admin_dark_zh-tw_390",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_dark_zh-tw_390.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首頁 – StartKiter",
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "accountMenu": true,
+        "navLinkCount": 12,
+        "knownIssues": []
+      }
+    },
+    {
+      "appId": "course",
+      "role": "super-admin",
+      "theme": "light",
+      "locale": "zh-tw",
+      "viewport": "1440",
+      "status": "verified",
+      "knownIssues": [],
+      "evidencePath": "evidence/launch-matrix-observations.json#super-admin_light_zh-tw_1440",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_light_zh-tw_1440.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首頁 – StartKiter",
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "accountMenu": true,
+        "navLinkCount": 9,
+        "knownIssues": []
+      }
+    },
+    {
+      "appId": "course",
+      "role": "super-admin",
+      "theme": "light",
+      "locale": "zh-tw",
+      "viewport": "390",
+      "status": "verified",
+      "knownIssues": [],
+      "evidencePath": "evidence/launch-matrix-observations.json#super-admin_light_zh-tw_390",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_light_zh-tw_390.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首頁 – StartKiter",
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "accountMenu": true,
+        "navLinkCount": 12,
+        "knownIssues": []
+      }
+    },
+    {
+      "appId": "course",
+      "role": "super-admin",
+      "theme": "dark",
+      "locale": "zh-cn",
+      "viewport": "1440",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#super-admin_dark_zh-cn_1440",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_dark_zh-cn_1440.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首页 – StartKiter",
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "accountMenu": true,
+        "navLinkCount": 9,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    },
+    {
+      "appId": "course",
+      "role": "super-admin",
+      "theme": "dark",
+      "locale": "zh-cn",
+      "viewport": "390",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#super-admin_dark_zh-cn_390",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_dark_zh-cn_390.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首页 – StartKiter",
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "accountMenu": true,
+        "navLinkCount": 7,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    },
+    {
+      "appId": "course",
+      "role": "super-admin",
+      "theme": "light",
+      "locale": "zh-cn",
+      "viewport": "1440",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#super-admin_light_zh-cn_1440",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_light_zh-cn_1440.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首页 – StartKiter",
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "accountMenu": true,
+        "navLinkCount": 9,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    },
+    {
+      "appId": "course",
+      "role": "super-admin",
+      "theme": "light",
+      "locale": "zh-cn",
+      "viewport": "390",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#super-admin_light_zh-cn_390",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_light_zh-cn_390.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "首页 – StartKiter",
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "accountMenu": true,
+        "navLinkCount": 7,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    },
+    {
+      "appId": "course",
+      "role": "super-admin",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": "1440",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#super-admin_dark_en_1440",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_dark_en_1440.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "Start – StartKiter",
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "accountMenu": true,
+        "navLinkCount": 9,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    },
+    {
+      "appId": "course",
+      "role": "super-admin",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": "390",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#super-admin_dark_en_390",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_dark_en_390.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "Start – StartKiter",
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "accountMenu": true,
+        "navLinkCount": 12,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    },
+    {
+      "appId": "course",
+      "role": "super-admin",
+      "theme": "light",
+      "locale": "en",
+      "viewport": "1440",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#super-admin_light_en_1440",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_light_en_1440.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "Start – StartKiter",
+        "viewportWidth": 1440,
+        "viewportHeight": 900,
+        "accountMenu": true,
+        "navLinkCount": 9,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    },
+    {
+      "appId": "course",
+      "role": "super-admin",
+      "theme": "light",
+      "locale": "en",
+      "viewport": "390",
+      "status": "unverified",
+      "knownIssues": [
+        {
+          "id": "workspace-label-not-localized",
+          "severity": "failed",
+          "expected": "zh-cn/en workspace identity label is localized",
+          "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+          "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+        }
+      ],
+      "evidencePath": "evidence/launch-matrix-observations.json#super-admin_light_en_390",
+      "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_light_en_390.png",
+      "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+      "actualOutcome": {
+        "url": "https://app.startkiter.dev/app",
+        "title": "Start – StartKiter",
+        "viewportWidth": 390,
+        "viewportHeight": 844,
+        "accountMenu": true,
+        "navLinkCount": 12,
+        "knownIssues": [
+          {
+            "id": "workspace-label-not-localized",
+            "severity": "failed",
+            "expected": "zh-cn/en workspace identity label is localized",
+            "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+            "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+          }
+        ]
+      }
+    }
+  ],
+  "linkChecks": [
+    {
+      "appId": "course",
+      "entryId": "super-admin:首頁@/app",
+      "expectedOutcome": "navigates to /app",
+      "actualOutcome": "https://app.startkiter.dev/app",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "super-admin:課程@/course",
+      "expectedOutcome": "navigates to /course",
+      "actualOutcome": "https://app.startkiter.dev/course",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "super-admin:客服@/support",
+      "expectedOutcome": "navigates to /support",
+      "actualOutcome": "https://app.startkiter.dev/support",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "super-admin:AI 助手@/ai",
+      "expectedOutcome": "navigates to /ai",
+      "actualOutcome": "https://app.startkiter.dev/ai",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "super-admin:帳號設定@/settings/general",
+      "expectedOutcome": "navigates to /settings/general",
+      "actualOutcome": "https://app.startkiter.dev/settings/general",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "super-admin:課程管理員設定@/admin/course/settings",
+      "expectedOutcome": "navigates to /admin/course/settings",
+      "actualOutcome": "https://app.startkiter.dev/admin/course/settings",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "super-admin:文件@/support",
+      "expectedOutcome": "navigates to /support",
+      "actualOutcome": "https://app.startkiter.dev/support",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "super-admin:我的訂閱@/settings/billing",
+      "expectedOutcome": "navigates to /settings/billing",
+      "actualOutcome": "https://app.startkiter.dev/settings/billing",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "super-admin:core-menu:1440",
+      "expectedOutcome": "first-level and account menus visible",
+      "actualOutcome": "both menus visible",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "super-admin:core-menu:390",
+      "expectedOutcome": "first-level and account menus visible",
+      "actualOutcome": "both menus visible",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-user:首頁@/app",
+      "expectedOutcome": "navigates to /app",
+      "actualOutcome": "https://app.startkiter.dev/app",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-user:課程@/course",
+      "expectedOutcome": "navigates to /course",
+      "actualOutcome": "https://app.startkiter.dev/course",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-user:客服@/support",
+      "expectedOutcome": "navigates to /support",
+      "actualOutcome": "https://app.startkiter.dev/support",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-user:AI 助手@/ai",
+      "expectedOutcome": "navigates to /ai",
+      "actualOutcome": "https://app.startkiter.dev/ai",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-user:帳號設定@/settings/general",
+      "expectedOutcome": "navigates to /settings/general",
+      "actualOutcome": "https://app.startkiter.dev/settings/general",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-user:課程管理員設定@/admin/course/settings",
+      "expectedOutcome": "navigates to /admin/course/settings",
+      "actualOutcome": "https://app.startkiter.dev/admin/course/settings",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-user:文件@/support",
+      "expectedOutcome": "navigates to /support",
+      "actualOutcome": "https://app.startkiter.dev/support",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-user:我的訂閱@/settings/billing",
+      "expectedOutcome": "navigates to /settings/billing",
+      "actualOutcome": "https://app.startkiter.dev/settings/billing",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-user:core-menu:1440",
+      "expectedOutcome": "first-level and account menus visible",
+      "actualOutcome": "both menus visible",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-user:core-menu:390",
+      "expectedOutcome": "first-level and account menus visible",
+      "actualOutcome": "both menus visible",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-admin:首頁@/app",
+      "expectedOutcome": "navigates to /app",
+      "actualOutcome": "https://app.startkiter.dev/app",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-admin:課程@/course",
+      "expectedOutcome": "navigates to /course",
+      "actualOutcome": "https://app.startkiter.dev/course",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-admin:客服@/support",
+      "expectedOutcome": "navigates to /support",
+      "actualOutcome": "https://app.startkiter.dev/support",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-admin:AI 助手@/ai",
+      "expectedOutcome": "navigates to /ai",
+      "actualOutcome": "https://app.startkiter.dev/ai",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-admin:帳號設定@/settings/general",
+      "expectedOutcome": "navigates to /settings/general",
+      "actualOutcome": "https://app.startkiter.dev/settings/general",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-admin:課程管理員設定@/admin/course/settings",
+      "expectedOutcome": "navigates to /admin/course/settings",
+      "actualOutcome": "https://app.startkiter.dev/admin/course/settings",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-admin:文件@/support",
+      "expectedOutcome": "navigates to /support",
+      "actualOutcome": "https://app.startkiter.dev/support",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-admin:我的訂閱@/settings/billing",
+      "expectedOutcome": "navigates to /settings/billing",
+      "actualOutcome": "https://app.startkiter.dev/settings/billing",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-admin:core-menu:1440",
+      "expectedOutcome": "first-level and account menus visible",
+      "actualOutcome": "both menus visible",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-admin:core-menu:390",
+      "expectedOutcome": "first-level and account menus visible",
+      "actualOutcome": "both menus visible",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "super-admin:notification:1440",
+      "expectedOutcome": "opens notifications without error",
+      "actualOutcome": "notification control responded",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "super-admin:user-menu-button:1440",
+      "expectedOutcome": "opens account menu",
+      "actualOutcome": "account menu inspected",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "super-admin:support-button:1440",
+      "expectedOutcome": "opens support widget",
+      "actualOutcome": "support control responded",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "super-admin:navigation-toggle:1440",
+      "expectedOutcome": "first-level navigation toggle is available",
+      "actualOutcome": {},
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "super-admin:notification:390",
+      "expectedOutcome": "opens notifications without error",
+      "actualOutcome": "notification control responded",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "super-admin:user-menu-button:390",
+      "expectedOutcome": "opens account menu",
+      "actualOutcome": "account menu inspected",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "super-admin:support-button:390",
+      "expectedOutcome": "opens support widget",
+      "actualOutcome": "support control responded",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "super-admin:navigation-toggle:390",
+      "expectedOutcome": "first-level navigation toggle is available",
+      "actualOutcome": {},
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-user:notification:1440",
+      "expectedOutcome": "opens notifications without error",
+      "actualOutcome": "notification control responded",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-user:user-menu-button:1440",
+      "expectedOutcome": "opens account menu",
+      "actualOutcome": "account menu inspected",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-user:support-button:1440",
+      "expectedOutcome": "opens support widget",
+      "actualOutcome": "support control responded",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-user:navigation-toggle:1440",
+      "expectedOutcome": "first-level navigation toggle is available",
+      "actualOutcome": {},
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-user:notification:390",
+      "expectedOutcome": "opens notifications without error",
+      "actualOutcome": "notification control responded",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-user:user-menu-button:390",
+      "expectedOutcome": "opens account menu",
+      "actualOutcome": "account menu inspected",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-user:support-button:390",
+      "expectedOutcome": "opens support widget",
+      "actualOutcome": "support control responded",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-user:navigation-toggle:390",
+      "expectedOutcome": "first-level navigation toggle is available",
+      "actualOutcome": {},
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-admin:notification:1440",
+      "expectedOutcome": "opens notifications without error",
+      "actualOutcome": "notification control responded",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-admin:user-menu-button:1440",
+      "expectedOutcome": "opens account menu",
+      "actualOutcome": "account menu inspected",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-admin:support-button:1440",
+      "expectedOutcome": "opens support widget",
+      "actualOutcome": "support control responded",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-admin:navigation-toggle:1440",
+      "expectedOutcome": "first-level navigation toggle is available",
+      "actualOutcome": {},
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-admin:notification:390",
+      "expectedOutcome": "opens notifications without error",
+      "actualOutcome": "notification control responded",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-admin:user-menu-button:390",
+      "expectedOutcome": "opens account menu",
+      "actualOutcome": "account menu inspected",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-admin:support-button:390",
+      "expectedOutcome": "opens support widget",
+      "actualOutcome": "support control responded",
+      "passed": true
+    },
+    {
+      "appId": "course",
+      "entryId": "app-admin:navigation-toggle:390",
+      "expectedOutcome": "first-level navigation toggle is available",
+      "actualOutcome": {},
+      "passed": true
+    }
+  ],
+  "errorScenarios": [
+    {
+      "scenario": "unauthorized route",
+      "expected": "safe redirect or authorization-denied page",
+      "actual": "https://app.startkiter.dev/ | root   container     container       container         button \"開啟導覽\" [ref=1, loc=css:button[aria-label=\"開啟導覽\"]]           svg_root         anchor [ref=2, loc=href:/, url=https://app.startkiter.dev/]           svg_root       container         button \"開啟通知\" [ref=3, loc=css:button[aria-label=\"開啟通知\"]]           svg_root           text \"1\"         button \"User menu\" [ref=4, loc=css:button[aria-label=\"User menu\"]]           text \"驗G\"       container         anchor [ref=5, loc=href:/app, url=https://ap",
+      "passed": true
+    },
+    {
+      "scenario": "invalid form input",
+      "expected": "handled validation message; no unhandled exception",
+      "actual": "https://app.startkiter.dev/signup | root   container     container       anchor [ref=1, loc=href:/, url=https://app.startkiter.dev/]         svg_root       container         heading           text \"建立帳號\"         paragraph           text \"很高興你想加入我們，請填寫下方表單建立帳號。\"         form           container             text \"姓名\"             textbox [ref=2, loc=css:input[name=\"name\"]]               text \"測試無效輸入\"           container             text \"Email\"             textbox [ref=3, loc=css:input[name=\"email\"]]               text \"not-an-email\"             svg_root             paragraph               text \"Invalid email address\"           container             text \"密碼\"             container               container                 textbox [",
+      "passed": true
+    },
+    {
+      "scenario": "simulated timeout",
+      "expected": "request timeout is handled without stack/internal path",
+      "actual": "{\"kind\":\"timeout\",\"name\":\"AbortError\",\"message\":\"request aborted by verification harness\"}",
+      "passed": true
+    }
+  ],
+  "rollbackRehearsal": null,
+  "knownIssues": [
+    {
+      "id": "workspace-label-not-localized",
+      "severity": "failed",
+      "affected": "24 matrix cells: locale zh-cn/en across all roles, themes, and viewports",
+      "expected": "zh-cn/en workspace identity label is localized",
+      "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+      "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+    }
+  ],
+  "unresolvedItems": [
+    "rollbackRehearsal 未執行：任務明確排除 4.1，依範圍不得對正式站執行回滾；後續需在 TEST/preview 補 timestamp、command、health check。",
+    "36 格截圖未產出：ego-browser Page.captureScreenshot 在 1440px 與 390px 均 15 秒逾時；核心路徑已由 DOM snapshot/state 驗證，3.2 截圖 gate 仍未確認。",
+    "課程 App 的 courseAccess 未透過正式購買或後台開通；本輪驗收的是平台殼核心路徑，課程內容權限仍未確認。",
+    "24 格 zh-cn/en 矩陣未通過：workspaceLabel 未走 i18n，身份標籤仍顯示繁體中文；根因為 packages/platform/src/workspace/navigation.ts 第 237/239 行硬編碼，需另開 SR 修正後重跑。"
+  ],
+  "completionStatus": "incomplete",
+  "isComplete": false,
+  "acceptance": {
+    "2.1_matrix": {
+      "status": "failed_with_known_issue",
+      "verifiedCells": 12,
+      "failedCells": 24,
+      "evidencePath": "evidence/launch-matrix-observations.json"
+    },
+    "2.2_visible_entries": {
+      "status": "verified",
+      "totalChecks": 54,
+      "passedChecks": 54,
+      "evidencePaths": [
+        "evidence/link-checks.json",
+        "evidence/button-checks.json"
+      ]
+    },
+    "3.1_error_scenarios": {
+      "status": "verified",
+      "evidencePath": "evidence/error-scenarios.json"
+    },
+    "3.2_deployed_environment": {
+      "status": "verified_with_screenshot_gap",
+      "url": "https://app.startkiter.dev",
+      "evidencePath": "evidence/launch-matrix-observations.json"
+    },
+    "4.1_rollback": {
+      "status": "out_of_scope_not_executed",
+      "reason": "本任務明確不含 4.1，且禁止對正式站執行回滾。"
+    },
+    "6.1_scope": {
+      "status": "verified",
+      "allowedRoots": [
+        "docs/verification/",
+        "openspec/changes/platform-launch-verification-evidence/evidence/"
+      ]
+    },
+    "6.2_mitigations": {
+      "status": "verified",
+      "items": [
+        {
+          "risk": "36 格執行成本高",
+          "mitigation": "批次腳本固定角色、主題、語言、viewport 組合，JSON 留存 36 格唯一鍵。"
+        },
+        {
+          "risk": "回滾排練影響正式環境",
+          "mitigation": "本輪不碰正式站回滾；後續改在 TEST/preview 低流量時段排練。"
+        },
+        {
+          "risk": "未來新增 App 擴大驗收範圍",
+          "mitigation": "以 appId 分組，新增 App 只新增該 App 的矩陣與 link checks；共用元件變更才重跑全量。"
+        }
+      ]
+    }
+  },
+  "validation": {
+    "reportGenerator": "docs/verification/launch-evidence-report.mjs",
+    "status": "incomplete_by_design",
+    "reason": "現有 generator 對 rollbackRehearsal=null 會拒絕 completion report；本任務排除 4.1，故保留 null 並明列 unresolvedItems。另有 24 格 zh-cn/en workspaceLabel i18n 已知失敗。"
+  }
+}

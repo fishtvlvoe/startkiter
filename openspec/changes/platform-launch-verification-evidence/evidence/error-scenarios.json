@@ -1,0 +1,20 @@
+[
+  {
+    "scenario": "unauthorized route",
+    "expected": "safe redirect or authorization-denied page",
+    "actual": "https://app.startkiter.dev/ | root   container     container       container         button \"開啟導覽\" [ref=1, loc=css:button[aria-label=\"開啟導覽\"]]           svg_root         anchor [ref=2, loc=href:/, url=https://app.startkiter.dev/]           svg_root       container         button \"開啟通知\" [ref=3, loc=css:button[aria-label=\"開啟通知\"]]           svg_root           text \"1\"         button \"User menu\" [ref=4, loc=css:button[aria-label=\"User menu\"]]           text \"驗G\"       container         anchor [ref=5, loc=href:/app, url=https://ap",
+    "passed": true
+  },
+  {
+    "scenario": "invalid form input",
+    "expected": "handled validation message; no unhandled exception",
+    "actual": "https://app.startkiter.dev/signup | root   container     container       anchor [ref=1, loc=href:/, url=https://app.startkiter.dev/]         svg_root       container         heading           text \"建立帳號\"         paragraph           text \"很高興你想加入我們，請填寫下方表單建立帳號。\"         form           container             text \"姓名\"             textbox [ref=2, loc=css:input[name=\"name\"]]               text \"測試無效輸入\"           container             text \"Email\"             textbox [ref=3, loc=css:input[name=\"email\"]]               text \"not-an-email\"             svg_root             paragraph               text \"Invalid email address\"           container             text \"密碼\"             container               container                 textbox [",
+    "passed": true
+  },
+  {
+    "scenario": "simulated timeout",
+    "expected": "request timeout is handled without stack/internal path",
+    "actual": "{\"kind\":\"timeout\",\"name\":\"AbortError\",\"message\":\"request aborted by verification harness\"}",
+    "passed": true
+  }
+]
