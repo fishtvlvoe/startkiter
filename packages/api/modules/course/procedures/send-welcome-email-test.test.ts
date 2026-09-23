@@ -83,6 +83,57 @@ describe("sendWelcomeEmailTest", () => {
 		expect(db.emailDeliveryLog.create).not.toHaveBeenCalled();
 	});
 
+	it("does not Markdown-escape punctuation in the plain-text subject", async () => {
+		vi.mocked(db.course.findUnique).mockResolvedValue({
+			id: "course-1",
+			title: "(StartKiter Academy)",
+			slug: "startkiter",
+		} as never);
+		vi.mocked(db.courseWelcomeEmail.findUnique).mockResolvedValue({
+			courseId: "course-1",
+			enabled: true,
+			subjectTemplate: "{{courseName}}",
+			markdownTemplate: "請從課程入口開始。",
+			contentJson: null,
+		} as never);
+
+		const result = await call(
+			sendWelcomeEmailTest,
+			{ courseId: "course-1", toEmail: "fish@example.com" },
+			{ context: { headers: new Headers() } },
+		);
+
+		expect(result.subject).toBe("(StartKiter Academy)");
+		expect(sendEmail).toHaveBeenCalledWith(expect.objectContaining({ subject: "(StartKiter Academy)" }));
+	});
+
+	it("sends rendered HTML for a legacy Markdown template", async () => {
+		const actualMail = await vi.importActual<typeof import("@startkiter/mail")>("@startkiter/mail");
+		vi.mocked(renderCourseWelcomeEmail).mockImplementation(actualMail.renderCourseWelcomeEmail);
+		vi.mocked(db.courseWelcomeEmail.findUnique).mockResolvedValue({
+			courseId: "course-1",
+			enabled: true,
+			subjectTemplate: "歡迎 {{courseName}}",
+			markdownTemplate: "**電馭學院**\n\n[開始上課](https://app.startkiter.dev/course/startkiter)",
+			contentJson: null,
+		} as never);
+
+		await call(
+			sendWelcomeEmailTest,
+			{ courseId: "course-1", toEmail: "fish@example.com" },
+			{ context: { headers: new Headers() } },
+		);
+
+		const calls = vi.mocked(sendEmail).mock.calls;
+		const sentEmail = calls[calls.length - 1]?.[0];
+		expect(sentEmail?.html).toMatch(/<strong(?:\s[^>]*)?>電馭學院<\/strong>/);
+		expect(sentEmail?.html).toMatch(
+			/<a href="https:\/\/app\.startkiter\.dev\/course\/startkiter"[^>]*>開始上課<\/a>/,
+		);
+		expect(sentEmail?.html).not.toContain("**電馭學院**");
+		expect(sentEmail?.html).not.toContain("[開始上課](https://app.startkiter.dev/course/startkiter)");
+	});
+
 	it("rejects empty toEmail without sending", async () => {
 		await expect(
 			call(

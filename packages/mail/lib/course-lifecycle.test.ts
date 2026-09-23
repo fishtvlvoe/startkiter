@@ -71,4 +71,20 @@ describe("renderCourseWelcomeEmail", () => {
 		expect(rendered.html).toContain("從課程入口開始。");
 		expect(rendered.html).toContain("開站包");
 	});
+
+	it("renders Markdown emphasis and links as HTML in the legacy fallback", async () => {
+		const rendered = await renderCourseWelcomeEmail({
+			userName: "Fish",
+			courseName: "開站包",
+			markdown: "**電馭學院**\n\n[開始上課](https://app.startkiter.dev/course/startkiter)",
+			contentJson: null,
+		});
+
+		expect(rendered.html).toMatch(/<strong(?:\s[^>]*)?>電馭學院<\/strong>/);
+		expect(rendered.html).toMatch(
+			/<a href="https:\/\/app\.startkiter\.dev\/course\/startkiter"[^>]*>開始上課<\/a>/,
+		);
+		expect(rendered.html).not.toContain("**電馭學院**");
+		expect(rendered.html).not.toContain("[開始上課](https://app.startkiter.dev/course/startkiter)");
+	});
 });

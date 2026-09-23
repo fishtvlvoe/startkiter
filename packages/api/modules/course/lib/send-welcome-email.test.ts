@@ -103,6 +103,24 @@ describe("sendWelcomeEmail", () => {
 		}));
 	});
 
+	it("does not Markdown-escape punctuation in the plain-text subject", async () => {
+		vi.mocked(db.courseWelcomeEmail.findUnique).mockResolvedValue({
+			courseId: "course-1",
+			enabled: true,
+			subjectTemplate: "{{courseName}}",
+			markdownTemplate: "請從課程入口開始。",
+		} as never);
+		vi.mocked(db.course.findUnique).mockResolvedValue({
+			id: "course-1",
+			title: "(StartKiter Academy)",
+			slug: "startkiter",
+		} as never);
+
+		await sendWelcomeEmail({ userId: "user-1", courseId: "course-1", orderId: "order-1" });
+
+		expect(sendEmail).toHaveBeenCalledWith(expect.objectContaining({ subject: "(StartKiter Academy)" }));
+	});
+
 	it.each([
 		["disabled", { enabled: false }],
 		["unconfigured", null],

@@ -3,7 +3,8 @@ import { render } from "react-email";
 import { CourseWelcome, type CourseLifecycleEmailProps } from "../emails/CourseWelcome";
 import { renderWelcomeEmailFromBlocks } from "./welcome-email-render";
 
-function escapeMarkdownHtml(source: string): string {
+/** Escape raw HTML before CourseWelcome's Markdown component parses Markdown syntax. */
+function escapeRawHtmlForMarkdown(source: string): string {
 	return source.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
@@ -28,7 +29,7 @@ export async function renderCourseWelcomeEmail(props: RenderCourseWelcomeEmailIn
 	const email = CourseWelcome({
 		userName: props.userName,
 		courseName: props.courseName,
-		markdown: escapeMarkdownHtml(props.markdown),
+		markdown: escapeRawHtmlForMarkdown(props.markdown),
 	});
 
 	return {
