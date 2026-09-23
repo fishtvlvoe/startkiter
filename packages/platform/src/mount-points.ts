@@ -135,7 +135,7 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		version: "0.1.0",
 		app: COURSE_ADMIN_APP,
 		mount: {
-			route: { path: "/quiz-admin" },
+			route: { path: "/admin/course/quiz" },
 			menu: {
 				labelKey: "course.quiz",
 				icon: "list-checks",
@@ -153,7 +153,7 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		version: "0.1.0",
 		app: COURSE_ADMIN_APP,
 		mount: {
-			route: { path: "/assignment-admin" },
+			route: { path: "/admin/course/assignment" },
 			menu: {
 				labelKey: "course.assignment",
 				icon: "file-pen-line",
@@ -182,7 +182,7 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		version: "0.1.0",
 		app: COURSE_ADMIN_APP,
 		mount: {
-			route: { path: "/review-admin" },
+			route: { path: "/admin/course/review" },
 			menu: {
 				labelKey: "course.review",
 				icon: "message-square",
@@ -243,7 +243,7 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		version: "0.1.0",
 		app: COURSE_ADMIN_APP,
 		mount: {
-			route: { path: "/admin/bundles" },
+			route: { path: "/admin/course/bundles" },
 			menu: {
 				labelKey: "course.bundles",
 				icon: "package",
@@ -260,7 +260,7 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		version: "0.1.0",
 		app: COURSE_ADMIN_APP,
 		mount: {
-			route: { path: "/admin/onboarding-surveys" },
+			route: { path: "/admin/course/onboarding-surveys" },
 			menu: {
 				labelKey: "course.onboarding",
 				icon: "clipboard-list",
@@ -277,7 +277,7 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		version: "0.1.0",
 		app: COURSE_ADMIN_APP,
 		mount: {
-			route: { path: "/admin/media" },
+			route: { path: "/admin/course/media" },
 			menu: {
 				labelKey: "course.media",
 				icon: "image",
@@ -294,7 +294,7 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		version: "0.1.0",
 		app: COURSE_ADMIN_APP,
 		mount: {
-			route: { path: "/admin/course-pack" },
+			route: { path: "/admin/course/course-pack" },
 			menu: {
 				labelKey: "course.coursePack",
 				icon: "clipboard-list",

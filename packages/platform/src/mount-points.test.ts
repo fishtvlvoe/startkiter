@@ -25,10 +25,10 @@ describe("MOUNT_POINTS registry tests (Task 3.1)", () => {
 		expect(coursePlugin?.mount.menu?.requiresOperator).toBeUndefined();
 	});
 
-	it("7.3 contains bundles plugin manifest, operator-only menu item pointing at /admin/bundles", () => {
+	it("7.3 contains bundles plugin manifest, operator-only menu item pointing at /admin/course/bundles", () => {
 		const bundlesPlugin = MOUNT_POINTS.find((plugin) => plugin.id === "bundles");
 		expect(bundlesPlugin).toBeDefined();
-		expect(bundlesPlugin?.mount.route?.path).toBe("/admin/bundles");
+		expect(bundlesPlugin?.mount.route?.path).toBe("/admin/course/bundles");
 		expect(bundlesPlugin?.mount.menu?.requiresOperator).toBe(true);
 		expect(bundlesPlugin?.mount.menu?.labelKey).toBe("course.bundles");
 		expect(bundlesPlugin?.mount.menu?.icon).toBe("package");

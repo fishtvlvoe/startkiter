@@ -317,7 +317,7 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 	it("uses SidebarGroupedNav with nested course admin menu for operators", () => {
 		mockIsCollapsed = false;
 		mockCanAccessAdmin = true;
-		mockPathname = "/admin/media";
+		mockPathname = "/admin/course/media";
 		const html = renderToStaticMarkup(<NavBar />);
 
 		expect(html).toContain("course.coursePack");

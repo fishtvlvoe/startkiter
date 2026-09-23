@@ -177,9 +177,10 @@ export function resolveNavigation(input: {
 		}
 		workspace = { scope: "platform" };
 	} else {
-		const role: WorkspaceRole = input.capabilities.platformAdmin
-			? "app-admin"
-			: (input.capabilities.appRoles[currentEntry.appId] ?? "app-user");
+		// 路由樹決定畫面；總管理員可切換到 app-admin 路由，但不能把使用者路由變成管理畫面。
+		const role: WorkspaceRole = currentEntry.requiredRole === "app-admin"
+			? (input.capabilities.platformAdmin ? "app-admin" : (input.capabilities.appRoles[currentEntry.appId] ?? "app-user"))
+			: "app-user";
 		workspace = { scope: "app", appId: currentEntry.appId, role };
 	}
 	validateWorkspaceContext(workspace, input.apps);

@@ -124,7 +124,7 @@ describe("nav-menu-items (WorkspaceContext navigation model)", () => {
 	});
 
 	it("marks App child and platform routes active without false positives", () => {
-		const mediaItems = getMountMenuItems({ pathname: "/admin/media", platformAdmin: false, labelForKey });
+		const mediaItems = getMountMenuItems({ pathname: "/admin/course/media", platformAdmin: false, labelForKey });
 		const emailItems = getMountMenuItems({
 			pathname: "/admin/email-settings",
 				platformAdmin: true,
@@ -134,7 +134,7 @@ describe("nav-menu-items (WorkspaceContext navigation model)", () => {
 
 		expect(mediaItems.find((item) => item.id === "course-admin")?.isActive).toBe(true);
 		expect(mediaItems.find((item) => item.id === "course-admin")?.subItems?.find((item) => item.id === "media-library")?.href).toBe(
-			"/admin/media",
+			"/admin/course/media",
 		);
 		expect(emailItems.filter((item) => item.isActive).map((item) => item.id)).toEqual(["email-settings"]);
 	});
@@ -163,11 +163,11 @@ describe("nav-menu-items (WorkspaceContext navigation model)", () => {
 		expect(getTabBarItems(englishItems, "More").overflow[0]?.label).toBe("More");
 	});
 
-		it("isMenuActive prefers the longest matching admin href (/admin/course-pack vs /admin/course)", () => {
-			const hrefs = ["/admin/course", "/admin/course-pack", "/admin/media", "/admin/email-settings"];
-			expect(isMenuActive("/admin/course-pack", "/admin/course", hrefs)).toBe(false);
-			expect(isMenuActive("/admin/course-pack", "/admin/course-pack", hrefs)).toBe(true);
-			expect(isMenuActive("/admin/media", "/admin/media", hrefs)).toBe(true);
+		it("isMenuActive prefers the longest matching admin href (/admin/course/course-pack vs /admin/course)", () => {
+			const hrefs = ["/admin/course", "/admin/course/course-pack", "/admin/course/media", "/admin/email-settings"];
+			expect(isMenuActive("/admin/course/course-pack", "/admin/course", hrefs)).toBe(false);
+			expect(isMenuActive("/admin/course/course-pack", "/admin/course/course-pack", hrefs)).toBe(true);
+			expect(isMenuActive("/admin/course/media", "/admin/course/media", hrefs)).toBe(true);
 			expect(isMenuActive("/admin/email-settings", "/admin/email-settings", hrefs)).toBe(true);
 		});
 
@@ -177,7 +177,7 @@ describe("nav-menu-items (WorkspaceContext navigation model)", () => {
 			const bundlesItem = MOUNT_POINTS.find((p) => p.id === "bundles");
 
 			expect(courseItem?.mount.route?.path).toBe("/course");
-			expect(bundlesItem?.mount.route?.path).toBe("/admin/bundles");
+			expect(bundlesItem?.mount.route?.path).toBe("/admin/course/bundles");
 		});
 	});
 
@@ -208,7 +208,7 @@ describe("nav-menu-items (WorkspaceContext navigation model)", () => {
 				{ id: "1", label: "Item 1", href: "/1", icon: "home", order: 1, isActive: false },
 				{ id: "2", label: "Item 2", href: "/2", icon: "home", order: 2, isActive: false },
 				{ id: "3", label: "Item 3", href: "/3", icon: "home", order: 3, isActive: false },
-				{ id: "admin", label: "管理設定", href: "/admin/bundles", icon: "settings", order: 4, isActive: true },
+				{ id: "admin", label: "管理設定", href: "/admin/course/bundles", icon: "settings", order: 4, isActive: true },
 			];
 
 			const { overflow } = getTabBarItems(mockItems);
@@ -216,7 +216,7 @@ describe("nav-menu-items (WorkspaceContext navigation model)", () => {
 			const more = overflow[0];
 			expect(more).toBeDefined();
 			expect(more?.isActive).toBe(true);
-			expect(more?.subItems?.some((item) => item.href === "/admin/bundles")).toBe(true);
+			expect(more?.subItems?.some((item) => item.href === "/admin/course/bundles")).toBe(true);
 		});
 
 		it("9.2 More drawer contains admin settings for operators only", () => {

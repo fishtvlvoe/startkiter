@@ -51,7 +51,7 @@ const apps: AppManifestEntry[] = [
 		scope: "app",
 		displayName: "課程",
 		displayNameKey: "course.navLabel",
-		route: { path: "/quiz-admin" },
+		route: { path: "/admin/course/quiz" },
 		menu: { labelKey: "course.quiz", icon: "list-checks", order: 20, parentId: "course-admin" },
 		requiredRole: "app-admin",
 		i18nNamespace: "course",
@@ -62,7 +62,7 @@ const apps: AppManifestEntry[] = [
 		scope: "app",
 		displayName: "課程",
 		displayNameKey: "course.navLabel",
-		route: { path: "/assignment-admin" },
+			route: { path: "/admin/course/assignment" },
 		menu: { labelKey: "course.assignment", icon: "file-pen-line", order: 30, parentId: "course-admin" },
 		requiredRole: "app-admin",
 		i18nNamespace: "course",
@@ -73,7 +73,7 @@ const apps: AppManifestEntry[] = [
 		scope: "app",
 		displayName: "課程",
 		displayNameKey: "course.navLabel",
-		route: { path: "/review-admin" },
+			route: { path: "/admin/course/review" },
 		menu: { labelKey: "course.review", icon: "message-square", order: 40, parentId: "course-admin" },
 		requiredRole: "app-admin",
 		i18nNamespace: "course",
@@ -173,14 +173,14 @@ describe("resolveNavigation", () => {
 		expect(design.workspace).toEqual({ scope: "app", appId: "design", role: "app-user" });
 	});
 
-	it("lets a platform admin resolve app-admin inside any app", () => {
+	it("keeps an app-user route as app-user for a platform admin", () => {
 		const model = resolveNavigation({
 			pathname: "/design",
 			capabilities: capabilities({ platformAdmin: true }),
 			apps,
 		});
 
-		expect(model.workspace).toEqual({ scope: "app", appId: "design", role: "app-admin" });
+		expect(model.workspace).toEqual({ scope: "app", appId: "design", role: "app-user" });
 	});
 });
 

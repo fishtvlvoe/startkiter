@@ -51,7 +51,7 @@ export default async function AdminCoursePackPage() {
 								>
 									<div className="min-w-0">
 										<Link
-											href={`/admin/course-pack/${coursePack.id}`}
+												href={`/admin/course/course-pack/${coursePack.id}`}
 											className="font-medium underline-offset-4 hover:underline"
 										>
 											{coursePack.title}
@@ -64,7 +64,7 @@ export default async function AdminCoursePackPage() {
 										<span className="rounded-full border px-2.5 py-1" data-testid="course-pack-status">
 											{coursePack.status}
 										</span>
-										<Link className="text-primary underline" href={`/admin/course-pack/${coursePack.id}`}>
+												<Link className="text-primary underline" href={`/admin/course/course-pack/${coursePack.id}`}>
 											查看 Mission
 										</Link>
 									</div>

@@ -49,7 +49,7 @@ describe("Admin CoursePack list page", () => {
 		expect(html).toContain("開站任務包");
 		expect(html).toContain("active");
 		expect(html).toContain("2026/8/30");
-		expect(html).toContain("/admin/course-pack/pack-1");
+		expect(html).toContain("/admin/course/course-pack/pack-1");
 		expect(createProcedureClientMock).toHaveBeenCalled();
 	});
 });

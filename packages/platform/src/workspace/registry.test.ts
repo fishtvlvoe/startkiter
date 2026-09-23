@@ -41,6 +41,15 @@ const designMountPoint: PluginManifest = {
 	dataSpec: "none",
 };
 
+const designAdminMountPoint: PluginManifest = {
+	...designMountPoint,
+	app: { ...designMountPoint.app!, requiredRole: "app-admin" },
+	mount: {
+		...designMountPoint.mount,
+		route: { path: "/admin/design" },
+	},
+};
+
 describe("App registry adapter", () => {
 	it("converts one plugin manifest without creating a second menu literal", () => {
 		const source: PluginManifest = {
@@ -91,9 +100,13 @@ describe("App registry adapter", () => {
 		expect(model.workspace).toEqual({ scope: "app", appId: "course", role: "app-admin" });
 		expect(model.items.map((item) => item.id)).toEqual(["course-admin"]);
 		expect(model.items[0]?.children.map((item) => item.id)).toEqual([
+			"course-dashboard",
 			"quiz",
 			"assignment",
 			"review",
+			"course-comments",
+			"course-messages",
+			"course-coupons",
 			"bundles",
 			"onboarding-surveys",
 			"media-library",
@@ -110,9 +123,9 @@ describe("App registry adapter", () => {
 		};
 
 		const beforeUpdate = resolveNavigation({
-			pathname: "/design",
+			pathname: "/admin/design",
 			capabilities,
-			apps: toAppManifestEntries([designMountPoint], registry),
+			apps: toAppManifestEntries([designAdminMountPoint], registry),
 		});
 		expect(beforeUpdate.workspaceLabel).toBe("設計管理員");
 
@@ -124,9 +137,9 @@ describe("App registry adapter", () => {
 		expect(update.updated).toBe(true);
 
 		const afterUpdate = resolveNavigation({
-			pathname: "/design",
+			pathname: "/admin/design",
 			capabilities,
-			apps: toAppManifestEntries([designMountPoint], registry),
+			apps: toAppManifestEntries([designAdminMountPoint], registry),
 		});
 		expect(afterUpdate.workspaceLabel).toBe("圖片設計管理員");
 	});

@@ -29,7 +29,7 @@ export default async function AdminCoursePackDetailPage({ params }: AdminCourseP
 		<div className="mx-auto max-w-5xl space-y-6 p-6" data-testid="admin-course-pack-detail">
 			<div className="flex flex-wrap items-start justify-between gap-4">
 				<div>
-					<Link href="/admin/course-pack" className="text-sm text-muted-foreground underline">
+					<Link href="/admin/course/course-pack" className="text-sm text-muted-foreground underline">
 						返回 CoursePack 列表
 					</Link>
 					<h1 className="mt-2 text-2xl font-semibold">{coursePack.title}</h1>
