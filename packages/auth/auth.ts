@@ -38,8 +38,15 @@ const appUrl = getBaseUrl(process.env.NEXT_PUBLIC_SAAS_URL, 3000);
 const socialProviders = getSocialProviders(process.env);
 
 export const auth = betterAuth({
-	baseURL: appUrl,
-	trustedOrigins: [appUrl],
+	baseURL:
+		process.env.NODE_ENV === "production"
+			? appUrl
+			: {
+					// 本機開發：Orca 開發隧道（development.orca.localhost:<動態埠>）與一般 localhost:<埠> 都放行；
+					// 正式環境仍只用單一 appUrl，不受這裡影響。
+					allowedHosts: ["localhost:*", "127.0.0.1:*", "*.orca.localhost:*"],
+					fallback: appUrl,
+				},
 	database: prismaAdapter(db, {
 		provider: "postgresql",
 	}),

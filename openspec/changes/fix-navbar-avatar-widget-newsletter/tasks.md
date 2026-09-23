@@ -1,0 +1,25 @@
+## 1. NavBar 接上 resolveNavigation
+
+- [ ] 1.1 完成「NavBar 呼叫 resolveNavigation 決定選單內容」：把 `NavBar.tsx` 改為呼叫 `resolveNavigation`，依 `WorkspaceContext` 動態顯示身份與選單；驗證：對照 `specs/role-based-workspace-navigation/spec.md` 兩個 Scenario，新增「總管理員進課程 App 顯示課程管理員身份」這個之前完全沒測到的測試案例（對應設計決策「NavBar 修復需要新增之前完全沒有的測試案例」）
+- [ ] 1.2 確認既有 `NavBar.test.tsx` 全數通過，沒有因這次改動破壞舊行為；驗證：`pnpm test NavBar`
+
+## 2. 頭像上傳修復
+
+- [ ] 2.1 完成「上傳失敗要顯示原因」：`onCrop` 失敗時顯示具體錯誤提示並記錄 log；驗證：對照該 Scenario，手動製造 S3 憑證缺漏情境確認有錯誤提示
+- [ ] 2.2 完成「上傳流程在環境齊全時要能成功」：確認/補齊 `S3_ENDPOINT`/`S3_ACCESS_KEY_ID`/`S3_SECRET_ACCESS_KEY`；驗證：本機若有可用 S3 環境，實際跑一次上傳成功；若無，明確標記「受限於環境，無法端到端驗證」
+
+## 3. 客服按鈕位置修復
+
+- [ ] 3.1 完成「客服按鈕可收合」：改成可收合/可關閉，功能不變；驗證：對照兩個 Scenario 手動操作確認
+
+## 4. 電子報分支合��
+
+- [ ] 4.1 找出 `origin/fishtvlvoe/newsletter-automation-integration` 與 `main` 全部差異檔案，`packages/database/prisma/schema.prisma`、`packages/mail/provider/*` 衝突採用 main 版本（對應設計決策「電子報合併採技術實作用新的、行為邏輯要核對原則」）
+- [ ] 4.2 完成「自動寄送引擎可正式運作」：合併 Wave 1B send engine + dispatch cron 進 main；驗證：對照該 Scenario 實際跑一次排程寄送
+- [ ] 4.3 完成「合併衝突時保留行為正確的一方」：逐一核對 `packages/newsletter/`、`unsubscribe`、`email-consent`、`SignupForm.tsx`、`checkout` 相關衝突的行為語意；驗證：對照「兩套退訂邏輯行為不一致時停下回報」Scenario，發現不一致時停下記錄差異，不自行選邊
+- [ ] 4.4 合併後跑一次既有退訂/同意相關測試，確保沒有變紅；驗證：`pnpm test` 全綠
+
+## 5. 整合驗證
+
+- [ ] 5.1 `pnpm build` 全綠
+- [ ] 5.2 本機以總管理員帳號走一次：進課程 App 看到管理員身份、頭像上傳（若環境允許）、客服按鈕收合、電子報後台，截圖存證
