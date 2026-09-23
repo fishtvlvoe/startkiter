@@ -5,14 +5,14 @@
 
 ## 1. 先建立失敗測試
 
-- [ ] 1.1 [P] 讓「A new App registers through a typed manifest validated at CI time」在缺 `displayName`、`route.basePath`、icon 版本、語系 key，以及 `appId`／route 衝突時失敗；先建立 manifest validation test，列出每種缺失欄位的預期錯誤訊息。
-- [ ] 1.2 [P] 讓「displayName is owned by the App's own admin and blocks reserved words」在非 app-admin 嘗試修改、保留字「總管理員」「使用者」、空白字串時失敗；先建立 displayName 更新 test。
+- [x] 1.1 [P] 讓「A new App registers through a typed manifest validated at CI time」在缺 `displayName`、`route.basePath`、icon 版本、語系 key，以及 `appId`／route 衝突時失敗；先建立 manifest validation test，列出每種缺失欄位的預期錯誤訊息。
+- [x] 1.2 [P] 讓「displayName is owned by the App's own admin and blocks reserved words」在非 app-admin 嘗試修改、保留字「總管理員」「使用者」、空白字串時失敗；先建立 displayName 更新 test。
 - [ ] 1.3 [P] 讓「Developer-only vocabulary is excluded from learner-facing text」在使用者可見文案出現 `manifest`／`resolver`／`registry`／`workspace context` 時失敗，在程式碼註解與 Skill 檔案出現時不失敗；先建立 forbidden-term scan script 與 fixture。
 
 ## 2. 建立 App registration 核心
 
-- [ ] 2.1 依「A new App registers through a typed manifest validated at CI time」實作 `AppRegistrationManifest` 型別與 `registerApp` 驗證函式；完成後缺欄位或衝突的 App 無法進入 registry，並以 1.1 測試驗證。
-- [ ] 2.2 依「displayName is owned by the App's own admin and blocks reserved words」實作 `displayName` 更新 API，綁定既有 `app-admin` 權限檢查；完成後只有該 App 的 app-admin 能改名，且保留字被擋下，並以 1.2 測試驗證。
+- [x] 2.1 依「A new App registers through a typed manifest validated at CI time」實作 `AppRegistrationManifest` 型別與 `registerApp` 驗證函式；完成後缺欄位或衝突的 App 無法進入 registry，並以 1.1 測試驗證。
+- [x] 2.2 依「displayName is owned by the App's own admin and blocks reserved words」實作 `displayName` 更新 API，綁定既有 `app-admin` 權限檢查；完成後只有該 App 的 app-admin 能改名，且保留字被擋下，並以 1.2 測試驗證。
 - [ ] 2.3 依「Observable behavior」確認 `displayName` 更新後，navigation model 重新 resolve 立即反映新名稱，不需要重新部署；完成後以 fixture 測試模擬修改前後兩次 resolve 比對驗證。
 - [ ] 2.4 依「Interface and data shape」與「Failure behavior」接上 CI，讓任何新增或修改 App registry 的 PR 跑 `registerApp` 驗證；完成後 CI 會在缺欄位時擋下合併，並以 CI 設定檔與一次刻意失敗的 PR fixture 驗證。
 
