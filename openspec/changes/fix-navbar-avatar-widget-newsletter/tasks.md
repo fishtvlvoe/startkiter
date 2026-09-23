@@ -1,16 +1,16 @@
 ## 1. NavBar 接上 resolveNavigation
 
-- [ ] 1.1 完成「NavBar 呼叫 resolveNavigation 決定選單內容」：把 `NavBar.tsx` 改為呼叫 `resolveNavigation`，依 `WorkspaceContext` 動態顯示身份與選單；驗證：對照 `specs/role-based-workspace-navigation/spec.md` 兩個 Scenario，新增「總管理員進課程 App 顯示課程管理員身份」這個之前完全沒測到的測試案例（對應設計決策「NavBar 修復需要新增之前完全沒有的測試案例」）
-- [ ] 1.2 確認既有 `NavBar.test.tsx` 全數通過，沒有因這次改動破壞舊行為；驗證：`pnpm test NavBar`
+- [x] 1.1 完成「NavBar 呼叫 resolveNavigation 決定選單內容」：把 `NavBar.tsx` 改為呼叫 `resolveNavigation`，依 `WorkspaceContext` 動態顯示身份與選單；驗證：對照 `specs/role-based-workspace-navigation/spec.md` 兩個 Scenario，新增「總管理員進課程 App 顯示課程管理員身份」這個之前完全沒測到的測試案例（對應設計決策「NavBar 修復需要新增之前完全沒有的測試案例」）
+- [x] 1.2 確認既有 `NavBar.test.tsx` 全數通過，沒有因這次改動破壞舊行為；驗證：`pnpm test NavBar`
 
 ## 2. 頭像上傳修復
 
-- [ ] 2.1 完成「上傳失敗要顯示原因」：`onCrop` 失敗時顯示具體錯誤提示並記錄 log；驗證：對照該 Scenario，手動製造 S3 憑證缺漏情境確認有錯誤提示
-- [ ] 2.2 完成「上傳流程在環境齊全時要能成功」：確認/補齊 `S3_ENDPOINT`/`S3_ACCESS_KEY_ID`/`S3_SECRET_ACCESS_KEY`；驗證：本機若有可用 S3 環境，實際跑一次上傳成功；若無，明確標記「受限於環境，無法端到端驗證」
+- [x] 2.1 完成「上傳失敗要顯示原因」：`onCrop` 失敗時顯示具體錯誤提示並記錄 log；驗證：對照該 Scenario，手動製造 S3 憑證缺漏情境確認有錯誤提示
+- [x] 2.2 完成「上傳流程在環境齊全時要能成功」：確認/補齊 `S3_ENDPOINT`/`S3_ACCESS_KEY_ID`/`S3_SECRET_ACCESS_KEY`；驗證：本機若有可用 S3 環境，實際跑一次上傳成功；若無，明確標記「受限於環境，無法端到端驗證」。2026-09-23：沒有可用 S3，成功上傳無法端到端驗證；失敗提示已有。
 
 ## 3. 客服按鈕位置修復
 
-- [ ] 3.1 完成「客服按鈕可收合」：改成可收合/可關閉，功能不變；驗證：對照兩個 Scenario 手動操作確認
+- [x] 3.1 完成「客服按鈕可收合」：改成可收合/可關閉，功能不變；驗證：對照兩個 Scenario 手動操作確認
 
 ## 4. 電子報分支合��
 
