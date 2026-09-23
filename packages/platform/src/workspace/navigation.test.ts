@@ -173,14 +173,28 @@ describe("resolveNavigation", () => {
 		expect(design.workspace).toEqual({ scope: "app", appId: "design", role: "app-user" });
 	});
 
-	it("keeps an app-user route as app-user for a platform admin", () => {
+	it("labels an App user route as app-admin for a platform admin", () => {
 		const model = resolveNavigation({
 			pathname: "/design",
 			capabilities: capabilities({ platformAdmin: true }),
 			apps,
 		});
 
-		expect(model.workspace).toEqual({ scope: "app", appId: "design", role: "app-user" });
+		expect(model.workspace).toEqual({ scope: "app", appId: "design", role: "app-admin" });
+		expect(model.workspaceLabel).toBe("設計管理員");
+		expect(model.items.map((item) => item.id)).toEqual(["design-user"]);
+	});
+
+	it("labels a platform admin as the App admin on the App user route without changing its menu", () => {
+		const model = resolveNavigation({
+			pathname: "/course",
+			capabilities: capabilities({ platformAdmin: true }),
+			apps,
+		});
+
+		expect(model.workspace).toEqual({ scope: "app", appId: "course", role: "app-admin" });
+		expect(model.workspaceLabel).toBe("課程管理員");
+		expect(model.items.map((item) => item.id)).toEqual(["course-user"]);
 	});
 });
 
