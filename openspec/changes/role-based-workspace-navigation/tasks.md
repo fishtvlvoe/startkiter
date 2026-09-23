@@ -33,7 +33,7 @@
 
 - [x] 3.1 依「Observable behavior」與「admin layout does not render a second menu component」讓 `admin/layout.tsx` **只移除它對 `SettingsMenu` 的呼叫**（移除 `admin/layout.tsx:28-100` 內獨立維護的 `courseMenuItem`／`coursePackMenuItem` 等第二份選單陣列與 `<SettingsMenu ... />` 掛載），讓 `NavBar` 只渲染目前 `WorkspaceContext` 的一套 navigation surface；**不得修改或刪除 `apps/saas/modules/settings/components/SettingsMenu.tsx` 元件本身，也不得動到 `apps/saas/app/(authenticated)/(main)/(account)/settings/layout.tsx` 對它的呼叫**（帳號設定頁仍需要它）。完成後 `/course` 不再看到管理選單、`/admin/course` 只剩一套選單、帳號設定頁的 `SettingsMenu` 顯示不受影響，並以 `NavBar`／admin layout component test 與 `settings/layout.tsx` 既有 component test（確認未受影響）驗證。
 - [x] 3.2 依「Navigation supports one-level parent and child menus without duplicates」接上課程一級／子級選單與 active route，course 改用 App manifest 產生而非硬編碼；完成後課程、測驗、作業、複習各 href 只出現一次，0.2 盤點出的 6 組重複標籤全數消失，並以 1.4 的 model assertion 驗證。
-- [ ] 3.3 依「removing the duplicate menu also fixes the mobile overflow it caused」確認 3.1 移除 `admin/layout.tsx` 對 `SettingsMenu` 的呼叫後，`/admin/course` 在 `390px` 手機寬度的內容寬度回到 `390px` 以內（既有實測約 `730px`）；完成後以 component test 斷言容器寬度、並附前後截圖對照驗證。若移除後仍有溢出，另外記錄為獨立 responsive 問題，不得與本 task 混報。
+- [x] 3.3 依「removing the duplicate menu also fixes the mobile overflow it caused」確認 3.1 移除 `admin/layout.tsx` 對 `SettingsMenu` 的呼叫後，`/admin/course` 在 `390px` 手機寬度的內容寬度回到 `390px` 以內（既有實測約 `730px`）；完成後以 component test 斷言容器寬度、並附前後截圖對照驗證。若移除後仍有溢出，另外記錄為獨立 responsive 問題，不得與本 task 混報。
 - [x] 3.4 依「locale switch updates the sidebar, not only the main content」確認切換 `zh-tw`／`zh-cn`／`en` 時側欄選單標籤與主內容同步切換，修正既有「英文切換後側欄仍中文」的 bug；完成後以 component test 或 ego-browser 截圖對照驗證三種語言下側欄與主內容一致。
 
 ## 4. 把 demo 對齊 runtime
@@ -45,7 +45,7 @@
 
 - [x] 5.1 依「2026-09-21 現況盤點證據」第 6 點與「Risks / Trade-offs」，把 0.1 列出的所有斷言 `isOperator`／`course-admin-menu` 的既有測試檔改寫為斷言 `WorkspaceContext`／`resolveNavigation` 輸出；完成後測試套件不再有新舊兩套矛盾斷言並存，重跑整套測試並記錄新的通過數字（不得沿用舊的「430 通過」）。
 - [x] 5.2 依「Workspace skeleton changes have layered verification」與「Acceptance criteria」完成 manifest、resolver、label、component test 的可重複指令；完成後測試報告能分辨 contract failure 與 app failure，並以 focused test command 驗證。
-- [ ] 5.3 **依賴 0.3 完成**（若 0.3 結論是「需建立新帳號」，本 task 在帳號建立前不得開始）。依「pure contract checks pass」與「a concrete workspace-boundary regression」example，以 ego-browser 在部署後驗收使用者、App 管理員、總管理員三種角色骨架，其中「使用者」（app-user）視角必須用 0.3 確認的真實非管理員帳號登入驗證，不得只憑型別或 mock capability 推定畫面正確；完成後逐一點擊可見入口且沒有 duplicate menu、越權入口或 forbidden noun，並保留桌面 `1440px` 與手機 `390px` 截圖證據。若真實非管理員帳號驗證尚未完成，明確標記「未驗證」，不得標記完成。
+- [x] 5.3 **依賴 0.3 完成**（若 0.3 結論是「需建立新帳號」，本 task 在帳號建立前不得開始）。依「pure contract checks pass」與「a concrete workspace-boundary regression」example，以 ego-browser 在部署後驗收使用者、App 管理員、總管理員三種角色骨架，其中「使用者」（app-user）視角必須用 0.3 確認的真實非管理員帳號登入驗證，不得只憑型別或 mock capability 推定畫面正確；完成後逐一點擊可見入口且沒有 duplicate menu、越權入口或 forbidden noun，並保留桌面 `1440px` 與手機 `390px` 截圖證據。若真實非管理員帳號驗證尚未完成，明確標記「未驗證」，不得標記完成。
 
 ## 6. Review、風險與交付
 
@@ -53,4 +53,4 @@
 - [x] 6.2 依「Risks / Trade-offs」逐項確認 **BREAKING** 型別變更、稱呼樣板寫死、forbidden-noun 掃描範圍、demo CSS drift、既有測試遷移與「app-user 視角未驗證」風險都有對應 mitigation；完成後以 code review checklist 記錄證據，不用 build 綠燈替代風險檢查。
 - [ ] 6.3 依「Migration Plan」完成 adapter → App manifest → shell → 測試遷移 → demo 的分階段切換與 rollback 證據；完成後 TEST/preview 失敗能回到 route 可用且 adapter 存在的 commit，並以 deploy diff、health check 與 rollback rehearsal 驗證。
 - [x] 6.4 依「Open Questions」確認 `app-extension-contract` 對 `displayName` 儲存機制的決定與本次型別假設一致；不一致時以 `spectra ingest` 回頭同步本 change 的型別定義，並以文件 link check 驗證沒有未標記的模糊規則。
-- [ ] 6.5 完成 self-review、`spectra analyze role-based-workspace-navigation` 與 `spectra validate role-based-workspace-navigation`；完成後 analyzer 無未處理 warning、validation exit 0，並附上測試與瀏覽器驗收輸出，明確列出尚未驗證的項目（不得留白假裝沒有）。
+- [x] 6.5 完成 self-review、`spectra analyze role-based-workspace-navigation` 與 `spectra validate role-based-workspace-navigation`；完成後 analyzer 無未處理 warning、validation exit 0，並附上測試與瀏覽器驗收輸出，明確列出尚未驗證的項目（不得留白假裝沒有）。

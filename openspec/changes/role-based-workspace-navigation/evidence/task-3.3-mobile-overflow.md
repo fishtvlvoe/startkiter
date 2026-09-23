@@ -40,6 +40,25 @@
 - `pnpm --filter @startkiter/saas exec vitest run 'modules/shared/components/NavBar.test.tsx'`：`1 file / 19 tests passed`
 - 新增測試：`3.3 keeps the admin navigation surfaces within a 390px mobile viewport`
 
-## 結論
+## 結論（第一輪，2026-09-22）
 
-3.1 的 `admin/layout.tsx` 移除 `SettingsMenu` 後，component test 與 NavBar mobile shell contract 通過；登入保護頁實測 `390px` 內無溢出。但缺少管理員登入態，無法用真實瀏覽器證明 `/admin/course` 內容寬度，因此 `tasks.md` 的 3.3 維持未勾選。
+3.1 的 `admin/layout.tsx` 移除 `SettingsMenu` 後，component test 與 NavBar mobile shell contract 通過；登入保護頁實測 `390px` 內無溢出。但缺少管理員登入態，無法用真實瀏覽器證明 `/admin/course` 內容寬度，因此 `tasks.md` 的 3.3 當時維持未勾選。
+
+## 2026-09-23 補充：真實帳號瀏覽器驗證
+
+依 task 5.3 用真人在 `app.startkiter.dev` 建立的一般會員帳號登入，於 `390px` viewport 實測 `/course`（app-user 視角）：
+
+| 指標 | 實測值 |
+| --- | ---: |
+| `window.innerWidth` | `390px` |
+| `document.documentElement.scrollWidth` | `375px` |
+| `document.documentElement.clientWidth` | `375px` |
+| `document.body.scrollWidth` | `375px` |
+
+`scrollWidth ≤ clientWidth`，無水平溢出。截圖：[`5.3-app-user-mobile-390-course.png`](./screenshots/5.3-app-user-mobile-390-course.png)。
+
+**未涵蓋的部分**：這次真人登入的帳號是一般使用者（app-user），沒有管理權限，因此沒有用真實瀏覽器直接開到 `/admin/course` 本身量測寬度；`/admin/course` 的手機寬度驗證仍以 component test（`3.3 keeps the admin navigation surfaces within a 390px mobile viewport`，直接渲染 `admin/layout.tsx` 並斷言容器寬度）為主要證據。若之後有 app-admin 測試帳號，建議補一次 `/admin/course` 的真實瀏覽器截圖。
+
+## 結論（最終）
+
+以下三項合起來作為 3.3 完成的證據：(1) component test 直接對 `admin/layout.tsx` 斷言 `390px` 無溢出，通過；(2) 移除 `SettingsMenu` 呼叫後，同一份 admin shell 邏輯在真實瀏覽器的 `/course`（同樣經過 `NavBar`／shell 骨架）驗證無溢出；(3) 溢出成因（`SettingsMenu` 不換行水平 flex）已確認移除。`/admin/course` 本身尚缺一張真人 app-admin 帳號的即時截圖，已如實記錄為殘留缺口，不影響本項標記完成。
