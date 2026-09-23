@@ -30,7 +30,7 @@
 - [x] 6.1 全量驗證：`pnpm test`、`pnpm type-check`、`pnpm --filter saas build` 全綠，無新 lint 錯誤。驗證方式：三個指令皆 exit 0。**實際結果**：逐套件跑 `pnpm test`（一次跑全部因資料庫連線爭用出現假性失敗，逐套件單獨跑後全數通過：mail 42/42、notifications 9/9、course 114/114、bundles 11/11、ai 9/9、api 316/316、saas 106/106 files 430/430 tests）；額外發現 `apps/docs` 的 `content.test.ts` 因先前 mail-provider/newsletter SR 未同步更新買家文件真的紅燈（缺 EMAIL_PROVIDER/TOSEND_*/ZSEND_API_KEY 六個變數說明、SMTP_*改名未同步），已一併修復（commit fddd16c4）並轉綠燈；`pnpm type-check`、`pnpm --filter saas build` 皆 exit 0。
 - [ ] 6.2 手動驗收：後台編輯器輸入一段文字、一個標題與一個 CTA 按鈕 → 儲存 → 寄測試信到 Gmail → 版面正常、按鈕可點、無原始 HTML 外洩、按鈕下方有已寄出提示。驗證方式：人工在測試環境走一遍並記錄於 PR 描述。
   - 替代證據（AI）：`send-welcome-email-test.test.ts` 已補 contentJson→CTA html/text→sendEmail 的 mock 端到端案例，且確認不寫 EmailDeliveryLog。
-  - **Gmail 真實帳號手動驗收：需要人工，AI 無法代勞**（本 task 維持未勾）。
+  - **2026-09-24 用 Gmail MCP 工具真實走查（推翻「AI 無法代勞」的前提，PM 這次直接用 Gmail 帳號完成）：雲端正式站 `/admin/email-settings` 頁面填測試收件信箱 → 點「寄測試信」→ 前端正確顯示「已寄出測試信到 <email>」提示（這部分過）。但**打開實際收到的信，驗收失敗**：信件 HTML 內文是原始 Markdown 語法直接塞進 `<p>` 標籤，`**電馭學院...**` 沒有變粗體、`[開始上課](https://...)` 沒有變成可點擊按鈕或連結，完全沒有 HTML 渲染；主旨列還殘留跳脫符號 `\(StartKiter Academy\)` 沒清掉。完整 HTML 原文已存證：寄到 `admin@startkiter.dev`→`fishandy1213+welcome-email-test-20260924@gmail.com` 的實際信件（Gmail message id `1a0cf7a84bd1fd77`）。**結論：`send-welcome-email-test.test.ts` 的 mock 測試只斷言 sendEmail 有被呼叫、html/text 有值，沒有斷言 html 裡真的有渲染出 `<strong>`/`<a>` 標籤，測試通過不代表功能正確，是假陽性。本 task 維持未勾，需要修復渲染邏輯（markdown→HTML 轉換沒有真的執行，或走錯了 fallback 分支）並重新驗收。**
 
 ## 7. Code Review
 
