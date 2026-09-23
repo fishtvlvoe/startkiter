@@ -25,6 +25,10 @@
 
 ## 4. Review、風險與交付
 
-- [ ] 4.1 依「Scope boundaries」檢查 diff 只涉及課程 App 的路由歸屬與邊界測試，不觸碰課程內容資料模型或編輯器本體邏輯、前三張 change 已固定的型別與規則；完成後以 `git diff --stat` 與檔案清單 review 驗證。
-- [ ] 4.2 依「Risks / Trade-offs」逐項確認既有測試基準、盤點完整性與契約欄位不足時的處理方式都有對應 mitigation；完成後以 code review checklist 記錄證據。
+- [x] 4.1 依「Scope boundaries」檢查 diff 只涉及課程 App 的路由歸屬與邊界測試，不觸碰課程內容資料模型或編輯器本體邏輯、前三張 change 已固定的型別與規則；完成後以 `git diff --stat` 與檔案清單 review 驗證。證據：`code-review.md`；`git diff f6d6ba4d^ f6d6ba4d` 為 26 files、16 個課程路由 rename、邊界測試與平台 route resolver 變更，未涉及 `packages/course/**`、`app-extension-contract` 或 `account-settings-theme-language`。
+- [x] 4.2 依「Risks / Trade-offs」逐項確認既有測試基準、盤點完整性與契約欄位不足時的處理方式都有對應 mitigation；完成後以 code review checklist 記錄證據。證據：`code-review.md`；課程基準 19 files／114 tests、路由邊界測試 4 files／30 tests 通過，32 個 admin page route 完成 16／16 分類，契約欄位不足沿用 `spectra ingest` 處理；完整 platform suite 的既有 forbidden-noun 失敗已明列，未宣稱全綠。
 - [ ] 4.3 完成 self-review、`spectra analyze app-feature-surfaces` 與 `spectra validate app-feature-surfaces`；完成後 analyzer 無未處理 warning、validation exit 0，並附上測試與瀏覽器驗收輸出。
+
+> 4.3 檢查紀錄（2026-09-23）：`spectra analyze app-feature-surfaces` exit 0；Coverage／Consistency／Gaps／Localization 均 `Clean (0 findings)`，Ambiguity 有 1 個 `[SUGGEST]`：`existing course functionality is unaffected by the migration` 缺少 concrete examples，位置 `specs/app-feature-surfaces/spec.md`。`spectra validate app-feature-surfaces` exit 0，輸出 `✓ app-feature-surfaces — valid`。
+>
+> 4.3 維持未勾：本輪沒有部署後 preview URL，未執行 ego-browser，沒有瀏覽器／桌面／手機驗收輸出；不製作假截圖、不把本地測試當瀏覽器驗收。
