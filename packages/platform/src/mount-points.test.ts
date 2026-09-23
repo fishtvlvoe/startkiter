@@ -15,7 +15,7 @@ describe("MOUNT_POINTS registry tests (Task 3.1)", () => {
 		expect(coursePlugin?.mount.content?.kind).toBe("auto");
 		expect(coursePlugin?.mount.content?.boundTo).toBe("/course");
 		expect(coursePlugin?.mount.menu).toBeDefined();
-		expect(coursePlugin?.mount.menu?.label).toBe("課程");
+		expect(coursePlugin?.mount.menu?.labelKey).toBe("course.navLabel");
 		expect(coursePlugin?.mount.menu?.icon).toBe("book-open");
 	});
 
@@ -30,7 +30,7 @@ describe("MOUNT_POINTS registry tests (Task 3.1)", () => {
 		expect(bundlesPlugin).toBeDefined();
 		expect(bundlesPlugin?.mount.route?.path).toBe("/admin/bundles");
 		expect(bundlesPlugin?.mount.menu?.requiresOperator).toBe(true);
-		expect(bundlesPlugin?.mount.menu?.label).toBe("課程綁定包");
+		expect(bundlesPlugin?.mount.menu?.labelKey).toBe("course.bundles");
 		expect(bundlesPlugin?.mount.menu?.icon).toBe("package");
 	});
 });
@@ -45,9 +45,9 @@ describe("MOUNT_POINTS menu rendering tests (Task 3.2)", () => {
 		// Each menu mount should have required fields for auto-rendering
 		itemsWithMenu.forEach((plugin) => {
 			expect(plugin.mount.menu).toBeDefined();
-			expect(plugin.mount.menu?.label).toBeDefined();
-			expect(typeof plugin.mount.menu?.label).toBe("string");
-			expect(plugin.mount.menu?.label).toBeTruthy();
+			expect(plugin.mount.menu?.labelKey).toBeDefined();
+			expect(typeof plugin.mount.menu?.labelKey).toBe("string");
+			expect(plugin.mount.menu?.labelKey).toBeTruthy();
 			// order allows sorting
 			if (plugin.mount.menu?.order !== undefined) {
 				expect(typeof plugin.mount.menu.order).toBe("number");
@@ -84,7 +84,7 @@ describe("ai-assistant mount point (ai-chatbot-frontend-wireup)", () => {
 		const aiAssistant = MOUNT_POINTS.find((plugin) => plugin.id === "ai-assistant");
 		expect(aiAssistant).toBeDefined();
 		expect(aiAssistant?.mount.route?.path).toBe("/ai");
-		expect(aiAssistant?.mount.menu?.label).toBe("AI 助手");
+		expect(aiAssistant?.mount.menu?.labelKey).toBe("app.menu.aiAssistant");
 		expect(aiAssistant?.mount.menu?.requiresOperator).not.toBe(true);
 		expect(aiAssistant?.mount.menu?.requiresOperator).toBeUndefined();
 		expect(aiAssistant?.dataSpec).toBe("none");
@@ -96,7 +96,7 @@ describe("pages-cms Core mount point (Requirement: This capability is a fixed Co
 		const pagesCms = MOUNT_POINTS.find((plugin) => plugin.id === "pages-cms");
 		expect(pagesCms).toBeDefined();
 		expect(pagesCms?.mount.route?.path).toBe("/admin/pages");
-		expect(pagesCms?.mount.menu?.label).toBe("頁面管理");
+		expect(pagesCms?.mount.menu?.labelKey).toBe("admin.menu.pages");
 		expect(pagesCms?.mount.menu?.requiresOperator).toBe(true);
 	});
 

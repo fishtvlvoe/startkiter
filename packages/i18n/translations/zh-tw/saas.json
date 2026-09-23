@@ -2,7 +2,18 @@
   "admin": {
     "menu": {
       "organizations": "組織",
-      "users": "用戶"
+      "users": "用戶",
+      "settings": "系統設定",
+      "navLabel": "總管理員",
+      "pages": "頁面管理",
+      "emailSettings": "郵件設定",
+      "newsletter": "電子報",
+      "orders": "訂單管理",
+      "revenue": "營收報表",
+      "gateway": "金流設定",
+      "einvoice": "發票設定",
+      "gemini": "Gemini 設定",
+      "aiProvider": "AI 助手模型"
     },
     "organizations": {
       "backToList": "Back to organizations",
@@ -100,7 +111,8 @@
       "assignAdminRole": "Assign admin role",
       "removeAdminRole": "Remove admin role"
     },
-    "description": "管理你的應用程式。"
+    "description": "管理你的應用程式。",
+    "navLabel": "總管理員"
   },
   "app": {
     "menu": {
@@ -112,6 +124,9 @@
       "openNavigation": "開啟導覽",
       "organizationSettings": "組織設定",
       "start": "首頁",
+      "support": "客服",
+      "aiAssistant": "AI 助手",
+      "more": "更多",
       "addGroup": "新增分組",
       "renameGroupPrompt": "修改分組名稱",
       "newGroupPrompt": "輸入新分組名稱",
@@ -678,6 +693,14 @@
   },
   "course": {
     "navLabel": "課程",
+    "quiz": "測驗管理",
+    "assignment": "作業管理",
+    "review": "評價與留言管理",
+    "bundles": "課程綁定包",
+    "onboarding": "新生問卷",
+    "media": "媒體庫",
+    "coursePack": "CoursePack 任務",
+    "content": "課程內容",
     "title": "課程",
     "entitledDescription": "買斷後可看全部單元。",
     "lockedDescription": "購買開站包後即可解鎖全部單元。",

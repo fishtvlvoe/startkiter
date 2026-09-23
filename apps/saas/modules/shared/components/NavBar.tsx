@@ -91,6 +91,7 @@ interface NavMenuItem {
 interface NavMenuListProps {
 	menuItems: NavMenuItem[];
 	isCollapsedEffective: boolean;
+	adminSectionLabel: string;
 	listClassName?: string;
 	onLinkClick?: () => void;
 	tone?: "dark" | "surface";
@@ -133,6 +134,7 @@ function isNavSubItemActive(pathname: string, href: string): boolean {
 export function NavMenuList({
 	menuItems,
 	isCollapsedEffective,
+	adminSectionLabel,
 	listClassName,
 	onLinkClick,
 	tone = "dark",
@@ -158,7 +160,7 @@ export function NavMenuList({
 								)}
 							/>
 							<div className={cn("px-3 text-[10px] font-semibold uppercase tracking-wider", mutedTextClass)}>
-								管理
+								{adminSectionLabel}
 							</div>
 						</li>
 					) : null;
@@ -491,6 +493,7 @@ interface SidebarGroupedNavProps {
 	onRequestAddGroup: () => void;
 	addGroupLabel: string;
 	unassignedLabel: string;
+	adminLabel: string;
 	isSaving: boolean;
 }
 
@@ -571,6 +574,7 @@ function SidebarGroupedNav({
 	onRequestAddGroup,
 	addGroupLabel,
 	unassignedLabel,
+	adminLabel,
 	isSaving,
 }: SidebarGroupedNavProps) {
 	const sortedGroups = useMemo(() => [...groups].sort((a, b) => a.order - b.order), [groups]);
@@ -673,7 +677,7 @@ function SidebarGroupedNav({
 						{operatorUnassigned.length > 0 && (
 							<div data-testid="sidebar-group-admin-section">
 								<div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#c3c4c7]/70 border-t border-[#c3c4c7]/15 pt-3 mt-1">
-									管理
+									{adminLabel}
 								</div>
 								<ul className="gap-0.5 flex list-none flex-col">
 									{operatorUnassigned.map((menuItem) => (
@@ -744,15 +748,16 @@ export function NavBar() {
 		() =>
 			getMountMenuItems({
 				pathname,
-				isOperator: canAccessAdmin,
+				platformAdmin: canAccessAdmin,
 				canAccessPagesCms,
+				labelForKey: t,
 			}),
-		[canAccessAdmin, canAccessPagesCms, pathname],
+		[canAccessAdmin, canAccessPagesCms, pathname, t],
 	);
 
 	const { fixed: tabBarFixed, overflow: tabBarOverflow } = useMemo(
-		() => getTabBarItems(mountMenuItems),
-		[mountMenuItems],
+		() => getTabBarItems(mountMenuItems, t("app.menu.more")),
+		[mountMenuItems, t],
 	);
 
 	const menuItems: NavMenuItem[] = useMemo(() => {
@@ -975,6 +980,7 @@ export function NavBar() {
 									<NavMenuList
 											menuItems={menuItems}
 											isCollapsedEffective={false}
+											adminSectionLabel={t("app.menu.admin")}
 											listClassName="flex list-none flex-col flex-nowrap items-stretch gap-1 px-0"
 											onLinkClick={() => setMobileMenuOpen(false)}
 											tone="surface"
@@ -1090,16 +1096,18 @@ export function NavBar() {
 										setGroupNamePromptValue("");
 										setGroupNamePrompt({ mode: "add" });
 									}}
-									addGroupLabel={t("app.menu.addGroup")}
-									unassignedLabel={t("app.menu.unassignedGroup")}
-									isSaving={saveSidebarLayout.isPending}
+											addGroupLabel={t("app.menu.addGroup")}
+											unassignedLabel={t("app.menu.unassignedGroup")}
+											adminLabel={t("app.menu.admin")}
+											isSaving={saveSidebarLayout.isPending}
 								/>
 							</div>
 						) : (
-							<NavMenuList
-								menuItems={menuItems}
-								isCollapsedEffective={isCollapsedEffective}
-								listClassName={cn(
+										<NavMenuList
+											menuItems={menuItems}
+											isCollapsedEffective={isCollapsedEffective}
+											adminSectionLabel={t("app.menu.admin")}
+											listClassName={cn(
 									"md:mx-0 md:mt-3 md:mb-6 md:flex md:flex-col md:flex-nowrap md:items-stretch md:gap-1 md:px-0 md:overflow-visible hidden list-none",
 									isCollapsedEffective && "md:items-center",
 								)}

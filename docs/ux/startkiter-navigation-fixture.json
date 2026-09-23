@@ -1,0 +1,33 @@
+{
+  "source": "packages/platform/src/mount-points.ts",
+  "modules": [
+    { "id": "start", "appId": "course", "scope": "app", "requiredRole": "app-user", "href": "/app", "labelKey": "app.menu.start" },
+    { "id": "course", "appId": "course", "scope": "app", "requiredRole": "app-user", "href": "/course", "labelKey": "course.navLabel" },
+    { "id": "course-admin", "appId": "course", "scope": "app", "requiredRole": "app-admin", "href": "/admin/course", "labelKey": "course.navLabel" },
+    { "id": "quiz", "appId": "course", "scope": "app", "requiredRole": "app-admin", "href": "/quiz-admin", "labelKey": "course.quiz", "parentId": "course-admin" },
+    { "id": "assignment", "appId": "course", "scope": "app", "requiredRole": "app-admin", "href": "/assignment-admin", "labelKey": "course.assignment", "parentId": "course-admin" },
+    { "id": "pages-cms", "appId": "platform", "scope": "platform", "requiredRole": "platform-admin", "href": "/admin/pages", "labelKey": "admin.menu.pages" },
+    { "id": "review", "appId": "course", "scope": "app", "requiredRole": "app-admin", "href": "/review-admin", "labelKey": "course.review", "parentId": "course-admin" },
+    { "id": "chatbot", "appId": "course", "scope": "app", "requiredRole": "app-user", "href": "/support", "labelKey": "app.menu.support" },
+    { "id": "ai-assistant", "appId": "course", "scope": "app", "requiredRole": "app-user", "href": "/ai", "labelKey": "app.menu.aiAssistant" },
+    { "id": "settings", "appId": "course", "scope": "app", "requiredRole": "app-user", "href": "/settings/general", "labelKey": "app.menu.accountSettings" },
+    { "id": "admin", "appId": "platform", "scope": "platform", "requiredRole": "platform-admin", "href": "/admin/users", "labelKey": "admin.menu.users" },
+    { "id": "bundles", "appId": "course", "scope": "app", "requiredRole": "app-admin", "href": "/admin/bundles", "labelKey": "course.bundles", "parentId": "course-admin" },
+    { "id": "onboarding-surveys", "appId": "course", "scope": "app", "requiredRole": "app-admin", "href": "/admin/onboarding-surveys", "labelKey": "course.onboarding", "parentId": "course-admin" },
+    { "id": "media-library", "appId": "course", "scope": "app", "requiredRole": "app-admin", "href": "/admin/media", "labelKey": "course.media", "parentId": "course-admin" },
+    { "id": "course-pack-admin", "appId": "course", "scope": "app", "requiredRole": "app-admin", "href": "/admin/course-pack", "labelKey": "course.coursePack", "parentId": "course-admin" },
+    { "id": "email-settings", "appId": "platform", "scope": "platform", "requiredRole": "platform-admin", "href": "/admin/email-settings", "labelKey": "admin.menu.emailSettings" },
+    { "id": "newsletter", "appId": "platform", "scope": "platform", "requiredRole": "platform-admin", "href": "/admin/newsletter", "labelKey": "admin.menu.newsletter" },
+    { "id": "admin-organizations", "appId": "platform", "scope": "platform", "requiredRole": "platform-admin", "href": "/admin/organizations", "labelKey": "admin.menu.organizations" },
+    { "id": "admin-orders", "appId": "platform", "scope": "platform", "requiredRole": "platform-admin", "href": "/admin/orders", "labelKey": "admin.menu.orders" },
+    { "id": "admin-revenue", "appId": "platform", "scope": "platform", "requiredRole": "platform-admin", "href": "/admin/revenue", "labelKey": "admin.menu.revenue" },
+    { "id": "admin-gateway-config", "appId": "platform", "scope": "platform", "requiredRole": "platform-admin", "href": "/admin/settings/checkout-gateway", "labelKey": "admin.menu.gateway" },
+    { "id": "admin-einvoice", "appId": "platform", "scope": "platform", "requiredRole": "platform-admin", "href": "/admin/settings/einvoice", "labelKey": "admin.menu.einvoice" },
+    { "id": "admin-gemini", "appId": "platform", "scope": "platform", "requiredRole": "platform-admin", "href": "/admin/settings/gemini", "labelKey": "admin.menu.gemini" },
+    { "id": "admin-ai-provider", "appId": "platform", "scope": "platform", "requiredRole": "platform-admin", "href": "/admin/settings/ai-provider", "labelKey": "admin.menu.aiProvider" }
+  ],
+  "apps": [
+    { "appId": "course", "displayName": "課程", "displayNameKey": "course.navLabel", "scope": "app" },
+    { "appId": "platform", "displayName": "平台", "displayNameKey": "admin.navLabel", "scope": "platform" }
+  ]
+}

@@ -2,6 +2,34 @@ import { describe, expect, it } from "vitest";
 import { MOUNT_POINTS } from "@startkiter/platform";
 import { getMountMenuItems, getTabBarItems, isMenuActive, type MountMenuItem } from "./nav-menu-items";
 
+const labels: Record<string, string> = {
+	"app.menu.start": "開始",
+	"app.menu.support": "客服",
+	"app.menu.aiAssistant": "AI 助手",
+	"app.menu.accountSettings": "帳號設定",
+	"course.navLabel": "課程",
+	"course.quiz": "測驗管理",
+	"course.assignment": "作業管理",
+	"course.review": "評價與留言管理",
+	"course.bundles": "課程綁定包",
+	"course.onboarding": "新生問卷",
+	"course.media": "媒體庫",
+	"course.coursePack": "CoursePack 任務",
+	"admin.menu.pages": "頁面管理",
+	"admin.menu.users": "後台設定",
+	"admin.menu.emailSettings": "郵件設定",
+	"admin.menu.newsletter": "電子報",
+	"admin.menu.organizations": "組織管理",
+	"admin.menu.orders": "訂單管理",
+	"admin.menu.revenue": "營收報表",
+	"admin.menu.gateway": "收款閘道設定",
+	"admin.menu.einvoice": "發票設定",
+	"admin.menu.gemini": "Gemini API Key",
+	"admin.menu.aiProvider": "AI 助手模型",
+};
+
+const labelForKey = (key: string): string => labels[key] ?? key;
+
 function collectMenuHrefs(items: MountMenuItem[]): string[] {
 	const hrefs: string[] = [];
 	for (const item of items) {
@@ -13,137 +41,112 @@ function collectMenuHrefs(items: MountMenuItem[]): string[] {
 	return hrefs;
 }
 
-describe("nav-menu-items (Phase 2 shell mount points)", () => {
-	describe("admin-nav-orphan-pages-wireup: orphan admin pages in sidebar", () => {
-		it("1.1 isOperator=true includes organizations/orders/revenue/checkout-gateway/einvoice/gemini/ai-provider hrefs", () => {
-			const items = getMountMenuItems({
-				pathname: "/",
-				isOperator: true,
-				canAccessPagesCms: true,
-			});
-			const hrefs = collectMenuHrefs(items);
+describe("nav-menu-items (WorkspaceContext navigation model)", () => {
+	it("app-user sees only user entries on /course", () => {
+		const items = getMountMenuItems({ pathname: "/course", platformAdmin: false, labelForKey });
 
-			expect(hrefs).toContain("/admin/organizations");
-			expect(hrefs).toContain("/admin/orders");
-			expect(hrefs).toContain("/admin/revenue");
-			expect(hrefs).toContain("/admin/settings/checkout-gateway");
-			expect(hrefs).toContain("/admin/settings/einvoice");
-			expect(hrefs).toContain("/admin/settings/gemini");
-			expect(hrefs).toContain("/admin/settings/ai-provider");
-		});
-
-		it("1.2 checkout-gateway/einvoice/gemini/ai-provider collapse under admin-settings-menu", () => {
-			const items = getMountMenuItems({
-				pathname: "/",
-				isOperator: true,
-				canAccessPagesCms: true,
-			});
-			const adminSettings = items.find((item) => item.id === "admin-settings-menu");
-
-			expect(adminSettings).toBeDefined();
-			expect(adminSettings?.label).toBe("系統設定");
-			expect(adminSettings?.subItems?.map((item) => item.href)).toEqual([
-				"/admin/settings/checkout-gateway",
-				"/admin/settings/einvoice",
-				"/admin/settings/gemini",
-				"/admin/settings/ai-provider",
-			]);
-		});
-
-		it("3.2 isOperator=false hides the orphan admin pages and admin-settings group", () => {
-			const items = getMountMenuItems({ pathname: "/", isOperator: false });
-			const hrefs = collectMenuHrefs(items);
-
-			expect(items.some((item) => item.id === "admin-settings-menu")).toBe(false);
-			expect(hrefs).not.toContain("/admin/organizations");
-			expect(hrefs).not.toContain("/admin/orders");
-			expect(hrefs).not.toContain("/admin/revenue");
-			expect(hrefs).not.toContain("/admin/settings/checkout-gateway");
-			expect(hrefs).not.toContain("/admin/settings/einvoice");
-			expect(hrefs).not.toContain("/admin/settings/gemini");
-			expect(hrefs).not.toContain("/admin/settings/ai-provider");
-		});
+		expect(items.map((item) => item.label)).toEqual(["開始", "課程", "客服", "AI 助手", "帳號設定"]);
+		expect(collectMenuHrefs(items).some((href) => href.startsWith("/admin/"))).toBe(false);
+		expect(items.find((item) => item.href === "/course")?.isActive).toBe(true);
 	});
 
-	describe("Task 5.1 / 5.2 / 5.3: sidebar items from MOUNT_POINTS", () => {
-		it("renders all MOUNT_POINTS menu items sorted by order", () => {
-			const learnerItems = getMountMenuItems({ pathname: "/course", isOperator: false });
-			const operatorItems = getMountMenuItems({
-				pathname: "/course",
-				isOperator: true,
-				canAccessPagesCms: true,
-			});
+	it("course app-admin sees one parent and ordered children without duplicates", () => {
+		const items = getMountMenuItems({ pathname: "/admin/course", platformAdmin: false, labelForKey });
+		const course = items.find((item) => item.id === "course-admin");
+		const hrefs = collectMenuHrefs(items);
 
-			// Learner should see every non-operator-only menu item, sorted by order.
-			expect(learnerItems.map((item) => item.label)).toEqual([
-				"開始",
-				"課程",
-				"客服",
-				"AI 助手",
-				"帳號設定",
-			]);
-			expect(learnerItems.find((item) => item.href === "/course")?.isActive).toBe(true);
+		expect(items).toHaveLength(1);
+		expect(course?.label).toBe("課程");
+		expect(course?.requiresOperator).toBe(true);
+		expect(course?.subItems?.map((item) => item.label)).toEqual([
+			"測驗管理",
+			"作業管理",
+			"評價與留言管理",
+			"課程綁定包",
+			"新生問卷",
+			"媒體庫",
+			"CoursePack 任務",
+		]);
+		expect(new Set(hrefs).size).toBe(hrefs.length);
+	});
 
-			// Operator sees course admin children grouped under one「課程」parent.
-			// New orphan admin pages follow their mount-point order.
-			expect(operatorItems.map((item) => item.label)).toEqual([
-				"開始",
-				"課程",
-				"客服",
-				"AI 助手",
-				"帳號設定",
-				"後台設定",
-				"課程",
-				"頁面管理",
-				"電子報",
-				"郵件設定",
-				"組織管理",
-				"訂單管理",
-				"營收報表",
-				"系統設定",
-			]);
-			const courseAdminMenu = operatorItems.find((item) => item.id === "course-admin-menu");
-			expect(courseAdminMenu?.requiresOperator).toBe(true);
-			expect(courseAdminMenu?.subItems?.map((item) => item.label)).toEqual([
-				"課程管理",
-				"測驗管理",
-				"評價與留言管理",
-				"作業管理",
-				"課程綁定包",
-				"新生問卷",
-				"媒體庫",
-				"CoursePack 任務",
-			]);
-			for (let i = 1; i < operatorItems.length; i++) {
-				expect(operatorItems[i]!.order).toBeGreaterThanOrEqual(operatorItems[i - 1]!.order);
-			}
+	it("platform scope shows platform entries and one entry per App", () => {
+		const items = getMountMenuItems({
+			pathname: "/admin/users",
+			platformAdmin: true,
+			canAccessPagesCms: true,
+			labelForKey,
+		});
+		const hrefs = collectMenuHrefs(items);
+
+		expect(items.map((item) => item.id)).toEqual([
+			"admin",
+			"course-admin",
+			"pages-cms",
+			"newsletter",
+			"email-settings",
+			"admin-organizations",
+			"admin-orders",
+			"admin-revenue",
+			"admin-gateway-config",
+			"admin-einvoice",
+			"admin-gemini",
+			"admin-ai-provider",
+		]);
+		expect(new Set(hrefs).size).toBe(hrefs.length);
+		expect(items.find((item) => item.id === "course-admin")?.subItems).toBeUndefined();
+	});
+
+	it("filters pages-cms without changing App workspace", () => {
+		const items = getMountMenuItems({
+			pathname: "/admin/users",
+			platformAdmin: true,
+			canAccessPagesCms: false,
+			labelForKey,
+		});
+		expect(items.some((item) => item.id === "pages-cms")).toBe(false);
+		expect(items.some((item) => item.id === "course-admin")).toBe(true);
+	});
+
+	it("marks App child and platform routes active without false positives", () => {
+		const mediaItems = getMountMenuItems({ pathname: "/admin/media", platformAdmin: false, labelForKey });
+		const emailItems = getMountMenuItems({
+			pathname: "/admin/email-settings",
+				platformAdmin: true,
+			canAccessPagesCms: true,
+			labelForKey,
 		});
 
-		it("marks 媒體庫 and 郵件設定 active on their routes without false positives", () => {
-			const mediaItems = getMountMenuItems({
-				pathname: "/admin/media",
-				isOperator: true,
-				canAccessPagesCms: true,
-			});
-			const emailItems = getMountMenuItems({
-				pathname: "/admin/email-settings",
-				isOperator: true,
-				canAccessPagesCms: true,
-			});
+		expect(mediaItems.find((item) => item.id === "course-admin")?.isActive).toBe(true);
+		expect(mediaItems.find((item) => item.id === "course-admin")?.subItems?.find((item) => item.id === "media-library")?.href).toBe(
+			"/admin/media",
+		);
+		expect(emailItems.filter((item) => item.isActive).map((item) => item.id)).toEqual(["email-settings"]);
+	});
 
-			const courseAdminOnMedia = mediaItems.find((item) => item.id === "course-admin-menu");
-			expect(courseAdminOnMedia?.isActive).toBe(true);
-			expect(courseAdminOnMedia?.subItems?.find((item) => item.id === "media-library")?.href).toBe(
-				"/admin/media",
-			);
-			expect(mediaItems.filter((item) => item.isActive).map((item) => item.id)).toEqual([
-				"course-admin-menu",
-			]);
-
-			const emailItem = emailItems.find((item) => item.id === "email-settings");
-			expect(emailItem?.isActive).toBe(true);
-			expect(emailItems.filter((item) => item.isActive).map((item) => item.id)).toEqual(["email-settings"]);
+	it("uses the active locale for sidebar and overflow labels", () => {
+		const englishLabels: Record<string, string> = {
+			"app.menu.start": "Start",
+			"course.navLabel": "Courses",
+			"app.menu.support": "Support",
+			"app.menu.aiAssistant": "AI assistant",
+			"app.menu.accountSettings": "Account settings",
+		};
+		const englishItems = getMountMenuItems({
+			pathname: "/course",
+				platformAdmin: false,
+			labelForKey: (key) => englishLabels[key] ?? key,
 		});
+
+		expect(englishItems.map((item) => item.label)).toEqual([
+			"Start",
+			"Courses",
+			"Support",
+			"AI assistant",
+			"Account settings",
+		]);
+		expect(getTabBarItems(englishItems, "More").overflow[0]?.label).toBe("More");
+	});
 
 		it("isMenuActive prefers the longest matching admin href (/admin/course-pack vs /admin/course)", () => {
 			const hrefs = ["/admin/course", "/admin/course-pack", "/admin/media", "/admin/email-settings"];
@@ -153,42 +156,7 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 			expect(isMenuActive("/admin/email-settings", "/admin/email-settings", hrefs)).toBe(true);
 		});
 
-		it("hides 頁面管理 from role=admin when canAccessPagesCms is false", () => {
-			const items = getMountMenuItems({
-				pathname: "/",
-				isOperator: true,
-				canAccessPagesCms: false,
-			});
-			expect(items.some((item) => item.id === "pages-cms")).toBe(false);
-			const courseAdmin = items.find((item) => item.id === "course-admin-menu");
-			expect(courseAdmin?.subItems?.some((item) => item.href === "/admin/bundles")).toBe(true);
-		});
-
-		it("shows 頁面管理 for ADMIN_EMAIL even when isOperator is false", () => {
-			const items = getMountMenuItems({
-				pathname: "/",
-				isOperator: false,
-				canAccessPagesCms: true,
-			});
-			expect(items.some((item) => item.id === "pages-cms")).toBe(true);
-			expect(items.some((item) => item.href === "/admin/bundles")).toBe(false);
-		});
-
-		it("5.3 hides operator-only menu items from learners", () => {
-			const learnerItems = getMountMenuItems({ pathname: "/", isOperator: false });
-			const operatorItems = getMountMenuItems({
-				pathname: "/",
-				isOperator: true,
-				canAccessPagesCms: true,
-			});
-
-			const learnerCourseAdmin = learnerItems.find((item) => item.id === "course-admin-menu");
-			expect(learnerCourseAdmin).toBeUndefined();
-			const operatorCourseAdmin = operatorItems.find((item) => item.id === "course-admin-menu");
-			expect(operatorCourseAdmin?.subItems?.some((item) => item.href === "/admin/bundles")).toBe(true);
-		});
-
-		it("5.1 / 5.2 includes the unified Shell navigation on /course and /admin/bundles", () => {
+		it("includes the unified shell routes in the registry", () => {
 			// Verify MOUNT_POINTS covers the authenticated routes that render inside AppWrapper
 			const courseItem = MOUNT_POINTS.find((p) => p.id === "course");
 			const bundlesItem = MOUNT_POINTS.find((p) => p.id === "bundles");
@@ -238,16 +206,23 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 
 		it("9.2 More drawer contains admin settings for operators only", () => {
 			const operatorOverflow = getTabBarItems(
-				getMountMenuItems({ pathname: "/", isOperator: true, canAccessPagesCms: true }),
+				getMountMenuItems({
+					pathname: "/admin/users",
+					platformAdmin: true,
+					canAccessPagesCms: true,
+					labelForKey,
+				}),
 			).overflow;
-			const learnerOverflow = getTabBarItems(getMountMenuItems({ pathname: "/", isOperator: false })).overflow;
+			const learnerOverflow = getTabBarItems(
+				getMountMenuItems({ pathname: "/course", platformAdmin: false, labelForKey }),
+			).overflow;
 
 			expect(
 				operatorOverflow[0]?.subItems?.some(
-					(item) => item.href === "/admin/bundles" || item.label === "課程",
+					(item) => item.href === "/admin/newsletter" || item.label === "電子報",
 				),
 			).toBe(true);
-			expect(learnerOverflow.some((entry) => entry.subItems?.some((item) => item.href === "/admin/bundles"))).toBe(
+			expect(learnerOverflow.some((entry) => entry.subItems?.some((item) => item.href.startsWith("/admin/")))).toBe(
 				false,
 			);
 		});
@@ -264,4 +239,3 @@ describe("nav-menu-items (Phase 2 shell mount points)", () => {
 			expect(overflow).toHaveLength(0);
 		});
 	});
-});
