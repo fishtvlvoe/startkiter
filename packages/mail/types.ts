@@ -25,6 +25,8 @@ export interface SendEmailParams {
 	subject: string;
 	text: string;
 	html?: string;
+	/** 可取消的寄信；fetch-based provider 必須轉傳給 fetch */
+	signal?: AbortSignal;
 }
 
 export type SendEmailHandler = (params: SendEmailParams) => Promise<void>;

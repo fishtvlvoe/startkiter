@@ -1,6 +1,8 @@
 {
 	"name": "@startkiter/newsletter",
 	"version": "0.0.0",
+	"private": true,
+	"type": "module",
 	"main": "./index.ts",
 	"types": "./index.ts",
 	"exports": {
@@ -15,7 +17,7 @@
 	},
 	"scripts": {
 		"clean": "git clean -xdf .cache .turbo dist node_modules",
-		"test": "vitest run",
+		"test": "dotenv -c -e ../../.env -- vitest run ../../packages/newsletter",
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
@@ -25,6 +27,7 @@
 	"devDependencies": {
 		"@startkiter/tsconfig": "workspace:*",
 		"@types/node": "catalog:",
+		"dotenv-cli": "catalog:",
 		"typescript": "catalog:",
 		"vitest": "catalog:"
 	}

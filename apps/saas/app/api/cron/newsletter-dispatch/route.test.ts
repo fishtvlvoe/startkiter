@@ -1,39 +1,28 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@startkiter/newsletter", () => ({
-	runNewsletterDispatchTick: vi.fn(),
-	dispatchCampaignBatch: vi.fn(),
-	queueDueScheduledCampaigns: vi.fn(),
+const { dispatchNewsletters, queueDueCampaigns } = vi.hoisted(() => ({
+	dispatchNewsletters: vi.fn(),
+	queueDueCampaigns: vi.fn(),
 }));
 
-import {
-	queueDueScheduledCampaigns,
-	runNewsletterDispatchTick,
-} from "@startkiter/newsletter";
-
-import { GET } from "./route";
+vi.mock("@startkiter/newsletter", () => ({
+	dispatchNewsletters,
+	queueDueCampaigns,
+}));
 
 describe("GET /api/cron/newsletter-dispatch", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		vi.resetModules();
 		vi.stubEnv("CRON_SECRET", "cron-secret");
-		vi.mocked(runNewsletterDispatchTick).mockResolvedValue({
-			queued: 1,
-			dispatched: 1,
-			sent: 2,
-			skipped: 0,
-			failed: 0,
-			campaignIds: ["campaign-1"],
-		});
-		vi.mocked(queueDueScheduledCampaigns).mockResolvedValue({
-			queued: 1,
-			campaignIds: ["campaign-1"],
-		});
+		queueDueCampaigns.mockResolvedValue({ queued: 1 });
+		dispatchNewsletters.mockResolvedValue({ queued: 1, processed: 0 });
 	});
 
 	it.each([undefined, "Bearer wrong", "Basic cron-secret"])(
 		"rejects an invalid authorization header: %s",
 		async (authorization) => {
+			const { GET } = await import("./route");
 			const response = await GET(
 				new Request("http://localhost/api/cron/newsletter-dispatch", {
 					headers: authorization ? { authorization } : undefined,
@@ -41,11 +30,13 @@ describe("GET /api/cron/newsletter-dispatch", () => {
 			);
 
 			expect(response.status).toBe(401);
-			expect(runNewsletterDispatchTick).not.toHaveBeenCalled();
+			expect(dispatchNewsletters).not.toHaveBeenCalled();
+			expect(queueDueCampaigns).not.toHaveBeenCalled();
 		},
 	);
 
-	it("queues due campaigns and dispatches batches with a valid bearer token", async () => {
+	it("runs dispatch with a valid bearer token", async () => {
+		const { GET } = await import("./route");
 		const response = await GET(
 			new Request("http://localhost/api/cron/newsletter-dispatch", {
 				headers: { authorization: "Bearer cron-secret" },
@@ -53,39 +44,23 @@ describe("GET /api/cron/newsletter-dispatch", () => {
 		);
 
 		expect(response.status).toBe(200);
-		expect(await response.json()).toMatchObject({
-			queued: 1,
-			dispatched: expect.any(Number),
-		});
-		expect(runNewsletterDispatchTick).toHaveBeenCalledOnce();
+		expect(dispatchNewsletters).toHaveBeenCalledOnce();
+		expect(await response.json()).toEqual({ queued: 1, processed: 0 });
 	});
 
-	it("transitions a due SCHEDULED campaign to QUEUED only once when invoked twice near-simultaneously", async () => {
+	it("near-simultaneous cron triggers only queue a due campaign once (atomic scheduling)", async () => {
 		let queued = false;
-
-		vi.mocked(runNewsletterDispatchTick).mockImplementation(async () => {
-			if (queued) {
-				return {
-					queued: 0,
-					dispatched: 0,
-					sent: 0,
-					skipped: 0,
-					failed: 0,
-					campaignIds: [],
-				};
-			}
-
+		queueDueCampaigns.mockImplementation(async () => {
+			if (queued) return { queued: 0 };
 			queued = true;
-			return {
-				queued: 1,
-				dispatched: 1,
-				sent: 0,
-				skipped: 0,
-				failed: 0,
-				campaignIds: ["campaign-1"],
-			};
+			return { queued: 1 };
+		});
+		dispatchNewsletters.mockImplementation(async () => {
+			const result = await queueDueCampaigns();
+			return { queued: result.queued, processed: 0 };
 		});
 
+		const { GET } = await import("./route");
 		const request = () =>
 			GET(
 				new Request("http://localhost/api/cron/newsletter-dispatch", {
@@ -93,13 +68,12 @@ describe("GET /api/cron/newsletter-dispatch", () => {
 				}),
 			);
 
-		const [first, second] = await Promise.all([request(), request()]);
-		const bodies = [await first.json(), await second.json()];
-		const queuedTotal = bodies.reduce((sum, body) => sum + (body.queued as number), 0);
+		const [a, b] = await Promise.all([request(), request()]);
+		expect(a.status).toBe(200);
+		expect(b.status).toBe(200);
 
-		expect(first.status).toBe(200);
-		expect(second.status).toBe(200);
-		expect(queuedTotal).toBe(1);
-		expect(runNewsletterDispatchTick).toHaveBeenCalledTimes(2);
+		const bodies = await Promise.all([a.json(), b.json()]);
+		expect(bodies.reduce((sum, body) => sum + body.queued, 0)).toBe(1);
+		expect(queueDueCampaigns).toHaveBeenCalledTimes(2);
 	});
 });

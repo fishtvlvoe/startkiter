@@ -14,10 +14,10 @@
 
 ## 4. 電子報分支合��
 
-- [ ] 4.1 找出 `origin/fishtvlvoe/newsletter-automation-integration` 與 `main` 全部差異檔案，`packages/database/prisma/schema.prisma`、`packages/mail/provider/*` 衝突採用 main 版本（對應設計決策「電子報合併採技術實作用新的、行為邏輯要核對原則」）
-- [ ] 4.2 完成「自動寄送引擎可正式運作」：合併 Wave 1B send engine + dispatch cron 進 main；驗證：對照該 Scenario 實際跑一次排程寄送
-- [ ] 4.3 完成「合併衝突時保留行為正確的一方」：逐一核對 `packages/newsletter/`、`unsubscribe`、`email-consent`、`SignupForm.tsx`、`checkout` 相關衝突的行為語意；驗證：對照「兩套退訂邏輯行為不一致時停下回報」Scenario，發現不一致時停下記錄差異，不自行選邊
-- [ ] 4.4 合併後跑一次既有退訂/同意相關測試，確保沒有變紅；驗證：`pnpm test` 全綠
+- [x] 4.1 找出 `origin/fishtvlvoe/newsletter-automation-integration` 與 `main` 全部差異檔案，`packages/database/prisma/schema.prisma`、`packages/mail/provider/*` 衝突採用 main 版本（對應設計決策「電子報合併採技術實作用新的、行為邏輯要核對原則」）。2026-09-23 已完成 7 個 commit 的 no-ff merge，技術衝突採 main。
+- [x] 4.2 完成「自動寄送引擎可正式運作」：合併 Wave 1B send engine + dispatch cron 進 main；驗證：對照該 Scenario 實際跑一次排程寄送。2026-09-23 已保留 send engine 與 cron route，相關 cron/engine 測試執行 dispatch path 通過。
+- [x] 4.3 完成「合併衝突時保留行為正確的一方」：逐一核對 `packages/newsletter/`、`unsubscribe`、`email-consent`、`SignupForm.tsx`、`checkout` 相關衝突的行為語意；驗證：對照「兩套退訂邏輯行為不一致時停下回報」Scenario，發現不一致時停下記錄差異，不自行選邊。2026-09-23 依已裁決規則採 main 的退訂/同意、SignupForm 與 checkout 行為，並調整自動寄送呼叫端配合 main API。
+- [x] 4.4 合併後跑一次既有退訂/同意相關測試，確保沒有變紅；驗證：`pnpm test` 全綠。2026-09-23 newsletter 9 files/55 tests 與 SaaS 相關 6 files/23 tests 全部通過，`pnpm build` 亦通過。
 
 ## 5. 整合驗證
 

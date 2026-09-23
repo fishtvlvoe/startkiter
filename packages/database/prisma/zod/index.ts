@@ -12,7 +12,7 @@ export type TransactionIsolationLevel = z.infer<typeof TransactionIsolationLevel
 
 // File: UserScalarFieldEnum.schema.ts
 
-export const UserScalarFieldEnumSchema = z.enum(['id', 'name', 'email', 'emailVerified', 'image', 'createdAt', 'updatedAt', 'role', 'banned', 'banReason', 'banExpires', 'onboardingComplete', 'paymentsCustomerId', 'locale', 'twoFactorEnabled', 'lastActiveOrganizationId'])
+export const UserScalarFieldEnumSchema = z.enum(['id', 'name', 'email', 'emailVerified', 'image', 'createdAt', 'updatedAt', 'role', 'banned', 'banReason', 'banExpires', 'onboardingComplete', 'paymentsCustomerId', 'locale', 'twoFactorEnabled', 'lastActiveOrganizationId', 'marketingConsent', 'marketingConsentAt', 'marketingConsentSource', 'marketingConsentIp', 'generalEmailConsent', 'generalEmailConsentAt', 'unsubscribedAt', 'emailInvalidAt', 'emailBounceState', 'emailBounceCount'])
 
 export type UserScalarFieldEnum = z.infer<typeof UserScalarFieldEnumSchema>;
 
@@ -96,7 +96,7 @@ export type AdminLogScalarFieldEnum = z.infer<typeof AdminLogScalarFieldEnumSche
 
 // File: OrderScalarFieldEnum.schema.ts
 
-export const OrderScalarFieldEnumSchema = z.enum(['id', 'orderNo', 'userId', 'organizationId', 'sku', 'amount', 'currency', 'status', 'paymentGateway', 'gatewayTradeNo', 'courseAccess', 'kitClaimEligible', 'paidAt', 'refundedAt', 'refundOperationToken', 'refundOperationStartedAt', 'refundGatewayRefundId', 'refundError', 'refundStatus', 'invoiceType', 'invoiceCarrierType', 'invoiceCarrierId', 'invoiceTaxId', 'invoiceTitle', 'invoiceAddress', 'invoiceLoveCode', 'couponId', 'couponCode', 'createdAt', 'updatedAt'])
+export const OrderScalarFieldEnumSchema = z.enum(['id', 'orderNo', 'userId', 'organizationId', 'sku', 'amount', 'currency', 'status', 'paymentGateway', 'gatewayTradeNo', 'courseAccess', 'kitClaimEligible', 'paidAt', 'refundedAt', 'refundOperationToken', 'refundOperationStartedAt', 'refundGatewayRefundId', 'refundError', 'refundStatus', 'invoiceType', 'invoiceCarrierType', 'invoiceCarrierId', 'invoiceTaxId', 'invoiceTitle', 'invoiceAddress', 'invoiceLoveCode', 'couponId', 'couponCode', 'newsletterCampaignId', 'createdAt', 'updatedAt'])
 
 export type OrderScalarFieldEnum = z.infer<typeof OrderScalarFieldEnumSchema>;
 
@@ -394,6 +394,78 @@ export const PageScalarFieldEnumSchema = z.enum(['id', 'type', 'slug', 'locale',
 
 export type PageScalarFieldEnum = z.infer<typeof PageScalarFieldEnumSchema>;
 
+// File: NewsletterCampaignScalarFieldEnum.schema.ts
+
+export const NewsletterCampaignScalarFieldEnumSchema = z.enum(['id', 'type', 'name', 'subject', 'preheader', 'contentJson', 'bodyHtml', 'bodyText', 'templateId', 'status', 'scheduledAt', 'timezone', 'senderName', 'replyTo', 'segmentJson', 'couponId', 'attributionWindowDays', 'ratePerMinute', 'senderSnapshot', 'sentCursor', 'totalRecipients', 'sentCount', 'failedCount', 'skippedCount', 'openCount', 'clickCount', 'unsubCount', 'lastHeartbeatAt', 'snapshotAt', 'errorMessage', 'createdById', 'createdAt', 'updatedAt'])
+
+export type NewsletterCampaignScalarFieldEnum = z.infer<typeof NewsletterCampaignScalarFieldEnumSchema>;
+
+// File: NewsletterRecipientScalarFieldEnum.schema.ts
+
+export const NewsletterRecipientScalarFieldEnumSchema = z.enum(['id', 'campaignId', 'userId', 'toEmail', 'toName', 'status', 'skipReason', 'bounceType', 'providerMessageId', 'attemptCount', 'errorMessage', 'openedAt', 'firstClickedAt', 'unsubscribedAt', 'isTest', 'sentAt', 'createdAt', 'updatedAt'])
+
+export type NewsletterRecipientScalarFieldEnum = z.infer<typeof NewsletterRecipientScalarFieldEnumSchema>;
+
+// File: NewsletterTemplateScalarFieldEnum.schema.ts
+
+export const NewsletterTemplateScalarFieldEnumSchema = z.enum(['id', 'type', 'name', 'contentJson', 'isBuiltIn', 'createdById', 'createdAt', 'updatedAt'])
+
+export type NewsletterTemplateScalarFieldEnum = z.infer<typeof NewsletterTemplateScalarFieldEnumSchema>;
+
+// File: NewsletterLinkScalarFieldEnum.schema.ts
+
+export const NewsletterLinkScalarFieldEnumSchema = z.enum(['id', 'campaignId', 'recipientId', 'token', 'targetUrl', 'clickCount', 'uniqueClickCount', 'createdAt'])
+
+export type NewsletterLinkScalarFieldEnum = z.infer<typeof NewsletterLinkScalarFieldEnumSchema>;
+
+// File: EmailConsentLogScalarFieldEnum.schema.ts
+
+export const EmailConsentLogScalarFieldEnumSchema = z.enum(['id', 'userId', 'email', 'consentType', 'action', 'source', 'ip', 'market', 'termsVersion', 'campaignId', 'createdAt'])
+
+export type EmailConsentLogScalarFieldEnum = z.infer<typeof EmailConsentLogScalarFieldEnumSchema>;
+
+// File: NewsletterAlertScalarFieldEnum.schema.ts
+
+export const NewsletterAlertScalarFieldEnumSchema = z.enum(['id', 'type', 'title', 'message', 'campaignId', 'readAt', 'createdAt'])
+
+export type NewsletterAlertScalarFieldEnum = z.infer<typeof NewsletterAlertScalarFieldEnumSchema>;
+
+// File: NewsletterAutomationScalarFieldEnum.schema.ts
+
+export const NewsletterAutomationScalarFieldEnumSchema = z.enum(['id', 'courseId', 'name', 'enabled', 'createdAt', 'updatedAt'])
+
+export type NewsletterAutomationScalarFieldEnum = z.infer<typeof NewsletterAutomationScalarFieldEnumSchema>;
+
+// File: NewsletterAutomationStepScalarFieldEnum.schema.ts
+
+export const NewsletterAutomationStepScalarFieldEnumSchema = z.enum(['id', 'automationId', 'stepOrder', 'delayDays', 'delayHours', 'subjectTemplate', 'contentJson', 'enabled', 'createdAt', 'updatedAt'])
+
+export type NewsletterAutomationStepScalarFieldEnum = z.infer<typeof NewsletterAutomationStepScalarFieldEnumSchema>;
+
+// File: NewsletterAutomationEnrollmentScalarFieldEnum.schema.ts
+
+export const NewsletterAutomationEnrollmentScalarFieldEnumSchema = z.enum(['id', 'userId', 'automationId', 'orderId', 'enrolledAt'])
+
+export type NewsletterAutomationEnrollmentScalarFieldEnum = z.infer<typeof NewsletterAutomationEnrollmentScalarFieldEnumSchema>;
+
+// File: NewsletterAutomationDeliveryScalarFieldEnum.schema.ts
+
+export const NewsletterAutomationDeliveryScalarFieldEnumSchema = z.enum(['id', 'enrollmentId', 'stepId', 'status', 'scheduledAt', 'sentAt', 'providerMessageId', 'errorMessage', 'createdAt', 'updatedAt'])
+
+export type NewsletterAutomationDeliveryScalarFieldEnum = z.infer<typeof NewsletterAutomationDeliveryScalarFieldEnumSchema>;
+
+// File: NewsletterAutomationOpenScalarFieldEnum.schema.ts
+
+export const NewsletterAutomationOpenScalarFieldEnumSchema = z.enum(['id', 'deliveryId', 'userId', 'openedAt'])
+
+export type NewsletterAutomationOpenScalarFieldEnum = z.infer<typeof NewsletterAutomationOpenScalarFieldEnumSchema>;
+
+// File: NewsletterAutomationClickScalarFieldEnum.schema.ts
+
+export const NewsletterAutomationClickScalarFieldEnumSchema = z.enum(['id', 'deliveryId', 'userId', 'url', 'clickedAt'])
+
+export type NewsletterAutomationClickScalarFieldEnum = z.infer<typeof NewsletterAutomationClickScalarFieldEnumSchema>;
+
 // File: SortOrder.schema.ts
 
 export const SortOrderSchema = z.enum(['asc', 'desc'])
@@ -429,6 +501,12 @@ export type NullsOrder = z.infer<typeof NullsOrderSchema>;
 export const JsonNullValueFilterSchema = z.enum(['DbNull', 'JsonNull', 'AnyNull'])
 
 export type JsonNullValueFilter = z.infer<typeof JsonNullValueFilterSchema>;
+
+// File: EmailBounceState.schema.ts
+
+export const EmailBounceStateSchema = z.enum(['NONE', 'SOFT_SUSPENDED', 'HARD_BOUNCED', 'COMPLAINED'])
+
+export type EmailBounceState = z.infer<typeof EmailBounceStateSchema>;
 
 // File: PurchaseType.schema.ts
 
@@ -562,6 +640,48 @@ export const ContentStatusSchema = z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED'])
 
 export type ContentStatus = z.infer<typeof ContentStatusSchema>;
 
+// File: NewsletterType.schema.ts
+
+export const NewsletterTypeSchema = z.enum(['GENERAL', 'PROMO'])
+
+export type NewsletterType = z.infer<typeof NewsletterTypeSchema>;
+
+// File: NewsletterStatus.schema.ts
+
+export const NewsletterStatusSchema = z.enum(['DRAFT', 'SCHEDULED', 'QUEUED', 'SENDING', 'PAUSED', 'SENT', 'PARTIAL_FAILED', 'FAILED', 'CANCELLED'])
+
+export type NewsletterStatus = z.infer<typeof NewsletterStatusSchema>;
+
+// File: NewsletterRecipientStatus.schema.ts
+
+export const NewsletterRecipientStatusSchema = z.enum(['PENDING', 'PROCESSING', 'SENT', 'FAILED', 'SKIPPED', 'BOUNCED'])
+
+export type NewsletterRecipientStatus = z.infer<typeof NewsletterRecipientStatusSchema>;
+
+// File: EmailConsentType.schema.ts
+
+export const EmailConsentTypeSchema = z.enum(['GENERAL', 'MARKETING'])
+
+export type EmailConsentType = z.infer<typeof EmailConsentTypeSchema>;
+
+// File: EmailConsentAction.schema.ts
+
+export const EmailConsentActionSchema = z.enum(['GRANTED', 'REVOKED'])
+
+export type EmailConsentAction = z.infer<typeof EmailConsentActionSchema>;
+
+// File: NewsletterAlertType.schema.ts
+
+export const NewsletterAlertTypeSchema = z.enum(['INFO', 'WARNING', 'ERROR'])
+
+export type NewsletterAlertType = z.infer<typeof NewsletterAlertTypeSchema>;
+
+// File: NewsletterAutomationDeliveryStatus.schema.ts
+
+export const NewsletterAutomationDeliveryStatusSchema = z.enum(['PENDING', 'PROCESSING', 'SENT', 'FAILED', 'SKIPPED'])
+
+export type NewsletterAutomationDeliveryStatus = z.infer<typeof NewsletterAutomationDeliveryStatusSchema>;
+
 // File: User.schema.ts
 
 export const UserSchema = z.object({
@@ -581,6 +701,16 @@ export const UserSchema = z.object({
   locale: z.string().nullish(),
   twoFactorEnabled: z.boolean().nullish(),
   lastActiveOrganizationId: z.string().nullish(),
+  marketingConsent: z.boolean().nullish(),
+  marketingConsentAt: z.date().nullish(),
+  marketingConsentSource: z.string().nullish(),
+  marketingConsentIp: z.string().nullish(),
+  generalEmailConsent: z.boolean().default(true),
+  generalEmailConsentAt: z.date().nullish(),
+  unsubscribedAt: z.date().nullish(),
+  emailInvalidAt: z.date().nullish(),
+  emailBounceState: EmailBounceStateSchema.default("NONE"),
+  emailBounceCount: z.number().int(),
 });
 
 export type UserType = z.infer<typeof UserSchema>;
@@ -824,6 +954,7 @@ export const OrderSchema = z.object({
   invoiceLoveCode: z.string().nullish(),
   couponId: z.string().nullish(),
   couponCode: z.string().nullish(),
+  newsletterCampaignId: z.string().nullish(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -1671,4 +1802,224 @@ export const PageSchema = z.object({
 });
 
 export type PageType = z.infer<typeof PageSchema>;
+
+
+// File: NewsletterCampaign.schema.ts
+
+export const NewsletterCampaignSchema = z.object({
+  id: z.string(),
+  type: NewsletterTypeSchema.default("GENERAL"),
+  name: z.string(),
+  subject: z.string(),
+  preheader: z.string().nullish(),
+  contentJson: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10"),
+  bodyHtml: z.string().nullish(),
+  bodyText: z.string().nullish(),
+  templateId: z.string().nullish(),
+  status: NewsletterStatusSchema.default("DRAFT"),
+  scheduledAt: z.date().nullish(),
+  timezone: z.string().default("Asia/Taipei"),
+  senderName: z.string().nullish(),
+  replyTo: z.string().nullish(),
+  segmentJson: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").nullish(),
+  couponId: z.string().nullish(),
+  attributionWindowDays: z.number().int().default(7),
+  ratePerMinute: z.number().int().default(60),
+  senderSnapshot: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10").nullish(),
+  sentCursor: z.number().int(),
+  totalRecipients: z.number().int(),
+  sentCount: z.number().int(),
+  failedCount: z.number().int(),
+  skippedCount: z.number().int(),
+  openCount: z.number().int(),
+  clickCount: z.number().int(),
+  unsubCount: z.number().int(),
+  lastHeartbeatAt: z.date().nullish(),
+  snapshotAt: z.date().nullish(),
+  errorMessage: z.string().nullish(),
+  createdById: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type NewsletterCampaignType = z.infer<typeof NewsletterCampaignSchema>;
+
+
+// File: NewsletterRecipient.schema.ts
+
+export const NewsletterRecipientSchema = z.object({
+  id: z.string(),
+  campaignId: z.string(),
+  userId: z.string().nullish(),
+  toEmail: z.string(),
+  toName: z.string().nullish(),
+  status: NewsletterRecipientStatusSchema.default("PENDING"),
+  skipReason: z.string().nullish(),
+  bounceType: z.string().nullish(),
+  providerMessageId: z.string().nullish(),
+  attemptCount: z.number().int(),
+  errorMessage: z.string().nullish(),
+  openedAt: z.date().nullish(),
+  firstClickedAt: z.date().nullish(),
+  unsubscribedAt: z.date().nullish(),
+  isTest: z.boolean(),
+  sentAt: z.date().nullish(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type NewsletterRecipientType = z.infer<typeof NewsletterRecipientSchema>;
+
+
+// File: NewsletterTemplate.schema.ts
+
+export const NewsletterTemplateSchema = z.object({
+  id: z.string(),
+  type: NewsletterTypeSchema,
+  name: z.string(),
+  contentJson: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10"),
+  isBuiltIn: z.boolean(),
+  createdById: z.string().nullish(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type NewsletterTemplateType = z.infer<typeof NewsletterTemplateSchema>;
+
+
+// File: NewsletterLink.schema.ts
+
+export const NewsletterLinkSchema = z.object({
+  id: z.string(),
+  campaignId: z.string(),
+  recipientId: z.string().nullish(),
+  token: z.string(),
+  targetUrl: z.string(),
+  clickCount: z.number().int(),
+  uniqueClickCount: z.number().int(),
+  createdAt: z.date(),
+});
+
+export type NewsletterLinkType = z.infer<typeof NewsletterLinkSchema>;
+
+
+// File: EmailConsentLog.schema.ts
+
+export const EmailConsentLogSchema = z.object({
+  id: z.string(),
+  userId: z.string().nullish(),
+  email: z.string(),
+  consentType: EmailConsentTypeSchema,
+  action: EmailConsentActionSchema,
+  source: z.string(),
+  ip: z.string().nullish(),
+  market: z.string().nullish(),
+  termsVersion: z.string().nullish(),
+  campaignId: z.string().nullish(),
+  createdAt: z.date(),
+});
+
+export type EmailConsentLogType = z.infer<typeof EmailConsentLogSchema>;
+
+
+// File: NewsletterAlert.schema.ts
+
+export const NewsletterAlertSchema = z.object({
+  id: z.string(),
+  type: NewsletterAlertTypeSchema.default("INFO"),
+  title: z.string(),
+  message: z.string(),
+  campaignId: z.string().nullish(),
+  readAt: z.date().nullish(),
+  createdAt: z.date(),
+});
+
+export type NewsletterAlertModel = z.infer<typeof NewsletterAlertSchema>;
+
+// File: NewsletterAutomation.schema.ts
+
+export const NewsletterAutomationSchema = z.object({
+  id: z.string(),
+  courseId: z.string(),
+  name: z.string(),
+  enabled: z.boolean(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type NewsletterAutomationType = z.infer<typeof NewsletterAutomationSchema>;
+
+
+// File: NewsletterAutomationStep.schema.ts
+
+export const NewsletterAutomationStepSchema = z.object({
+  id: z.string(),
+  automationId: z.string(),
+  stepOrder: z.number().int(),
+  delayDays: z.number().int(),
+  delayHours: z.number().int(),
+  subjectTemplate: z.string(),
+  contentJson: z.unknown().refine((val) => { const getDepth = (obj: unknown, depth: number = 0): number => { if (depth > 10) return depth; if (obj === null || typeof obj !== 'object') return depth; const values = Object.values(obj as Record<string, unknown>); if (values.length === 0) return depth; return Math.max(...values.map(v => getDepth(v, depth + 1))); }; return getDepth(val) <= 10; }, "JSON nesting depth exceeds maximum of 10"),
+  enabled: z.boolean().default(true),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type NewsletterAutomationStepType = z.infer<typeof NewsletterAutomationStepSchema>;
+
+
+// File: NewsletterAutomationEnrollment.schema.ts
+
+export const NewsletterAutomationEnrollmentSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  automationId: z.string(),
+  orderId: z.string(),
+  enrolledAt: z.date(),
+});
+
+export type NewsletterAutomationEnrollmentType = z.infer<typeof NewsletterAutomationEnrollmentSchema>;
+
+
+// File: NewsletterAutomationDelivery.schema.ts
+
+export const NewsletterAutomationDeliverySchema = z.object({
+  id: z.string(),
+  enrollmentId: z.string(),
+  stepId: z.string().nullish(),
+  status: NewsletterAutomationDeliveryStatusSchema.default("PENDING"),
+  scheduledAt: z.date(),
+  sentAt: z.date().nullish(),
+  providerMessageId: z.string().nullish(),
+  errorMessage: z.string().nullish(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type NewsletterAutomationDeliveryType = z.infer<typeof NewsletterAutomationDeliverySchema>;
+
+
+// File: NewsletterAutomationOpen.schema.ts
+
+export const NewsletterAutomationOpenSchema = z.object({
+  id: z.string(),
+  deliveryId: z.string(),
+  userId: z.string(),
+  openedAt: z.date(),
+});
+
+export type NewsletterAutomationOpenType = z.infer<typeof NewsletterAutomationOpenSchema>;
+
+
+// File: NewsletterAutomationClick.schema.ts
+
+export const NewsletterAutomationClickSchema = z.object({
+  id: z.string(),
+  deliveryId: z.string(),
+  userId: z.string(),
+  url: z.string(),
+  clickedAt: z.date(),
+});
+
+export type NewsletterAutomationClickType = z.infer<typeof NewsletterAutomationClickSchema>;
 
