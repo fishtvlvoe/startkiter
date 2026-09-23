@@ -4,6 +4,7 @@
 	"private": true,
 	"scripts": {
 		"build": "next build",
+		"check:icon-assets": "node scripts/check-icon-assets.mjs",
 		"clean": "git clean -xdf .cache .turbo dist node_modules .next .content-collections",
 		"dev": "next dev --port 3000",
 		"e2e": "pnpm exec playwright test --ui",

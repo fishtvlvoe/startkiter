@@ -133,7 +133,7 @@ describe("Unified Shell covering authenticated routes (Task 5.1 / Task 5.2 / Tas
 
 		// Must contain unified Shell sidebar structure
 		expect(html).toContain("sidebar-user-area");
-		expect(html).toContain("locale-switch");
+		expect(html).not.toContain("locale-switch");
 		expect(html).toContain("站內助手");
 	});
 
@@ -148,7 +148,7 @@ describe("Unified Shell covering authenticated routes (Task 5.1 / Task 5.2 / Tas
 
 		// Must contain unified Shell sidebar structure
 		expect(html).toContain("sidebar-user-area");
-		expect(html).toContain("locale-switch");
+		expect(html).not.toContain("locale-switch");
 		expect(html).toContain("後台設定");
 	});
 

@@ -3,6 +3,7 @@
 import { useSession } from "@auth/hooks/use-session";
 import { config } from "@config";
 import { authClient } from "@startkiter/auth/client";
+import type { WorkspaceContext } from "@startkiter/platform/src/workspace/navigation";
 import {
 	cn,
 	DropdownMenu,
@@ -14,13 +15,27 @@ import {
 	DropdownMenuTrigger,
 } from "@startkiter/ui";
 import { UserAvatar } from "@shared/components/UserAvatar";
-import { BookOpenIcon, CreditCardIcon, LogOutIcon, MoreVerticalIcon } from "lucide-react";
+import { MoreVerticalIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 
 import { useIsMobile } from "../hooks/use-media-query";
+import { getAccountMenuEntries } from "../lib/account-menu";
+import { ThemedIcon } from "../lib/icon-assets";
 
-export function UserMenu({ showUserName }: { showUserName?: boolean }) {
+type UserMenuProps = {
+	showUserName?: boolean;
+	workspaceContext?: WorkspaceContext;
+	appDisplayName?: string;
+};
+
+const FALLBACK_WORKSPACE_CONTEXT: WorkspaceContext = {
+	scope: "app",
+	appId: "account",
+	role: "app-user",
+};
+
+export function UserMenu({ showUserName, workspaceContext, appDisplayName }: UserMenuProps) {
 	const t = useTranslations();
 	const { user } = useSession();
 	const isMobile = useIsMobile();
@@ -45,6 +60,12 @@ export function UserMenu({ showUserName }: { showUserName?: boolean }) {
 	const { name, email, image } = user;
 	const dropdownSide = isMobile ? "bottom" : showUserName ? "top" : "right";
 	const dropdownAlign = isMobile || !showUserName ? "end" : "start";
+	const accountMenuEntries = getAccountMenuEntries(workspaceContext ?? FALLBACK_WORKSPACE_CONTEXT);
+
+	const labelForEntry = (entry: (typeof accountMenuEntries)[number]) =>
+		t(entry.labelKey, {
+			appName: appDisplayName ?? (workspaceContext?.scope === "app" ? workspaceContext.appId : ""),
+		});
 
 	return (
 		<DropdownMenu modal={false}>
@@ -64,7 +85,7 @@ export function UserMenu({ showUserName }: { showUserName?: boolean }) {
 							{showUserName && (
 								<span className="leading-tight text-left">
 									<span className="font-medium text-sm">{name}</span>
-									<span className="text-xs block opacity-70 text-[#c3c4c7]">
+									<span className="text-muted-foreground text-xs block opacity-70">
 										{email}
 									</span>
 								</span>
@@ -79,7 +100,8 @@ export function UserMenu({ showUserName }: { showUserName?: boolean }) {
 			<DropdownMenuContent
 				side={dropdownSide}
 				align={dropdownAlign}
-				className="w-56 min-w-[var(--anchor-width)]"
+				className="w-56 max-w-[calc(100vw-2rem)] min-w-0"
+				data-testid="account-menu"
 			>
 				<DropdownMenuGroup>
 					<DropdownMenuLabel>
@@ -92,38 +114,32 @@ export function UserMenu({ showUserName }: { showUserName?: boolean }) {
 
 				<DropdownMenuSeparator />
 
-				<DropdownMenuItem
-					nativeButton={false}
-					render={(props) => (
-						<Link
-							{...props}
-							href="/course"
-							className={cn(props.className, "flex items-center")}
-						>
-							<BookOpenIcon className="mr-2 size-4" />
-							{t("app.userMenu.learningCenter")}
-						</Link>
-					)}
-				/>
+				{accountMenuEntries.map((entry) => {
+					const label = labelForEntry(entry);
+					const icon = <ThemedIcon icon={entry.icon} namespace="account" className="mr-2 size-4" />;
 
-				<DropdownMenuItem
-					nativeButton={false}
-					render={(props) => (
-						<Link
-							{...props}
-							href="/settings/billing"
-							className={cn(props.className, "flex items-center")}
-						>
-							<CreditCardIcon className="mr-2 size-4" />
-							{t("app.userMenu.subscription")}
-						</Link>
-					)}
-				/>
+					if (entry.id === "logout") {
+						return (
+							<DropdownMenuItem key={entry.id} onClick={onLogout}>
+								{icon}
+								{label}
+							</DropdownMenuItem>
+						);
+					}
 
-				<DropdownMenuItem onClick={onLogout}>
-					<LogOutIcon className="mr-2 size-4" />
-					{t("app.userMenu.logout")}
-				</DropdownMenuItem>
+					return (
+						<DropdownMenuItem
+							key={entry.id}
+							nativeButton={false}
+							render={(props) => (
+								<Link {...props} href={entry.href} className={cn(props.className, "flex items-center")}>
+									{icon}
+									{label}
+								</Link>
+							)}
+						/>
+					);
+				})}
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

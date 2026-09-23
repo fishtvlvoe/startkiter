@@ -133,9 +133,11 @@
       "unassignedGroup": "未分組",
       "saveSidebarLayoutError": "儲存側邊欄排序失敗，請重試"
     },
-    "userMenu": {
-      "accountSettings": "帳號設定",
-      "colorMode": "顯示模式",
+      "userMenu": {
+        "accountSettings": "帳號設定",
+        "appAdminSettings": "{appName}管理員設定",
+        "platformAdminSettings": "總管理員設定",
+        "colorMode": "顯示模式",
       "documentation": "文件",
       "home": "首頁",
       "learningCenter": "我的學習中心",
@@ -487,6 +489,10 @@
           "success": "語言已更新"
         },
         "title": "你的語言"
+      },
+      "colorMode": {
+        "description": "選擇這個帳號使用的顯示模式，變更會立即套用。",
+        "title": "顯示模式"
       },
       "security": {
         "activeSessions": {

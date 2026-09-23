@@ -97,29 +97,18 @@ describe("NavBar shell layout (Phase 2)", () => {
 		mockSidebarGroups = [];
 	});
 
-	it("7.1 renders LocaleSwitch in the sidebar user area", () => {
+	it("keeps locale controls out of the sidebar user area", () => {
 		const html = renderToStaticMarkup(<NavBar />);
 
-		// Locale switcher should be present inside the sidebar user area.
-		expect(html).toContain("locale-switch");
 		expect(html).toContain("sidebar-user-area");
-		// Ensure the sidebar user area comes after the top bar in document order.
-		const topBarEnd = html.indexOf("sidebar-user-area");
-		const userAreaHtml = topBarEnd > 0 ? html.slice(topBarEnd) : html;
-		expect(userAreaHtml).toContain("locale-switch");
+		expect(html).not.toContain("locale-switch");
 	});
 
-	it("7.1 renders ColorModeToggle in the top bar, not in the sidebar user area", () => {
+	it("keeps color mode controls out of the top bar and sidebar", () => {
 		const html = renderToStaticMarkup(<NavBar />);
 
-		// Color mode toggle should be present in the rendered output.
-		expect(html).toContain("color-mode-toggle");
-		// Locale switcher should not be in the top bar area.
-		// The top bar is the first container in the NavBar output.
-		const topBarEnd = html.indexOf("sidebar-user-area");
-		const topBarHtml = topBarEnd > 0 ? html.slice(0, topBarEnd) : html;
-		expect(topBarHtml).toContain("color-mode-toggle");
-		expect(topBarHtml).not.toContain("locale-switch");
+		expect(html).not.toContain("color-mode-toggle");
+		expect(html).not.toContain("LocaleSwitch");
 	});
 
 	it("renders exactly one theme switch per breakpoint (desktop + mobile, not duplicated within either) and uses surface colors in the mobile drawer", () => {
@@ -141,21 +130,8 @@ describe("NavBar shell layout (Phase 2)", () => {
 			/>,
 		);
 
-		// Exactly two instances total: one desktop-only wrapper, one mobile-only wrapper. This mirrors the
-		// existing NotificationCenter/Logo pattern in this file — each breakpoint gets its own DOM node toggled
-		// by CSS, not JS. The original BUG-05 duplicate was two toggles visible within the SAME (mobile)
-		// breakpoint at once; that is what this test guards against, not the normal one-per-breakpoint
-		// responsive split.
 		const toggleCount = (html.match(/data-testid="color-mode-toggle"/g) ?? []).length;
-		expect(toggleCount).toBe(2);
-
-		const desktopWrapperEnd = html.indexOf('data-testid="color-mode-toggle"');
-		const desktopWrapperStart = html.lastIndexOf("<div", desktopWrapperEnd);
-		expect(html.slice(desktopWrapperStart, desktopWrapperEnd)).toContain("md:block");
-
-		const mobileWrapperEnd = html.lastIndexOf('data-testid="color-mode-toggle"');
-		const mobileSectionStart = html.lastIndexOf("md:hidden", mobileWrapperEnd);
-		expect(mobileSectionStart).toBeGreaterThan(desktopWrapperEnd);
+		expect(toggleCount).toBe(0);
 
 		expect(drawerHtml).toContain('data-sidebar-variant="surface"');
 		expect(drawerHtml).toContain("text-muted-foreground");
@@ -223,14 +199,16 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 		mockCanAccessAdmin = false;
 	});
 
-	it("45.1 頂列 admin bar 固定 32px（h-8）並使用 WP 配色 token（#1d2327 深色背景、#2271b1 active）", () => {
+	it("45.1 頂列 admin bar 固定 32px（h-8）並使用 semantic 配色 token", () => {
 		mockPathname = "/app";
 		const html = renderToStaticMarkup(<NavBar />);
 
 		expect(html).toContain('data-testid="admin-bar"');
 		expect(html).toContain("h-8");
-		expect(html).toContain("#1d2327");
-		expect(html).toContain("#2271b1");
+		expect(html).toContain("bg-background");
+		expect(html).toContain("text-foreground");
+		expect(html).not.toContain("#1d2327");
+		expect(html).not.toContain("#2271b1");
 	});
 
 	it("45.2a 側邊欄收折後寬度為 56px（md:w-14），不是舊的 80px", () => {
@@ -371,7 +349,7 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 		const html = renderToStaticMarkup(<NavBar />);
 
 		expect(html).toContain("admin.menu.emailSettings");
-		expect(html).toContain("bg-[#2271b1]");
+		expect(html).toContain("bg-accent");
 	});
 
 	it("does not render operator admin section when user is not operator", () => {
@@ -398,8 +376,8 @@ describe("NavBar iconMap & resolveIcon coverage", () => {
 			expect(IconComponent).toBeDefined();
 
 			const rendered = renderToStaticMarkup(React.createElement(IconComponent));
-			// Should render SVG icon, not raw string fallback span
-			expect(rendered).toContain("<svg");
+			// Should load the paired SVG asset, not render a raw string fallback span.
+			expect(rendered).toContain(`/icons/nav/${icon}.light.svg`);
 			expect(rendered).not.toContain(`>${icon}<`);
 		}
 	});
@@ -408,8 +386,8 @@ describe("NavBar iconMap & resolveIcon coverage", () => {
 		const PackageComp = resolveIcon("package");
 		const BookOpenComp = resolveIcon("book-open");
 
-		expect(renderToStaticMarkup(React.createElement(PackageComp))).toContain("<svg");
-		expect(renderToStaticMarkup(React.createElement(BookOpenComp))).toContain("<svg");
+		expect(renderToStaticMarkup(React.createElement(PackageComp))).toContain("/icons/nav/package.light.svg");
+		expect(renderToStaticMarkup(React.createElement(BookOpenComp))).toContain("/icons/nav/book-open.light.svg");
 	});
 
 	it("resolveIcon does not render raw multi-character string on unknown key fallback", () => {
@@ -418,6 +396,6 @@ describe("NavBar iconMap & resolveIcon coverage", () => {
 
 		// Should NOT render span containing the long string
 		expect(html).not.toContain("unknown-feature-key");
-		expect(html).toContain("<svg");
+		expect(html).toContain("/icons/nav/package.light.svg");
 	});
 });

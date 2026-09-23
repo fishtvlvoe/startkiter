@@ -3,6 +3,7 @@ import { ChangeEmailForm } from "@settings/components/ChangeEmailForm";
 import { ChangeNameForm } from "@settings/components/ChangeNameForm";
 import { DeleteAccountForm } from "@settings/components/DeleteAccountForm";
 import { UserAvatarForm } from "@settings/components/UserAvatarForm";
+import { UserColorModeForm } from "@settings/components/UserColorModeForm";
 import { UserLanguageForm } from "@settings/components/UserLanguageForm";
 import { PageHeader } from "@shared/components/PageHeader";
 import { SettingsList } from "@shared/components/SettingsList";
@@ -32,6 +33,7 @@ export default async function AccountSettingsPage() {
 
 			<SettingsList>
 				<UserAvatarForm />
+				<UserColorModeForm />
 				<UserLanguageForm />
 				<ChangeNameForm />
 				<ChangeEmailForm />

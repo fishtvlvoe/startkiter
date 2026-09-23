@@ -35,6 +35,8 @@ vi.mock("next-intl", () => ({
 			"app.userMenu.subscription": "我的訂閱",
 			"app.userMenu.logout": "登出",
 			"app.userMenu.accountSettings": "帳號設定",
+			"app.userMenu.appAdminSettings": "課程管理員設定",
+			"app.userMenu.platformAdminSettings": "總管理員設定",
 			"app.userMenu.documentation": "文件",
 			"app.userMenu.home": "首頁",
 		}[key] ?? key),
@@ -83,22 +85,61 @@ vi.mock("@startkiter/ui", () => {
 import { UserMenu } from "./UserMenu";
 
 describe("UserMenu personal navigation", () => {
-	it("shows learning center, subscription, and logout without duplicate or management links", () => {
+	it("shows user settings for every workspace context", () => {
+		const UserMenuForTest = UserMenu as React.ComponentType<Record<string, unknown>>;
+		const contexts = [
+			{ scope: "app", appId: "course", role: "app-user" },
+			{ scope: "app", appId: "course", role: "app-admin" },
+			{ scope: "platform" },
+		];
+
+		for (const workspaceContext of contexts) {
+			const html = renderToStaticMarkup(
+				<UserMenuForTest
+					showUserName
+					workspaceContext={workspaceContext}
+					appDisplayName="課程"
+				/>,
+			);
+
+			expect(html).toContain('href="/settings/general"');
+		}
+	});
+
+	it("derives admin settings visibility from the workspace context", () => {
+		const UserMenuForTest = UserMenu as React.ComponentType<Record<string, unknown>>;
+		const appUserHtml = renderToStaticMarkup(
+			<UserMenuForTest workspaceContext={{ scope: "app", appId: "course", role: "app-user" }} />,
+		);
+		const appAdminHtml = renderToStaticMarkup(
+			<UserMenuForTest
+				workspaceContext={{ scope: "app", appId: "course", role: "app-admin" }}
+				appDisplayName="課程"
+			/>,
+		);
+		const platformHtml = renderToStaticMarkup(
+			<UserMenuForTest workspaceContext={{ scope: "platform" }} />,
+		);
+
+		expect(appUserHtml).not.toContain('href="/admin/course/settings"');
+		expect(appAdminHtml).toContain('href="/admin/course/settings"');
+		expect(appAdminHtml).toContain("課程管理員設定");
+		expect(platformHtml).toContain('href="/admin/settings"');
+		expect(platformHtml).toContain("總管理員設定");
+	});
+
+	it("keeps help, upgrade, and logout available without top-level theme or locale controls", () => {
 		const html = renderToStaticMarkup(<UserMenu showUserName />);
 
 		expect(html).toContain("Fish");
 		expect(html).toContain("fish@example.com");
-		expect(html).toContain('href="/course"');
-		expect(html).toContain("我的學習中心");
+		expect(html).toContain('href="/support"');
+		expect(html).toContain("文件");
 		expect(html).toContain('href="/settings/billing"');
 		expect(html).toContain("我的訂閱");
 		expect(html).toContain("登出");
-		expect(html).not.toContain("後台");
-		expect(html).not.toContain('href="/settings/general"');
-		expect(html).not.toContain("文件");
-		expect(html).not.toContain("首頁");
-		expect(html).not.toContain('href="https://docs.example.com"');
-		expect(html).not.toContain('href="https://startkiter.dev"');
-		expect((html.match(/data-testid="dropdown-item"/g) ?? []).length).toBe(3);
+		expect(html).not.toContain("color-mode-toggle");
+		expect(html).not.toContain("locale-switch");
+		expect((html.match(/data-testid="dropdown-item"/g) ?? []).length).toBeGreaterThanOrEqual(4);
 	});
 });
