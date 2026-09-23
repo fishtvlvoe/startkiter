@@ -31,6 +31,12 @@
 
 ## 5. Review、風險與交付
 
-- [ ] 5.1 依「Scope boundaries」檢查 diff 只涉及帳號選單、主題／語言落腳位置、icon 資產與語意 token，不觸碰 `WorkspaceContext`／resolver 邏輯本身、新 App 加入規則或各設定頁的真實業務選項內容；完成後以 `git diff --stat` 與檔案清單 review 驗證。
-- [ ] 5.2 依「Risks / Trade-offs」逐項確認型別同步、icon 缺版本佔位與語言切換位置異動都有對應 mitigation；完成後以 code review checklist 記錄證據。
+- [x] 5.1 依「Scope boundaries」檢查 diff 只涉及帳號選單、主題／語言落腳位置、icon 資產與語意 token，不觸碰 `WorkspaceContext`／resolver 邏輯本身、新 App 加入規則或各設定頁的真實業務選項內容；完成後以 `git diff --stat` 與檔案清單 review 驗證。
+
+  > 2026-09-23 審查證據：`code-review.md`。`git diff --stat 726de936^ 726de936` 為 `62 files changed, 578 insertions(+), 205 deletions(-)`；檔案清單分類為帳號選單 8、主題／語言 5、icon registry／SVG／檢查 46、相關測試 1、套件與 tasks 2。`WorkspaceContext`／resolver、App registry、課程路由、`docs/verification` 差異均未列入本次範圍。
+- [x] 5.2 依「Risks / Trade-offs」逐項確認型別同步、icon 缺版本佔位與語言切換位置異動都有對應 mitigation；完成後以 code review checklist 記錄證據。
+
+  > 2026-09-23 審查證據：`code-review.md`。`AccountMenuEntry` 直接同步既有 `WorkspaceContext`；20 筆 icon registry 均有 light／dark 且 `missing_variants=none`，缺 dark fixture 會列出 `nav.fixture:dark`；設定頁掛載主題／語言控制，NavBar／UserMenu／UnifiedShell 測試保留一級區域沒有 locale switch 的斷言。
 - [ ] 5.3 完成 self-review、`spectra analyze account-settings-theme-language` 與 `spectra validate account-settings-theme-language`；完成後 analyzer 無未處理 warning、validation exit 0，並附上測試與瀏覽器驗收輸出。
+
+  > 2026-09-23 真實檢查輸出（5.3 維持未勾）：`spectra analyze account-settings-theme-language` 顯示 Coverage／Consistency／Gaps／Localization 均 Clean，但 Ambiguity 有 3 個 `SUGGEST`（三個 scenario 缺具體 `##### Example:`）；`spectra validate account-settings-theme-language` 輸出 `✓ account-settings-theme-language — valid`。本 worktree 沒有可登入部署 URL，未執行 ego-browser、未產生瀏覽器截圖，因此不以這些檢查輸出替代 4.2／5.3 的瀏覽器驗收。
