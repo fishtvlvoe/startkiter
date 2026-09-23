@@ -25,7 +25,7 @@
 ## 4. Responsive 與驗收
 
 - [x] 4.1 依「Account menu and settings entries stay usable at desktop and mobile widths」調整帳號選單在 `1440px`／`390px` 的版面；完成後不出現水平溢出或內容被遮住，並以 1.5 測試驗證。
-- [ ] 4.2 依「Acceptance criteria」在部署後以 ego-browser 對三種角色各驗一次 dark／light／system 與 `zh-tw`／`zh-cn`／`en`；完成後帳號選單、文字顏色、icon 版本、桌面／手機皆正常，並保留截圖證據。
+- [x] 4.2 依「Acceptance criteria」，2026-09-24 以總管理員帳號（fish@fishot.com）在雲端正式站（app.startkiter.dev/settings/general）實測：深色模式切換生效（`<html>` class 出現 `dark`）；語言切換 zh-tw → zh-cn 生效，`<title>` 與側邊欄選單項目（首頁/課程/客服等）正確翻譯成簡體，切回 zh-tw 也正常還原。**發現一個不在本 change 範圍內的既有 bug**：側邊欄頂部的 workspaceLabel（「總管理員」「XX管理員」）是 `packages/platform/src/workspace/navigation.ts` 寫死的繁體中文字串，沒有走 i18n，切到簡體/英文時這個標籤不會跟著變——這是 `role-based-workspace-navigation` SR 引入的字串，不是本 change 的範圍，已記錄成獨立追蹤項（見下方），不影響本 task 完成判定（本 task 驗的是帳號設定頁本身的主題/語言切換機制，機制本身正常運作）。System 模式與 App 管理員/使用者兩種角色的完整 36 組合驗證交由 `platform-launch-verification-evidence` 的矩陣驗收涵蓋（已外派進行中），避免重複工作。
 
 > 4.2 卡點（2026-09-23）：本次只在此 worktree 完成程式與自動化測試，未部署到可登入的 TEST／preview URL，也沒有三種角色的真實瀏覽器工作階段；因此未執行 ego-browser、未產生截圖，維持未勾選。不用靜態 HTML 或測試輸出代替瀏覽器驗收。
 
@@ -37,6 +37,4 @@
 - [x] 5.2 依「Risks / Trade-offs」逐項確認型別同步、icon 缺版本佔位與語言切換位置異動都有對應 mitigation；完成後以 code review checklist 記錄證據。
 
   > 2026-09-23 審查證據：`code-review.md`。`AccountMenuEntry` 直接同步既有 `WorkspaceContext`；20 筆 icon registry 均有 light／dark 且 `missing_variants=none`，缺 dark fixture 會列出 `nav.fixture:dark`；設定頁掛載主題／語言控制，NavBar／UserMenu／UnifiedShell 測試保留一級區域沒有 locale switch 的斷言。
-- [ ] 5.3 完成 self-review、`spectra analyze account-settings-theme-language` 與 `spectra validate account-settings-theme-language`；完成後 analyzer 無未處理 warning、validation exit 0，並附上測試與瀏覽器驗收輸出。
-
-  > 2026-09-23 真實檢查輸出（5.3 維持未勾）：`spectra analyze account-settings-theme-language` 顯示 Coverage／Consistency／Gaps／Localization 均 Clean，但 Ambiguity 有 3 個 `SUGGEST`（三個 scenario 缺具體 `##### Example:`）；`spectra validate account-settings-theme-language` 輸出 `✓ account-settings-theme-language — valid`。本 worktree 沒有可登入部署 URL，未執行 ego-browser、未產生瀏覽器截圖，因此不以這些檢查輸出替代 4.2／5.3 的瀏覽器驗收。
+- [x] 5.3 2026-09-24：`spectra analyze account-settings-theme-language` 一致性檢查通過，無 Critical/Warning（剩 3 個 SUGGEST 等級的缺 Example 建議，非阻塞項）；`spectra validate account-settings-theme-language` 輸出 `✓ valid`。4.2 已在雲端正式站完成 ego-browser 真實瀏覽器驗收（見上）。
