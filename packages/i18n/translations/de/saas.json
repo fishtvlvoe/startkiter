@@ -692,6 +692,12 @@
       "specialCharacter": "Sonderzeichen"
     }
   },
+  "course": {
+    "dashboard": "Kurs-Dashboard",
+    "comments": "Kurskommentare",
+    "messages": "Lernenden-Nachrichten",
+    "coupons": "Kursgutscheine"
+  },
   "checkoutReturn": {
     "title": "Kauf wird verarbeitet",
     "description": "Bitte warten Sie, während wir Ihre Zahlung bestätigen.",

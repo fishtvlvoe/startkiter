@@ -4,9 +4,7 @@ import { z } from "zod";
 
 import { protectedProcedure } from "../../../orpc/procedures";
 import { userCanAccessCourseId } from "../lib/course-access";
-import { isOperator } from "@startkiter/permissions";
-
-import { courseOperatorProcedure } from "../lib/course-operator";
+import { requireCourseManageAccess, manageableCourseWhereForUser } from "../lib/course-instructor-access";
 import {
 	buildLessonMessageStorageKey,
 	createLessonMessageUploadToken,
@@ -54,13 +52,17 @@ export const sendLessonMessage = protectedProcedure
 	.route({ method: "POST", path: "/course/lesson-messages", tags: ["Course messages"], summary: "Send a private lesson message" })
 	.input(messageInput)
 	.handler(async ({ input, context }) => {
-		const operator = isOperator(context.user, process.env.ADMIN_EMAIL);
-		if (input.isFromTeacher && !operator) throw new ORPCError("FORBIDDEN");
 		if (!input.isFromTeacher && input.threadUserId) throw new ORPCError("BAD_REQUEST", { message: "學員不能指定其他私訊串。" });
 
 		let userId = context.user.id;
 		if (input.isFromTeacher) {
 			if (!input.threadUserId) throw new ORPCError("BAD_REQUEST", { message: "老師回覆需要指定私訊串。" });
+			const lesson = await db.lesson.findUnique({
+				where: { id: input.lessonId },
+				select: { chapter: { select: { courseId: true } } },
+			});
+			if (!lesson) throw new ORPCError("NOT_FOUND", { message: "找不到指定單元。" });
+			await requireCourseManageAccess(context.user.id, lesson.chapter.courseId);
 			const thread = await db.lessonPrivateMessage.findFirst({
 				where: { lessonId: input.lessonId, userId: input.threadUserId, isFromTeacher: false },
 				select: { userId: true },
@@ -190,22 +192,32 @@ export const listLessonMessages = protectedProcedure
 		return { messages: await Promise.all(messages.map((message) => withAttachmentUrl(message))) };
 	});
 
-export const operatorListLessonMessages = courseOperatorProcedure
+export const operatorListLessonMessages = protectedProcedure
 	.route({ method: "GET", path: "/course/lesson-messages/operator", tags: ["Course messages"], summary: "List private lesson messages for operators" })
 	.input(z.object({ unreadOnly: z.boolean().default(false) }))
-	.handler(async ({ input }) => {
+	.handler(async ({ input, context }) => {
+		const manageableWhere = await manageableCourseWhereForUser(context.user.id);
 		const messages = await db.lessonPrivateMessage.findMany({
-			where: input.unreadOnly ? { isFromTeacher: false, readByTeacher: false } : undefined,
+			where: {
+				...(input.unreadOnly ? { isFromTeacher: false, readByTeacher: false } : {}),
+				lesson: { chapter: { course: manageableWhere } },
+			},
 			orderBy: { createdAt: "desc" },
 			include: { lesson: { select: { title: true } }, user: { select: { id: true, name: true, email: true } } },
 		});
 		return { messages: await Promise.all(messages.map((message) => withAttachmentUrl(message))) };
 	});
 
-export const markLessonMessageRead = courseOperatorProcedure
+export const markLessonMessageRead = protectedProcedure
 	.route({ method: "POST", path: "/course/lesson-messages/{messageId}/read", tags: ["Course messages"], summary: "Mark a private lesson message as read" })
 	.input(z.object({ messageId: z.string().trim().min(1).max(200) }))
-	.handler(async ({ input }) => {
+	.handler(async ({ input, context }) => {
+		const message = await db.lessonPrivateMessage.findUnique({
+			where: { id: input.messageId },
+			select: { lesson: { select: { chapter: { select: { courseId: true } } } } },
+		});
+		if (!message) throw new ORPCError("NOT_FOUND");
+		await requireCourseManageAccess(context.user.id, message.lesson.chapter.courseId);
 		const updated = await db.lessonPrivateMessage.updateMany({
 			where: { id: input.messageId, isFromTeacher: false, readByTeacher: false },
 			data: { readByTeacher: true },

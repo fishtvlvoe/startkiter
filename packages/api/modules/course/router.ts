@@ -27,6 +27,7 @@ import { submitOnboardingSurvey } from "./procedures/submit-onboarding-survey";
 import { assignCourseInstructor } from "./procedures/assign-course-instructor";
 import { removeCourseInstructor } from "./procedures/remove-course-instructor";
 import { listManageableCourses } from "./procedures/list-manageable-courses";
+import { getCourseDashboardMetrics } from "./lib/course-dashboard";
 import { recordWatchTime } from "./procedures/record-watch-time";
 import {
 	listLessonMessages,
@@ -312,6 +313,9 @@ export const courseRouter = publicProcedure.router({
 	assignCourseInstructor,
 	removeCourseInstructor,
 	listManageableCourses,
+	getDashboardMetrics: protectedProcedure
+		.route({ method: "GET", path: "/course/dashboard", tags: ["Course"], summary: "Get scoped course dashboard metrics" })
+		.handler(async ({ context }) => getCourseDashboardMetrics(context.user.id)),
 	importCoursePack,
 	listCoursePacks,
 	submitMissionFormValue,

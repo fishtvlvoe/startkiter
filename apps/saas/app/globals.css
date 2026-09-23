@@ -8,6 +8,12 @@
 
 @theme inline {
 	--font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+	--color-heading: var(--heading);
+	--color-body: var(--body);
+	--color-caption: var(--caption);
+	--color-surface: var(--surface);
+	--color-surface-hover: var(--surface-hover);
+	--color-divider: var(--divider);
 }
 
 @utility container {

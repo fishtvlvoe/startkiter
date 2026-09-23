@@ -26,6 +26,7 @@ import { useConfirmationAlert } from "@shared/components/ConfirmationAlertProvid
 import { Pagination } from "@shared/components/Pagination";
 import { UserAvatar } from "@shared/components/UserAvatar";
 import { orpc } from "@shared/lib/orpc-query-utils";
+import { orpcClient } from "@shared/lib/orpc-client";
 import { manualPaginationTableFeatures } from "@shared/lib/table-features";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -49,6 +50,7 @@ import { BanUserDialog } from "./BanUserDialog";
 
 const ITEMS_PER_PAGE = 10;
 const BAN_STATUS_REFRESH_INTERVAL = 30_000;
+type UserRoleFilter = "all" | "student" | "instructor" | "admin";
 
 type AdminUser = UserType;
 
@@ -111,6 +113,7 @@ export function UserList() {
 		leading: true,
 		trailing: false,
 	});
+	const [roleFilter, setRoleFilter] = useState<UserRoleFilter>("all");
 
 	useEffect(() => {
 		setDebouncedSearchTerm(searchTerm);
@@ -130,6 +133,7 @@ export function UserList() {
 				limit: ITEMS_PER_PAGE,
 				offset: (currentPage - 1) * ITEMS_PER_PAGE,
 				query: debouncedSearchTerm,
+				role: roleFilter,
 			},
 		}),
 	);
@@ -139,6 +143,25 @@ export function UserList() {
 			void setCurrentPage(1);
 		}
 	}, [debouncedSearchTerm]); // oxlint-disable-line eslint-plugin-react-hooks/exhaustive-deps
+
+	useEffect(() => {
+		if (currentPage > 1) void setCurrentPage(1);
+	}, [roleFilter]); // oxlint-disable-line eslint-plugin-react-hooks/exhaustive-deps
+
+	const setInstructorRole = async (id: string, role: "instructor" | "user") => {
+		await orpcClient.admin.users.setInstructorRole({ userId: id, role });
+		await queryClient.invalidateQueries({ queryKey: orpc.admin.users.list.key() });
+	};
+
+	const confirmInstructorRole = (id: string, role: "instructor" | "user") => {
+		const assigning = role === "instructor";
+		confirm({
+			title: assigning ? "指派講師角色" : "撤銷講師角色",
+			message: assigning ? "確認將此使用者設為講師？" : "確認撤銷此使用者的講師角色？",
+			confirmLabel: "確認",
+			onConfirm: () => void setInstructorRole(id, role),
+		});
+	};
 
 	const impersonateUser = async (userId: string, { name }: { name: string }) => {
 		const toastId = toastLoading(
@@ -263,7 +286,7 @@ export function UserList() {
 							<small className="gap-1 flex items-center text-foreground/60">
 								<span className="block">{!!row.original.name && row.original.email}</span>
 								<EmailVerified verified={row.original.emailVerified} />
-								<strong className="block">{row.original.role === "admin" ? "Admin" : ""}</strong>
+								<strong className="block">{row.original.role === "admin" ? "Admin" : row.original.role === "instructor" ? "講師" : ""}</strong>
 								<UserBanStatus user={row.original} currentTime={banStatusTime} />
 							</small>
 						</div>
@@ -328,6 +351,15 @@ export function UserList() {
 											{t("admin.users.removeAdminRole")}
 										</DropdownMenuItem>
 									)}
+					{row.original.role === "instructor" ? (
+						<DropdownMenuItem onClick={() => confirmInstructorRole(row.original.id, "user")}>
+							<ShieldXIcon className="mr-2 size-4" />撤銷講師角色
+						</DropdownMenuItem>
+					) : row.original.role !== "admin" ? (
+						<DropdownMenuItem onClick={() => confirmInstructorRole(row.original.id, "instructor")}>
+											<ShieldCheckIcon className="mr-2 size-4" />指派講師角色
+										</DropdownMenuItem>
+									) : null}
 
 									<DropdownMenuItem
 										onClick={() =>
@@ -368,6 +400,9 @@ export function UserList() {
 		<>
 			<Card className="p-6">
 				<h2 className="mb-4 font-semibold text-2xl">{t("admin.users.title")}</h2>
+				<div className="mb-4 flex flex-wrap gap-2" role="tablist" aria-label="使用者角色篩選">
+					{([['all', '全部'], ['student', '學員'], ['instructor', '講師'], ['admin', '管理員']] as const).map(([value, label]) => <Button key={value} type="button" size="sm" variant={roleFilter === value ? "primary" : "outline"} role="tab" aria-selected={roleFilter === value} onClick={() => setRoleFilter(value)}>{label}</Button>)}
+				</div>
 				<Input
 					type="search"
 					placeholder={t("admin.users.search")}

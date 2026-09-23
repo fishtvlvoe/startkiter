@@ -10,7 +10,9 @@ vi.mock("@startkiter/auth", () => ({
 }));
 
 vi.mock("@startkiter/database", () => ({
-	db: {
+		db: {
+		user: { findUnique: vi.fn() },
+		courseInstructor: { findUnique: vi.fn(), findFirst: vi.fn() },
 		course: {
 			findMany: vi.fn(),
 		},
@@ -30,6 +32,7 @@ describe("course.listManageableCourses", () => {
 			session: { id: "session-1", userId: "operator-1" },
 			user: { id: "operator-1", email: "operator@example.com", role: "user" },
 		} as never);
+		vi.mocked(db.user.findUnique).mockResolvedValue({ email: "operator@example.com", role: "admin" } as never);
 		vi.mocked(db.course.findMany).mockResolvedValue([] as never);
 	});
 
@@ -41,14 +44,15 @@ describe("course.listManageableCourses", () => {
 			call(listManageableCourses, {}, { context: { headers: new Headers() } }),
 		).resolves.toEqual({ courses });
 
-		expect(db.course.findMany).toHaveBeenCalledWith({ orderBy: { createdAt: "desc" } });
+		expect(db.course.findMany).toHaveBeenCalledWith({ where: {}, orderBy: { createdAt: "desc" } });
 	});
 
 	it("returns only courses assigned to an instructor", async () => {
 		vi.mocked(auth.api.getSession).mockResolvedValue({
 			session: { id: "session-2", userId: "instructor-1" },
-			user: { id: "instructor-1", email: "instructor@example.com", role: "user" },
+			user: { id: "instructor-1", email: "instructor@example.com", role: "instructor" },
 		} as never);
+		vi.mocked(db.user.findUnique).mockResolvedValue({ email: "instructor@example.com", role: "instructor" } as never);
 		const courses = [{ id: "course-assigned" }];
 		vi.mocked(db.course.findMany).mockResolvedValue(courses as never);
 
@@ -57,7 +61,7 @@ describe("course.listManageableCourses", () => {
 		).resolves.toEqual({ courses });
 
 		expect(db.course.findMany).toHaveBeenCalledWith({
-			where: { instructors: { some: { userId: "instructor-1" } } },
+			where: { OR: [{ instructors: { none: {} } }, { instructors: { some: { userId: "instructor-1" } } }] },
 			orderBy: { createdAt: "desc" },
 		});
 	});
@@ -65,8 +69,9 @@ describe("course.listManageableCourses", () => {
 	it("returns an empty list when the instructor has no assignments", async () => {
 		vi.mocked(auth.api.getSession).mockResolvedValue({
 			session: { id: "session-3", userId: "instructor-2" },
-			user: { id: "instructor-2", email: "instructor@example.com", role: "user" },
+			user: { id: "instructor-2", email: "instructor@example.com", role: "instructor" },
 		} as never);
+		vi.mocked(db.user.findUnique).mockResolvedValue({ email: "instructor@example.com", role: "instructor" } as never);
 
 		await expect(
 			call(listManageableCourses, {}, { context: { headers: new Headers() } }),

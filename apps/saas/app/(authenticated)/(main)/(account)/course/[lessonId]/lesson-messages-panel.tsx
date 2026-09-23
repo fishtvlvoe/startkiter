@@ -60,7 +60,7 @@ export function LessonMessagesPanel({ lessonId }: { lessonId: string }) {
 	return (
 		<section className="space-y-4 rounded-xl border border-border bg-card/60 p-5" data-testid="lesson-messages-panel">
 			<div>
-				<h2 className="text-base font-bold text-card-foreground">單元私訊</h2>
+				<h2 className="text-base font-bold text-card-foreground">私訊老師</h2>
 				<p className="mt-1 text-sm text-muted-foreground">只會和老師分享這個單元的問題。</p>
 			</div>
 			<form className="space-y-3" onSubmit={submit} aria-label="lesson-message-form">

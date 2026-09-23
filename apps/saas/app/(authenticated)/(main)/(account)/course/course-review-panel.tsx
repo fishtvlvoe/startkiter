@@ -59,10 +59,10 @@ export function CourseReviewPanel({ courseId }: { courseId: string }) {
 	}
 
 	return (
-		<section className="space-y-4 rounded-xl border border-neutral-800 bg-neutral-900/60 p-5" data-testid="course-review-panel">
+		<section className="space-y-4 rounded-xl border border-divider bg-surface/60 p-5" data-testid="course-review-panel">
 			<div>
-				<h2 className="text-base font-bold text-neutral-100">課程評價</h2>
-				<p className="mt-1 text-sm text-neutral-400" data-testid="review-summary">
+				<h2 className="text-base font-bold text-heading">課程評價</h2>
+				<p className="mt-1 text-sm text-caption" data-testid="review-summary">
 					{reviewCount ? `${averageRating.toFixed(1)} / 5（${reviewCount} 則評價）` : "還沒有評價"}
 				</p>
 			</div>
@@ -73,7 +73,7 @@ export function CourseReviewPanel({ courseId }: { courseId: string }) {
 						<button
 							key={value}
 							type="button"
-							className={value <= rating ? "text-amber-400" : "text-neutral-600"}
+							className={value <= rating ? "text-amber-400" : "text-caption"}
 							aria-label={`${value} 星`}
 							aria-pressed={value === rating}
 							onClick={() => setRating(value)}
@@ -83,7 +83,7 @@ export function CourseReviewPanel({ courseId }: { courseId: string }) {
 					))}
 				</div>
 				<textarea
-					className="min-h-24 w-full rounded-md border border-neutral-700 bg-neutral-950 p-3 text-sm text-neutral-100"
+					className="min-h-24 w-full rounded-md border border-divider bg-surface p-3 text-sm text-heading"
 					value={content}
 					onChange={(event) => setContent(event.target.value)}
 					placeholder="分享你對這門課的看法（可留白）"
@@ -94,20 +94,20 @@ export function CourseReviewPanel({ courseId }: { courseId: string }) {
 				</button>
 			</form>
 
-			{message && <p className="text-sm text-neutral-300" role="status">{message}</p>}
+			{message && <p className="text-sm text-body" role="status">{message}</p>}
 
 			<div className="space-y-3" data-testid="review-list">
 				{reviews.map((review) => (
 					<article key={review.id} className="rounded-lg border border-neutral-800 p-4" data-testid="course-review">
 						<div className="flex items-center justify-between gap-3 text-sm">
 							<span className="text-amber-400">{"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}</span>
-							<span className="text-neutral-500">{review.user.name}</span>
+						<span className="text-caption">{review.user.name}</span>
 						</div>
-						{review.content && <p className="mt-2 text-sm text-neutral-300">{review.content}</p>}
-						<div className="mt-3 flex items-center gap-3 text-xs text-neutral-500">
+						{review.content && <p className="mt-2 text-sm text-body">{review.content}</p>}
+						<div className="mt-3 flex items-center gap-3 text-xs text-caption">
 							<button type="button" className="underline" onClick={() => void markHelpful(review.id)}>有用（{review.helpfulCount}）</button>
 						</div>
-						{review.replyContent && <p className="mt-3 border-l-2 border-primary pl-3 text-sm text-neutral-300">老師回覆：{review.replyContent}</p>}
+						{review.replyContent && <p className="mt-3 border-l-2 border-primary pl-3 text-sm text-body">老師回覆：{review.replyContent}</p>}
 					</article>
 				))}
 			</div>

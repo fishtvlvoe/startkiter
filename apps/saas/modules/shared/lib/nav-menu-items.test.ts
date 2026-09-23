@@ -8,6 +8,10 @@ const labels: Record<string, string> = {
 	"app.menu.aiAssistant": "AI 助手",
 	"app.menu.accountSettings": "帳號設定",
 	"course.navLabel": "課程",
+	"course.dashboard": "課程儀表板",
+	"course.comments": "課程留言",
+	"course.messages": "學員私訊",
+	"course.coupons": "課程優惠券",
 	"course.quiz": "測驗管理",
 	"course.assignment": "作業管理",
 	"course.review": "評價與留言管理",
@@ -59,15 +63,26 @@ describe("nav-menu-items (WorkspaceContext navigation model)", () => {
 		expect(course?.label).toBe("課程");
 		expect(course?.requiresOperator).toBe(true);
 		expect(course?.subItems?.map((item) => item.label)).toEqual([
+			"課程儀表板",
 			"測驗管理",
 			"作業管理",
 			"評價與留言管理",
+			"課程留言",
+			"學員私訊",
+			"課程優惠券",
 			"課程綁定包",
 			"新生問卷",
 			"媒體庫",
 			"CoursePack 任務",
 		]);
 		expect(new Set(hrefs).size).toBe(hrefs.length);
+	});
+
+	it("instructor app-user cannot see admin-only course menu entries", () => {
+		const items = getMountMenuItems({ pathname: "/admin/course", platformAdmin: false, workspaceRole: "app-user", labelForKey });
+
+		expect(items.map((item) => item.href)).toEqual(["/app", "/course", "/support", "/ai", "/settings/general"]);
+		expect(collectMenuHrefs(items).some((href) => href.startsWith("/admin/"))).toBe(false);
 	});
 
 	it("platform scope shows platform entries and one entry per App", () => {

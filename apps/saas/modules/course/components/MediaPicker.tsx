@@ -100,11 +100,11 @@ export function MediaPicker({ type, usageType = "MANUAL", usageId, value, onSele
 	}
 
 	return (
-		<div className="space-y-3 rounded-lg border border-neutral-800 bg-neutral-950/40 p-3" data-testid="media-picker">
+		<div className="space-y-3 rounded-lg border border-divider bg-surface/40 p-3" data-testid="media-picker">
 			<div className="flex flex-wrap items-center justify-between gap-2">
 				<div>
-					<p className="text-sm font-medium text-neutral-200">從媒體庫選擇{type === "VIDEO" ? "影片" : "圖片"}</p>
-					<p className="text-xs text-neutral-400">可搜尋既有媒體，或在下方登記新來源。</p>
+					<p className="text-sm font-medium text-heading">從媒體庫選擇{type === "VIDEO" ? "影片" : "圖片"}</p>
+					<p className="text-xs text-caption">可搜尋既有媒體，或在下方登記新來源。</p>
 				</div>
 				<Input aria-label="搜尋媒體庫" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="搜尋檔名、網址或 provider" className="max-w-xs text-xs" />
 			</div>
@@ -121,16 +121,16 @@ export function MediaPicker({ type, usageType = "MANUAL", usageId, value, onSele
 							}
 							onSelect(item);
 						}}
-						className={`rounded-md border p-2 text-left text-xs ${value === item.url ? "border-primary bg-primary/10" : "border-neutral-800 hover:border-primary/60"}`}
+						className={`rounded-md border p-2 text-left text-xs ${value === item.url ? "border-primary bg-primary/10" : "border-divider hover:border-primary/60"}`}
 						data-testid={`media-option-${item.id}`}
 					>
 						{item.type === "IMAGE" ? <img src={`/image-proxy/${item.url}`} alt={item.filename ?? "媒體圖片"} className="mb-2 h-20 w-full rounded object-cover" /> : null}
 						<span className="block font-medium">{item.filename ?? item.provider ?? "影片"}</span>
-						<span className="block truncate text-neutral-400">{item.url}</span>
-						<span className="block text-neutral-500">{item.usageId ? `使用中 · ${item.usageType}` : "未引用"}</span>
+						<span className="block truncate text-caption">{item.url}</span>
+						<span className="block text-caption">{item.usageId ? `使用中 · ${item.usageType}` : "未引用"}</span>
 					</button>
 				))}
-				{media.length === 0 ? <p className="text-xs text-neutral-500">目前沒有符合條件的媒體。</p> : null}
+			{media.length === 0 ? <p className="text-xs text-caption">目前沒有符合條件的媒體。</p> : null}
 			</div>
 
 			{type === "VIDEO" ? (
@@ -145,7 +145,7 @@ export function MediaPicker({ type, usageType = "MANUAL", usageId, value, onSele
 				</div>
 			)}
 
-			{status ? <p className="text-xs text-neutral-300" role="status">{status}</p> : null}
+			{status ? <p className="text-xs text-body" role="status">{status}</p> : null}
 		</div>
 	);
 }

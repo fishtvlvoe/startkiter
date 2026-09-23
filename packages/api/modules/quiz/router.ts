@@ -16,6 +16,7 @@ import { z } from "zod";
 import { protectedProcedure } from "../../orpc/procedures";
 import { userCanAccessCourseId } from "../course/lib/course-access";
 import { isOperator } from "@startkiter/permissions";
+import { getQuizAttemptDetail, getQuizAttemptsForAdmin } from "./quiz-results";
 
 const quizOperatorProcedure = protectedProcedure.use(async ({ context, next }) => {
 	if (!isOperator(context.user, process.env.ADMIN_EMAIL)) {
@@ -46,6 +47,14 @@ async function getAccessibleQuiz(pluginContentId: string, userId: string) {
 }
 
 export const quizRouter = {
+	getAttemptsForAdmin: protectedProcedure
+		.route({ method: "GET", path: "/quiz/admin/{courseId}/{lessonId}/attempts", tags: ["Quiz"], summary: "List scoped quiz attempts" })
+		.input(z.object({ courseId: z.string().min(1), lessonId: z.string().min(1) }))
+		.handler(async ({ input, context }) => ({ attempts: await getQuizAttemptsForAdmin(context.user.id, input.courseId, input.lessonId) })),
+	getAttemptDetail: protectedProcedure
+		.route({ method: "GET", path: "/quiz/admin/{courseId}/attempts/{attemptId}", tags: ["Quiz"], summary: "Get scoped quiz attempt detail" })
+		.input(z.object({ courseId: z.string().min(1), attemptId: z.string().min(1) }))
+		.handler(async ({ input, context }) => getQuizAttemptDetail(context.user.id, input.courseId, input.attemptId)),
 	create: quizOperatorProcedure
 		.route({ method: "POST", path: "/quiz", tags: ["Quiz"], summary: "Create a quiz" })
 		.input(z.object({ title: z.string().trim().min(1).max(200), body: quizDefinitionBodySchema }))
