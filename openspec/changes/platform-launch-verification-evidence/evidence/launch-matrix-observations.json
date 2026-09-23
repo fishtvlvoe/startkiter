@@ -1,0 +1,2534 @@
+[
+  {
+    "role": "app-user",
+    "theme": "dark",
+    "locale": "zh-tw",
+    "viewport": "1440",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首頁 – StartKiter",
+    "viewportWidth": 1440,
+    "viewportHeight": 900,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試使用者 Gmail Launch Verify fishandy1213+sr-launch-verify-user-20260924@gmail.com 帳號設定 文件 我的訂閱 登出",
+    "navLinkCount": 8,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "開啟通知",
+      "User menu",
+      "收合側欄",
+      "開啟線上客服",
+      "收合客服按鈕"
+    ],
+    "visibleLinks": [
+      {
+        "label": "StartKiter",
+        "href": "/"
+      },
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "首頁",
+        "href": "/app"
+      },
+      {
+        "label": "課程",
+        "href": "/course"
+      },
+      {
+        "label": "客服",
+        "href": "/support"
+      },
+      {
+        "label": "AI 助手",
+        "href": "/ai"
+      },
+      {
+        "label": "帳號設定",
+        "href": "/settings/general"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "帳號設定",
+        "href": "/settings/general"
+      },
+      {
+        "label": "文件",
+        "href": "/support"
+      },
+      {
+        "label": "我的訂閱",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_dark_zh-tw_1440.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "verified"
+  },
+  {
+    "role": "app-user",
+    "theme": "dark",
+    "locale": "zh-tw",
+    "viewport": "390",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首頁 – StartKiter",
+    "viewportWidth": 390,
+    "viewportHeight": 844,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試使用者 Gmail Launch Verify fishandy1213+sr-launch-verify-user-20260924@gmail.com 帳號設定 文件 我的訂閱 登出",
+    "navLinkCount": 11,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "開啟導覽",
+      "開啟通知",
+      "User menu",
+      "更多",
+      "開啟線上客服",
+      "收合客服按鈕",
+      "Close"
+    ],
+    "visibleLinks": [
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "首頁",
+        "href": "/app"
+      },
+      {
+        "label": "課程",
+        "href": "/course"
+      },
+      {
+        "label": "客服",
+        "href": "/support"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "首頁",
+        "href": "/app"
+      },
+      {
+        "label": "課程",
+        "href": "/course"
+      },
+      {
+        "label": "客服",
+        "href": "/support"
+      },
+      {
+        "label": "AI 助手",
+        "href": "/ai"
+      },
+      {
+        "label": "帳號設定",
+        "href": "/settings/general"
+      },
+      {
+        "label": "帳號設定",
+        "href": "/settings/general"
+      },
+      {
+        "label": "文件",
+        "href": "/support"
+      },
+      {
+        "label": "我的訂閱",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_dark_zh-tw_390.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "verified"
+  },
+  {
+    "role": "app-user",
+    "theme": "light",
+    "locale": "zh-tw",
+    "viewport": "1440",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首頁 – StartKiter",
+    "viewportWidth": 1440,
+    "viewportHeight": 900,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試使用者 Gmail Launch Verify fishandy1213+sr-launch-verify-user-20260924@gmail.com 帳號設定 文件 我的訂閱 登出",
+    "navLinkCount": 8,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "開啟通知",
+      "User menu",
+      "收合側欄",
+      "開啟線上客服",
+      "收合客服按鈕"
+    ],
+    "visibleLinks": [
+      {
+        "label": "StartKiter",
+        "href": "/"
+      },
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "首頁",
+        "href": "/app"
+      },
+      {
+        "label": "課程",
+        "href": "/course"
+      },
+      {
+        "label": "客服",
+        "href": "/support"
+      },
+      {
+        "label": "AI 助手",
+        "href": "/ai"
+      },
+      {
+        "label": "帳號設定",
+        "href": "/settings/general"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "帳號設定",
+        "href": "/settings/general"
+      },
+      {
+        "label": "文件",
+        "href": "/support"
+      },
+      {
+        "label": "我的訂閱",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_light_zh-tw_1440.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "verified"
+  },
+  {
+    "role": "app-user",
+    "theme": "light",
+    "locale": "zh-tw",
+    "viewport": "390",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首頁 – StartKiter",
+    "viewportWidth": 390,
+    "viewportHeight": 844,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試使用者 Gmail Launch Verify fishandy1213+sr-launch-verify-user-20260924@gmail.com 帳號設定 文件 我的訂閱 登出",
+    "navLinkCount": 11,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "開啟導覽",
+      "開啟通知",
+      "User menu",
+      "更多",
+      "開啟線上客服",
+      "收合客服按鈕",
+      "Close"
+    ],
+    "visibleLinks": [
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "首頁",
+        "href": "/app"
+      },
+      {
+        "label": "課程",
+        "href": "/course"
+      },
+      {
+        "label": "客服",
+        "href": "/support"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "首頁",
+        "href": "/app"
+      },
+      {
+        "label": "課程",
+        "href": "/course"
+      },
+      {
+        "label": "客服",
+        "href": "/support"
+      },
+      {
+        "label": "AI 助手",
+        "href": "/ai"
+      },
+      {
+        "label": "帳號設定",
+        "href": "/settings/general"
+      },
+      {
+        "label": "帳號設定",
+        "href": "/settings/general"
+      },
+      {
+        "label": "文件",
+        "href": "/support"
+      },
+      {
+        "label": "我的訂閱",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_light_zh-tw_390.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "verified"
+  },
+  {
+    "role": "app-user",
+    "theme": "dark",
+    "locale": "zh-cn",
+    "viewport": "1440",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首页 – StartKiter",
+    "viewportWidth": 1440,
+    "viewportHeight": 900,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試使用者 Gmail Launch Verify fishandy1213+sr-launch-verify-user-20260924@gmail.com 账户设置 文档 我的订阅 退出登录",
+    "navLinkCount": 8,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "打开通知",
+      "User menu",
+      "收起侧栏",
+      "開啟線上客服",
+      "收合客服按鈕"
+    ],
+    "visibleLinks": [
+      {
+        "label": "StartKiter",
+        "href": "/"
+      },
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "首页",
+        "href": "/app"
+      },
+      {
+        "label": "课程",
+        "href": "/course"
+      },
+      {
+        "label": "客服",
+        "href": "/support"
+      },
+      {
+        "label": "AI 助手",
+        "href": "/ai"
+      },
+      {
+        "label": "账户设置",
+        "href": "/settings/general"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "账户设置",
+        "href": "/settings/general"
+      },
+      {
+        "label": "文档",
+        "href": "/support"
+      },
+      {
+        "label": "我的订阅",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_dark_zh-cn_1440.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  },
+  {
+    "role": "app-user",
+    "theme": "dark",
+    "locale": "zh-cn",
+    "viewport": "390",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首页 – StartKiter",
+    "viewportWidth": 390,
+    "viewportHeight": 844,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試使用者 Gmail Launch Verify fishandy1213+sr-launch-verify-user-20260924@gmail.com 账户设置 文档 我的订阅 退出登录",
+    "navLinkCount": 6,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "打开导航",
+      "打开通知",
+      "User menu",
+      "更多",
+      "開啟線上客服",
+      "收合客服按鈕"
+    ],
+    "visibleLinks": [
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "首页",
+        "href": "/app"
+      },
+      {
+        "label": "课程",
+        "href": "/course"
+      },
+      {
+        "label": "客服",
+        "href": "/support"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "账户设置",
+        "href": "/settings/general"
+      },
+      {
+        "label": "文档",
+        "href": "/support"
+      },
+      {
+        "label": "我的订阅",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_dark_zh-cn_390.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  },
+  {
+    "role": "app-user",
+    "theme": "light",
+    "locale": "zh-cn",
+    "viewport": "1440",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首页 – StartKiter",
+    "viewportWidth": 1440,
+    "viewportHeight": 900,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試使用者 Gmail Launch Verify fishandy1213+sr-launch-verify-user-20260924@gmail.com 账户设置 文档 我的订阅 退出登录",
+    "navLinkCount": 8,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "打开通知",
+      "User menu",
+      "收起侧栏",
+      "開啟線上客服",
+      "收合客服按鈕"
+    ],
+    "visibleLinks": [
+      {
+        "label": "StartKiter",
+        "href": "/"
+      },
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "首页",
+        "href": "/app"
+      },
+      {
+        "label": "课程",
+        "href": "/course"
+      },
+      {
+        "label": "客服",
+        "href": "/support"
+      },
+      {
+        "label": "AI 助手",
+        "href": "/ai"
+      },
+      {
+        "label": "账户设置",
+        "href": "/settings/general"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "账户设置",
+        "href": "/settings/general"
+      },
+      {
+        "label": "文档",
+        "href": "/support"
+      },
+      {
+        "label": "我的订阅",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_light_zh-cn_1440.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  },
+  {
+    "role": "app-user",
+    "theme": "light",
+    "locale": "zh-cn",
+    "viewport": "390",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首页 – StartKiter",
+    "viewportWidth": 390,
+    "viewportHeight": 844,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試使用者 Gmail Launch Verify fishandy1213+sr-launch-verify-user-20260924@gmail.com 账户设置 文档 我的订阅 退出登录",
+    "navLinkCount": 6,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "打开导航",
+      "打开通知",
+      "User menu",
+      "更多",
+      "開啟線上客服",
+      "收合客服按鈕"
+    ],
+    "visibleLinks": [
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "首页",
+        "href": "/app"
+      },
+      {
+        "label": "课程",
+        "href": "/course"
+      },
+      {
+        "label": "客服",
+        "href": "/support"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "账户设置",
+        "href": "/settings/general"
+      },
+      {
+        "label": "文档",
+        "href": "/support"
+      },
+      {
+        "label": "我的订阅",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_light_zh-cn_390.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  },
+  {
+    "role": "app-user",
+    "theme": "dark",
+    "locale": "en",
+    "viewport": "1440",
+    "url": "https://app.startkiter.dev/app",
+    "title": "Start – StartKiter",
+    "viewportWidth": 1440,
+    "viewportHeight": 900,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試使用者 Gmail Launch Verify fishandy1213+sr-launch-verify-user-20260924@gmail.com Account settings Documentation My subscription Logout",
+    "navLinkCount": 8,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "Open notifications",
+      "User menu",
+      "Collapse sidebar",
+      "開啟線上客服",
+      "收合客服按鈕"
+    ],
+    "visibleLinks": [
+      {
+        "label": "StartKiter",
+        "href": "/"
+      },
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "Start",
+        "href": "/app"
+      },
+      {
+        "label": "Course",
+        "href": "/course"
+      },
+      {
+        "label": "Support",
+        "href": "/support"
+      },
+      {
+        "label": "AI assistant",
+        "href": "/ai"
+      },
+      {
+        "label": "Account settings",
+        "href": "/settings/general"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "Account settings",
+        "href": "/settings/general"
+      },
+      {
+        "label": "Documentation",
+        "href": "/support"
+      },
+      {
+        "label": "My subscription",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_dark_en_1440.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  },
+  {
+    "role": "app-user",
+    "theme": "dark",
+    "locale": "en",
+    "viewport": "390",
+    "url": "https://app.startkiter.dev/app",
+    "title": "Start – StartKiter",
+    "viewportWidth": 390,
+    "viewportHeight": 844,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試使用者 Gmail Launch Verify fishandy1213+sr-launch-verify-user-20260924@gmail.com Account settings Documentation My subscription Logout",
+    "navLinkCount": 11,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "Open navigation",
+      "Open notifications",
+      "User menu",
+      "More",
+      "開啟線上客服",
+      "收合客服按鈕",
+      "Close"
+    ],
+    "visibleLinks": [
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "Start",
+        "href": "/app"
+      },
+      {
+        "label": "Course",
+        "href": "/course"
+      },
+      {
+        "label": "Support",
+        "href": "/support"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "Start",
+        "href": "/app"
+      },
+      {
+        "label": "Course",
+        "href": "/course"
+      },
+      {
+        "label": "Support",
+        "href": "/support"
+      },
+      {
+        "label": "AI assistant",
+        "href": "/ai"
+      },
+      {
+        "label": "Account settings",
+        "href": "/settings/general"
+      },
+      {
+        "label": "Account settings",
+        "href": "/settings/general"
+      },
+      {
+        "label": "Documentation",
+        "href": "/support"
+      },
+      {
+        "label": "My subscription",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_dark_en_390.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  },
+  {
+    "role": "app-user",
+    "theme": "light",
+    "locale": "en",
+    "viewport": "1440",
+    "url": "https://app.startkiter.dev/app",
+    "title": "Start – StartKiter",
+    "viewportWidth": 1440,
+    "viewportHeight": 900,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試使用者 Gmail Launch Verify fishandy1213+sr-launch-verify-user-20260924@gmail.com Account settings Documentation My subscription Logout",
+    "navLinkCount": 8,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "Open notifications",
+      "User menu",
+      "Collapse sidebar",
+      "開啟線上客服",
+      "收合客服按鈕"
+    ],
+    "visibleLinks": [
+      {
+        "label": "StartKiter",
+        "href": "/"
+      },
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "Start",
+        "href": "/app"
+      },
+      {
+        "label": "Course",
+        "href": "/course"
+      },
+      {
+        "label": "Support",
+        "href": "/support"
+      },
+      {
+        "label": "AI assistant",
+        "href": "/ai"
+      },
+      {
+        "label": "Account settings",
+        "href": "/settings/general"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "Account settings",
+        "href": "/settings/general"
+      },
+      {
+        "label": "Documentation",
+        "href": "/support"
+      },
+      {
+        "label": "My subscription",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_light_en_1440.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  },
+  {
+    "role": "app-user",
+    "theme": "light",
+    "locale": "en",
+    "viewport": "390",
+    "url": "https://app.startkiter.dev/app",
+    "title": "Start – StartKiter",
+    "viewportWidth": 390,
+    "viewportHeight": 844,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試使用者 Gmail Launch Verify fishandy1213+sr-launch-verify-user-20260924@gmail.com Account settings Documentation My subscription Logout",
+    "navLinkCount": 11,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "Open navigation",
+      "Open notifications",
+      "User menu",
+      "More",
+      "開啟線上客服",
+      "收合客服按鈕",
+      "Close"
+    ],
+    "visibleLinks": [
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "Start",
+        "href": "/app"
+      },
+      {
+        "label": "Course",
+        "href": "/course"
+      },
+      {
+        "label": "Support",
+        "href": "/support"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "Start",
+        "href": "/app"
+      },
+      {
+        "label": "Course",
+        "href": "/course"
+      },
+      {
+        "label": "Support",
+        "href": "/support"
+      },
+      {
+        "label": "AI assistant",
+        "href": "/ai"
+      },
+      {
+        "label": "Account settings",
+        "href": "/settings/general"
+      },
+      {
+        "label": "Account settings",
+        "href": "/settings/general"
+      },
+      {
+        "label": "Documentation",
+        "href": "/support"
+      },
+      {
+        "label": "My subscription",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-user_light_en_390.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  },
+  {
+    "role": "app-admin",
+    "theme": "dark",
+    "locale": "zh-tw",
+    "viewport": "1440",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首頁 – StartKiter",
+    "viewportWidth": 1440,
+    "viewportHeight": 900,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試 App 管理員 Gmail Launch Verify fishandy1213+sr-launch-verify-appadmin-20260924@gmail.com 帳號設定 文件 我的訂閱 登出",
+    "navLinkCount": 8,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "開啟通知",
+      "User menu",
+      "收合側欄",
+      "開啟線上客服",
+      "收合客服按鈕"
+    ],
+    "visibleLinks": [
+      {
+        "label": "StartKiter",
+        "href": "/"
+      },
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "首頁",
+        "href": "/app"
+      },
+      {
+        "label": "課程",
+        "href": "/course"
+      },
+      {
+        "label": "客服",
+        "href": "/support"
+      },
+      {
+        "label": "AI 助手",
+        "href": "/ai"
+      },
+      {
+        "label": "帳號設定",
+        "href": "/settings/general"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "帳號設定",
+        "href": "/settings/general"
+      },
+      {
+        "label": "文件",
+        "href": "/support"
+      },
+      {
+        "label": "我的訂閱",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_dark_zh-tw_1440.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "verified"
+  },
+  {
+    "role": "app-admin",
+    "theme": "dark",
+    "locale": "zh-tw",
+    "viewport": "390",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首頁 – StartKiter",
+    "viewportWidth": 390,
+    "viewportHeight": 844,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試 App 管理員 Gmail Launch Verify fishandy1213+sr-launch-verify-appadmin-20260924@gmail.com 帳號設定 文件 我的訂閱 登出",
+    "navLinkCount": 11,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "開啟導覽",
+      "開啟通知",
+      "User menu",
+      "更多",
+      "開啟線上客服",
+      "收合客服按鈕",
+      "Close"
+    ],
+    "visibleLinks": [
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "首頁",
+        "href": "/app"
+      },
+      {
+        "label": "課程",
+        "href": "/course"
+      },
+      {
+        "label": "客服",
+        "href": "/support"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "首頁",
+        "href": "/app"
+      },
+      {
+        "label": "課程",
+        "href": "/course"
+      },
+      {
+        "label": "客服",
+        "href": "/support"
+      },
+      {
+        "label": "AI 助手",
+        "href": "/ai"
+      },
+      {
+        "label": "帳號設定",
+        "href": "/settings/general"
+      },
+      {
+        "label": "帳號設定",
+        "href": "/settings/general"
+      },
+      {
+        "label": "文件",
+        "href": "/support"
+      },
+      {
+        "label": "我的訂閱",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_dark_zh-tw_390.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "verified"
+  },
+  {
+    "role": "app-admin",
+    "theme": "light",
+    "locale": "zh-tw",
+    "viewport": "1440",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首頁 – StartKiter",
+    "viewportWidth": 1440,
+    "viewportHeight": 900,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試 App 管理員 Gmail Launch Verify fishandy1213+sr-launch-verify-appadmin-20260924@gmail.com 帳號設定 文件 我的訂閱 登出",
+    "navLinkCount": 8,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "開啟通知",
+      "User menu",
+      "收合側欄",
+      "開啟線上客服",
+      "收合客服按鈕"
+    ],
+    "visibleLinks": [
+      {
+        "label": "StartKiter",
+        "href": "/"
+      },
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "首頁",
+        "href": "/app"
+      },
+      {
+        "label": "課程",
+        "href": "/course"
+      },
+      {
+        "label": "客服",
+        "href": "/support"
+      },
+      {
+        "label": "AI 助手",
+        "href": "/ai"
+      },
+      {
+        "label": "帳號設定",
+        "href": "/settings/general"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "帳號設定",
+        "href": "/settings/general"
+      },
+      {
+        "label": "文件",
+        "href": "/support"
+      },
+      {
+        "label": "我的訂閱",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_light_zh-tw_1440.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "verified"
+  },
+  {
+    "role": "app-admin",
+    "theme": "light",
+    "locale": "zh-tw",
+    "viewport": "390",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首頁 – StartKiter",
+    "viewportWidth": 390,
+    "viewportHeight": 844,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試 App 管理員 Gmail Launch Verify fishandy1213+sr-launch-verify-appadmin-20260924@gmail.com 帳號設定 文件 我的訂閱 登出",
+    "navLinkCount": 11,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "開啟導覽",
+      "開啟通知",
+      "User menu",
+      "更多",
+      "開啟線上客服",
+      "收合客服按鈕",
+      "Close"
+    ],
+    "visibleLinks": [
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "首頁",
+        "href": "/app"
+      },
+      {
+        "label": "課程",
+        "href": "/course"
+      },
+      {
+        "label": "客服",
+        "href": "/support"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "首頁",
+        "href": "/app"
+      },
+      {
+        "label": "課程",
+        "href": "/course"
+      },
+      {
+        "label": "客服",
+        "href": "/support"
+      },
+      {
+        "label": "AI 助手",
+        "href": "/ai"
+      },
+      {
+        "label": "帳號設定",
+        "href": "/settings/general"
+      },
+      {
+        "label": "帳號設定",
+        "href": "/settings/general"
+      },
+      {
+        "label": "文件",
+        "href": "/support"
+      },
+      {
+        "label": "我的訂閱",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_light_zh-tw_390.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "verified"
+  },
+  {
+    "role": "app-admin",
+    "theme": "dark",
+    "locale": "zh-cn",
+    "viewport": "1440",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首页 – StartKiter",
+    "viewportWidth": 1440,
+    "viewportHeight": 900,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試 App 管理員 Gmail Launch Verify fishandy1213+sr-launch-verify-appadmin-20260924@gmail.com 账户设置 文档 我的订阅 退出登录",
+    "navLinkCount": 8,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "打开通知",
+      "User menu",
+      "收起侧栏",
+      "開啟線上客服",
+      "收合客服按鈕"
+    ],
+    "visibleLinks": [
+      {
+        "label": "StartKiter",
+        "href": "/"
+      },
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "首页",
+        "href": "/app"
+      },
+      {
+        "label": "课程",
+        "href": "/course"
+      },
+      {
+        "label": "客服",
+        "href": "/support"
+      },
+      {
+        "label": "AI 助手",
+        "href": "/ai"
+      },
+      {
+        "label": "账户设置",
+        "href": "/settings/general"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "账户设置",
+        "href": "/settings/general"
+      },
+      {
+        "label": "文档",
+        "href": "/support"
+      },
+      {
+        "label": "我的订阅",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_dark_zh-cn_1440.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  },
+  {
+    "role": "app-admin",
+    "theme": "dark",
+    "locale": "zh-cn",
+    "viewport": "390",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首页 – StartKiter",
+    "viewportWidth": 390,
+    "viewportHeight": 844,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試 App 管理員 Gmail Launch Verify fishandy1213+sr-launch-verify-appadmin-20260924@gmail.com 账户设置 文档 我的订阅 退出登录",
+    "navLinkCount": 6,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "打开导航",
+      "打开通知",
+      "User menu",
+      "更多",
+      "開啟線上客服",
+      "收合客服按鈕"
+    ],
+    "visibleLinks": [
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "首页",
+        "href": "/app"
+      },
+      {
+        "label": "课程",
+        "href": "/course"
+      },
+      {
+        "label": "客服",
+        "href": "/support"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "账户设置",
+        "href": "/settings/general"
+      },
+      {
+        "label": "文档",
+        "href": "/support"
+      },
+      {
+        "label": "我的订阅",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_dark_zh-cn_390.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  },
+  {
+    "role": "app-admin",
+    "theme": "light",
+    "locale": "zh-cn",
+    "viewport": "1440",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首页 – StartKiter",
+    "viewportWidth": 1440,
+    "viewportHeight": 900,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試 App 管理員 Gmail Launch Verify fishandy1213+sr-launch-verify-appadmin-20260924@gmail.com 账户设置 文档 我的订阅 退出登录",
+    "navLinkCount": 8,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "打开通知",
+      "User menu",
+      "收起侧栏",
+      "開啟線上客服",
+      "收合客服按鈕"
+    ],
+    "visibleLinks": [
+      {
+        "label": "StartKiter",
+        "href": "/"
+      },
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "首页",
+        "href": "/app"
+      },
+      {
+        "label": "课程",
+        "href": "/course"
+      },
+      {
+        "label": "客服",
+        "href": "/support"
+      },
+      {
+        "label": "AI 助手",
+        "href": "/ai"
+      },
+      {
+        "label": "账户设置",
+        "href": "/settings/general"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "账户设置",
+        "href": "/settings/general"
+      },
+      {
+        "label": "文档",
+        "href": "/support"
+      },
+      {
+        "label": "我的订阅",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_light_zh-cn_1440.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  },
+  {
+    "role": "app-admin",
+    "theme": "light",
+    "locale": "zh-cn",
+    "viewport": "390",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首页 – StartKiter",
+    "viewportWidth": 390,
+    "viewportHeight": 844,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試 App 管理員 Gmail Launch Verify fishandy1213+sr-launch-verify-appadmin-20260924@gmail.com 账户设置 文档 我的订阅 退出登录",
+    "navLinkCount": 6,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "打开导航",
+      "打开通知",
+      "User menu",
+      "更多",
+      "開啟線上客服",
+      "收合客服按鈕"
+    ],
+    "visibleLinks": [
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "首页",
+        "href": "/app"
+      },
+      {
+        "label": "课程",
+        "href": "/course"
+      },
+      {
+        "label": "客服",
+        "href": "/support"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "账户设置",
+        "href": "/settings/general"
+      },
+      {
+        "label": "文档",
+        "href": "/support"
+      },
+      {
+        "label": "我的订阅",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_light_zh-cn_390.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  },
+  {
+    "role": "app-admin",
+    "theme": "dark",
+    "locale": "en",
+    "viewport": "1440",
+    "url": "https://app.startkiter.dev/app",
+    "title": "Start – StartKiter",
+    "viewportWidth": 1440,
+    "viewportHeight": 900,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試 App 管理員 Gmail Launch Verify fishandy1213+sr-launch-verify-appadmin-20260924@gmail.com Account settings Documentation My subscription Logout",
+    "navLinkCount": 8,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "Open notifications",
+      "User menu",
+      "Collapse sidebar",
+      "開啟線上客服",
+      "收合客服按鈕"
+    ],
+    "visibleLinks": [
+      {
+        "label": "StartKiter",
+        "href": "/"
+      },
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "Start",
+        "href": "/app"
+      },
+      {
+        "label": "Course",
+        "href": "/course"
+      },
+      {
+        "label": "Support",
+        "href": "/support"
+      },
+      {
+        "label": "AI assistant",
+        "href": "/ai"
+      },
+      {
+        "label": "Account settings",
+        "href": "/settings/general"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "Account settings",
+        "href": "/settings/general"
+      },
+      {
+        "label": "Documentation",
+        "href": "/support"
+      },
+      {
+        "label": "My subscription",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_dark_en_1440.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  },
+  {
+    "role": "app-admin",
+    "theme": "dark",
+    "locale": "en",
+    "viewport": "390",
+    "url": "https://app.startkiter.dev/app",
+    "title": "Start – StartKiter",
+    "viewportWidth": 390,
+    "viewportHeight": 844,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試 App 管理員 Gmail Launch Verify fishandy1213+sr-launch-verify-appadmin-20260924@gmail.com Account settings Documentation My subscription Logout",
+    "navLinkCount": 11,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "Open navigation",
+      "Open notifications",
+      "User menu",
+      "More",
+      "開啟線上客服",
+      "收合客服按鈕",
+      "Close"
+    ],
+    "visibleLinks": [
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "Start",
+        "href": "/app"
+      },
+      {
+        "label": "Course",
+        "href": "/course"
+      },
+      {
+        "label": "Support",
+        "href": "/support"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "Start",
+        "href": "/app"
+      },
+      {
+        "label": "Course",
+        "href": "/course"
+      },
+      {
+        "label": "Support",
+        "href": "/support"
+      },
+      {
+        "label": "AI assistant",
+        "href": "/ai"
+      },
+      {
+        "label": "Account settings",
+        "href": "/settings/general"
+      },
+      {
+        "label": "Account settings",
+        "href": "/settings/general"
+      },
+      {
+        "label": "Documentation",
+        "href": "/support"
+      },
+      {
+        "label": "My subscription",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_dark_en_390.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  },
+  {
+    "role": "app-admin",
+    "theme": "light",
+    "locale": "en",
+    "viewport": "1440",
+    "url": "https://app.startkiter.dev/app",
+    "title": "Start – StartKiter",
+    "viewportWidth": 1440,
+    "viewportHeight": 900,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試 App 管理員 Gmail Launch Verify fishandy1213+sr-launch-verify-appadmin-20260924@gmail.com Account settings Documentation My subscription Logout",
+    "navLinkCount": 8,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "Open notifications",
+      "User menu",
+      "Collapse sidebar",
+      "開啟線上客服",
+      "收合客服按鈕"
+    ],
+    "visibleLinks": [
+      {
+        "label": "StartKiter",
+        "href": "/"
+      },
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "Start",
+        "href": "/app"
+      },
+      {
+        "label": "Course",
+        "href": "/course"
+      },
+      {
+        "label": "Support",
+        "href": "/support"
+      },
+      {
+        "label": "AI assistant",
+        "href": "/ai"
+      },
+      {
+        "label": "Account settings",
+        "href": "/settings/general"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "Account settings",
+        "href": "/settings/general"
+      },
+      {
+        "label": "Documentation",
+        "href": "/support"
+      },
+      {
+        "label": "My subscription",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_light_en_1440.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  },
+  {
+    "role": "app-admin",
+    "theme": "light",
+    "locale": "en",
+    "viewport": "390",
+    "url": "https://app.startkiter.dev/app",
+    "title": "Start – StartKiter",
+    "viewportWidth": 390,
+    "viewportHeight": 844,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "驗收測試 App 管理員 Gmail Launch Verify fishandy1213+sr-launch-verify-appadmin-20260924@gmail.com Account settings Documentation My subscription Logout",
+    "navLinkCount": 11,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/support",
+      "/settings/billing"
+    ],
+    "visibleButtons": [
+      "Open navigation",
+      "Open notifications",
+      "User menu",
+      "More",
+      "開啟線上客服",
+      "收合客服按鈕",
+      "Close"
+    ],
+    "visibleLinks": [
+      {
+        "label": "",
+        "href": "/"
+      },
+      {
+        "label": "Start",
+        "href": "/app"
+      },
+      {
+        "label": "Course",
+        "href": "/course"
+      },
+      {
+        "label": "Support",
+        "href": "/support"
+      },
+      {
+        "label": "",
+        "href": ""
+      },
+      {
+        "label": "Start",
+        "href": "/app"
+      },
+      {
+        "label": "Course",
+        "href": "/course"
+      },
+      {
+        "label": "Support",
+        "href": "/support"
+      },
+      {
+        "label": "AI assistant",
+        "href": "/ai"
+      },
+      {
+        "label": "Account settings",
+        "href": "/settings/general"
+      },
+      {
+        "label": "Account settings",
+        "href": "/settings/general"
+      },
+      {
+        "label": "Documentation",
+        "href": "/support"
+      },
+      {
+        "label": "My subscription",
+        "href": "/settings/billing"
+      }
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/app-admin_light_en_390.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  },
+  {
+    "role": "super-admin",
+    "theme": "dark",
+    "locale": "zh-tw",
+    "viewport": "1440",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首頁 – StartKiter",
+    "viewportWidth": 1440,
+    "viewportHeight": 900,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "SR01 使用者測試 fish@fishot.com 帳號設定 課程管理員設定 文件 我的訂閱 登出",
+    "navLinkCount": 9,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/admin/course/settings",
+      "/support",
+      "/settings/billing"
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_dark_zh-tw_1440.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "verified"
+  },
+  {
+    "role": "super-admin",
+    "theme": "dark",
+    "locale": "zh-tw",
+    "viewport": "390",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首頁 – StartKiter",
+    "viewportWidth": 390,
+    "viewportHeight": 844,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "SR01 使用者測試 fish@fishot.com 帳號設定 課程管理員設定 文件 我的訂閱 登出",
+    "navLinkCount": 12,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/admin/course/settings",
+      "/support",
+      "/settings/billing"
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_dark_zh-tw_390.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "verified"
+  },
+  {
+    "role": "super-admin",
+    "theme": "light",
+    "locale": "zh-tw",
+    "viewport": "1440",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首頁 – StartKiter",
+    "viewportWidth": 1440,
+    "viewportHeight": 900,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "SR01 使用者測試 fish@fishot.com 帳號設定 課程管理員設定 文件 我的訂閱 登出",
+    "navLinkCount": 9,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/admin/course/settings",
+      "/support",
+      "/settings/billing"
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_light_zh-tw_1440.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "verified"
+  },
+  {
+    "role": "super-admin",
+    "theme": "light",
+    "locale": "zh-tw",
+    "viewport": "390",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首頁 – StartKiter",
+    "viewportWidth": 390,
+    "viewportHeight": 844,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "SR01 使用者測試 fish@fishot.com 帳號設定 課程管理員設定 文件 我的訂閱 登出",
+    "navLinkCount": 12,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/admin/course/settings",
+      "/support",
+      "/settings/billing"
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_light_zh-tw_390.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "verified"
+  },
+  {
+    "role": "super-admin",
+    "theme": "dark",
+    "locale": "zh-cn",
+    "viewport": "1440",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首页 – StartKiter",
+    "viewportWidth": 1440,
+    "viewportHeight": 900,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "SR01 使用者測試 fish@fishot.com 账户设置 課程管理员设置 文档 我的订阅 退出登录",
+    "navLinkCount": 9,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/admin/course/settings",
+      "/support",
+      "/settings/billing"
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_dark_zh-cn_1440.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  },
+  {
+    "role": "super-admin",
+    "theme": "dark",
+    "locale": "zh-cn",
+    "viewport": "390",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首页 – StartKiter",
+    "viewportWidth": 390,
+    "viewportHeight": 844,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "SR01 使用者測試 fish@fishot.com 账户设置 課程管理员设置 文档 我的订阅 退出登录",
+    "navLinkCount": 7,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/settings/general",
+      "/admin/course/settings",
+      "/support",
+      "/settings/billing"
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_dark_zh-cn_390.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  },
+  {
+    "role": "super-admin",
+    "theme": "light",
+    "locale": "zh-cn",
+    "viewport": "1440",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首页 – StartKiter",
+    "viewportWidth": 1440,
+    "viewportHeight": 900,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "SR01 使用者測試 fish@fishot.com 账户设置 課程管理员设置 文档 我的订阅 退出登录",
+    "navLinkCount": 9,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/admin/course/settings",
+      "/support",
+      "/settings/billing"
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_light_zh-cn_1440.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  },
+  {
+    "role": "super-admin",
+    "theme": "light",
+    "locale": "zh-cn",
+    "viewport": "390",
+    "url": "https://app.startkiter.dev/app",
+    "title": "首页 – StartKiter",
+    "viewportWidth": 390,
+    "viewportHeight": 844,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "SR01 使用者測試 fish@fishot.com 账户设置 課程管理员设置 文档 我的订阅 退出登录",
+    "navLinkCount": 7,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/settings/general",
+      "/admin/course/settings",
+      "/support",
+      "/settings/billing"
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_light_zh-cn_390.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  },
+  {
+    "role": "super-admin",
+    "theme": "dark",
+    "locale": "en",
+    "viewport": "1440",
+    "url": "https://app.startkiter.dev/app",
+    "title": "Start – StartKiter",
+    "viewportWidth": 1440,
+    "viewportHeight": 900,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "SR01 使用者測試 fish@fishot.com Account settings 課程 admin settings Documentation My subscription Logout",
+    "navLinkCount": 9,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/admin/course/settings",
+      "/support",
+      "/settings/billing"
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_dark_en_1440.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  },
+  {
+    "role": "super-admin",
+    "theme": "dark",
+    "locale": "en",
+    "viewport": "390",
+    "url": "https://app.startkiter.dev/app",
+    "title": "Start – StartKiter",
+    "viewportWidth": 390,
+    "viewportHeight": 844,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "SR01 使用者測試 fish@fishot.com Account settings 課程 admin settings Documentation My subscription Logout",
+    "navLinkCount": 12,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/admin/course/settings",
+      "/support",
+      "/settings/billing"
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_dark_en_390.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  },
+  {
+    "role": "super-admin",
+    "theme": "light",
+    "locale": "en",
+    "viewport": "1440",
+    "url": "https://app.startkiter.dev/app",
+    "title": "Start – StartKiter",
+    "viewportWidth": 1440,
+    "viewportHeight": 900,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "SR01 使用者測試 fish@fishot.com Account settings 課程 admin settings Documentation My subscription Logout",
+    "navLinkCount": 9,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/admin/course/settings",
+      "/support",
+      "/settings/billing"
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_light_en_1440.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  },
+  {
+    "role": "super-admin",
+    "theme": "light",
+    "locale": "en",
+    "viewport": "390",
+    "url": "https://app.startkiter.dev/app",
+    "title": "Start – StartKiter",
+    "viewportWidth": 390,
+    "viewportHeight": 844,
+    "actual": true,
+    "accountMenu": true,
+    "accountText": "SR01 使用者測試 fish@fishot.com Account settings 課程 admin settings Documentation My subscription Logout",
+    "navLinkCount": 12,
+    "navLinks": [
+      "/app",
+      "/course",
+      "/support",
+      "/app",
+      "/course",
+      "/support",
+      "/ai",
+      "/settings/general",
+      "/settings/general",
+      "/admin/course/settings",
+      "/support",
+      "/settings/billing"
+    ],
+    "screenshotPath": "openspec/changes/platform-launch-verification-evidence/evidence/launch-matrix/super-admin_light_en_390.png",
+    "screenshotStatus": "blocked: ego-browser Page.captureScreenshot timed out after 15s",
+    "verificationStatus": "unverified",
+    "knownIssues": [
+      {
+        "id": "workspace-label-not-localized",
+        "severity": "failed",
+        "expected": "zh-cn/en workspace identity label is localized",
+        "actual": "workspaceLabel remains Traditional Chinese (總管理員/課程管理員/使用者)",
+        "rootCause": "packages/platform/src/workspace/navigation.ts lines 237/239 use hard-coded labels instead of i18n"
+      }
+    ]
+  }
+]

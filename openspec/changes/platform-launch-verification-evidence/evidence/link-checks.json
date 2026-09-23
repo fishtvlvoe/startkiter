@@ -1,0 +1,212 @@
+[
+  {
+    "appId": "course",
+    "entryId": "super-admin:首頁@/app",
+    "expectedOutcome": "navigates to /app",
+    "actualOutcome": "https://app.startkiter.dev/app",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "super-admin:課程@/course",
+    "expectedOutcome": "navigates to /course",
+    "actualOutcome": "https://app.startkiter.dev/course",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "super-admin:客服@/support",
+    "expectedOutcome": "navigates to /support",
+    "actualOutcome": "https://app.startkiter.dev/support",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "super-admin:AI 助手@/ai",
+    "expectedOutcome": "navigates to /ai",
+    "actualOutcome": "https://app.startkiter.dev/ai",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "super-admin:帳號設定@/settings/general",
+    "expectedOutcome": "navigates to /settings/general",
+    "actualOutcome": "https://app.startkiter.dev/settings/general",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "super-admin:課程管理員設定@/admin/course/settings",
+    "expectedOutcome": "navigates to /admin/course/settings",
+    "actualOutcome": "https://app.startkiter.dev/admin/course/settings",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "super-admin:文件@/support",
+    "expectedOutcome": "navigates to /support",
+    "actualOutcome": "https://app.startkiter.dev/support",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "super-admin:我的訂閱@/settings/billing",
+    "expectedOutcome": "navigates to /settings/billing",
+    "actualOutcome": "https://app.startkiter.dev/settings/billing",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "super-admin:core-menu:1440",
+    "expectedOutcome": "first-level and account menus visible",
+    "actualOutcome": "both menus visible",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "super-admin:core-menu:390",
+    "expectedOutcome": "first-level and account menus visible",
+    "actualOutcome": "both menus visible",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-user:首頁@/app",
+    "expectedOutcome": "navigates to /app",
+    "actualOutcome": "https://app.startkiter.dev/app",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-user:課程@/course",
+    "expectedOutcome": "navigates to /course",
+    "actualOutcome": "https://app.startkiter.dev/course",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-user:客服@/support",
+    "expectedOutcome": "navigates to /support",
+    "actualOutcome": "https://app.startkiter.dev/support",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-user:AI 助手@/ai",
+    "expectedOutcome": "navigates to /ai",
+    "actualOutcome": "https://app.startkiter.dev/ai",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-user:帳號設定@/settings/general",
+    "expectedOutcome": "navigates to /settings/general",
+    "actualOutcome": "https://app.startkiter.dev/settings/general",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-user:課程管理員設定@/admin/course/settings",
+    "expectedOutcome": "navigates to /admin/course/settings",
+    "actualOutcome": "https://app.startkiter.dev/admin/course/settings",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-user:文件@/support",
+    "expectedOutcome": "navigates to /support",
+    "actualOutcome": "https://app.startkiter.dev/support",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-user:我的訂閱@/settings/billing",
+    "expectedOutcome": "navigates to /settings/billing",
+    "actualOutcome": "https://app.startkiter.dev/settings/billing",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-user:core-menu:1440",
+    "expectedOutcome": "first-level and account menus visible",
+    "actualOutcome": "both menus visible",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-user:core-menu:390",
+    "expectedOutcome": "first-level and account menus visible",
+    "actualOutcome": "both menus visible",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-admin:首頁@/app",
+    "expectedOutcome": "navigates to /app",
+    "actualOutcome": "https://app.startkiter.dev/app",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-admin:課程@/course",
+    "expectedOutcome": "navigates to /course",
+    "actualOutcome": "https://app.startkiter.dev/course",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-admin:客服@/support",
+    "expectedOutcome": "navigates to /support",
+    "actualOutcome": "https://app.startkiter.dev/support",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-admin:AI 助手@/ai",
+    "expectedOutcome": "navigates to /ai",
+    "actualOutcome": "https://app.startkiter.dev/ai",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-admin:帳號設定@/settings/general",
+    "expectedOutcome": "navigates to /settings/general",
+    "actualOutcome": "https://app.startkiter.dev/settings/general",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-admin:課程管理員設定@/admin/course/settings",
+    "expectedOutcome": "navigates to /admin/course/settings",
+    "actualOutcome": "https://app.startkiter.dev/admin/course/settings",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-admin:文件@/support",
+    "expectedOutcome": "navigates to /support",
+    "actualOutcome": "https://app.startkiter.dev/support",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-admin:我的訂閱@/settings/billing",
+    "expectedOutcome": "navigates to /settings/billing",
+    "actualOutcome": "https://app.startkiter.dev/settings/billing",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-admin:core-menu:1440",
+    "expectedOutcome": "first-level and account menus visible",
+    "actualOutcome": "both menus visible",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-admin:core-menu:390",
+    "expectedOutcome": "first-level and account menus visible",
+    "actualOutcome": "both menus visible",
+    "passed": true
+  }
+]

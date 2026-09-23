@@ -1,0 +1,170 @@
+[
+  {
+    "appId": "course",
+    "entryId": "super-admin:notification:1440",
+    "expectedOutcome": "opens notifications without error",
+    "actualOutcome": "notification control responded",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "super-admin:user-menu-button:1440",
+    "expectedOutcome": "opens account menu",
+    "actualOutcome": "account menu inspected",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "super-admin:support-button:1440",
+    "expectedOutcome": "opens support widget",
+    "actualOutcome": "support control responded",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "super-admin:navigation-toggle:1440",
+    "expectedOutcome": "first-level navigation toggle is available",
+    "actualOutcome": {},
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "super-admin:notification:390",
+    "expectedOutcome": "opens notifications without error",
+    "actualOutcome": "notification control responded",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "super-admin:user-menu-button:390",
+    "expectedOutcome": "opens account menu",
+    "actualOutcome": "account menu inspected",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "super-admin:support-button:390",
+    "expectedOutcome": "opens support widget",
+    "actualOutcome": "support control responded",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "super-admin:navigation-toggle:390",
+    "expectedOutcome": "first-level navigation toggle is available",
+    "actualOutcome": {},
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-user:notification:1440",
+    "expectedOutcome": "opens notifications without error",
+    "actualOutcome": "notification control responded",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-user:user-menu-button:1440",
+    "expectedOutcome": "opens account menu",
+    "actualOutcome": "account menu inspected",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-user:support-button:1440",
+    "expectedOutcome": "opens support widget",
+    "actualOutcome": "support control responded",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-user:navigation-toggle:1440",
+    "expectedOutcome": "first-level navigation toggle is available",
+    "actualOutcome": {},
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-user:notification:390",
+    "expectedOutcome": "opens notifications without error",
+    "actualOutcome": "notification control responded",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-user:user-menu-button:390",
+    "expectedOutcome": "opens account menu",
+    "actualOutcome": "account menu inspected",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-user:support-button:390",
+    "expectedOutcome": "opens support widget",
+    "actualOutcome": "support control responded",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-user:navigation-toggle:390",
+    "expectedOutcome": "first-level navigation toggle is available",
+    "actualOutcome": {},
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-admin:notification:1440",
+    "expectedOutcome": "opens notifications without error",
+    "actualOutcome": "notification control responded",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-admin:user-menu-button:1440",
+    "expectedOutcome": "opens account menu",
+    "actualOutcome": "account menu inspected",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-admin:support-button:1440",
+    "expectedOutcome": "opens support widget",
+    "actualOutcome": "support control responded",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-admin:navigation-toggle:1440",
+    "expectedOutcome": "first-level navigation toggle is available",
+    "actualOutcome": {},
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-admin:notification:390",
+    "expectedOutcome": "opens notifications without error",
+    "actualOutcome": "notification control responded",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-admin:user-menu-button:390",
+    "expectedOutcome": "opens account menu",
+    "actualOutcome": "account menu inspected",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-admin:support-button:390",
+    "expectedOutcome": "opens support widget",
+    "actualOutcome": "support control responded",
+    "passed": true
+  },
+  {
+    "appId": "course",
+    "entryId": "app-admin:navigation-toggle:390",
+    "expectedOutcome": "first-level navigation toggle is available",
+    "actualOutcome": {},
+    "passed": true
+  }
+]
