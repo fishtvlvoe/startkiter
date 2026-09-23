@@ -25,6 +25,14 @@ export interface MountMenuItem {
 	subItems?: MountMenuSubItem[];
 }
 
+export interface MountMenuNavigationInput {
+	pathname: string;
+	platformAdmin: boolean;
+	canAccessPagesCms?: boolean;
+	labelForKey?: (key: string) => string;
+	workspaceRole?: WorkspaceRole;
+}
+
 export interface TabBarOverflowItem {
 	label: string;
 	href: string;
@@ -84,19 +92,12 @@ function getAppRoleForPath(
 	};
 }
 
-export function getMountMenuItems({
+function resolveMountNavigation({
 	pathname,
 	platformAdmin,
 	canAccessPagesCms = false,
-	labelForKey = (key: string) => key,
 	workspaceRole,
-}: {
-	pathname: string;
-	platformAdmin: boolean;
-	canAccessPagesCms?: boolean;
-	labelForKey?: (key: string) => string;
-	workspaceRole?: WorkspaceRole;
-}): MountMenuItem[] {
+}: MountMenuNavigationInput) {
 	const apps = toAppManifestEntries(MOUNT_POINTS).filter(
 		(entry) => canAccessPagesCms || entry.id !== "pages-cms",
 	);
@@ -128,6 +129,19 @@ export function getMountMenuItems({
 		apps,
 	});
 
+	return { apps, model, isPagesCmsOnly };
+}
+
+export function getMountWorkspaceLabel(input: MountMenuNavigationInput): string {
+	return resolveMountNavigation(input).model.workspaceLabel;
+}
+
+export function getMountMenuItems({
+	labelForKey = (key: string) => key,
+	...input
+}: MountMenuNavigationInput): MountMenuItem[] {
+	const { apps, model, isPagesCmsOnly } = resolveMountNavigation(input);
+
 	const entriesById = new Map(apps.map((entry) => [entry.id, entry]));
 	const allHrefs = model.items.flatMap((item) => [item.href, ...item.children.map((child) => child.href)]);
 
@@ -139,8 +153,8 @@ export function getMountMenuItems({
 			href: child.href,
 		}));
 		const isActive =
-			isMenuActive(pathname, item.href, allHrefs) ||
-			children.some((child) => isMenuActive(pathname, child.href, allHrefs));
+			isMenuActive(input.pathname, item.href, allHrefs) ||
+			children.some((child) => isMenuActive(input.pathname, child.href, allHrefs));
 		const entry = entriesById.get(item.id);
 
 		return {
