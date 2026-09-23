@@ -31,6 +31,15 @@ description: 引導 StartKiter 買家依照模組慣例，用 AI 新增一個功
 
 在模組目錄跑 `pnpm type-check` 與 `pnpm test`，再回到倉庫根目錄跑整體測試。AI 必須貼出實際結果；只說「應該可以」不算完成。若是 UI，再用真實瀏覽器把相關頁面、表單、跳轉點過一次。
 
+## 新增 App
+
+新增 App 先查 `packages/` 是否已有可重用的 App 或相近功能，避免重複造一個新的。接著依 [App registration spec](../../../openspec/changes/app-extension-contract/specs/app-extension-contract/spec.md) 填齊 `AppRegistrationManifest`；欄位定義與驗證規則以該規格為唯一來源，本段不複製第二份欄位清單。
+
+- `icon` 必須同時提供 `light` 與 `dark` 版本。
+- `supportedLocales` 至少涵蓋 `zh-tw`、`zh-cn`、`en` 三份語系 key。
+- 補齊 `tests.unit` 與 `tests.browser`，合併前跑過兩者。
+- 使用者可見文案與說明文件不得放入 `manifest`、`resolver`、`registry`、`workspace context` 等開發者詞彙。
+
 ## 情境範例：我想加一個電子報訂閱功能
 
 你可以直接對 AI 說：

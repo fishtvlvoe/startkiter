@@ -7,7 +7,7 @@
 
 - [x] 1.1 [P] 讓「A new App registers through a typed manifest validated at CI time」在缺 `displayName`、`route.basePath`、icon 版本、語系 key，以及 `appId`／route 衝突時失敗；先建立 manifest validation test，列出每種缺失欄位的預期錯誤訊息。
 - [x] 1.2 [P] 讓「displayName is owned by the App's own admin and blocks reserved words」在非 app-admin 嘗試修改、保留字「總管理員」「使用者」、空白字串時失敗；先建立 displayName 更新 test。
-- [ ] 1.3 [P] 讓「Developer-only vocabulary is excluded from learner-facing text」在使用者可見文案出現 `manifest`／`resolver`／`registry`／`workspace context` 時失敗，在程式碼註解與 Skill 檔案出現時不失敗；先建立 forbidden-term scan script 與 fixture。
+- [x] 1.3 [P] 讓「Developer-only vocabulary is excluded from learner-facing text」在使用者可見文案出現 `manifest`／`resolver`／`registry`／`workspace context` 時失敗，在程式碼註解與 Skill 檔案出現時不失敗；先建立 forbidden-term scan script 與 fixture。
 
 ## 2. 建立 App registration 核心
 
@@ -18,9 +18,9 @@
 
 ## 3. 把 Skill 與詞彙隔離規則落地
 
-- [ ] 3.1 依「The startkiter-dev Skill guides new App registration from the repository」（設計決策「The startkiter-dev Skill is the single App-authoring entrypoint; enforcement stays in code」）更新 `.agents/skills/startkiter-dev/SKILL.md`，加入「新增 App」段落（查重用、填 manifest、補 icon／語系、補測試）；完成後 Skill 不含第二份欄位清單，並以 Skill content check 驗證。
-- [ ] 3.2 依「Developer-only vocabulary is excluded from learner-facing text」實作 forbidden-term static check，掃描 `apps/saas/modules/**` 與 `docs/tutorials/**`，排除 `.agents/skills/` 與程式碼註解；完成後掃描能正確分辨兩種情境，並以 1.3 測試驗證。
-- [ ] 3.3 更新 `AGENTS.md` 指向本 change 的 canonical spec，說明 App registration 是新增 App 的固定入口；完成後新開發者能從 repo 找到規則，並以 link check 驗證。
+- [x] 3.1 依「The startkiter-dev Skill guides new App registration from the repository」（設計決策「The startkiter-dev Skill is the single App-authoring entrypoint; enforcement stays in code」）更新 `.agents/skills/startkiter-dev/SKILL.md`，加入「新增 App」段落（查重用、填 manifest、補 icon／語系、補測試）；完成後 Skill 不含第二份欄位清單，並以 Skill content check 驗證。
+- [x] 3.2 依「Developer-only vocabulary is excluded from learner-facing text」實作 forbidden-term static check，掃描 `apps/saas/modules/**` 與 `docs/tutorials/**`，排除 `.agents/skills/` 與程式碼註解；完成後掃描能正確分辨兩種情境，並以 1.3 測試驗證。
+- [x] 3.3 更新 `AGENTS.md` 指向本 change 的 canonical spec，說明 App registration 是新增 App 的固定入口；完成後新開發者能從 repo 找到規則，並以 link check 驗證。
 
 ## 4. 示範與驗收
 

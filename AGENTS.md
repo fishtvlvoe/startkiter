@@ -143,3 +143,7 @@ Rules:
 - The workspace-level project index is `/Users/fishtv/Development/graphify-projects.json`.
 - Maintained by `/Users/fishtv/Development/batch-graphify.sh` for `B-產品/products/startkiter`.
 <!-- graphify:auto:end -->
+
+## App 擴充註冊契約
+
+新增 App 固定走 `AppRegistrationManifest` 註冊契約，不直接繞過平台註冊入口。完整欄位、驗證規則與新增流程以 [app-extension-contract canonical spec](openspec/changes/app-extension-contract/specs/app-extension-contract/spec.md) 為準；實作前先查可重用 App，完成註冊資料與測試參照。
