@@ -29,6 +29,6 @@
 
 ## 5. Review、風險與交付
 
-- [ ] 5.1 依「Scope boundaries」檢查 diff 只涉及 App registration manifest、`displayName` 規則、Skill 段落與詞彙掃描，不觸碰 `WorkspaceContext`／resolver 邏輯本身或任何一個實際 App 的功能實作；完成後以 `git diff --stat` 與檔案清單 review 驗證。
-- [ ] 5.2 依「Risks / Trade-offs」逐項確認 `displayName` 即時性、CI 規則擴充相容性與詞彙掃描誤傷風險都有對應 mitigation；完成後以 code review checklist 記錄證據。
-- [ ] 5.3 完成 self-review、`spectra analyze app-extension-contract` 與 `spectra validate app-extension-contract`；完成後 analyzer 無未處理 warning、validation exit 0，並附上測試輸出。
+- [x] 5.1 依「Scope boundaries」檢查 diff 只涉及 App registration manifest、`displayName` 規則、Skill 段落與詞彙掃描，不觸碰 `WorkspaceContext`／resolver 邏輯本身或任何一個實際 App 的功能實作；完成後以 `git diff --stat` 與檔案清單 review 驗證。
+- [x] 5.2 依「Risks / Trade-offs」逐項確認 `displayName` 即時性、CI 規則擴充相容性與詞彙掃描誤傷風險都有對應 mitigation；完成後以 code review checklist 記錄證據。
+- [x] 5.3 完成 self-review、`spectra analyze app-extension-contract` 與 `spectra validate app-extension-contract`；完成後 analyzer 無未處理 warning、validation exit 0，並附上測試輸出。

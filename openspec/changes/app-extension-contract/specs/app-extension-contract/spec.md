@@ -69,14 +69,26 @@ The repository SHALL extend the existing `.agents/skills/startkiter-dev/SKILL.md
 - **WHEN** a developer asks the supported development workflow to add a new App
 - **THEN** the startkiter-dev Skill directs the workflow to check reusable Apps, complete the registration manifest fields, and identify unit and browser checks before implementation
 
+##### Example: new App checklist
+
+- **GIVEN** `packages/` has no reusable App for `design`
+- **WHEN** the developer follows the `新增 App` section of `startkiter-dev`
+- **THEN** the workflow opens the canonical spec, requires `light` and `dark` icons, requires `zh-tw`, `zh-cn`, and `en`, and records both `tests.unit` and `tests.browser`
+
 #### Scenario: unsupported Skill discovery does not weaken enforcement
 
 - **WHEN** an AI tool does not automatically discover repo-local Skills
 - **THEN** the CI-enforced manifest validation still blocks an incomplete App registration regardless of whether the Skill was read
 
+##### Example: CI blocks unread Skill
+
+- **GIVEN** an AI submits a `design` manifest without `displayName` and does not read `.agents/skills/startkiter-dev/SKILL.md`
+- **WHEN** `pnpm --filter @startkiter/platform validate:app-registry` runs in CI
+- **THEN** validation fails and lists `displayName` as missing
+
 ### Requirement: Developer-only vocabulary is excluded from learner-facing text
 
-Terms `manifest`, `resolver`, `registry`, and `workspace context` MUST NOT appear in user-visible UI copy, `docs/tutorials/`, or marketing/help documentation. These terms MAY appear in `.agents/skills/`, `openspec/`, source code, and code comments.
+Terms `manifest`, `resolver`, `registry`, and `workspace context` MUST NOT appear in user-visible UI copy, `docs/tutorials/`, or marketing/help documentation. These terms SHALL be allowed in `.agents/skills/`, `openspec/`, source code, and code comments.
 
 #### Scenario: forbidden developer term in UI copy is rejected
 
