@@ -1,9 +1,45 @@
 import { describe, expect, it } from "vitest";
 
 import { MOUNT_POINTS } from "../mount-points";
+import { updateAppDisplayName, type AppRegistrationManifest } from "../app-registration";
 import { resolveNavigation } from "./navigation";
 import { toAppManifestEntries } from "./registry";
 import type { PluginManifest } from "../types";
+
+const designRegistration: AppRegistrationManifest = {
+	appId: "design",
+	displayName: "設計",
+	route: { basePath: "/design" },
+	menu: {
+		labelKey: "design.navLabel",
+		icon: { light: "image", dark: "image" },
+	},
+	eligibility: { userRole: "app-user", grantedBy: "self-serve" },
+	i18nNamespace: "design",
+	supportedLocales: ["zh-tw", "zh-cn", "en"],
+	tests: {
+		unit: ["packages/platform/src/workspace/registry.test.ts"],
+		browser: ["tests/design.browser.ts"],
+	},
+};
+
+const designMountPoint: PluginManifest = {
+	id: "design",
+	name: "設計模組",
+	version: "0.1.0",
+	app: {
+		appId: "design",
+		scope: "app",
+		displayName: "設計",
+		displayNameKey: "design.navLabel",
+		requiredRole: "app-user",
+	},
+	mount: {
+		route: { path: "/design" },
+		menu: { labelKey: "design.navLabel", icon: "image", order: 1 },
+	},
+	dataSpec: "none",
+};
 
 describe("App registry adapter", () => {
 	it("converts one plugin manifest without creating a second menu literal", () => {
@@ -63,5 +99,35 @@ describe("App registry adapter", () => {
 			"media-library",
 			"course-pack-admin",
 		]);
+	});
+
+	it("uses the updated App displayName on the next navigation resolve", () => {
+		const registry = [structuredClone(designRegistration)];
+		const capabilities = {
+			userId: "user-1",
+			platformAdmin: false,
+			appRoles: { design: "app-admin" as const },
+		};
+
+		const beforeUpdate = resolveNavigation({
+			pathname: "/design",
+			capabilities,
+			apps: toAppManifestEntries([designMountPoint], registry),
+		});
+		expect(beforeUpdate.workspaceLabel).toBe("設計管理員");
+
+		const update = updateAppDisplayName(registry, {
+			appId: "design",
+			displayName: "圖片設計",
+			actor: { appId: "design", role: "app-admin" },
+		});
+		expect(update.updated).toBe(true);
+
+		const afterUpdate = resolveNavigation({
+			pathname: "/design",
+			capabilities,
+			apps: toAppManifestEntries([designMountPoint], registry),
+		});
+		expect(afterUpdate.workspaceLabel).toBe("圖片設計管理員");
 	});
 });

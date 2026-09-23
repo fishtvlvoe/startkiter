@@ -1,4 +1,5 @@
 import { MOUNT_POINTS } from "../mount-points";
+import { APP_REGISTRY, type AppRegistrationManifest } from "../app-registration";
 import type { PluginManifest } from "../types";
 import type { AppManifestEntry } from "./navigation";
 
@@ -17,7 +18,10 @@ function getPluginContext(plugin: PluginManifest): NonNullable<PluginManifest["a
 	};
 }
 
-export function toAppManifestEntries(mountPoints: PluginManifest[] = MOUNT_POINTS): AppManifestEntry[] {
+export function toAppManifestEntries(
+	mountPoints: PluginManifest[] = MOUNT_POINTS,
+	appRegistry: AppRegistrationManifest[] = APP_REGISTRY,
+): AppManifestEntry[] {
 	return mountPoints.flatMap((plugin) => {
 		const menu = plugin.mount.menu;
 		const route = plugin.mount.route;
@@ -30,6 +34,7 @@ export function toAppManifestEntries(mountPoints: PluginManifest[] = MOUNT_POINT
 		}
 
 		const context = getPluginContext(plugin);
+		const registeredApp = appRegistry.find((entry) => entry.appId === context.appId);
 		const parentId =
 			menu.parentId ??
 			(context.scope === "app" && menu.groupId && menu.groupId !== plugin.id ? menu.groupId : undefined);
@@ -39,7 +44,7 @@ export function toAppManifestEntries(mountPoints: PluginManifest[] = MOUNT_POINT
 				id: plugin.id,
 				appId: context.appId,
 				scope: context.scope,
-				displayName: context.displayName,
+				displayName: registeredApp?.displayName ?? context.displayName,
 				displayNameKey: context.displayNameKey,
 				route,
 				menu: {

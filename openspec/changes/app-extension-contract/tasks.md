@@ -13,8 +13,8 @@
 
 - [x] 2.1 依「A new App registers through a typed manifest validated at CI time」實作 `AppRegistrationManifest` 型別與 `registerApp` 驗證函式；完成後缺欄位或衝突的 App 無法進入 registry，並以 1.1 測試驗證。
 - [x] 2.2 依「displayName is owned by the App's own admin and blocks reserved words」實作 `displayName` 更新 API，綁定既有 `app-admin` 權限檢查；完成後只有該 App 的 app-admin 能改名，且保留字被擋下，並以 1.2 測試驗證。
-- [ ] 2.3 依「Observable behavior」確認 `displayName` 更新後，navigation model 重新 resolve 立即反映新名稱，不需要重新部署；完成後以 fixture 測試模擬修改前後兩次 resolve 比對驗證。
-- [ ] 2.4 依「Interface and data shape」與「Failure behavior」接上 CI，讓任何新增或修改 App registry 的 PR 跑 `registerApp` 驗證；完成後 CI 會在缺欄位時擋下合併，並以 CI 設定檔與一次刻意失敗的 PR fixture 驗證。
+- [x] 2.3 依「Observable behavior」確認 `displayName` 更新後，navigation model 重新 resolve 立即反映新名稱，不需要重新部署；完成後以 fixture 測試模擬修改前後兩次 resolve 比對驗證。
+- [x] 2.4 依「Interface and data shape」與「Failure behavior」接上 CI，讓任何新增或修改 App registry 的 PR 跑 `registerApp` 驗證；完成後 CI 會在缺欄位時擋下合併，並以 CI 設定檔與一次刻意失敗的 PR fixture 驗證。
 
 ## 3. 把 Skill 與詞彙隔離規則落地
 

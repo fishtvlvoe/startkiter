@@ -30,6 +30,17 @@ export type AppRegistrationResult = {
 	errors: string[];
 };
 
+export type AppRegistryValidationFailure = {
+	index: number;
+	missing: string[];
+	conflicts: string[];
+};
+
+export type AppRegistryValidationResult = {
+	valid: boolean;
+	failures: AppRegistryValidationFailure[];
+};
+
 export type DisplayNameActor = {
 	appId: string;
 	role: "app-user" | "app-admin";
@@ -179,6 +190,20 @@ export function registerApp(
 
 	registry.push(manifest);
 	return { registered: true, missing: [], conflicts: [], errors: [] };
+}
+
+export function validateAppRegistry(entries: readonly unknown[]): AppRegistryValidationResult {
+	const validatedRegistry: AppRegistrationManifest[] = [];
+	const failures: AppRegistryValidationFailure[] = [];
+
+	entries.forEach((entry, index) => {
+		const result = registerApp(entry, validatedRegistry);
+		if (!result.registered) {
+			failures.push({ index, missing: result.missing, conflicts: result.conflicts });
+		}
+	});
+
+	return { valid: failures.length === 0, failures };
 }
 
 function validateDisplayName(displayName: string): string[] {
