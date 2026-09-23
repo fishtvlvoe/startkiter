@@ -138,6 +138,8 @@
       "colorMode": "Color mode",
       "documentation": "Documentation",
       "home": "Home",
+      "learningCenter": "My learning center",
+      "subscription": "My subscription",
       "logout": "Logout"
     },
     "notifications": {

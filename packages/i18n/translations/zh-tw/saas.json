@@ -138,6 +138,8 @@
       "colorMode": "顯示模式",
       "documentation": "文件",
       "home": "首頁",
+      "learningCenter": "我的學習中心",
+      "subscription": "我的訂閱",
       "logout": "登出"
     },
     "notifications": {
