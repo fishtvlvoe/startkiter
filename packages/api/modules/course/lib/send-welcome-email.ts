@@ -19,9 +19,17 @@ function safeTemplateValue(value: string): string {
 	return value.replaceAll("\\", "\\\\").replace(/[\[\]()*_`#<>]/g, "\\$&");
 }
 
-function interpolateTemplate(source: string, values: Record<TemplateVariable, string>): string {
+function interpolateTemplate(
+	source: string,
+	values: Record<TemplateVariable, string>,
+	mode: "markdown" | "plainText" = "markdown",
+): string {
 	return TEMPLATE_VARIABLES.reduce(
-		(result, variable) => result.replaceAll(`{{${variable}}}`, safeTemplateValue(values[variable])),
+		(result, variable) =>
+			result.replaceAll(
+				`{{${variable}}}`,
+				mode === "plainText" ? values[variable] : safeTemplateValue(values[variable]),
+			),
 		source,
 	);
 }
@@ -103,7 +111,7 @@ export async function sendWelcomeEmail(input: {
 			courseName: course.title,
 			courseUrl: `${baseUrl()}/course/${encodeURIComponent(course.slug)}`,
 		} satisfies Record<TemplateVariable, string>;
-		const subject = safeSubject(interpolateTemplate(setting.subjectTemplate, values));
+		const subject = safeSubject(interpolateTemplate(setting.subjectTemplate, values, "plainText"));
 		const rendered = setting.contentJson
 			? await renderCourseWelcomeEmail({
 					userName: values.userName,
