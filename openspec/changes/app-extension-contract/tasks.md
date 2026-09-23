@@ -24,8 +24,8 @@
 
 ## 4. 示範與驗收
 
-- [ ] 4.1 依「Acceptance criteria」以一個假設的 `design` App fixture 走過整套 `AppRegistrationManifest`，不實作真實功能畫面；完成後確認 CI 能正確通過完整案例、擋下刻意缺欄位的案例，並以測試輸出附上兩種結果證據。
-- [ ] 4.2 回歸驗證既有 course App：套用本 change 的 registry 格式後，course 的選單、稱呼與既有測試仍全數通過；完成後以既有測試套件重跑結果驗證。
+- [x] 4.1 依「Acceptance criteria」以一個假設的 `design` App fixture 走過整套 `AppRegistrationManifest`，不實作真實功能畫面；完成後確認 CI 能正確通過完整案例、擋下刻意缺欄位的案例，並以測試輸出附上兩種結果證據。
+- [x] 4.2 回歸驗證既有 course App：套用本 change 的 registry 格式後，course 的選單、稱呼與既有測試仍全數通過；完成後以既有測試套件重跑結果驗證。
 
 ## 5. Review、風險與交付
 
