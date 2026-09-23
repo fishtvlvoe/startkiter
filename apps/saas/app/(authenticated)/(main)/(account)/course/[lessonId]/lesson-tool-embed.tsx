@@ -14,9 +14,9 @@ export function LessonToolEmbed({
 	const heading = title.trim() || "課程工具";
 
 	return (
-		<section className="space-y-3 rounded-lg border border-neutral-800 bg-neutral-900/40 p-5">
+		<section className="space-y-3 rounded-lg border border-divider bg-surface/40 p-5">
 			<div className="flex items-center justify-between gap-3">
-				<h2 className="text-base font-bold text-neutral-100">{heading}</h2>
+				<h2 className="text-base font-bold text-heading">{heading}</h2>
 				<a
 					href={embedHref}
 					target="_blank"

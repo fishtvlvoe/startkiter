@@ -695,6 +695,10 @@
   },
   "course": {
     "navLabel": "课程",
+    "dashboard": "课程仪表板",
+    "comments": "课程留言",
+    "messages": "学员私信",
+    "coupons": "课程优惠券",
     "quiz": "测验管理",
     "assignment": "作业管理",
     "review": "评价与留言管理",

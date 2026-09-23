@@ -13,6 +13,7 @@ export const listUsers = adminProcedure
 	.input(
 		z.object({
 			query: z.string().optional(),
+			role: z.enum(["all", "student", "instructor", "admin"]).default("all"),
 			limit: z.number().min(1).max(100).default(10),
 			offset: z.number().min(0).default(0),
 		}),
@@ -23,14 +24,15 @@ export const listUsers = adminProcedure
 			total: z.number().int().nonnegative(),
 		}),
 	)
-	.handler(async ({ input: { query, limit, offset } }) => {
+	.handler(async ({ input: { query, role, limit, offset } }) => {
 		const users = await getUsers({
 			limit,
 			offset,
 			query,
+			role,
 		});
 
-		const total = await countAllUsers({ query });
+		const total = await countAllUsers({ query, role });
 
 		return { users, total };
 	});

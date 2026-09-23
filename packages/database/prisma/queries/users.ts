@@ -3,18 +3,36 @@ import type { z } from "zod";
 import { db } from "../client";
 import type { UserSchema } from "../zod";
 
+type UserRoleFilter = "all" | "student" | "instructor" | "admin";
+
+function roleFilter(role: UserRoleFilter) {
+	if (role === "admin") return { role: "admin" };
+	if (role === "instructor") {
+		return { OR: [{ role: "instructor" }, { courseInstructorAssignments: { some: {} } }] };
+	}
+	if (role === "student") {
+		return { role: { notIn: ["admin", "instructor"] }, courseInstructorAssignments: { none: {} } };
+	}
+	return {};
+}
+
 export async function getUsers({
 	limit,
 	offset,
 	query,
+	role,
 }: {
 	limit: number;
 	offset: number;
 	query?: string;
+	role?: UserRoleFilter;
 }) {
+	const selectedRoleFilter = roleFilter(role ?? "all");
 	return await db.user.findMany({
-		where: query
-			? {
+		where: {
+			...selectedRoleFilter,
+			...(query
+				? {
 					OR: [
 						{
 							name: {
@@ -30,16 +48,20 @@ export async function getUsers({
 						},
 					],
 				}
-			: undefined,
+				: {}),
+		},
 		take: limit,
 		skip: offset,
 	});
 }
 
-export async function countAllUsers({ query }: { query?: string }) {
+export async function countAllUsers({ query, role }: { query?: string; role?: UserRoleFilter }) {
+	const selectedRoleFilter = roleFilter(role ?? "all");
 	return await db.user.count({
-		where: query
-			? {
+		where: {
+			...selectedRoleFilter,
+			...(query
+				? {
 					OR: [
 						{
 							name: {
@@ -55,7 +77,8 @@ export async function countAllUsers({ query }: { query?: string }) {
 						},
 					],
 				}
-			: undefined,
+				: {}),
+		},
 	});
 }
 

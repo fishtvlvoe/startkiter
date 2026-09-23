@@ -695,6 +695,10 @@
   },
   "course": {
     "navLabel": "Course",
+    "dashboard": "Course dashboard",
+    "comments": "Course comments",
+    "messages": "Learner messages",
+    "coupons": "Course coupons",
     "quiz": "Quiz management",
     "assignment": "Assignment management",
     "review": "Reviews and comments",

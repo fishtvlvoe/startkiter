@@ -10,10 +10,13 @@ vi.mock("@startkiter/auth", () => ({
 vi.mock("@startkiter/database", () => ({
 	db: {
 		$transaction: databaseTransaction,
+		user: { findUnique: vi.fn() },
+		courseInstructor: { findUnique: vi.fn() },
 		lesson: { findUnique: vi.fn() },
 		lessonPrivateMessage: {
 			create: vi.fn(),
 			findFirst: vi.fn(),
+			findUnique: vi.fn(),
 			findMany: vi.fn(),
 			updateMany: vi.fn(),
 		},
@@ -59,6 +62,8 @@ describe("course lesson private messages", () => {
 		process.env.S3_ACCESS_KEY_ID = "test-access-key";
 		process.env.S3_SECRET_ACCESS_KEY = "test-secret-key";
 		vi.mocked(auth.api.getSession).mockResolvedValue(learnerSession as never);
+		vi.mocked(db.user.findUnique).mockResolvedValue({ email: "operator@example.com", role: "user" } as never);
+		vi.mocked(db.courseInstructor.findUnique).mockResolvedValue({ id: "assignment-1" } as never);
 		vi.mocked(db.lesson.findUnique).mockResolvedValue({
 			status: "PUBLISHED",
 			isFreePreview: true,
@@ -72,6 +77,9 @@ describe("course lesson private messages", () => {
 			content: "請問這段怎麼做？",
 			isFromTeacher: false,
 			readByTeacher: false,
+		} as never);
+		vi.mocked(db.lessonPrivateMessage.findUnique).mockResolvedValue({
+			lesson: { chapter: { courseId: "course-1" } },
 		} as never);
 		vi.mocked(db.lessonMessageUploadIntent.findMany).mockResolvedValue([] as never);
 		vi.mocked(db.lessonMessageUploadIntent.create).mockResolvedValue({ id: "intent-1" } as never);

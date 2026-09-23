@@ -5,7 +5,7 @@ import { isOperator, type OperatorSession } from "@startkiter/permissions";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { COURSE_STUDIO_ERROR_CODES } from "@startkiter/api/modules/course/errors";
-import { canManageCourse } from "@startkiter/api/modules/course/lib/course-instructor-access";
+import { canManageCourse, manageableCourseWhereForUser } from "@startkiter/api/modules/course/lib/course-instructor-access";
 import { updateLesson } from "@startkiter/api/modules/course/lib/update-lesson";
 
 type StudioAccess = {
@@ -50,10 +50,11 @@ export async function GET(request: Request) {
 		return NextResponse.json({ error: COURSE_STUDIO_ERROR_CODES.UNAUTHORIZED }, { status: 401 });
 	}
 	const { userId, isOperator } = status;
+	const manageableWhere = isOperator ? {} : await manageableCourseWhereForUser(userId);
 
 	const courses = await db.course.findMany({
 		orderBy: { createdAt: "desc" },
-		...(isOperator ? {} : { where: { instructors: { some: { userId } } } }),
+		where: manageableWhere,
 		include: {
 			watermarkSetting: true,
 			chapters: {

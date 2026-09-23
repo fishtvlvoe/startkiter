@@ -1,6 +1,7 @@
 "use client";
 
 import { useActiveOrganization } from "@organizations/hooks/use-active-organization";
+import { useSession } from "@auth/hooks/use-session";
 import { config as authConfig } from "@startkiter/auth/config";
 import { config as paymentsConfig } from "@startkiter/payments/config";
 import { resolveNavigation } from "@startkiter/platform/src/workspace/navigation";
@@ -704,6 +705,7 @@ export function NavBar() {
 	const pathname = usePathname();
 	const { check } = usePermissions();
 	const { activeOrganization } = useActiveOrganization();
+	const { user: currentUser } = useSession();
 	const { isCollapsed, toggleCollapsed } = useSidebar();
 	const isMobile = useIsMobile();
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -774,10 +776,11 @@ export function NavBar() {
 				pathname,
 				platformAdmin: canAccessAdmin,
 				canAccessPagesCms,
+				workspaceRole: currentUser?.role === "instructor" ? "app-user" : undefined,
 				labelForKey: t,
 				resolvedNavigation: navigation,
 			}),
-		[canAccessAdmin, canAccessPagesCms, navigation, pathname, t],
+		[canAccessAdmin, canAccessPagesCms, currentUser?.role, navigation, pathname, t],
 	);
 	const workspaceLabel = navigation.model.workspaceLabel;
 

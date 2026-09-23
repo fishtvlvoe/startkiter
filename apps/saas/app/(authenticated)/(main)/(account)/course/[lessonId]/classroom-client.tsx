@@ -267,7 +267,7 @@ export function AcademyClassroomClient({
 				<div className="flex flex-1 flex-col overflow-y-auto">
 					<div className="mx-auto w-full max-w-4xl p-6 space-y-6">
 						<Card className="overflow-hidden border-border bg-black p-0 shadow-2xl">
-							<div className="relative aspect-video w-full bg-neutral-900">
+							<div className="relative aspect-video w-full bg-surface">
 								<FluentPlayer
 									title={currentLesson.title}
 									watchKey={currentLesson.id}

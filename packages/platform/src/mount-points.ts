@@ -86,6 +86,50 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		dataSpec: "none",
 	},
 	{
+		id: "course-dashboard",
+		name: "課程儀表板",
+		version: "0.1.0",
+		app: COURSE_ADMIN_APP,
+		mount: {
+			route: { path: "/admin/course/dashboard" },
+			menu: { labelKey: "course.dashboard", icon: "home", order: 10, requiresOperator: true, groupId: "course-admin" },
+		},
+		dataSpec: "none",
+	},
+	{
+		id: "course-comments",
+		name: "課程留言",
+		version: "0.1.0",
+		app: COURSE_ADMIN_APP,
+		mount: {
+			route: { path: "/admin/course/comments" },
+			menu: { labelKey: "course.comments", icon: "message-square", order: 41, requiresOperator: true, groupId: "course-admin" },
+		},
+		dataSpec: "none",
+	},
+	{
+		id: "course-messages",
+		name: "學員私訊",
+		version: "0.1.0",
+		app: COURSE_ADMIN_APP,
+		mount: {
+			route: { path: "/admin/course/messages" },
+			menu: { labelKey: "course.messages", icon: "mail", order: 42, requiresOperator: true, groupId: "course-admin" },
+		},
+		dataSpec: "none",
+	},
+	{
+		id: "course-coupons",
+		name: "課程優惠券",
+		version: "0.1.0",
+		app: COURSE_ADMIN_APP,
+		mount: {
+			route: { path: "/admin/course/coupons" },
+			menu: { labelKey: "course.coupons", icon: "package", order: 43, requiresOperator: true, groupId: "course-admin" },
+		},
+		dataSpec: "none",
+	},
+	{
 		id: "quiz",
 		name: "課後測驗",
 		version: "0.1.0",

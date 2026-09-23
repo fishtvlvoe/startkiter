@@ -690,6 +690,12 @@
       "specialCharacter": "Caractère spécial"
     }
   },
+  "course": {
+    "dashboard": "Tableau de bord du cours",
+    "comments": "Commentaires du cours",
+    "messages": "Messages des apprenants",
+    "coupons": "Coupons du cours"
+  },
   "checkoutReturn": {
     "title": "Traitement de votre achat",
     "description": "Veuillez patienter pendant que nous confirmons votre paiement.",
