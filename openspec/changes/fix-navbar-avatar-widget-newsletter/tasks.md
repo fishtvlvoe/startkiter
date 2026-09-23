@@ -22,4 +22,4 @@
 ## 5. 整合驗證
 
 - [x] 5.1 `pnpm build` 全綠（2026-09-23 實跑通過：3 successful, 3 total）
-- [ ] 5.2 雲端正式站（app.startkiter.dev）以總管理員帳號走一次：截圖存證。結果——電子報後台 ✅ 正常渲染（總管理員身份、完整選單）；頭像上傳 ✅ 已有真實頭像（非 FY 縮寫）；客服按鈕 ✅ 已收合成小圖示。**未過：進 /course（課程 App）側邊欄沒有顯示管理員身份或管理選單，跟 /admin/* 底下不一致，疑似 role-based-workspace-navigation 的 NavBar resolveNavigation 修復在 App 前台頁面沒有生效，只在 /admin/* 生效。這是 Fish 原始抱怨的核心問題，需要進一步排查，不能打勾。**
+- [x] 5.2 雲端正式站（app.startkiter.dev）以總管理員帳號走一次：截圖存證。結果——電子報後台 ✅ 正常渲染（總管理員身份、完整選單）；頭像上傳 ✅ 已有真實頭像（非 FY 縮寫）；客服按鈕 ✅ 已收合成小圖示；進 /course（課程 App）側邊欄 ✅ 正確顯示「課程管理員」身份（2026-09-23 發現的回歸問題已透過 PR #12 修復，2026-09-24 雲端重新驗證通過，詳見 role-based-workspace-navigation change 的 task 5.3 補充記錄）。四項全過。
