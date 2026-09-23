@@ -47,6 +47,8 @@
 - [x] 5.2 依「Workspace skeleton changes have layered verification」與「Acceptance criteria」完成 manifest、resolver、label、component test 的可重複指令；完成後測試報告能分辨 contract failure 與 app failure，並以 focused test command 驗證。
 - [x] 5.3 **依賴 0.3 完成**（若 0.3 結論是「需建立新帳號」，本 task 在帳號建立前不得開始）。依「pure contract checks pass」與「a concrete workspace-boundary regression」example，以 ego-browser 在部署後驗收使用者、App 管理員、總管理員三種角色骨架，其中「使用者」（app-user）視角必須用 0.3 確認的真實非管理員帳號登入驗證，不得只憑型別或 mock capability 推定畫面正確；完成後逐一點擊可見入口且沒有 duplicate menu、越權入口或 forbidden noun，並保留桌面 `1440px` 與手機 `390px` 截圖證據。若真實非管理員帳號驗證尚未完成，明確標記「未驗證」，不得標記完成。
 
+	**2026-09-24 補充驗證與更正**：原本這項的驗收沒有涵蓋「總管理員在 App 前台路由（如 `/course`）是否顯示管理員身份」這個情境，只測了 `/admin/*` 底下。2026-09-23 用 fish@fishot.com 實測雲端 `/course`，發現側邊欄沒有任何身份標籤（應顯示「課程管理員」），跟 `/admin/newsletter` 底下正確顯示「總管理員」不一致，是真實回歸，不是設計如此。根因：`getMountNavigationContext` 把「目前路由是否需要 app-admin」跟「使用者的實際角色」混為一談，導致總管理員在使用者路由被降級成 app-user。已透過 PR #12（commit d15fbb8）修復並部署，2026-09-24 用 ego-browser 重新登入雲端正式站確認 `/course` 側邊欄正確顯示「課程管理員」。完整根因分析見 `evidence/task-5.3-course-admin-label-regression.md`。
+
 ## 6. Review、風險與交付
 
 - [x] 6.1 依「Scope boundaries」檢查 diff 只涉及 workspace 型別、resolver、NavBar／admin layout 骨架與 demo 對齊，不觸碰帳號選單內容、App 加入規則、各 App 功能畫面或跨 App 全量驗收；完成後以 `git diff --stat` 與檔案清單 review 驗證。
