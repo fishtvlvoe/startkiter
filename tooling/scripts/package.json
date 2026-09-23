@@ -5,6 +5,7 @@
 	"scripts": {
 		"clean": "git clean -xdf .cache .turbo dist node_modules",
 		"create:user": "dotenv -c -e ../../.env -- tsx ./src/create-user.ts",
+		"check:forbidden-terms": "tsx ./forbidden-term-scan.ts",
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
