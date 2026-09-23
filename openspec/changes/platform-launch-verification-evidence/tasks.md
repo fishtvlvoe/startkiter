@@ -5,11 +5,11 @@
 
 ## 1. 先建立報告產生器與失敗規則
 
-- [ ] 1.1 [P] 讓「The verification matrix covers every role, theme, locale, and device combination」與「Failure behavior」在矩陣缺格或格子為 `unverified` 時拒絕產出報告；先建立 `LaunchEvidenceReport` 產生器與矩陣完整性 test。
-- [ ] 1.2 [P] 讓「Every visible button and link has a recorded expected and actual outcome」在任一 `LinkVerification` 為 `passed: false` 時整體報告不得標記完成；先建立 link-check aggregation test。
-- [ ] 1.3 [P] 讓「Defined error scenarios are exercised and recorded」在三種錯誤情境缺任一筆實測結果時拒絕產出報告；先建立 error-scenario completeness test。
-- [ ] 1.4 [P] 讓「Rollback is rehearsed with a recorded execution, not only documented」在 `rollbackRehearsal` 為 `null` 時拒絕產出完成報告；先建立 rollback-record test。
-- [ ] 1.5 [P] 讓「Delivery evidence uses a fixed report format naming unresolved items」在 `unresolvedItems` 欄位缺失時拒絕產出報告，欄位存在但為空陣列時允許通過；先建立 schema completeness test。
+- [x] 1.1 [P] 讓「The verification matrix covers every role, theme, locale, and device combination」與「Failure behavior」在矩陣缺格或格子為 `unverified` 時拒絕產出報告；先建立 `LaunchEvidenceReport` 產生器與矩陣完整性 test。
+- [x] 1.2 [P] 讓「Every visible button and link has a recorded expected and actual outcome」在任一 `LinkVerification` 為 `passed: false` 時整體報告不得標記完成；先建立 link-check aggregation test。
+- [x] 1.3 [P] 讓「Defined error scenarios are exercised and recorded」在三種錯誤情境缺任一筆實測結果時拒絕產出報告；先建立 error-scenario completeness test。
+- [x] 1.4 [P] 讓「Rollback is rehearsed with a recorded execution, not only documented」在 `rollbackRehearsal` 為 `null` 時拒絕產出完成報告；先建立 rollback-record test。
+- [x] 1.5 [P] 讓「Delivery evidence uses a fixed report format naming unresolved items」在 `unresolvedItems` 欄位缺失時拒絕產出報告，欄位存在但為空陣列時允許通過；先建立 schema completeness test。
 
 ## 2. 執行驗收矩陣
 
