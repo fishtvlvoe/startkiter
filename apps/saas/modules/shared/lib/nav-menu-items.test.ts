@@ -54,6 +54,14 @@ describe("nav-menu-items (WorkspaceContext navigation model)", () => {
 		expect(items.find((item) => item.href === "/course")?.isActive).toBe(true);
 	});
 
+	it("platform admin keeps the App user menu on /course while resolving an App admin workspace", () => {
+		const items = getMountMenuItems({ pathname: "/course", platformAdmin: true, labelForKey });
+
+		expect(items.map((item) => item.label)).toEqual(["開始", "課程", "客服", "AI 助手", "帳號設定"]);
+		expect(collectMenuHrefs(items).some((href) => href.startsWith("/admin/"))).toBe(false);
+		expect(items.every((item) => item.requiresOperator !== true)).toBe(true);
+	});
+
 	it("course app-admin sees one parent and ordered children without duplicates", () => {
 		const items = getMountMenuItems({ pathname: "/admin/course", platformAdmin: false, labelForKey });
 		const course = items.find((item) => item.id === "course-admin");

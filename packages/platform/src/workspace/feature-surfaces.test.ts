@@ -28,7 +28,7 @@ function isWithinRouteTree(route: string, tree: string): boolean {
 }
 
 describe("App feature route surfaces", () => {
-	it("keeps the course user surface independent from the caller's admin role", () => {
+	it("labels the course user surface as App-admin for a platform admin without changing its menu", () => {
 		const model = resolveNavigation({
 			pathname: "/course",
 			capabilities: {
@@ -39,7 +39,8 @@ describe("App feature route surfaces", () => {
 			apps: toAppManifestEntries(MOUNT_POINTS),
 		});
 
-		expect(model.workspace).toEqual({ scope: "app", appId: "course", role: "app-user" });
+		expect(model.workspace).toEqual({ scope: "app", appId: "course", role: "app-admin" });
+		expect(model.workspaceLabel).toBe("課程管理員");
 		expect(model.items.map((item) => item.id)).toEqual([
 			"start",
 			"course",

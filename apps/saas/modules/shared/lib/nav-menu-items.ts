@@ -133,9 +133,7 @@ export function getMountNavigationContext({
 		resolutionPath,
 		capabilities: {
 			userId: "navigation",
-			platformAdmin: (platformAdmin || isPagesCmsOnly) && apps.some(
-				(entry) => entry.scope === "platform" && matchesRoute(resolutionPath, entry.route.path),
-			),
+			platformAdmin: platformAdmin || isPagesCmsOnly,
 			appRoles: appRole
 				? { [appRole.appId]: workspaceRole ?? appRole.role }
 				: {},
@@ -191,7 +189,7 @@ export function getMountMenuItems({
 			requiresOperator:
 				model.workspace.scope === "platform"
 					? entry?.scope === "platform"
-					: model.workspace.role === "app-admin",
+					: entry?.requiredRole === "app-admin",
 			subItems: children.length > 0 ? children : undefined,
 		};
 	});

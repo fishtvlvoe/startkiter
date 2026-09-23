@@ -240,6 +240,17 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 		resolveNavigationSpy.mockRestore();
 	});
 
+	it("總管理員在課程 App 前台路徑也顯示課程管理員身份", () => {
+		mockCanAccessAdmin = true;
+		mockPathname = "/course";
+		const html = renderToStaticMarkup(<NavBar />);
+
+		expect(html).toContain('data-testid="sidebar-workspace-label"');
+		expect(html).toContain("課程管理員");
+		expect(html).toContain("app.menu.start");
+		expect(html).not.toContain("course.dashboard");
+	});
+
 	it("shows 頁面管理 when canAccessPagesCmsAdmin is true even without admin.access", () => {
 		mockCanAccessAdmin = false;
 		mockPathname = "/admin/pages";

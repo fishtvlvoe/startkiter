@@ -177,10 +177,10 @@ export function resolveNavigation(input: {
 		}
 		workspace = { scope: "platform" };
 	} else {
-		// 路由樹決定畫面；總管理員可切換到 app-admin 路由，但不能把使用者路由變成管理畫面。
-		const role: WorkspaceRole = currentEntry.requiredRole === "app-admin"
-			? (input.capabilities.platformAdmin ? "app-admin" : (input.capabilities.appRoles[currentEntry.appId] ?? "app-user"))
-			: "app-user";
+		// 路由樹決定顯示哪一套入口；workspace label 仍反映使用者在這個 App 的實際角色。
+		const role: WorkspaceRole = input.capabilities.platformAdmin
+			? "app-admin"
+			: (input.capabilities.appRoles[currentEntry.appId] ?? "app-user");
 		workspace = { scope: "app", appId: currentEntry.appId, role };
 	}
 	validateWorkspaceContext(workspace, input.apps);
@@ -217,11 +217,12 @@ export function resolveNavigation(input: {
 		};
 	}
 
+	const menuRole: WorkspaceRole = currentEntry.requiredRole === "app-admin" ? workspace.role : "app-user";
 	const visibleEntries = entries.filter(
 		(entry) =>
 			entry.scope === "app" &&
 			entry.appId === workspace.appId &&
-			isRoleAllowed(entry.requiredRole, workspace.role),
+			isRoleAllowed(entry.requiredRole, menuRole),
 	);
 	const items = visibleEntries
 		.filter((entry) => !entry.menu?.parentId)
