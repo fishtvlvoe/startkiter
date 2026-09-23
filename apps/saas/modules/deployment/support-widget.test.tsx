@@ -44,8 +44,9 @@ describe("SupportWidget - 前端客服入口與部署選擇邏輯 (Tasks 7.1-7.4
 			const deployments: SupportDeployment[] = [];
 			const html = renderToStaticMarkup(<SupportWidget deployments={deployments} />);
 
-			// 斷言有浮動客服按鈕，但沒有多部署選擇對話框
+			// 斷言有浮動客服按鈕與收合控制，但沒有多部署選擇對話框
 			expect(html).toContain("開啟線上客服");
+			expect(html).toContain("收合客服按鈕");
 			expect(html).not.toContain("選擇要回報問題的網站部署");
 		});
 

@@ -3,7 +3,11 @@
 // 這個檔案被 "use client" 的 NavBar.tsx 引用，整包 barrel 進到 client bundle 會建置失敗
 // （pg 需要 Node 的 util/types，瀏覽器打包解析不到）。
 import { MOUNT_POINTS } from "@startkiter/platform/src/mount-points";
-import { resolveNavigation, type WorkspaceRole } from "@startkiter/platform/src/workspace/navigation";
+import {
+	resolveNavigation,
+	type NavigationCapabilities,
+	type WorkspaceRole,
+} from "@startkiter/platform/src/workspace/navigation";
 import { toAppManifestEntries } from "@startkiter/platform/src/workspace/registry";
 
 export interface MountMenuSubItem {
@@ -24,6 +28,23 @@ export interface MountMenuItem {
 	requiresOperator?: boolean;
 	subItems?: MountMenuSubItem[];
 }
+
+export interface MountMenuNavigationInput {
+	pathname: string;
+	platformAdmin: boolean;
+	canAccessPagesCms?: boolean;
+	labelForKey?: (key: string) => string;
+	workspaceRole?: WorkspaceRole;
+}
+
+export type MountNavigationContext = {
+	apps: ReturnType<typeof toAppManifestEntries>;
+	resolutionPath: string;
+	capabilities: NavigationCapabilities;
+	isPagesCmsOnly: boolean;
+};
+
+export type MountNavigationResolution = ReturnType<typeof resolveMountNavigation>;
 
 export interface TabBarOverflowItem {
 	label: string;
@@ -84,19 +105,12 @@ function getAppRoleForPath(
 	};
 }
 
-export function getMountMenuItems({
+export function getMountNavigationContext({
 	pathname,
 	platformAdmin,
 	canAccessPagesCms = false,
-	labelForKey = (key: string) => key,
 	workspaceRole,
-}: {
-	pathname: string;
-	platformAdmin: boolean;
-	canAccessPagesCms?: boolean;
-	labelForKey?: (key: string) => string;
-	workspaceRole?: WorkspaceRole;
-}): MountMenuItem[] {
+}: MountMenuNavigationInput): MountNavigationContext {
 	const apps = toAppManifestEntries(MOUNT_POINTS).filter(
 		(entry) => canAccessPagesCms || entry.id !== "pages-cms",
 	);
@@ -114,8 +128,9 @@ export function getMountMenuItems({
 		.sort((left, right) => right.route.path.length - left.route.path.length)
 		.find((entry) => matchesRoute(resolutionPath, entry.route.path));
 	const isPagesCmsOnly = currentEntry?.id === "pages-cms" && canAccessPagesCms && !platformAdmin;
-	const model = resolveNavigation({
-		pathname: resolutionPath,
+	return {
+		apps,
+		resolutionPath,
 		capabilities: {
 			userId: "navigation",
 			platformAdmin: (platformAdmin || isPagesCmsOnly) && apps.some(
@@ -125,8 +140,30 @@ export function getMountMenuItems({
 				? { [appRole.appId]: workspaceRole ?? appRole.role }
 				: {},
 		},
-		apps,
-	});
+		isPagesCmsOnly,
+	};
+}
+
+export function resolveMountNavigation(input: MountMenuNavigationInput) {
+	const context = getMountNavigationContext(input);
+	return {
+		...context,
+		model: resolveNavigation({
+			pathname: context.resolutionPath,
+			capabilities: context.capabilities,
+			apps: context.apps,
+		}),
+	};
+}
+
+export function getMountMenuItems({
+	labelForKey = (key: string) => key,
+	resolvedNavigation,
+	...input
+}: MountMenuNavigationInput & {
+	resolvedNavigation?: MountNavigationResolution;
+}): MountMenuItem[] {
+	const { apps, model, isPagesCmsOnly } = resolvedNavigation ?? resolveMountNavigation(input);
 
 	const entriesById = new Map(apps.map((entry) => [entry.id, entry]));
 	const allHrefs = model.items.flatMap((item) => [item.href, ...item.children.map((child) => child.href)]);
@@ -139,8 +176,8 @@ export function getMountMenuItems({
 			href: child.href,
 		}));
 		const isActive =
-			isMenuActive(pathname, item.href, allHrefs) ||
-			children.some((child) => isMenuActive(pathname, child.href, allHrefs));
+			isMenuActive(input.pathname, item.href, allHrefs) ||
+			children.some((child) => isMenuActive(input.pathname, child.href, allHrefs));
 		const entry = entriesById.get(item.id);
 
 		return {

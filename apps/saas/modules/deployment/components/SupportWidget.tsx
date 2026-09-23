@@ -9,8 +9,8 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@startkiter/ui/components/dialog";
-import { Headphones, MessageSquare, Globe } from "lucide-react";
-import React, { useState } from "react";
+import { ChevronDown, ChevronUp, Globe, Headphones, MessageSquare } from "lucide-react";
+import React, { useEffect, useState } from "react";
 
 import {
 	buildDeploymentSupportBody,
@@ -109,9 +109,29 @@ export interface SupportWidgetProps {
 	deployments?: SupportDeployment[];
 }
 
+export const SUPPORT_WIDGET_COLLAPSED_STORAGE_KEY = "startkiter.support-widget.collapsed";
+
 export function SupportWidget({ deployments = [] }: SupportWidgetProps) {
 	const [isOpen, setIsOpen] = useState(false);
+	const [isCollapsed, setIsCollapsed] = useState(false);
 	const [selectedId, setSelectedId] = useState<string | null>(null);
+
+	useEffect(() => {
+		try {
+			setIsCollapsed(window.localStorage.getItem(SUPPORT_WIDGET_COLLAPSED_STORAGE_KEY) === "true");
+		} catch {
+			// localStorage may be disabled; the widget remains usable for this session.
+		}
+	}, []);
+
+	const setCollapsed = (collapsed: boolean) => {
+		setIsCollapsed(collapsed);
+		try {
+			window.localStorage.setItem(SUPPORT_WIDGET_COLLAPSED_STORAGE_KEY, String(collapsed));
+		} catch {
+			// localStorage may be disabled; keep the in-memory state.
+		}
+	};
 
 	const handleOpenChat = () => {
 		openSupportChat({
@@ -137,15 +157,39 @@ export function SupportWidget({ deployments = [] }: SupportWidgetProps) {
 		<>
 			{/* 浮動客服按鈕 */}
 			<div className="fixed bottom-6 right-6 z-40">
-				<Button
-					type="button"
-					size="icon"
-					className="h-12 w-12 rounded-full shadow-lg hover:shadow-xl transition-all"
-					aria-label="開啟線上客服"
-					onClick={handleOpenChat}
-				>
-					<MessageSquare className="h-6 w-6" />
-				</Button>
+				{isCollapsed ? (
+					<Button
+						type="button"
+						size="icon"
+						className="h-10 w-10 rounded-full shadow-lg hover:shadow-xl transition-all"
+						aria-label="展開客服按鈕"
+						onClick={() => setCollapsed(false)}
+					>
+						<ChevronUp className="h-5 w-5" />
+					</Button>
+				) : (
+					<div className="gap-2 flex items-center">
+						<Button
+							type="button"
+							size="icon"
+							className="h-12 w-12 rounded-full shadow-lg hover:shadow-xl transition-all"
+							aria-label="開啟線上客服"
+							onClick={handleOpenChat}
+						>
+							<MessageSquare className="h-6 w-6" />
+						</Button>
+						<Button
+							type="button"
+							variant="outline"
+							size="icon"
+							className="h-8 w-8 rounded-full shadow-md"
+							aria-label="收合客服按鈕"
+							onClick={() => setCollapsed(true)}
+						>
+							<ChevronDown className="h-4 w-4" />
+						</Button>
+					</div>
+				)}
 			</div>
 
 			{/* 多部署選擇對話框 */}

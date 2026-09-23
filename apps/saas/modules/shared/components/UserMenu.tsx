@@ -14,7 +14,7 @@ import {
 	DropdownMenuTrigger,
 } from "@startkiter/ui";
 import { UserAvatar } from "@shared/components/UserAvatar";
-import { BookIcon, HomeIcon, LogOutIcon, MoreVerticalIcon, SettingsIcon } from "lucide-react";
+import { BookOpenIcon, CreditCardIcon, LogOutIcon, MoreVerticalIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 
@@ -24,7 +24,6 @@ export function UserMenu({ showUserName }: { showUserName?: boolean }) {
 	const t = useTranslations();
 	const { user } = useSession();
 	const isMobile = useIsMobile();
-	const marketingUrl = config.marketingUrl;
 
 	const onLogout = async () => {
 		await authClient.signOut({
@@ -98,46 +97,28 @@ export function UserMenu({ showUserName }: { showUserName?: boolean }) {
 					render={(props) => (
 						<Link
 							{...props}
-							href="/settings/general"
+							href="/course"
 							className={cn(props.className, "flex items-center")}
 						>
-							<SettingsIcon className="mr-2 size-4" />
-							{t("app.userMenu.accountSettings")}
+							<BookOpenIcon className="mr-2 size-4" />
+							{t("app.userMenu.learningCenter")}
 						</Link>
 					)}
 				/>
 
-				{config.docsUrl && (
-					<DropdownMenuItem
-						nativeButton={false}
-						render={(props) => (
-							<a
-								{...props}
-								href={config.docsUrl}
-								className={cn(props.className, "flex items-center")}
-							>
-								<BookIcon className="mr-2 size-4" />
-								{t("app.userMenu.documentation")}
-							</a>
-						)}
-					/>
-				)}
-
-				{marketingUrl && (
-					<DropdownMenuItem
-						nativeButton={false}
-						render={(props) => (
-							<Link
-								{...props}
-								href={marketingUrl}
-								className={cn(props.className, "flex items-center")}
-							>
-								<HomeIcon className="mr-2 size-4" />
-								{t("app.userMenu.home")}
-							</Link>
-						)}
-					/>
-				)}
+				<DropdownMenuItem
+					nativeButton={false}
+					render={(props) => (
+						<Link
+							{...props}
+							href="/settings/billing"
+							className={cn(props.className, "flex items-center")}
+						>
+							<CreditCardIcon className="mr-2 size-4" />
+							{t("app.userMenu.subscription")}
+						</Link>
+					)}
+				/>
 
 				<DropdownMenuItem onClick={onLogout}>
 					<LogOutIcon className="mr-2 size-4" />

@@ -138,6 +138,8 @@
       "colorMode": "显示模式",
       "documentation": "文档",
       "home": "首页",
+      "learningCenter": "我的学习中心",
+      "subscription": "我的订阅",
       "logout": "退出登录"
     },
     "notifications": {

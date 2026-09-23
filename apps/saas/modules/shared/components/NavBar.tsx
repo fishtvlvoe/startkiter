@@ -3,6 +3,7 @@
 import { useActiveOrganization } from "@organizations/hooks/use-active-organization";
 import { config as authConfig } from "@startkiter/auth/config";
 import { config as paymentsConfig } from "@startkiter/payments/config";
+import { resolveNavigation } from "@startkiter/platform/src/workspace/navigation";
 import {
 	Button,
 	cn,
@@ -67,7 +68,12 @@ import { type DragEvent, Fragment, type MouseEvent, type PointerEvent, useMemo, 
 
 import { OrganzationSelect } from "../../organizations/components/OrganizationSelect";
 import { useIsMobile } from "../hooks/use-media-query";
-import { getMountMenuItems, getTabBarItems, isMenuActive } from "../lib/nav-menu-items";
+import {
+	getMountMenuItems,
+	getMountNavigationContext,
+	getTabBarItems,
+	isMenuActive,
+} from "../lib/nav-menu-items";
 import { useSidebar } from "../lib/sidebar-context";
 import type { SidebarGroup } from "../lib/sidebar-layout";
 import { useSaveSidebarLayout, useSidebarLayout } from "../lib/sidebar-layout";
@@ -744,6 +750,24 @@ export function NavBar() {
 
 	const basePath = activeOrganization ? `/${activeOrganization.slug}` : "";
 
+	const navigation = useMemo(
+		() => {
+			const context = getMountNavigationContext({
+				pathname,
+				platformAdmin: canAccessAdmin,
+				canAccessPagesCms,
+			});
+			return {
+				...context,
+				model: resolveNavigation({
+					pathname: context.resolutionPath,
+					capabilities: context.capabilities,
+					apps: context.apps,
+				}),
+			};
+		},
+		[canAccessAdmin, canAccessPagesCms, pathname],
+	);
 	const mountMenuItems = useMemo(
 		() =>
 			getMountMenuItems({
@@ -751,9 +775,11 @@ export function NavBar() {
 				platformAdmin: canAccessAdmin,
 				canAccessPagesCms,
 				labelForKey: t,
+				resolvedNavigation: navigation,
 			}),
-		[canAccessAdmin, canAccessPagesCms, pathname, t],
+		[canAccessAdmin, canAccessPagesCms, navigation, pathname, t],
 	);
+	const workspaceLabel = navigation.model.workspaceLabel;
 
 	const { fixed: tabBarFixed, overflow: tabBarOverflow } = useMemo(
 		() => getTabBarItems(mountMenuItems, t("app.menu.more")),
@@ -976,6 +1002,14 @@ export function NavBar() {
 								<SheetTitle>{t("app.menu.navigationTitle")}</SheetTitle>
 							</SheetHeader>
 							<div className="min-h-0 px-4 pb-4 flex flex-1 flex-col">
+								{workspaceLabel !== "使用者" && (
+									<div
+										className="border-b px-3 py-3 text-sm font-semibold text-foreground"
+										data-testid="sidebar-workspace-label-mobile"
+									>
+										{workspaceLabel}
+									</div>
+								)}
 								<div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]">
 									<NavMenuList
 											menuItems={menuItems}
@@ -1079,6 +1113,14 @@ export function NavBar() {
 					</div>
 
 					<div className="min-h-0 md:flex hidden flex-1 flex-col overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]">
+						{workspaceLabel !== "使用者" && (
+							<div
+								className="mb-2 px-3 text-xs font-semibold text-[#c3c4c7]"
+								data-testid="sidebar-workspace-label"
+							>
+								{workspaceLabel}
+							</div>
+						)}
 						{useSidebarGroupedNav ? (
 							<div className="md:mx-0 md:mt-3 md:mb-6">
 								<SidebarGroupedNav

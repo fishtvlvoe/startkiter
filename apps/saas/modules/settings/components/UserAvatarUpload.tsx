@@ -16,17 +16,19 @@ export function UserAvatarUpload({
 	onError,
 }: {
 	onSuccess: () => void;
-	onError: () => void;
+	onError: (error?: Error) => void;
 }) {
 	const { user, reloadSession } = useSession();
 	const [uploading, setUploading] = useState(false);
 	const [cropDialogOpen, setCropDialogOpen] = useState(false);
 	const [image, setImage] = useState<File | null>(null);
+	const [uploadError, setUploadError] = useState<string | null>(null);
 
 	const getSignedUploadUrlMutation = useMutation(orpc.users.avatarUploadUrl.mutationOptions());
 
 	const { getRootProps, getInputProps } = useDropzone({
 		onDrop: (acceptedFiles) => {
+			setUploadError(null);
 			setImage(acceptedFiles[0]);
 			setCropDialogOpen(true);
 		},
@@ -46,6 +48,7 @@ export function UserAvatarUpload({
 		}
 
 		setUploading(true);
+		setUploadError(null);
 		try {
 			const { signedUploadUrl, path } = await getSignedUploadUrlMutation.mutateAsync({});
 
@@ -72,8 +75,11 @@ export function UserAvatarUpload({
 			await reloadSession();
 
 			onSuccess();
-		} catch {
-			onError();
+		} catch (cause) {
+			const error = cause instanceof Error ? cause : new Error("Unknown avatar upload error");
+			console.error("[UserAvatarUpload] upload failed", error);
+			setUploadError("上傳失敗，請稍後再試或聯絡客服");
+			onError(error);
 		} finally {
 			setUploading(false);
 		}
@@ -98,6 +104,11 @@ export function UserAvatarUpload({
 					</div>
 				)}
 			</div>
+			{uploadError && (
+				<p className="mt-2 text-sm text-destructive" role="alert" aria-live="polite">
+					{uploadError}
+				</p>
+			)}
 
 			<CropImageDialog
 				image={image}
