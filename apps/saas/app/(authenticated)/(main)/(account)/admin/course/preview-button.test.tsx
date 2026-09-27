@@ -24,9 +24,16 @@ vi.mock("next/link", () => ({
 vi.mock("@startkiter/ui", async () => {
 	const React = await import("react");
 	return {
-		Button: ({ asChild, children, ...props }: { asChild?: boolean; children: React.ReactNode }) => {
-			if (asChild && React.isValidElement(children)) {
-				return React.cloneElement(children as React.ReactElement<any>, props);
+		Button: ({
+			render,
+			children,
+			...props
+		}: {
+			render?: (props: any) => React.ReactElement;
+			children?: React.ReactNode;
+		}) => {
+			if (render) {
+				return render(props);
 			}
 			return <button {...props}>{children}</button>;
 		},

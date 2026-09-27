@@ -75,7 +75,7 @@ export default async function CoursePreviewPage() {
 					{firstLesson ? (
 						<>
 							<h2 className="text-lg font-medium">{firstLesson.title}</h2>
-							<p className="text-muted-foreground mt-2">{firstLesson.description}</p>
+							<p className="text-muted-foreground mt-2">{firstLesson.content}</p>
 							<Link className="text-primary mt-4 inline-block underline" href={`/course/${firstLesson.id}`}>
 								{t("watch")}
 							</Link>

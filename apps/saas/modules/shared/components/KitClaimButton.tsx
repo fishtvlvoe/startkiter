@@ -41,7 +41,7 @@ export function KitClaimButton({ className }: { className?: string }) {
 				onClick={handleClaim}
 				disabled={loading}
 				className={className}
-				variant="default"
+				variant="primary"
 			>
 				{loading ? "領取中..." : "領取代碼包"}
 			</Button>

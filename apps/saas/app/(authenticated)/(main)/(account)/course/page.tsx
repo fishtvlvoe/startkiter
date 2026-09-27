@@ -101,7 +101,7 @@ export default async function CoursePage() {
 						<>
 							{course?.coverImageUrl ? <img src={`/image-proxy/${course.coverImageUrl}`} alt="課程封面" className="mb-4 aspect-video w-full rounded-lg object-cover" data-testid="course-cover-image" /> : null}
 							<h2 className="text-lg font-medium">{firstLesson.title}</h2>
-							<p className="text-muted-foreground mt-2">{firstLesson.description}</p>
+							<p className="text-muted-foreground mt-2">{firstLesson.content}</p>
 							<Link className="text-primary mt-4 inline-block underline" href={`/course/${firstLesson.id}`}>
 								{t("watch")}
 							</Link>
