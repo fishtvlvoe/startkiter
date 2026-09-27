@@ -4,6 +4,7 @@ import { db } from "@startkiter/database";
 import { checkPermission, isOperator } from "@startkiter/permissions";
 import { redirect } from "next/navigation";
 import { ExportSpreadsheetButton } from "@admin/component/ExportSpreadsheetButton";
+import { CreateCouponForm } from "./CreateCouponForm";
 
 export default async function CourseCouponsPage() {
 	const session = await getSession();
@@ -32,30 +33,7 @@ export default async function CourseCouponsPage() {
 			{canManageCoupons && (
 				<section className="rounded-lg border border-divider p-4 bg-surface space-y-4">
 					<h2 className="text-lg font-semibold text-heading">建立優惠券</h2>
-					<form method="POST" action="/api/coupons" className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-						<div>
-							<label className="block text-sm font-medium text-body" htmlFor="code">優惠碼</label>
-							<input id="code" name="code" type="text" required placeholder="例如 SAVE100" className="mt-1 block w-full rounded border border-divider p-2 text-sm" />
-						</div>
-						<div>
-							<label className="block text-sm font-medium text-body" htmlFor="discountType">折扣類型</label>
-							<select id="discountType" name="discountType" className="mt-1 block w-full rounded border border-divider p-2 text-sm">
-								<option value="amount">固定金額 (NT$)</option>
-								<option value="percent">百分比 (%)</option>
-							</select>
-						</div>
-						<div>
-							<label className="block text-sm font-medium text-body" htmlFor="amountOff">折抵金額</label>
-							<input id="amountOff" name="amountOff" type="number" min="1" placeholder="例如 100" className="mt-1 block w-full rounded border border-divider p-2 text-sm" />
-						</div>
-						<div>
-							<label className="block text-sm font-medium text-body" htmlFor="percentOff">折扣百分比</label>
-							<input id="percentOff" name="percentOff" type="number" min="1" max="100" placeholder="例如 20" className="mt-1 block w-full rounded border border-divider p-2 text-sm" />
-						</div>
-						<div className="sm:col-span-2">
-							<button type="submit" className="rounded bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90">建立優惠券</button>
-						</div>
-					</form>
+					<CreateCouponForm />
 				</section>
 			)}
 

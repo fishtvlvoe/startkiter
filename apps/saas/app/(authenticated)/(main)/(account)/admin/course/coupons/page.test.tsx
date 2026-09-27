@@ -21,6 +21,11 @@ vi.mock("next/navigation", () => ({
 	redirect: vi.fn((url: string) => {
 		throw new Error(`REDIRECT:${url}`);
 	}),
+	useRouter: () => ({
+		push: vi.fn(),
+		replace: vi.fn(),
+		refresh: vi.fn(),
+	}),
 }));
 
 import { getSession } from "@auth/lib/server";
@@ -117,7 +122,7 @@ describe("CourseCouponsPage (Requirement: Instructor used-coupon list stays scop
 
 		// 營運人員看到建立表單
 		expect(html).toContain("建立優惠券");
-		expect(html).toContain('action="/api/coupons"');
+		expect(html).toContain('name="code"');
 		expect(html).toContain("/api/export/coupons");
 	});
 
