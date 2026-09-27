@@ -1,29 +1,12 @@
+import {
+	getCachedPublishedCourse,
+	type PublicChapter,
+	type PublicCourse,
+	type PublicLesson,
+} from "@startkiter/api/modules/course/lib/published-content-cache";
 import { config } from "@config";
 
-export type PublicLesson = {
-	id: string;
-	slug: string;
-	title: string;
-	isFreePreview: boolean;
-	videoDuration: string | null;
-	order: number;
-	chapterId: string;
-};
-
-export type PublicChapter = {
-	id: string;
-	title: string;
-	order: number;
-	lessons: PublicLesson[];
-};
-
-export type PublicCourse = {
-	id: string;
-	slug: string;
-	title: string;
-	description: string | null;
-	chapters: PublicChapter[];
-};
+export type { PublicChapter, PublicCourse, PublicLesson };
 
 function unwrapRpcPayload(payload: unknown): unknown {
 	if (typeof payload !== "object" || payload === null) {
@@ -40,6 +23,15 @@ function unwrapRpcPayload(payload: unknown): unknown {
 }
 
 export async function fetchPublishedCourse(): Promise<PublicCourse | null> {
+	try {
+		const cached = await getCachedPublishedCourse();
+		if (cached) {
+			return cached;
+		}
+	} catch {
+		// Fallback to RPC fetch if direct DB/cache is unavailable
+	}
+
 	const saasUrl = config.saasUrl?.replace(/\/$/, "");
 
 	if (!saasUrl) {

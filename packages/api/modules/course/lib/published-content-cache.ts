@@ -67,7 +67,10 @@ async function loadPublishedCurriculum() {
 		include: {
 			course: {
 				select: {
+					id: true,
+					slug: true,
 					title: true,
+					description: true,
 					watermarkSetting: {
 						select: {
 							enabled: true,
@@ -153,3 +156,71 @@ export async function getCachedPublishedCurriculum() {
 	};
 	return value;
 }
+
+export type PublicLesson = {
+	id: string;
+	slug: string;
+	title: string;
+	isFreePreview: boolean;
+	videoDuration: string | null;
+	order: number;
+	chapterId: string;
+};
+
+export type PublicChapter = {
+	id: string;
+	title: string;
+	order: number;
+	lessons: PublicLesson[];
+};
+
+export type PublicCourse = {
+	id: string;
+	slug: string;
+	title: string;
+	description: string | null;
+	chapters: PublicChapter[];
+};
+
+export async function getCachedPublishedCourse(): Promise<PublicCourse | null> {
+	const chapters = await getCachedPublishedCurriculum();
+	if (!chapters.length) {
+		const course = await db.course.findFirst({
+			where: { status: "PUBLISHED" },
+			select: { id: true, slug: true, title: true, description: true },
+		});
+		if (!course) {
+			return null;
+		}
+		return {
+			id: course.id,
+			slug: course.slug,
+			title: course.title,
+			description: course.description,
+			chapters: [],
+		};
+	}
+
+	const firstCourse = chapters[0].course as any;
+	return {
+		id: firstCourse.id ?? "",
+		slug: firstCourse.slug ?? "",
+		title: firstCourse.title,
+		description: firstCourse.description ?? null,
+		chapters: chapters.map((chapter) => ({
+			id: chapter.id,
+			title: chapter.title,
+			order: chapter.order,
+			lessons: chapter.lessons.map((lesson) => ({
+				id: lesson.id,
+				slug: lesson.slug,
+				title: lesson.title,
+				isFreePreview: Boolean(lesson.isFreePreview),
+				videoDuration: lesson.videoDuration ?? null,
+				order: lesson.order,
+				chapterId: lesson.chapterId,
+			})),
+		})),
+	};
+}
+

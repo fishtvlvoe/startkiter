@@ -57,6 +57,7 @@ describe("getCourseAccessOrdersForUser", () => {
 		expect(db.order.findFirst).toHaveBeenCalledWith({
 			where: {
 				sku: "startkiter-mvp",
+				courseAccess: true,
 				kitClaimEligible: true,
 				OR: [
 					{ userId: "user-1" },

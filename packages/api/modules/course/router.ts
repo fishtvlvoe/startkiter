@@ -48,33 +48,12 @@ import { runMissionCheck } from "./procedures/run-mission-check";
 import { listEmailDeliveryLog } from "./procedures/list-email-delivery-log";
 import { sendWelcomeEmailTest } from "./procedures/send-welcome-email-test";
 import { updateWelcomeEmailSettings } from "./procedures/update-welcome-email-settings";
+import { getCachedPublishedCourse } from "./lib/published-content-cache";
 
 export const courseRouter = publicProcedure.router({
 	// 1. 公開/試看課綱大綱 (Public)
 	getPublicCurriculum: publicProcedure.handler(async () => {
-		const course = await db.course.findFirst({
-			where: { status: "PUBLISHED" },
-			include: {
-				chapters: {
-					orderBy: { order: "asc" },
-					include: {
-						lessons: {
-							where: { status: "PUBLISHED" },
-							orderBy: { order: "asc" },
-							select: {
-								id: true,
-								slug: true,
-								title: true,
-								isFreePreview: true,
-								videoDuration: true,
-								order: true,
-								chapterId: true,
-							},
-						},
-					},
-				},
-			},
-		});
+		const course = await getCachedPublishedCourse();
 
 		return { course };
 	}),

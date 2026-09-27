@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
 	experimental: {
 		useTypeScriptCli: true,
 	},
-	transpilePackages: ["@startkiter/i18n", "@startkiter/ui", "@startkiter/payments", "@startkiter/database", "@startkiter/utils"],
+	transpilePackages: ["@startkiter/i18n", "@startkiter/ui", "@startkiter/payments", "@startkiter/database", "@startkiter/utils", "@startkiter/api"],
 	images: {
 		remotePatterns: [
 			{

@@ -58,7 +58,7 @@ export default async function CoursePage() {
 							加入 LINE 學習群
 						</a>
 					)}
-					{kitClaimEligible && (
+					{entitled && kitClaimEligible && (
 						<div>
 							<KitClaimButton />
 						</div>

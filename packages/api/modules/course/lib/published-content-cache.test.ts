@@ -23,6 +23,7 @@ import { db } from "@startkiter/database";
 import {
 	getCachedPublishedLessonById,
 	getCachedPublishedCurriculum,
+	getCachedPublishedCourse,
 	getPublishedLessonCacheSizeForTests,
 	invalidatePublishedContentCache,
 	PUBLISHED_CONTENT_CACHE_TTL_MS,
@@ -204,5 +205,42 @@ describe("published content server cache", () => {
 		vi.mocked(db.lesson.findUnique).mockClear();
 		await getCachedPublishedLessonById("lesson-0");
 		expect(db.lesson.findUnique).toHaveBeenCalledTimes(1);
+	});
+
+	it("getCachedPublishedCourse reuses the cached published curriculum without hitting DB twice", async () => {
+		vi.mocked(db.chapter.findMany).mockResolvedValue([
+			{
+				id: "ch-1",
+				title: "Chapter 1",
+				order: 0,
+				course: {
+					id: "course-1",
+					slug: "course-slug",
+					title: "Course Title",
+					description: "Course Desc",
+				},
+				lessons: [
+					{
+						id: "les-1",
+						slug: "les-1-slug",
+						title: "Lesson 1",
+						isFreePreview: true,
+						videoDuration: "10:00",
+						order: 0,
+						chapterId: "ch-1",
+					},
+				],
+			},
+		] as never);
+
+		const course = await getCachedPublishedCourse();
+		expect(course?.title).toBe("Course Title");
+		expect(course?.chapters[0].lessons[0].title).toBe("Lesson 1");
+		expect(db.chapter.findMany).toHaveBeenCalledTimes(1);
+
+		// Subsequent call to getCachedPublishedCurriculum reuses the exact same cached data
+		const curriculum = await getCachedPublishedCurriculum();
+		expect(curriculum.length).toBe(1);
+		expect(db.chapter.findMany).toHaveBeenCalledTimes(1);
 	});
 });

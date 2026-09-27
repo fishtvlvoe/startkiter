@@ -36,6 +36,7 @@ export async function getEligibleKitOrderForUser(userId: string, sku: string) {
 	return db.order.findFirst({
 		where: {
 			sku,
+			courseAccess: true,
 			kitClaimEligible: true,
 			...accessScope(userId, organizationIds),
 		},
