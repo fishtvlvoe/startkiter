@@ -20,6 +20,8 @@ import {
 	toastError,
 	toastSuccess,
 } from "@startkiter/ui";
+import { useSession } from "@auth/hooks/use-session";
+import { checkPermission } from "@startkiter/permissions";
 import { ExportSpreadsheetButton } from "@admin/component/ExportSpreadsheetButton";
 
 type BundleStatus = "draft" | "published" | "archived";
@@ -122,6 +124,8 @@ function TrashIcon({ className }: { className?: string }) {
 }
 
 export default function AdminBundlesPage() {
+	const { user } = useSession();
+	const canExportBundles = checkPermission({ user }, "admin.access");
 	const [bundles, setBundles] = useState<Bundle[]>([]);
 	const [courses, setCourses] = useState<CourseOption[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -360,7 +364,9 @@ export default function AdminBundlesPage() {
 					<p className="text-muted-foreground text-sm">把多堂課組成一個組合價商品，可套用優惠券折扣。</p>
 				</div>
 				<div className="flex items-center gap-2">
-					<ExportSpreadsheetButton endpoint="/api/export/bundles" />
+					{canExportBundles && (
+						<ExportSpreadsheetButton endpoint="/api/export/bundles" />
+					)}
 					<Button onClick={openNewBundle}>
 						<PackageIcon className="size-4" />
 						新增組合包

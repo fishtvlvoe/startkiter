@@ -1,7 +1,7 @@
 import { getSession } from "@auth/lib/server";
 import { manageableCourseWhereForUser } from "@startkiter/api/modules/course/lib/course-instructor-access";
 import { db } from "@startkiter/database";
-import { isOperator } from "@startkiter/permissions";
+import { checkPermission, isOperator } from "@startkiter/permissions";
 import { redirect } from "next/navigation";
 import { ExportSpreadsheetButton } from "@admin/component/ExportSpreadsheetButton";
 
@@ -10,6 +10,7 @@ export default async function CourseCouponsPage() {
 	if (!session) redirect("/login");
 
 	const canManageCoupons = isOperator(session.user, process.env.ADMIN_EMAIL);
+	const canExportCoupons = checkPermission({ user: session.user }, "admin.access");
 	const courseWhere = await manageableCourseWhereForUser(session.user.id);
 	const courses = await db.course.findMany({ where: courseWhere, select: { slug: true } });
 	const orders = await db.order.findMany({
@@ -58,7 +59,7 @@ export default async function CourseCouponsPage() {
 				</section>
 			)}
 
-			{canManageCoupons && (
+			{canExportCoupons && (
 				<div className="flex justify-end">
 					<ExportSpreadsheetButton endpoint="/api/export/coupons" />
 				</div>

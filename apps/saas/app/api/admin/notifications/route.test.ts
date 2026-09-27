@@ -48,6 +48,14 @@ describe("POST /api/admin/notifications (Requirement: Operator can send one APP_
 		expect(response.status).toBe(403);
 	});
 
+	it("ADMIN_EMAIL fallback operator 但無 admin.access 呼叫回傳 403 (Scenario: Operator without admin.access is rejected)", async () => {
+		vi.mocked(auth.api.getSession).mockResolvedValue({
+			user: { id: "op-1", role: "user", email: "admin@example.com" },
+		} as any);
+		const response = await POST(jsonRequest({ userId: "u1", title: "標題", message: "內文" }));
+		expect(response.status).toBe(403);
+	});
+
 	it("目標使用者不存在回傳 404 (Scenario: Unknown user)", async () => {
 		vi.mocked(auth.api.getSession).mockResolvedValue({
 			user: { id: "admin-1", role: "admin", email: "admin@example.com" },

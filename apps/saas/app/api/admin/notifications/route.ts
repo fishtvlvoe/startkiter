@@ -1,7 +1,7 @@
 import { auth } from "@startkiter/auth";
 import { db } from "@startkiter/database";
 import { createNotification } from "@startkiter/notifications";
-import { isOperator } from "@startkiter/permissions";
+import { checkPermission } from "@startkiter/permissions";
 import { NextResponse } from "next/server";
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
 		return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
 	}
 
-	if (!isOperator(session.user, process.env.ADMIN_EMAIL)) {
+	if (!checkPermission({ user: session.user }, "admin.access")) {
 		return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
 	}
 

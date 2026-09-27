@@ -118,5 +118,25 @@ describe("CourseCouponsPage (Requirement: Instructor used-coupon list stays scop
 		// 營運人員看到建立表單
 		expect(html).toContain("建立優惠券");
 		expect(html).toContain('action="/api/coupons"');
+		expect(html).toContain("/api/export/coupons");
+	});
+
+	it("ADMIN_EMAIL fallback operator 但無 admin.access 時，不顯示匯出按鈕 (Requirement: Export button requires admin.access)", async () => {
+		mockedGetSession.mockResolvedValue({
+			user: { id: "op_1", email: "admin@example.com", role: "user" },
+			session: { id: "s_op" },
+		} as any);
+
+		mockedManageableCourseWhere.mockResolvedValue({} as any);
+		mockedDbCourseFindMany.mockResolvedValue([]);
+		mockedDbOrderFindMany.mockResolvedValue([]);
+		mockedDbCouponFindMany.mockResolvedValue([]);
+
+		const html = renderToStaticMarkup(await CourseCouponsPage());
+
+		// 具備 isOperator 權限所以看到管理/建立表單
+		expect(html).toContain("建立優惠券");
+		// 但沒有 admin.access 權限，因此不可看見匯出按鈕
+		expect(html).not.toContain("/api/export/coupons");
 	});
 });
