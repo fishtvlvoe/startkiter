@@ -10,9 +10,10 @@ export function CreateCouponForm() {
 
 	async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
+		const form = e.currentTarget;
 		setError(null);
 		setSubmitting(true);
-		const formData = new FormData(e.currentTarget);
+		const formData = new FormData(form);
 		const amountOffRaw = formData.get("amountOff");
 		const percentOffRaw = formData.get("percentOff");
 		try {
@@ -31,7 +32,7 @@ export function CreateCouponForm() {
 				setError(typeof data.error === "string" ? data.error : `建立失敗（HTTP ${res.status}）`);
 				return;
 			}
-			e.currentTarget.reset();
+			form.reset();
 			router.refresh();
 		} catch {
 			setError("網路錯誤，請稍後再試。");

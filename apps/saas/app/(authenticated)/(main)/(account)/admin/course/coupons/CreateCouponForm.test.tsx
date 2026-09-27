@@ -67,6 +67,29 @@ describe("CreateCouponForm", () => {
 		expect(parsedBody.amountOff).toBe(50);
 	});
 
+	it("API 成功時不顯示網路錯誤（防止 e.currentTarget 在 await 後失效被誤判為失敗）", async () => {
+		(global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
+			ok: true,
+			json: async () => ({ success: true }),
+		});
+
+		await act(async () => {
+			root.render(<CreateCouponForm />);
+		});
+
+		const codeInput = container.querySelector('input[name="code"]') as HTMLInputElement;
+		codeInput.value = "OK01";
+		codeInput.dispatchEvent(new Event("input", { bubbles: true }));
+
+		const form = container.querySelector("form") as HTMLFormElement;
+		await act(async () => {
+			form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+		});
+
+		expect(container.textContent).not.toContain("網路錯誤");
+		expect(container.textContent).not.toContain("undefined");
+	});
+
 	it("API 回傳錯誤時顯示錯誤訊息，不會靜默失敗", async () => {
 		(global.fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
 			ok: false,
