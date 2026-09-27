@@ -33,6 +33,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { flexRender, useTable } from "@tanstack/react-table";
 import {
 	BanIcon,
+	BellIcon,
 	MoreVerticalIcon,
 	Repeat1Icon,
 	ShieldCheckIcon,
@@ -47,6 +48,7 @@ import { useDebounceValue } from "usehooks-ts";
 
 import { EmailVerified } from "../EmailVerified";
 import { BanUserDialog } from "./BanUserDialog";
+import { SendNotificationDialog } from "./SendNotificationDialog";
 
 const ITEMS_PER_PAGE = 10;
 const BAN_STATUS_REFRESH_INTERVAL = 30_000;
@@ -106,6 +108,7 @@ export function UserList() {
 	const queryClient = useQueryClient();
 	const { confirm } = useConfirmationAlert();
 	const [userToBan, setUserToBan] = useState<AdminUser | null>(null);
+	const [userToNotify, setUserToNotify] = useState<AdminUser | null>(null);
 	const [banStatusTime, setBanStatusTime] = useState(Date.now);
 	const [currentPage, setCurrentPage] = useQueryState("currentPage", parseAsInteger.withDefault(1));
 	const [searchTerm, setSearchTerm] = useQueryState("query", parseAsString.withDefault(""));
@@ -361,6 +364,10 @@ export function UserList() {
 										</DropdownMenuItem>
 									) : null}
 
+					<DropdownMenuItem onClick={() => setUserToNotify(row.original)}>
+						<BellIcon className="mr-2 size-4" />發送站內通知
+					</DropdownMenuItem>
+
 									<DropdownMenuItem
 										onClick={() =>
 											confirm({
@@ -401,7 +408,7 @@ export function UserList() {
 			<Card className="p-6">
 				<h2 className="mb-4 font-semibold text-2xl">{t("admin.users.title")}</h2>
 				<div className="mb-4 flex flex-wrap gap-2" role="tablist" aria-label="使用者角色篩選">
-					{([['all', '全部'], ['student', '學員'], ['instructor', '講師'], ['admin', '管理員']] as const).map(([value, label]) => <Button key={value} type="button" size="sm" variant={roleFilter === value ? "primary" : "outline"} role="tab" aria-selected={roleFilter === value} onClick={() => setRoleFilter(value)}>{label}</Button>)}
+					{([['all', '全部'], ['student', '使用者'], ['instructor', '講師'], ['admin', '管理員']] as const).map(([value, label]) => <Button key={value} type="button" size="sm" variant={roleFilter === value ? "primary" : "outline"} role="tab" aria-selected={roleFilter === value} onClick={() => setRoleFilter(value)}>{label}</Button>)}
 				</div>
 				<Input
 					type="search"
@@ -464,6 +471,16 @@ export function UserList() {
 					}
 				}}
 				user={userToBan}
+			/>
+
+			<SendNotificationDialog
+				open={userToNotify !== null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setUserToNotify(null);
+					}
+				}}
+				user={userToNotify}
 			/>
 		</>
 	);

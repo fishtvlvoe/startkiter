@@ -1,3 +1,5 @@
 export type { Coupon } from "./types";
 export { redeemCouponInTransaction, validateCoupon } from "./validate";
 export type { RedeemCouponResult, ValidateCouponResult } from "./validate";
+export { createCoupon, deactivateCoupon } from "./admin";
+export type { CreateCouponInput, CreateCouponResult, DeactivateCouponResult } from "./admin";

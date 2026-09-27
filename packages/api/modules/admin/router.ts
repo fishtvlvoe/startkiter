@@ -3,6 +3,9 @@ import { listOrganizations } from "./procedures/list-organizations";
 import { listUsers } from "./procedures/list-users";
 import { exportOrdersSpreadsheet } from "./procedures/export-orders-spreadsheet";
 import { exportRevenueSpreadsheet } from "./procedures/export-revenue-spreadsheet";
+import { exportBundlesSpreadsheet } from "./procedures/export-bundles-spreadsheet";
+import { exportCouponsSpreadsheet } from "./procedures/export-coupons-spreadsheet";
+import { sendNotification } from "./procedures/send-notification";
 import { setInstructorRole } from "./procedures/set-instructor-role";
 
 export const adminRouter = {
@@ -17,5 +20,10 @@ export const adminRouter = {
 	exports: {
 		orders: exportOrdersSpreadsheet,
 		revenue: exportRevenueSpreadsheet,
+		bundles: exportBundlesSpreadsheet,
+		coupons: exportCouponsSpreadsheet,
+	},
+	notifications: {
+		send: sendNotification,
 	},
 };

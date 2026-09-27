@@ -20,6 +20,7 @@ import {
 	toastError,
 	toastSuccess,
 } from "@startkiter/ui";
+import { ExportSpreadsheetButton } from "@admin/component/ExportSpreadsheetButton";
 
 type BundleStatus = "draft" | "published" | "archived";
 
@@ -358,10 +359,13 @@ export default function AdminBundlesPage() {
 					<h1 className="text-xl font-bold">課程綁定包</h1>
 					<p className="text-muted-foreground text-sm">把多堂課組成一個組合價商品，可套用優惠券折扣。</p>
 				</div>
-				<Button onClick={openNewBundle}>
-					<PackageIcon className="size-4" />
-					新增組合包
-				</Button>
+				<div className="flex items-center gap-2">
+					<ExportSpreadsheetButton endpoint="/api/export/bundles" />
+					<Button onClick={openNewBundle}>
+						<PackageIcon className="size-4" />
+						新增組合包
+					</Button>
+				</div>
 			</div>
 
 			<Card>
