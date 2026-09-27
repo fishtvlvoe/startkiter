@@ -1,7 +1,15 @@
 import { Button } from '@startkiter/ui'
 import { DownloadIcon } from 'lucide-react'
 
-export function ExportSpreadsheetButton({ endpoint }: { endpoint: '/api/export/orders' | '/api/export/revenue' }) {
+export function ExportSpreadsheetButton({
+	endpoint,
+}: {
+	endpoint:
+		| '/api/export/orders'
+		| '/api/export/revenue'
+		| '/api/export/bundles'
+		| '/api/export/coupons'
+}) {
 	return (
 		<Button
 			variant="outline"
