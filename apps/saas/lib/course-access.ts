@@ -1,5 +1,6 @@
-import { db, getCourseAccessOrdersForUser } from "@startkiter/database";
+import { db, getCourseAccessOrdersForUser, getEligibleKitOrderForUser } from "@startkiter/database";
 import { canAccessCourse, type CourseAccessReader } from "@startkiter/course";
+import { MVP_SKU } from "@startkiter/payments";
 
 export function createPrismaCourseAccessReader(): CourseAccessReader {
 	return {
@@ -14,3 +15,9 @@ export function createPrismaCourseAccessReader(): CourseAccessReader {
 export async function userHasCourseAccess(userId: string): Promise<boolean> {
 	return canAccessCourse(userId, createPrismaCourseAccessReader());
 }
+
+export async function userHasKitClaimAccess(userId: string): Promise<boolean> {
+	const order = await getEligibleKitOrderForUser(userId, MVP_SKU);
+	return !!order;
+}
+

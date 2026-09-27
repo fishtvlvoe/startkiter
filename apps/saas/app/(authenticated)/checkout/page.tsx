@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@star
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { userHasCourseAccess } from "../../../lib/course-access";
+import { userHasCourseAccess, userHasKitClaimAccess } from "../../../lib/course-access";
 
 import { CheckoutButton } from "./checkout-button";
+import { KitClaimButton } from "@shared/components/KitClaimButton";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -19,7 +20,10 @@ export default async function CheckoutPage() {
 		redirect("/login?next=/checkout");
 	}
 
-	const entitled = await userHasCourseAccess(session.user.id);
+	const [entitled, kitClaimEligible] = await Promise.all([
+		userHasCourseAccess(session.user.id),
+		userHasKitClaimAccess(session.user.id),
+	]);
 
 	return (
 		<AuthWrapper>
@@ -35,12 +39,15 @@ export default async function CheckoutPage() {
 
 				<CardContent className="space-y-5">
 					{entitled ? (
-						<Link
-							className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-9 items-center justify-center rounded-full px-4 text-sm font-semibold transition-colors"
-							href="/course"
-						>
-							進入課程
-						</Link>
+						<div className="flex flex-wrap items-center gap-3">
+							<Link
+								className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-9 items-center justify-center rounded-full px-4 text-sm font-semibold transition-colors"
+								href="/course"
+							>
+								進入課程
+							</Link>
+							{kitClaimEligible && <KitClaimButton className="rounded-full h-9 px-4" />}
+						</div>
 					) : (
 						<>
 							<div className="rounded-2xl border border-foreground/10 bg-muted/30 p-4 text-sm text-muted-foreground">

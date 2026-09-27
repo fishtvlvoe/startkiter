@@ -17,6 +17,7 @@ vi.mock("@startkiter/database", () => ({
 
 vi.mock("../../../../../lib/course-access", () => ({
 	userHasCourseAccess: vi.fn(),
+	userHasKitClaimAccess: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -35,17 +36,18 @@ vi.mock("./course-review-panel", () => ({
 	),
 }));
 
-vi.mock("@startkiter/course", () => ({
-	listLessons: vi.fn(() => [
-		{ id: "lesson-1", order: 0, title: "Lesson 1", description: "Desc 1" },
-		{ id: "lesson-2", order: 1, title: "Lesson 2", description: "Desc 2" },
+vi.mock("@startkiter/api/modules/course/lib/published-content-cache", () => ({
+	getCachedPublishedCurriculum: vi.fn(async () => [
+		{
+			id: "chapter-1",
+			title: "Chapter 1",
+			order: 0,
+			lessons: [
+				{ id: "lesson-1", order: 0, title: "Lesson 1", description: "Desc 1" },
+				{ id: "lesson-2", order: 1, title: "Lesson 2", description: "Desc 2" },
+			],
+		},
 	]),
-	getLesson: vi.fn((id: string) => ({
-		id,
-		order: 0,
-		title: `Lesson ${id}`,
-		description: `Desc ${id}`,
-	})),
 }));
 
 import { getSession } from "@auth/lib/server";

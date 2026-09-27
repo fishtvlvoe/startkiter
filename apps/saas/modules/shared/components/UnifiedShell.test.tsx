@@ -90,6 +90,7 @@ vi.mock("@startkiter/database", () => ({
 		},
 	},
 	getCourseAccessOrdersForUser: async () => [],
+	getEligibleKitOrderForUser: async () => null,
 }));
 
 vi.mock("@i18n/lib/update-locale", () => ({

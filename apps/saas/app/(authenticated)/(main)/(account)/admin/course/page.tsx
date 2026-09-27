@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type DragEvent } from "react";
+import Link from "next/link";
 import {
 	Button,
 	Card,
@@ -109,6 +110,7 @@ interface StudioCourseResponse {
 	id: string;
 	title: string;
 	coverImageUrl: string | null;
+	lineInviteUrl?: string | null;
 	chapters: Array<{
 		id: string;
 		courseId: string;
@@ -183,6 +185,8 @@ export default function CourseAdminStudioPage() {
 	const [courses, setCourses] = useState<StudioCourseResponse[]>([]);
 	const [isOperator, setIsOperator] = useState(false);
 	const [courseId, setCourseId] = useState<string | null>(null);
+	const [lineInviteUrlInput, setLineInviteUrlInput] = useState("");
+	const [lineInviteUrlError, setLineInviteUrlError] = useState<string | null>(null);
 	const [chapters, setChapters] = useState<ChapterItem[]>([]);
 	const [selectedLesson, setSelectedLesson] = useState<LessonItem | null>(null);
 	const [showAiNotesDialog, setShowAiNotesDialog] = useState(false);
@@ -230,6 +234,8 @@ export default function CourseAdminStudioPage() {
 
 	function selectCourse(course: StudioCourseResponse) {
 		setCourseId(course.id);
+		setLineInviteUrlInput(course.lineInviteUrl ?? "");
+		setLineInviteUrlError(null);
 		setWatermarkSetting({ ...DEFAULT_WATERMARK_SETTING, ...(course.watermarkSetting ?? {}) });
 		const mappedChapters: ChapterItem[] = course.chapters.map((ch) => ({
 			id: ch.id,
@@ -401,6 +407,37 @@ export default function CourseAdminStudioPage() {
 			showMessage("success", "浮水印設定已儲存");
 		} else {
 			showMessage("error", "浮水印設定儲存失敗");
+		}
+	};
+
+	const handleSaveLineInviteUrl = async () => {
+		if (!courseId) return;
+		const trimmed = lineInviteUrlInput.trim();
+		if (trimmed !== "" && !trimmed.startsWith("https://")) {
+			setLineInviteUrlError("連結必須為 https:// 開頭的網址");
+			return;
+		}
+
+		setLineInviteUrlError(null);
+		const result = await callStudio("update_course", {
+			id: courseId,
+			title: selectedCourse?.title ?? courseTitle,
+			lineInviteUrl: trimmed === "" ? null : trimmed,
+		});
+
+		if (result && !result.error && (result.ok || result.success)) {
+			setCourses((currentCourses) =>
+				currentCourses.map((course) =>
+					course.id === courseId
+						? { ...course, lineInviteUrl: trimmed === "" ? null : trimmed }
+						: course,
+				),
+			);
+			showMessage("success", "LINE 學習群連結已儲存");
+		} else {
+			const errorMsg = result?.error ?? "儲存失敗";
+			setLineInviteUrlError(errorMsg);
+			showMessage("error", errorMsg);
 		}
 	};
 
@@ -661,13 +698,15 @@ export default function CourseAdminStudioPage() {
 					</p>
 				</div>
 				<div className="flex gap-2">
-					<Button variant="outline" size="sm" onClick={() => window.open("/course", "_blank")}>
-						{/* 預覽前台 SVG */}
-						<svg className="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-							<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-						</svg>
-						預覽學員教室
+					<Button asChild variant="outline" size="sm">
+						<Link href="/course/preview" target="_blank">
+							{/* 預覽前台 SVG */}
+							<svg className="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+							</svg>
+							預覽學員教室
+						</Link>
 					</Button>
 					<Button size="sm" onClick={handleSaveLesson}>
 						{/* 發布/儲存 SVG */}
@@ -756,6 +795,36 @@ export default function CourseAdminStudioPage() {
 					) : null}
 				</Card>
 				{showBatchImportDialog && courseId ? <BatchImportDialog courseId={courseId} onClose={() => setShowBatchImportDialog(false)} onImported={() => loadStudio().catch((error) => showMessage("error", String(error)))} /> : null}
+
+				{courseId ? (
+					<Card className="space-y-3 p-4" data-testid="line-invite-settings">
+						<div className="flex items-center justify-between gap-3">
+							<div>
+								<h2 className="text-base font-semibold text-heading">LINE 學習群連結</h2>
+								<p className="text-xs text-caption">貼上此課程的專屬 LINE 社群/學習群邀請網址（必須為 https:// 開頭）。</p>
+							</div>
+							<Button variant="outline" size="sm" onClick={handleSaveLineInviteUrl} data-testid="save-line-invite-button">
+								儲存 LINE 連結
+							</Button>
+						</div>
+						<div className="space-y-1">
+							<Input
+								aria-label="LINE 學習群連結"
+								placeholder="https://line.me/ti/g/..."
+								value={lineInviteUrlInput}
+								onChange={(event) => {
+									setLineInviteUrlInput(event.target.value);
+									setLineInviteUrlError(null);
+								}}
+							/>
+							{lineInviteUrlError ? (
+								<p className="text-xs text-rose-500" data-testid="line-invite-error">
+									{lineInviteUrlError}
+								</p>
+							) : null}
+						</div>
+					</Card>
+				) : null}
 
 				{isOperator && courseId ? (
 					<Card className="space-y-3 p-4" data-testid="course-cover-settings">

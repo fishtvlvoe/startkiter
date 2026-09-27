@@ -685,6 +685,11 @@ function SidebarGroupedNav({
 export function NavBar() {
 	const t = useTranslations();
 	const pathname = usePathname();
+
+	if (pathname === "/course/preview") {
+		return null;
+	}
+
 	const { check } = usePermissions();
 	const { activeOrganization } = useActiveOrganization();
 	const { user: currentUser } = useSession();

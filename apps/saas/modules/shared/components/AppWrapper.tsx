@@ -6,8 +6,19 @@ import type { PropsWithChildren } from "react";
 import { SidebarProvider, useSidebar } from "../lib/sidebar-context";
 import { NavBar } from "./NavBar";
 
+import { usePathname } from "next/navigation";
+
 function AppContent({ children }: PropsWithChildren) {
 	const { isCollapsed } = useSidebar();
+	const pathname = usePathname();
+
+	if (pathname === "/course/preview") {
+		return (
+			<div className="min-h-screen bg-[#f0f0f1] dark:bg-background py-8">
+				<div className="container max-w-5xl">{children}</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="pt-8 md:h-screen md:overflow-hidden bg-background">

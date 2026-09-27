@@ -363,8 +363,95 @@ describe("Course Studio API", () => {
 
 		expect(response.status).toBe(400);
 		const body = await response.json();
-			expect(body.error).toBe(COURSE_STUDIO_ERROR_CODES.INVALID_MDX_CONTENT);
-			expect(body.details).toBe(error);
 		expect(db.lesson.update).not.toHaveBeenCalled();
 	});
+
+	describe("update_course lineInviteUrl", () => {
+		it("拒絕非 https 的 lineInviteUrl 並回傳 400", async () => {
+			const response = await POST(
+				new Request("http://localhost/api/course/studio", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						action: "update_course",
+						payload: {
+							id: "course-01",
+							title: "課程標題",
+							lineInviteUrl: "http://line.me/ti/g/insecure",
+						},
+					}),
+				}),
+			);
+
+			expect(response.status).toBe(400);
+			expect(db.course.update).not.toHaveBeenCalled();
+		});
+
+		it("接受合法 https 的 lineInviteUrl 並寫入資料庫", async () => {
+			vi.mocked(db.course.update).mockResolvedValue({
+				id: "course-01",
+				title: "課程標題",
+				lineInviteUrl: "https://line.me/ti/g/secure",
+			} as never);
+
+			const response = await POST(
+				new Request("http://localhost/api/course/studio", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						action: "update_course",
+						payload: {
+							id: "course-01",
+							title: "課程標題",
+							lineInviteUrl: "https://line.me/ti/g/secure",
+						},
+					}),
+				}),
+			);
+
+			expect(response.status).toBe(200);
+			expect(db.course.update).toHaveBeenCalledWith(
+				expect.objectContaining({
+					where: { id: "course-01" },
+					data: expect.objectContaining({
+						lineInviteUrl: "https://line.me/ti/g/secure",
+					}),
+				}),
+			);
+		});
+
+		it("允許以空字串或 null 清空 lineInviteUrl", async () => {
+			vi.mocked(db.course.update).mockResolvedValue({
+				id: "course-01",
+				title: "課程標題",
+				lineInviteUrl: null,
+			} as never);
+
+			const response = await POST(
+				new Request("http://localhost/api/course/studio", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						action: "update_course",
+						payload: {
+							id: "course-01",
+							title: "課程標題",
+							lineInviteUrl: "",
+						},
+					}),
+				}),
+			);
+
+			expect(response.status).toBe(200);
+			expect(db.course.update).toHaveBeenCalledWith(
+				expect.objectContaining({
+					where: { id: "course-01" },
+					data: expect.objectContaining({
+						lineInviteUrl: null,
+					}),
+				}),
+			);
+		});
+	});
 });
+

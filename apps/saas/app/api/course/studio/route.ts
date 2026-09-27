@@ -208,10 +208,40 @@ export async function POST(request: Request) {
 		}
 
 		if (action === "update_course") {
-			const { id, title, description, status: courseStatus } = payload;
+			const { id, title, description, status: courseStatus, lineInviteUrl } = payload;
+
+			let normalizedLineInviteUrl: string | null | undefined = undefined;
+			if (lineInviteUrl !== undefined) {
+				if (lineInviteUrl === null || lineInviteUrl === "") {
+					normalizedLineInviteUrl = null;
+				} else if (typeof lineInviteUrl === "string") {
+					const trimmed = lineInviteUrl.trim();
+					if (trimmed === "") {
+						normalizedLineInviteUrl = null;
+					} else {
+						try {
+							const parsed = new URL(trimmed);
+							if (parsed.protocol !== "https:") {
+								return NextResponse.json({ error: "INVALID_LINE_INVITE_URL" }, { status: 400 });
+							}
+							normalizedLineInviteUrl = trimmed;
+						} catch {
+							return NextResponse.json({ error: "INVALID_LINE_INVITE_URL" }, { status: 400 });
+						}
+					}
+				} else {
+					return NextResponse.json({ error: "INVALID_LINE_INVITE_URL" }, { status: 400 });
+				}
+			}
+
 			const course = await db.course.update({
 				where: { id },
-				data: { title, description, status: courseStatus },
+				data: {
+					title,
+					description,
+					status: courseStatus,
+					...(lineInviteUrl !== undefined ? { lineInviteUrl: normalizedLineInviteUrl } : {}),
+				},
 			});
 			return NextResponse.json({ success: true, course });
 		}

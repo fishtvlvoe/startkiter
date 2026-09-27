@@ -126,7 +126,7 @@ export type SupportTicketScalarFieldEnum = z.infer<typeof SupportTicketScalarFie
 
 // File: CourseScalarFieldEnum.schema.ts
 
-export const CourseScalarFieldEnumSchema = z.enum(['id', 'slug', 'title', 'description', 'coverImageUrl', 'status', 'createdAt', 'updatedAt'])
+export const CourseScalarFieldEnumSchema = z.enum(['id', 'slug', 'title', 'description', 'coverImageUrl', 'lineInviteUrl', 'status', 'createdAt', 'updatedAt'])
 
 export type CourseScalarFieldEnum = z.infer<typeof CourseScalarFieldEnumSchema>;
 
@@ -1041,6 +1041,7 @@ export const CourseSchema = z.object({
   title: z.string(),
   description: z.string().nullish(),
   coverImageUrl: z.string().nullish(),
+  lineInviteUrl: z.string().nullish(),
   status: PublishStatusSchema.default("PUBLISHED"),
   createdAt: z.date(),
   updatedAt: z.date(),
