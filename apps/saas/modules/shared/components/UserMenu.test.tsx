@@ -102,7 +102,8 @@ describe("UserMenu personal navigation", () => {
 				/>,
 			);
 
-			expect(html).toContain('href="/settings/general"');
+			expect(html).not.toContain('href="/settings/general"');
+			expect(html).not.toContain("帳號設定");
 		}
 	});
 
@@ -133,13 +134,13 @@ describe("UserMenu personal navigation", () => {
 
 		expect(html).toContain("Fish");
 		expect(html).toContain("fish@example.com");
-		expect(html).toContain('href="/support"');
-		expect(html).toContain("文件");
+		expect(html).not.toContain('href="/support"');
+		expect(html).not.toContain("文件");
 		expect(html).toContain('href="/settings/billing"');
 		expect(html).toContain("我的訂閱");
 		expect(html).toContain("登出");
 		expect(html).not.toContain("color-mode-toggle");
 		expect(html).not.toContain("locale-switch");
-		expect((html.match(/data-testid="dropdown-item"/g) ?? []).length).toBeGreaterThanOrEqual(4);
+		expect((html.match(/data-testid="dropdown-item"/g) ?? []).length).toBeGreaterThanOrEqual(2);
 	});
 });
