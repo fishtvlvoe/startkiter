@@ -54,6 +54,25 @@ async function renderClient(element: ReactElement) {
 	return container;
 }
 
+async function renderClientWithRerender(element: ReactElement) {
+	const container = document.createElement("div");
+	document.body.appendChild(container);
+	const root = createRoot(container);
+	roots.add(root);
+	await act(async () => {
+		root.render(element);
+	});
+	return {
+		container,
+		rerender: async (nextElement: ReactElement) => {
+			await act(async () => {
+				root.render(nextElement);
+			});
+		},
+	};
+}
+
+
 const localStorageStore: Record<string, string> = {};
 const localStorageMock = {
 	getItem: (key: string) => localStorageStore[key] ?? null,
@@ -996,5 +1015,40 @@ describe("Admin 側邊欄互動與無障礙優化（Task 1.1 紅燈測試）", (
 		expect(renameBtn?.getAttribute("aria-label")).toBe("重新命名分組");
 		expect(renameBtn?.className).toContain("focus-visible:opacity-100");
 	});
+
+	it("在 /admin/users 手動展開「系統設定」後切換至 /admin/orders，系統設定維持展開", async () => {
+		mockIsCollapsed = false;
+		mockCanAccessAdmin = true;
+		mockPathname = "/admin/users";
+
+		const { container, rerender } = await renderClientWithRerender(<NavBar />);
+
+		const systemToggle = container.querySelector(
+			'[data-testid="sidebar-item-toggle-admin-system-settings"]',
+		) as HTMLButtonElement;
+		expect(systemToggle).not.toBeNull();
+		expect(systemToggle.getAttribute("aria-expanded")).toBe("false");
+
+		// 手動點擊展開「系統設定」（此操作會將 admin-system-settings 寫入 localStorage）
+		await act(async () => {
+			systemToggle.click();
+		});
+
+		expect(systemToggle.getAttribute("aria-expanded")).toBe("true");
+		expect(container.querySelector('a[href="/admin/settings/einvoice"]')).not.toBeNull();
+		expect(localStorage.getItem("startkiter:sidebar-expanded-submenus")).toContain("admin-system-settings");
+
+		// 切換 pathname 到 /admin/orders（非系統設定子頁）
+		mockPathname = "/admin/orders";
+		await rerender(<NavBar />);
+
+		// 系統設定必須維持展開，不應被收起
+		const updatedSystemToggle = container.querySelector(
+			'[data-testid="sidebar-item-toggle-admin-system-settings"]',
+		);
+		expect(updatedSystemToggle?.getAttribute("aria-expanded")).toBe("true");
+		expect(container.querySelector('a[href="/admin/settings/einvoice"]')).not.toBeNull();
+	});
 });
+
 

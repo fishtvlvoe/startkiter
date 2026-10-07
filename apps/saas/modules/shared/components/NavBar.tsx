@@ -567,14 +567,13 @@ function SidebarGroupedNavItem({
 	const [userExpandedOverride, setUserExpandedOverride] = useState<boolean | null>(null);
 
 	useEffect(() => {
-		setUserExpandedOverride(null);
-	}, [pathname]);
-
-	useEffect(() => {
 		if (getStoredExpandedSubmenus().includes(menuItem.id)) {
 			setUserExpandedOverride(true);
+		} else {
+			setUserExpandedOverride(null);
 		}
-	}, [menuItem.id]);
+	}, [menuItem.id, pathname]);
+
 
 	const isExpanded = userExpandedOverride !== null ? userExpandedOverride : isChildActive;
 
