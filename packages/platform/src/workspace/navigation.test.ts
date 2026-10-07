@@ -10,6 +10,8 @@ import {
 	validateWorkspaceContext,
 } from "./navigation";
 import type { AppManifestEntry, NavigationCapabilities } from "./navigation";
+import { MOUNT_POINTS } from "../mount-points";
+import { toAppManifestEntries } from "./registry";
 
 const apps: AppManifestEntry[] = [
 	{
@@ -252,3 +254,85 @@ describe("labels and catalog contracts", () => {
 		).toThrow(/en:design.navLabel/);
 	});
 });
+
+describe("Platform workspace resolves app root children", () => {
+	it("resolves app-admin children for app root item in platform workspace", () => {
+		const model = resolveNavigation({
+			pathname: "/admin/users",
+			capabilities: capabilities({ platformAdmin: true }),
+			apps,
+		});
+
+		const courseAdminItem = model.items.find((item) => item.id === "course-admin");
+		expect(courseAdminItem).toBeDefined();
+		expect(courseAdminItem?.children).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					id: "quiz",
+					href: "/admin/course/quiz",
+				}),
+			]),
+		);
+	});
+
+	it("does not include app-admin children for learners in app workspace", () => {
+		const model = resolveNavigation({
+			pathname: "/course",
+			capabilities: capabilities(),
+			apps,
+		});
+
+		expect(model.workspace).toEqual({ scope: "app", appId: "course", role: "app-user" });
+		const allChildren = model.items.flatMap((item) => item.children);
+		expect(allChildren.some((child) => child.id === "quiz")).toBe(false);
+		expect(allChildren).toHaveLength(0);
+	});
+});
+
+describe("Expandable parent items and registry validation", () => {
+	it("resolves admin-system-settings with 5 settings child items in platform workspace", () => {
+		const model = resolveNavigation({
+			pathname: "/admin/users",
+			capabilities: capabilities({ platformAdmin: true }),
+			apps: toAppManifestEntries(MOUNT_POINTS),
+		});
+
+		const systemSettings = model.items.find((item) => item.id === "admin-system-settings");
+		expect(systemSettings).toBeDefined();
+		expect(systemSettings?.children).toHaveLength(5);
+		expect(systemSettings?.children.map((child) => child.href)).toEqual([
+			"/admin/email-settings",
+			"/admin/settings/checkout-gateway",
+			"/admin/settings/einvoice",
+			"/admin/settings/gemini",
+			"/admin/settings/ai-provider",
+		]);
+		expect(systemSettings?.children).toEqual([
+			expect.objectContaining({
+				id: expect.stringMatching(/email/),
+				href: "/admin/email-settings",
+			}),
+			expect.objectContaining({
+				id: expect.stringMatching(/gateway/),
+				href: "/admin/settings/checkout-gateway",
+			}),
+			expect.objectContaining({
+				id: expect.stringMatching(/einvoice/),
+				href: "/admin/settings/einvoice",
+			}),
+			expect.objectContaining({
+				id: expect.stringMatching(/gemini/),
+				href: "/admin/settings/gemini",
+			}),
+			expect.objectContaining({
+				id: expect.stringMatching(/ai-provider/),
+				href: "/admin/settings/ai-provider",
+			}),
+		]);
+	});
+
+	it("validates navigation registry without throwing for current mount points", () => {
+		expect(() => validateNavigationRegistry(toAppManifestEntries(MOUNT_POINTS))).not.toThrow();
+	});
+});
+

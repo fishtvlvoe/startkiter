@@ -1,8 +1,8 @@
 ## 1. 紅燈測試
 
-- [ ] 1.1 依「Platform workspace resolves app root children」與「Expandable parent items」在 `packages/platform/src/workspace/navigation.test.ts`（或現有 navigation 測試檔）新增紅燈測試：平台工作區 `course-admin` 帶出含 `quiz` 的 children、`admin-system-settings` 帶出 5 個設定子項、學員 `/course` 不出現 app-admin 子項；`validateNavigationRegistry(toAppManifestEntries(MOUNT_POINTS))` 不 throw。驗證：`pnpm --filter @startkiter/platform test` 新測試失敗、既有測試仍綠。
-- [ ] 1.2 依「Default sections in fixed order」「Collapsible section headings」「Expandable parent items」在 `apps/saas/modules/shared/components/NavBar.test.tsx` 新增紅燈測試：五分區標題順序與項目、無「管理」標題、自建分組優先、點分區標題收合、點「課程」不換頁且出現 11 子項、`/admin/settings/einvoice` 自動展開；保留既有分組側邊欄回歸測試不改預期。驗證：新測試失敗、舊測試仍綠。
-- [ ] 1.3 依「Mobile overflow includes sub-items」在 `apps/saas/modules/shared/lib/nav-menu-items.test.ts` 新增紅燈測試：overflow 含 `/admin/email-settings` 與 `/admin/course/quiz`，固定 3 格斷言實際順序。驗證：新測試失敗。
+- [x] 1.1 依「Platform workspace resolves app root children」與「Expandable parent items」在 `packages/platform/src/workspace/navigation.test.ts`（或現有 navigation 測試檔）新增紅燈測試：平台工作區 `course-admin` 帶出含 `quiz` 的 children、`admin-system-settings` 帶出 5 個設定子項、學員 `/course` 不出現 app-admin 子項；`validateNavigationRegistry(toAppManifestEntries(MOUNT_POINTS))` 不 throw。驗證：`pnpm --filter @startkiter/platform test` 新測試失敗、既有測試仍綠。
+- [x] 1.2 依「Default sections in fixed order」「Collapsible section headings」「Expandable parent items」在 `apps/saas/modules/shared/components/NavBar.test.tsx` 新增紅燈測試：五分區標題順序與項目、無「管理」標題、自建分組優先、點分區標題收合、點「課程」不換頁且出現 11 子項、`/admin/settings/einvoice` 自動展開；保留既有分組側邊欄回歸測試不改預期。驗證：新測試失敗、舊測試仍綠。
+- [x] 1.3 依「Mobile overflow includes sub-items」在 `apps/saas/modules/shared/lib/nav-menu-items.test.ts` 新增紅燈測試：overflow 含 `/admin/email-settings` 與 `/admin/course/quiz`，固定 3 格斷言實際順序。驗證：新測試失敗。
 
 ## 2. Manifest 與導覽解析
 

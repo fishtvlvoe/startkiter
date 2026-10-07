@@ -11,7 +11,30 @@ let mockPathname = "/";
 let mockIsCollapsed = false;
 let mockIsMobile = false;
 let mockSidebarGroups: Array<{ id: string; title: string; order: number; isCollapsed: boolean }> = [];
+let mockSidebarItems: Array<{ id: string; groupId: string; menuItemId: string; order: number }> = [];
 let mockCanAccessAdmin = false;
+
+const localStorageStore: Record<string, string> = {};
+const localStorageMock = {
+	getItem: (key: string) => localStorageStore[key] ?? null,
+	setItem: (key: string, value: string) => {
+		localStorageStore[key] = String(value);
+	},
+	removeItem: (key: string) => {
+		delete localStorageStore[key];
+	},
+	clear: () => {
+		for (const key of Object.keys(localStorageStore)) {
+			delete localStorageStore[key];
+		}
+	},
+};
+
+Object.defineProperty(globalThis, "localStorage", {
+	value: localStorageMock,
+	configurable: true,
+	writable: true,
+});
 
 vi.mock("next/navigation", () => ({
 	usePathname: () => mockPathname,
@@ -51,7 +74,7 @@ vi.mock("../hooks/use-media-query", () => ({
 }));
 
 vi.mock("../lib/sidebar-layout", () => ({
-	useSidebarLayout: () => ({ groups: mockSidebarGroups, items: [], isLoading: false }),
+	useSidebarLayout: () => ({ groups: mockSidebarGroups, items: mockSidebarItems, isLoading: false }),
 	useSaveSidebarLayout: () => ({ mutate: () => {}, isPending: false }),
 }));
 
@@ -95,6 +118,8 @@ describe("NavBar shell layout (Phase 2)", () => {
 	afterEach(() => {
 		mockIsCollapsed = false;
 		mockSidebarGroups = [];
+		mockSidebarItems = [];
+		localStorage.clear?.();
 	});
 
 	it("keeps locale controls out of the sidebar user area", () => {
@@ -195,8 +220,10 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 	afterEach(() => {
 		mockIsCollapsed = false;
 		mockSidebarGroups = [];
+		mockSidebarItems = [];
 		mockPathname = "/";
 		mockCanAccessAdmin = false;
+		localStorage.clear?.();
 	});
 
 	it("45.1 頂列 admin bar 固定 32px（h-8）並使用 semantic 配色 token", () => {
@@ -408,5 +435,207 @@ describe("NavBar iconMap & resolveIcon coverage", () => {
 		// Should NOT render span containing the long string
 		expect(html).not.toContain("unknown-feature-key");
 		expect(html).toContain("/icons/nav/package.light.svg");
+	});
+});
+
+describe("Admin 側邊欄五分區與可展開子選單（Task 1.2 紅燈測試）", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		mockIsMobile = false;
+		mockIsCollapsed = false;
+		mockSidebarGroups = [];
+		mockSidebarItems = [];
+		mockPathname = "/";
+		mockCanAccessAdmin = false;
+		localStorage.clear();
+	});
+
+	afterEach(() => {
+		mockIsCollapsed = false;
+		mockSidebarGroups = [];
+		mockSidebarItems = [];
+		mockPathname = "/";
+		mockCanAccessAdmin = false;
+		localStorage.clear();
+	});
+
+	it("1.2a 依固定順序渲染五個分區（core, content, members, billing, system）並移除單一「管理」標題", () => {
+		mockIsCollapsed = false;
+		mockCanAccessAdmin = true;
+		mockPathname = "/admin/email-settings";
+
+		const html = renderToStaticMarkup(<NavBar />);
+
+		// 移除舊的單一「管理」標題與分區容器
+		expect(html).not.toContain('data-testid="sidebar-group-admin-section"');
+		expect(html).not.toContain("app.menu.admin");
+
+		// 五個預設分區存在
+		expect(html).toContain('data-testid="sidebar-section-core"');
+		expect(html).toContain('data-testid="sidebar-section-content"');
+		expect(html).toContain('data-testid="sidebar-section-members"');
+		expect(html).toContain('data-testid="sidebar-section-billing"');
+		expect(html).toContain('data-testid="sidebar-section-system"');
+
+		// 依固定順序排序：core -> content -> members -> billing -> system
+		const corePos = html.indexOf('data-testid="sidebar-section-core"');
+		const contentPos = html.indexOf('data-testid="sidebar-section-content"');
+		const membersPos = html.indexOf('data-testid="sidebar-section-members"');
+		const billingPos = html.indexOf('data-testid="sidebar-section-billing"');
+		const systemPos = html.indexOf('data-testid="sidebar-section-system"');
+
+		expect(corePos).toBeGreaterThan(-1);
+		expect(contentPos).toBeGreaterThan(corePos);
+		expect(membersPos).toBeGreaterThan(contentPos);
+		expect(billingPos).toBeGreaterThan(membersPos);
+		expect(systemPos).toBeGreaterThan(billingPos);
+
+		// 各分區包含對應項目
+		expect(html).toContain("course.dashboard");
+		expect(html).toContain("course.navLabel");
+		expect(html).toContain("admin.menu.pages");
+		expect(html).toContain("admin.menu.users");
+		expect(html).toContain("admin.menu.organizations");
+		expect(html).toContain("admin.menu.newsletter");
+		expect(html).toContain("admin.menu.orders");
+		expect(html).toContain("admin.menu.revenue");
+		expect(html).toContain("admin.menu.systemSettings");
+	});
+
+	it("1.2b 使用者自建分組優先於預設分區（拖入自建分組的項目不再出現在預設分區）", () => {
+		mockIsCollapsed = false;
+		mockCanAccessAdmin = true;
+		mockPathname = "/admin/orders";
+		mockSidebarGroups = [
+			{ id: "custom-group-1", title: "營運常用", order: 0, isCollapsed: false },
+		];
+		mockSidebarItems = [
+			{ id: "assigned-orders", groupId: "custom-group-1", menuItemId: "admin-orders", order: 0 },
+		];
+
+		const html = renderToStaticMarkup(<NavBar />);
+
+		// 自建分組存在且包含「訂單管理」
+		expect(html).toContain('data-testid="sidebar-group-custom-group-1"');
+		expect(html).toContain('data-testid="sidebar-group-item-admin-orders"');
+
+		// billing 分區依然渲染其餘項目（營收報表），但不包含「訂單管理」
+		expect(html).toContain('data-testid="sidebar-section-billing"');
+		expect(html).toContain("admin.menu.revenue");
+
+		const billingSectionHtml =
+			html.split('data-testid="sidebar-section-billing"')[1]?.split('data-testid="sidebar-section-')[0] ?? "";
+		expect(billingSectionHtml).toContain("admin.menu.revenue");
+		expect(billingSectionHtml).not.toContain('data-testid="sidebar-group-item-admin-orders"');
+		expect(billingSectionHtml).not.toContain("admin.menu.orders");
+	});
+
+	it("1.2c 分區標題可點擊收合，收合時隱藏其項目且其他分區保持可見", () => {
+		mockIsCollapsed = false;
+		mockCanAccessAdmin = true;
+		mockPathname = "/admin/users";
+
+		// 預設展開時：分區標題具備收合按鈕控制項，且項目正常顯示
+		const expandedHtml = renderToStaticMarkup(<NavBar />);
+		expect(expandedHtml).toContain('data-testid="sidebar-section-toggle-billing"');
+		expect(expandedHtml).toContain('data-testid="sidebar-section-billing"');
+		expect(expandedHtml).toContain('data-sidebar-section-collapsed="false"');
+		expect(expandedHtml).toContain("admin.menu.orders");
+		expect(expandedHtml).toContain("admin.menu.revenue");
+
+		// 收合 billing 分區
+		localStorage.setItem("startkiter:sidebar-collapsed-sections", JSON.stringify(["billing"]));
+		const collapsedHtml = renderToStaticMarkup(<NavBar />);
+
+		// billing 分區標記為收合狀態，其子項目被隱藏
+		expect(collapsedHtml).toContain('data-testid="sidebar-section-billing"');
+		expect(collapsedHtml).toContain('data-sidebar-section-collapsed="true"');
+		const billingSectionHtml =
+			collapsedHtml.split('data-testid="sidebar-section-billing"')[1]?.split('data-testid="sidebar-section-')[0] ?? "";
+		expect(billingSectionHtml).not.toContain("admin.menu.orders");
+		expect(billingSectionHtml).not.toContain("admin.menu.revenue");
+
+		// 其他分區（如 members 與 core）依然展開且可見
+		expect(collapsedHtml).toContain("admin.menu.users");
+		expect(collapsedHtml).toContain("course.dashboard");
+	});
+
+	it("1.2d 點「課程」切換展開子選單而不換頁，展開後顯示完整的 11 個課程子項", () => {
+		mockIsCollapsed = false;
+		mockCanAccessAdmin = true;
+		mockPathname = "/admin/users";
+
+		localStorage.setItem("startkiter:sidebar-expanded-submenus", JSON.stringify(["course-admin"]));
+		const html = renderToStaticMarkup(<NavBar />);
+
+		// 頂層「課程」項目是不直接導向 /admin/course 的展開按鈕（點擊不換頁）
+		expect(html).toContain('data-testid="sidebar-item-toggle-course-admin"');
+		const courseToggleHtml = html.match(/<[^>]*data-testid="sidebar-item-toggle-course-admin"[^>]*>/)?.[0] ?? "";
+		expect(courseToggleHtml).not.toContain('href="/admin/course"');
+
+		// 子選單展開且包含全部 11 個課程子項目
+		// 1. 課程列表 (self route: /admin/course)
+		expect(html).toContain('href="/admin/course"');
+		expect(html).toContain("course.list");
+		// 2. 測驗管理
+		expect(html).toContain('href="/admin/course/quiz"');
+		expect(html).toContain("course.quiz");
+		// 3. 作業管理
+		expect(html).toContain('href="/admin/course/assignment"');
+		expect(html).toContain("course.assignment");
+		// 4. 評價與留言管理
+		expect(html).toContain('href="/admin/course/review"');
+		expect(html).toContain("course.review");
+		// 5. 課程留言
+		expect(html).toContain('href="/admin/course/comments"');
+		expect(html).toContain("course.comments");
+		// 6. 學員私訊
+		expect(html).toContain('href="/admin/course/messages"');
+		expect(html).toContain("course.messages");
+		// 7. 課程優惠券
+		expect(html).toContain('href="/admin/course/coupons"');
+		expect(html).toContain("course.coupons");
+		// 8. 課程綁定包
+		expect(html).toContain('href="/admin/course/bundles"');
+		expect(html).toContain("course.bundles");
+		// 9. 新生問卷
+		expect(html).toContain('href="/admin/course/onboarding-surveys"');
+		expect(html).toContain("course.onboarding");
+		// 10. 課程媒體庫
+		expect(html).toContain('href="/admin/course/media"');
+		expect(html).toContain("course.media");
+		// 11. CoursePack 任務
+		expect(html).toContain('href="/admin/course/course-pack"');
+		expect(html).toContain("course.coursePack");
+	});
+
+	it("1.2e 在 /admin/settings/einvoice 時自動展開「系統設定」子選單且發票設定標記為 active", () => {
+		mockIsCollapsed = false;
+		mockCanAccessAdmin = true;
+		mockPathname = "/admin/settings/einvoice";
+
+		const html = renderToStaticMarkup(<NavBar />);
+
+		// 系統設定父項目存在
+		expect(html).toContain("admin.menu.systemSettings");
+
+		// 子選單自動展開，全部 5 個設定子頁可見
+		expect(html).toContain('href="/admin/email-settings"');
+		expect(html).toContain("admin.menu.emailSettings");
+		expect(html).toContain('href="/admin/settings/checkout-gateway"');
+		expect(html).toContain("admin.menu.gateway");
+		expect(html).toContain('href="/admin/settings/einvoice"');
+		expect(html).toContain("admin.menu.einvoice");
+		expect(html).toContain('href="/admin/settings/gemini"');
+		expect(html).toContain("admin.menu.gemini");
+		expect(html).toContain('href="/admin/settings/ai-provider"');
+		expect(html).toContain("admin.menu.aiProvider");
+
+		// 發票設定標記為 active
+		const einvoiceLinkMatch = html.match(/<a[^>]*href="\/admin\/settings\/einvoice"[^>]*class="([^"]*)"/);
+		expect(einvoiceLinkMatch).not.toBeNull();
+		const einvoiceClasses = einvoiceLinkMatch?.[1] ?? "";
+		expect(einvoiceClasses).toContain("font-semibold");
+		expect(einvoiceClasses).toContain("text-foreground");
 	});
 });

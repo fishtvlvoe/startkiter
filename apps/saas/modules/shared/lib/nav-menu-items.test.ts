@@ -262,3 +262,81 @@ describe("nav-menu-items (WorkspaceContext navigation model)", () => {
 			expect(overflow).toHaveLength(0);
 		});
 	});
+
+	describe("Task 1.3: Mobile overflow includes sub-items", () => {
+		it("platform admin mobile tab bar fixed items order is 控制台, 課程, 頁面管理 and overflow flattens sub-items including /admin/email-settings and /admin/course/quiz", () => {
+			const adminMenuItems: MountMenuItem[] = [
+				{ id: "course-dashboard", label: "控制台", href: "/admin/course/dashboard", icon: "home", order: 1, isActive: false },
+				{
+					id: "course-admin",
+					label: "課程",
+					href: "/admin/course",
+					icon: "book-open",
+					order: 2,
+					isActive: false,
+					subItems: [
+						{ id: "course-list", label: "課程列表", href: "/admin/course" },
+						{ id: "quiz", label: "測驗管理", href: "/admin/course/quiz" },
+						{ id: "assignment", label: "作業管理", href: "/admin/course/assignment" },
+					],
+				},
+				{ id: "pages-cms", label: "頁面管理", href: "/admin/pages", icon: "file-text", order: 3, isActive: false },
+				{ id: "admin-users", label: "用戶", href: "/admin/users", icon: "users", order: 4, isActive: false },
+				{
+					id: "admin-system-settings",
+					label: "系統設定",
+					href: "/admin/settings",
+					icon: "settings",
+					order: 5,
+					isActive: false,
+					subItems: [
+						{ id: "email-settings", label: "Email 設定", href: "/admin/email-settings" },
+						{ id: "gateway", label: "收款閘道設定", href: "/admin/settings/checkout-gateway" },
+						{ id: "einvoice", label: "發票設定", href: "/admin/settings/einvoice" },
+					],
+				},
+			];
+
+			const { fixed, overflow } = getTabBarItems(adminMenuItems);
+
+			expect(fixed.map((item) => item.label)).toEqual(["控制台", "課程", "頁面管理"]);
+			expect(overflow).toHaveLength(1);
+
+			const overflowSubItems = overflow[0]?.subItems ?? [];
+			const overflowHrefs = overflowSubItems.map((item) => item.href);
+
+			expect(overflowHrefs).toContain("/admin/email-settings");
+			expect(overflowHrefs).toContain("/admin/course/quiz");
+		});
+
+		it("flattens subItems of non-fixed parent items into overflow drawer so all sub-pages are reachable", () => {
+			const mockItems: MountMenuItem[] = [
+				{ id: "item-1", label: "項目 1", href: "/item-1", icon: "home", order: 1, isActive: false },
+				{ id: "item-2", label: "項目 2", href: "/item-2", icon: "home", order: 2, isActive: false },
+				{ id: "item-3", label: "項目 3", href: "/item-3", icon: "home", order: 3, isActive: false },
+				{ id: "standalone", label: "獨立管理頁", href: "/standalone", icon: "file", order: 4, isActive: false },
+				{
+					id: "parent-menu",
+					label: "母選單",
+					href: "/parent",
+					icon: "settings",
+					order: 5,
+					isActive: false,
+					subItems: [
+						{ id: "sub-1", label: "子項目 1", href: "/parent/sub-1" },
+						{ id: "sub-2", label: "子項目 2", href: "/parent/sub-2" },
+					],
+				},
+			];
+
+			const { fixed, overflow } = getTabBarItems(mockItems);
+
+			expect(fixed).toHaveLength(3);
+			expect(overflow).toHaveLength(1);
+
+			const overflowHrefs = (overflow[0]?.subItems ?? []).map((item) => item.href);
+			expect(overflowHrefs).toContain("/standalone");
+			expect(overflowHrefs).toContain("/parent/sub-1");
+			expect(overflowHrefs).toContain("/parent/sub-2");
+		});
+	});
