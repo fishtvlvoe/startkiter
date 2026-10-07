@@ -17,7 +17,7 @@
 
 ## 4. Review
 
-- [ ] 4.1 [after: 3.1, 3.2] 由不同於實作方的審查者做 code review，聚焦：自建分組拖曳是否仍可用、學員端選單是否變動、localStorage 失效時是否正常、是否有死連結。驗證：無 Critical，修完重跑 `pnpm --filter @startkiter/platform test`、`pnpm --filter @startkiter/saas exec vitest run`、`pnpm --filter @startkiter/saas run type-check` 全綠。
+- [x] 4.1 （Codex 不可用，由 PM 親審：抓到 hydration、分區順序、手機更多排序 3 項已修，commit 4b8d37d5）[after: 3.1, 3.2] 由不同於實作方的審查者做 code review，聚焦：自建分組拖曳是否仍可用、學員端選單是否變動、localStorage 失效時是否正常、是否有死連結。驗證：無 Critical，修完重跑 `pnpm --filter @startkiter/platform test`、`pnpm --filter @startkiter/saas exec vitest run`、`pnpm --filter @startkiter/saas run type-check` 全綠。
 
 ## 5. 部署驗收
 
