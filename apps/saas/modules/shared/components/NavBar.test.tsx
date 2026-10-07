@@ -1,4 +1,7 @@
-import React from "react";
+// @vitest-environment jsdom
+
+import React, { act, type ReactElement } from "react";
+import { createRoot, type Root } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MOUNT_POINTS } from "@startkiter/platform";
@@ -13,6 +16,25 @@ let mockIsMobile = false;
 let mockSidebarGroups: Array<{ id: string; title: string; order: number; isCollapsed: boolean }> = [];
 let mockSidebarItems: Array<{ id: string; groupId: string; menuItemId: string; order: number }> = [];
 let mockCanAccessAdmin = false;
+
+const mockRouterPush = vi.fn();
+const mockRouterReplace = vi.fn();
+const mockRouterRefresh = vi.fn();
+
+(globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
+
+const roots = new Set<Root>();
+
+async function renderClient(element: ReactElement) {
+	const container = document.createElement("div");
+	document.body.appendChild(container);
+	const root = createRoot(container);
+	roots.add(root);
+	await act(async () => {
+		root.render(element);
+	});
+	return container;
+}
 
 const localStorageStore: Record<string, string> = {};
 const localStorageMock = {
@@ -38,7 +60,7 @@ Object.defineProperty(globalThis, "localStorage", {
 
 vi.mock("next/navigation", () => ({
 	usePathname: () => mockPathname,
-	useRouter: () => ({ refresh: () => {}, push: () => {}, replace: () => {} }),
+	useRouter: () => ({ refresh: mockRouterRefresh, push: mockRouterPush, replace: mockRouterReplace }),
 }));
 
 vi.mock("next-intl", () => ({
@@ -455,12 +477,20 @@ describe("Admin 側邊欄五分區與可展開子選單（Task 1.2 紅燈測試�
 	});
 
 	afterEach(() => {
+		for (const root of roots) {
+			act(() => root.unmount());
+		}
+		roots.clear();
+		if (typeof document !== "undefined") {
+			document.body.innerHTML = "";
+		}
 		mockIsCollapsed = false;
 		mockSidebarGroups = [];
 		mockSidebarItems = [];
 		mockPathname = "/";
 		mockCanAccessAdmin = false;
 		localStorage.clear();
+		vi.clearAllMocks();
 	});
 
 	it("1.2a 依固定順序渲染五個分區（core, content, members, billing, system）並移除單一「管理」標題", () => {
@@ -508,6 +538,32 @@ describe("Admin 側邊欄五分區與可展開子選單（Task 1.2 紅燈測試�
 		expect(html).toContain("admin.menu.orders");
 		expect(html).toContain("admin.menu.revenue");
 		expect(html).toContain("admin.menu.systemSettings");
+
+		// 會員與行銷分區內部順序符合 spec 與設計稿：用戶 -> 組織 -> 電子報
+		const usersPos = html.indexOf("admin.menu.users");
+		const orgsPos = html.indexOf("admin.menu.organizations");
+		const newsletterPos = html.indexOf("admin.menu.newsletter");
+		expect(usersPos).toBeGreaterThan(-1);
+		expect(orgsPos).toBeGreaterThan(usersPos);
+		expect(newsletterPos).toBeGreaterThan(orgsPos);
+	});
+
+	it("在伺服器渲染（無 localStorage）與客戶端首次渲染（即使 localStorage 存有自訂收合或展開）輸出相同的 HTML，避免 hydration mismatch", () => {
+		mockIsCollapsed = false;
+		mockCanAccessAdmin = true;
+		mockPathname = "/admin/users";
+
+		// 模擬伺服器渲染或 localStorage 為空
+		localStorage.clear();
+		const serverHtml = renderToStaticMarkup(<NavBar />);
+
+		// 模擬客戶端含有舊的展開/收合快取
+		localStorage.setItem("startkiter:sidebar-expanded-submenus", JSON.stringify(["course-admin"]));
+		localStorage.setItem("startkiter:sidebar-collapsed-sections", JSON.stringify(["billing"]));
+		const clientInitialHtml = renderToStaticMarkup(<NavBar />);
+
+		// 首次渲染必須不受 localStorage 影響，保持與伺服器端 HTML 一致
+		expect(clientInitialHtml).toBe(serverHtml);
 	});
 
 	it("1.2b 使用者自建分組優先於預設分區（拖入自建分組的項目不再出現在預設分區）", () => {
@@ -538,83 +594,105 @@ describe("Admin 側邊欄五分區與可展開子選單（Task 1.2 紅燈測試�
 		expect(billingSectionHtml).not.toContain("admin.menu.orders");
 	});
 
-	it("1.2c 分區標題可點擊收合，收合時隱藏其項目且其他分區保持可見", () => {
+	it("1.2c 分區標題可點擊收合，收合時隱藏其項目且其他分區保持可見", async () => {
 		mockIsCollapsed = false;
 		mockCanAccessAdmin = true;
 		mockPathname = "/admin/users";
+
+		// 客戶端渲染 /admin/users
+		const container = await renderClient(<NavBar />);
 
 		// 預設展開時：分區標題具備收合按鈕控制項，且項目正常顯示
-		const expandedHtml = renderToStaticMarkup(<NavBar />);
-		expect(expandedHtml).toContain('data-testid="sidebar-section-toggle-billing"');
-		expect(expandedHtml).toContain('data-testid="sidebar-section-billing"');
-		expect(expandedHtml).toContain('data-sidebar-section-collapsed="false"');
-		expect(expandedHtml).toContain("admin.menu.orders");
-		expect(expandedHtml).toContain("admin.menu.revenue");
+		const billingToggle = container.querySelector(
+			'[data-testid="sidebar-section-toggle-billing"]',
+		) as HTMLButtonElement;
+		expect(billingToggle).not.toBeNull();
+		expect(container.querySelector('[data-testid="sidebar-section-billing"]')).not.toBeNull();
+		expect(container.querySelector('a[href="/admin/orders"]')).not.toBeNull();
+		expect(container.querySelector('a[href="/admin/revenue"]')).not.toBeNull();
 
-		// 收合 billing 分區
-		localStorage.setItem("startkiter:sidebar-collapsed-sections", JSON.stringify(["billing"]));
-		const collapsedHtml = renderToStaticMarkup(<NavBar />);
+		// 點「營收」分區標題，斷言 訂單管理、營收報表 的連結消失，其他分區仍在
+		await act(async () => {
+			billingToggle.click();
+		});
 
-		// billing 分區標記為收合狀態，其子項目被隱藏
-		expect(collapsedHtml).toContain('data-testid="sidebar-section-billing"');
-		expect(collapsedHtml).toContain('data-sidebar-section-collapsed="true"');
-		const billingSectionHtml =
-			collapsedHtml.split('data-testid="sidebar-section-billing"')[1]?.split('data-testid="sidebar-section-')[0] ?? "";
-		expect(billingSectionHtml).not.toContain("admin.menu.orders");
-		expect(billingSectionHtml).not.toContain("admin.menu.revenue");
+		expect(container.querySelector('a[href="/admin/orders"]')).toBeNull();
+		expect(container.querySelector('a[href="/admin/revenue"]')).toBeNull();
+		expect(container.querySelector('[data-testid="sidebar-section-members"]')).not.toBeNull();
+		expect(container.querySelector('a[href="/admin/users"]')).not.toBeNull();
 
-		// 其他分區（如 members 與 core）依然展開且可見
-		expect(collapsedHtml).toContain("admin.menu.users");
-		expect(collapsedHtml).toContain("course.dashboard");
+		// 再點一次斷言回來
+		await act(async () => {
+			billingToggle.click();
+		});
+
+		expect(container.querySelector('a[href="/admin/orders"]')).not.toBeNull();
+		expect(container.querySelector('a[href="/admin/revenue"]')).not.toBeNull();
 	});
 
-	it("1.2d 點「課程」切換展開子選單而不換頁，展開後顯示完整的 11 個課程子項", () => {
+	it("1.2c (localStorage 預存) localStorage 預存營收為收合時，掛載完成（act 後）營收是收合的", async () => {
+		mockIsCollapsed = false;
+		mockCanAccessAdmin = true;
+		mockPathname = "/admin/users";
+		localStorage.setItem("startkiter:sidebar-collapsed-sections", JSON.stringify(["billing"]));
+
+		const container = await renderClient(<NavBar />);
+
+		expect(container.querySelector('[data-testid="sidebar-section-billing"]')).not.toBeNull();
+		expect(container.querySelector('a[href="/admin/orders"]')).toBeNull();
+		expect(container.querySelector('a[href="/admin/revenue"]')).toBeNull();
+		expect(container.querySelector('a[href="/admin/users"]')).not.toBeNull();
+	});
+
+	it("1.2d 點「課程」切換展開子選單而不換頁，展開後顯示完整的 11 個課程子項", async () => {
 		mockIsCollapsed = false;
 		mockCanAccessAdmin = true;
 		mockPathname = "/admin/users";
 
-		localStorage.setItem("startkiter:sidebar-expanded-submenus", JSON.stringify(["course-admin"]));
-		const html = renderToStaticMarkup(<NavBar />);
+		const container = await renderClient(<NavBar />);
+
+		// 初始狀態下課程子項不展開
+		expect(container.querySelector('a[href="/admin/course/quiz"]')).toBeNull();
 
 		// 頂層「課程」項目是不直接導向 /admin/course 的展開按鈕（點擊不換頁）
-		expect(html).toContain('data-testid="sidebar-item-toggle-course-admin"');
-		const courseToggleHtml = html.match(/<[^>]*data-testid="sidebar-item-toggle-course-admin"[^>]*>/)?.[0] ?? "";
-		expect(courseToggleHtml).not.toContain('href="/admin/course"');
+		const courseToggle = container.querySelector(
+			'[data-testid="sidebar-item-toggle-course-admin"]',
+		) as HTMLButtonElement;
+		expect(courseToggle).not.toBeNull();
+		expect(courseToggle.tagName.toLowerCase()).toBe("button");
+
+		// 點擊「課程」
+		await act(async () => {
+			courseToggle.click();
+		});
+
+		// 斷言網址不變（沒呼叫 router push / replace）
+		expect(mockRouterPush).not.toHaveBeenCalled();
+		expect(mockRouterReplace).not.toHaveBeenCalled();
 
 		// 子選單展開且包含全部 11 個課程子項目
 		// 1. 課程列表 (self route: /admin/course)
-		expect(html).toContain('href="/admin/course"');
-		expect(html).toContain("course.list");
+		expect(container.querySelector('a[href="/admin/course"]')).not.toBeNull();
 		// 2. 測驗管理
-		expect(html).toContain('href="/admin/course/quiz"');
-		expect(html).toContain("course.quiz");
+		expect(container.querySelector('a[href="/admin/course/quiz"]')).not.toBeNull();
 		// 3. 作業管理
-		expect(html).toContain('href="/admin/course/assignment"');
-		expect(html).toContain("course.assignment");
+		expect(container.querySelector('a[href="/admin/course/assignment"]')).not.toBeNull();
 		// 4. 評價與留言管理
-		expect(html).toContain('href="/admin/course/review"');
-		expect(html).toContain("course.review");
+		expect(container.querySelector('a[href="/admin/course/review"]')).not.toBeNull();
 		// 5. 課程留言
-		expect(html).toContain('href="/admin/course/comments"');
-		expect(html).toContain("course.comments");
+		expect(container.querySelector('a[href="/admin/course/comments"]')).not.toBeNull();
 		// 6. 學員私訊
-		expect(html).toContain('href="/admin/course/messages"');
-		expect(html).toContain("course.messages");
+		expect(container.querySelector('a[href="/admin/course/messages"]')).not.toBeNull();
 		// 7. 課程優惠券
-		expect(html).toContain('href="/admin/course/coupons"');
-		expect(html).toContain("course.coupons");
+		expect(container.querySelector('a[href="/admin/course/coupons"]')).not.toBeNull();
 		// 8. 課程綁定包
-		expect(html).toContain('href="/admin/course/bundles"');
-		expect(html).toContain("course.bundles");
+		expect(container.querySelector('a[href="/admin/course/bundles"]')).not.toBeNull();
 		// 9. 新生問卷
-		expect(html).toContain('href="/admin/course/onboarding-surveys"');
-		expect(html).toContain("course.onboarding");
+		expect(container.querySelector('a[href="/admin/course/onboarding-surveys"]')).not.toBeNull();
 		// 10. 課程媒體庫
-		expect(html).toContain('href="/admin/course/media"');
-		expect(html).toContain("course.media");
+		expect(container.querySelector('a[href="/admin/course/media"]')).not.toBeNull();
 		// 11. CoursePack 任務
-		expect(html).toContain('href="/admin/course/course-pack"');
-		expect(html).toContain("course.coursePack");
+		expect(container.querySelector('a[href="/admin/course/course-pack"]')).not.toBeNull();
 	});
 
 	it("1.2e 在 /admin/settings/einvoice 時自動展開「系統設定」子選單且發票設定標記為 active", () => {
