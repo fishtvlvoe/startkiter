@@ -117,15 +117,20 @@ export function getMountNavigationContext({
 		(entry) => canAccessPagesCms || entry.id !== "pages-cms",
 	);
 	const requestedPath = pathname === "/" ? "/app" : pathname;
+	const isPlatformAdminOnAdminPath = Boolean(
+		platformAdmin && (requestedPath === "/admin" || requestedPath.startsWith("/admin/")),
+	);
 	const requestedEntry = [...apps]
 		.sort((left, right) => right.route.path.length - left.route.path.length)
 		.find((entry) => matchesRoute(requestedPath, entry.route.path));
-	const resolutionPath = requestedEntry
-		? requestedPath
-		: platformAdmin && requestedPath.startsWith("/admin/")
-			? "/admin/users"
-			: "/app";
-	const appRole = getAppRoleForPath(resolutionPath, apps);
+	const resolutionPath = isPlatformAdminOnAdminPath
+		? "/admin"
+		: requestedEntry
+			? requestedPath
+			: platformAdmin && requestedPath.startsWith("/admin/")
+				? "/admin/users"
+				: "/app";
+	const appRole = isPlatformAdminOnAdminPath ? undefined : getAppRoleForPath(resolutionPath, apps);
 	const currentEntry = [...apps]
 		.sort((left, right) => right.route.path.length - left.route.path.length)
 		.find((entry) => matchesRoute(resolutionPath, entry.route.path));
