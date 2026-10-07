@@ -10,4 +10,4 @@
 
 ## 3. 驗收
 
-- [ ] 3.1 [after: 2.1, 2.2] 跑 `pnpm --filter @startkiter/saas run type-check` 與正式 build。PM 親審 diff 後部署，正式站 ego-browser：桌面 1440 在 `/admin/course/quiz`（先把內容分區收起再重新整理）內容分區展開且測驗管理亮起、在發票設定頁可收起系統設定、點子選單切頁網址變但頁面不整頁重載（以 `performance.getEntriesByType('navigation')` 數量不變判斷）；手機 390 客服泡泡與底部選單不重疊（量兩者座標）。截圖存 `~/Downloads/sk-batch1-*.png`。驗證：截圖與量測數字。
+- [x] 3.1 [after: 2.1, 2.2] 跑 `pnpm --filter @startkiter/saas run type-check` 與正式 build。PM 親審 diff 後部署，正式站 ego-browser：桌面 1440 在 `/admin/course/quiz`（先把內容分區收起再重新整理）內容分區展開且測驗管理亮起、在發票設定頁可收起系統設定、點子選單切頁網址變但頁面不整頁重載（以 `performance.getEntriesByType('navigation')` 數量不變判斷）；手機 390 客服泡泡與底部選單不重疊（量兩者座標）。截圖存 `~/Downloads/sk-batch1-*.png`。驗證：截圖與量測數字。

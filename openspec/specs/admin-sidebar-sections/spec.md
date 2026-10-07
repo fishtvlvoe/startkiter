@@ -42,17 +42,30 @@ code:
 ---
 ### Requirement: Collapsible section headings
 
-Clicking a section heading SHALL hide or show that section's items. When storage is unavailable, all sections SHALL render expanded.
+Clicking a section heading SHALL hide or show that section's items. When storage is unavailable, all sections SHALL render expanded. The section that contains the current page SHALL always render expanded, regardless of any stored collapsed state. Each section heading button SHALL expose `aria-expanded` matching its state and `aria-controls` referencing the id of its item list.
+
+##### Example: Stored collapse versus current page
+
+| Stored collapsed sections | Current path | Content section | Billing section |
+| ------------------------- | ------------ | --------------- | --------------- |
+| content, billing | /admin/course/quiz | expanded | collapsed |
+| content, billing | /admin/orders | collapsed | expanded |
+| none | /admin/users | expanded | expanded |
 
 #### Scenario: Collapse billing
 
-- **WHEN** the administrator clicks the billing heading
-- **THEN** 訂單管理 and 營收報表 are hidden and the other sections remain visible
+- **WHEN** the administrator clicks the billing heading on `/admin/users`
+- **THEN** 訂單管理 and 營收報表 are hidden, the other sections remain visible, and the billing heading has `aria-expanded="false"`
+
+#### Scenario: Current section forced open
+
+- **WHEN** the content section was stored as collapsed and the administrator opens `/admin/course/dashboard`
+- **THEN** the content section is expanded and 課程儀表板 is marked active
 
 
 <!-- @trace
-source: admin-sidebar-grouped-nav
-updated: 2026-10-07
+source: admin-nav-polish-batch1
+updated: 2026-10-08
 code:
   - AGENTS.md
   - docs/dashboard/README.md
@@ -61,7 +74,7 @@ code:
 ---
 ### Requirement: Expandable parent items
 
-A menu item with sub-items SHALL toggle its sub-menu when clicked instead of navigating. When the current path matches one of its sub-items, the sub-menu SHALL be expanded on load. When the parent declares a self label, the first sub-item SHALL link to the parent's own route with that label.
+A menu item with sub-items SHALL toggle its sub-menu when clicked instead of navigating. When the current path matches one of its sub-items, the sub-menu SHALL be expanded on load, and the user SHALL still be able to collapse it by clicking the parent. When the parent declares a self label, the first sub-item SHALL link to the parent's own route with that label. Sub-item links SHALL use client-side navigation without a full page reload. The parent toggle button SHALL expose `aria-expanded` and `aria-controls`.
 
 ##### Example: Sub-menus
 
@@ -80,10 +93,20 @@ A menu item with sub-items SHALL toggle its sub-menu when clicked instead of nav
 - **WHEN** the administrator on `/admin/users` clicks 課程
 - **THEN** the URL stays `/admin/users` and the 12 course sub-items become visible
 
+#### Scenario: Collapse while on a child page
+
+- **WHEN** the administrator on `/admin/settings/einvoice` clicks 系統設定
+- **THEN** the five settings sub-items are hidden and 系統設定 has `aria-expanded="false"`
+
+#### Scenario: Client-side navigation
+
+- **WHEN** the administrator clicks 測驗管理 in the expanded 課程 sub-menu
+- **THEN** the sub-item is rendered by the Next.js `Link` component, so the router changes route without a document reload
+
 
 <!-- @trace
-source: platform-admin-dashboard
-updated: 2026-10-07
+source: admin-nav-polish-batch1
+updated: 2026-10-08
 code:
   - AGENTS.md
   - docs/dashboard/README.md
@@ -120,6 +143,24 @@ The core section item 控制台 SHALL link to `/admin/dashboard`.
 <!-- @trace
 source: platform-admin-dashboard
 updated: 2026-10-07
+code:
+  - AGENTS.md
+  - docs/dashboard/README.md
+-->
+
+---
+### Requirement: Accessible custom group controls
+
+The collapse button of each user-created group SHALL expose `aria-expanded` and `aria-controls`. The rename button SHALL have `aria-label` "重新命名分組" and SHALL be visible when focused by keyboard.
+
+#### Scenario: Keyboard focus on rename
+
+- **WHEN** a keyboard user tabs to a group's rename button
+- **THEN** the button is visible and announces "重新命名分組"
+
+<!-- @trace
+source: admin-nav-polish-batch1
+updated: 2026-10-08
 code:
   - AGENTS.md
   - docs/dashboard/README.md
