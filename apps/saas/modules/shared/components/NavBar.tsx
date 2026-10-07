@@ -43,6 +43,7 @@ import {
 	BotMessageSquareIcon,
 	BookOpenIcon,
 	ClipboardListIcon,
+	ChevronDownIcon,
 	ChevronLeftIcon,
 	ChevronRightIcon,
 	EllipsisIcon,
@@ -91,6 +92,8 @@ interface NavMenuItem {
 	isActive: boolean;
 	order: number;
 	requiresOperator?: boolean;
+	section?: "core" | "content" | "members" | "billing" | "system";
+	selfLabelKey?: string;
 	subItems?: NavSubItem[];
 }
 
@@ -486,6 +489,51 @@ interface SidebarGroupedNavProps {
 	isSaving: boolean;
 }
 
+const DEFAULT_ADMIN_SECTIONS = ["core", "content", "members", "billing", "system", "other"] as const;
+type AdminSectionKey = (typeof DEFAULT_ADMIN_SECTIONS)[number];
+
+function getStoredExpandedSubmenus(): string[] {
+	try {
+		if (typeof localStorage === "undefined") {
+			return [];
+		}
+		const raw = localStorage.getItem("startkiter:sidebar-expanded-submenus");
+		return raw ? JSON.parse(raw) : [];
+	} catch {
+		return [];
+	}
+}
+
+function setStoredExpandedSubmenus(items: string[]) {
+	try {
+		if (typeof localStorage === "undefined") {
+			return;
+		}
+		localStorage.setItem("startkiter:sidebar-expanded-submenus", JSON.stringify(items));
+	} catch {}
+}
+
+function getStoredCollapsedSections(): string[] {
+	try {
+		if (typeof localStorage === "undefined") {
+			return [];
+		}
+		const raw = localStorage.getItem("startkiter:sidebar-collapsed-sections");
+		return raw ? JSON.parse(raw) : [];
+	} catch {
+		return [];
+	}
+}
+
+function setStoredCollapsedSections(sections: string[]) {
+	try {
+		if (typeof localStorage === "undefined") {
+			return;
+		}
+		localStorage.setItem("startkiter:sidebar-collapsed-sections", JSON.stringify(sections));
+	} catch {}
+}
+
 function SidebarGroupedNavItem({
 	menuItem,
 	isSaving,
@@ -493,11 +541,48 @@ function SidebarGroupedNavItem({
 	menuItem: NavMenuItem;
 	isSaving: boolean;
 }) {
+	const t = useTranslations();
 	const pathname = usePathname();
+
+	const effectiveSubItems = useMemo(() => {
+		const items: NavSubItem[] = [];
+		if (menuItem.selfLabelKey) {
+			items.push({
+				label: t(menuItem.selfLabelKey as any),
+				href: menuItem.href,
+			});
+		}
+		if (menuItem.subItems) {
+			items.push(...menuItem.subItems);
+		}
+		return items;
+	}, [menuItem.selfLabelKey, menuItem.href, menuItem.subItems, t]);
+
+	const hasSubItems = effectiveSubItems.length > 0;
+	const isChildActive = effectiveSubItems.some((subItem) => isNavSubItemActive(pathname, subItem.href));
 	const isActive =
 		isMenuActive(pathname, menuItem.href) ||
-		(menuItem.subItems?.some((subItem) => isNavSubItemActive(pathname, subItem.href)) ?? false);
-	const hasSubItems = (menuItem.subItems?.length ?? 0) > 0;
+		isChildActive;
+
+	const [isManualExpanded, setIsManualExpanded] = useState<boolean>(() => {
+		return getStoredExpandedSubmenus().includes(menuItem.id);
+	});
+
+	function handleToggleSubmenu() {
+		setIsManualExpanded((prev) => {
+			const next = !prev;
+			try {
+				const current = getStoredExpandedSubmenus();
+				const updated = next
+					? Array.from(new Set([...current, menuItem.id]))
+					: current.filter((id) => id !== menuItem.id);
+				setStoredExpandedSubmenus(updated);
+			} catch {}
+			return next;
+		});
+	}
+
+	const isExpanded = isChildActive || isManualExpanded;
 
 	return (
 		<li
@@ -507,42 +592,68 @@ function SidebarGroupedNavItem({
 				event.dataTransfer.setData("text/plain", menuItem.id)
 			}
 		>
-			<Link
-				href={menuItem.href}
-				aria-disabled={isSaving}
-				className={cn(
-					"gap-3 px-3 py-2 text-sm flex w-full items-center rounded-lg whitespace-nowrap transition-colors cursor-grab",
-					isActive ? "bg-accent font-semibold text-accent-foreground" : "hover:bg-accent/50",
-					isSaving && "pointer-events-none opacity-60",
-				)}
-			>
-				<menuItem.icon
-					className={cn("size-5 shrink-0", isActive ? "text-accent-foreground" : "text-muted-foreground")}
-				/>
-				<span className={isActive ? "text-accent-foreground" : "text-muted-foreground"}>{menuItem.label}</span>
-			</Link>
-			{hasSubItems && isActive && (
+			{hasSubItems ? (
+				<button
+					type="button"
+					data-testid={`sidebar-item-toggle-${menuItem.id}`}
+					disabled={isSaving}
+					onClick={handleToggleSubmenu}
+					className={cn(
+						"gap-3 px-3 py-2 text-sm flex w-full items-center rounded-lg whitespace-nowrap transition-colors cursor-pointer",
+						isActive ? "bg-accent font-semibold text-accent-foreground" : "hover:bg-accent/50",
+						isSaving && "pointer-events-none opacity-60",
+					)}
+				>
+					<menuItem.icon
+						className={cn("size-5 shrink-0", isActive ? "text-accent-foreground" : "text-muted-foreground")}
+					/>
+					<span className={cn("flex-1 text-left truncate", isActive ? "text-accent-foreground" : "text-muted-foreground")}>
+						{menuItem.label}
+					</span>
+					<ChevronRightIcon
+						className={cn(
+							"size-3.5 shrink-0 text-muted-foreground transition-transform",
+							isExpanded && "rotate-90",
+						)}
+					/>
+				</button>
+			) : (
+				<Link
+					href={menuItem.href}
+					aria-disabled={isSaving}
+					className={cn(
+						"gap-3 px-3 py-2 text-sm flex w-full items-center rounded-lg whitespace-nowrap transition-colors cursor-grab",
+						isActive ? "bg-accent font-semibold text-accent-foreground" : "hover:bg-accent/50",
+						isSaving && "pointer-events-none opacity-60",
+					)}
+				>
+					<menuItem.icon
+						className={cn("size-5 shrink-0", isActive ? "text-accent-foreground" : "text-muted-foreground")}
+					/>
+					<span className={isActive ? "text-accent-foreground" : "text-muted-foreground"}>{menuItem.label}</span>
+				</Link>
+			)}
+			{hasSubItems && isExpanded && (
 				<div className="mt-1 relative">
 					<div
 						className="top-0 bottom-0 left-5.5 absolute w-px -translate-x-1/2 bg-border"
 						aria-hidden
 					/>
 					<ul className="gap-0.5 pl-9 flex flex-col">
-						{menuItem.subItems?.map((subItem) => {
+						{effectiveSubItems.map((subItem) => {
 							const subActive = isNavSubItemActive(pathname, subItem.href);
 							return (
 								<li key={subItem.href}>
-									<Link
+									<a
 										href={subItem.href}
 										className={cn(
 											"py-1.5 pl-2 pr-3 text-sm flex w-full items-center rounded-md transition-colors",
-																"text-muted-foreground hover:bg-accent/50",
+											"text-muted-foreground hover:bg-accent/50",
 											subActive && "font-semibold text-foreground",
 										)}
-										prefetch
 									>
 										{subItem.label}
-									</Link>
+									</a>
 								</li>
 							);
 						})}
@@ -563,10 +674,30 @@ function SidebarGroupedNav({
 	onRequestAddGroup,
 	addGroupLabel,
 	unassignedLabel,
-	adminLabel,
+	adminLabel: _adminLabel,
 	isSaving,
 }: SidebarGroupedNavProps) {
+	const t = useTranslations();
 	const sortedGroups = useMemo(() => [...groups].sort((a, b) => a.order - b.order), [groups]);
+
+	const [collapsedSections, setCollapsedSections] = useState<string[]>(() => getStoredCollapsedSections());
+
+	function handleToggleSection(section: string) {
+		setCollapsedSections((prev) => {
+			const next = prev.includes(section) ? prev.filter((s) => s !== section) : [...prev, section];
+			setStoredCollapsedSections(next);
+			return next;
+		});
+	}
+
+	const sectionTitles: Record<AdminSectionKey, string> = {
+		core: t("admin.menu.sections.core"),
+		content: t("admin.menu.sections.content"),
+		members: t("admin.menu.sections.members"),
+		billing: t("admin.menu.sections.billing"),
+		system: t("admin.menu.sections.system"),
+		other: t("admin.menu.sections.other"),
+	};
 
 	return (
 		<div className="gap-2 flex flex-col">
@@ -631,8 +762,20 @@ function SidebarGroupedNav({
 				);
 			})}
 			{unassignedItems.length > 0 && (() => {
-				const userUnassigned = unassignedItems.filter((item) => !item.requiresOperator);
-				const operatorUnassigned = unassignedItems.filter((item) => item.requiresOperator);
+				const userUnassigned = unassignedItems.filter((item) => !item.requiresOperator && !item.section);
+				const operatorUnassigned = unassignedItems.filter((item) => item.requiresOperator || Boolean(item.section));
+
+				const sectionItemsMap = new Map<AdminSectionKey, NavMenuItem[]>();
+				for (const section of DEFAULT_ADMIN_SECTIONS) {
+					sectionItemsMap.set(section, []);
+				}
+				for (const item of operatorUnassigned) {
+					const sectionKey =
+						item.section && DEFAULT_ADMIN_SECTIONS.includes(item.section as AdminSectionKey)
+							? (item.section as AdminSectionKey)
+							: "other";
+					sectionItemsMap.get(sectionKey)?.push(item);
+				}
 
 				return (
 					// biome-ignore lint/a11y/noStaticElementInteractions: 拖曳分組容器不是互動控制項本身，鍵盤操作走各選單連結
@@ -663,18 +806,41 @@ function SidebarGroupedNav({
 								</ul>
 							</div>
 						)}
-						{operatorUnassigned.length > 0 && (
-							<div data-testid="sidebar-group-admin-section">
-								<div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground border-t border-border pt-3 mt-1">
-									{adminLabel}
-								</div>
-								<ul className="gap-0.5 flex list-none flex-col">
-									{operatorUnassigned.map((menuItem) => (
-										<SidebarGroupedNavItem key={menuItem.id} menuItem={menuItem} isSaving={isSaving} />
-									))}
-								</ul>
-							</div>
-						)}
+						{DEFAULT_ADMIN_SECTIONS.map((section) => {
+							const sectionItems = sectionItemsMap.get(section) ?? [];
+							if (sectionItems.length === 0) {
+								return null;
+							}
+							const isCollapsed = collapsedSections.includes(section);
+							return (
+								<Fragment key={section}>
+									<button
+										type="button"
+										data-testid={`sidebar-section-toggle-${section}`}
+										onClick={() => handleToggleSection(section)}
+										disabled={isSaving}
+										className="gap-1 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground hover:text-foreground flex w-full items-center overflow-hidden disabled:opacity-50"
+									>
+										<ChevronDownIcon
+											className={cn("size-3 shrink-0 transition-transform", isCollapsed && "-rotate-90")}
+										/>
+										<span className="truncate">{sectionTitles[section]}</span>
+									</button>
+									<div
+										data-testid={`sidebar-section-${section}`}
+										data-sidebar-section-collapsed={isCollapsed ? "true" : "false"}
+									>
+										{!isCollapsed && (
+											<ul className="gap-0.5 flex list-none flex-col mt-0.5">
+												{sectionItems.map((menuItem) => (
+													<SidebarGroupedNavItem key={menuItem.id} menuItem={menuItem} isSaving={isSaving} />
+												))}
+											</ul>
+										)}
+									</div>
+								</Fragment>
+							);
+						})}
 					</div>
 				);
 			})()}
@@ -812,6 +978,8 @@ export function NavBar() {
 			isActive: item.isActive,
 			order: item.order,
 			requiresOperator: item.requiresOperator,
+			section: item.section,
+			selfLabelKey: item.selfLabelKey,
 			subItems: item.subItems?.map((subItem) => ({
 				label: subItem.label,
 				href: subItem.href,
