@@ -1,7 +1,12 @@
 import { randomUUID } from "node:crypto";
 
 import { db } from "@startkiter/database";
-import { sendEmail } from "@startkiter/mail";
+import {
+	readEmailSettings,
+	resolveActiveProvider,
+	sendEmail,
+	type StoredEmailSettings,
+} from "@startkiter/mail";
 
 import { assertEmailConsent } from "./email-consent";
 import { assertPromotionalCampaignCanActivate } from "./compliance";
@@ -20,6 +25,7 @@ export type NewsletterCampaignStatus =
 export type SenderSnapshot = {
 	fromEmail: string;
 	senderName: string;
+	replyTo?: string;
 	emailProvider?: string;
 	capturedAt: string;
 	[key: string]: unknown;
@@ -315,6 +321,7 @@ async function sendEmailWithLeaseGuard(params: {
 	attemptToken: string;
 	to: string;
 	from: string;
+	replyTo?: string;
 	subject: string;
 	html?: string;
 	text?: string;
@@ -346,6 +353,7 @@ async function sendEmailWithLeaseGuard(params: {
 		const ok = await sendEmail({
 			to: params.to,
 			from: params.from,
+			replyTo: params.replyTo,
 			subject: params.subject,
 			html: params.html,
 			text: params.text,
@@ -518,6 +526,7 @@ export async function processCampaignDispatch(
 			attemptToken: claimed.attemptToken,
 			to: claimed.toEmail,
 			from: snapshot.fromEmail,
+			replyTo: (snapshot.replyTo as string | undefined) ?? undefined,
 			subject: campaign.subject,
 			html: campaign.bodyHtml ?? undefined,
 			text: campaign.bodyText ?? undefined,
@@ -630,11 +639,44 @@ export class CampaignStateError extends SendEngineError {
 	}
 }
 
+export async function getDefaultRatePerMinute(): Promise<number> {
+	const settings = await readEmailSettings();
+	if (
+		typeof settings.newsletterRatePerMinute === "number" &&
+		settings.newsletterRatePerMinute >= 1
+	) {
+		return settings.newsletterRatePerMinute;
+	}
+	const envRate = process.env.NEWSLETTER_RATE_PER_MINUTE
+		? Number.parseInt(process.env.NEWSLETTER_RATE_PER_MINUTE, 10)
+		: NaN;
+	return Number.isFinite(envRate) && envRate >= 1 ? envRate : 60;
+}
+
 export async function captureSenderSnapshot(): Promise<SenderSnapshot> {
+	const settings = await readEmailSettings();
+	const fromEmail =
+		settings.fromEmail?.trim() ||
+		process.env.MAIL_FROM?.trim() ||
+		process.env.SMTP_FROM?.trim() ||
+		"";
+	const senderName =
+		settings.newsletterSenderName?.trim() ||
+		settings.senderName?.trim() ||
+		process.env.MAIL_FROM_NAME?.trim() ||
+		"StartKiter";
+	const replyTo =
+		settings.newsletterReplyTo?.trim() ||
+		process.env.MAIL_REPLY_TO?.trim() ||
+		undefined;
+	const activeProvider = await resolveActiveProvider(settings);
+	const emailProvider = activeProvider?.name;
+
 	return {
-		fromEmail: process.env.MAIL_FROM?.trim() || process.env.SMTP_FROM?.trim() || "",
-		senderName: process.env.MAIL_FROM_NAME?.trim() || "StartKiter",
-		emailProvider: process.env.EMAIL_PROVIDER?.trim(),
+		fromEmail,
+		senderName,
+		...(replyTo ? { replyTo } : {}),
+		emailProvider,
 		capturedAt: now().toISOString(),
 	};
 }

@@ -1,5 +1,11 @@
 import { logger } from "@startkiter/logs";
 
+import {
+	getStoredProviderSender,
+	hasStoredCredential,
+	readEmailSettings,
+	type StoredEmailSettings,
+} from "../lib/email-settings";
 import type { SendEmailHandler } from "../types";
 import { send as consoleSend } from "./console";
 import { send as nodemailerSend } from "./nodemailer";
@@ -32,7 +38,7 @@ function hasCredential(envKey: string): boolean {
 	return Boolean(process.env[envKey]?.trim());
 }
 
-function getEmailProvider(): ProviderDefinition {
+function getEnvEmailProvider(): ProviderDefinition {
 	const requestedProvider = getRequestedProvider();
 	const explicitlyRequested = requestedProvider
 		? fallbackProviders.find(({ name }) => name === requestedProvider)
@@ -66,6 +72,44 @@ function getEmailProvider(): ProviderDefinition {
 	);
 }
 
+function resolveDefaultFrom(stored: StoredEmailSettings): string | undefined {
+	if (stored.fromEmail) {
+		return stored.senderName
+			? `"${stored.senderName}" <${stored.fromEmail}>`
+			: stored.fromEmail;
+	}
+	return process.env.MAIL_FROM?.trim() || undefined;
+}
+
 export const send: SendEmailHandler = async (params) => {
-	return getEmailProvider().send(params);
+	let stored: StoredEmailSettings = {};
+	try {
+		stored = await readEmailSettings();
+	} catch {
+		stored = {};
+	}
+
+	const defaultFrom = resolveDefaultFrom(stored);
+	const resolvedParams =
+		params.from !== undefined
+			? params
+			: defaultFrom
+				? { ...params, from: defaultFrom }
+				: params;
+
+	if (stored.provider) {
+		if (hasStoredCredential(stored, stored.provider)) {
+			const sender = getStoredProviderSender(stored);
+			if (sender) {
+				return sender(resolvedParams);
+			}
+		} else {
+			logger.warn(
+				`Stored email provider "${stored.provider}" lacks required credentials; falling back to environment`,
+			);
+		}
+	}
+
+	const envProvider = getEnvEmailProvider();
+	return envProvider.send(resolvedParams);
 };

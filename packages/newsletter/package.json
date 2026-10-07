@@ -18,6 +18,7 @@
 	"scripts": {
 		"clean": "git clean -xdf .cache .turbo dist node_modules",
 		"test": "dotenv -c -e ../../.env -- vitest run ../../packages/newsletter",
+		"typecheck": "tsc --noEmit",
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {

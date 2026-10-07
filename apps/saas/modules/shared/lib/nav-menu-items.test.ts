@@ -21,7 +21,7 @@ const labels: Record<string, string> = {
 	"course.coursePack": "CoursePack 任務",
 	"admin.menu.pages": "頁面管理",
 	"admin.menu.users": "後台設定",
-	"admin.menu.emailSettings": "郵件設定",
+	"admin.menu.emailSettings": "Email 設定",
 	"admin.menu.newsletter": "電子報",
 	"admin.menu.organizations": "組織管理",
 	"admin.menu.orders": "訂單管理",

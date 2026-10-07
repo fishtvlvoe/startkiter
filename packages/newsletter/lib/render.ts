@@ -1,4 +1,8 @@
-import { sanitizeEmailHtml } from "@startkiter/mail";
+import {
+	getCachedEmailSettings,
+	readEmailSettings,
+	sanitizeEmailHtml,
+} from "@startkiter/mail";
 
 import {
 	bindCountdownBlock,
@@ -99,6 +103,9 @@ export type RenderCampaignOptions = {
 	recipientEmail?: string;
 	unsubscribeScope?: UnsubscribeScope;
 	senderPhysicalAddress?: string;
+	footerCompany?: string;
+	footerAddress?: string;
+	footerEmail?: string;
 };
 
 export type RenderCampaignResult = {
@@ -279,22 +286,84 @@ function buildUnsubscribeUrl(options: RenderCampaignOptions, appUrl: string): st
 	return unsubscribeUrl.toString();
 }
 
+export async function resolveFooterSettings(options: RenderCampaignOptions = {}): Promise<{
+	footerCompany?: string;
+	senderPhysicalAddress?: string;
+	footerEmail?: string;
+}> {
+	const settings = await readEmailSettings();
+	const footerCompany =
+		options.footerCompany?.trim() ||
+		settings.footerCompany?.trim() ||
+		process.env.NEWSLETTER_FOOTER_COMPANY?.trim() ||
+		undefined;
+
+	const senderPhysicalAddress =
+		options.footerAddress?.trim() ||
+		options.senderPhysicalAddress?.trim() ||
+		settings.footerAddress?.trim() ||
+		process.env.NEWSLETTER_SENDER_ADDRESS?.trim() ||
+		process.env.SUPPORT_ADDRESS?.trim() ||
+		undefined;
+
+	const footerEmail =
+		options.footerEmail?.trim() ||
+		settings.footerEmail?.trim() ||
+		process.env.SUPPORT_EMAIL?.trim() ||
+		process.env.NEWSLETTER_CONTACT_EMAIL?.trim() ||
+		undefined;
+
+	return { footerCompany, senderPhysicalAddress, footerEmail };
+}
+
 function renderFooter(options: RenderCampaignOptions, appUrl: string): { html: string; text: string } {
-	const configuredAddress = resolveSenderPhysicalAddress(options.senderPhysicalAddress);
+	const cached = getCachedEmailSettings();
+	const configuredAddress =
+		options.footerAddress?.trim() ||
+		options.senderPhysicalAddress?.trim() ||
+		cached.footerAddress?.trim() ||
+		process.env.NEWSLETTER_SENDER_ADDRESS?.trim() ||
+		process.env.SUPPORT_ADDRESS?.trim() ||
+		"";
+
 	if ((options.mode === "send" || options.mode === "test") && options.unsubscribeScope === "marketing" && !configuredAddress) {
 		throw new NewsletterComplianceError();
 	}
 
 	const senderPhysicalAddress = configuredAddress || DEFAULT_SENDER_PHYSICAL_ADDRESS;
+	const footerCompany =
+		options.footerCompany?.trim() ||
+		cached.footerCompany?.trim() ||
+		process.env.NEWSLETTER_FOOTER_COMPANY?.trim() ||
+		"";
+	const footerEmail =
+		options.footerEmail?.trim() ||
+		cached.footerEmail?.trim() ||
+		process.env.SUPPORT_EMAIL?.trim() ||
+		process.env.NEWSLETTER_CONTACT_EMAIL?.trim() ||
+		"";
+
 	const unsubscribeUrl = buildUnsubscribeUrl(options, appUrl);
 	const addressText = senderPhysicalAddress;
 	const unsubscribeHtml = unsubscribeUrl
 		? `<a href="${escapeAttr(unsubscribeUrl)}" style="color:#64748B;text-decoration:underline;">取消訂閱</a>`
 		: "";
+
+	const companyHtml = footerCompany ? `<p style="margin:0 0 4px;font-weight:600;">${escapeHtml(sanitizeInlineText(footerCompany))}</p>` : "";
+	const contactHtml = footerEmail ? `<p style="margin:4px 0 0;">聯絡信箱：<a href="mailto:${escapeAttr(footerEmail)}" style="color:#64748B;text-decoration:underline;">${escapeHtml(sanitizeInlineText(footerEmail))}</a></p>` : "";
+
 	const html = cell(
-		`<div role="contentinfo" style="color:#64748B;font-size:12px;line-height:1.5;text-align:center;"><p style="margin:0;">寄件人地址：${escapeHtml(sanitizeInlineText(addressText))}</p>${unsubscribeHtml ? `<p style="margin:8px 0 0;">${unsubscribeHtml}</p>` : ""}</div>`,
+		`<div role="contentinfo" style="color:#64748B;font-size:12px;line-height:1.5;text-align:center;">${companyHtml}<p style="margin:0;">寄件人地址：${escapeHtml(sanitizeInlineText(addressText))}</p>${contactHtml}${unsubscribeHtml ? `<p style="margin:8px 0 0;">${unsubscribeHtml}</p>` : ""}</div>`,
 	);
-	const text = `寄件人地址：${addressText}${unsubscribeUrl ? `\n取消訂閱：${unsubscribeUrl}` : ""}`;
+
+	const textParts = [
+		footerCompany || "",
+		`寄件人地址：${addressText}`,
+		footerEmail ? `聯絡信箱：${footerEmail}` : "",
+		unsubscribeUrl ? `取消訂閱：${unsubscribeUrl}` : "",
+	].filter(Boolean);
+	const text = textParts.join("\n");
+
 	return { html, text };
 }
 
@@ -345,6 +414,17 @@ export function renderCampaignHtml(
 	}
 
 	return { html, text, sizeBytes, isOversized, warnings };
+}
+
+export async function renderCampaignHtmlAsync(
+	content: NewsletterContentJson,
+	options: RenderCampaignOptions = {},
+): Promise<RenderCampaignResult> {
+	const footerSettings = await resolveFooterSettings(options);
+	return renderCampaignHtml(content, {
+		...options,
+		...footerSettings,
+	});
 }
 
 /** Helpers Wave 2D exposes for promo block construction against catalog/coupon records. */

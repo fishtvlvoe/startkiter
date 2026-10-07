@@ -6,9 +6,11 @@
 	"scripts": {
 		"clean": "git clean -xdf .cache .turbo dist node_modules",
 		"test": "vitest run",
+		"typecheck": "tsc --noEmit",
 		"type-check": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@startkiter/database": "workspace:*",
 		"@startkiter/i18n": "workspace:*",
 		"@startkiter/logs": "workspace:*",
 		"@startkiter/ui": "workspace:*",

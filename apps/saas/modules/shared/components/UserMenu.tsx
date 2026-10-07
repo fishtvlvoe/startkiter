@@ -27,6 +27,7 @@ type UserMenuProps = {
 	showUserName?: boolean;
 	workspaceContext?: WorkspaceContext;
 	appDisplayName?: string;
+	platformAdmin?: boolean;
 };
 
 const FALLBACK_WORKSPACE_CONTEXT: WorkspaceContext = {
@@ -35,7 +36,7 @@ const FALLBACK_WORKSPACE_CONTEXT: WorkspaceContext = {
 	role: "app-user",
 };
 
-export function UserMenu({ showUserName, workspaceContext, appDisplayName }: UserMenuProps) {
+export function UserMenu({ showUserName, workspaceContext, appDisplayName, platformAdmin }: UserMenuProps) {
 	const t = useTranslations();
 	const { user } = useSession();
 	const isMobile = useIsMobile();
@@ -60,7 +61,10 @@ export function UserMenu({ showUserName, workspaceContext, appDisplayName }: Use
 	const { name, email, image } = user;
 	const dropdownSide = isMobile ? "bottom" : showUserName ? "top" : "right";
 	const dropdownAlign = isMobile || !showUserName ? "end" : "start";
-	const accountMenuEntries = getAccountMenuEntries(workspaceContext ?? FALLBACK_WORKSPACE_CONTEXT);
+	const accountMenuEntries = getAccountMenuEntries(
+		workspaceContext ?? FALLBACK_WORKSPACE_CONTEXT,
+		{ platformAdmin },
+	);
 
 	const labelForEntry = (entry: (typeof accountMenuEntries)[number]) =>
 		t(entry.labelKey, {

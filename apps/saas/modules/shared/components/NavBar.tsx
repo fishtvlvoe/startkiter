@@ -1085,6 +1085,7 @@ export function NavBar() {
 							<UserMenu
 								workspaceContext={navigation.model.workspace}
 								appDisplayName={appDisplayName}
+								platformAdmin={canAccessAdmin}
 							/>
 						</div>
 					</div>
@@ -1151,6 +1152,7 @@ export function NavBar() {
 								showUserName={!isCollapsedEffective}
 								workspaceContext={navigation.model.workspace}
 								appDisplayName={appDisplayName}
+								platformAdmin={canAccessAdmin}
 							/>
 						</div>
 					</div>
