@@ -123,4 +123,13 @@ describe("SupportWidget - 前端客服入口與部署選擇邏輯 (Tasks 7.1-7.4
 			expect(window.$chatwoot?.toggle).toHaveBeenCalledWith("open");
 		});
 	});
+
+	describe("Widget does not cover the mobile tab bar (Task 1.2)", () => {
+		it("外層容器 class 含手機底部偏移 bottom-20（≥ 80px）與桌面 md:bottom-6", () => {
+			const html = renderToStaticMarkup(<SupportWidget deployments={[]} />);
+			expect(html).toContain("bottom-20");
+			expect(html).toContain("md:bottom-6");
+		});
+	});
 });
+
