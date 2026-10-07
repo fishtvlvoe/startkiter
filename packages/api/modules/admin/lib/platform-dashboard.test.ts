@@ -77,10 +77,12 @@ import { getPlatformDashboard } from "./platform-dashboard";
 
 describe("platform dashboard aggregate (控制台資料彙整)", () => {
 	const originalSupportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL;
+	const originalOpenaiApiKey = process.env.OPENAI_API_KEY;
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 		process.env.NEXT_PUBLIC_SUPPORT_EMAIL = "support@startkiter.com";
+		process.env.OPENAI_API_KEY = "mock-openai-key";
 
 		vi.mocked(getCourseDashboardMetrics).mockResolvedValue({
 			publishedCourseCount: 1,
@@ -124,6 +126,11 @@ describe("platform dashboard aggregate (控制台資料彙整)", () => {
 			delete process.env.NEXT_PUBLIC_SUPPORT_EMAIL;
 		} else {
 			process.env.NEXT_PUBLIC_SUPPORT_EMAIL = originalSupportEmail;
+		}
+		if (originalOpenaiApiKey === undefined) {
+			delete process.env.OPENAI_API_KEY;
+		} else {
+			process.env.OPENAI_API_KEY = originalOpenaiApiKey;
 		}
 	});
 
@@ -387,6 +394,44 @@ describe("platform dashboard aggregate (控制台資料彙整)", () => {
 			expect(serialized).not.toContain("test_hash_key_9999");
 			expect(serialized).not.toContain("test_hash_iv_8888");
 			expect(serialized).not.toContain("real_merchant");
+		});
+
+		it("provider 為 openai 且 OPENAI_API_KEY 為空時，ai 設定項 ok 為 false", async () => {
+			delete process.env.OPENAI_API_KEY;
+			vi.mocked(readAiProviderSettings).mockResolvedValue({
+				provider: "openai",
+				model: "gpt-4o-mini",
+				hasGeminiKey: false,
+			} as never);
+
+			const result = await getPlatformDashboard("admin-user-1");
+
+			expect(result.checks.status).toBe("ok");
+			if (result.checks.status === "ok") {
+				const aiCheck = result.checks.data.find((item) => item.key === "ai");
+				expect(aiCheck).toBeDefined();
+				expect(aiCheck?.ok).toBe(false);
+				expect(aiCheck?.label).toBe("未填金鑰");
+			}
+		});
+
+		it("provider 為 openai 且 OPENAI_API_KEY 有值時，ai 設定項 ok 為 true", async () => {
+			process.env.OPENAI_API_KEY = "sk-test-mock-key";
+			vi.mocked(readAiProviderSettings).mockResolvedValue({
+				provider: "openai",
+				model: "gpt-4o-mini",
+				hasGeminiKey: false,
+			} as never);
+
+			const result = await getPlatformDashboard("admin-user-1");
+
+			expect(result.checks.status).toBe("ok");
+			if (result.checks.status === "ok") {
+				const aiCheck = result.checks.data.find((item) => item.key === "ai");
+				expect(aiCheck).toBeDefined();
+				expect(aiCheck?.ok).toBe(true);
+				expect(aiCheck?.label).toBe("已設定");
+			}
 		});
 	});
 

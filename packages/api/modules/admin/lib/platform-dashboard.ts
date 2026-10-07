@@ -141,7 +141,7 @@ export async function getPlatformDashboard(
 				const supportEmailOk = Boolean(supportEmail && supportEmail.length > 0);
 				const aiOk = aiSettings
 					? aiSettings.provider === "openai"
-						? true
+						? Boolean(process.env.OPENAI_API_KEY?.trim())
 						: Boolean(aiSettings.hasGeminiKey)
 					: false;
 

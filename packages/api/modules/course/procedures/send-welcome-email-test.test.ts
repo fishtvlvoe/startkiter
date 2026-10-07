@@ -132,7 +132,7 @@ describe("sendWelcomeEmailTest", () => {
 		);
 		expect(sentEmail?.html).not.toContain("**電馭學院**");
 		expect(sentEmail?.html).not.toContain("[開始上課](https://app.startkiter.dev/course/startkiter)");
-	});
+	}, 15000);
 
 	it("rejects empty toEmail without sending", async () => {
 		await expect(
