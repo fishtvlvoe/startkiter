@@ -199,6 +199,38 @@ Coolify resource `8x5bmcpct9dri6tnnhjleeed` 起初是 `exited:unhealthy`，Traef
 
 這個決策取代討論稿中的「傾向 Neon」與「建議升級」措辭；後續文件引用目前部署規格時，以本節為準。
 
+## 從零建立資料庫
+
+買家或新環境從零初始化資料庫時，請依下列步驟執行遷移：
+
+### 1. 執行遷移指令
+
+在設定好 `DATABASE_URL` 後，於專案根目錄執行：
+
+```bash
+pnpm --filter @startkiter/database exec prisma migrate deploy
+```
+
+這會依序套用 `packages/database/prisma/migrations/` 下的所有遷移檔案。
+
+### 2. 修改遷移前後的驗證
+
+任何開發者在新增或修改資料庫遷移檔前後，必須在本地執行一鍵驗證指令，確保遷移鏈在全新空資料庫上可順利跑完且欄位符合預期：
+
+```bash
+pnpm --filter @startkiter/database verify:fresh-install
+```
+
+### 3. 既有環境若卡在 `20260916031800` 的恢復方式
+
+若既有資料庫在歷史版本中曾執行過失敗的 `20260916031800_add_newsletter_automation`（錯誤訊息 `type "EmailBounceState" already exists`），請先執行以下恢復指令將其標記為 rolled back，再重新執行 `prisma migrate deploy`：
+
+```bash
+pnpm --filter @startkiter/database exec prisma migrate resolve --rolled-back 20260916031800_add_newsletter_automation
+pnpm --filter @startkiter/database exec prisma migrate deploy
+```
+
+
 ## 每次部署的最小驗收清單
 
 - `pnpm install --frozen-lockfile`、`pnpm test`、`pnpm type-check`、`pnpm build` 全部 exit 0。
