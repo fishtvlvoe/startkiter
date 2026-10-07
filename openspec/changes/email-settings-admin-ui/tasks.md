@@ -1,8 +1,8 @@
 ## 1. 紅燈測試（先寫測試，跑過確認失敗）
 
-- [ ] 1.1 依「Stored settings take precedence over environment」與「Providers send with supplied credentials」在 `packages/mail/provider/index.test.ts` 新增紅燈測試：mock `readEmailSettings` 回傳 DB 設定，覆蓋 spec Example 表四列（DB tosend 蓋過 env resend、DB smtp 缺 host 落回 env tosend 並 `logger.warn` 一次、無 DB 用 env zsend、解密失敗落回 env resend）；既有環境變數測試全部保留不改預期。驗證：`pnpm --filter @startkiter/mail test` 新測試失敗、舊測試仍綠。
-- [ ] 1.2 依「Platform admin saves email provider settings」「Settings input validation」「Stored secrets are never returned in plain text」「Stored settings cache」新增 `packages/mail/lib/email-settings.test.ts` 紅燈測試：空金鑰沿用舊值、`SETTINGS_ENCRYPTION_KEY` 空回 `settings_unavailable`、spec 驗證邊界表七列、summary JSON 不含 `tsend_abcd1234` 且 hint 結尾 `1234`、存檔後快取被清除。驗證：`pnpm --filter @startkiter/mail test` 新測試失敗。
-- [ ] 1.3 依「Account menu does not duplicate sidebar entries」「Platform admin reaches platform settings from any app workspace」改寫 `apps/saas/modules/shared/lib/account-menu.test.ts` 預期為 spec Example 表四列，並更新 `UserMenu.test.tsx` 中對「帳號設定」「文件」的斷言。驗證：`pnpm --filter @startkiter/saas exec vitest run modules/shared` 這兩檔失敗。
+- [x] 1.1 依「Stored settings take precedence over environment」與「Providers send with supplied credentials」在 `packages/mail/provider/index.test.ts` 新增紅燈測試：mock `readEmailSettings` 回傳 DB 設定，覆蓋 spec Example 表四列（DB tosend 蓋過 env resend、DB smtp 缺 host 落回 env tosend 並 `logger.warn` 一次、無 DB 用 env zsend、解密失敗落回 env resend）；既有環境變數測試全部保留不改預期。驗證：`pnpm --filter @startkiter/mail test` 新測試失敗、舊測試仍綠。
+- [x] 1.2 依「Platform admin saves email provider settings」「Settings input validation」「Stored secrets are never returned in plain text」「Stored settings cache」新增 `packages/mail/lib/email-settings.test.ts` 紅燈測試：空金鑰沿用舊值、`SETTINGS_ENCRYPTION_KEY` 空回 `settings_unavailable`、spec 驗證邊界表七列、summary JSON 不含 `tsend_abcd1234` 且 hint 結尾 `1234`、存檔後快取被清除。驗證：`pnpm --filter @startkiter/mail test` 新測試失敗。
+- [x] 1.3 依「Account menu does not duplicate sidebar entries」「Platform admin reaches platform settings from any app workspace」改寫 `apps/saas/modules/shared/lib/account-menu.test.ts` 預期為 spec Example 表四列，並更新 `UserMenu.test.tsx` 中對「帳號設定」「文件」的斷言。驗證：`pnpm --filter @startkiter/saas exec vitest run modules/shared` 這兩檔失敗。
 
 ## 2. 寄信設定儲存層與路由
 
@@ -27,9 +27,9 @@
 
 ## 6. Review
 
-- [ ] 6.1 [after: 2.3, 3.1, 4.2, 5.1] 派不同於實作方的 CLI 做獨立 code review，聚焦：金鑰是否有任何路徑以明碼回到前端或 log、`requireGlobalAdmin` 是否涵蓋每個 action、DB 設定失效時是否仍能落回環境變數寄信。驗證：review 報告無 Critical，抓到的問題修完重跑 `pnpm --filter @startkiter/mail test`、`pnpm --filter @startkiter/newsletter test`、`pnpm --filter @startkiter/saas exec vitest run` 全綠。
+- [x] 6.1 （Codex 不可用，依 Fish 2026-10-07 指示改由 PM 親審；抓到 6 項已全修，commit fbe25736）[after: 2.3, 3.1, 4.2, 5.1] 派不同於實作方的 CLI 做獨立 code review，聚焦：金鑰是否有任何路徑以明碼回到前端或 log、`requireGlobalAdmin` 是否涵蓋每個 action、DB 設定失效時是否仍能落回環境變數寄信。驗證：review 報告無 Critical，抓到的問題修完重跑 `pnpm --filter @startkiter/mail test`、`pnpm --filter @startkiter/newsletter test`、`pnpm --filter @startkiter/saas exec vitest run` 全綠。
 
 ## 7. 部署與收尾
 
-- [ ] 7.1 [after: 6.1] 移除 `openspec/changes/mail-provider-tosend-smtp-support` 殘留副本（正本在 `openspec/changes/archive/2026-09-16-mail-provider-tosend-smtp-support`）。驗證：`spectra list` 不再列出該 change，且 archive 目錄仍存在。
+- [x] 7.1 [after: 6.1] 移除 `openspec/changes/mail-provider-tosend-smtp-support` 殘留副本（正本在 `openspec/changes/archive/2026-09-16-mail-provider-tosend-smtp-support`）。驗證：`spectra list` 不再列出該 change，且 archive 目錄仍存在。
 - [ ] 7.2 [after: 6.1] 部署正式站前確認容器有 `SETTINGS_ENCRYPTION_KEY`，補 `NEXT_PUBLIC_SUPPORT_EMAIL`；部署後在後台選 ToSend 填金鑰、存檔、寄測試信到 fish@fishot.com。驗證：收件匣收到測試信、`email_delivery_log` 或測試結果顯示成功；ego-browser 桌面 1440px 與手機 390px 截圖 Email 設定四分頁與 `/course` 右下選單（只剩「我的訂閱」「平台管理設定」「登出」等 spec 列出項目），客服頁不再顯示缺 `NEXT_PUBLIC_SUPPORT_EMAIL` 紅字。
