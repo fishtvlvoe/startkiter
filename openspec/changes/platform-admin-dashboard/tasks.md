@@ -20,7 +20,7 @@
 
 ## 5. Review
 
-- [ ] 5.1 [after: 4.1, 3.2, 3.3] 由不同於實作方的審查者做 code review：憑證是否可能進入回傳資料或 log、非總管理員進 `/admin/dashboard` 是否被擋、課程管理員選單是否不變、查詢是否都是 count/aggregate/take。驗證：無 Critical，修完重跑第 4 節指令全綠。
+- [x] 5.1 （Codex 不可用，由 PM 親審＋本機實測：抓到 AI 檢查假綠燈、/admin 被永久導向用戶頁、寄信狀態顯示 [object Object]、設計稿註記外露 4 項，均已修）[after: 4.1, 3.2, 3.3] 由不同於實作方的審查者做 code review：憑證是否可能進入回傳資料或 log、非總管理員進 `/admin/dashboard` 是否被擋、課程管理員選單是否不變、查詢是否都是 count/aggregate/take。驗證：無 Critical，修完重跑第 4 節指令全綠。
 
 ## 6. 部署驗收
 
