@@ -528,10 +528,10 @@ describe("Admin 側邊欄五分區與可展開子選單（Task 1.2 紅燈測試�
 		expect(billingPos).toBeGreaterThan(membersPos);
 		expect(systemPos).toBeGreaterThan(billingPos);
 
-		// 核心分區的「控制台」連結至 /admin（而非 /admin/course/dashboard）
+		// 核心分區的「控制台」連結至 /admin/dashboard（而非 /admin/course/dashboard）
 		const coreSectionHtml =
 			html.split('data-testid="sidebar-section-core"')[1]?.split('data-testid="sidebar-section-')[0] ?? "";
-		expect(coreSectionHtml).toContain('href="/admin"');
+		expect(coreSectionHtml).toContain('href="/admin/dashboard"');
 		expect(coreSectionHtml).not.toContain('href="/admin/course/dashboard"');
 		expect(coreSectionHtml).toContain("admin.menu.dashboard");
 
@@ -554,7 +554,7 @@ describe("Admin 側邊欄五分區與可展開子選單（Task 1.2 紅燈測試�
 		expect(newsletterPos).toBeGreaterThan(orgsPos);
 	});
 
-	it("核心分區的「控制台」href 為 /admin（而非 /admin/course/dashboard）", async () => {
+	it("核心分區的「控制台」href 為 /admin/dashboard（而非 /admin/course/dashboard）", async () => {
 		mockIsCollapsed = false;
 		mockCanAccessAdmin = true;
 		mockPathname = "/admin/users";
@@ -563,8 +563,8 @@ describe("Admin 側邊欄五分區與可展開子選單（Task 1.2 紅燈測試�
 		const coreSection = container.querySelector('[data-testid="sidebar-section-core"]');
 		expect(coreSection).not.toBeNull();
 
-		// 控制台連結指向 /admin，而非舊的 /admin/course/dashboard
-		expect(coreSection?.querySelector('a[href="/admin"]')).not.toBeNull();
+		// 控制台連結指向 /admin/dashboard，而非舊的 /admin/course/dashboard
+		expect(coreSection?.querySelector('a[href="/admin/dashboard"]')).not.toBeNull();
 		expect(coreSection?.querySelector('a[href="/admin/course/dashboard"]')).toBeNull();
 	});
 

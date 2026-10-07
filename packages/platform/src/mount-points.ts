@@ -93,7 +93,7 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		version: "0.1.0",
 		app: PLATFORM_APP,
 		mount: {
-			route: { path: "/admin" },
+			route: { path: "/admin/dashboard" },
 			menu: {
 				labelKey: "admin.menu.dashboard",
 				icon: "home",

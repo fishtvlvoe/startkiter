@@ -1,21 +1,21 @@
 ## Purpose
 
-The platform admin dashboard gives a platform administrator a single overview page at `/admin` with site-wide numbers, pending work, configuration health, recent orders, and quick links.
+The platform admin dashboard gives a platform administrator a single overview page at `/admin/dashboard` with site-wide numbers, pending work, configuration health, recent orders, and quick links.
 
 ## ADDED Requirements
 
 ### Requirement: Dashboard page access
 
-`GET /admin` SHALL render the dashboard with HTTP 200 for a platform administrator. A signed-in user without platform admin permission SHALL be redirected to `/`, and an anonymous visitor SHALL be redirected to `/login`.
+`GET /admin/dashboard` SHALL render the dashboard with HTTP 200 for a platform administrator. A signed-in user without platform admin permission SHALL be redirected to `/`, and an anonymous visitor SHALL be redirected to `/login`.
 
 #### Scenario: Platform admin opens dashboard
 
-- **WHEN** a platform administrator requests `/admin`
+- **WHEN** a platform administrator requests `/admin/dashboard`
 - **THEN** the response is HTTP 200 and shows the overview, pending work, configuration check, recent orders, and quick actions sections
 
 #### Scenario: Learner opens dashboard
 
-- **WHEN** a signed-in learner requests `/admin`
+- **WHEN** a signed-in learner requests `/admin/dashboard`
 - **THEN** the learner is redirected to `/`
 
 ### Requirement: Overview numbers

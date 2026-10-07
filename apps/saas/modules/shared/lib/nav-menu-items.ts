@@ -124,7 +124,7 @@ export function getMountNavigationContext({
 		.sort((left, right) => right.route.path.length - left.route.path.length)
 		.find((entry) => matchesRoute(requestedPath, entry.route.path));
 	const resolutionPath = isPlatformAdminOnAdminPath
-		? "/admin"
+		? "/admin/dashboard"
 		: requestedEntry
 			? requestedPath
 			: platformAdmin && requestedPath.startsWith("/admin/")

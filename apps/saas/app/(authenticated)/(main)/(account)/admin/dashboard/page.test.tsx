@@ -34,7 +34,7 @@ vi.mock("next/link", () => ({
 
 import PlatformAdminDashboardPage from "./page";
 
-describe("PlatformAdminDashboardPage (/admin)", () => {
+describe("PlatformAdminDashboardPage (/admin/dashboard)", () => {
 	const defaultDashboardData = {
 		kpis: {
 			status: "ok" as const,

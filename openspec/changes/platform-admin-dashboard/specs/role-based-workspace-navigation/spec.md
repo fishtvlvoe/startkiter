@@ -10,7 +10,7 @@ For a user with platform admin permission, any pathname starting with `/admin` S
 | ---- | -------- | --------- |
 | platform admin | /admin/course/quiz | platform |
 | platform admin | /admin/course/dashboard | platform |
-| platform admin | /admin | platform |
+| platform admin | /admin/dashboard | platform |
 | course instructor (not platform admin) | /admin/course/quiz | app course, role app-admin |
 | learner | /course | app course, role app-user |
 

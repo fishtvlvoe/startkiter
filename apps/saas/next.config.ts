@@ -59,8 +59,8 @@ const nextConfig: NextConfig = {
 			},
 			{
 				source: "/admin",
-				destination: "/admin/users",
-				permanent: true,
+				destination: "/admin/dashboard",
+				permanent: false,
 			},
 		];
 	},

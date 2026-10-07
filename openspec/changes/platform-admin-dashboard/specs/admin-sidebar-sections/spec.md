@@ -25,9 +25,9 @@ A menu item with sub-items SHALL toggle its sub-menu when clicked instead of nav
 
 ### Requirement: Core section links to the platform dashboard
 
-The core section item 控制台 SHALL link to `/admin`.
+The core section item 控制台 SHALL link to `/admin/dashboard`.
 
 #### Scenario: Click dashboard
 
 - **WHEN** a platform administrator clicks 控制台
-- **THEN** the browser navigates to `/admin` and 控制台 is marked active
+- **THEN** the browser navigates to `/admin/dashboard` and 控制台 is marked active

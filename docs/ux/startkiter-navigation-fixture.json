@@ -30,7 +30,7 @@
       "appId": "platform",
       "scope": "platform",
       "requiredRole": "platform-admin",
-      "href": "/admin",
+      "href": "/admin/dashboard",
       "labelKey": "admin.menu.dashboard"
     },
     {
