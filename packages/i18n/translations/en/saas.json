@@ -4,6 +4,7 @@
       "organizations": "Organizations",
       "users": "Users",
       "settings": "System settings",
+      "systemSettings": "System Settings",
       "navLabel": "Super Admin",
       "pages": "Page management",
       "emailSettings": "Email settings",
@@ -13,7 +14,15 @@
       "gateway": "Payment settings",
       "einvoice": "Invoice settings",
       "gemini": "Gemini settings",
-      "aiProvider": "AI assistant model"
+      "aiProvider": "AI assistant model",
+      "sections": {
+        "core": "Core",
+        "content": "Content",
+        "members": "Members & Marketing",
+        "billing": "Billing",
+        "system": "System",
+        "other": "Other"
+      }
     },
     "organizations": {
       "backToList": "Back to organizations",
@@ -701,7 +710,8 @@
   },
   "course": {
     "navLabel": "Course",
-    "dashboard": "Course dashboard",
+    "dashboard": "Dashboard",
+    "list": "Course List",
     "comments": "Course comments",
     "messages": "Learner messages",
     "coupons": "Course coupons",

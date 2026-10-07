@@ -4,6 +4,7 @@
       "organizations": "组织",
       "users": "用户",
       "settings": "系统设置",
+      "systemSettings": "系统设置",
       "navLabel": "总管理员",
       "pages": "页面管理",
       "emailSettings": "Email 设置",
@@ -13,7 +14,15 @@
       "gateway": "金流设置",
       "einvoice": "发票设置",
       "gemini": "Gemini 设置",
-      "aiProvider": "AI 助手模型"
+      "aiProvider": "AI 助手模型",
+      "sections": {
+        "core": "核心",
+        "content": "内容",
+        "members": "会员与营销",
+        "billing": "营收",
+        "system": "系统",
+        "other": "其他"
+      }
     },
     "organizations": {
       "backToList": "Back to organizations",
@@ -701,7 +710,8 @@
   },
   "course": {
     "navLabel": "课程",
-    "dashboard": "课程仪表板",
+    "dashboard": "控制台",
+    "list": "课程列表",
     "comments": "课程留言",
     "messages": "学员私信",
     "coupons": "课程优惠券",

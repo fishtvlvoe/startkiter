@@ -4,6 +4,7 @@
       "organizations": "組織",
       "users": "用戶",
       "settings": "系統設定",
+      "systemSettings": "系統設定",
       "navLabel": "總管理員",
       "pages": "頁面管理",
       "emailSettings": "Email 設定",
@@ -13,7 +14,15 @@
       "gateway": "金流設定",
       "einvoice": "發票設定",
       "gemini": "Gemini 設定",
-      "aiProvider": "AI 助手模型"
+      "aiProvider": "AI 助手模型",
+      "sections": {
+        "core": "核心",
+        "content": "內容",
+        "members": "會員與行銷",
+        "billing": "營收",
+        "system": "系統",
+        "other": "其他"
+      }
     },
     "organizations": {
       "backToList": "Back to organizations",
@@ -701,7 +710,8 @@
   },
   "course": {
     "navLabel": "課程",
-    "dashboard": "課程儀表板",
+    "dashboard": "控制台",
+    "list": "課程列表",
     "comments": "課程留言",
     "messages": "學員私訊",
     "coupons": "課程優惠券",
