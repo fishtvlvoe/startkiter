@@ -104,19 +104,23 @@ describe("nav-menu-items (WorkspaceContext navigation model)", () => {
 		expect(items.map((item) => item.id)).toEqual([
 			"admin",
 			"course-admin",
+			"course-dashboard",
 			"pages-cms",
 			"newsletter",
-			"email-settings",
 			"admin-organizations",
 			"admin-orders",
+			"admin-system-settings",
 			"admin-revenue",
+		]);
+		expect(new Set(hrefs).size).toBe(hrefs.length);
+		expect(items.find((item) => item.id === "admin-system-settings")?.subItems?.map((item) => item.id)).toEqual([
+			"email-settings",
 			"admin-gateway-config",
 			"admin-einvoice",
 			"admin-gemini",
 			"admin-ai-provider",
 		]);
-		expect(new Set(hrefs).size).toBe(hrefs.length);
-		expect(items.find((item) => item.id === "course-admin")?.subItems).toBeUndefined();
+		expect(items.find((item) => item.id === "course-admin")?.subItems).toHaveLength(10);
 	});
 
 	it("filters pages-cms without changing App workspace", () => {
@@ -143,7 +147,11 @@ describe("nav-menu-items (WorkspaceContext navigation model)", () => {
 		expect(mediaItems.find((item) => item.id === "course-admin")?.subItems?.find((item) => item.id === "media-library")?.href).toBe(
 			"/admin/course/media",
 		);
-		expect(emailItems.filter((item) => item.isActive).map((item) => item.id)).toEqual(["email-settings"]);
+		expect(emailItems.filter((item) => item.isActive).map((item) => item.id)).toEqual(["admin-system-settings"]);
+		const systemSettings = emailItems.find((item) => item.id === "admin-system-settings");
+		const emailSubItem = systemSettings?.subItems?.find((item) => item.id === "email-settings");
+		expect(emailSubItem?.href).toBe("/admin/email-settings");
+		expect(isMenuActive("/admin/email-settings", emailSubItem!.href)).toBe(true);
 	});
 
 	it("uses the active locale for sidebar and overflow labels", () => {

@@ -324,8 +324,12 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 		mockPathname = "/admin/users";
 		const html = renderToStaticMarkup(<NavBar />);
 
-		expect(html).toContain('data-testid="sidebar-group-admin-section"');
-		expect(html).toContain("app.menu.admin");
+		expect(html).not.toContain('data-testid="sidebar-group-admin-section"');
+		expect(html).toContain('data-testid="sidebar-section-core"');
+		expect(html).toContain('data-testid="sidebar-section-content"');
+		expect(html).toContain('data-testid="sidebar-section-members"');
+		expect(html).toContain('data-testid="sidebar-section-billing"');
+		expect(html).toContain('data-testid="sidebar-section-system"');
 		expect(html).toContain("admin.menu.users");
 		expect(html).toContain("course.navLabel");
 	});
@@ -464,7 +468,11 @@ describe("Admin 側邊欄五分區與可展開子選單（Task 1.2 紅燈測試�
 		mockCanAccessAdmin = true;
 		mockPathname = "/admin/email-settings";
 
-		const html = renderToStaticMarkup(<NavBar />);
+		const html = renderToStaticMarkup(
+			<PagesCmsAccessProvider canAccessPagesCms={true}>
+				<NavBar />
+			</PagesCmsAccessProvider>,
+		);
 
 		// 移除舊的單一「管理」標題與分區容器
 		expect(html).not.toContain('data-testid="sidebar-group-admin-section"');
