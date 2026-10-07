@@ -41,6 +41,7 @@
 		"@startkiter/database": "workspace:*",
 		"@startkiter/github-kit": "workspace:*",
 		"@startkiter/i18n": "workspace:*",
+		"@startkiter/mail": "workspace:*",
 		"@startkiter/newsletter": "workspace:*",
 		"@startkiter/notifications": "workspace:*",
 		"@startkiter/payments": "workspace:*",
