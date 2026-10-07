@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { MOUNT_POINTS } from "@startkiter/platform";
-import { getMountMenuItems, getTabBarItems, isMenuActive, type MountMenuItem } from "./nav-menu-items";
+import {
+	getMountMenuItems,
+	getMountNavigationContext,
+	getTabBarItems,
+	isMenuActive,
+	resolveMountNavigation,
+	type MountMenuItem,
+} from "./nav-menu-items";
 
 const labels: Record<string, string> = {
 	"app.menu.start": "開始",
@@ -387,3 +394,67 @@ describe("nav-menu-items (WorkspaceContext navigation model)", () => {
 			expect(revenueIndex).toBeLessThan(aiIndex);
 		});
 	});
+
+	describe("Task 1.2: Platform admins keep the platform workspace on admin paths (Resolution by role)", () => {
+		it("1. platform admin, /admin/course/quiz -> workspace: platform ({ scope: 'platform' }), workspaceLabel: '總管理員'", () => {
+			const nav = resolveMountNavigation({
+				pathname: "/admin/course/quiz",
+				platformAdmin: true,
+			});
+
+			expect(nav.model.workspace).toEqual({ scope: "platform" });
+			expect(nav.model.workspaceLabel).toBe("總管理員");
+		});
+
+		it("2. platform admin, /admin/course/dashboard -> workspace: platform ({ scope: 'platform' }), workspaceLabel: '總管理員'", () => {
+			const nav = resolveMountNavigation({
+				pathname: "/admin/course/dashboard",
+				platformAdmin: true,
+			});
+
+			expect(nav.model.workspace).toEqual({ scope: "platform" });
+			expect(nav.model.workspaceLabel).toBe("總管理員");
+		});
+
+		it("3. platform admin, /admin -> workspace: platform ({ scope: 'platform' }), workspaceLabel: '總管理員'", () => {
+			const nav = resolveMountNavigation({
+				pathname: "/admin",
+				platformAdmin: true,
+			});
+
+			expect(nav.model.workspace).toEqual({ scope: "platform" });
+			expect(nav.model.workspaceLabel).toBe("總管理員");
+		});
+
+		it("4. course instructor (not platform admin), /admin/course/quiz -> workspace: { scope: 'app', appId: 'course', role: 'app-admin' }, workspaceLabel: '課程管理員'", () => {
+			const nav = resolveMountNavigation({
+				pathname: "/admin/course/quiz",
+				platformAdmin: false,
+				workspaceRole: "app-admin",
+			});
+
+			expect(nav.model.workspace).toEqual({
+				scope: "app",
+				appId: "course",
+				role: "app-admin",
+			});
+			expect(nav.model.workspaceLabel).toBe("課程管理員");
+		});
+
+		it("5. learner (not platform admin), /course -> workspace: { scope: 'app', appId: 'course', role: 'app-user' }, workspaceLabel: '課程學員'", () => {
+			const nav = resolveMountNavigation({
+				pathname: "/course",
+				platformAdmin: false,
+				workspaceRole: "app-user",
+			});
+
+			expect(nav.model.workspace).toEqual({
+				scope: "app",
+				appId: "course",
+				role: "app-user",
+			});
+			expect(nav.capabilities.appRoles.course).toBe("app-user");
+			expect(["使用者", "課程學員"]).toContain(nav.model.workspaceLabel);
+		});
+	});
+

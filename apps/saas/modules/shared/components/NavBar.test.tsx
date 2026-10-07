@@ -528,8 +528,14 @@ describe("Admin 側邊欄五分區與可展開子選單（Task 1.2 紅燈測試�
 		expect(billingPos).toBeGreaterThan(membersPos);
 		expect(systemPos).toBeGreaterThan(billingPos);
 
+		// 核心分區的「控制台」連結至 /admin（而非 /admin/course/dashboard）
+		const coreSectionHtml =
+			html.split('data-testid="sidebar-section-core"')[1]?.split('data-testid="sidebar-section-')[0] ?? "";
+		expect(coreSectionHtml).toContain('href="/admin"');
+		expect(coreSectionHtml).not.toContain('href="/admin/course/dashboard"');
+		expect(coreSectionHtml).toContain("admin.menu.dashboard");
+
 		// 各分區包含對應項目
-		expect(html).toContain("course.dashboard");
 		expect(html).toContain("course.navLabel");
 		expect(html).toContain("admin.menu.pages");
 		expect(html).toContain("admin.menu.users");
@@ -546,6 +552,20 @@ describe("Admin 側邊欄五分區與可展開子選單（Task 1.2 紅燈測試�
 		expect(usersPos).toBeGreaterThan(-1);
 		expect(orgsPos).toBeGreaterThan(usersPos);
 		expect(newsletterPos).toBeGreaterThan(orgsPos);
+	});
+
+	it("核心分區的「控制台」href 為 /admin（而非 /admin/course/dashboard）", async () => {
+		mockIsCollapsed = false;
+		mockCanAccessAdmin = true;
+		mockPathname = "/admin/users";
+
+		const container = await renderClient(<NavBar />);
+		const coreSection = container.querySelector('[data-testid="sidebar-section-core"]');
+		expect(coreSection).not.toBeNull();
+
+		// 控制台連結指向 /admin，而非舊的 /admin/course/dashboard
+		expect(coreSection?.querySelector('a[href="/admin"]')).not.toBeNull();
+		expect(coreSection?.querySelector('a[href="/admin/course/dashboard"]')).toBeNull();
 	});
 
 	it("在伺服器渲染（無 localStorage）與客戶端首次渲染（即使 localStorage 存有自訂收合或展開）輸出相同的 HTML，避免 hydration mismatch", () => {
@@ -644,7 +664,7 @@ describe("Admin 側邊欄五分區與可展開子選單（Task 1.2 紅燈測試�
 		expect(container.querySelector('a[href="/admin/users"]')).not.toBeNull();
 	});
 
-	it("1.2d 點「課程」切換展開子選單而不換頁，展開後顯示完整的 11 個課程子項", async () => {
+	it("1.2d 點「課程」切換展開子選單而不換頁，展開後顯示完整的 12 個課程子項（含課程儀表板）", async () => {
 		mockIsCollapsed = false;
 		mockCanAccessAdmin = true;
 		mockPathname = "/admin/users";
@@ -670,29 +690,58 @@ describe("Admin 側邊欄五分區與可展開子選單（Task 1.2 紅燈測試�
 		expect(mockRouterPush).not.toHaveBeenCalled();
 		expect(mockRouterReplace).not.toHaveBeenCalled();
 
-		// 子選單展開且包含全部 11 個課程子項目
+		// 子選單展開且包含全部 12 個課程子項目
+		const courseSubmenu = container.querySelector(
+			'[data-testid="sidebar-item-toggle-course-admin"] ~ div',
+		);
+		expect(courseSubmenu).not.toBeNull();
+
+		const subLinks = Array.from(
+			courseSubmenu?.querySelectorAll("a") ?? [],
+		).map((el) => el.getAttribute("href"));
+
+		expect(subLinks).toEqual([
+			"/admin/course",
+			"/admin/course/dashboard",
+			"/admin/course/quiz",
+			"/admin/course/assignment",
+			"/admin/course/review",
+			"/admin/course/comments",
+			"/admin/course/messages",
+			"/admin/course/coupons",
+			"/admin/course/bundles",
+			"/admin/course/onboarding-surveys",
+			"/admin/course/media",
+			"/admin/course/course-pack",
+		]);
+
+		// 特別斷言包含 a[href="/admin/course/dashboard"]
+		expect(courseSubmenu?.querySelector('a[href="/admin/course/dashboard"]')).not.toBeNull();
+
 		// 1. 課程列表 (self route: /admin/course)
-		expect(container.querySelector('a[href="/admin/course"]')).not.toBeNull();
-		// 2. 測驗管理
-		expect(container.querySelector('a[href="/admin/course/quiz"]')).not.toBeNull();
-		// 3. 作業管理
-		expect(container.querySelector('a[href="/admin/course/assignment"]')).not.toBeNull();
-		// 4. 評價與留言管理
-		expect(container.querySelector('a[href="/admin/course/review"]')).not.toBeNull();
-		// 5. 課程留言
-		expect(container.querySelector('a[href="/admin/course/comments"]')).not.toBeNull();
-		// 6. 學員私訊
-		expect(container.querySelector('a[href="/admin/course/messages"]')).not.toBeNull();
-		// 7. 課程優惠券
-		expect(container.querySelector('a[href="/admin/course/coupons"]')).not.toBeNull();
-		// 8. 課程綁定包
-		expect(container.querySelector('a[href="/admin/course/bundles"]')).not.toBeNull();
-		// 9. 新生問卷
-		expect(container.querySelector('a[href="/admin/course/onboarding-surveys"]')).not.toBeNull();
-		// 10. 課程媒體庫
-		expect(container.querySelector('a[href="/admin/course/media"]')).not.toBeNull();
-		// 11. CoursePack 任務
-		expect(container.querySelector('a[href="/admin/course/course-pack"]')).not.toBeNull();
+		expect(courseSubmenu?.querySelector('a[href="/admin/course"]')).not.toBeNull();
+		// 2. 課程儀表板 (/admin/course/dashboard)
+		expect(courseSubmenu?.querySelector('a[href="/admin/course/dashboard"]')).not.toBeNull();
+		// 3. 測驗管理
+		expect(courseSubmenu?.querySelector('a[href="/admin/course/quiz"]')).not.toBeNull();
+		// 4. 作業管理
+		expect(courseSubmenu?.querySelector('a[href="/admin/course/assignment"]')).not.toBeNull();
+		// 5. 評價與留言管理
+		expect(courseSubmenu?.querySelector('a[href="/admin/course/review"]')).not.toBeNull();
+		// 6. 課程留言
+		expect(courseSubmenu?.querySelector('a[href="/admin/course/comments"]')).not.toBeNull();
+		// 7. 學員私訊
+		expect(courseSubmenu?.querySelector('a[href="/admin/course/messages"]')).not.toBeNull();
+		// 8. 課程優惠券
+		expect(courseSubmenu?.querySelector('a[href="/admin/course/coupons"]')).not.toBeNull();
+		// 9. 課程綁定包
+		expect(courseSubmenu?.querySelector('a[href="/admin/course/bundles"]')).not.toBeNull();
+		// 10. 新生問卷
+		expect(courseSubmenu?.querySelector('a[href="/admin/course/onboarding-surveys"]')).not.toBeNull();
+		// 11. 課程媒體庫
+		expect(courseSubmenu?.querySelector('a[href="/admin/course/media"]')).not.toBeNull();
+		// 12. CoursePack 任務
+		expect(courseSubmenu?.querySelector('a[href="/admin/course/course-pack"]')).not.toBeNull();
 	});
 
 	it("1.2e 在 /admin/settings/einvoice 時自動展開「系統設定」子選單且發票設定標記為 active", () => {
