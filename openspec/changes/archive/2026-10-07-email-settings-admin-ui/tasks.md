@@ -32,4 +32,4 @@
 ## 7. 部署與收尾
 
 - [x] 7.1 [after: 6.1] 移除 `openspec/changes/mail-provider-tosend-smtp-support` 殘留副本（正本在 `openspec/changes/archive/2026-09-16-mail-provider-tosend-smtp-support`）。驗證：`spectra list` 不再列出該 change，且 archive 目錄仍存在。
-- [ ] 7.2 [after: 6.1] 部署正式站前確認容器有 `SETTINGS_ENCRYPTION_KEY`，補 `NEXT_PUBLIC_SUPPORT_EMAIL`；部署後在後台選 ToSend 填金鑰、存檔、寄測試信到 fish@fishot.com。驗證：收件匣收到測試信、`email_delivery_log` 或測試結果顯示成功；ego-browser 桌面 1440px 與手機 390px 截圖 Email 設定四分頁與 `/course` 右下選單（只剩「我的訂閱」「平台管理設定」「登出」等 spec 列出項目），客服頁不再顯示缺 `NEXT_PUBLIC_SUPPORT_EMAIL` 紅字。
+- [x] 7.2 （2026-10-07 正式站以歡迎信測試寄送到 fish@fishot.com，Fish 確認收到；正式站目前走主機 ToSend 設定，尚未在後台存 DB 金鑰）[after: 6.1] 部署正式站前確認容器有 `SETTINGS_ENCRYPTION_KEY`，補 `NEXT_PUBLIC_SUPPORT_EMAIL`；部署後在後台選 ToSend 填金鑰、存檔、寄測試信到 fish@fishot.com。驗證：收件匣收到測試信、`email_delivery_log` 或測試結果顯示成功；ego-browser 桌面 1440px 與手機 390px 截圖 Email 設定四分頁與 `/course` 右下選單（只剩「我的訂閱」「平台管理設定」「登出」等 spec 列出項目），客服頁不再顯示缺 `NEXT_PUBLIC_SUPPORT_EMAIL` 紅字。
