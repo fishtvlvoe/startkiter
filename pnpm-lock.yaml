@@ -532,6 +532,9 @@ importers:
       '@startkiter/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@startkiter/mail':
+        specifier: workspace:*
+        version: link:../../packages/mail
       '@startkiter/newsletter':
         specifier: workspace:*
         version: link:../../packages/newsletter
