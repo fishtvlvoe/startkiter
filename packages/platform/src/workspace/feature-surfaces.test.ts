@@ -70,8 +70,8 @@ describe("App feature route surfaces", () => {
 		const courseEntries = model.items.filter((item) => item.id === "course-admin");
 
 		expect(courseEntries).toHaveLength(1);
-		expect(courseEntries[0]).toMatchObject({ href: "/admin/course", children: [] });
-		expect(model.items.flatMap((item) => [item.href, ...item.children.map((child) => child.href)])).not.toContain(
+		expect(courseEntries[0]?.children.length).toBeGreaterThan(0);
+		expect(model.items.flatMap((item) => [item.href, ...item.children.map((child) => child.href)])).toContain(
 			"/admin/course/dashboard",
 		);
 	});

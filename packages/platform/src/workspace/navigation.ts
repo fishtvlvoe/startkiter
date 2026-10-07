@@ -22,6 +22,8 @@ export type AppManifestEntry = {
 		icon: string;
 		order: number;
 		parentId?: string;
+		section?: "core" | "content" | "members" | "billing" | "system";
+		selfLabelKey?: string;
 	};
 	requiredRole: "platform-admin" | WorkspaceRole;
 	i18nNamespace: string;
@@ -34,6 +36,8 @@ export type NavigationItem = {
 	labelKey: string;
 	icon: string;
 	order: number;
+	section?: "core" | "content" | "members" | "billing" | "system";
+	selfLabelKey?: string;
 	children: Array<{ id: string; href: string; labelKey: string }>;
 };
 
@@ -85,6 +89,8 @@ function toNavigationItem(entry: AppManifestEntry, visibleEntries: AppManifestEn
 		labelKey: entry.menu!.labelKey,
 		icon: entry.menu!.icon,
 		order: entry.menu!.order,
+		...(entry.menu?.section ? { section: entry.menu.section } : {}),
+		...(entry.menu?.selfLabelKey ? { selfLabelKey: entry.menu.selfLabelKey } : {}),
 		children,
 	};
 }
@@ -198,22 +204,36 @@ export function resolveNavigation(input: {
 			.filter((entry) => entry.scope === "platform" && entry.requiredRole === "platform-admin" && !entry.menu?.parentId)
 			.sort((left, right) => (left.menu!.order ?? 0) - (right.menu!.order ?? 0))
 			.map((entry) => toNavigationItem(entry, entries));
-		const appRoots = new Map<string, AppManifestEntry>();
+
+		const appAdminRoots = entries.filter(
+			(entry) => entry.scope === "app" && entry.requiredRole === "app-admin" && !entry.menu?.parentId,
+		);
+		const adminAppIds = new Set(appAdminRoots.map((entry) => entry.appId));
+		const appUserRoots = new Map<string, AppManifestEntry>();
 		for (const entry of entries) {
-			if (entry.scope !== "app" || entry.menu?.parentId) {
+			if (entry.scope !== "app" || entry.requiredRole !== "app-user" || entry.menu?.parentId) {
 				continue;
 			}
-			const current = appRoots.get(entry.appId);
-			if (!current || (entry.requiredRole === "app-admin" && current.requiredRole !== "app-admin")) {
-				appRoots.set(entry.appId, entry);
+			if (!adminAppIds.has(entry.appId) && !appUserRoots.has(entry.appId)) {
+				appUserRoots.set(entry.appId, entry);
 			}
 		}
+
+		const appRoots = [...appAdminRoots, ...appUserRoots.values()];
+		const appItems = appRoots.map((entry) => {
+			const appEntriesOfSameApp = entries.filter(
+				(candidate) =>
+					candidate.scope === "app" &&
+					candidate.appId === entry.appId &&
+					candidate.requiredRole === "app-admin",
+			);
+			return toNavigationItem(entry, appEntriesOfSameApp);
+		});
+
 		return {
 			workspace,
 			workspaceLabel,
-			items: [...platformItems, ...[...appRoots.values()].map((entry) => toNavigationItem(entry, []))].sort(
-				(left, right) => left.order - right.order,
-			),
+			items: [...platformItems, ...appItems].sort((left, right) => left.order - right.order),
 		};
 	}
 

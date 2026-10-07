@@ -26,6 +26,8 @@ export interface MountMenuItem {
 	order: number;
 	isActive: boolean;
 	requiresOperator?: boolean;
+	section?: "core" | "content" | "members" | "billing" | "system";
+	selfLabelKey?: string;
 	subItems?: MountMenuSubItem[];
 }
 
@@ -190,6 +192,8 @@ export function getMountMenuItems({
 				model.workspace.scope === "platform"
 					? entry?.scope === "platform"
 					: entry?.requiredRole === "app-admin",
+			...(item.section ? { section: item.section } : {}),
+			...(item.selfLabelKey ? { selfLabelKey: item.selfLabelKey } : {}),
 			subItems: children.length > 0 ? children : undefined,
 		};
 	});

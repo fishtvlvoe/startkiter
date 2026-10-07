@@ -51,6 +51,8 @@ export function toAppManifestEntries(
 					labelKey: menu.labelKey,
 					icon: menu.icon,
 					order: menu.order,
+					...(menu.section ? { section: menu.section } : {}),
+					...(menu.selfLabelKey ? { selfLabelKey: menu.selfLabelKey } : {}),
 					...(parentId ? { parentId } : {}),
 				},
 				requiredRole: context.requiredRole,

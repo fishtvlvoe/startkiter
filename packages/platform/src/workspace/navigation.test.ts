@@ -163,7 +163,12 @@ describe("resolveNavigation", () => {
 		expect(model.workspace).toEqual({ scope: "platform" });
 		expect(model.workspaceLabel).toBe("總管理員");
 		expect(model.items.map((item) => item.id)).toEqual(["design-user", "admin-users", "course-admin"]);
-		expect(model.items.find((item) => item.id === "course-admin")?.children).toEqual([]);
+		expect(model.items.find((item) => item.id === "course-admin")?.children).toEqual([
+			{ id: "course-content", href: "/admin/course/content", labelKey: "course.content" },
+			{ id: "quiz", href: "/admin/course/quiz", labelKey: "course.quiz" },
+			{ id: "assignment", href: "/admin/course/assignment", labelKey: "course.assignment" },
+			{ id: "review", href: "/admin/course/review", labelKey: "course.review" },
+		]);
 	});
 
 	it("resolves roles per app for the same user", () => {
