@@ -74,10 +74,11 @@ describe("nav-menu-items (WorkspaceContext navigation model)", () => {
 		const course = items.find((item) => item.id === "course-admin");
 		const hrefs = collectMenuHrefs(items);
 
-		expect(items).toHaveLength(2);
+		expect(items).toHaveLength(1);
 		expect(course?.label).toBe("課程");
 		expect(course?.requiresOperator).toBe(true);
 		expect(course?.subItems?.map((item) => item.label)).toEqual([
+			"課程儀表板",
 			"測驗管理",
 			"作業管理",
 			"評價與留言管理",
@@ -109,9 +110,9 @@ describe("nav-menu-items (WorkspaceContext navigation model)", () => {
 		const hrefs = collectMenuHrefs(items);
 
 		expect(items.map((item) => item.id)).toEqual([
+			"admin-dashboard",
 			"admin",
 			"course-admin",
-			"course-dashboard",
 			"pages-cms",
 			"admin-organizations",
 			"newsletter",
@@ -127,7 +128,7 @@ describe("nav-menu-items (WorkspaceContext navigation model)", () => {
 			"admin-gemini",
 			"admin-ai-provider",
 		]);
-		expect(items.find((item) => item.id === "course-admin")?.subItems).toHaveLength(10);
+		expect(items.find((item) => item.id === "course-admin")?.subItems).toHaveLength(11);
 	});
 
 	it("filters pages-cms without changing App workspace", () => {

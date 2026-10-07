@@ -276,14 +276,14 @@ describe("WordPress Admin 視覺 Shell（Phase 9, task 45 紅燈）", () => {
 		expect(html).not.toContain("admin.menu.pages");
 	});
 
-	it("總管理員進入課程 App 時顯示課程管理員身份", () => {
+	it("總管理員進入後台課程頁面時維持總管理員身份", () => {
 		mockCanAccessAdmin = true;
 		mockPathname = "/admin/course";
 		const resolveNavigationSpy = vi.spyOn(workspaceNavigation, "resolveNavigation");
 		const html = renderToStaticMarkup(<NavBar />);
 
 		expect(html).toContain('data-testid="sidebar-workspace-label"');
-		expect(html).toContain("課程管理員");
+		expect(html).toContain("總管理員");
 		expect(html).toContain("course.bundles");
 		expect(resolveNavigationSpy).toHaveBeenCalledTimes(1);
 		resolveNavigationSpy.mockRestore();
