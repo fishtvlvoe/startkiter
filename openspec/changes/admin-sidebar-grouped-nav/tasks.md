@@ -12,8 +12,8 @@
 
 ## 3. 側邊欄與手機
 
-- [ ] 3.1 [after: 1.2, 2.2] 依 Decision「有子選單的項目改成展開按鈕，自己的頁面放成第一個子項」與「Default sections in fixed order」修改 `NavBar.tsx`：未分組的管理項目依 section 分區渲染、分區標題可收合、有子項的項目改為展開按鈕並在子頁時自動展開、展開狀態存 localStorage（try/catch）。動手前先 grep `NavBar.tsx` 所有讀 `subItems`、`requiresOperator`、`groupId` 的判斷式並列在 commit 說明。驗證：1.2 全部轉綠，既有 NavBar 測試全綠。
-- [ ] 3.2 [after: 1.3, 2.2] 依 Decision「手機『更多』攤平子選單」修改 `getTabBarItems`。驗證：1.3 轉綠。
+- [x] 3.1 [after: 1.2, 2.2] 依 Decision「有子選單的項目改成展開按鈕，自己的頁面放成第一個子項」與「Default sections in fixed order」修改 `NavBar.tsx`：未分組的管理項目依 section 分區渲染、分區標題可收合、有子項的項目改為展開按鈕並在子頁時自動展開、展開狀態存 localStorage（try/catch）。動手前先 grep `NavBar.tsx` 所有讀 `subItems`、`requiresOperator`、`groupId` 的判斷式並列在 commit 說明。驗證：1.2 全部轉綠，既有 NavBar 測試全綠。
+- [x] 3.2 [after: 1.3, 2.2] 依 Decision「手機『更多』攤平子選單」修改 `getTabBarItems`。驗證：1.3 轉綠。
 
 ## 4. Review
 
