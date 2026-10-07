@@ -20,8 +20,26 @@ let mockCanAccessAdmin = false;
 const mockRouterPush = vi.fn();
 const mockRouterReplace = vi.fn();
 const mockRouterRefresh = vi.fn();
+const mockNextLink = vi.fn();
+
+vi.mock("next/link", () => ({
+	default: (props: any) => {
+		mockNextLink(props);
+		const { children, href, prefetch, replace, scroll, shallow, passHref, ...rest } = props;
+		return (
+			<a
+				href={typeof href === "object" ? href?.pathname : href}
+				data-next-link="true"
+				{...rest}
+			>
+				{children}
+			</a>
+		);
+	},
+}));
 
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
+
 
 const roots = new Set<Root>();
 
@@ -774,3 +792,209 @@ describe("Admin 側邊欄五分區與可展開子選單（Task 1.2 紅燈測試�
 		expect(einvoiceClasses).toContain("text-foreground");
 	});
 });
+
+describe("Admin 側邊欄互動與無障礙優化（Task 1.1 紅燈測試）", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		mockIsMobile = false;
+		mockIsCollapsed = false;
+		mockSidebarGroups = [];
+		mockSidebarItems = [];
+		mockPathname = "/";
+		mockCanAccessAdmin = false;
+		localStorage.clear();
+	});
+
+	afterEach(() => {
+		for (const root of roots) {
+			act(() => root.unmount());
+		}
+		roots.clear();
+		if (typeof document !== "undefined") {
+			document.body.innerHTML = "";
+		}
+		mockIsCollapsed = false;
+		mockSidebarGroups = [];
+		mockSidebarItems = [];
+		mockPathname = "/";
+		mockCanAccessAdmin = false;
+		localStorage.clear();
+		vi.clearAllMocks();
+	});
+
+	describe("Collapsible section headings - Example 表三列（預存收合 vs 目前頁）", () => {
+		it("列 1: 預存 content, billing 收合，當前路徑 /admin/course/quiz，content 展開且 billing 收合", async () => {
+			mockIsCollapsed = false;
+			mockCanAccessAdmin = true;
+			mockPathname = "/admin/course/quiz";
+			localStorage.setItem("startkiter:sidebar-collapsed-sections", JSON.stringify(["content", "billing"]));
+
+			const container = await renderClient(<NavBar />);
+
+			// content 分區包含目前頁面，即使預存收合也強制展開
+			const contentSection = container.querySelector('[data-testid="sidebar-section-content"]');
+			expect(contentSection).not.toBeNull();
+			expect(contentSection?.getAttribute("data-sidebar-section-collapsed")).toBe("false");
+			expect(container.querySelector('[data-testid="sidebar-item-toggle-course-admin"]')).not.toBeNull();
+
+			// billing 分區不含目前頁面，維持預存的收合狀態
+			const billingSection = container.querySelector('[data-testid="sidebar-section-billing"]');
+			expect(billingSection).not.toBeNull();
+			expect(billingSection?.getAttribute("data-sidebar-section-collapsed")).toBe("true");
+			expect(container.querySelector('a[href="/admin/orders"]')).toBeNull();
+		});
+
+		it("列 2: 預存 content, billing 收合，當前路徑 /admin/orders，content 收合且 billing 展開", async () => {
+			mockIsCollapsed = false;
+			mockCanAccessAdmin = true;
+			mockPathname = "/admin/orders";
+			localStorage.setItem("startkiter:sidebar-collapsed-sections", JSON.stringify(["content", "billing"]));
+
+			const container = await renderClient(<NavBar />);
+
+			// content 分區不含目前頁面，維持預存的收合狀態
+			const contentSection = container.querySelector('[data-testid="sidebar-section-content"]');
+			expect(contentSection).not.toBeNull();
+			expect(contentSection?.getAttribute("data-sidebar-section-collapsed")).toBe("true");
+			expect(container.querySelector('[data-testid="sidebar-item-toggle-course-admin"]')).toBeNull();
+
+			// billing 分區包含目前頁面，強制展開
+			const billingSection = container.querySelector('[data-testid="sidebar-section-billing"]');
+			expect(billingSection).not.toBeNull();
+			expect(billingSection?.getAttribute("data-sidebar-section-collapsed")).toBe("false");
+			expect(container.querySelector('a[href="/admin/orders"]')).not.toBeNull();
+		});
+
+		it("列 3: 預存 none，當前路徑 /admin/users，content 展開且 billing 展開", async () => {
+			mockIsCollapsed = false;
+			mockCanAccessAdmin = true;
+			mockPathname = "/admin/users";
+			localStorage.setItem("startkiter:sidebar-collapsed-sections", JSON.stringify([]));
+
+			const container = await renderClient(<NavBar />);
+
+			const contentSection = container.querySelector('[data-testid="sidebar-section-content"]');
+			expect(contentSection?.getAttribute("data-sidebar-section-collapsed")).toBe("false");
+			expect(container.querySelector('[data-testid="sidebar-item-toggle-course-admin"]')).not.toBeNull();
+
+			const billingSection = container.querySelector('[data-testid="sidebar-section-billing"]');
+			expect(billingSection?.getAttribute("data-sidebar-section-collapsed")).toBe("false");
+			expect(container.querySelector('a[href="/admin/orders"]')).not.toBeNull();
+		});
+	});
+
+	it("在 /admin/settings/einvoice 點系統設定可收起且 aria-expanded=\"false\"", async () => {
+		mockIsCollapsed = false;
+		mockCanAccessAdmin = true;
+		mockPathname = "/admin/settings/einvoice";
+
+		const container = await renderClient(<NavBar />);
+
+		// 初始在子頁面，系統設定展開
+		const systemToggle = container.querySelector(
+			'[data-testid="sidebar-item-toggle-admin-system-settings"]',
+		) as HTMLButtonElement;
+		expect(systemToggle).not.toBeNull();
+		expect(container.querySelector('a[href="/admin/settings/einvoice"]')).not.toBeNull();
+
+		// 點擊系統設定按鈕進行手動收起
+		await act(async () => {
+			systemToggle.click();
+		});
+
+		// 5 個子選單項目隱藏，且按鈕 aria-expanded="false"
+		expect(container.querySelector('a[href="/admin/settings/einvoice"]')).toBeNull();
+		expect(container.querySelector('a[href="/admin/email-settings"]')).toBeNull();
+		expect(systemToggle.getAttribute("aria-expanded")).toBe("false");
+	});
+
+	it("子選單項目使用 Next.js Link 元件渲染", async () => {
+		mockIsCollapsed = false;
+		mockCanAccessAdmin = true;
+		mockPathname = "/admin/settings/einvoice";
+
+		const container = await renderClient(<NavBar />);
+
+		// 子選單發票設定連結必須是 Next.js Link（帶有 mock 的 data-next-link）
+		const einvoiceLink = container.querySelector('a[href="/admin/settings/einvoice"]');
+		expect(einvoiceLink).not.toBeNull();
+		expect(einvoiceLink?.getAttribute("data-next-link")).toBe("true");
+
+		// 檢查 mockNextLink 是否被以該 href 呼叫
+		const calls = mockNextLink.mock.calls;
+		const einvoiceCall = calls.find(([props]) => props?.href === "/admin/settings/einvoice");
+		expect(einvoiceCall).toBeDefined();
+	});
+
+	it("分區、子選單、自訂分組按鈕皆有 aria-expanded 與指向存在 id 的 aria-controls", async () => {
+		mockIsCollapsed = false;
+		mockCanAccessAdmin = true;
+		mockPathname = "/admin/users";
+		mockSidebarGroups = [
+			{ id: "custom-g1", title: "常用", order: 0, isCollapsed: false },
+		];
+
+		const container = await renderClient(<NavBar />);
+
+		// 1. 分區標題收合按鈕
+		const sectionButtons = container.querySelectorAll<HTMLButtonElement>(
+			'[data-testid^="sidebar-section-toggle-"]',
+		);
+		expect(sectionButtons.length).toBeGreaterThan(0);
+		for (const btn of sectionButtons) {
+			const expanded = btn.getAttribute("aria-expanded");
+			expect(expanded === "true" || expanded === "false").toBe(true);
+			const controlsId = btn.getAttribute("aria-controls");
+			expect(controlsId).toBeTruthy();
+			expect(container.querySelector(`#${controlsId}`)).not.toBeNull();
+		}
+
+		// 2. 子選單展開按鈕（課程）
+		const courseToggle = container.querySelector(
+			'[data-testid="sidebar-item-toggle-course-admin"]',
+		) as HTMLButtonElement;
+		expect(courseToggle).not.toBeNull();
+		expect(courseToggle.getAttribute("aria-expanded")).toBe("false");
+		const courseControlsId = courseToggle.getAttribute("aria-controls");
+		expect(courseControlsId).toBeTruthy();
+
+		// 點開課程子選單
+		await act(async () => {
+			courseToggle.click();
+		});
+		expect(courseToggle.getAttribute("aria-expanded")).toBe("true");
+		expect(container.querySelector(`#${courseControlsId}`)).not.toBeNull();
+
+		// 3. 自訂分組收折按鈕
+		const groupContainer = container.querySelector('[data-testid="sidebar-group-custom-g1"]');
+		expect(groupContainer).not.toBeNull();
+		const groupToggle = groupContainer?.querySelector("button") as HTMLButtonElement;
+		expect(groupToggle).not.toBeNull();
+		expect(groupToggle.getAttribute("aria-expanded")).toBe("true");
+		const groupControlsId = groupToggle.getAttribute("aria-controls");
+		expect(groupControlsId).toBeTruthy();
+		expect(container.querySelector(`#${groupControlsId}`)).not.toBeNull();
+	});
+
+	it("自訂分組改名按鈕具有 aria-label=\"重新命名分組\" 且在 focus-visible 時可見", async () => {
+		mockIsCollapsed = false;
+		mockCanAccessAdmin = true;
+		mockPathname = "/admin/users";
+		mockSidebarGroups = [
+			{ id: "custom-g1", title: "常用", order: 0, isCollapsed: false },
+		];
+
+		const container = await renderClient(<NavBar />);
+
+		const groupContainer = container.querySelector('[data-testid="sidebar-group-custom-g1"]');
+		expect(groupContainer).not.toBeNull();
+		// header 區域內第二個按鈕為改名按鈕
+		const headerButtons = groupContainer?.querySelectorAll(".group\\/header button") ?? [];
+		const renameBtn = headerButtons[1] as HTMLButtonElement | undefined;
+
+		expect(renameBtn).toBeDefined();
+		expect(renameBtn?.getAttribute("aria-label")).toBe("重新命名分組");
+		expect(renameBtn?.className).toContain("focus-visible:opacity-100");
+	});
+});
+

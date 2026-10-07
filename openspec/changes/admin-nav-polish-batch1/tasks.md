@@ -1,7 +1,7 @@
 ## 1. 紅燈測試
 
-- [ ] 1.1 依「Collapsible section headings」「Expandable parent items」「Accessible custom group controls」在 `apps/saas/modules/shared/components/NavBar.test.tsx` 用客戶端渲染＋點擊新增紅燈測試：Example 表三列（預存收合 vs 目前頁）、在 `/admin/settings/einvoice` 點系統設定可收起且 `aria-expanded="false"`、子選單項目是 Next.js `Link`（以 mock `next/link` 斷言被使用，或斷言點擊時呼叫 router 而非整頁導向）、分區／子選單／自訂分組按鈕皆有 `aria-expanded` 與指向存在 id 的 `aria-controls`、改名按鈕 `aria-label="重新命名分組"`。既有測試預期不改。驗證：`pnpm --filter @startkiter/saas exec vitest run modules/shared/components/NavBar.test.tsx` 新測試失敗、舊測試仍綠。
-- [ ] 1.2 依「Widget does not cover the mobile tab bar」在既有 `apps/saas/modules/deployment/support-widget.test.tsx` 新增紅燈測試：外層容器 class 含手機底部偏移（≥ 80px，對應 Tailwind `bottom-20` 以上）與 `md:bottom-6`。驗證：新測試失敗。
+- [x] 1.1 依「Collapsible section headings」「Expandable parent items」「Accessible custom group controls」在 `apps/saas/modules/shared/components/NavBar.test.tsx` 用客戶端渲染＋點擊新增紅燈測試：Example 表三列（預存收合 vs 目前頁）、在 `/admin/settings/einvoice` 點系統設定可收起且 `aria-expanded="false"`、子選單項目是 Next.js `Link`（以 mock `next/link` 斷言被使用，或斷言點擊時呼叫 router 而非整頁導向）、分區／子選單／自訂分組按鈕皆有 `aria-expanded` 與指向存在 id 的 `aria-controls`、改名按鈕 `aria-label="重新命名分組"`。既有測試預期不改。驗證：`pnpm --filter @startkiter/saas exec vitest run modules/shared/components/NavBar.test.tsx` 新測試失敗、舊測試仍綠。
+- [x] 1.2 依「Widget does not cover the mobile tab bar」在既有 `apps/saas/modules/deployment/support-widget.test.tsx` 新增紅燈測試：外層容器 class 含手機底部偏移（≥ 80px，對應 Tailwind `bottom-20` 以上）與 `md:bottom-6`。驗證：新測試失敗。
 
 ## 2. 實作
 
