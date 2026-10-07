@@ -67,11 +67,10 @@ describe("nav-menu-items (WorkspaceContext navigation model)", () => {
 		const course = items.find((item) => item.id === "course-admin");
 		const hrefs = collectMenuHrefs(items);
 
-		expect(items).toHaveLength(1);
+		expect(items).toHaveLength(2);
 		expect(course?.label).toBe("課程");
 		expect(course?.requiresOperator).toBe(true);
 		expect(course?.subItems?.map((item) => item.label)).toEqual([
-			"課程儀表板",
 			"測驗管理",
 			"作業管理",
 			"評價與留言管理",
