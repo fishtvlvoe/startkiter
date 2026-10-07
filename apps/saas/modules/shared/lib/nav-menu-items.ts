@@ -190,7 +190,7 @@ export function getMountMenuItems({
 			isActive,
 			requiresOperator:
 				model.workspace.scope === "platform"
-					? entry?.scope === "platform"
+					? entry?.scope === "platform" || entry?.requiredRole === "app-admin" || Boolean(item.section)
 					: entry?.requiredRole === "app-admin",
 			...(item.section ? { section: item.section } : {}),
 			...(item.selfLabelKey ? { selfLabelKey: item.selfLabelKey } : {}),
@@ -204,7 +204,8 @@ export function getTabBarItems(menuItems: MountMenuItem[], moreLabel = "更多")
 	overflow: TabBarItem[];
 } {
 	const sorted = [...menuItems].sort((a, b) => a.order - b.order);
-	const fixed = sorted.slice(0, 3).map((item) => ({
+	const fixedItems = sorted.slice(0, 3);
+	const fixed = fixedItems.map((item) => ({
 		id: item.id,
 		label: item.label,
 		href: item.href,
@@ -212,20 +213,46 @@ export function getTabBarItems(menuItems: MountMenuItem[], moreLabel = "更多")
 		isActive: item.isActive,
 	}));
 
+	const overflowSubItems: TabBarOverflowItem[] = [];
+
+	for (const item of fixedItems) {
+		if (item.subItems?.length) {
+			for (const sub of item.subItems) {
+				overflowSubItems.push({
+					label: sub.label,
+					href: sub.href,
+				});
+			}
+		}
+	}
+
 	const remaining = sorted.slice(3);
+	for (const item of remaining) {
+		if (item.subItems?.length) {
+			for (const sub of item.subItems) {
+				overflowSubItems.push({
+					label: sub.label,
+					href: sub.href,
+				});
+			}
+		} else {
+			overflowSubItems.push({
+				label: item.label,
+				href: item.href,
+			});
+		}
+	}
+
 	const overflow: TabBarItem[] =
-		remaining.length > 0
+		overflowSubItems.length > 0
 			? [
-				{
-					id: "more",
-					label: moreLabel,
+					{
+						id: "more",
+						label: moreLabel,
 						href: "#",
 						icon: "ellipsis",
 						isActive: remaining.some((item) => item.isActive),
-						subItems: remaining.map((item) => ({
-							label: item.label,
-							href: item.href,
-						})),
+						subItems: overflowSubItems,
 					},
 				]
 			: [];
