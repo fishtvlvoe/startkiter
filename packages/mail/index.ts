@@ -17,6 +17,7 @@ export {
 	getCachedEmailSettings,
 	hasStoredCredential,
 	getStoredProviderSender,
+	resolveActiveProvider,
 } from "./lib/email-settings";
 export type {
 	StoredEmailSettings,

@@ -48,6 +48,7 @@ export type StoredEmailSettings = {
 
 export type EmailSettingsSummary = {
 	provider?: EmailProviderType;
+	activeProvider: { name: EmailProviderType; source: "stored" | "environment" } | null;
 	hasZsendApiKey: boolean;
 	zsendApiKeyHint?: string;
 	zsendDomain?: string;
@@ -77,22 +78,10 @@ const CREDENTIAL_KEYS = ["tosendApiKey", "zsendApiKey", "resendApiKey", "smtpPas
 const CACHE_TTL_MS = 30_000;
 let cachedSettings: StoredEmailSettings | null = null;
 let cacheExpiresAt = 0;
-let cachedTestKey: string | null = null;
-
-function getCurrentTestKey(): string | null {
-	try {
-		const g = globalThis as Record<string, unknown>;
-		const exp = g.expect as { getState?: () => { currentTestName?: string } } | undefined;
-		return exp?.getState?.()?.currentTestName ?? null;
-	} catch {
-		return null;
-	}
-}
 
 export function clearEmailSettingsCache(): void {
 	cachedSettings = null;
 	cacheExpiresAt = 0;
-	cachedTestKey = null;
 }
 
 export function getCachedEmailSettings(): StoredEmailSettings {
@@ -101,14 +90,10 @@ export function getCachedEmailSettings(): StoredEmailSettings {
 
 export async function readEmailSettings(): Promise<StoredEmailSettings> {
 	const now = Date.now();
-	const testKey = getCurrentTestKey();
-	const isSameTest = testKey === null || testKey === cachedTestKey;
 
-	if (cachedSettings !== null && now < cacheExpiresAt && isSameTest) {
+	if (cachedSettings !== null && now < cacheExpiresAt) {
 		return cachedSettings;
 	}
-
-	cachedTestKey = testKey;
 
 	const db = await getDb();
 	if (!db) {
@@ -149,8 +134,45 @@ export async function readEmailSettings(): Promise<StoredEmailSettings> {
 	}
 }
 
+const ENV_FALLBACK_PROVIDERS: readonly { name: EmailProviderType; envKey: string }[] = [
+	{ name: "zsend", envKey: "ZSEND_API_KEY" },
+	{ name: "tosend", envKey: "TOSEND_API_KEY" },
+	{ name: "resend", envKey: "RESEND_API_KEY" },
+	{ name: "smtp", envKey: "SMTP_HOST" },
+] as const;
+
+export async function resolveActiveProvider(
+	providedSettings?: StoredEmailSettings,
+): Promise<{
+	name: EmailProviderType;
+	source: "stored" | "environment";
+} | null> {
+	const settings = providedSettings ?? (await readEmailSettings());
+	if (settings.provider && hasStoredCredential(settings, settings.provider)) {
+		return { name: settings.provider, source: "stored" };
+	}
+
+	const requested = process.env.EMAIL_PROVIDER?.trim().toLowerCase();
+	const envHas = (k: string) => Boolean(process.env[k]?.trim());
+
+	if (requested) {
+		const match = ENV_FALLBACK_PROVIDERS.find((c) => c.name === requested);
+		if (match && envHas(match.envKey)) {
+			return { name: match.name, source: "environment" };
+		}
+	}
+
+	const fallback = ENV_FALLBACK_PROVIDERS.find((c) => envHas(c.envKey));
+	if (fallback) {
+		return { name: fallback.name, source: "environment" };
+	}
+
+	return null;
+}
+
 export async function getEmailSettingsSummary(): Promise<EmailSettingsSummary> {
 	const settings = await readEmailSettings();
+	const activeProvider = await resolveActiveProvider();
 
 	const hasTosendApiKey = Boolean(settings.tosendApiKey?.trim());
 	const hasZsendApiKey = Boolean(settings.zsendApiKey?.trim());
@@ -159,6 +181,7 @@ export async function getEmailSettingsSummary(): Promise<EmailSettingsSummary> {
 
 	return {
 		provider: settings.provider,
+		activeProvider,
 		hasTosendApiKey,
 		tosendApiKeyHint: hasTosendApiKey ? maskSecret(settings.tosendApiKey) : undefined,
 		tosendApiBaseUrl: settings.tosendApiBaseUrl,
@@ -188,6 +211,39 @@ function isValidEmail(email: string): boolean {
 	return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+const VALID_PROVIDERS: readonly EmailProviderType[] = [
+	"zsend",
+	"tosend",
+	"resend",
+	"smtp",
+] as const;
+
+const STRING_KEYS = [
+	"zsendApiKey",
+	"zsendDomain",
+	"tosendApiKey",
+	"tosendApiBaseUrl",
+	"resendApiKey",
+	"smtpHost",
+	"smtpUser",
+	"smtpPass",
+	"senderName",
+	"fromEmail",
+	"newsletterSenderName",
+	"newsletterReplyTo",
+	"footerCompany",
+	"footerAddress",
+	"footerEmail",
+] as const;
+
+const ALLOWED_SETTING_KEYS = [
+	"provider",
+	...STRING_KEYS,
+	"smtpPort",
+	"smtpSecure",
+	"newsletterRatePerMinute",
+] as const;
+
 export type SaveEmailSettingsResult =
 	| { ok: true }
 	| { ok: false; error: "invalid_input" | "settings_unavailable" };
@@ -202,6 +258,21 @@ export async function saveEmailSettings(
 	}
 
 	// 驗證邊界
+	if (
+		input.provider !== undefined &&
+		!VALID_PROVIDERS.includes(input.provider as EmailProviderType)
+	) {
+		return { ok: false, error: "invalid_input" };
+	}
+	for (const key of STRING_KEYS) {
+		const val = (input as Record<string, unknown>)[key];
+		if (val !== undefined && typeof val !== "string") {
+			return { ok: false, error: "invalid_input" };
+		}
+	}
+	if (input.smtpSecure !== undefined && typeof input.smtpSecure !== "boolean") {
+		return { ok: false, error: "invalid_input" };
+	}
 	if (input.fromEmail !== undefined && input.fromEmail !== "" && !isValidEmail(input.fromEmail)) {
 		return { ok: false, error: "invalid_input" };
 	}
@@ -261,8 +332,16 @@ export async function saveEmailSettings(
 		}
 	}
 
-	const next: StoredEmailSettings = { ...existing };
-	for (const [key, value] of Object.entries(input)) {
+	const next: StoredEmailSettings = {};
+	for (const key of ALLOWED_SETTING_KEYS) {
+		const existingVal = (existing as Record<string, unknown>)[key];
+		if (existingVal !== undefined) {
+			(next as Record<string, unknown>)[key] = existingVal;
+		}
+	}
+
+	for (const key of ALLOWED_SETTING_KEYS) {
+		const value = (input as Record<string, unknown>)[key];
 		if (value === undefined) continue;
 		if (CREDENTIAL_KEYS.includes(key as (typeof CREDENTIAL_KEYS)[number]) && value === "") {
 			// 空字串金鑰沿用既有值

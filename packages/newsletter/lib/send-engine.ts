@@ -2,8 +2,8 @@ import { randomUUID } from "node:crypto";
 
 import { db } from "@startkiter/database";
 import {
-	hasStoredCredential,
 	readEmailSettings,
+	resolveActiveProvider,
 	sendEmail,
 	type StoredEmailSettings,
 } from "@startkiter/mail";
@@ -639,27 +639,6 @@ export class CampaignStateError extends SendEngineError {
 	}
 }
 
-function resolveActiveProvider(settings: StoredEmailSettings): string | undefined {
-	if (settings.provider && hasStoredCredential(settings, settings.provider)) {
-		return settings.provider;
-	}
-	const requested = process.env.EMAIL_PROVIDER?.trim().toLowerCase();
-	const envHas = (k: string) => Boolean(process.env[k]?.trim());
-	const candidates: Array<{ name: string; envKey: string }> = [
-		{ name: "zsend", envKey: "ZSEND_API_KEY" },
-		{ name: "tosend", envKey: "TOSEND_API_KEY" },
-		{ name: "resend", envKey: "RESEND_API_KEY" },
-		{ name: "smtp", envKey: "SMTP_HOST" },
-	];
-	if (requested) {
-		const match = candidates.find((c) => c.name === requested);
-		if (match && envHas(match.envKey)) return match.name;
-	}
-	const fallback = candidates.find((c) => envHas(c.envKey));
-	if (fallback) return fallback.name;
-	return process.env.EMAIL_PROVIDER?.trim() || undefined;
-}
-
 export async function getDefaultRatePerMinute(): Promise<number> {
 	const settings = await readEmailSettings();
 	if (
@@ -690,7 +669,8 @@ export async function captureSenderSnapshot(): Promise<SenderSnapshot> {
 		settings.newsletterReplyTo?.trim() ||
 		process.env.MAIL_REPLY_TO?.trim() ||
 		undefined;
-	const emailProvider = resolveActiveProvider(settings);
+	const activeProvider = await resolveActiveProvider(settings);
+	const emailProvider = activeProvider?.name;
 
 	return {
 		fromEmail,

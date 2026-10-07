@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const {
 	campaignFindFirst,
+	campaignCreate,
 	recipientDeleteMany,
 	recipientFindMany,
 	recipientCreateMany,
@@ -9,8 +10,10 @@ const {
 	transaction,
 	getNewsletterSiteSettings,
 	scheduleCampaign,
+	getDefaultRatePerMinute,
 } = vi.hoisted(() => ({
 	campaignFindFirst: vi.fn(),
+	campaignCreate: vi.fn(),
 	recipientDeleteMany: vi.fn(),
 	recipientFindMany: vi.fn(),
 	recipientCreateMany: vi.fn(),
@@ -18,11 +21,16 @@ const {
 	transaction: vi.fn(),
 	getNewsletterSiteSettings: vi.fn(),
 	scheduleCampaign: vi.fn(),
+	getDefaultRatePerMinute: vi.fn(),
 }));
 
 vi.mock("@startkiter/database", () => ({
 	db: {
-		newsletterCampaign: { findFirst: campaignFindFirst, update: campaignUpdate },
+		newsletterCampaign: {
+			findFirst: campaignFindFirst,
+			update: campaignUpdate,
+			create: campaignCreate,
+		},
 		newsletterRecipient: {
 			deleteMany: recipientDeleteMany,
 			findMany: recipientFindMany,
@@ -58,9 +66,10 @@ vi.mock("@startkiter/newsletter", () => ({
 	requestImmediateSend: vi.fn(),
 	scheduleCampaign,
 	sendEmail: vi.fn(),
+	getDefaultRatePerMinute,
 }));
 
-import { prepareNewsletterAudience, scheduleNewsletter } from "./actions";
+import { createNewsletterDraft, prepareNewsletterAudience, scheduleNewsletter } from "./actions";
 
 describe("prepareNewsletterAudience", () => {
 	beforeEach(() => {
@@ -151,5 +160,23 @@ describe("prepareNewsletterAudience", () => {
 			ok: false,
 			error: expect.stringMatching(/Zero eligible recipients/),
 		});
+	});
+});
+
+describe("createNewsletterDraft", () => {
+	it("creates draft campaign with ratePerMinute from getDefaultRatePerMinute", async () => {
+		getDefaultRatePerMinute.mockResolvedValue(120);
+		campaignCreate.mockResolvedValue({ id: "campaign-new-1" });
+
+		await createNewsletterDraft();
+
+		expect(getDefaultRatePerMinute).toHaveBeenCalled();
+		expect(campaignCreate).toHaveBeenCalledWith(
+			expect.objectContaining({
+				data: expect.objectContaining({
+					ratePerMinute: 120,
+				}),
+			}),
+		);
 	});
 });

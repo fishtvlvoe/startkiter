@@ -100,7 +100,7 @@ function blocksFromMarkdownFallback(markdown: string): WelcomeEmailBlock[] {
 }
 
 function isProviderConfigured(
-	summary?: EmailSettingsSummary | null,
+	summary?: Partial<EmailSettingsSummary> | null,
 	provider?: EmailProviderType | null,
 ): boolean {
 	if (!summary || !provider) return false;
@@ -116,17 +116,28 @@ export default function EmailSettingsPanel({
 	initialSettings,
 }: {
 	initialCourses: Course[];
-	initialSettings?: EmailSettingsSummary;
+	initialSettings?: Partial<EmailSettingsSummary>;
 }) {
 	// 分頁狀態
 	const [activeTab, setActiveTab] = useState<"service" | "sender" | "welcome" | "logs">("service");
 
 	// 設定摘要與已儲存狀態
-	const [summary, setSummary] = useState<EmailSettingsSummary>(initialSettings ?? {
-		hasTosendApiKey: false,
-		hasZsendApiKey: false,
-		hasResendApiKey: false,
-		hasSmtpPass: false,
+	const [summary, setSummary] = useState<EmailSettingsSummary>(() => {
+		const derivedActiveProvider =
+			initialSettings?.activeProvider !== undefined
+				? initialSettings.activeProvider
+				: initialSettings?.provider && isProviderConfigured(initialSettings, initialSettings.provider)
+					? { name: initialSettings.provider, source: "stored" as const }
+					: null;
+
+		return {
+			hasTosendApiKey: false,
+			hasZsendApiKey: false,
+			hasResendApiKey: false,
+			hasSmtpPass: false,
+			...initialSettings,
+			activeProvider: derivedActiveProvider,
+		};
 	});
 
 	// 分頁 1: 寄信服務
@@ -246,7 +257,10 @@ export default function EmailSettingsPanel({
 
 			const result = await saveEmailSettingsAction(payload);
 			if (result.ok) {
-				setSummary(result.summary);
+				setSummary({
+					...result.summary,
+					activeProvider: result.summary.activeProvider ?? { name: provider, source: "stored" },
+				});
 				setIsSaved(true);
 				setServiceMessage("寄信服務設定已儲存。");
 			} else {
@@ -387,8 +401,7 @@ export default function EmailSettingsPanel({
 	}
 
 	// 狀態條判斷
-	const activeProvider = summary.provider;
-	const isConfiguredNow = Boolean(activeProvider && isProviderConfigured(summary, activeProvider));
+	const activeProvider = summary.activeProvider;
 
 	return (
 		<div className="mx-auto max-w-6xl space-y-6 p-6" data-testid="course-email-settings-page">
@@ -401,13 +414,17 @@ export default function EmailSettingsPanel({
 			</div>
 
 			{/* 狀態條 */}
-			{isConfiguredNow && activeProvider ? (
+			{activeProvider ? (
 				<div
 					data-testid="email-settings-status"
 					className="flex items-center gap-2 rounded-lg border border-emerald-300 bg-emerald-50 p-3.5 text-sm font-medium text-emerald-900 dark:border-emerald-900/50 dark:bg-emerald-950/30 dark:text-emerald-200"
 				>
 					<CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
-					<span>設定已生效，目前使用 {PROVIDER_NAMES[activeProvider]} 寄信。</span>
+					<span>
+						{activeProvider.source === "environment"
+							? `目前使用 ${PROVIDER_NAMES[activeProvider.name]} 寄信（來自主機設定）。`
+							: `設定已生效，目前使用 ${PROVIDER_NAMES[activeProvider.name]} 寄信。`}
+					</span>
 				</div>
 			) : (
 				<div

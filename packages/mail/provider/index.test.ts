@@ -1,4 +1,5 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { clearEmailSettingsCache } from "../lib/email-settings";
 
 const providerEnvNames = [
 	"EMAIL_PROVIDER",
@@ -71,14 +72,22 @@ function mockProviders(options?: MockProvidersOptions) {
 			warn: handlers.warn,
 		},
 	}));
-	vi.doMock("../lib/email-settings", () => ({
-		readEmailSettings: handlers.readEmailSettings,
-	}));
+	vi.doMock("../lib/email-settings", async (importOriginal) => {
+		const actual = await importOriginal<typeof import("../lib/email-settings")>();
+		return {
+			...actual,
+			readEmailSettings: handlers.readEmailSettings,
+		};
+	});
 
 	return handlers;
 }
 
 describe("mail provider selection", () => {
+	beforeEach(() => {
+		clearEmailSettingsCache();
+	});
+
 	afterEach(() => {
 		vi.resetModules();
 		vi.unstubAllEnvs();
@@ -281,5 +290,66 @@ describe("mail provider selection", () => {
 		expect(handlers.readEmailSettings).toHaveBeenCalled();
 		expect(handlers.resendSend).toHaveBeenCalledWith(params);
 		expect(handlers.warn).toHaveBeenCalledTimes(1);
+	});
+
+	it("uses DB senderName and fromEmail when caller does not provide from", async () => {
+		clearProviderEnv();
+		const handlers = mockProviders({
+			storedSettings: {
+				provider: "resend",
+				resendApiKey: "re_test",
+				senderName: "我的課程平台",
+				fromEmail: "noreply@x.com",
+			},
+		});
+
+		const { send } = await import("./index");
+		await send(params);
+
+		expect(handlers.resendSend).toHaveBeenCalledWith({
+			...params,
+			from: '"我的課程平台" <noreply@x.com>',
+		});
+	});
+
+	it("preserves caller provided from even when DB sender is configured", async () => {
+		clearProviderEnv();
+		const handlers = mockProviders({
+			storedSettings: {
+				provider: "resend",
+				resendApiKey: "re_test",
+				senderName: "我的課程平台",
+				fromEmail: "noreply@x.com",
+			},
+		});
+
+		const customParams = {
+			...params,
+			from: "custom@example.com",
+		};
+
+		const { send } = await import("./index");
+		await send(customParams);
+
+		expect(handlers.resendSend).toHaveBeenCalledWith(customParams);
+	});
+
+	it("falls back to process.env.MAIL_FROM when DB fromEmail is not configured", async () => {
+		clearProviderEnv();
+		vi.stubEnv("MAIL_FROM", "fallback-env@example.com");
+		const handlers = mockProviders({
+			storedSettings: {
+				provider: "resend",
+				resendApiKey: "re_test",
+			},
+		});
+
+		const { send } = await import("./index");
+		await send(params);
+
+		expect(handlers.resendSend).toHaveBeenCalledWith({
+			...params,
+			from: "fallback-env@example.com",
+		});
 	});
 });

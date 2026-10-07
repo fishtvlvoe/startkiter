@@ -247,4 +247,77 @@ describe("EmailSettingsPanel", () => {
 			expect(testBtn.disabled).toBe(false);
 		});
 	});
+
+	describe("Email settings page layout 狀態條 Example 驗證", () => {
+		it("① stored none / env none -> 顯示警告「尚未完成設定：網站目前寄不出任何信」", async () => {
+			const container = await render(
+				<EmailSettingsPanel
+					initialCourses={initialCourses}
+					initialSettings={{
+						activeProvider: null,
+						hasTosendApiKey: false,
+						hasZsendApiKey: false,
+						hasResendApiKey: false,
+						hasSmtpPass: false,
+					}}
+				/>,
+			);
+			const status = container.querySelector('[data-testid="email-settings-status"]');
+			expect(status?.textContent).toContain("尚未完成設定：網站目前寄不出任何信");
+		});
+
+		it("② stored none / env TOSEND_API_KEY set -> 顯示「目前使用 ToSend 寄信（來自主機設定）」", async () => {
+			const container = await render(
+				<EmailSettingsPanel
+					initialCourses={initialCourses}
+					initialSettings={{
+						activeProvider: { name: "tosend", source: "environment" },
+						hasTosendApiKey: false,
+						hasZsendApiKey: false,
+						hasResendApiKey: false,
+						hasSmtpPass: false,
+					}}
+				/>,
+			);
+			const status = container.querySelector('[data-testid="email-settings-status"]');
+			expect(status?.textContent).toContain("目前使用 ToSend 寄信（來自主機設定）");
+		});
+
+		it("③ stored tosend with tosendApiKey / env none -> 顯示「目前使用 ToSend 寄信」", async () => {
+			const container = await render(
+				<EmailSettingsPanel
+					initialCourses={initialCourses}
+					initialSettings={{
+						provider: "tosend",
+						hasTosendApiKey: true,
+						activeProvider: { name: "tosend", source: "stored" },
+						hasZsendApiKey: false,
+						hasResendApiKey: false,
+						hasSmtpPass: false,
+					}}
+				/>,
+			);
+			const status = container.querySelector('[data-testid="email-settings-status"]');
+			expect(status?.textContent).toContain("目前使用 ToSend 寄信");
+		});
+
+		it("④ stored smtp without smtpHost / env none -> 顯示警告「尚未完成設定：網站目前寄不出任何信」", async () => {
+			const container = await render(
+				<EmailSettingsPanel
+					initialCourses={initialCourses}
+					initialSettings={{
+						provider: "smtp",
+						smtpHost: "",
+						activeProvider: null,
+						hasTosendApiKey: false,
+						hasZsendApiKey: false,
+						hasResendApiKey: false,
+						hasSmtpPass: false,
+					}}
+				/>,
+			);
+			const status = container.querySelector('[data-testid="email-settings-status"]');
+			expect(status?.textContent).toContain("尚未完成設定：網站目前寄不出任何信");
+		});
+	});
 });

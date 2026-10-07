@@ -15,9 +15,11 @@ import {
 	encryptSettingsJson,
 } from "../../api/modules/course/lib/settings-crypto";
 import {
+	clearEmailSettingsCache,
 	EMAIL_SETTINGS_ID,
 	getEmailSettingsSummary,
 	readEmailSettings,
+	resolveActiveProvider,
 	saveEmailSettings,
 } from "./email-settings";
 
@@ -35,6 +37,7 @@ function siteSettingRow(ciphertext: string) {
 describe("email settings", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		clearEmailSettingsCache();
 		process.env.SETTINGS_ENCRYPTION_KEY = TEST_SECRET;
 		vi.mocked(db.siteSetting.findUnique).mockResolvedValue(null);
 		vi.mocked(db.siteSetting.upsert).mockResolvedValue(
@@ -164,6 +167,46 @@ describe("email settings", () => {
 			expect(result).toEqual({ ok: true });
 			expect(db.siteSetting.upsert).toHaveBeenCalledTimes(1);
 		});
+
+		it("rejects invalid provider with invalid_input", async () => {
+			const result = await saveEmailSettings({ provider: "mailgun" as any });
+			expect(result).toEqual({ ok: false, error: "invalid_input" });
+			expect(db.siteSetting.upsert).not.toHaveBeenCalled();
+		});
+
+		it("strips unknown fields such as evil:'x' from stored ciphertext", async () => {
+			let storedCiphertext = "";
+			vi.mocked(db.siteSetting.upsert).mockImplementation((async ({ create, update }: any) => {
+				storedCiphertext = update?.ciphertext ?? create?.ciphertext;
+				return siteSettingRow(storedCiphertext);
+			}) as never);
+
+			const result = await saveEmailSettings({
+				provider: "tosend",
+				evil: "x",
+			} as any);
+
+			expect(result).toEqual({ ok: true });
+			expect(db.siteSetting.upsert).toHaveBeenCalledTimes(1);
+
+			const decrypted = decryptSettingsJson(storedCiphertext, TEST_SECRET);
+			expect(decrypted).not.toBeNull();
+			const parsed = JSON.parse(decrypted!);
+			expect(parsed.evil).toBeUndefined();
+			expect(Object.keys(parsed)).not.toContain("evil");
+		});
+
+		it("rejects non-string values for string fields with invalid_input", async () => {
+			const result = await saveEmailSettings({ senderName: 123 as any });
+			expect(result).toEqual({ ok: false, error: "invalid_input" });
+			expect(db.siteSetting.upsert).not.toHaveBeenCalled();
+		});
+
+		it("rejects non-boolean values for smtpSecure with invalid_input", async () => {
+			const result = await saveEmailSettings({ smtpSecure: "true" as any });
+			expect(result).toEqual({ ok: false, error: "invalid_input" });
+			expect(db.siteSetting.upsert).not.toHaveBeenCalled();
+		});
 	});
 
 	describe("Stored secrets are never returned in plain text", () => {
@@ -255,6 +298,87 @@ describe("email settings", () => {
 			);
 			const settings = await readEmailSettings();
 			expect(settings).toEqual({});
+		});
+	});
+
+	describe("resolveActiveProvider", () => {
+		const envKeys = [
+			"EMAIL_PROVIDER",
+			"ZSEND_API_KEY",
+			"TOSEND_API_KEY",
+			"RESEND_API_KEY",
+			"SMTP_HOST",
+		];
+
+		beforeEach(() => {
+			for (const key of envKeys) {
+				delete process.env[key];
+			}
+		});
+
+		it("resolves stored provider when valid credentials exist in DB", async () => {
+			const payload = {
+				provider: "resend",
+				resendApiKey: "re_valid_key",
+			};
+			vi.mocked(db.siteSetting.findUnique).mockResolvedValue(
+				siteSettingRow(encryptSettingsJson(JSON.stringify(payload), TEST_SECRET)) as never,
+			);
+
+			const active = await resolveActiveProvider();
+			expect(active).toEqual({ name: "resend", source: "stored" });
+		});
+
+		it("falls back to environment fallback chain when stored provider lacks credentials", async () => {
+			const payload = {
+				provider: "tosend",
+				tosendApiKey: "",
+			};
+			vi.mocked(db.siteSetting.findUnique).mockResolvedValue(
+				siteSettingRow(encryptSettingsJson(JSON.stringify(payload), TEST_SECRET)) as never,
+			);
+			process.env.ZSEND_API_KEY = "zs_key";
+
+			const active = await resolveActiveProvider();
+			expect(active).toEqual({ name: "zsend", source: "environment" });
+		});
+
+		it("prefers explicitly requested EMAIL_PROVIDER from environment when credentials exist", async () => {
+			vi.mocked(db.siteSetting.findUnique).mockResolvedValue(null);
+			process.env.EMAIL_PROVIDER = "resend";
+			process.env.RESEND_API_KEY = "re_env_key";
+			process.env.ZSEND_API_KEY = "zs_env_key";
+
+			const active = await resolveActiveProvider();
+			expect(active).toEqual({ name: "resend", source: "environment" });
+		});
+
+		it("uses SMTP when it is the only configured environment provider", async () => {
+			vi.mocked(db.siteSetting.findUnique).mockResolvedValue(null);
+			process.env.SMTP_HOST = "smtp.mailgun.org";
+
+			const active = await resolveActiveProvider();
+			expect(active).toEqual({ name: "smtp", source: "environment" });
+		});
+
+		it("returns null when no provider credentials exist anywhere", async () => {
+			vi.mocked(db.siteSetting.findUnique).mockResolvedValue(null);
+
+			const active = await resolveActiveProvider();
+			expect(active).toBeNull();
+		});
+
+		it("includes activeProvider in getEmailSettingsSummary", async () => {
+			const payload = {
+				provider: "tosend",
+				tosendApiKey: "tsend_1234",
+			};
+			vi.mocked(db.siteSetting.findUnique).mockResolvedValue(
+				siteSettingRow(encryptSettingsJson(JSON.stringify(payload), TEST_SECRET)) as never,
+			);
+
+			const summary = await getEmailSettingsSummary();
+			expect(summary.activeProvider).toEqual({ name: "tosend", source: "stored" });
 		});
 	});
 });
