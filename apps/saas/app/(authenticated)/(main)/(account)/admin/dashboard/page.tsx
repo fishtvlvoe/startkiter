@@ -53,7 +53,6 @@ export default async function PlatformAdminDashboardPage() {
 						早安，{displayName}。這裡是整個網站的總覽。
 					</p>
 				</div>
-				<p className="text-xs text-muted-foreground">網址：/admin/dashboard</p>
 			</div>
 
 			{/* 區塊一：數字概況 */}

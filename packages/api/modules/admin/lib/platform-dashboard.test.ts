@@ -433,6 +433,23 @@ describe("platform dashboard aggregate (控制台資料彙整)", () => {
 				expect(aiCheck?.label).toBe("已設定");
 			}
 		});
+
+		it("寄信服務 activeProvider 為物件時，依 provider 名稱與 source 正確格式化 label（不含 [object Object]）", async () => {
+			vi.mocked(getEmailSettingsSummary).mockResolvedValue({
+				activeProvider: { name: "tosend", source: "environment" },
+			} as never);
+
+			const result = await getPlatformDashboard("admin-user-1");
+
+			expect(result.checks.status).toBe("ok");
+			if (result.checks.status === "ok") {
+				const emailCheck = result.checks.data.find((item) => item.key === "email");
+				expect(emailCheck).toBeDefined();
+				expect(emailCheck?.ok).toBe(true);
+				expect(emailCheck?.label).toBe("ToSend 運作中（主機設定）");
+				expect(emailCheck?.label).not.toContain("[object Object]");
+			}
+		});
 	});
 
 	describe("4. Recent orders (最近訂單)", () => {

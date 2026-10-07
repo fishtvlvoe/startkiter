@@ -50,6 +50,37 @@ export function maskEmail(email: string): string {
 	return `${local[0]}***${domain}`;
 }
 
+function formatEmailProviderName(name: string): string {
+	switch (name.toLowerCase()) {
+		case "tosend":
+			return "ToSend";
+		case "zsend":
+			return "ZSend";
+		case "resend":
+			return "Resend";
+		case "smtp":
+			return "SMTP";
+		default:
+			return name;
+	}
+}
+
+function formatEmailStatusLabel(activeProvider: any): string {
+	if (!activeProvider) {
+		return "未設定";
+	}
+	if (typeof activeProvider === "string") {
+		const providerName = formatEmailProviderName(activeProvider);
+		return `${providerName} 運作中`;
+	}
+	const name = activeProvider.name ? String(activeProvider.name) : "";
+	const providerName = formatEmailProviderName(name);
+	if (activeProvider.source === "environment") {
+		return `${providerName} 運作中（主機設定）`;
+	}
+	return `${providerName} 運作中`;
+}
+
 export async function getPlatformDashboard(
 	userId: string,
 	now?: Date,
@@ -153,7 +184,7 @@ export async function getPlatformDashboard(
 					{
 						key: "email",
 						ok: emailOk,
-						label: emailOk ? `${emailSummary!.activeProvider} 運作中` : "未設定",
+						label: formatEmailStatusLabel(emailSummary?.activeProvider),
 						href: "/admin/email-settings",
 					},
 					{

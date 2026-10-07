@@ -113,6 +113,7 @@ describe("PlatformAdminDashboardPage (/admin/dashboard)", () => {
 		// 歡迎列
 		expect(html).toContain("控制台");
 		expect(html).toContain("早安，Fish");
+		expect(html).not.toContain("網址：");
 
 		// 5 區塊標題
 		expect(html).toContain("近 30 天營收");
