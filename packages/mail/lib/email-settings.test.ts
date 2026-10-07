@@ -66,7 +66,7 @@ describe("email settings", () => {
 			expect(ciphertext).toBeTruthy();
 			expect(ciphertext).not.toContain("tsend_abcd1234");
 
-			const decrypted = decryptSettingsJson(ciphertext, TEST_SECRET);
+			const decrypted = decryptSettingsJson(ciphertext as string, TEST_SECRET);
 			expect(decrypted).not.toBeNull();
 			const parsed = JSON.parse(decrypted!);
 			expect(parsed).toMatchObject({
@@ -103,7 +103,7 @@ describe("email settings", () => {
 
 			const upsertCall = vi.mocked(db.siteSetting.upsert).mock.calls[0]?.[0];
 			const ciphertext = upsertCall?.update?.ciphertext ?? upsertCall?.create?.ciphertext;
-			const decrypted = decryptSettingsJson(ciphertext, TEST_SECRET);
+			const decrypted = decryptSettingsJson(ciphertext as string, TEST_SECRET);
 			expect(decrypted).not.toBeNull();
 			const parsed = JSON.parse(decrypted!);
 			expect(parsed.tosendApiKey).toBe("existing_key_1234");
@@ -206,12 +206,13 @@ describe("email settings", () => {
 				provider: "tosend",
 				tosendApiKey: "tsend_abcd1234",
 			};
-			vi.mocked(db.siteSetting.findUnique).mockImplementation(async () =>
-				siteSettingRow(encryptSettingsJson(JSON.stringify(currentPayload), TEST_SECRET)) as never,
+			vi.mocked(db.siteSetting.findUnique).mockImplementation(
+				(async () =>
+					siteSettingRow(encryptSettingsJson(JSON.stringify(currentPayload), TEST_SECRET))) as never,
 			);
 			vi.mocked(db.siteSetting.upsert).mockImplementation((async ({ create, update }: any) => {
 				const ciphertext = update?.ciphertext ?? create?.ciphertext;
-				const decrypted = decryptSettingsJson(ciphertext, TEST_SECRET);
+				const decrypted = decryptSettingsJson(ciphertext as string, TEST_SECRET);
 				if (decrypted) {
 					currentPayload = JSON.parse(decrypted);
 				}

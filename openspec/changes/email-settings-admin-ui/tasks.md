@@ -6,14 +6,14 @@
 
 ## 2. 寄信設定儲存層與路由
 
-- [ ] 2.1 [after: 1.2] 依 Decision「寄信設定沿用 SiteSetting 加密列，不開新表」與「設定讀取加 30 秒行程內快取，存檔時清除」新增 `packages/mail/lib/email-settings.ts`，實作 design Implementation Contract 列出的 `readEmailSettings`／`getEmailSettingsSummary`／`saveEmailSettings`，沿用 `packages/api/modules/course/lib/settings-crypto.ts`；不新增 migration。驗證：1.2 的測試轉綠。
-- [ ] 2.2 [after: 1.1] 依 Decision「provider 改成接收憑證參數」把 `tosend.ts`、`zsend.ts`、`resend.ts`、`nodemailer.ts` 改成 `createXxxSender(credentials)` 形式，`resend.ts` 依 apiKey 建 client；既有 `tosend.test.ts`、`zsend.test.ts`、`nodemailer.test.ts` 改成傳入憑證但斷言內容不變。驗證：這三檔測試綠燈。
-- [ ] 2.3 [after: 2.1, 2.2] 依 Decision「路由優先序：DB 設定 → 環境變數 → fallback 鏈」改寫 `packages/mail/provider/index.ts`，對外 `send` 簽名不變。驗證：1.1 測試轉綠，且 `pnpm --filter @startkiter/mail test` 與 `pnpm --filter @startkiter/mail typecheck` 全綠。
-- [ ] 2.4 [after: 2.3] 依「Test email uses saved settings」在 `packages/mail/lib/email-settings.ts` 實作 `sendTestEmail(to)`：無設定時回錯誤、provider 失敗訊息含 HTTP status 但不含金鑰；補對應單元測試（成功、401 失敗、無設定三情境）。驗證：`pnpm --filter @startkiter/mail test` 綠燈。
+- [x] 2.1 [after: 1.2] 依 Decision「寄信設定沿用 SiteSetting 加密列，不開新表」與「設定讀取加 30 秒行程內快取，存檔時清除」新增 `packages/mail/lib/email-settings.ts`，實作 design Implementation Contract 列出的 `readEmailSettings`／`getEmailSettingsSummary`／`saveEmailSettings`，沿用 `packages/api/modules/course/lib/settings-crypto.ts`；不新增 migration。驗證：1.2 的測試轉綠。
+- [x] 2.2 [after: 1.1] 依 Decision「provider 改成接收憑證參數」把 `tosend.ts`、`zsend.ts`、`resend.ts`、`nodemailer.ts` 改成 `createXxxSender(credentials)` 形式，`resend.ts` 依 apiKey 建 client；既有 `tosend.test.ts`、`zsend.test.ts`、`nodemailer.test.ts` 改成傳入憑證但斷言內容不變。驗證：這三檔測試綠燈。
+- [x] 2.3 [after: 2.1, 2.2] 依 Decision「路由優先序：DB 設定 → 環境變數 → fallback 鏈」改寫 `packages/mail/provider/index.ts`，對外 `send` 簽名不變。驗證：1.1 測試轉綠，且 `pnpm --filter @startkiter/mail test` 與 `pnpm --filter @startkiter/mail typecheck` 全綠。
+- [x] 2.4 [after: 2.3] 依「Test email uses saved settings」在 `packages/mail/lib/email-settings.ts` 實作 `sendTestEmail(to)`：無設定時回錯誤、provider 失敗訊息含 HTTP status 但不含金鑰；補對應單元測試（成功、401 失敗、無設定三情境）。驗證：`pnpm --filter @startkiter/mail test` 綠燈。
 
 ## 3. 電子報讀後台設定
 
-- [ ] 3.1 [after: 2.1] 依 Decision「路由優先序：DB 設定 → 環境變數 → fallback 鏈」讓 `packages/newsletter/lib/send-engine.ts` 的寄件人名稱、寄件 Email、Reply-To、新 campaign 預設每分鐘上限，以及 `packages/newsletter/lib/render.ts` 的頁尾公司名、實體地址、聯絡 Email 先讀 `readEmailSettings()`，寄件快照 `SenderSnapshot.emailProvider` 改記實際生效的 provider（DB 優先），空值時沿用現行 `MAIL_FROM_NAME`／`MAIL_FROM`／`SMTP_FROM`／`NEWSLETTER_SENDER_ADDRESS`／`SUPPORT_ADDRESS`。先寫紅燈測試再實作。驗證：`pnpm --filter @startkiter/newsletter test` 全綠，含「DB 有值用 DB、DB 空用 env」兩組情境。
+- [x] 3.1 [after: 2.1] 依 Decision「路由優先序：DB 設定 → 環境變數 → fallback 鏈」讓 `packages/newsletter/lib/send-engine.ts` 的寄件人名稱、寄件 Email、Reply-To、新 campaign 預設每分鐘上限，以及 `packages/newsletter/lib/render.ts` 的頁尾公司名、實體地址、聯絡 Email 先讀 `readEmailSettings()`，寄件快照 `SenderSnapshot.emailProvider` 改記實際生效的 provider（DB 優先），空值時沿用現行 `MAIL_FROM_NAME`／`MAIL_FROM`／`SMTP_FROM`／`NEWSLETTER_SENDER_ADDRESS`／`SUPPORT_ADDRESS`。先寫紅燈測試再實作。驗證：`pnpm --filter @startkiter/newsletter test` 全綠，含「DB 有值用 DB、DB 空用 env」兩組情境。
 
 ## 4. Email 設定頁面
 

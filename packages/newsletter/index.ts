@@ -11,6 +11,7 @@ export {
 	BATCH_SIZE,
 	CampaignStateError,
 	captureSenderSnapshot,
+	getDefaultRatePerMinute,
 	SendEngineError,
 	cancelCampaign,
 	dispatchCampaignBatch,
@@ -99,6 +100,8 @@ export {
 	createPromoCouponBlock,
 	createPromoCourseBlock,
 	renderCampaignHtml,
+	renderCampaignHtmlAsync,
+	resolveFooterSettings,
 } from "./lib/render";
 export type {
 	NewsletterContentBlock,
