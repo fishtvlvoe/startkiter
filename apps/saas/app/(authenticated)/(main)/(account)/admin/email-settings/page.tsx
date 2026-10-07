@@ -1,4 +1,5 @@
 import { db } from "@startkiter/database";
+import { getEmailSettingsSummary } from "@startkiter/mail";
 
 import { requireGlobalAdmin } from "../../../../../../lib/admin-access";
 import EmailSettingsPanel from "./EmailSettingsPanel";
@@ -17,5 +18,7 @@ export default async function EmailSettingsPage() {
 		},
 	});
 
-	return <EmailSettingsPanel initialCourses={courses} />;
+	const initialSettings = await getEmailSettingsSummary();
+
+	return <EmailSettingsPanel initialCourses={courses} initialSettings={initialSettings} />;
 }

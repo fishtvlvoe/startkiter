@@ -17,9 +17,9 @@
 
 ## 4. Email 設定頁面
 
-- [ ] 4.1 [after: 2.4] 依「Platform admin saves email provider settings」「Test email uses saved settings」在 `apps/saas/app/(authenticated)/(main)/(account)/admin/email-settings/` 新增 server actions（儲存設定、寄測試信），每個 action 開頭呼叫 `requireGlobalAdmin()`，回傳值只含 summary 不含明碼。驗證：action 單元測試斷言非管理員被 redirect、回應不含金鑰字串。
-- [ ] 4.2 [after: 4.1] 依「Email settings page layout」與 design「Design Source」表，把 `EmailSettingsPanel.tsx` 改為狀態條 + 四分頁（寄信服務／寄件人與電子報／歡迎信模板／送達紀錄），服務卡片切換只顯示對應欄位，金鑰欄位以遮罩值當 placeholder，未儲存時測試信按鈕停用；歡迎信與送達紀錄沿用現有元件不改行為；圖示用 SVG。驗證：`EmailSettingsPanel.test.tsx` 新增「選 SMTP 只顯示 SMTP 欄位」「未設定顯示警示」「未儲存時測試按鈕停用」三個測試並綠燈，既有測試仍綠。
-- [ ] 4.3 依「Email settings page layout」把 `packages/i18n/translations/zh-tw/saas.json` 的 `admin.menu.emailSettings` 改為「Email 設定」，並確認 `packages/platform/src/mount-points.ts` 的 `email-settings` 與金流、發票、AI 設定同屬系統設定群組顯示。同步更新 `apps/saas/modules/shared/lib/nav-menu-items.test.ts` 寫死的「郵件設定」標籤。驗證：`pnpm --filter @startkiter/platform test` 與 `nav-menu-items.test.ts` 綠燈，ego-browser 於本機 dev server 看到側邊欄文字「Email 設定」。
+- [x] 4.1 [after: 2.4] 依「Platform admin saves email provider settings」「Test email uses saved settings」在 `apps/saas/app/(authenticated)/(main)/(account)/admin/email-settings/` 新增 server actions（儲存設定、寄測試信），每個 action 開頭呼叫 `requireGlobalAdmin()`，回傳值只含 summary 不含明碼。驗證：action 單元測試斷言非管理員被 redirect、回應不含金鑰字串。
+- [x] 4.2 [after: 4.1] 依「Email settings page layout」與 design「Design Source」表，把 `EmailSettingsPanel.tsx` 改為狀態條 + 四分頁（寄信服務／寄件人與電子報／歡迎信模板／送達紀錄），服務卡片切換只顯示對應欄位，金鑰欄位以遮罩值當 placeholder，未儲存時測試信按鈕停用；歡迎信與送達紀錄沿用現有元件不改行為；圖示用 SVG。驗證：`EmailSettingsPanel.test.tsx` 新增「選 SMTP 只顯示 SMTP 欄位」「未設定顯示警示」「未儲存時測試按鈕停用」三個測試並綠燈，既有測試仍綠。
+- [x] 4.3 依「Email settings page layout」把 `packages/i18n/translations/zh-tw/saas.json` 的 `admin.menu.emailSettings` 改為「Email 設定」，並確認 `packages/platform/src/mount-points.ts` 的 `email-settings` 與金流、發票、AI 設定同屬系統設定群組顯示。同步更新 `apps/saas/modules/shared/lib/nav-menu-items.test.ts` 寫死的「郵件設定」標籤。驗證：`pnpm --filter @startkiter/platform test` 與 `nav-menu-items.test.ts` 綠燈，ego-browser 於本機 dev server 看到側邊欄文字「Email 設定」。
 
 ## 5. 帳號選單去重
 
