@@ -21,4 +21,4 @@
 
 ## 5. 部署驗收
 
-- [ ] 5.1 [after: 4.1] 合併、部署正式站後，ego-browser 桌面 1440 與手機 390：五分區、課程與系統設定子選單展開收合、`/admin/settings/einvoice` 自動展開、手機「更多」含 Email 設定、`/course` 學員選單不變；每個子選單連結點一次無 404/500。截圖存 `~/Downloads/sk-sidebar-*.png`。驗證：截圖與點擊紀錄。
+- [x] 5.1 [after: 4.1] 合併、部署正式站後，ego-browser 桌面 1440 與手機 390：五分區、課程與系統設定子選單展開收合、`/admin/settings/einvoice` 自動展開、手機「更多」含 Email 設定、`/course` 學員選單不變；每個子選單連結點一次無 404/500。截圖存 `~/Downloads/sk-sidebar-*.png`。驗證：截圖與點擊紀錄。
