@@ -98,8 +98,9 @@ describe("App registry adapter", () => {
 		});
 
 		expect(model.workspace).toEqual({ scope: "app", appId: "course", role: "app-admin" });
-		expect(model.items.map((item) => item.id)).toEqual(["course-admin", "course-dashboard"]);
+		expect(model.items.map((item) => item.id)).toEqual(["course-admin"]);
 		expect(model.items[0]?.children.map((item) => item.id)).toEqual([
+			"course-dashboard",
 			"quiz",
 			"assignment",
 			"review",
