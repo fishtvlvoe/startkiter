@@ -24,4 +24,4 @@
 
 ## 6. 部署驗收
 
-- [ ] 6.1 [after: 5.1] 合併部署後，ego-browser 桌面 1440 與手機 390：`/admin/dashboard` 五區塊、點待處理 4 列與設定檢查 5 列連結無 404/500、`/admin/course/quiz` 與 `/admin/course/dashboard` 左側仍是總管理員 5 分區選單、記錄 `/admin/dashboard` 載入時間。截圖存 `~/Downloads/sk-dashboard-prod-*.png`。驗證：截圖與點擊紀錄。
+- [x] 6.1 （2026-10-07 正式站驗收：/admin/dashboard 五區塊與 11 個連結正常、直接載入 0.66 秒、課程頁維持總管理員選單；收合分區不會自動展開的問題移到 admin-nav-polish-batch1）[after: 5.1] 合併部署後，ego-browser 桌面 1440 與手機 390：`/admin/dashboard` 五區塊、點待處理 4 列與設定檢查 5 列連結無 404/500、`/admin/course/quiz` 與 `/admin/course/dashboard` 左側仍是總管理員 5 分區選單、記錄 `/admin/dashboard` 載入時間。截圖存 `~/Downloads/sk-dashboard-prod-*.png`。驗證：截圖與點擊紀錄。

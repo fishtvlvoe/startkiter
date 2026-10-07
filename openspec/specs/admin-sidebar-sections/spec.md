@@ -67,7 +67,7 @@ A menu item with sub-items SHALL toggle its sub-menu when clicked instead of nav
 
 | Parent | Sub-items in order |
 | ------ | ------------------ |
-| 課程 | 課程列表 (/admin/course), 測驗管理, 作業管理, 評價與留言管理, 課程留言, 學員私訊, 課程優惠券, 課程綁定包, 新生問卷, 媒體庫, CoursePack 任務 |
+| 課程 | 課程列表 (/admin/course), 課程儀表板 (/admin/course/dashboard), 測驗管理, 作業管理, 評價與留言管理, 課程留言, 學員私訊, 課程優惠券, 課程綁定包, 新生問卷, 媒體庫, CoursePack 任務 |
 | 系統設定 | Email 設定, 金流設定, 發票設定, Gemini 設定, AI 助手模型 |
 
 #### Scenario: Auto-expand on child page
@@ -78,11 +78,11 @@ A menu item with sub-items SHALL toggle its sub-menu when clicked instead of nav
 #### Scenario: Toggle without navigation
 
 - **WHEN** the administrator on `/admin/users` clicks 課程
-- **THEN** the URL stays `/admin/users` and the 11 course sub-items become visible
+- **THEN** the URL stays `/admin/users` and the 12 course sub-items become visible
 
 
 <!-- @trace
-source: admin-sidebar-grouped-nav
+source: platform-admin-dashboard
 updated: 2026-10-07
 code:
   - AGENTS.md
@@ -101,6 +101,24 @@ On viewports using the bottom tab bar, the "更多" list SHALL include every sub
 
 <!-- @trace
 source: admin-sidebar-grouped-nav
+updated: 2026-10-07
+code:
+  - AGENTS.md
+  - docs/dashboard/README.md
+-->
+
+---
+### Requirement: Core section links to the platform dashboard
+
+The core section item 控制台 SHALL link to `/admin/dashboard`.
+
+#### Scenario: Click dashboard
+
+- **WHEN** a platform administrator clicks 控制台
+- **THEN** the browser navigates to `/admin/dashboard` and 控制台 is marked active
+
+<!-- @trace
+source: platform-admin-dashboard
 updated: 2026-10-07
 code:
   - AGENTS.md
