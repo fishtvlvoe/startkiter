@@ -107,26 +107,43 @@ describe("UserMenu personal navigation", () => {
 		}
 	});
 
-	it("derives admin settings visibility from the workspace context", () => {
+	it("derives admin settings visibility from the workspace context and platformAdmin", () => {
 		const UserMenuForTest = UserMenu as React.ComponentType<Record<string, unknown>>;
 		const appUserHtml = renderToStaticMarkup(
-			<UserMenuForTest workspaceContext={{ scope: "app", appId: "course", role: "app-user" }} />,
+			<UserMenuForTest
+				workspaceContext={{ scope: "app", appId: "course", role: "app-user" }}
+				platformAdmin={false}
+			/>,
 		);
 		const appAdminHtml = renderToStaticMarkup(
 			<UserMenuForTest
 				workspaceContext={{ scope: "app", appId: "course", role: "app-admin" }}
 				appDisplayName="課程"
+				platformAdmin={false}
+			/>,
+		);
+		const platformAdminInAppHtml = renderToStaticMarkup(
+			<UserMenuForTest
+				workspaceContext={{ scope: "app", appId: "course", role: "app-user" }}
+				platformAdmin={true}
 			/>,
 		);
 		const platformHtml = renderToStaticMarkup(
-			<UserMenuForTest workspaceContext={{ scope: "platform" }} />,
+			<UserMenuForTest workspaceContext={{ scope: "platform" }} platformAdmin={true} />,
 		);
 
 		expect(appUserHtml).not.toContain('href="/admin/course/settings"');
-		expect(appAdminHtml).toContain('href="/admin/course/settings"');
-		expect(appAdminHtml).toContain("課程管理員設定");
-		expect(platformHtml).toContain('href="/admin/settings"');
-		expect(platformHtml).toContain("總管理員設定");
+		expect(appUserHtml).not.toContain("課程管理員設定");
+		expect(appUserHtml).not.toContain("總管理員設定");
+
+		expect(appAdminHtml).not.toContain('href="/admin/course/settings"');
+		expect(appAdminHtml).not.toContain("課程管理員設定");
+
+		expect(platformAdminInAppHtml).toContain('href="/admin/settings"');
+		expect(platformAdminInAppHtml).toContain("總管理員設定");
+
+		expect(platformHtml).not.toContain("總管理員設定");
+		expect(platformHtml).not.toContain('href="/admin/course/settings"');
 	});
 
 	it("keeps help, upgrade, and logout available without top-level theme or locale controls", () => {

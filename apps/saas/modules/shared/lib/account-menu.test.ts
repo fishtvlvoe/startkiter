@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+
 import { getAccountMenuEntries } from "./account-menu";
+
 describe("ACCOUNT_MENU_ENTRIES visibility matrix", () => {
 	it.each([
 		[
@@ -12,13 +14,13 @@ describe("ACCOUNT_MENU_ENTRIES visibility matrix", () => {
 			"app, app-admin (platformAdmin: false)",
 			{ scope: "app", appId: "course", role: "app-admin" } as const,
 			false,
-			["app-admin-settings", "upgrade", "logout"],
+			["upgrade", "logout"],
 		],
 		[
-			"app, app-admin (platformAdmin: true)",
-			{ scope: "app", appId: "course", role: "app-admin" } as const,
+			"app, app-user (platformAdmin: true)",
+			{ scope: "app", appId: "course", role: "app-user" } as const,
 			true,
-			["app-admin-settings", "platform-admin-settings", "upgrade", "logout"],
+			["platform-admin-settings", "upgrade", "logout"],
 		],
 		[
 			"platform (platformAdmin: true)",
@@ -35,11 +37,11 @@ describe("ACCOUNT_MENU_ENTRIES visibility matrix", () => {
 		},
 	);
 
-	it("uses the current app id in the app-admin settings target", () => {
+	it("does not contain app-admin-settings dead link for course instructor", () => {
 		const entries = getAccountMenuEntries(
 			{ scope: "app", appId: "course", role: "app-admin" },
 			{ platformAdmin: false },
 		);
-		expect(entries.find((entry) => entry.id === "app-admin-settings")?.href).toBe("/admin/course/settings");
+		expect(entries.some((entry: any) => entry.id === "app-admin-settings")).toBe(false);
 	});
 });

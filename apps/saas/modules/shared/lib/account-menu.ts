@@ -1,11 +1,12 @@
 import type { WorkspaceContext } from "@startkiter/platform/src/workspace/navigation";
+
 export type AccountMenuEntryId =
 	| "user-settings"
-	| "app-admin-settings"
 	| "platform-admin-settings"
 	| "help"
 	| "upgrade"
 	| "logout";
+
 export type AccountMenuOptions = {
 	platformAdmin?: boolean;
 };
@@ -17,14 +18,8 @@ export type AccountMenuEntry = {
 	icon: string;
 	visibleWhen: (context: WorkspaceContext, options?: AccountMenuOptions) => boolean;
 };
+
 export const ACCOUNT_MENU_ENTRIES: readonly AccountMenuEntry[] = [
-	{
-		id: "app-admin-settings",
-		labelKey: "app.userMenu.appAdminSettings",
-		href: "/admin/{appId}/settings",
-		icon: "shield-user",
-		visibleWhen: (context) => context.scope === "app" && context.role === "app-admin",
-	},
 	{
 		id: "platform-admin-settings",
 		labelKey: "app.userMenu.platformAdminSettings",
@@ -32,7 +27,7 @@ export const ACCOUNT_MENU_ENTRIES: readonly AccountMenuEntry[] = [
 		icon: "shield-user",
 		visibleWhen: (context, options) =>
 			options?.platformAdmin !== undefined
-				? options.platformAdmin && context.scope !== "platform"
+				? Boolean(options.platformAdmin && context.scope !== "platform")
 				: context.scope === "platform",
 	},
 	{
@@ -50,15 +45,10 @@ export const ACCOUNT_MENU_ENTRIES: readonly AccountMenuEntry[] = [
 		visibleWhen: () => true,
 	},
 ];
+
 export function getAccountMenuEntries(
 	context: WorkspaceContext,
 	options?: AccountMenuOptions,
 ): AccountMenuEntry[] {
-	return ACCOUNT_MENU_ENTRIES.filter((entry) => entry.visibleWhen(context, options)).map((entry) => ({
-		...entry,
-		href:
-			entry.id === "app-admin-settings" && context.scope === "app"
-				? entry.href.replace("{appId}", context.appId)
-				: entry.href,
-	}));
+	return ACCOUNT_MENU_ENTRIES.filter((entry) => entry.visibleWhen(context, options));
 }
