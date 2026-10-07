@@ -331,7 +331,7 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		app: PLATFORM_APP,
 		mount: {
 			route: { path: "/admin/newsletter" },
-			menu: { labelKey: "admin.menu.newsletter", icon: "mail", order: 17, requiresOperator: true, section: "members" },
+			menu: { labelKey: "admin.menu.newsletter", icon: "mail", order: 19, requiresOperator: true, section: "members" },
 		},
 		dataSpec: "none",
 	},
@@ -345,7 +345,7 @@ export const MOUNT_POINTS: PluginManifest[] = [
 			menu: {
 				labelKey: "admin.menu.organizations",
 				icon: "user-cog",
-				order: 19,
+				order: 17,
 				requiresOperator: true,
 				section: "members",
 			},

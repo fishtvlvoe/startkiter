@@ -65,7 +65,7 @@ import {
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { type DragEvent, Fragment, type MouseEvent, type PointerEvent, useMemo, useRef, useState } from "react";
+import { type DragEvent, Fragment, type MouseEvent, type PointerEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import { OrganzationSelect } from "../../organizations/components/OrganizationSelect";
 import { useIsMobile } from "../hooks/use-media-query";
@@ -564,9 +564,13 @@ function SidebarGroupedNavItem({
 		isMenuActive(pathname, menuItem.href) ||
 		isChildActive;
 
-	const [isManualExpanded, setIsManualExpanded] = useState<boolean>(() => {
-		return getStoredExpandedSubmenus().includes(menuItem.id);
-	});
+	const [isManualExpanded, setIsManualExpanded] = useState<boolean>(false);
+
+	useEffect(() => {
+		if (getStoredExpandedSubmenus().includes(menuItem.id)) {
+			setIsManualExpanded(true);
+		}
+	}, [menuItem.id]);
 
 	function handleToggleSubmenu() {
 		setIsManualExpanded((prev) => {
@@ -680,7 +684,11 @@ function SidebarGroupedNav({
 	const t = useTranslations();
 	const sortedGroups = useMemo(() => [...groups].sort((a, b) => a.order - b.order), [groups]);
 
-	const [collapsedSections, setCollapsedSections] = useState<string[]>(() => getStoredCollapsedSections());
+	const [collapsedSections, setCollapsedSections] = useState<string[]>([]);
+
+	useEffect(() => {
+		setCollapsedSections(getStoredCollapsedSections());
+	}, []);
 
 	function handleToggleSection(section: string) {
 		setCollapsedSections((prev) => {

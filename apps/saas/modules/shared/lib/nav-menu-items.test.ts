@@ -106,8 +106,8 @@ describe("nav-menu-items (WorkspaceContext navigation model)", () => {
 			"course-admin",
 			"course-dashboard",
 			"pages-cms",
-			"newsletter",
 			"admin-organizations",
+			"newsletter",
 			"admin-orders",
 			"admin-system-settings",
 			"admin-revenue",
@@ -345,5 +345,45 @@ describe("nav-menu-items (WorkspaceContext navigation model)", () => {
 			expect(overflowHrefs).toContain("/standalone");
 			expect(overflowHrefs).toContain("/parent/sub-1");
 			expect(overflowHrefs).toContain("/parent/sub-2");
+		});
+
+		it("flattens overflow drawer in section order (core -> content -> members -> billing -> system) where revenue precedes system settings", () => {
+			const adminMenuItems: MountMenuItem[] = [
+				{ id: "course-dashboard", label: "控制台", href: "/admin/course/dashboard", icon: "home", order: 1, section: "core", isActive: false },
+				{ id: "course-admin", label: "課程", href: "/admin/course", icon: "book-open", order: 2, section: "content", isActive: false },
+				{ id: "pages-cms", label: "頁面管理", href: "/admin/pages", icon: "file-text", order: 3, section: "content", isActive: false },
+				{ id: "admin-users", label: "用戶", href: "/admin/users", icon: "users", order: 4, section: "members", isActive: false },
+				{
+					id: "admin-system-settings",
+					label: "系統設定",
+					href: "/admin/settings",
+					icon: "settings",
+					order: 20,
+					section: "system",
+					isActive: false,
+					subItems: [
+						{ id: "email-settings", label: "Email 設定", href: "/admin/email-settings" },
+						{ id: "admin-ai-provider", label: "AI 助手模型", href: "/admin/settings/ai-provider" },
+					],
+				},
+				{ id: "admin-revenue", label: "營收報表", href: "/admin/revenue", icon: "trending-up", order: 30, section: "billing", isActive: false },
+			];
+
+			const { fixed, overflow } = getTabBarItems(adminMenuItems);
+
+			expect(fixed.map((item) => item.label)).toEqual(["控制台", "課程", "頁面管理"]);
+			expect(overflow).toHaveLength(1);
+
+			const overflowHrefs = (overflow[0]?.subItems ?? []).map((item) => item.href);
+			const revenueIndex = overflowHrefs.indexOf("/admin/revenue");
+			const emailIndex = overflowHrefs.indexOf("/admin/email-settings");
+			const aiIndex = overflowHrefs.indexOf("/admin/settings/ai-provider");
+
+			expect(revenueIndex).toBeGreaterThan(-1);
+			expect(emailIndex).toBeGreaterThan(-1);
+			expect(aiIndex).toBeGreaterThan(-1);
+			// billing (營收) 必須排在 system (系統設定: Email, AI) 前面
+			expect(revenueIndex).toBeLessThan(emailIndex);
+			expect(revenueIndex).toBeLessThan(aiIndex);
 		});
 	});

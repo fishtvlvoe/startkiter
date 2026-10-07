@@ -199,6 +199,22 @@ export function getMountMenuItems({
 	});
 }
 
+const SECTION_ORDER: Record<string, number> = {
+	core: 1,
+	content: 2,
+	members: 3,
+	billing: 4,
+	system: 5,
+};
+
+interface CandidateOverflowItem {
+	label: string;
+	href: string;
+	section?: string;
+	order: number;
+	index: number;
+}
+
 export function getTabBarItems(menuItems: MountMenuItem[], moreLabel = "更多"): {
 	fixed: TabBarItem[];
 	overflow: TabBarItem[];
@@ -213,14 +229,18 @@ export function getTabBarItems(menuItems: MountMenuItem[], moreLabel = "更多")
 		isActive: item.isActive,
 	}));
 
-	const overflowSubItems: TabBarOverflowItem[] = [];
+	const candidates: CandidateOverflowItem[] = [];
+	let runningIndex = 0;
 
 	for (const item of fixedItems) {
 		if (item.subItems?.length) {
 			for (const sub of item.subItems) {
-				overflowSubItems.push({
+				candidates.push({
 					label: sub.label,
 					href: sub.href,
+					section: item.section,
+					order: item.order,
+					index: runningIndex++,
 				});
 			}
 		}
@@ -230,18 +250,41 @@ export function getTabBarItems(menuItems: MountMenuItem[], moreLabel = "更多")
 	for (const item of remaining) {
 		if (item.subItems?.length) {
 			for (const sub of item.subItems) {
-				overflowSubItems.push({
+				candidates.push({
 					label: sub.label,
 					href: sub.href,
+					section: item.section,
+					order: item.order,
+					index: runningIndex++,
 				});
 			}
 		} else {
-			overflowSubItems.push({
+			candidates.push({
 				label: item.label,
 				href: item.href,
+				section: item.section,
+				order: item.order,
+				index: runningIndex++,
 			});
 		}
 	}
+
+	candidates.sort((a, b) => {
+		const sectionA = a.section && a.section in SECTION_ORDER ? SECTION_ORDER[a.section] : 99;
+		const sectionB = b.section && b.section in SECTION_ORDER ? SECTION_ORDER[b.section] : 99;
+		if (sectionA !== sectionB) {
+			return sectionA - sectionB;
+		}
+		if (a.order !== b.order) {
+			return a.order - b.order;
+		}
+		return a.index - b.index;
+	});
+
+	const overflowSubItems: TabBarOverflowItem[] = candidates.map((item) => ({
+		label: item.label,
+		href: item.href,
+	}));
 
 	const overflow: TabBarItem[] =
 		overflowSubItems.length > 0
