@@ -6,7 +6,7 @@
 
 ## 2. Manifest 與導覽解析
 
-- [ ] 2.1 [after: 1.1] 依 Decision「子選單一律用既有 parentId 機制，不新增第二種巢狀方式」與「分區用 manifest 的 menu.section 欄位宣告」：`packages/platform/src/types.ts` 加 `section`、`selfLabelKey`；`mount-points.ts` 新增 `admin-system-settings`、5 個設定頁改標 `parentId: "admin-system-settings"` 並移除 `groupId: "admin-settings"`、課程子頁維持既有 `groupId`（registry 已轉成 parentId）、`course-dashboard` 移除 `groupId`、`course-admin` 加 `selfLabelKey: "course.list"`、頂層項目標 `section`（依 design Design Source 表）、`course-dashboard` 改顯示「控制台」並標 core。驗證：`pnpm --filter @startkiter/platform test` 中 registry 驗證與 mount-points 測試綠燈。
+- [x] 2.1 [after: 1.1] 依 Decision「子選單一律用既有 parentId 機制，不新增第二種巢狀方式」與「分區用 manifest 的 menu.section 欄位宣告」：`packages/platform/src/types.ts` 加 `section`、`selfLabelKey`；`mount-points.ts` 新增 `admin-system-settings`、5 個設定頁改標 `parentId: "admin-system-settings"` 並移除 `groupId: "admin-settings"`、課程子頁維持既有 `groupId`（registry 已轉成 parentId）、`course-dashboard` 移除 `groupId`、`course-admin` 加 `selfLabelKey: "course.list"`、頂層項目標 `section`（依 design Design Source 表）、`course-dashboard` 改顯示「控制台」並標 core。驗證：`pnpm --filter @startkiter/platform test` 中 registry 驗證與 mount-points 測試綠燈。
 - [ ] 2.2 [after: 2.1] 依 Decision「平台工作區帶出 App 根項目的子選單」修改 `resolveNavigation` platform 分支，並把 `section`、`selfLabelKey` 傳到 `NavigationItem` 與 `nav-menu-items.ts` 的 `MountMenuItem`。驗證：1.1 全部轉綠。
 - [ ] 2.3 [after: 2.1] 新增 i18n key（zh-tw、zh-cn、en）：`admin.menu.systemSettings`、`admin.menu.sections.*`（core/content/members/billing/system/other）、`course.list`，並把 course-dashboard 的顯示名改為「控制台」。驗證：`pnpm --filter @startkiter/platform test` 的 locale 完整性測試綠燈。
 

@@ -21,6 +21,8 @@ export type PluginManifest = {
 			/** Nest this item under a synthesized parent sidebar entry (see nav-menu-items.ts). */
 			groupId?: string;
 			parentId?: string;
+			section?: "core" | "content" | "members" | "billing" | "system";
+			selfLabelKey?: string;
 		};
 		content?: { kind: "auto" | "shortcode" | "block"; boundTo?: string };
 	};
