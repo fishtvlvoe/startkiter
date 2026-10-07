@@ -6,21 +6,18 @@ export type AccountMenuEntryId =
 	| "help"
 	| "upgrade"
 	| "logout";
+export type AccountMenuOptions = {
+	platformAdmin?: boolean;
+};
+
 export type AccountMenuEntry = {
 	id: AccountMenuEntryId;
 	labelKey: string;
 	href: string;
 	icon: string;
-	visibleWhen: (context: WorkspaceContext) => boolean;
+	visibleWhen: (context: WorkspaceContext, options?: AccountMenuOptions) => boolean;
 };
 export const ACCOUNT_MENU_ENTRIES: readonly AccountMenuEntry[] = [
-	{
-		id: "user-settings",
-		labelKey: "app.userMenu.accountSettings",
-		href: "/settings/general",
-		icon: "settings",
-		visibleWhen: () => true,
-	},
 	{
 		id: "app-admin-settings",
 		labelKey: "app.userMenu.appAdminSettings",
@@ -33,14 +30,10 @@ export const ACCOUNT_MENU_ENTRIES: readonly AccountMenuEntry[] = [
 		labelKey: "app.userMenu.platformAdminSettings",
 		href: "/admin/settings",
 		icon: "shield-user",
-		visibleWhen: (context) => context.scope === "platform",
-	},
-	{
-		id: "help",
-		labelKey: "app.userMenu.documentation",
-		href: "/support",
-		icon: "bot-message-square",
-		visibleWhen: () => true,
+		visibleWhen: (context, options) =>
+			options?.platformAdmin !== undefined
+				? options.platformAdmin && context.scope !== "platform"
+				: context.scope === "platform",
 	},
 	{
 		id: "upgrade",
@@ -57,8 +50,11 @@ export const ACCOUNT_MENU_ENTRIES: readonly AccountMenuEntry[] = [
 		visibleWhen: () => true,
 	},
 ];
-export function getAccountMenuEntries(context: WorkspaceContext): AccountMenuEntry[] {
-	return ACCOUNT_MENU_ENTRIES.filter((entry) => entry.visibleWhen(context)).map((entry) => ({
+export function getAccountMenuEntries(
+	context: WorkspaceContext,
+	options?: AccountMenuOptions,
+): AccountMenuEntry[] {
+	return ACCOUNT_MENU_ENTRIES.filter((entry) => entry.visibleWhen(context, options)).map((entry) => ({
 		...entry,
 		href:
 			entry.id === "app-admin-settings" && context.scope === "app"

@@ -23,7 +23,7 @@
 
 ## 5. 帳號選單去重
 
-- [ ] 5.1 [after: 1.3] 依 Decision「帳號選單移除重複項，平台入口改看 platformAdmin」修改 `apps/saas/modules/shared/lib/account-menu.ts`：`getAccountMenuEntries(context, { platformAdmin })` 移除 `user-settings`、`help`，平台入口只在「platformAdmin 且非 platform 工作區」出現；`UserMenu.tsx` 從 NavBar 既有的 `canAccessAdmin` 傳入 `platformAdmin`。不修改 `WorkspaceContext` 型別。驗證：1.3 測試轉綠，`grep -rn "getAccountMenuEntries" apps packages` 每個呼叫點都已傳入第二參數。
+- [x] 5.1 [after: 1.3] 依 Decision「帳號選單移除重複項，平台入口改看 platformAdmin」修改 `apps/saas/modules/shared/lib/account-menu.ts`：`getAccountMenuEntries(context, { platformAdmin })` 移除 `user-settings`、`help`，平台入口只在「platformAdmin 且非 platform 工作區」出現；`UserMenu.tsx` 從 NavBar 既有的 `canAccessAdmin` 傳入 `platformAdmin`。不修改 `WorkspaceContext` 型別。驗證：1.3 測試轉綠，`grep -rn "getAccountMenuEntries" apps packages` 每個呼叫點都已傳入第二參數。
 
 ## 6. Review
 
