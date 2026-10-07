@@ -15,4 +15,4 @@
 ## 4. 驗收
 
 - [x] 4.1 [after: 2.3] 依 design Acceptance criteria 跑 `pnpm --filter @startkiter/database test` 與 `pnpm --filter @startkiter/saas exec vitest run`。驗證：全綠，記下通過數字。
-- [ ] 4.2 [after: 4.1] PM 親自驗收（不信任實作方自報）：自己再跑一次 `verify:fresh-install`；用一個從零建好的臨時資料庫起本機 `apps/saas`，以 ego-browser 開 `/admin/email-settings`，確認畫面正常、無 500，截圖存 `~/Downloads/`，驗完刪除臨時資料庫。
+- [x] 4.2 [after: 4.1] PM 親自驗收（不信任實作方自報）：自己再跑一次 `verify:fresh-install`；用一個從零建好的臨時資料庫起本機 `apps/saas`，以 ego-browser 開 `/admin/email-settings`，確認畫面正常、無 500，截圖存 `~/Downloads/`，驗完刪除臨時資料庫。
