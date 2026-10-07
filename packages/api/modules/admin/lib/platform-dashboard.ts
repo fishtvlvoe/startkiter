@@ -8,6 +8,13 @@ import { getInvoiceSettings } from "../../course/lib/invoice-settings";
 
 export type Section<T> = { status: "ok"; data: T } | { status: "unavailable" };
 
+export type PlatformDashboardCheckItem = {
+	key: "email" | "gateway" | "einvoice" | "supportEmail" | "ai";
+	ok: boolean;
+	label: string;
+	href: string;
+};
+
 export type PlatformDashboard = {
 	kpis: Section<{
 		revenueLast30Days: number;
@@ -21,14 +28,7 @@ export type PlatformDashboard = {
 		unrepliedReviews: number;
 		failedEmailsLast7Days: number;
 	}>;
-	checks: Section<
-		Array<{
-			key: "email" | "gateway" | "einvoice" | "supportEmail" | "ai";
-			ok: boolean;
-			label: string;
-			href: string;
-		}>
-	>;
+	checks: Section<PlatformDashboardCheckItem[]>;
 	recentOrders: Section<
 		Array<{
 			id: string;
@@ -149,7 +149,7 @@ export async function getPlatformDashboard(
 					? "PAYUNi"
 					: (gatewayCreds?.gateway ? String(gatewayCreds.gateway).toUpperCase() : "金流");
 
-				const checks: PlatformDashboard["checks"]["data"] = [
+				const checks: PlatformDashboardCheckItem[] = [
 					{
 						key: "email",
 						ok: emailOk,
