@@ -564,29 +564,33 @@ function SidebarGroupedNavItem({
 		isMenuActive(pathname, menuItem.href) ||
 		isChildActive;
 
-	const [isManualExpanded, setIsManualExpanded] = useState<boolean>(false);
+	const [userExpandedOverride, setUserExpandedOverride] = useState<boolean | null>(null);
+
+	useEffect(() => {
+		setUserExpandedOverride(null);
+	}, [pathname]);
 
 	useEffect(() => {
 		if (getStoredExpandedSubmenus().includes(menuItem.id)) {
-			setIsManualExpanded(true);
+			setUserExpandedOverride(true);
 		}
 	}, [menuItem.id]);
 
+	const isExpanded = userExpandedOverride !== null ? userExpandedOverride : isChildActive;
+
 	function handleToggleSubmenu() {
-		setIsManualExpanded((prev) => {
-			const next = !prev;
-			try {
-				const current = getStoredExpandedSubmenus();
-				const updated = next
-					? Array.from(new Set([...current, menuItem.id]))
-					: current.filter((id) => id !== menuItem.id);
-				setStoredExpandedSubmenus(updated);
-			} catch {}
-			return next;
-		});
+		const next = !isExpanded;
+		setUserExpandedOverride(next);
+		try {
+			const current = getStoredExpandedSubmenus();
+			const updated = next
+				? Array.from(new Set([...current, menuItem.id]))
+				: current.filter((id) => id !== menuItem.id);
+			setStoredExpandedSubmenus(updated);
+		} catch {}
 	}
 
-	const isExpanded = isChildActive || isManualExpanded;
+	const submenuId = `sidebar-submenu-${menuItem.id}`;
 
 	return (
 		<li
@@ -602,6 +606,8 @@ function SidebarGroupedNavItem({
 					data-testid={`sidebar-item-toggle-${menuItem.id}`}
 					disabled={isSaving}
 					onClick={handleToggleSubmenu}
+					aria-expanded={isExpanded}
+					aria-controls={submenuId}
 					className={cn(
 						"gap-3 px-3 py-2 text-sm flex w-full items-center rounded-lg whitespace-nowrap transition-colors cursor-pointer",
 						isActive ? "bg-accent font-semibold text-accent-foreground" : "hover:bg-accent/50",
@@ -638,7 +644,7 @@ function SidebarGroupedNavItem({
 				</Link>
 			)}
 			{hasSubItems && isExpanded && (
-				<div className="mt-1 relative">
+				<div id={submenuId} className="mt-1 relative">
 					<div
 						className="top-0 bottom-0 left-5.5 absolute w-px -translate-x-1/2 bg-border"
 						aria-hidden
@@ -648,7 +654,7 @@ function SidebarGroupedNavItem({
 							const subActive = isNavSubItemActive(pathname, subItem.href);
 							return (
 								<li key={subItem.href}>
-									<a
+									<Link
 										href={subItem.href}
 										className={cn(
 											"py-1.5 pl-2 pr-3 text-sm flex w-full items-center rounded-md transition-colors",
@@ -657,7 +663,7 @@ function SidebarGroupedNavItem({
 										)}
 									>
 										{subItem.label}
-									</a>
+									</Link>
 								</li>
 							);
 						})}
@@ -682,6 +688,7 @@ function SidebarGroupedNav({
 	isSaving,
 }: SidebarGroupedNavProps) {
 	const t = useTranslations();
+	const pathname = usePathname();
 	const sortedGroups = useMemo(() => [...groups].sort((a, b) => a.order - b.order), [groups]);
 
 	const [collapsedSections, setCollapsedSections] = useState<string[]>([]);
@@ -697,6 +704,24 @@ function SidebarGroupedNav({
 			return next;
 		});
 	}
+
+	const { userUnassigned, sectionItemsMap } = useMemo(() => {
+		const user = unassignedItems.filter((item) => !item.requiresOperator && !item.section);
+		const operatorUnassigned = unassignedItems.filter((item) => item.requiresOperator || Boolean(item.section));
+
+		const map = new Map<AdminSectionKey, NavMenuItem[]>();
+		for (const section of DEFAULT_ADMIN_SECTIONS) {
+			map.set(section, []);
+		}
+		for (const item of operatorUnassigned) {
+			const sectionKey =
+				item.section && DEFAULT_ADMIN_SECTIONS.includes(item.section as AdminSectionKey)
+					? (item.section as AdminSectionKey)
+					: "other";
+			map.get(sectionKey)?.push(item);
+		}
+		return { userUnassigned: user, sectionItemsMap: map };
+	}, [unassignedItems]);
 
 	const sectionTitles: Record<AdminSectionKey, string> = {
 		core: t("admin.menu.sections.core"),
@@ -719,6 +744,7 @@ function SidebarGroupedNav({
 			</button>
 			{sortedGroups.map((group) => {
 				const groupItems = itemsByGroupId.get(group.id) ?? [];
+				const groupContentId = `sidebar-group-content-${group.id}`;
 
 				return (
 					// biome-ignore lint/a11y/noStaticElementInteractions: 拖曳分組容器不是互動控制項本身，鍵盤操作走各選單連結
@@ -743,6 +769,8 @@ function SidebarGroupedNav({
 								type="button"
 								onClick={() => onToggleGroupCollapse(group.id)}
 								disabled={isSaving}
+								aria-expanded={!group.isCollapsed}
+								aria-controls={groupContentId}
 								className="gap-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex flex-1 items-center overflow-hidden disabled:opacity-50"
 							>
 								<ChevronRightIcon
@@ -753,105 +781,101 @@ function SidebarGroupedNav({
 							<button
 								type="button"
 								disabled={isSaving}
+								aria-label="重新命名分組"
 								onClick={() => onRequestRenameGroup(group.id, group.title)}
-								className="opacity-0 text-muted-foreground group-hover/header:opacity-100 hover:text-foreground disabled:opacity-50 transition"
+								className="opacity-0 text-muted-foreground group-hover/header:opacity-100 focus-visible:opacity-100 hover:text-foreground disabled:opacity-50 transition"
 							>
 								<PenIcon className="size-3" />
 							</button>
 						</div>
-						{!group.isCollapsed && (
-							<ul className="gap-0.5 flex list-none flex-col">
-								{groupItems.map((menuItem) => (
-									<SidebarGroupedNavItem key={menuItem.id} menuItem={menuItem} isSaving={isSaving} />
-								))}
-							</ul>
-						)}
-					</div>
-				);
-			})}
-			{unassignedItems.length > 0 && (() => {
-				const userUnassigned = unassignedItems.filter((item) => !item.requiresOperator && !item.section);
-				const operatorUnassigned = unassignedItems.filter((item) => item.requiresOperator || Boolean(item.section));
-
-				const sectionItemsMap = new Map<AdminSectionKey, NavMenuItem[]>();
-				for (const section of DEFAULT_ADMIN_SECTIONS) {
-					sectionItemsMap.set(section, []);
-				}
-				for (const item of operatorUnassigned) {
-					const sectionKey =
-						item.section && DEFAULT_ADMIN_SECTIONS.includes(item.section as AdminSectionKey)
-							? (item.section as AdminSectionKey)
-							: "other";
-					sectionItemsMap.get(sectionKey)?.push(item);
-				}
-
-				return (
-					// biome-ignore lint/a11y/noStaticElementInteractions: 拖曳分組容器不是互動控制項本身，鍵盤操作走各選單連結
-					<div
-						data-testid="sidebar-group-unassigned"
-						onDragOver={(event: DragEvent<HTMLDivElement>) => event.preventDefault()}
-						onDrop={(event: DragEvent<HTMLDivElement>) => {
-							event.preventDefault();
-							if (isSaving) {
-								return;
-							}
-							const menuItemId = event.dataTransfer.getData("text/plain");
-							if (menuItemId) {
-								onDropItem(menuItemId, null);
-							}
-						}}
-						className="gap-3 flex flex-col"
-					>
-						{userUnassigned.length > 0 && (
-							<div>
-								<div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-									{unassignedLabel}
-								</div>
+						<div id={groupContentId}>
+							{!group.isCollapsed && (
 								<ul className="gap-0.5 flex list-none flex-col">
-									{userUnassigned.map((menuItem) => (
+									{groupItems.map((menuItem) => (
 										<SidebarGroupedNavItem key={menuItem.id} menuItem={menuItem} isSaving={isSaving} />
 									))}
 								</ul>
-							</div>
-						)}
-						{DEFAULT_ADMIN_SECTIONS.map((section) => {
-							const sectionItems = sectionItemsMap.get(section) ?? [];
-							if (sectionItems.length === 0) {
-								return null;
-							}
-							const isCollapsed = collapsedSections.includes(section);
-							return (
-								<Fragment key={section}>
-									<button
-										type="button"
-										data-testid={`sidebar-section-toggle-${section}`}
-										onClick={() => handleToggleSection(section)}
-										disabled={isSaving}
-										className="gap-1 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground hover:text-foreground flex w-full items-center overflow-hidden disabled:opacity-50"
-									>
-										<ChevronDownIcon
-											className={cn("size-3 shrink-0 transition-transform", isCollapsed && "-rotate-90")}
-										/>
-										<span className="truncate">{sectionTitles[section]}</span>
-									</button>
-									<div
-										data-testid={`sidebar-section-${section}`}
-										data-sidebar-section-collapsed={isCollapsed ? "true" : "false"}
-									>
-										{!isCollapsed && (
-											<ul className="gap-0.5 flex list-none flex-col mt-0.5">
-												{sectionItems.map((menuItem) => (
-													<SidebarGroupedNavItem key={menuItem.id} menuItem={menuItem} isSaving={isSaving} />
-												))}
-											</ul>
-										)}
-									</div>
-								</Fragment>
-							);
-						})}
+							)}
+						</div>
 					</div>
 				);
-			})()}
+			})}
+			{unassignedItems.length > 0 && (
+				// biome-ignore lint/a11y/noStaticElementInteractions: 拖曳分組容器不是互動控制項本身，鍵盤操作走各選單連結
+				<div
+					data-testid="sidebar-group-unassigned"
+					onDragOver={(event: DragEvent<HTMLDivElement>) => event.preventDefault()}
+					onDrop={(event: DragEvent<HTMLDivElement>) => {
+						event.preventDefault();
+						if (isSaving) {
+							return;
+						}
+						const menuItemId = event.dataTransfer.getData("text/plain");
+						if (menuItemId) {
+							onDropItem(menuItemId, null);
+						}
+					}}
+					className="gap-3 flex flex-col"
+				>
+					{userUnassigned.length > 0 && (
+						<div>
+							<div className="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+								{unassignedLabel}
+							</div>
+							<ul className="gap-0.5 flex list-none flex-col">
+								{userUnassigned.map((menuItem) => (
+									<SidebarGroupedNavItem key={menuItem.id} menuItem={menuItem} isSaving={isSaving} />
+								))}
+							</ul>
+						</div>
+					)}
+					{DEFAULT_ADMIN_SECTIONS.map((section) => {
+						const sectionItems = sectionItemsMap.get(section) ?? [];
+						if (sectionItems.length === 0) {
+							return null;
+						}
+						const isCurrentSection = sectionItems.some((item) => {
+							if (isMenuActive(pathname, item.href)) return true;
+							if (item.subItems?.some((sub) => isNavSubItemActive(pathname, sub.href))) return true;
+							return false;
+						});
+						const isCollapsed = !isCurrentSection && collapsedSections.includes(section);
+						const contentId = `sidebar-section-content-${section}`;
+
+						return (
+							<Fragment key={section}>
+								<button
+									type="button"
+									data-testid={`sidebar-section-toggle-${section}`}
+									onClick={() => handleToggleSection(section)}
+									disabled={isSaving}
+									aria-expanded={!isCollapsed}
+									aria-controls={contentId}
+									className="gap-1 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground hover:text-foreground flex w-full items-center overflow-hidden disabled:opacity-50"
+								>
+									<ChevronDownIcon
+										className={cn("size-3 shrink-0 transition-transform", isCollapsed && "-rotate-90")}
+									/>
+									<span className="truncate">{sectionTitles[section]}</span>
+								</button>
+								<div
+									id={contentId}
+									data-testid={`sidebar-section-${section}`}
+									data-sidebar-section-collapsed={isCollapsed ? "true" : "false"}
+								>
+									{!isCollapsed && (
+										<ul className="gap-0.5 flex list-none flex-col mt-0.5">
+											{sectionItems.map((menuItem) => (
+												<SidebarGroupedNavItem key={menuItem.id} menuItem={menuItem} isSaving={isSaving} />
+											))}
+										</ul>
+									)}
+								</div>
+							</Fragment>
+						);
+					})}
+				</div>
+			)}
 		</div>
 	);
 }

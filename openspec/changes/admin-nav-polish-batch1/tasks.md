@@ -5,8 +5,8 @@
 
 ## 2. 實作
 
-- [ ] 2.1 [after: 1.1] 修改 `NavBar.tsx`：子選單 `<a>` 改 `Link`；展開狀態改為「在子頁時預設展開、使用者手動收起後收起」；目前頁所在分區強制展開；三種展開按鈕補 `aria-expanded`／`aria-controls` 與對應容器 id；改名按鈕補 `aria-label` 與 `focus-visible:opacity-100`；未分組項目的分區計算提到元件頂層 `useMemo`。不得重新引入 render 期間讀 localStorage（避免 hydration 不一致）。驗證：1.1 全綠，`pnpm --filter @startkiter/saas exec vitest run` 全綠。
-- [ ] 2.2 [after: 1.2] 修改 `SupportWidget.tsx` 外層定位為手機 `bottom-20`、`md:bottom-6`。驗證：1.2 轉綠。
+- [x] 2.1 [after: 1.1] 修改 `NavBar.tsx`：子選單 `<a>` 改 `Link`；展開狀態改為「在子頁時預設展開、使用者手動收起後收起」；目前頁所在分區強制展開；三種展開按鈕補 `aria-expanded`／`aria-controls` 與對應容器 id；改名按鈕補 `aria-label` 與 `focus-visible:opacity-100`；未分組項目的分區計算提到元件頂層 `useMemo`。不得重新引入 render 期間讀 localStorage（避免 hydration 不一致）。驗證：1.1 全綠，`pnpm --filter @startkiter/saas exec vitest run` 全綠。
+- [x] 2.2 [after: 1.2] 修改 `SupportWidget.tsx` 外層定位為手機 `bottom-20`、`md:bottom-6`。驗證：1.2 轉綠。
 
 ## 3. 驗收
 

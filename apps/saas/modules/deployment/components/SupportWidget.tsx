@@ -156,7 +156,7 @@ export function SupportWidget({ deployments = [] }: SupportWidgetProps) {
 	return (
 		<>
 			{/* 浮動客服按鈕 */}
-			<div className="fixed bottom-6 right-6 z-40">
+			<div className="fixed bottom-20 md:bottom-6 right-6 z-40">
 				{isCollapsed ? (
 					<Button
 						type="button"
