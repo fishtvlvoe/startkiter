@@ -88,13 +88,36 @@ export const MOUNT_POINTS: PluginManifest[] = [
 		dataSpec: "none",
 	},
 	{
-		id: "course-dashboard",
+		id: "admin-dashboard",
 		name: "控制台",
+		version: "0.1.0",
+		app: PLATFORM_APP,
+		mount: {
+			route: { path: "/admin" },
+			menu: {
+				labelKey: "admin.menu.dashboard",
+				icon: "home",
+				order: 1,
+				requiresOperator: true,
+				section: "core",
+			},
+		},
+		dataSpec: "none",
+	},
+	{
+		id: "course-dashboard",
+		name: "課程儀表板",
 		version: "0.1.0",
 		app: COURSE_ADMIN_APP,
 		mount: {
 			route: { path: "/admin/course/dashboard" },
-			menu: { labelKey: "course.dashboard", icon: "home", order: 10, requiresOperator: true, section: "core" },
+			menu: {
+				labelKey: "course.dashboard",
+				icon: "home",
+				order: 10,
+				requiresOperator: true,
+				groupId: "course-admin",
+			},
 		},
 		dataSpec: "none",
 	},

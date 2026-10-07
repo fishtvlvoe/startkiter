@@ -1,6 +1,7 @@
 {
   "admin": {
     "menu": {
+      "dashboard": "Dashboard",
       "organizations": "Organizations",
       "users": "Users",
       "settings": "System settings",
@@ -710,7 +711,7 @@
   },
   "course": {
     "navLabel": "Course",
-    "dashboard": "Dashboard",
+    "dashboard": "Course Dashboard",
     "list": "Course List",
     "comments": "Course comments",
     "messages": "Learner messages",

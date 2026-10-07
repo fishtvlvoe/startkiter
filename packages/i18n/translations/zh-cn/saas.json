@@ -1,6 +1,7 @@
 {
   "admin": {
     "menu": {
+      "dashboard": "控制台",
       "organizations": "组织",
       "users": "用户",
       "settings": "系统设置",
@@ -710,7 +711,7 @@
   },
   "course": {
     "navLabel": "课程",
-    "dashboard": "控制台",
+    "dashboard": "课程仪表板",
     "list": "课程列表",
     "comments": "课程留言",
     "messages": "学员私信",

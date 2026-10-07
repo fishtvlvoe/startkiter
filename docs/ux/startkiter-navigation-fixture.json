@@ -26,12 +26,21 @@
       "labelKey": "course.navLabel"
     },
     {
+      "id": "admin-dashboard",
+      "appId": "platform",
+      "scope": "platform",
+      "requiredRole": "platform-admin",
+      "href": "/admin",
+      "labelKey": "admin.menu.dashboard"
+    },
+    {
       "id": "course-dashboard",
       "appId": "course",
       "scope": "app",
       "requiredRole": "app-admin",
       "href": "/admin/course/dashboard",
-      "labelKey": "course.dashboard"
+      "labelKey": "course.dashboard",
+      "parentId": "course-admin"
     },
     {
       "id": "course-comments",
