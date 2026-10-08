@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState, type DragEvent } from "react";
+import { Suspense, useEffect, useRef, useState, type DragEvent } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { decideStudioQuickAction } from "./studio-quick-action";
 import {
 	Button,
 	Card,
@@ -153,7 +155,13 @@ function ErrorIcon({ className }: { className?: string }) {
 	);
 }
 
-export default function CourseAdminStudioPage() {
+function CourseAdminStudioContent() {
+	const router = useRouter();
+	const searchParams = useSearchParams();
+	const action = searchParams.get("action");
+	const [coursesLoaded, setCoursesLoaded] = useState(false);
+	const lastHandledActionRef = useRef<string | null>(null);
+
 	// 全域提示訊息（替代 alert）
 	const [message, setMessage] = useState<StudioMessage | null>(null);
 
@@ -203,6 +211,14 @@ export default function CourseAdminStudioPage() {
 	const selectedChapter = chapters.find((chapter) => chapter.lessons.some((lesson) => lesson.id === selectedLesson?.id));
 	const assignedInstructors = selectedCourse?.instructors ?? [];
 	const [watermarkSetting, setWatermarkSetting] = useState(DEFAULT_WATERMARK_SETTING);
+
+	const targetLessonCourse =
+		courses.find((c) => c.chapters?.some((ch) => ch.id === createLessonChapterId)) ?? selectedCourse;
+	const targetLessonChapter =
+		targetLessonCourse?.chapters?.find((ch) => ch.id === createLessonChapterId) ??
+		chapters.find((ch) => ch.id === createLessonChapterId);
+	const targetCourseTitle = targetLessonCourse?.title ?? "";
+	const targetChapterTitle = targetLessonChapter?.title ?? "";
 
 	// 自動清除提示訊息
 	useEffect(() => {
@@ -269,10 +285,44 @@ export default function CourseAdminStudioPage() {
 		if (!res.ok) throw new Error(typeof data.error === "string" ? data.error : "載入後台資料失敗");
 
 		setIsOperator(data.isOperator === true);
-		setCourses(data.courses ?? []);
+		const loadedCourses = data.courses ?? [];
+		setCourses(loadedCourses);
+		setCoursesLoaded(true);
 		if (data.courses?.length) selectCourse(data.courses[0]);
 		if (data.folders) setFolders(data.folders);
 	}
+
+	// 當網址列 action 變為 null（例如 replace 完成後），重設已處理紀錄，以利後續再次從控制台點入能重新處理
+	useEffect(() => {
+		if (!action) {
+			lastHandledActionRef.current = null;
+		}
+	}, [action]);
+
+	// 處理網址 action 參數（例如 ?action=new-course 或 ?action=new-lesson）
+	// 依賴 loadStudio 預設選 courses[0]，新增單元固定加到第一門課 order 最大的章節（呼應 spec「Quick actions open creation dialogs」）
+	useEffect(() => {
+		const decision = decideStudioQuickAction({
+			action,
+			coursesLoaded,
+			lastHandledAction: lastHandledActionRef.current,
+			courses,
+		});
+
+		if (decision.type === "execute") {
+			lastHandledActionRef.current = action;
+			const { result } = decision;
+			if (result.type === "open-course-dialog") {
+				setCourseTitle("");
+				setShowCreateCourseDialog(true);
+			} else if (result.type === "open-lesson-dialog") {
+				handleCreateLesson(result.chapterId);
+			} else if (result.type === "error") {
+				showMessage("error", result.message);
+			}
+			router.replace("/admin/course");
+		}
+	}, [action, coursesLoaded, courses, router]);
 
 	// 載入真實資料庫課綱與資料夾
 	useEffect(() => {
@@ -494,11 +544,11 @@ export default function CourseAdminStudioPage() {
 	};
 
 	// 新增單元
-	const handleCreateLesson = (chapterId: string) => {
+	function handleCreateLesson(chapterId: string) {
 		setLessonTitle("");
 		setCreateLessonChapterId(chapterId);
 		setShowCreateLessonDialog(true);
-	};
+	}
 
 	// 提交新增單元
 	const handleConfirmCreateLesson = async () => {
@@ -1468,7 +1518,11 @@ export default function CourseAdminStudioPage() {
 					<DialogContent>
 						<DialogHeader>
 							<DialogTitle>新增單元</DialogTitle>
-							<DialogDescription>輸入新單元的名稱</DialogDescription>
+							<DialogDescription>
+								{targetCourseTitle && targetChapterTitle
+									? `加到「${targetCourseTitle}／${targetChapterTitle}」`
+									: "輸入新單元的名稱"}
+							</DialogDescription>
 						</DialogHeader>
 						<div className="space-y-4">
 							<Input
@@ -1490,5 +1544,13 @@ export default function CourseAdminStudioPage() {
 					</DialogContent>
 				</Dialog>
 		</div>
+	);
+}
+
+export default function CourseAdminStudioPage() {
+	return (
+		<Suspense fallback={null}>
+			<CourseAdminStudioContent />
+		</Suspense>
 	);
 }

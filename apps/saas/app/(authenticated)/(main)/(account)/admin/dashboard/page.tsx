@@ -44,7 +44,7 @@ export default async function PlatformAdminDashboardPage() {
 	const displayName = session.user.name || session.user.email || "管理員";
 
 	return (
-		<main className="mx-auto max-w-6xl space-y-6 p-6" data-testid="platform-dashboard">
+		<main className="mx-auto max-w-6xl space-y-6 px-0 py-2 sm:p-6" data-testid="platform-dashboard">
 			{/* 歡迎列 */}
 			<div className="flex flex-wrap items-end justify-between gap-4">
 				<div>
@@ -65,25 +65,25 @@ export default async function PlatformAdminDashboardPage() {
 					<div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
 						<Card className="p-4">
 							<p className="text-sm text-muted-foreground">近 30 天營收</p>
-							<p className="mt-2 text-2xl font-bold text-heading">
+							<p className="mt-2 text-xl sm:text-2xl font-bold text-heading whitespace-nowrap">
 								{formatAmount(dashboard.kpis.data.revenueLast30Days)}
 							</p>
 						</Card>
 						<Card className="p-4">
 							<p className="text-sm text-muted-foreground">近 30 天訂單</p>
-							<p className="mt-2 text-2xl font-bold text-heading">
+							<p className="mt-2 text-xl sm:text-2xl font-bold text-heading whitespace-nowrap">
 								{dashboard.kpis.data.paidOrdersLast30Days}
 							</p>
 						</Card>
 						<Card className="p-4">
 							<p className="text-sm text-muted-foreground">學員總數</p>
-							<p className="mt-2 text-2xl font-bold text-heading">
+							<p className="mt-2 text-xl sm:text-2xl font-bold text-heading whitespace-nowrap">
 								{dashboard.kpis.data.studentCount}
 							</p>
 						</Card>
 						<Card className="p-4">
 							<p className="text-sm text-muted-foreground">上架課程</p>
-							<p className="mt-2 text-2xl font-bold text-heading">
+							<p className="mt-2 text-xl sm:text-2xl font-bold text-heading whitespace-nowrap">
 								{dashboard.kpis.data.publishedCourseCount}
 							</p>
 						</Card>
@@ -315,11 +315,18 @@ export default async function PlatformAdminDashboardPage() {
 
 						<div className="flex flex-wrap gap-2.5">
 							<Link
-								href="/admin/course"
+								href="/admin/course?action=new-course"
 								className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs font-medium text-foreground transition-colors hover:bg-muted"
 							>
 								<PlusCircleIcon className="size-3.5" />
 								新增課程
+							</Link>
+							<Link
+								href="/admin/course?action=new-lesson"
+								className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+							>
+								<PlusCircleIcon className="size-3.5" />
+								新增單元
 							</Link>
 							<Link
 								href="/admin/newsletter/new"

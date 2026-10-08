@@ -1,7 +1,7 @@
 import { getSession } from "@auth/lib/server";
 import { hasAnyCourseInstructorAssignment } from "@startkiter/api/modules/course/lib/course-instructor-access";
 import { isOperator as checkIsOperator } from "@startkiter/permissions";
-import { PageHeader } from "@shared/components/PageHeader";
+import { AdminLayoutHeader } from "@shared/components/AdminLayoutHeader";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import type { PropsWithChildren } from "react";
@@ -23,7 +23,7 @@ export default async function AdminLayout({ children }: PropsWithChildren) {
 
 	return (
 		<>
-			<PageHeader title={t("title")} subtitle={t("description")} />
+			<AdminLayoutHeader title={t("title")} subtitle={t("description")} />
 
 			{children}
 		</>

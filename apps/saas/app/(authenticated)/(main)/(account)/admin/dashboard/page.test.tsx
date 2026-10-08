@@ -149,11 +149,33 @@ describe("PlatformAdminDashboardPage (/admin/dashboard)", () => {
 		expect(html).toContain("b***@yahoo.com");
 		expect(html).toContain("電馭學院");
 
-		// 快速操作
-		expect(html).toContain("新增課程");
-		expect(html).toContain("寫電子報");
-		expect(html).toContain("建立優惠券");
-		expect(html).toContain("查看前台");
+		// 快速操作依序是新增課程、新增單元、寫電子報、建立優惠券、查看前台，且帶有對應 action 參數
+		const quickActionMatches = [
+			...html.matchAll(/<a[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g),
+		].filter(([, , text]) =>
+			["新增課程", "新增單元", "寫電子報", "建立優惠券", "查看前台"].some((label) =>
+				text.includes(label),
+			),
+		);
+		expect(
+			quickActionMatches.map(([_, href, text]) => ({
+				href,
+				label: ["新增課程", "新增單元", "寫電子報", "建立優惠券", "查看前台"].find((l) =>
+					text.includes(l),
+				),
+			})),
+		).toEqual([
+			{ href: "/admin/course?action=new-course", label: "新增課程" },
+			{ href: "/admin/course?action=new-lesson", label: "新增單元" },
+			{ href: "/admin/newsletter/new", label: "寫電子報" },
+			{ href: "/admin/course/coupons", label: "建立優惠券" },
+			{ href: "/", label: "查看前台" },
+		]);
+
+		// KPI 數字元素帶 whitespace-nowrap 與 text-xl
+		expect(html).toMatch(
+			/<p[^>]*class="[^"]*(?=.*whitespace-nowrap)(?=.*text-xl)[^"]*"[^>]*>\s*NT\$ 8,830\s*<\/p>/,
+		);
 	});
 
 	it("某區塊 unavailable 時，該區塊顯示「暫時無法載入」，其他區塊仍正常渲染", async () => {
