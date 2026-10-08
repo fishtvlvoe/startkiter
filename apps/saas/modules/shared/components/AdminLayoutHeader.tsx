@@ -13,9 +13,10 @@ export function AdminLayoutHeader({
 	className?: string;
 }) {
 	const pathname = usePathname();
+	const normalizedPathname = pathname ? pathname.replace(/\/+$/, "") : "";
 
-	// 在 /admin/dashboard 控制台不重複渲染頂部「後台管理」標題
-	if (pathname === "/admin/dashboard") {
+	// 在 /admin/dashboard（含結尾斜線）控制台不重複渲染頂部「後台管理」標題
+	if (normalizedPathname === "/admin/dashboard") {
 		return null;
 	}
 

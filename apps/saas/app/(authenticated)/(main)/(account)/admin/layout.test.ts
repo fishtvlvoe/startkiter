@@ -72,4 +72,18 @@ describe("AdminLayoutHeader", () => {
 		);
 		expect(courseDashboardHtml).toContain("後台管理");
 	});
+
+	it("pathname 是 /admin/dashboard/（帶結尾斜線）時亦輸出空字串", async () => {
+		const { AdminLayoutHeader } = await import(
+			"../../../../../modules/shared/components/AdminLayoutHeader"
+		);
+		usePathnameMock.mockReturnValue("/admin/dashboard/");
+		const dashboardHtml = renderToStaticMarkup(
+			React.createElement(AdminLayoutHeader, {
+				title: "後台管理",
+				subtitle: "管理你的應用程式。",
+			}),
+		);
+		expect(dashboardHtml).toBe("");
+	});
 });
