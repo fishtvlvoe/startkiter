@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState, type DragEvent } from "react";
+import { Suspense, useEffect, useState, type DragEvent } from "react";
 import Link from "next/link";
+import * as navigation from "next/navigation";
+import { resolveStudioQuickAction } from "./studio-quick-action";
 import {
 	Button,
 	Card,
@@ -153,7 +155,17 @@ function ErrorIcon({ className }: { className?: string }) {
 	);
 }
 
-export default function CourseAdminStudioPage() {
+function CourseAdminStudioContent() {
+	const router = navigation.useRouter();
+	let searchParams: ReturnType<typeof navigation.useSearchParams> | null = null;
+	try {
+		if (typeof navigation.useSearchParams === "function") {
+			searchParams = navigation.useSearchParams();
+		}
+	} catch {
+		searchParams = null;
+	}
+
 	// 全域提示訊息（替代 alert）
 	const [message, setMessage] = useState<StudioMessage | null>(null);
 
@@ -203,6 +215,14 @@ export default function CourseAdminStudioPage() {
 	const selectedChapter = chapters.find((chapter) => chapter.lessons.some((lesson) => lesson.id === selectedLesson?.id));
 	const assignedInstructors = selectedCourse?.instructors ?? [];
 	const [watermarkSetting, setWatermarkSetting] = useState(DEFAULT_WATERMARK_SETTING);
+
+	const targetLessonCourse =
+		courses.find((c) => c.chapters?.some((ch) => ch.id === createLessonChapterId)) ?? selectedCourse;
+	const targetLessonChapter =
+		targetLessonCourse?.chapters?.find((ch) => ch.id === createLessonChapterId) ??
+		chapters.find((ch) => ch.id === createLessonChapterId);
+	const targetCourseTitle = targetLessonCourse?.title ?? "";
+	const targetChapterTitle = targetLessonChapter?.title ?? "";
 
 	// 自動清除提示訊息
 	useEffect(() => {
@@ -269,9 +289,26 @@ export default function CourseAdminStudioPage() {
 		if (!res.ok) throw new Error(typeof data.error === "string" ? data.error : "載入後台資料失敗");
 
 		setIsOperator(data.isOperator === true);
-		setCourses(data.courses ?? []);
+		const loadedCourses = data.courses ?? [];
+		setCourses(loadedCourses);
 		if (data.courses?.length) selectCourse(data.courses[0]);
 		if (data.folders) setFolders(data.folders);
+
+		// 處理網址 action 參數（例如 ?action=new-course 或 ?action=new-lesson）
+		// 這一項依賴 loadStudio 預設選 courses[0]，新增單元固定加到第一門課 order 最大的章節（呼應 spec「Quick actions open creation dialogs」）
+		const action = searchParams?.get("action") ?? null;
+		if (action) {
+			const resolution = resolveStudioQuickAction(action, loadedCourses);
+			if (resolution.type === "open-course-dialog") {
+				setCourseTitle("");
+				setShowCreateCourseDialog(true);
+			} else if (resolution.type === "open-lesson-dialog") {
+				handleCreateLesson(resolution.chapterId);
+			} else if (resolution.type === "error") {
+				showMessage("error", resolution.message);
+			}
+			router.replace("/admin/course");
+		}
 	}
 
 	// 載入真實資料庫課綱與資料夾
@@ -494,11 +531,11 @@ export default function CourseAdminStudioPage() {
 	};
 
 	// 新增單元
-	const handleCreateLesson = (chapterId: string) => {
+	function handleCreateLesson(chapterId: string) {
 		setLessonTitle("");
 		setCreateLessonChapterId(chapterId);
 		setShowCreateLessonDialog(true);
-	};
+	}
 
 	// 提交新增單元
 	const handleConfirmCreateLesson = async () => {
@@ -1468,7 +1505,11 @@ export default function CourseAdminStudioPage() {
 					<DialogContent>
 						<DialogHeader>
 							<DialogTitle>新增單元</DialogTitle>
-							<DialogDescription>輸入新單元的名稱</DialogDescription>
+							<DialogDescription>
+								{targetCourseTitle && targetChapterTitle
+									? `加到「${targetCourseTitle}／${targetChapterTitle}」`
+									: "輸入新單元的名稱"}
+							</DialogDescription>
 						</DialogHeader>
 						<div className="space-y-4">
 							<Input
@@ -1490,5 +1531,13 @@ export default function CourseAdminStudioPage() {
 					</DialogContent>
 				</Dialog>
 		</div>
+	);
+}
+
+export default function CourseAdminStudioPage() {
+	return (
+		<Suspense fallback={null}>
+			<CourseAdminStudioContent />
+		</Suspense>
 	);
 }
