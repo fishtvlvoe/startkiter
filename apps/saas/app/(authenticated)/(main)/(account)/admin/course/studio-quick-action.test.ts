@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveStudioQuickAction } from "./studio-quick-action";
+import { decideStudioQuickAction, resolveStudioQuickAction } from "./studio-quick-action";
 
 describe("resolveStudioQuickAction", () => {
 	const sampleCourses = [
@@ -74,5 +74,79 @@ describe("resolveStudioQuickAction", () => {
 	it("未帶 action（null）回傳 none", () => {
 		const result = resolveStudioQuickAction(null, sampleCourses);
 		expect(result).toEqual({ type: "none" });
+	});
+});
+
+describe("decideStudioQuickAction", () => {
+	const sampleCourses = [
+		{
+			id: "course-a",
+			title: "Course A",
+			chapters: [
+				{ id: "ch-1", title: "Chapter 1", order: 1 },
+			],
+		},
+	];
+
+	// courses 尚未載入時不處理
+	it("courses 尚未載入時不處理", () => {
+		const decision = decideStudioQuickAction({
+			action: "new-lesson",
+			coursesLoaded: false,
+			lastHandledAction: null,
+			courses: [],
+		});
+		expect(decision).toEqual({ type: "skip", reason: "not-loaded" });
+	});
+
+	// 載入後 0 門課時回傳錯誤「請先新增課程，再新增單元」
+	it("載入後 0 門課時回傳錯誤「請先新增課程，再新增單元」", () => {
+		const decision = decideStudioQuickAction({
+			action: "new-lesson",
+			coursesLoaded: true,
+			lastHandledAction: null,
+			courses: [],
+		});
+		expect(decision).toEqual({
+			type: "execute",
+			result: { type: "error", message: "請先新增課程，再新增單元" },
+		});
+	});
+
+	// 同一個 action 在重複觸發（模擬 Strict Mode 兩次）時只處理一次
+	it("同一個 action 在重複觸發（模擬 Strict Mode 兩次）時只處理一次", () => {
+		const firstCall = decideStudioQuickAction({
+			action: "new-course",
+			coursesLoaded: true,
+			lastHandledAction: null,
+			courses: sampleCourses,
+		});
+		expect(firstCall).toEqual({
+			type: "execute",
+			result: { type: "open-course-dialog" },
+		});
+
+		// 模擬第二次觸發（lastHandledAction 已記錄為 new-course）
+		const secondCall = decideStudioQuickAction({
+			action: "new-course",
+			coursesLoaded: true,
+			lastHandledAction: "new-course",
+			courses: sampleCourses,
+		});
+		expect(secondCall).toEqual({
+			type: "skip",
+			reason: "already-handled",
+		});
+	});
+
+	// action 為 null 時略過
+	it("action 為 null 時略過", () => {
+		const decision = decideStudioQuickAction({
+			action: null,
+			coursesLoaded: true,
+			lastHandledAction: null,
+			courses: sampleCourses,
+		});
+		expect(decision).toEqual({ type: "skip", reason: "no-action" });
 	});
 });

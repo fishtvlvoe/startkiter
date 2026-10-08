@@ -66,3 +66,38 @@ export function resolveStudioQuickAction(
 
 	return { type: "none" };
 }
+
+export type StudioQuickActionDecision =
+	| { type: "skip"; reason: "no-action" | "not-loaded" | "already-handled" }
+	| { type: "execute"; result: StudioQuickActionResult };
+
+/**
+ * 依據 action 參數、課程載入狀態與前次處理紀錄，決定是否執行動作。
+ * - 若無 action，略過 (no-action)
+ * - 若課程尚未載入，等待載入 (not-loaded)
+ * - 若同一個 action 已被處理過（例如 Strict Mode 雙次觸發），略過 (already-handled)
+ * - 否則解析並執行動作
+ */
+export function decideStudioQuickAction(params: {
+	action: string | null;
+	coursesLoaded: boolean;
+	lastHandledAction: string | null;
+	courses: StudioQuickActionCourse[];
+}): StudioQuickActionDecision {
+	const { action, coursesLoaded, lastHandledAction, courses } = params;
+
+	if (!action) {
+		return { type: "skip", reason: "no-action" };
+	}
+
+	if (!coursesLoaded) {
+		return { type: "skip", reason: "not-loaded" };
+	}
+
+	if (lastHandledAction === action) {
+		return { type: "skip", reason: "already-handled" };
+	}
+
+	const result = resolveStudioQuickAction(action, courses);
+	return { type: "execute", result };
+}

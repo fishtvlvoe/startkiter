@@ -1,9 +1,9 @@
 "use client";
 
-import { Suspense, useEffect, useState, type DragEvent } from "react";
+import { Suspense, useEffect, useRef, useState, type DragEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { resolveStudioQuickAction } from "./studio-quick-action";
+import { decideStudioQuickAction } from "./studio-quick-action";
 import {
 	Button,
 	Card,
@@ -158,6 +158,9 @@ function ErrorIcon({ className }: { className?: string }) {
 function CourseAdminStudioContent() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
+	const action = searchParams.get("action");
+	const [coursesLoaded, setCoursesLoaded] = useState(false);
+	const lastHandledActionRef = useRef<string | null>(null);
 
 	// 全域提示訊息（替代 alert）
 	const [message, setMessage] = useState<StudioMessage | null>(null);
@@ -284,25 +287,42 @@ function CourseAdminStudioContent() {
 		setIsOperator(data.isOperator === true);
 		const loadedCourses = data.courses ?? [];
 		setCourses(loadedCourses);
+		setCoursesLoaded(true);
 		if (data.courses?.length) selectCourse(data.courses[0]);
 		if (data.folders) setFolders(data.folders);
+	}
 
-		// 處理網址 action 參數（例如 ?action=new-course 或 ?action=new-lesson）
-		// 這一項依賴 loadStudio 預設選 courses[0]，新增單元固定加到第一門課 order 最大的章節（呼應 spec「Quick actions open creation dialogs」）
-		const action = searchParams.get("action");
-		if (action) {
-			const resolution = resolveStudioQuickAction(action, loadedCourses);
-			if (resolution.type === "open-course-dialog") {
+	// 當網址列 action 變為 null（例如 replace 完成後），重設已處理紀錄，以利後續再次從控制台點入能重新處理
+	useEffect(() => {
+		if (!action) {
+			lastHandledActionRef.current = null;
+		}
+	}, [action]);
+
+	// 處理網址 action 參數（例如 ?action=new-course 或 ?action=new-lesson）
+	// 依賴 loadStudio 預設選 courses[0]，新增單元固定加到第一門課 order 最大的章節（呼應 spec「Quick actions open creation dialogs」）
+	useEffect(() => {
+		const decision = decideStudioQuickAction({
+			action,
+			coursesLoaded,
+			lastHandledAction: lastHandledActionRef.current,
+			courses,
+		});
+
+		if (decision.type === "execute") {
+			lastHandledActionRef.current = action;
+			const { result } = decision;
+			if (result.type === "open-course-dialog") {
 				setCourseTitle("");
 				setShowCreateCourseDialog(true);
-			} else if (resolution.type === "open-lesson-dialog") {
-				handleCreateLesson(resolution.chapterId);
-			} else if (resolution.type === "error") {
-				showMessage("error", resolution.message);
+			} else if (result.type === "open-lesson-dialog") {
+				handleCreateLesson(result.chapterId);
+			} else if (result.type === "error") {
+				showMessage("error", result.message);
 			}
 			router.replace("/admin/course");
 		}
-	}
+	}, [action, coursesLoaded, courses, router]);
 
 	// 載入真實資料庫課綱與資料夾
 	useEffect(() => {
