@@ -39,8 +39,16 @@
 
 - Affected specs: `platform-admin-dashboard`
 - Affected code:
-  - Modified: apps/saas/app/(authenticated)/(main)/(account)/admin/dashboard/page.tsx、apps/saas/app/(authenticated)/(main)/(account)/admin/dashboard/page.test.tsx、apps/saas/app/(authenticated)/(main)/(account)/admin/layout.tsx、apps/saas/app/(authenticated)/(main)/(account)/admin/layout.test.ts、apps/saas/app/(authenticated)/(main)/(account)/admin/course/page.tsx
-  - New: apps/saas/modules/shared/components/AdminLayoutHeader.tsx、apps/saas/app/(authenticated)/(main)/(account)/admin/course/studio-quick-action.ts、apps/saas/app/(authenticated)/(main)/(account)/admin/course/studio-quick-action.test.ts
+  - Modified:
+    - apps/saas/app/(authenticated)/(main)/(account)/admin/dashboard/page.tsx
+    - apps/saas/app/(authenticated)/(main)/(account)/admin/dashboard/page.test.tsx
+    - apps/saas/app/(authenticated)/(main)/(account)/admin/layout.tsx
+    - apps/saas/app/(authenticated)/(main)/(account)/admin/layout.test.ts
+    - apps/saas/app/(authenticated)/(main)/(account)/admin/course/page.tsx
+  - New:
+    - apps/saas/modules/shared/components/AdminLayoutHeader.tsx
+    - apps/saas/app/(authenticated)/(main)/(account)/admin/course/studio-quick-action.ts
+    - apps/saas/app/(authenticated)/(main)/(account)/admin/course/studio-quick-action.test.ts
   - Removed: 無
 - Dependencies 新增：無
 - 環境變數新增：無
