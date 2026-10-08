@@ -14,4 +14,4 @@
 ## 3. 審查與驗收
 
 - [x] 3.1 （2026-10-08：第 1 輪 Codex 審查 0 Critical、4 Warning，其中 W1/W2/W6 已由 Agy 修正；第 2 輪因 Codex 無用量改由 PM 自審，0 Critical 0 Warning）派一個和實作方不同的 CLI 做 code review，重點看 `router.replace` 會不會造成重複渲染、`useSearchParams` 有沒有包在 Suspense 裡；驗證：審查回報沒有 Critical
-- [ ] 3.2 部署後用 ego-browser 檢查正式站：`/admin/dashboard` 在 1440px 和 390px 各截一張，390px 時 `scrollWidth === 390` 且 `NT$ 8,830` 只有一行；點「新增課程」「新增單元」各截一張視窗已開的圖；`/admin/course/dashboard` 仍然顯示「後台管理」。截圖存到 `~/Downloads/startkiter-dashboard-check/after-*.png`；驗證：截圖檔存在，且畫面符合 spec 的 5 個 Scenario [after: 3.1]
+- [x] 3.2 部署後用 ego-browser 檢查正式站：`/admin/dashboard` 在 1440px 和 390px 各截一張，390px 時 `scrollWidth === 390` 且 `NT$ 8,830` 只有一行；點「新增課程」「新增單元」各截一張視窗已開的圖；`/admin/course/dashboard` 仍然顯示「後台管理」。截圖存到 `~/Downloads/startkiter-dashboard-check/after-*.png`；驗證：截圖檔存在，且畫面符合 spec 的 5 個 Scenario [after: 3.1]
