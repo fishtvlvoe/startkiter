@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState, type DragEvent } from "react";
 import Link from "next/link";
-import * as navigation from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { resolveStudioQuickAction } from "./studio-quick-action";
 import {
 	Button,
@@ -156,15 +156,8 @@ function ErrorIcon({ className }: { className?: string }) {
 }
 
 function CourseAdminStudioContent() {
-	const router = navigation.useRouter();
-	let searchParams: ReturnType<typeof navigation.useSearchParams> | null = null;
-	try {
-		if (typeof navigation.useSearchParams === "function") {
-			searchParams = navigation.useSearchParams();
-		}
-	} catch {
-		searchParams = null;
-	}
+	const router = useRouter();
+	const searchParams = useSearchParams();
 
 	// 全域提示訊息（替代 alert）
 	const [message, setMessage] = useState<StudioMessage | null>(null);
@@ -296,7 +289,7 @@ function CourseAdminStudioContent() {
 
 		// 處理網址 action 參數（例如 ?action=new-course 或 ?action=new-lesson）
 		// 這一項依賴 loadStudio 預設選 courses[0]，新增單元固定加到第一門課 order 最大的章節（呼應 spec「Quick actions open creation dialogs」）
-		const action = searchParams?.get("action") ?? null;
+		const action = searchParams.get("action");
 		if (action) {
 			const resolution = resolveStudioQuickAction(action, loadedCourses);
 			if (resolution.type === "open-course-dialog") {
