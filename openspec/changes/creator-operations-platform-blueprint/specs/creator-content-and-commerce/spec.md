@@ -32,6 +32,11 @@ The platform SHALL support a published page, a form or checkout entry, and an op
 - **WHEN** a creator edits a published page
 - **THEN** the system creates a draft revision and leaves the current published revision unchanged until publish
 
+#### Scenario: A public page presents multiple courses
+
+- **WHEN** a creator publishes a page containing multiple course cards and valid purchase calls to action
+- **THEN** the public page shows the configured courses, each call to action resolves to its configured offer, and page revisions remain independent from historical orders
+
 ### Requirement: Offers SHALL connect to Taiwan checkout and order records
 
 The system SHALL represent price, currency, payment mode, tax or invoice requirements, entitlement outcome, and refund policy for each offer. Checkout SHALL use the existing provider abstraction and SHALL create an auditable order state transition.
@@ -40,6 +45,11 @@ The system SHALL represent price, currency, payment mode, tax or invoice require
 
 - **WHEN** a buyer completes a valid PAYUNi checkout in TWD
 - **THEN** the system records the order, payment reference, entitlement result, and customer contact linkage
+
+#### Scenario: A buyer purchases a multi-course offer
+
+- **WHEN** a buyer completes a valid PAYUNi checkout for an offer that references multiple courses
+- **THEN** the system records one order and grants each configured course entitlement exactly once
 
 #### Scenario: Checkout provider is unavailable
 

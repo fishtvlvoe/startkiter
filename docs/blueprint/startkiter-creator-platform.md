@@ -92,6 +92,38 @@ Offer
   → 退款或取消時反向收回資格
 ```
 
+### 第一個垂直切片：多課程前台銷售與交付
+
+這個切片已拍板，作為第一個真正施工的 end-to-end flow：
+
+```text
+創作者建立多門課程
+  ↓
+建立公開銷售頁
+  ↓
+頁面放入課程卡片與購買 CTA
+  ↓
+單課 Offer 或多課程 Bundle Offer
+  ↓
+買家進入 PAYUNi checkout
+  ↓
+付款成功建立 Order
+  ↓
+依 Offer 授予一門或多門課程權限
+  ↓
+交付 GitHub 代碼包與 LINE 邀請入口
+  ↓
+寄出交易型通知並記錄事件
+```
+
+第一版銷售頁必須支援：
+
+- 同一創作者有多門課程。
+- 銷售頁顯示多門課程的名稱、簡介、封面、價格與 CTA。
+- 課程可以單獨販售，也可以組成多課程 Bundle。
+- 一筆 Offer 的交付結果可以包含一門或多門課程。
+- 發布頁面與付款 Offer 分開管理；改頁面文案不會改動歷史訂單。
+
 ### 工作流 E：每日營運
 
 ```text
@@ -264,7 +296,7 @@ Offer
 | 0 | Blueprint approval | 本文件、6 份 capability spec、glossary、open questions 拍板 |
 | 1 | Creator workspace foundation | workspace profile、capability、task shell、page states |
 | 2 | Contact and consent foundation | Contact、identity、tag、segment、consent、import/export |
-| 3 | Offer and commerce foundation | Product、Offer、course/bundle mapping、checkout state |
+| 3 | Multi-course offer and commerce foundation | 多門課程、公開銷售頁、單課／Bundle Offer、checkout state、課程權限交付 |
 | 4 | Creator home and operations | 待辦、訂單、名單、寄送、系統警告與 drill-down |
 | 5 | Campaign and automation | campaign composer、outbox、workflow、delivery、retry |
 | 6 | Landing page and funnel | page revision、form、funnel step、conversion event |
@@ -286,8 +318,8 @@ Offer
 ## 13. 待拍板事項
 
 1. 第一個主要創作者族群：課程講師、顧問／教練、服務型創作者或代理商。
-2. 第一條真正要打通的 end-to-end flow：名單 → 電子報，還是商品 → 付款 → 交付。
-3. 第一版網站能力：單頁銷售頁、漏斗，還是完整網站。
+2. 公開銷售頁的第一版編輯方式：課程卡片清單、單一 Offer 銷售頁，或兩者同時支援。
+3. 第一版網站能力是否延伸到多步驟漏斗；本輪先確定公開銷售頁。
 4. SMS provider 與台灣簡訊合規流程。
 5. Creator Workspace 的團隊計費與多品牌邊界。
 6. 電子發票 provider 與正式營業人流程。
@@ -298,4 +330,4 @@ Offer
 - 六份 capability spec 通過 Spectra validate。
 - 資料模型、事件流、權限、台灣契約與 UI/UX contract 互相一致。
 - 每個後續 SR 有明確輸入、輸出、owner、測試與瀏覽器驗收條件。
-- Fish 拍板待決事項 1、2、3 後，才進入第一張施工 SR。
+- Fish 已拍板第一個垂直切片為「多課程前台銷售 → PAYUNi → 課程／GitHub／LINE 交付」；剩餘頁面編輯方式與主要創作者族群拍板後，進入第一張施工 SR。
