@@ -18,11 +18,14 @@ StartKiter 現有課程、PAYUNi、訂單、課程權限、GitHub 代碼包與 L
   → PAYUNi
   → Order
   → 一門或多門課程權限
-  → GitHub 代碼包與 LINE 邀請入口
+  → 每門課的 LINE 邀請與歡迎信
+  → 唯一 GitHub 代碼包資格
   → 交易型通知與事件紀錄
 ```
 
 課程是可重用的 Content Resource；Product／Offer 決定販售方式；同一門課可被多個 Offer 引用；一個 Offer 可授予多門課程權限。公開銷售頁可以展示多門課程與各自 CTA，且頁面修訂不改寫歷史訂單。
+
+GitHub 代碼包是全平台唯一的一種交付物，不包含課程教學內容。現有 GitHub App 仍從同一份範本為每位買家建立個人私人 repo，權限限定唯讀（pull）。買家購買多門課程時，Course entitlement 可以有多筆，但 GitHub 代碼包資格與個人 repo 只能有一份；退款只有在買家沒有其他有效代碼包資格時才撤銷 repo 存取。
 
 ## 為什麼不是先做 CRM／電子報
 
@@ -38,6 +41,6 @@ StartKiter 現有課程、PAYUNi、訂單、課程權限、GitHub 代碼包與 L
 
 ## 後果
 
-- 第一張施工 SR 必須同時處理多課程 catalog、公開銷售頁、Offer／Bundle、PAYUNi checkout、Order、entitlement 與交付狀態。
+- 第一張施工 SR 必須同時處理多課程 catalog、公開銷售頁、CourseOffer、PAYUNi checkout、Order、課程 entitlement 與唯一代碼包資格。
 - 必須先定義「頁面展示課程」與「付款後授權課程」的資料關係，避免把前台卡片直接當成訂單權限。
 - CRM／電子報不是取消，而是依賴第一階段的 Contact、Consent 與 purchase events 延後施工。

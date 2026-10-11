@@ -9,7 +9,7 @@ StartKiter：課 + 終身代碼包，對外課名「開站包」。產品定位�
 
 Fish 已確認：StartKiter 要擴成「台灣創作者完整營運平台」，並把 UI/UX 的容易操作列為硬條件；先完成完整藍圖，再進行開發。
 
-第一個垂直切片已拍板：多門課程 → 公開前台銷售頁 → 單課／Bundle Offer → PAYUNi → 課程權限、GitHub 代碼包、LINE 邀請與交易型通知。完整 CRM 與行銷電子報延後到交易交付閉環完成後。
+第一個垂直切片已拍板：多門課程 → 公開前台銷售頁 → CourseOffer → PAYUNi → 課程權限與每門課的 LINE／歡迎信，再提供全平台唯一的 GitHub 代碼包資格。代碼包不包含課程教材；每位買家仍由同一份範本取得唯讀個人 repo，多買課程不會重複建立 repo。完整 CRM 與行銷電子報延後到交易交付閉環完成後。
 
 已完成只讀盤點：Systeme.io Dashboard 主導覽與代表頁、StartKiter 正式站桌面／手機畫面、實際 route、`MOUNT_POINTS`、現有 package、資料模型、外部服務與 Spectra changes。
 

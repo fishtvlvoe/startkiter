@@ -111,10 +111,14 @@ Offer
   ↓
 依 Offer 授予一門或多門課程權限
   ↓
-交付 GitHub 代碼包與 LINE 邀請入口
+顯示每門已購課程的 LINE 邀請入口
+  ↓
+授予唯一 GitHub 代碼包資格
   ↓
 寄出交易型通知並記錄事件
 ```
+
+代碼包是全平台唯一的一種產品，不包含課程教學內容。現有 GitHub 流程會以同一份範本，為每位買家建立自己的私人 repo，權限只讀；買家購買多門課，只會有一份代碼包資格與一個個人 repo。
 
 第一版銷售頁必須支援：
 
@@ -122,6 +126,7 @@ Offer
 - 銷售頁顯示多門課程的名稱、簡介、封面、價格與 CTA。
 - 課程可以單獨販售，也可以組成多課程 Bundle。
 - 一筆 Offer 的交付結果可以包含一門或多門課程。
+- 課程內容、課程 LINE 邀請與唯一 GitHub 代碼包資格分開管理。
 - 發布頁面與付款 Offer 分開管理；改頁面文案不會改動歷史訂單。
 
 ### 工作流 E：每日營運
@@ -184,6 +189,7 @@ Offer
 | ContentResource | 課程、檔案、服務內容 | 沿用 Course、Lesson、Media、PluginContent |
 | Product | 可販售的商品聚合 | 新增共同 contract，映射 Course／Bundle |
 | Offer | 價格、幣別、付款模式、交付權限 | 新增，不取代既有 checkout |
+| CodePackage | 唯一 GitHub 代碼包資格；每位買家最多取得一個個人 repo | 沿用 GitHub App 範本與 per-buyer repo 流程 |
 | Order／Payment | 訂單與付款狀態 | 沿用 Order、PaymentWebhookEvent、PAYUNi |
 | Subscription | 訂閱週期與取消 | 沿用 CourseSubscription，逐步抽出通用介面 |
 | Invoice | 發票生命週期 | 沿用 Invoice、InvoiceAllowanceOperation |
@@ -296,7 +302,7 @@ Offer
 | 0 | Blueprint approval | 本文件、6 份 capability spec、glossary、open questions 拍板 |
 | 1 | Creator workspace foundation | workspace profile、capability、task shell、page states |
 | 2 | Contact and consent foundation | Contact、identity、tag、segment、consent、import/export |
-| 3 | Multi-course offer and commerce foundation | 多門課程、公開銷售頁、單課／Bundle Offer、checkout state、課程權限交付 |
+| 3 | Multi-course offer and commerce foundation | 多門課程、公開銷售頁、單課 Offer、checkout state、課程權限與唯一代碼包交付 |
 | 4 | Creator home and operations | 待辦、訂單、名單、寄送、系統警告與 drill-down |
 | 5 | Campaign and automation | campaign composer、outbox、workflow、delivery、retry |
 | 6 | Landing page and funnel | page revision、form、funnel step、conversion event |
@@ -313,6 +319,7 @@ Offer
 - 不直接複製 Systeme.io 的頁面、品牌、文案或 UI。
 - 不新增沒有 owner、事件契約與驗收案例的資料表。
 - 不把 user、contact、member、subscriber 混成一個模型。
+- 不把 GitHub 代碼包當成課程教材，也不為每門課建立不同代碼包。
 - 不用 AI 自動決定會員資格、退款、發票或行銷同意；AI 只能解釋與輔助，規則由系統決定。
 
 ## 13. 待拍板事項
