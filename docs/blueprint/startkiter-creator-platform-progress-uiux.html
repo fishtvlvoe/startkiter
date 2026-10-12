@@ -123,6 +123,74 @@
       .mini-tile b { display: block; font-size: calc(13px * var(--fs, 1)); }
       .mini-tile span { color: var(--g500); font-size: calc(12px * var(--fs, 1)); }
       .screen-mobile { display: none; }
+      .demo-intro { display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:calc(12px * var(--dens, 1)); margin:calc(26px * var(--dens, 1)) 0 calc(12px * var(--dens, 1)); }
+      .demo-intro p { margin:0; color:var(--g700); font-size:calc(14px * var(--fs, 1)); }
+      .preview-switch { display:flex; gap:calc(6px * var(--dens, 1)); }
+      .preview-switch button, .admin-action, .demo-nav button, .demo-filter button, .row-action, .demo-back {
+        border:1px solid var(--g300); border-radius:5px; background:var(--paper); color:var(--g700);
+        padding:calc(7px * var(--dens, 1)) calc(10px * var(--dens, 1)); font:600 calc(12px * var(--fs, 1))/1.3 var(--sans); cursor:pointer;
+      }
+      .preview-switch button[aria-pressed="true"], .demo-nav button[aria-current="page"] { border-color:var(--clay); background:var(--clay-soft); color:var(--clay-d); }
+      .admin-demo { overflow:hidden; border:1px solid var(--g300); border-radius:8px; background:#fff; box-shadow:0 8px 24px rgba(20,20,19,.07); }
+      .admin-demo[data-preview="phone"] { width:min(100%,390px); margin:0 auto; }
+      .admin-demo[data-preview="phone"] .admin-layout { grid-template-columns:1fr; }
+      .admin-demo[data-preview="phone"] .demo-nav { display:flex; gap:calc(4px * var(--dens, 1)); overflow-x:auto; padding:calc(7px * var(--dens, 1)); border-right:0; border-bottom:1px solid var(--g300); }
+      .admin-demo[data-preview="phone"] .demo-nav .nav-caption { display:none; }
+      .admin-demo[data-preview="phone"] .demo-nav button { width:auto; min-width:max-content; margin:0; padding:calc(8px * var(--dens, 1)); }
+      .admin-demo[data-preview="phone"] .admin-context .workspace-name { display:none; }
+      .admin-chrome { display:flex; justify-content:space-between; align-items:center; gap:calc(12px * var(--dens, 1)); padding:calc(11px * var(--dens, 1)) calc(14px * var(--dens, 1)); border-bottom:1px solid var(--g300); background:#fff; }
+      .admin-brand { display:flex; align-items:center; gap:calc(9px * var(--dens, 1)); font-size:calc(13px * var(--fs, 1)); font-weight:750; }
+      .brand-mark { display:grid; width:27px; height:27px; place-items:center; border-radius:6px; background:var(--slate); color:white; font:700 calc(12px * var(--fs, 1)) var(--mono); }
+      .admin-context { display:flex; align-items:center; gap:calc(10px * var(--dens, 1)); color:var(--g500); font-size:calc(12px * var(--fs, 1)); }
+      .avatar { display:grid; width:27px; height:27px; place-items:center; border-radius:50%; background:var(--oat); color:var(--g700); font-weight:700; }
+      .admin-layout { display:grid; grid-template-columns:190px minmax(0,1fr); min-height:430px; }
+      .demo-nav { padding:calc(13px * var(--dens, 1)) calc(9px * var(--dens, 1)); border-right:1px solid var(--g300); background:#fbfaf7; }
+      .nav-caption { margin:calc(9px * var(--dens, 1)) calc(9px * var(--dens, 1)) calc(5px * var(--dens, 1)); color:var(--g500); font:calc(10px * var(--fs, 1)) var(--mono); letter-spacing:.04em; }
+      .demo-nav button { display:flex; width:100%; align-items:center; gap:calc(9px * var(--dens, 1)); margin:calc(2px * var(--dens, 1)) 0; border-color:transparent; text-align:left; font-weight:500; }
+      .demo-nav button:hover, .admin-action:hover, .demo-filter button:hover { background:var(--g100); }
+      .nav-dot { width:7px; height:7px; flex:0 0 7px; border:1px solid currentColor; border-radius:2px; }
+      .demo-page { min-width:0; padding:calc(20px * var(--dens, 1)); }
+      .demo-page[hidden] { display:none; }
+      .demo-page-head { display:flex; justify-content:space-between; align-items:flex-start; gap:calc(12px * var(--dens, 1)); margin-bottom:calc(18px * var(--dens, 1)); }
+      .demo-page-head h3 { margin:0 0 calc(4px * var(--dens, 1)); font-size:calc(20px * var(--fs, 1)); }
+      .demo-page-head p { margin:0; color:var(--g500); font-size:calc(12px * var(--fs, 1)); }
+      .admin-action.primary { border-color:var(--slate); background:var(--slate); color:#fff; }
+      .admin-action.primary:hover { background:#333; }
+      .demo-stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:calc(10px * var(--dens, 1)); margin-bottom:calc(16px * var(--dens, 1)); }
+      .demo-stat { padding:calc(12px * var(--dens, 1)); border:1px solid var(--g300); border-radius:6px; }
+      .demo-stat span { display:block; color:var(--g500); font-size:calc(11px * var(--fs, 1)); }
+      .demo-stat strong { display:block; margin:calc(5px * var(--dens, 1)) 0 calc(2px * var(--dens, 1)); font:600 calc(22px * var(--fs, 1)) var(--serif); }
+      .demo-stat small { color:#526744; font-size:calc(10px * var(--fs, 1)); }
+      .demo-panel { margin-top:calc(12px * var(--dens, 1)); padding:calc(14px * var(--dens, 1)); border:1px solid var(--g300); border-radius:6px; }
+      .demo-panel-title { display:flex; justify-content:space-between; align-items:center; gap:calc(10px * var(--dens, 1)); margin-bottom:calc(10px * var(--dens, 1)); font-size:calc(13px * var(--fs, 1)); font-weight:700; }
+      .demo-task { display:flex; justify-content:space-between; gap:calc(12px * var(--dens, 1)); padding:calc(10px * var(--dens, 1)) 0; border-top:1px solid var(--g200); font-size:calc(12px * var(--fs, 1)); }
+      .demo-task span:last-child { color:var(--clay-d); }
+      .demo-toolbar { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:calc(9px * var(--dens, 1)); margin-bottom:calc(12px * var(--dens, 1)); }
+      .demo-search { width:min(100%,240px); padding:calc(8px * var(--dens, 1)) calc(10px * var(--dens, 1)); border:1px solid var(--g300); border-radius:5px; background:#fff; color:var(--slate); font:calc(12px * var(--fs, 1)) var(--sans); }
+      .demo-search:focus, .demo-form input:focus, .demo-form select:focus { outline:2px solid var(--clay-soft); border-color:var(--clay); }
+      .demo-filter { display:flex; flex-wrap:wrap; gap:calc(5px * var(--dens, 1)); }
+      .demo-table-wrap { overflow-x:auto; border:1px solid var(--g200); border-radius:5px; }
+      .demo-table { width:100%; min-width:590px; border-collapse:collapse; table-layout:fixed; }
+      .demo-table th, .demo-table td { padding:calc(10px * var(--dens, 1)) calc(9px * var(--dens, 1)); border-bottom:1px solid var(--g200); text-align:left; vertical-align:middle; font-size:calc(11px * var(--fs, 1)); }
+      .demo-table th { background:#fbfaf7; color:var(--g500); font-weight:600; }
+      .demo-table tr:last-child td { border-bottom:0; }
+      .demo-table .primary-cell { color:var(--slate); font-weight:700; }
+      .demo-status { display:inline-flex; align-items:center; gap:calc(5px * var(--dens, 1)); white-space:nowrap; }
+      .demo-status::before { width:6px; height:6px; border-radius:50%; background:var(--olive); content:""; }
+      .demo-status.draft::before { background:var(--yellow); }
+      .demo-status.future::before { background:var(--g500); }
+      .demo-note { margin:calc(11px * var(--dens, 1)) 0 0; padding:calc(9px * var(--dens, 1)) calc(11px * var(--dens, 1)); border-left:3px solid var(--yellow); background:var(--yellow-soft); color:#6f571f; font-size:calc(11px * var(--fs, 1)); }
+      .demo-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:calc(12px * var(--dens, 1)); }
+      .demo-form label { display:grid; gap:calc(5px * var(--dens, 1)); color:var(--g700); font-size:calc(11px * var(--fs, 1)); font-weight:650; }
+      .demo-form input, .demo-form select { width:100%; min-width:0; padding:calc(8px * var(--dens, 1)) calc(9px * var(--dens, 1)); border:1px solid var(--g300); border-radius:5px; background:#fff; color:var(--slate); font:calc(12px * var(--fs, 1)) var(--sans); }
+      .demo-form .wide { grid-column:1/-1; }
+      .demo-checks { display:flex; flex-wrap:wrap; gap:calc(8px * var(--dens, 1)); }
+      .demo-check { display:flex!important; grid-template-columns:auto 1fr; align-items:center; gap:calc(7px * var(--dens, 1))!important; padding:calc(8px * var(--dens, 1)) calc(9px * var(--dens, 1)); border:1px solid var(--g300); border-radius:5px; background:#fff; font-weight:500!important; }
+      .demo-check input { width:auto; }
+      .demo-form-actions { display:flex; justify-content:flex-end; gap:calc(8px * var(--dens, 1)); margin-top:calc(14px * var(--dens, 1)); }
+      .demo-toast { min-height:20px; margin-top:calc(10px * var(--dens, 1)); color:#526744; font-size:calc(12px * var(--fs, 1)); }
+      .demo-empty { padding:calc(22px * var(--dens, 1)); border:1px dashed var(--g300); border-radius:6px; color:var(--g700); text-align:center; font-size:calc(12px * var(--fs, 1)); }
+      .demo-preview-label { color:var(--g500); font-size:calc(11px * var(--fs, 1)); }
       .status-row { display: flex; flex-wrap: wrap; gap: calc(8px * var(--dens, 1)); margin-top: calc(14px * var(--dens, 1)); }
       .state-chip { padding: calc(6px * var(--dens, 1)) calc(9px * var(--dens, 1)); border-radius: 4px; background: var(--g100); color: var(--g700); font-size: calc(12px * var(--fs, 1)); }
       .state-chip.good { background: var(--green-soft); color: #526744; }
@@ -166,6 +234,24 @@
         .roadmap-items { grid-template-columns: 1fr; }
         .gate { grid-template-columns: 1fr; }
         .gate-arrow { transform: rotate(90deg); justify-self: center; }
+      }
+      @media (max-width: 760px) {
+        .admin-layout { grid-template-columns:1fr; }
+        .demo-nav { display:flex; gap:calc(4px * var(--dens, 1)); overflow-x:auto; padding:calc(7px * var(--dens, 1)); border-right:0; border-bottom:1px solid var(--g300); }
+        .demo-nav .nav-caption { display:none; }
+        .demo-nav button { width:auto; min-width:max-content; margin:0; padding:calc(8px * var(--dens, 1)); }
+        .admin-context .workspace-name { display:none; }
+      }
+      @media (max-width: 520px) {
+        .demo-page { padding:calc(14px * var(--dens, 1)); }
+        .demo-stats { grid-template-columns:1fr 1fr; }
+        .demo-stats .demo-stat:last-child { grid-column:1/-1; }
+        .demo-form { grid-template-columns:1fr; }
+        .demo-form .wide { grid-column:auto; }
+        .demo-page-head { align-items:center; }
+        .admin-chrome { padding:calc(9px * var(--dens, 1)); }
+        .admin-context { gap:calc(5px * var(--dens, 1)); }
+        .demo-intro { align-items:flex-start; flex-direction:column; }
       }
       @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
     </style>
@@ -263,7 +349,7 @@
               <p>目前工作樹有大量未提交變更；本報告不會替它們標成已合併或已上線。</p>
             </article>
           </div>
-          <details style="margin-top:calc(14px * var(--dens, 1))">
+          <details class="reveal" style="margin-top:calc(14px * var(--dens, 1))">
             <summary>測試數字怎麼來的？</summary>
             <div class="detail-body">本次針對課程權限、付款通知、訂單、Email、GitHub 領取／撤銷、結帳頁與公開課程頁等測試執行 Vitest。實際輸出為 9 個測試檔、89 tests passed；`packages/payments/catalog.test.ts` 需要可用的測試資料庫，環境拒絕連線，9 tests 中 6 項因資料庫不可用失敗、3 項通過。沒有連正式資料庫、沒有做正式付款、沒有做正式部署。</div>
           </details>
@@ -319,27 +405,100 @@
           <div class="section-kicker">04 · UI/UX 不是最後才美化</div>
           <h2>畫面先幫人找到「下一個要做的事」</h2>
           <p class="section-lead prose">建議讓後台以創作者的工作任務組織，不要求使用者記 route 或模組名稱。這是總藍圖的目標設計，不代表所有畫面目前都已實作。</p>
-          <div class="screen" aria-label="建議中的創作者營運首頁示意">
-            <div class="screen-top"><span class="screen-title">創作者工作台</span><span class="tag">示意：待辦優先，不是目前正式畫面截圖</span></div>
-            <div class="screen-body">
-              <aside class="screen-nav" aria-label="建議後台導覽">
-                <div class="active">今天要處理</div><div>課程與內容</div><div>商品與銷售方案</div><div>客戶名單</div><div>行銷與自動化</div><div>網站與銷售頁</div><div>直播與回放</div><div>數據與設定</div>
-              </aside>
-              <div class="screen-main">
-                <h3>今天要處理的 3 件事</h3>
-                <div class="mini-grid">
-                  <div class="mini-tile"><b>付款待確認</b><span>打開訂單查看原因 →</span></div>
-                  <div class="mini-tile"><b>課程尚未發布</b><span>補上銷售方案 →</span></div>
-                  <div class="mini-tile"><b>直播提醒未送出</b><span>檢查通知並重試 →</span></div>
-                </div>
-                <div class="status-row"><span class="state-chip good">成功：已完成</span><span class="state-chip warn">等待：尚未發布</span><span class="state-chip bad">失敗：有明確修復方式</span><span class="state-chip">無權限：說明找誰處理</span></div>
-              </div>
+          <div class="demo-intro">
+            <div><h3>後台操作 Demo</h3><p>點左側選單切換畫面；桌機版和手機版都可以預覽。畫面是設計稿，不會寫入資料。</p></div>
+            <div class="preview-switch" role="group" aria-label="切換示意畫面大小">
+              <button type="button" data-demo-preview="desktop" aria-pressed="true">桌機版</button>
+              <button type="button" data-demo-preview="phone" aria-pressed="false">手機版</button>
             </div>
-            <div class="screen-mobile">
-              <div class="mini-tile"><b>付款待確認</b><span>查看原因與下一步 →</span></div>
-              <div class="mini-tile"><b>課程尚未發布</b><span>補上銷售方案 →</span></div>
-              <div class="mini-tile"><b>直播提醒未送出</b><span>檢查通知並重試 →</span></div>
-              <div class="mini-tile"><b>手機原則</b><span>同樣完成任務；主按鈕不藏在橫向表格裡。</span></div>
+          </div>
+          <div class="admin-demo" id="creator-admin-demo" data-preview="desktop">
+            <div class="admin-chrome">
+              <div class="admin-brand"><span class="brand-mark">S</span><span>StartKiter <span class="demo-preview-label">創作者工作台</span></span></div>
+              <div class="admin-context"><span class="workspace-name">示範工作區　⌄</span><span class="tag">設計 Demo</span><span class="avatar" aria-label="使用者 Fish">F</span></div>
+            </div>
+            <div class="admin-layout">
+              <nav class="demo-nav" aria-label="後台功能選單">
+                <p class="nav-caption">工作區</p>
+                <button type="button" data-demo-view="overview" aria-current="page"><span class="nav-dot"></span>工作總覽</button>
+                <button type="button" data-demo-view="courses"><span class="nav-dot"></span>課程與內容</button>
+                <button type="button" data-demo-view="offers"><span class="nav-dot"></span>商品與銷售方案</button>
+                <p class="nav-caption">成長與營運</p>
+                <button type="button" data-demo-view="contacts"><span class="nav-dot"></span>客戶名單</button>
+                <button type="button" data-demo-view="live"><span class="nav-dot"></span>直播與回放</button>
+              </nav>
+              <div class="demo-stage" aria-live="polite">
+                <section class="demo-page" data-demo-page="overview" aria-label="工作總覽畫面">
+                  <div class="demo-page-head"><div><h3>工作總覽</h3><p>先看今天要處理什麼，再回到對應工作。</p></div><button class="admin-action primary" type="button" data-demo-view="courses">新增課程</button></div>
+                  <div class="demo-stats">
+                    <div class="demo-stat"><span>本月營收</span><strong>NT$ 126,000</strong><small>示意資料</small></div>
+                    <div class="demo-stat"><span>已發布課程</span><strong>6 門</strong><small>2 個草稿待整理</small></div>
+                    <div class="demo-stat"><span>待處理事項</span><strong>3 件</strong><small>付款、發布、通知</small></div>
+                  </div>
+                  <div class="demo-panel"><div class="demo-panel-title"><span>今天要處理</span><span class="demo-preview-label">每件事都能回到處理頁</span></div>
+                    <div class="demo-task"><span><b>課程尚未發布</b><br />AI 自動化入門還沒有銷售方案</span><button class="row-action" type="button" data-demo-view="offers">去設定方案</button></div>
+                    <div class="demo-task"><span><b>有 1 筆付款需要確認</b><br />查看訂單狀態與付款通知</span><span>查看訂單 →</span></div>
+                    <div class="demo-task"><span><b>直播提醒尚未送出</b><br />確認活動時間與寄送設定</span><button class="row-action" type="button" data-demo-view="live">查看活動</button></div>
+                  </div>
+                </section>
+
+                <section class="demo-page" data-demo-page="courses" aria-label="課程列表畫面" hidden>
+                  <div class="demo-page-head"><div><h3>課程與內容</h3><p>管理課程、章節和發布狀態；賣什麼方案到「商品與銷售方案」設定。</p></div><button class="admin-action primary" type="button" data-demo-view="offers">管理銷售方案</button></div>
+                  <div class="demo-toolbar"><input class="demo-search" type="search" aria-label="搜尋課程" placeholder="搜尋課程名稱" data-demo-search="courses" /><div class="demo-filter" role="group" aria-label="課程篩選"><button type="button" data-demo-filter="all" aria-pressed="true">全部 6</button><button type="button" data-demo-filter="published">已發布 4</button><button type="button" data-demo-filter="draft">草稿 2</button></div></div>
+                  <div class="demo-table-wrap"><table class="demo-table"><thead><tr><th style="width:38%">課程名稱</th><th style="width:18%">狀態</th><th style="width:18%">學員</th><th style="width:26%">下一步</th></tr></thead><tbody>
+                    <tr data-course-state="published"><td class="primary-cell">AI 自動化入門</td><td><span class="demo-status">已發布</span></td><td>128 人</td><td><button class="row-action" type="button" data-demo-view="offers">管理方案</button></td></tr>
+                    <tr data-course-state="published"><td class="primary-cell">用 AI 建立會員服務</td><td><span class="demo-status">已發布</span></td><td>64 人</td><td><button class="row-action" type="button" data-demo-view="offers">管理方案</button></td></tr>
+                    <tr data-course-state="draft"><td class="primary-cell">打造第一個線上產品</td><td><span class="demo-status draft">草稿</span></td><td>尚未開放</td><td><button class="row-action" type="button" data-demo-view="offers">補銷售方案</button></td></tr>
+                  </tbody></table></div>
+                  <p class="demo-note">這裡只管理課程內容；方案價格、付款週期和程式包交付規則，另外在 Offer 編輯畫面設定。</p>
+                </section>
+
+                <section class="demo-page" data-demo-page="offers" aria-label="商品與銷售方案畫面" hidden>
+                  <div class="demo-page-head"><div><h3>商品與銷售方案</h3><p>同一門課可以有不同方案；每個方案各自決定價格和交付內容。</p></div><button class="admin-action primary" type="button" data-demo-view="offer-form">＋ 建立銷售方案</button></div>
+                  <div class="demo-toolbar"><div class="demo-filter" role="group" aria-label="選擇課程"><button type="button" aria-pressed="true">AI 自動化入門　⌄</button><button type="button">全部課程</button></div><span class="demo-preview-label">以下名稱、金額為畫面示意</span></div>
+                  <div class="demo-table-wrap"><table class="demo-table"><thead><tr><th style="width:30%">方案名稱</th><th style="width:18%">賣什麼</th><th style="width:20%">價格／週期</th><th style="width:14%">狀態</th><th style="width:18%">操作</th></tr></thead><tbody>
+                    <tr><td class="primary-cell">單堂課程</td><td>一門課</td><td>NT$ 8,800<br /><span class="demo-preview-label">一次付清</span></td><td><span class="demo-status">已發布</span></td><td><button class="row-action" type="button" data-demo-view="offer-form">編輯</button></td></tr>
+                    <tr><td class="primary-cell">創作者工具組合包</td><td>多門指定課程</td><td>價格待設定</td><td><span class="demo-status draft">草稿</span></td><td><button class="row-action" type="button" data-demo-view="offer-form">繼續設定</button></td></tr>
+                    <tr><td class="primary-cell">CodePackage 獨立販售</td><td>程式包</td><td>價格待設定</td><td><span class="demo-status draft">草稿</span></td><td><button class="row-action" type="button" data-demo-view="offer-form">繼續設定</button></td></tr>
+                    <tr><td class="primary-cell">CodePackage 訂閱</td><td>程式包更新</td><td>週期尚未決定</td><td><span class="demo-status future">規劃中</span></td><td><span class="demo-preview-label">尚不可販售</span></td></tr>
+                  </tbody></table></div>
+                  <p class="demo-note">組合包只授予包內指定課程；CodePackage 是否單賣、是否訂閱、退款或取消後保留多久，還要依 SR 規格決定。</p>
+                </section>
+
+                <section class="demo-page" data-demo-page="offer-form" aria-label="建立銷售方案畫面" hidden>
+                  <div class="demo-page-head"><div><h3>建立銷售方案</h3><p>先選買家付什麼，再清楚列出他會拿到什麼。</p></div><button class="demo-back" type="button" data-demo-view="offers">← 回方案列表</button></div>
+                  <div class="demo-panel"><div class="demo-panel-title"><span>方案基本資料</span><span class="demo-preview-label">步驟 1／2</span></div>
+                    <form class="demo-form" id="demo-offer-form">
+                      <label>方案名稱<input name="offerName" value="AI 自動化入門｜單堂課" /></label>
+                      <label>販售內容<select name="productType"><option>單堂課程</option><option>多門課程組合包</option><option>獨立 CodePackage</option><option>課程＋CodePackage</option></select></label>
+                      <label>付款方式<select name="billingType" id="demo-billing-type"><option value="once">一次付清</option><option value="subscription">定期訂閱（規劃中）</option></select></label>
+                      <label id="demo-billing-period" hidden>收款週期<select name="billingPeriod"><option>每月</option><option>每季</option><option>每年</option></select></label>
+                      <label>價格（新台幣）<input name="price" inputmode="numeric" placeholder="例如：8,800" /></label>
+                      <label>發布狀態<select name="status"><option>先存草稿</option><option>發布並開始販售</option></select></label>
+                      <label class="wide">付款後交付什麼
+                        <span class="demo-checks"><label class="demo-check"><input type="checkbox" checked /> 指定課程觀看權限</label><label class="demo-check"><input type="checkbox" /> CodePackage 私人程式庫</label></span>
+                      </label>
+                    </form>
+                    <p class="demo-note">畫面先把內容、收費、交付分開。訂閱方案、程式包更新權限和取消政策尚未定案，未定案前不會真的開放發布。</p>
+                    <div class="demo-form-actions"><button class="demo-back" type="button" data-demo-view="offers">取消</button><button class="admin-action primary" type="button" id="demo-preview-offer">預覽方案</button></div>
+                    <p class="demo-toast" id="demo-offer-message" role="status" aria-live="polite"></p>
+                  </div>
+                </section>
+
+                <section class="demo-page" data-demo-page="contacts" aria-label="客戶名單畫面" hidden>
+                  <div class="demo-page-head"><div><h3>客戶名單</h3><p>依標籤和同意狀態找人；登入帳號和聯絡人資料分開管理。</p></div><span class="tag">後續規劃</span></div>
+                  <div class="demo-stats"><div class="demo-stat"><span>全部聯絡人</span><strong>412</strong><small>示意資料</small></div><div class="demo-stat"><span>可寄送電子報</span><strong>286</strong><small>已取得同意</small></div><div class="demo-stat"><span>需要確認</span><strong>12</strong><small>尚未完成同意確認</small></div></div>
+                  <div class="demo-panel"><div class="demo-panel-title"><span>最近加入</span><span class="demo-preview-label">名單欄位依權限顯示</span></div><div class="demo-task"><span><b>林小姐</b><br />來自課程報名 · 已同意電子郵件</span><span class="demo-status">可寄送</span></div><div class="demo-task"><span><b>陳先生</b><br />來自網站表單 · 尚未同意行銷信</span><span class="demo-status draft">不可寄送</span></div></div>
+                  <p class="demo-note">這是後續 CRM 的畫面方向，不代表目前已經有 CRM 功能或真實名單。</p>
+                </section>
+
+                <section class="demo-page" data-demo-page="live" aria-label="直播與回放畫面" hidden>
+                  <div class="demo-page-head"><div><h3>直播與回放</h3><p>活動狀態、報名、出席和回放放在同一個工作頁。</p></div><span class="tag">後續規劃</span></div>
+                  <div class="demo-filter" role="group" aria-label="活動類型"><button type="button" aria-pressed="true">全部活動</button><button type="button">即時直播</button><button type="button">預錄常青內容</button></div>
+                  <div class="demo-panel"><div class="demo-task"><span><b>每週創作者問答</b><br />即時直播 · 10 月 18 日 19:30 · 42 人報名</span><span class="demo-status">已排程</span></div><div class="demo-task"><span><b>自動化入門說明會</b><br />預錄常青內容 · 報名後依規則安排觀看</span><span class="demo-status future">草稿</span></div></div>
+                  <p class="demo-note">即時直播與預錄常青內容分開呈現；影音供應商與正式收費方案還未選定，這頁是產品設計示意。</p>
+                </section>
+              </div>
             </div>
           </div>
           <div class="grid three" style="margin-top:calc(16px * var(--dens, 1))">
@@ -347,7 +506,7 @@
             <article class="card"><span class="label">每一個操作都說清楚</span><h3>按下去會怎樣？</h3><p>儲存成功有回饋；資料錯誤指出哪裡要改；危險操作先確認，失敗後可重試。</p></article>
             <article class="card"><span class="label">桌機和手機都能完成</span><h3>不只是縮小畫面</h3><p>主要任務、按鈕順序、欄位和鍵盤操作都要規劃；手機不能只剩被擠壞的桌面表格。</p></article>
           </div>
-          <details style="margin-top:calc(14px * var(--dens, 1))">
+          <details class="reveal" style="margin-top:calc(14px * var(--dens, 1))">
             <summary>UI/UX 設計規則的白話版</summary>
             <div class="detail-body">先知道使用者來這頁要完成什麼，再決定導航、欄位、按鈕。建立、列表、詳情、編輯都沿用同一套操作方式；每頁都設計載入中、沒資料、出錯、沒權限、儲存成功和重試狀態。每張 UI SR 要附桌機與 390px 手機操作路徑、鍵盤／焦點檢查和真實瀏覽器驗收。</div>
           </details>
@@ -396,7 +555,7 @@
             </article>
           </div>
           <div class="callout prose"><p><strong>排程提醒：</strong>正式藍圖把 Offer／Bundle／訂閱基礎（#06）排在公開銷售切片（#07）前面；但 #07 現在已經有程式在動。要先把目前改動對齊 #06 的商品與資格規則，才不會同時長出兩套商品真相。</p></div>
-          <details>
+          <details class="reveal">
             <summary>直播參考目前確認到哪裡？</summary>
             <div class="detail-body">REA 已看 WebinarJam 管理清單與新增設定入口：有快速／完整設定、立即／排程／常開等選項、Analytics 和 Registrants 篩選入口；完整設定畫面也看到 WebinarJam Live、YouTube Live、Facebook Live 的選項。這些只證明畫面入口存在，沒有證明它們底層如何串流、錄影或儲存。Systeme.io 的 Webinar 也不能直接推論成原生即時直播。後續會把即時直播、預錄常青內容與影音服務供應商分開設計。<a href="webinarjam-reverse-engineering-notes.md">查看 REA 觀察與未確認清單</a>。</div>
           </details>
@@ -453,6 +612,55 @@
         </section>
       </main>
       <footer>狀態截至 2026-10-12。這份 HTML 是白話導讀；規格以 Spectra 文件為準，測試、瀏覽器、付款、寄信、部署與回滾證據分開記錄。</footer>
+      <script>
+        (function () {
+          const demo = document.getElementById("creator-admin-demo");
+          if (!demo) return;
+          function showView(name) {
+            demo.querySelectorAll("[data-demo-page]").forEach((page) => {
+              page.hidden = page.dataset.demoPage !== name;
+            });
+            demo.querySelectorAll(".demo-nav [data-demo-view]").forEach((button) => {
+              if (button.dataset.demoView === name) button.setAttribute("aria-current", "page");
+              else button.removeAttribute("aria-current");
+            });
+            if (demo.querySelector(`[data-demo-page="${name}"]`)) demo.setAttribute("data-current-view", name);
+          }
+          demo.addEventListener("click", (event) => {
+            const viewButton = event.target.closest("[data-demo-view]");
+            if (viewButton) showView(viewButton.dataset.demoView);
+            const filterButton = event.target.closest("[data-demo-filter]");
+            if (filterButton) {
+              demo.querySelectorAll("[data-demo-filter]").forEach((button) => button.setAttribute("aria-pressed", String(button === filterButton)));
+              demo.querySelectorAll("[data-course-state]").forEach((row) => {
+                row.hidden = filterButton.dataset.demoFilter !== "all" && row.dataset.courseState !== filterButton.dataset.demoFilter;
+              });
+            }
+          });
+          document.querySelectorAll("[data-demo-preview]").forEach((button) => {
+            button.addEventListener("click", () => {
+              demo.dataset.preview = button.dataset.demoPreview;
+              document.querySelectorAll("[data-demo-preview]").forEach((item) => item.setAttribute("aria-pressed", String(item === button)));
+            });
+          });
+          const billing = document.getElementById("demo-billing-type");
+          const period = document.getElementById("demo-billing-period");
+          if (billing && period) billing.addEventListener("change", () => { period.hidden = billing.value !== "subscription"; });
+          const search = demo.querySelector('[data-demo-search="courses"]');
+          if (search) search.addEventListener("input", () => {
+            const term = search.value.trim().toLocaleLowerCase();
+            demo.querySelectorAll("[data-course-state]").forEach((row) => {
+              row.hidden = term !== "" && !row.innerText.toLocaleLowerCase().includes(term);
+            });
+          });
+          const preview = document.getElementById("demo-preview-offer");
+          if (preview) preview.addEventListener("click", () => {
+            const name = demo.querySelector('[name="offerName"]')?.value || "未命名方案";
+            const message = document.getElementById("demo-offer-message");
+            if (message) message.textContent = `畫面預覽：${name}。這是互動示意，沒有儲存或發布資料。`;
+          });
+        })();
+      </script>
     </div>
     <script>
       window.VT_SESSION = { label: "startkiter · feature/public-multi-course-sales-and-code-package", id: "local", project: "startkiter" };
