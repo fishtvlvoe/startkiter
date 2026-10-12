@@ -1,0 +1,1163 @@
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>StartKiter 平台計畫、UI/UX 與開發進度</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        --wrap-max: 1760px;
+        --ivory: #faf9f5;
+        --paper: #ffffff;
+        --slate: #141413;
+        --clay: #d97757;
+        --clay-d: #b85c3e;
+        --oat: #e3dacc;
+        --olive: #788c5d;
+        --g100: #f0eee6;
+        --g200: #e6e3da;
+        --g300: #d1cfc5;
+        --g500: #87867f;
+        --g700: #3d3d3a;
+        --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+        --sans: system-ui, -apple-system, "Segoe UI", Roboto, "PingFang TC", "Noto Sans TC", Helvetica, Arial, sans-serif;
+        --mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+        --green: #788c5d;
+        --green-soft: #eff1e8;
+        --green-border: #c8d2b8;
+        --red: #b85c3e;
+        --red-soft: #faebe3;
+        --red-border: #e8c4af;
+        --yellow: #c49845;
+        --yellow-soft: #f8efd9;
+        --yellow-border: #e8d4a0;
+        --clay-soft: #fbe9df;
+        --bg: var(--ivory);
+        --bg-card: var(--paper);
+        --bg-soft: var(--g100);
+        --bg-soft-2: var(--g200);
+        --border: var(--g300);
+        --text: var(--slate);
+        --text-muted: var(--g700);
+        --text-soft: var(--g500);
+        --accent: var(--clay);
+        --accent-soft: var(--clay-soft);
+        --accent-strong: var(--clay-d);
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        color: var(--slate);
+        background: var(--ivory);
+        font: calc(16px * var(--fs, 1))/1.6 var(--sans);
+        -webkit-font-smoothing: antialiased;
+        font-synthesis: none;
+      }
+      a { color: var(--clay-d); text-underline-offset: 3px; }
+      a:hover { color: var(--slate); }
+      .wrap { width: min(94vw, var(--wrap-max, 1760px)); margin: 0 auto; padding: 0 calc(32px * var(--dens, 1)) calc(100px * var(--dens, 1)); }
+      .prose { max-width: 72ch; }
+      header.masthead { padding: calc(58px * var(--dens, 1)) 0 calc(34px * var(--dens, 1)); border-bottom: 1px solid var(--g300); }
+      .eyebrow { color: var(--g500); font: calc(12px * var(--fs, 1))/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+      h1, h2, h3 { text-wrap: balance; }
+      h1 { max-width: 900px; margin: calc(16px * var(--dens, 1)) 0; font: 500 clamp(36px, 5vw, 68px)/1.08 var(--serif); letter-spacing: -.035em; }
+      h2 { margin: 0 0 calc(10px * var(--dens, 1)); font: 500 clamp(28px, 3vw, 40px)/1.15 var(--serif); letter-spacing: -.02em; }
+      h3 { margin: 0 0 calc(7px * var(--dens, 1)); font-size: calc(18px * var(--fs, 1)); line-height: 1.35; }
+      p { margin: 0 0 calc(14px * var(--dens, 1)); text-wrap: pretty; }
+      .subhead { max-width: 72ch; color: var(--g700); font-size: calc(18px * var(--fs, 1)); }
+      .meta-row { display: flex; flex-wrap: wrap; gap: calc(8px * var(--dens, 1)); margin-top: calc(22px * var(--dens, 1)); }
+      .pill, .tag { display: inline-flex; align-items: center; gap: calc(7px * var(--dens, 1)); padding: calc(5px * var(--dens, 1)) calc(10px * var(--dens, 1)); border: 1px solid var(--g300); border-radius: 999px; background: var(--paper); color: var(--g700); font-size: calc(12px * var(--fs, 1)); }
+      .pill strong { color: var(--slate); }
+      nav.contents { display: flex; flex-wrap: wrap; gap: calc(8px * var(--dens, 1)); padding: calc(14px * var(--dens, 1)) 0; border-bottom: 1px solid var(--g300); }
+      nav.contents a { padding: calc(6px * var(--dens, 1)) calc(10px * var(--dens, 1)); border-radius: 5px; color: var(--g700); font-size: calc(13px * var(--fs, 1)); text-decoration: none; }
+      nav.contents a:hover { background: var(--g100); }
+      section { padding: calc(52px * var(--dens, 1)) 0 calc(12px * var(--dens, 1)); scroll-margin-top: 20px; }
+      .section-lead { margin-bottom: calc(24px * var(--dens, 1)); color: var(--g700); }
+      .section-kicker { margin-bottom: calc(7px * var(--dens, 1)); color: var(--clay-d); font: calc(12px * var(--fs, 1))/1.4 var(--mono); letter-spacing: .08em; }
+      .grid { display: grid; gap: calc(16px * var(--dens, 1)); }
+      .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .card { min-width: 0; padding: calc(20px * var(--dens, 1)); border: 1px solid var(--g300); border-radius: 8px; background: var(--paper); }
+      .card p:last-child { margin-bottom: 0; }
+      .card.soft { background: var(--g100); }
+      .card.warm { border-color: var(--red-border); background: var(--red-soft); }
+      .card.done { border-color: var(--green-border); background: var(--green-soft); }
+      .card.wait { border-color: var(--yellow-border); background: var(--yellow-soft); }
+      .label { display: block; margin-bottom: calc(8px * var(--dens, 1)); color: var(--g500); font: calc(11px * var(--fs, 1))/1.4 var(--mono); letter-spacing: .06em; }
+      .big-number { display: block; margin: calc(4px * var(--dens, 1)) 0; font: 500 calc(34px * var(--fs, 1))/1.1 var(--serif); }
+      .status { display: inline-flex; align-items: center; gap: calc(7px * var(--dens, 1)); margin: calc(2px * var(--dens, 1)) 0 calc(10px * var(--dens, 1)); font-size: calc(12px * var(--fs, 1)); font-weight: 700; }
+      .status::before { width: 8px; height: 8px; border-radius: 50%; background: currentColor; content: ""; }
+      .status.green { color: #526744; }
+      .status.amber { color: #89661d; }
+      .status.red { color: #9a4b35; }
+      .plain-list { display: grid; gap: calc(9px * var(--dens, 1)); margin: 0; padding: 0; list-style: none; }
+      .plain-list li { display: flex; gap: calc(10px * var(--dens, 1)); align-items: flex-start; }
+      .plain-list li::before { flex: 0 0 7px; width: 7px; height: 7px; margin-top: calc(9px * var(--dens, 1)); border-radius: 50%; background: var(--clay); content: ""; }
+      .figure { width: 100%; max-width: 100%; min-width: 0; overflow-x: auto; border: 1px solid var(--g300); border-radius: 8px; background: var(--paper); }
+      .figure svg { display: block; width: 100%; height: auto; }
+      .flow-figure svg { min-width: 760px; }
+      svg text { fill: var(--g700); font-family: var(--sans); font-size: calc(12px * var(--fs, 1)); }
+      svg text.node-title { fill: var(--slate); font-size: calc(14px * var(--fs, 1)); font-weight: 700; }
+      svg text.small { fill: var(--g500); font-size: calc(11px * var(--fs, 1)); }
+      .flow-caption { padding: calc(12px * var(--dens, 1)) calc(16px * var(--dens, 1)); border-top: 1px solid var(--g300); color: var(--g700); font-size: calc(13px * var(--fs, 1)); }
+      .step-flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: calc(24px * var(--dens, 1)); counter-reset: phase; }
+      .step { position: relative; min-width: 0; padding: calc(16px * var(--dens, 1)); border: 1px solid var(--g300); border-radius: 8px; background: var(--paper); counter-increment: phase; }
+      .step::before { display: block; margin-bottom: calc(12px * var(--dens, 1)); color: var(--clay-d); font: calc(12px * var(--fs, 1)) var(--mono); content: "0" counter(phase); }
+      .step:not(:last-child)::after { position: absolute; top: 50%; right: -20px; color: var(--g500); content: "→"; font-size: calc(18px * var(--fs, 1)); }
+      .step p { margin: 0; color: var(--g700); font-size: calc(13px * var(--fs, 1)); }
+      .callout { margin: calc(18px * var(--dens, 1)) 0; padding: calc(16px * var(--dens, 1)) calc(18px * var(--dens, 1)); border-left: 3px solid var(--clay); background: var(--clay-soft); }
+      .callout p:last-child { margin-bottom: 0; }
+      .screen { overflow: hidden; border: 1px solid var(--g300); border-radius: 8px; background: var(--paper); }
+      .screen-top { display: flex; justify-content: space-between; align-items: center; gap: calc(12px * var(--dens, 1)); padding: calc(12px * var(--dens, 1)) calc(16px * var(--dens, 1)); border-bottom: 1px solid var(--g300); background: #fbfaf7; }
+      .screen-title { font-weight: 700; }
+      .screen-body { display: grid; grid-template-columns: 190px minmax(0,1fr); min-height: 280px; }
+      .screen-nav { padding: calc(14px * var(--dens, 1)) calc(10px * var(--dens, 1)); border-right: 1px solid var(--g300); background: #fbfaf7; }
+      .screen-nav div { padding: calc(8px * var(--dens, 1)) calc(10px * var(--dens, 1)); border-radius: 5px; color: var(--g700); font-size: calc(13px * var(--fs, 1)); }
+      .screen-nav .active { background: var(--clay-soft); color: var(--clay-d); font-weight: 700; }
+      .screen-main { min-width: 0; padding: calc(20px * var(--dens, 1)); }
+      .screen-main h3 { margin-bottom: calc(14px * var(--dens, 1)); }
+      .mini-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: calc(10px * var(--dens, 1)); }
+      .mini-tile { padding: calc(12px * var(--dens, 1)); border: 1px solid var(--g300); border-radius: 6px; background: var(--paper); }
+      .mini-tile b { display: block; font-size: calc(13px * var(--fs, 1)); }
+      .mini-tile span { color: var(--g500); font-size: calc(12px * var(--fs, 1)); }
+      .screen-mobile { display: none; }
+      .status-row { display: flex; flex-wrap: wrap; gap: calc(8px * var(--dens, 1)); margin-top: calc(14px * var(--dens, 1)); }
+      .state-chip { padding: calc(6px * var(--dens, 1)) calc(9px * var(--dens, 1)); border-radius: 4px; background: var(--g100); color: var(--g700); font-size: calc(12px * var(--fs, 1)); }
+      .state-chip.good { background: var(--green-soft); color: #526744; }
+      .state-chip.bad { background: var(--red-soft); color: #9a4b35; }
+      .state-chip.warn { background: var(--yellow-soft); color: #89661d; }
+      .roadmap { display: grid; gap: calc(14px * var(--dens, 1)); }
+      .wave { padding: calc(18px * var(--dens, 1)); border: 1px solid var(--g300); border-radius: 8px; background: var(--paper); }
+      .wave-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: calc(10px * var(--dens, 1)); margin-bottom: calc(12px * var(--dens, 1)); }
+      .wave-head h3 { margin: 0; }
+      .wave-head span { color: var(--g500); font-size: calc(13px * var(--fs, 1)); }
+      .roadmap-items { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: calc(8px * var(--dens, 1)); }
+      .roadmap-item { padding: calc(10px * var(--dens, 1)); border-left: 2px solid var(--g300); background: var(--ivory); font-size: calc(13px * var(--fs, 1)); }
+      .roadmap-item strong { display: block; margin-bottom: calc(3px * var(--dens, 1)); color: var(--clay-d); font: calc(11px * var(--fs, 1)) var(--mono); }
+      details { border: 1px solid var(--g300); border-radius: 6px; background: var(--paper); }
+      details + details { margin-top: calc(10px * var(--dens, 1)); }
+      summary { padding: calc(12px * var(--dens, 1)) calc(14px * var(--dens, 1)); cursor: pointer; font-weight: 700; }
+      details .detail-body { padding: 0 calc(14px * var(--dens, 1)) calc(14px * var(--dens, 1)); color: var(--g700); font-size: calc(14px * var(--fs, 1)); }
+      .table-wrap { overflow-x: auto; border: 1px solid var(--g300); border-radius: 8px; background: var(--paper); }
+      table { width: 100%; min-width: 760px; border-collapse: collapse; table-layout: fixed; }
+      th, td { padding: calc(12px * var(--dens, 1)); border-bottom: 1px solid var(--g200); text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+      th { background: var(--g100); color: var(--g700); font-size: calc(12px * var(--fs, 1)); }
+      td { font-size: calc(13px * var(--fs, 1)); }
+      tr:last-child td { border-bottom: 0; }
+      .gate { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; gap: calc(12px * var(--dens, 1)); }
+      .gate-card { min-width: 0; padding: calc(14px * var(--dens, 1)); border: 1px solid var(--g300); border-radius: 6px; background: var(--paper); }
+      .gate-arrow { color: var(--g500); font-size: calc(20px * var(--fs, 1)); }
+      footer { margin-top: calc(56px * var(--dens, 1)); padding-top: calc(18px * var(--dens, 1)); border-top: 1px solid var(--g300); color: var(--g500); font-size: calc(12px * var(--fs, 1)); }
+      @media (max-width: 900px) {
+        .grid.three { grid-template-columns: repeat(2, minmax(0,1fr)); }
+        .step-flow { grid-template-columns: 1fr; gap: calc(10px * var(--dens, 1)); }
+        .step:not(:last-child)::after { top: auto; right: 50%; bottom: -17px; content: "↓"; }
+        .roadmap-items { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      }
+      @media (max-width: 620px) {
+        .wrap { width: 100%; padding: 0 calc(18px * var(--dens, 1)) calc(72px * var(--dens, 1)); }
+        header.masthead { padding-top: calc(38px * var(--dens, 1)); }
+        .grid.two, .grid.three { grid-template-columns: 1fr; }
+        .screen-body { display: none; }
+        .screen-mobile { display: grid; gap: calc(8px * var(--dens, 1)); padding: calc(14px * var(--dens, 1)); }
+        .mini-grid { grid-template-columns: 1fr; }
+        .roadmap-items { grid-template-columns: 1fr; }
+        .gate { grid-template-columns: 1fr; }
+        .gate-arrow { transform: rotate(90deg); justify-self: center; }
+      }
+      @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    </style>
+  <style id="vt-profile" data-profile-hash="020a3e00b0">:root { --fs: 1.45; --wrap-max: 1080px; }</style>
+</head>
+  <body>
+    <div class="wrap">
+      <header class="masthead">
+        <div class="eyebrow">STARTKITER · 白話計畫圖 · 2026-10-12</div>
+        <h1>不是打掉重練。<br />是把已經有的課程平台，長成一套創作者營運工具。</h1>
+        <p class="subhead">這份報告把「StartKiter 自己營運的網站」、「客戶買回去的程式碼包」、UI/UX 方向，以及接下來每張開發 SR 的順序放在同一張地圖。</p>
+        <div class="meta-row">
+          <span class="pill"><strong>總藍圖</strong> 3 / 75 項核對完成</span>
+          <span class="pill"><strong>目前程式 SR</strong> 2 / 15 項核對完成</span>
+          <span class="pill"><strong>狀態</strong> 有實作，驗收未完成</span>
+        </div>
+      </header>
+
+      <nav class="contents" aria-label="報告段落">
+        <a href="#plain">先看懂兩套東西</a>
+        <a href="#now">現在做到哪</a>
+        <a href="#journey">完整使用流程</a>
+        <a href="#ux">UI/UX 長相</a>
+        <a href="#roadmap">15 張 SR 順序</a>
+        <a href="#done">怎樣才算做完</a>
+      </nav>
+
+      <main>
+        <section id="plain">
+          <div class="section-kicker">01 · 先看懂產品邊界</div>
+          <h2>「我們的營運網站」跟「客戶買回去的程式包」是兩個產品</h2>
+          <p class="section-lead prose">白話說：StartKiter 是我們自己用來管理課程、商品、客戶、行銷和直播的工作室；CodePackage 是交到買家手上的一份程式原始碼。買家可以用它另外做自己的 SaaS，自己的會員、收費和部署由買家那套系統負責。</p>
+          <div class="grid three">
+            <article class="card">
+              <span class="label">A · 我們的 StartKiter 平台</span>
+              <h3>我們在這裡營運生意</h3>
+              <ul class="plain-list">
+                <li>建課程、組合包、單堂課、程式包商品</li>
+                <li>管理名單、優惠、付款、訂閱與交付</li>
+                <li>未來加 CRM、Email、自動化、網站、直播、報表</li>
+              </ul>
+            </article>
+            <article class="card warm">
+              <span class="label">B · 買家取得的 CodePackage</span>
+              <h3>買家拿到一份獨立程式碼</h3>
+              <ul class="plain-list">
+                <li>可以做自己的 SaaS 或會員網站</li>
+                <li>買家的登入、客戶資料、訂閱、主機是買家自己的</li>
+                <li>Codex Desktop／Claude Desktop Code 模式可照操作手冊或 Skill 使用</li>
+              </ul>
+            </article>
+            <article class="card soft">
+              <span class="label">C · 不能混成一件事</span>
+              <h3>買一門課，不等於全站都能看</h3>
+              <ul class="plain-list">
+                <li>單堂課只開那一堂</li>
+                <li>Bundle 開組合包裡的課</li>
+                <li>CodePackage 可以自己單賣，也可由 Offer 決定是否附送／訂閱期間可用</li>
+              </ul>
+            </article>
+          </div>
+          <div class="callout prose"><p><strong>核心做法：</strong>內容是什麼、賣什麼、買家付了什麼、買家因此能看／能下載什麼，分開記錄。以後加訂閱、Bundle、獨立程式包，才不會把課程權限和整站登入混在一起。</p></div>
+        </section>
+
+        <section id="now">
+          <div class="section-kicker">02 · 真實進度，不把文件當程式</div>
+          <h2>計畫有雛形；第一條銷售功能正在寫，還不能說已完成</h2>
+          <p class="section-lead prose">下面的數字來自目前 SR 的核對清單與本次測試。清單打勾數只代表該項已按驗收條件核對，不代表其他程式碼不存在。</p>
+          <div class="grid three">
+            <article class="card wait">
+              <span class="label">總體 Creator Blueprint</span>
+              <span class="big-number">3 / 75</span>
+              <p>目前正式勾選的是 WebinarJam 畫面逆向觀察 3 項。架構、功能、UI/UX 與後續 SR 雖已有文件草稿，交叉核對和 Spectra 驗證還沒完成。</p>
+            </article>
+            <article class="card wait">
+              <span class="label">目前程式 SR：多課程銷售與程式包</span>
+              <span class="big-number">2 / 15</span>
+              <p>Marketing 公開課程頁、Offer 管理、結帳、權限、退款與 GitHub 交付已有多處程式修改；任務核對清單和端到端驗收尚未收尾。</p>
+            </article>
+            <article class="card done">
+              <span class="label">本次實際跑的相關測試</span>
+              <span class="big-number">89 項通過</span>
+              <p>9 個測試檔通過。商品目錄另有資料庫整合測試；目前測試環境拒絕資料庫連線，9 項中 6 項因此失敗，不能算功能驗收通過。</p>
+            </article>
+          </div>
+          <div class="grid two" style="margin-top:calc(16px * var(--dens, 1))">
+            <article class="card">
+              <span class="status green">已看到程式修改</span>
+              <p>商品方案與資料庫遷移、課程公開頁、方案管理、結帳價格與訂單資格、退款後資格處理、GitHub 程式包領取、課程歡迎信。</p>
+              <p>這代表「有程式在做」，不代表部署、付款或買家實際領取已驗收。</p>
+            </article>
+            <article class="card warm">
+              <span class="status red">尚未驗收的關鍵門</span>
+              <p>資料庫整合測試、桌機／手機實際 UI、PAYUNi sandbox 付款、真實 Email、GitHub repo 唯讀權限、退款保留其他訂單資格、部署後回讀與回滾。</p>
+              <p>目前工作樹有大量未提交變更；本報告不會替它們標成已合併或已上線。</p>
+            </article>
+          </div>
+          <details style="margin-top:calc(14px * var(--dens, 1))">
+            <summary>測試數字怎麼來的？</summary>
+            <div class="detail-body">本次針對課程權限、付款通知、訂單、Email、GitHub 領取／撤銷、結帳頁與公開課程頁等測試執行 Vitest。實際輸出為 9 個測試檔、89 tests passed；`packages/payments/catalog.test.ts` 需要可用的測試資料庫，環境拒絕連線，9 tests 中 6 項因資料庫不可用失敗、3 項通過。沒有連正式資料庫、沒有做正式付款、沒有做正式部署。</div>
+          </details>
+        </section>
+
+        <section id="journey">
+          <div class="section-kicker">03 · 一條生意從建立到交付</div>
+          <h2>先做完一條完整路徑，再複製這個做法加下一種功能</h2>
+          <p class="section-lead prose">不要一次做完整個 Systeme.io。先確保一種商品從後台設定、客人付款，到權限和商品交付都對，再用同一套商品／Offer／權限規則擴充。</p>
+          <div class="figure flow-figure">
+            <svg viewBox="0 0 1000 360" role="img" aria-labelledby="sale-flow-title sale-flow-desc">
+              <title id="sale-flow-title">課程和程式包銷售到交付流程</title>
+              <desc id="sale-flow-desc">創作者建立內容和商品方案，公開頁接到結帳，付款成功後才授予該方案的課程或程式包資格；付款失敗回到結帳重試。</desc>
+              <defs>
+                <marker id="sale-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#87867f" /></marker>
+                <marker id="sale-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#b85c3e" /></marker>
+              </defs>
+              <rect width="1000" height="360" fill="#faf9f5" />
+              <g fill="none" stroke="#87867f" stroke-width="1.5" marker-end="url(#sale-arrow)">
+                <path d="M205 103 H260" /><path d="M420 103 H475" /><path d="M635 103 H690" />
+                <path d="M770 145 V230 H555 V150" />
+              </g>
+              <path d="M770 145 V260 H855 V150" fill="none" stroke="#b85c3e" stroke-width="1.5" marker-end="url(#sale-arrow-accent)" />
+              <rect x="45" y="62" width="160" height="82" rx="6" fill="#fff" stroke="#d1cfc5" />
+              <text x="125" y="94" text-anchor="middle" class="node-title">課程／組合包</text><text x="125" y="119" text-anchor="middle" class="small">內容先建好</text>
+              <rect x="260" y="62" width="160" height="82" rx="6" fill="#fff" stroke="#d1cfc5" />
+              <text x="340" y="94" text-anchor="middle" class="node-title">銷售方案 Offer</text><text x="340" y="119" text-anchor="middle" class="small">價格、週期、交付</text>
+              <rect x="475" y="62" width="160" height="82" rx="6" fill="#fff" stroke="#d1cfc5" />
+              <text x="555" y="94" text-anchor="middle" class="node-title">公開頁與結帳</text><text x="555" y="119" text-anchor="middle" class="small">伺服器決定金額</text>
+              <rect x="690" y="62" width="160" height="82" rx="6" fill="#f8efd9" stroke="#e8d4a0" />
+              <text x="770" y="94" text-anchor="middle" class="node-title">付款結果</text><text x="770" y="119" text-anchor="middle" class="small">成功或失敗</text>
+              <rect x="855" y="62" width="110" height="82" rx="6" fill="#eff1e8" stroke="#c8d2b8" />
+              <text x="910" y="94" text-anchor="middle" class="node-title">交付資格</text><text x="910" y="119" text-anchor="middle" class="small">只給買到的</text>
+              <rect x="448" y="230" width="214" height="60" rx="6" fill="#faebe3" stroke="#e8c4af" />
+              <text x="555" y="255" text-anchor="middle" class="node-title">失敗：提示原因、可重試</text><text x="555" y="276" text-anchor="middle" class="small">不建立錯誤權限</text>
+              <text x="875" y="250" class="small" fill="#b85c3e">付款成功</text>
+              <text x="574" y="218" class="small">付款失敗</text>
+            </svg>
+            <div class="flow-caption">組合包不是「全站通行證」；付款通知只依訂單當下記錄的商品授權對應內容。</div>
+          </div>
+          <h3 style="margin:calc(26px * var(--dens, 1)) 0 calc(12px * var(--dens, 1))">每張 SR 都用同一套開發流程</h3>
+          <div class="step-flow" aria-label="單張 SR 完成流程">
+            <article class="step"><h3>先定義完成樣子</h3><p>列清楚誰能做什麼、做完畫面與資料變什麼。</p></article>
+            <article class="step"><h3>先寫會失敗的測試</h3><p>先證明舊行為／新需求的界線，避免只憑感覺改。</p></article>
+            <article class="step"><h3>只改這張 SR 的範圍</h3><p>沿用現有模組；必要時加遷移，不重做已存在的地基。</p></article>
+            <article class="step"><h3>把主要路徑走一遍</h3><p>測試、API、桌機和手機 UI；金流／Email 要走相應驗收。</p></article>
+            <article class="step"><h3>回歸、回滾，再封存</h3><p>檢查沒弄壞旁邊功能，留證據；過門檻後才交付。</p></article>
+          </div>
+          <div class="callout prose"><p><strong>如果某一關失敗：</strong>先回到那張 SR 修正並重跑該關，不把未通過的功能接到下一張 SR 上。</p></div>
+        </section>
+
+        <section id="ux">
+          <div class="section-kicker">04 · UI/UX 不是最後才美化</div>
+          <h2>畫面先幫人找到「下一個要做的事」</h2>
+          <p class="section-lead prose">建議讓後台以創作者的工作任務組織，不要求使用者記 route 或模組名稱。這是總藍圖的目標設計，不代表所有畫面目前都已實作。</p>
+          <div class="screen" aria-label="建議中的創作者營運首頁示意">
+            <div class="screen-top"><span class="screen-title">創作者工作台</span><span class="tag">示意：待辦優先，不是目前正式畫面截圖</span></div>
+            <div class="screen-body">
+              <aside class="screen-nav" aria-label="建議後台導覽">
+                <div class="active">今天要處理</div><div>課程與內容</div><div>商品與銷售方案</div><div>客戶名單</div><div>行銷與自動化</div><div>網站與銷售頁</div><div>直播與回放</div><div>數據與設定</div>
+              </aside>
+              <div class="screen-main">
+                <h3>今天要處理的 3 件事</h3>
+                <div class="mini-grid">
+                  <div class="mini-tile"><b>付款待確認</b><span>打開訂單查看原因 →</span></div>
+                  <div class="mini-tile"><b>課程尚未發布</b><span>補上銷售方案 →</span></div>
+                  <div class="mini-tile"><b>直播提醒未送出</b><span>檢查通知並重試 →</span></div>
+                </div>
+                <div class="status-row"><span class="state-chip good">成功：已完成</span><span class="state-chip warn">等待：尚未發布</span><span class="state-chip bad">失敗：有明確修復方式</span><span class="state-chip">無權限：說明找誰處理</span></div>
+              </div>
+            </div>
+            <div class="screen-mobile">
+              <div class="mini-tile"><b>付款待確認</b><span>查看原因與下一步 →</span></div>
+              <div class="mini-tile"><b>課程尚未發布</b><span>補上銷售方案 →</span></div>
+              <div class="mini-tile"><b>直播提醒未送出</b><span>檢查通知並重試 →</span></div>
+              <div class="mini-tile"><b>手機原則</b><span>同樣完成任務；主按鈕不藏在橫向表格裡。</span></div>
+            </div>
+          </div>
+          <div class="grid three" style="margin-top:calc(16px * var(--dens, 1))">
+            <article class="card"><span class="label">每一頁都先回答</span><h3>我現在在哪？</h3><p>頁面標題說人話、側邊選單標目前位置；不同角色只看到有權限的入口。</p></article>
+            <article class="card"><span class="label">每一個操作都說清楚</span><h3>按下去會怎樣？</h3><p>儲存成功有回饋；資料錯誤指出哪裡要改；危險操作先確認，失敗後可重試。</p></article>
+            <article class="card"><span class="label">桌機和手機都能完成</span><h3>不只是縮小畫面</h3><p>主要任務、按鈕順序、欄位和鍵盤操作都要規劃；手機不能只剩被擠壞的桌面表格。</p></article>
+          </div>
+          <details style="margin-top:calc(14px * var(--dens, 1))">
+            <summary>UI/UX 設計規則的白話版</summary>
+            <div class="detail-body">先知道使用者來這頁要完成什麼，再決定導航、欄位、按鈕。建立、列表、詳情、編輯都沿用同一套操作方式；每頁都設計載入中、沒資料、出錯、沒權限、儲存成功和重試狀態。每張 UI SR 要附桌機與 390px 手機操作路徑、鍵盤／焦點檢查和真實瀏覽器驗收。</div>
+          </details>
+        </section>
+
+        <section id="roadmap">
+          <div class="section-kicker">05 · 從現在排到可上線</div>
+          <h2>功能一張一張做，每張都有自己的完成條件</h2>
+          <p class="section-lead prose">先完成現在進行中的課程銷售切片，再把共同規則固定下來；接著才擴 CRM、自動化、直播和 AI。每一項都是獨立 SR，可單獨估、做、測、回滾。</p>
+          <div class="roadmap">
+            <article class="wave">
+              <div class="wave-head"><h3>第一波：平台骨架與買家程式包</h3><span>先把責任邊界與畫面慣例固定</span></div>
+              <div class="roadmap-items">
+                <div class="roadmap-item"><strong>01</strong>創作者工作區、導航、頁面狀態</div>
+                <div class="roadmap-item"><strong>02</strong>共用列表／表單／手機／無障礙 UI</div>
+                <div class="roadmap-item"><strong>03</strong>外掛擴充、版本相容、更新與回滾</div>
+                <div class="roadmap-item"><strong>04</strong>買家 SaaS 的授權、安裝、部署、更新</div>
+              </div>
+            </article>
+            <article class="wave">
+              <div class="wave-head"><h3>第二波：客戶、商品與付款</h3><span>把「誰買了什麼、因此能拿到什麼」做對</span></div>
+              <div class="roadmap-items">
+                <div class="roadmap-item"><strong>05</strong>CRM 名單、標籤、分群、同意</div>
+                <div class="roadmap-item"><strong>06</strong>商品、Offer、Bundle、CodePackage、訂閱</div>
+                <div class="roadmap-item"><strong>07</strong>公開課程銷售、PAYUNi、Email、GitHub 交付</div>
+                <div class="roadmap-item"><strong>注意</strong>目前的程式 SR 正在做 #07；要跟 #06 共用同一套商品規則。</div>
+              </div>
+            </article>
+            <article class="wave">
+              <div class="wave-head"><h3>第三波：日常營運與成長</h3><span>先能看見工作，再讓工作自動化</span></div>
+              <div class="roadmap-items">
+                <div class="roadmap-item"><strong>08</strong>營運首頁、待辦、失敗與返回任務</div>
+                <div class="roadmap-item"><strong>09</strong>行銷活動、寄信、自動化與退訂</div>
+                <div class="roadmap-item"><strong>10</strong>網站、表單、銷售頁與漏斗</div>
+                <div class="roadmap-item"><strong>11</strong>台灣發票、訂閱和合規流程</div>
+                <div class="roadmap-item"><strong>12</strong>報表、匯出、稽核和失敗提醒</div>
+              </div>
+            </article>
+            <article class="wave">
+              <div class="wave-head"><h3>第四波：直播、AI 與整體上線</h3><span>有權限、能追溯、有人工把關</span></div>
+              <div class="roadmap-items">
+                <div class="roadmap-item"><strong>13</strong>即時直播與常青 Webinar 分開設計</div>
+                <div class="roadmap-item"><strong>14</strong>AI 讀工作區資料、起草；重要動作由人核准</div>
+                <div class="roadmap-item"><strong>15</strong>手機、無障礙、正式環境與回滾驗收</div>
+              </div>
+            </article>
+          </div>
+          <div class="callout prose"><p><strong>排程提醒：</strong>正式藍圖把 Offer／Bundle／訂閱基礎（#06）排在公開銷售切片（#07）前面；但 #07 現在已經有程式在動。要先把目前改動對齊 #06 的商品與資格規則，才不會同時長出兩套商品真相。</p></div>
+          <details>
+            <summary>直播參考目前確認到哪裡？</summary>
+            <div class="detail-body">REA 已看 WebinarJam 管理清單與新增設定入口：有快速／完整設定、立即／排程／常開等選項、Analytics 和 Registrants 篩選入口；完整設定畫面也看到 WebinarJam Live、YouTube Live、Facebook Live 的選項。這些只證明畫面入口存在，沒有證明它們底層如何串流、錄影或儲存。Systeme.io 的 Webinar 也不能直接推論成原生即時直播。後續會把即時直播、預錄常青內容與影音服務供應商分開設計。<a href="webinarjam-reverse-engineering-notes.md">查看 REA 觀察與未確認清單</a>。</div>
+          </details>
+        </section>
+
+        <section id="done">
+          <div class="section-kicker">06 · 從最後結果反推前置工作</div>
+          <h2>先定義「敢交給買家」的證據，再倒推每一步</h2>
+          <p class="section-lead prose">不是寫完程式就算交付。每一張 SR 都要把能證明它正常的資料留好；UI、金流、寄信和部署各有自己的驗收門。</p>
+          <div class="gate" aria-label="由正式交付往前倒推的驗收關卡">
+            <div class="gate-card"><span class="label">最後交付</span><strong>買家能完成購買與使用</strong><p>正確課程、程式包、登入與部署。</p></div>
+            <span class="gate-arrow" aria-hidden="true">←</span>
+            <div class="gate-card"><span class="label">必備證據</span><strong>真實流程可讀回</strong><p>付款、Email、權限、桌機／手機 UI。</p></div>
+            <span class="gate-arrow" aria-hidden="true">←</span>
+            <div class="gate-card"><span class="label">更前面的保護</span><strong>測試、權限和回滾規則</strong><p>遷移安全，失敗不亂授權、不丟資料。</p></div>
+          </div>
+          <h3 style="margin:calc(28px * var(--dens, 1)) 0 calc(12px * var(--dens, 1))">目前這張銷售 SR，交付前還要過這幾關</h3>
+          <div class="table-wrap">
+            <table>
+              <colgroup><col style="width:22%" /><col style="width:46%" /><col style="width:32%" /></colgroup>
+              <thead><tr><th>驗收關</th><th>要實際證明的事</th><th>目前狀態</th></tr></thead>
+              <tbody>
+                <tr><td>課程／組合包資格</td><td>只打開買到的課；舊有單一課 SKU 不會突然開全站。</td><td>有程式與測試修改；仍需完成整合核對。</td></tr>
+                <tr><td>結帳／付款</td><td>畫面帶著正確 Offer；金額由伺服器決定；付款成功才授權。</td><td>單元測試部分通過；PAYUNi sandbox 未驗收。</td></tr>
+                <tr><td>程式包交付</td><td>符合資格才可領取；每位買家維持規定的私人 repo 與唯讀權限。</td><td>有程式與測試修改；真實 GitHub 權限未驗收。</td></tr>
+                <tr><td>退款／訂單共存</td><td>退款撤掉對應資格，不影響其他仍有效的訂單。</td><td>新增退款測試；需跑完相關回歸案例。</td></tr>
+                <tr><td>使用者畫面</td><td>桌機與手機都能找到商品、完成結帳、看到錯誤與下一步。</td><td>未完成部署後瀏覽器巡查。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="grid two" style="margin-top:calc(16px * var(--dens, 1))">
+            <article class="card">
+              <span class="label">目前可以往下做的事</span>
+              <h3>先把這條銷售路徑收尾</h3>
+              <p>把 Offer／Bundle／資格規則和 Creator Blueprint 對齊；補可用的隔離測試資料庫；完成桌機／手機、PAYUNi sandbox、Email、GitHub 權限與退款回歸。</p>
+            </article>
+            <article class="card soft">
+              <span class="label">目前還不該宣稱</span>
+              <h3>整個創作者平台已完成</h3>
+              <p>CRM、行銷自動化、Funnel、直播、Analytics、AI 和買家部署是後續 SR；WebinarJam 內部技術也沒有被逆向確認。</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="references">
+          <div class="section-kicker">參考文件</div>
+          <h2>想看原始規格時</h2>
+          <div class="grid two">
+            <article class="card"><h3>Creator 總藍圖</h3><p><a href="startkiter-creator-platform.md">產品定位、流程、資料邊界與使用者旅程</a></p></article>
+            <article class="card"><h3>SR 開發順序</h3><p><a href="../../openspec/changes/creator-operations-platform-blueprint/tasks.md">總計畫 tasks.md</a> · <a href="../../openspec/changes/creator-operations-platform-blueprint/design.md">技術決策 design.md</a></p></article>
+            <article class="card"><h3>目前銷售功能 SR</h3><p><a href="../../openspec/changes/public-multi-course-sales-and-code-package/tasks.md">單堂課／多課程／CodePackage 任務</a></p></article>
+            <article class="card"><h3>直播觀察紀錄</h3><p><a href="webinarjam-reverse-engineering-notes.md">WebinarJam REA 已確認與未知範圍</a></p></article>
+          </div>
+        </section>
+      </main>
+      <footer>狀態截至 2026-10-12。這份 HTML 是白話導讀；規格以 Spectra 文件為準，測試、瀏覽器、付款、寄信、部署與回滾證據分開記錄。</footer>
+    </div>
+    <script>
+      window.VT_SESSION = { label: "startkiter · feature/public-multi-course-sales-and-code-package", id: "local", project: "startkiter" };
+    </script>
+    <style>
+      .vt-session-badge { display:flex; align-items:center; gap:calc(9px * var(--dens, 1)); padding:calc(5px * var(--dens, 1)) calc(16px * var(--dens, 1)); background:var(--vt-session-color,#666); color:#fff; font:calc(11.5px * var(--fs, 1)) var(--mono); letter-spacing:.04em; }
+      .vt-session-badge .dot { width:7px; height:7px; border-radius:50%; background:#fff; opacity:.85; flex-shrink:0; }
+      .vt-session-badge .id { margin-left:auto; opacity:.75; }
+    </style>
+    <script>
+      (function(){
+        const s=window.VT_SESSION||{}; if(!s.label)return;
+        let hue=7; for(const c of (s.id||s.label))hue=(hue*31+c.charCodeAt(0))%360;
+        const color=`hsl(${hue} 58% 42%)`; document.title=`${s.label} · ${document.title}`;
+        const badge=document.createElement("div"); badge.className="vt-session-badge"; badge.style.setProperty("--vt-session-color",color);
+        badge.innerHTML='<span class="dot"></span><span class="lb"></span><span class="id"></span>';
+        badge.querySelector(".lb").textContent=s.label; badge.querySelector(".id").textContent=s.id||"";
+        const header=document.querySelector("header")||document.body; header.insertBefore(badge,header.firstChild);
+      })();
+    </script>
+  <!-- vt-tweaks:begin v=1f6fc87025 -->
+<style id="vt-tweaks-css">
+/* 風格設定面板 — 與 tweaks.js 成對，由 scripts/stamp.py 在 verify 時注入頁尾（作者不用複製）。
+   字級與間距的倍率靠兩個變數：--fs（字級）、--dens（間距）。stamp.py 會把頁面裡寫死的
+   px 字級與間距改成 calc(原值 * var(--fs|--dens, 1))，這裡只負責「哪些區塊不吃倍率」。 */
+
+/* 不吃倍率：結構圖、畫面樣張（它們是示意畫面，照比例縮放才對）、頁面介面本身
+   （風格設定面板、評論工具、session 徽章；字放到 200% 時還得能把它調回來）、作者手動鎖定的區塊。
+   ⚠️ 要逐一列出，不能用「class 以 vt- 開頭」：評論工具會在 body 加 vt-has-existing-export，
+   前綴比對會把整頁鎖死；被評論標記的文字（vt-comment-mark）也該跟著內文縮放。 */
+svg,
+.mock,
+[data-tw-lock],
+.vt-tw-root,
+.vt-comment-trigger,
+.vt-comment-popup,
+.vt-comment-pill,
+.vt-comment-list,
+.vt-session-badge {
+  --fs: 1;
+  --dens: 1;
+}
+/* 沒宣告字級的頁面（spec-alignment 範本就是）：零權重，任何頁面規則都蓋得過它 */
+:where(body) {
+  font-size: calc(16px * var(--fs, 1));
+}
+/* Tailwind 文字 class 的覆寫由 stamp.py 視頁面需要產生（只在有 Tailwind、倍率≠1 時生效），不放這裡 */
+
+/* ── 面板本體（按鈕與面板都掛 vt-tw-root → 在上面的排除清單裡，不吃倍率）── */
+/* 沒有底部列可停的頁：浮在左下角（右下角是評論工具） */
+.vt-tw-launch {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 9100;
+  display: flex;
+  align-items: center;
+  gap: calc(5px * var(--dens, 1));
+  font: 600 calc(12px * var(--fs, 1)) var(--sans, system-ui, sans-serif);
+  padding: calc(5px * var(--dens, 1)) calc(10px * var(--dens, 1));
+  border-radius: 999px;
+  border: 1.5px solid var(--slate, #141413);
+  background: var(--slate, #141413);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(20, 20, 19, 0.2);
+}
+.vt-tw-launch svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+/* 停在底部列「預覽摘要」左邊：外觀跟旁邊的次要按鈕一致，各寬度都停（窄螢幕只顯示圖示，見檔尾） */
+.vt-tw-launch.vt-tw-docked {
+  position: static;
+  display: inline-flex; /* 父層是一般區塊時才不會獨佔一行、把列撐高 */
+  font: 500 calc(14px * var(--fs, 1)) var(--sans, system-ui, sans-serif);
+  padding: calc(10px * var(--dens, 1)) calc(16px * var(--dens, 1));
+  border-radius: 10px;
+  border: 1.5px solid var(--g300, #d1cfc5);
+  background: #fff;
+  color: var(--slate, #141413);
+  box-shadow: none;
+}
+.vt-tw-launch.vt-tw-docked:hover {
+  border-color: var(--slate, #141413);
+}
+/* 位置（bottom、left／right、max-height）由 tweaks.js 依按鈕位置算 */
+.vt-tw-pop {
+  position: fixed;
+  width: min(330px, 92vw);
+  overflow: auto;
+  z-index: 9100;
+  background: #fff;
+  color: var(--slate, #141413);
+  border: 1.5px solid var(--g300, #d1cfc5);
+  border-radius: 12px;
+  box-shadow: 0 16px 44px rgba(20, 20, 19, 0.22);
+  padding: calc(14px * var(--dens, 1)) calc(16px * var(--dens, 1)) calc(16px * var(--dens, 1));
+  font: calc(13px * var(--fs, 1))/1.5 var(--sans, system-ui, sans-serif);
+  text-align: left;
+}
+.vt-tw-pop[hidden] {
+  display: none;
+}
+.vt-tw-sec {
+  font: 600 calc(10.5px * var(--fs, 1)) var(--mono, ui-monospace, monospace);
+  color: var(--g500, #87867f);
+  letter-spacing: 0.06em;
+  margin: calc(12px * var(--dens, 1)) 0 calc(6px * var(--dens, 1));
+  padding-top: calc(10px * var(--dens, 1));
+  border-top: 1px solid var(--g200, #e6e3da);
+}
+.vt-tw-sec.vt-tw-first {
+  border-top: 0;
+  padding-top: 0;
+  margin-top: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+/* 中英切換：面板頂端那行的右邊 */
+.vt-tw-lang {
+  font: 600 calc(11px * var(--fs, 1)) var(--sans, system-ui, sans-serif);
+  letter-spacing: 0;
+  padding: calc(2px * var(--dens, 1)) calc(8px * var(--dens, 1));
+  border-radius: 6px;
+  border: 1.5px solid var(--g300, #d1cfc5);
+  background: #fff;
+  color: var(--g700, #3d3d3a);
+  cursor: pointer;
+}
+.vt-tw-lang:hover {
+  border-color: var(--slate, #141413);
+}
+.vt-tw-item {
+  margin: calc(8px * var(--dens, 1)) 0;
+}
+.vt-tw-label {
+  display: flex;
+  justify-content: space-between;
+  gap: calc(8px * var(--dens, 1));
+  font-weight: 600;
+  margin-bottom: calc(4px * var(--dens, 1));
+}
+.vt-tw-val {
+  font-family: var(--mono, ui-monospace, monospace);
+  font-weight: 500;
+  color: var(--clay-d, #b85c3e);
+}
+.vt-tw-item input[type="range"] {
+  width: 100%;
+  accent-color: var(--clay, #d97757);
+}
+.vt-tw-seg {
+  display: flex;
+  border: 1.5px solid var(--g300, #d1cfc5);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.vt-tw-seg button {
+  flex: 1;
+  font: calc(12.5px * var(--fs, 1)) var(--sans, system-ui, sans-serif);
+  padding: calc(5px * var(--dens, 1)) calc(4px * var(--dens, 1));
+  border: 0;
+  border-right: 1px solid var(--g300, #d1cfc5);
+  background: #fff;
+  color: var(--g700, #3d3d3a);
+  cursor: pointer;
+}
+.vt-tw-seg button:last-child {
+  border-right: 0;
+}
+.vt-tw-seg button.vt-tw-on {
+  background: var(--slate, #141413);
+  color: #fff;
+}
+.vt-tw-hint {
+  font-size: calc(11.5px * var(--fs, 1));
+  color: var(--g500, #87867f);
+  line-height: 1.5;
+  margin-top: calc(5px * var(--dens, 1));
+}
+.vt-tw-actions {
+  display: flex;
+  gap: calc(8px * var(--dens, 1));
+  margin-top: calc(14px * var(--dens, 1));
+}
+.vt-tw-actions button {
+  flex: 1;
+  font: calc(12.5px * var(--fs, 1)) var(--sans, system-ui, sans-serif);
+  padding: calc(7px * var(--dens, 1)) calc(8px * var(--dens, 1));
+  border-radius: 8px;
+  border: 1.5px solid var(--g300, #d1cfc5);
+  background: #fff;
+  cursor: pointer;
+}
+.vt-tw-actions button.vt-tw-pri {
+  border-color: var(--clay, #d97757);
+  color: var(--clay-d, #b85c3e);
+  font-weight: 600;
+}
+.vt-tw-actions button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.vt-tw-manual {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: calc(8px * var(--dens, 1));
+  padding: calc(6px * var(--dens, 1)) calc(8px * var(--dens, 1));
+  font: calc(11px * var(--fs, 1))/1.5 var(--mono, ui-monospace, monospace);
+  border: 1.5px solid var(--g300, #d1cfc5);
+  border-radius: 8px;
+  resize: vertical;
+}
+.vt-tw-manual[hidden] {
+  display: none;
+}
+.vt-tw-actions button[aria-pressed="true"] {
+  background: var(--clay-d, #b85c3e);
+  border-color: var(--clay-d, #b85c3e);
+  color: #fff;
+}
+@media (max-width: 760px) {
+  .vt-tw-launch {
+    padding: calc(8px * var(--dens, 1));
+  }
+  .vt-tw-lbl {
+    display: none; /* 手機只留圖示，少蓋一點內容 */
+  }
+}
+/* 範本底部列在 900px 以下擠不下帶字的第三顆鈕：只留圖示、縮內距，高度跟旁邊的按鈕拉齊。
+   約 360px 以下、以及 700px 前後一小段寬度，列仍可能折成兩行（範圍依列上的文字與按鈕字數而定；等於更窄螢幕的版型），接受 */
+@media (max-width: 900px) {
+  .vt-tw-docked .vt-tw-lbl {
+    display: none;
+  }
+  .vt-tw-launch.vt-tw-docked {
+    padding: calc(10px * var(--dens, 1)) calc(11px * var(--dens, 1));
+    align-self: stretch;
+  }
+}
+
+</style>
+<script id="vt-tweaks-js" data-profile-tool="$HOME/.codex/skills/html-visualizer/scripts/profile.py">
+/* 風格設定面板 — 與 tweaks.css 成對，由 scripts/stamp.py 在 verify 時注入頁尾（作者不用複製）。
+ * 按鈕「風格設定」：頁面有範本底部列的「預覽摘要」（#preview-btn）就停在它左邊，各寬度都是（窄螢幕只顯示圖示）；
+ * 沒有底部列就固定在左下角（右下角是評論工具的位置）。面板從按鈕上方打開。
+ * 底部列一律用範本的，按鈕不偵測、不閃避頁面自己做的固定列。
+ * （本檔任何地方都不能出現 script 的結尾標籤字樣，否則內嵌時瀏覽器會在那裡把腳本切斷。）
+ *
+ * 固定層（每頁都有）：字級 90%–200%、密度、內容寬度，寫在 <html> 的 --fs／--dens／--wrap-max。
+ * 內容層（作者選配，預設 0 項）：頁面放一個 type 為 application/json、id 為 vt-tweaks 的 script 區塊，
+ *   內容是 [{id,label,options:[[值,顯示],...],hint}]。
+ * 選了之後在 <html> 設 data-tw-<id>="值"，作者只寫對應的 CSS，不寫 JS。hint 必填（這項會改到頁面上的什麼）。
+ * 調過的值只改畫面、不進複製摘要。讀者按「存成我的預設」才產生「設定檔變更」段落（給 AI 執行的一行
+ * profile.py 指令，使用者不用自己跑）：有拍板摘要的頁經 window.vtCollectComments 接進摘要，沒有的頁直接複製。
+ * 介面有中英兩種，面板頂端可切換（「設定檔變更」段落也跟著換語言）。
+ */
+(function () {
+  var root = document.documentElement;
+  var me = document.currentScript;
+  var tool = (me && me.getAttribute("data-profile-tool")) || "profile.py";
+  // 介面語言：讀者切換過就記在瀏覽器、之後的頁沿用；沒切過跟頁面的 lang 走。
+  // 沙盒 iframe（沒開 allow-same-origin）一碰 localStorage 就丟錯，所以包 try
+  var lang = null;
+  try {
+    lang = localStorage.getItem("vt-tw-lang");
+  } catch (e) {}
+  if (lang !== "zh" && lang !== "en") lang = /^en/i.test(root.lang) ? "en" : "zh";
+  var LANG = {
+    zh: {
+      name: "風格設定",
+      short: "風格設定",
+      title: "風格設定（字級、密度、寬度）",
+      fixed: "固定層 · 每頁都有",
+      content: "內容層 · 這頁專屬",
+      swap: "EN",
+      reset: "全部還原",
+      save: "存成我的預設",
+      added: "已加進複製摘要",
+      copied: "已複製，貼回對話即可",
+      select: "已選取，請按 Cmd+C",
+      need: function (n) {
+        return "調過" + n.slice(0, -1).join("、") + "或" + n[n.length - 1] + "，才能存成你的預設。";
+      },
+      undo: "存檔指令已加進這頁的複製摘要，複製後貼回對話即可；再按一次取消。",
+      toSummary: "按下後，存檔指令會加進這頁的複製摘要；貼回對話，AI 會寫進你的設定檔，之後的頁都用這組。",
+      toCopy: "按下後會複製一段指令；貼回對話，AI 會寫進你的設定檔，之後的頁都用這組。",
+      head: "## 設定檔變更\n給 AI：使用者要把這頁的顯示設定存成預設（",
+      pair: "：",
+      join: "、",
+      tail: "）。請執行下面這行寫入 html-visualizer 設定檔，完成後回報前後差異；使用者不用自己跑。\n",
+    },
+    en: {
+      name: "Style settings",
+      short: "Style",
+      title: "Style settings (text size, density, width)",
+      fixed: "Every page",
+      content: "This page only",
+      swap: "中文",
+      reset: "Reset all",
+      save: "Save as my default",
+      added: "Added to summary",
+      copied: "Copied",
+      select: "Press Cmd+C",
+      need: function (n) {
+        n = n.map(function (x) {
+          return x.toLowerCase();
+        });
+        return "Change the " + n.slice(0, -1).join(", ") + " or " + n[n.length - 1] + " to save it as your default.";
+      },
+      undo: "The save command is in this page's copy summary. Copy the summary and paste it into the chat. Click again to remove it.",
+      toSummary: "Adds a save command to this page's copy summary. Paste it into the chat and the AI writes it to your profile; later pages use these settings.",
+      toCopy: "Copies a save command. Paste it into the chat and the AI writes it to your profile; later pages use these settings.",
+      head: "## Profile changes\nFor the AI: the user wants to save this page's display settings as their default (",
+      pair: ": ",
+      join: ", ",
+      tail: "). Run the line below to write them to the html-visualizer profile, then report the before and after values. The user doesn't need to run it.\n",
+    },
+  };
+  var L = LANG[lang];
+  // 固定層的名稱與選項是 {zh, en}；作者寫的內容層（字串或數字）原樣顯示
+  function txt(x) {
+    return x && typeof x === "object" ? x[lang] : x;
+  }
+  var cs = getComputedStyle(root);
+  function cssNum(name, fallback) {
+    var v = parseFloat(cs.getPropertyValue(name));
+    return isNaN(v) ? fallback : v;
+  }
+  var baseFs = cssNum("--fs", 1);
+  var DENS = [
+    ["0.75", { zh: "緊湊", en: "Compact" }, "compact"],
+    ["1", { zh: "標準", en: "Standard" }, "standard"],
+    ["1.3", { zh: "寬鬆", en: "Relaxed" }, "relaxed"],
+  ];
+  var baseDens = String(cssNum("--dens", 1));
+  if (!DENS.some(function (d) { return d[0] === baseDens; })) baseDens = "1";
+  // 內容寬度只在頁面有用 --wrap-max 時提供（範本在 :root 宣告它）；沒宣告的頁按了也不會動，乾脆不顯示
+  var rawWrap = cs.getPropertyValue("--wrap-max").trim();
+  var baseWrap = parseFloat(rawWrap) || 1760;
+  var wrapOpts = [
+    ["1760px", { zh: "滿版", en: "Full" }, "1760"],
+    ["1080px", { zh: "閱讀寬", en: "Reading" }, "1080"],
+  ];
+  if (baseWrap !== 1760 && baseWrap !== 1080) wrapOpts.unshift([baseWrap + "px", { zh: "預設", en: "Default" }, String(baseWrap)]);
+  var FIXED = [
+    { id: "fs", label: { zh: "字級", en: "Text size" }, kind: "range", min: 0.9, max: 2, step: 0.05, def: String(baseFs), css: "--fs", profile: "tokens.type.scale" },
+    { id: "dens", label: { zh: "密度", en: "Density" }, css: "--dens", def: baseDens, profile: "tokens.layout.density", options: DENS },
+  ];
+  if (rawWrap) {
+    FIXED.push({ id: "width", label: { zh: "內容寬度", en: "Width" }, css: "--wrap-max", def: baseWrap + "px", profile: "tokens.layout.maxWidth", options: wrapOpts });
+  }
+  // html.vt-fs：倍率≠1 時才讓 Tailwind 文字 class 的覆寫生效（stamp.py 產生的規則都掛在它底下）
+  root.classList.toggle("vt-fs", baseFs !== 1);
+  var content = [];
+  // 用 querySelector：沒有內容層的頁面本來就沒有這個元素，不該被 verify 的元素參照檢查報成缺漏
+  var decl = document.querySelector("script#vt-tweaks");
+  if (decl) {
+    try {
+      content = JSON.parse(decl.textContent);
+    } catch (e) {
+      console.error("vt-tweaks 宣告不是合法 JSON", e);
+    }
+  }
+  content = content.filter(function (c) {
+    var ok =
+      c && c.id && c.label && Array.isArray(c.options) && c.options.length >= 2;
+    if (!ok) console.error("vt-tweaks 項目缺 id／label／options", c);
+    else if (!c.hint)
+      console.error(
+        "vt-tweaks 項目缺 hint（要寫這項會改到頁面上的什麼）",
+        c.id,
+      );
+    return ok;
+  });
+  if (content.length > 3) {
+    console.error("vt-tweaks 最多 3 項，多的不顯示");
+    content = content.slice(0, 3);
+  }
+  content.forEach(function (c) {
+    c.attr = "data-tw-" + c.id;
+    c.def = String(c.options[0][0]);
+  });
+  var ALL = FIXED.concat(content);
+  var saved = false; // 按過「存成我的預設」（只在有拍板摘要的頁用得到）
+  var state = {};
+  ALL.forEach(function (t) {
+    state[t.id] = t.def;
+  });
+
+  function label(t, v) {
+    if (t.kind === "range") return Math.round(parseFloat(v) * 100) + "%";
+    for (var i = 0; i < t.options.length; i++)
+      if (String(t.options[i][0]) === v) return txt(t.options[i][1]);
+    return v;
+  }
+  function apply(t) {
+    if (t.css) root.style.setProperty(t.css, state[t.id]);
+    if (t.attr) root.setAttribute(t.attr, state[t.id]);
+    if (t.id === "fs") root.classList.toggle("vt-fs", parseFloat(state.fs) !== 1);
+  }
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  // 切換語言時要重寫的文字：登記時先畫一次，切換時全部重跑
+  var paint = [];
+  function painted(fn) {
+    paint.push(fn);
+    fn();
+  }
+
+  var launch = el("button", "vt-tw-launch vt-tw-root");
+  launch.type = "button";
+  launch.setAttribute("aria-expanded", "false");
+  launch.innerHTML =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><line x1="21" y1="4" x2="14" y2="4"/><line x1="10" y1="4" x2="3" y2="4"/><line x1="21" y1="12" x2="12" y2="12"/><line x1="8" y1="12" x2="3" y2="12"/><line x1="21" y1="20" x2="16" y2="20"/><line x1="12" y1="20" x2="3" y2="20"/><line x1="14" y1="2" x2="14" y2="6"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="16" y1="18" x2="16" y2="22"/></svg>';
+  var lbl = launch.appendChild(el("span", "vt-tw-lbl"));
+  var pop = el("aside", "vt-tw-pop vt-tw-root");
+  pop.hidden = true;
+  painted(function () {
+    launch.setAttribute("aria-label", L.name);
+    launch.title = L.title;
+    lbl.textContent = L.short;
+    pop.setAttribute("aria-label", L.name);
+  });
+
+  function control(t) {
+    var wrap = el("div", "vt-tw-item");
+    var lab = el("div", "vt-tw-label");
+    var name = lab.appendChild(el("span"));
+    var val = el("span", "vt-tw-val");
+    lab.appendChild(val);
+    wrap.appendChild(lab);
+    function sync() {
+      val.textContent = label(t, state[t.id]);
+    }
+    if (t.kind === "range") {
+      var r = el("input");
+      r.type = "range";
+      r.min = t.min;
+      r.max = t.max;
+      r.step = t.step;
+      r.value = state[t.id];
+      r.addEventListener("input", function () {
+        state[t.id] = r.value;
+        apply(t);
+        sync();
+        refreshSave();
+      });
+      wrap.appendChild(r);
+      t.reset = function () {
+        r.value = t.def;
+      };
+    } else {
+      var seg = el("div", "vt-tw-seg");
+      t.options.forEach(function (o) {
+        var b = el("button");
+        b.type = "button";
+        painted(function () {
+          b.textContent = txt(o[1]);
+        });
+        b.setAttribute("data-v", String(o[0]));
+        b.addEventListener("click", function () {
+          state[t.id] = String(o[0]);
+          apply(t);
+          mark();
+          sync();
+          refreshSave();
+        });
+        seg.appendChild(b);
+      });
+      function mark() {
+        seg.querySelectorAll("button").forEach(function (b) {
+          b.classList.toggle(
+            "vt-tw-on",
+            b.getAttribute("data-v") === state[t.id],
+          );
+        });
+      }
+      mark();
+      t.reset = mark;
+      wrap.appendChild(seg);
+    }
+    if (t.hint) wrap.appendChild(el("div", "vt-tw-hint", t.hint));
+    t.sync = sync;
+    painted(function () {
+      name.textContent = txt(t.label);
+      if (r) r.setAttribute("aria-label", txt(t.label));
+      sync();
+    });
+    return wrap;
+  }
+  var first = pop.appendChild(el("div", "vt-tw-sec vt-tw-first"));
+  var firstText = first.appendChild(el("span"));
+  var langBtn = first.appendChild(el("button", "vt-tw-lang"));
+  langBtn.type = "button";
+  painted(function () {
+    firstText.textContent = L.fixed;
+    langBtn.textContent = L.swap;
+  });
+  FIXED.forEach(function (t) {
+    pop.appendChild(control(t));
+  });
+  if (content.length) {
+    var sec = pop.appendChild(el("div", "vt-tw-sec"));
+    painted(function () {
+      sec.textContent = L.content;
+    });
+    content.forEach(function (t) {
+      pop.appendChild(control(t));
+    });
+  }
+  var actions = el("div", "vt-tw-actions");
+  var resetBtn = el("button");
+  resetBtn.type = "button";
+  painted(function () {
+    resetBtn.textContent = L.reset;
+  });
+  var saveBtn = el("button", "vt-tw-pri");
+  saveBtn.type = "button";
+  actions.appendChild(resetBtn);
+  actions.appendChild(saveBtn);
+  pop.appendChild(actions);
+  var saveHint = el("div", "vt-tw-hint");
+  pop.appendChild(saveHint);
+  // 複製不到時的出路：指令放進這裡並全選，使用者按 Cmd+C（純展示頁沒有頁面自帶的複製函式）
+  var manual = el("textarea", "vt-tw-manual");
+  manual.readOnly = true;
+  manual.rows = 4;
+  manual.hidden = true;
+  pop.appendChild(manual);
+  var flashTimer = null;
+
+  function changedFixed() {
+    return FIXED.filter(function (t) {
+      return state[t.id] !== t.def;
+    });
+  }
+  function profileValue(t, v) {
+    if (t.options) {
+      for (var i = 0; i < t.options.length; i++)
+        if (String(t.options[i][0]) === v) return t.options[i][2];
+    }
+    return String(Math.round(parseFloat(v) * 100) / 100);
+  }
+  function hasSummary() {
+    return typeof window.vtBuildDecisionExport === "function";
+  }
+  function saveText(ch) {
+    return (
+      L.head +
+      ch
+        .map(function (t) {
+          return txt(t.label) + L.pair + label(t, state[t.id]);
+        })
+        .join(L.join) +
+      L.tail +
+      // 雙引號：路徑以 $HOME 開頭，單引號裡不會展開
+      'python3 "' +
+      tool +
+      '" set ' +
+      ch
+        .map(function (t) {
+          return t.profile + "=" + profileValue(t, state[t.id]);
+        })
+        .join(" ")
+    );
+  }
+  function refreshSave() {
+    var n = changedFixed().length;
+    // 只看目前的值：拖滑桿途中經過預設值那一格不該把已存取消
+    var on = saved && n > 0;
+    // 失敗時留下的文字框：設定一變，裡面的指令就過時了
+    if (!manual.hidden && manual.value !== saveText(changedFixed())) manual.hidden = true;
+    saveBtn.disabled = !n;
+    if (hasSummary()) saveBtn.setAttribute("aria-pressed", String(on));
+    saveBtn.textContent = on ? L.added : L.save;
+    saveHint.textContent = !n
+      ? L.need(FIXED.map(function (t) {
+          return txt(t.label);
+        }))
+      : on
+        ? L.undo
+        : hasSummary()
+        ? L.toSummary
+        : L.toCopy;
+  }
+  window.vtCollectTweaks = function () {
+    var ch = changedFixed();
+    return saved && ch.length ? "\n\n" + saveText(ch) : "";
+  };
+  resetBtn.addEventListener("click", function () {
+    saved = false;
+    ALL.forEach(function (t) {
+      state[t.id] = t.def;
+      apply(t);
+      t.reset();
+      t.sync();
+    });
+    refreshSave();
+  });
+  saveBtn.addEventListener("click", async function () {
+    if (hasSummary()) {
+      saved = !saved;
+      refreshSave();
+      return;
+    }
+    // 沒有拍板摘要的頁：按鈕本身就是出口，直接複製
+    var text = saveText(changedFixed());
+    var ok = false;
+    manual.hidden = true;
+    if (window.vtCopyText) ok = await window.vtCopyText(text);
+    // 沒有頁面的複製函式就直接走下面：在點擊當下同步複製，不先 await 別的 API 把使用者手勢耗掉
+    if (!ok) {
+      manual.value = text;
+      manual.hidden = false;
+      manual.select();
+      try {
+        ok = document.execCommand("copy");
+      } catch (e) {}
+      if (ok) manual.hidden = true;
+    }
+    saveBtn.textContent = ok ? L.copied : L.select;
+    clearTimeout(flashTimer); // 連點時舊計時器不能提早蓋掉新回饋
+    flashTimer = setTimeout(refreshSave, ok ? 2000 : 6000);
+  });
+  // 面板開在按鈕上方：按鈕在右半就右緣對齊、左半就左緣對齊；
+  // 按鈕上方不到 200px（視窗矮、底部列展開）就改貼畫面頂端，不讓面板頂端跑出畫面
+  function place() {
+    var r = launch.getBoundingClientRect();
+    var w = Math.min(330, window.innerWidth * 0.92);
+    var x = r.left + r.width / 2 > window.innerWidth / 2 ? r.right - w : r.left;
+    // 預覽鈕在列中間時（非範本的列）對齊邊緣會出界，夾回畫面內
+    pop.style.left = Math.max(8, Math.min(x, window.innerWidth - w - 8)) + "px";
+    var low = r.top - 24 < 200;
+    pop.style.top = low ? "12px" : "auto";
+    pop.style.bottom = low ? "auto" : window.innerHeight - r.top + 10 + "px";
+    pop.style.maxHeight = (low ? window.innerHeight - 24 : r.top - 24) + "px";
+  }
+  langBtn.addEventListener("click", function () {
+    lang = lang === "zh" ? "en" : "zh";
+    L = LANG[lang];
+    try {
+      localStorage.setItem("vt-tw-lang", lang);
+    } catch (e) {}
+    paint.forEach(function (f) {
+      f();
+    });
+    refreshSave();
+  });
+  function setOpen(open) {
+    if (open) place();
+    pop.hidden = !open;
+    launch.setAttribute("aria-expanded", String(open));
+  }
+  launch.addEventListener("click", function () {
+    setOpen(pop.hidden);
+  });
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape" && !pop.hidden) setOpen(false);
+  });
+  document.addEventListener("click", function (ev) {
+    // 用事件當下的路徑判斷（按鈕若在點擊後被重畫移除，closest 會找不到而誤關）
+    var inside = ev.composedPath().some(function (el) {
+      return el.classList && el.classList.contains("vt-tw-root");
+    });
+    if (!pop.hidden && !inside) setOpen(false);
+  });
+  // 把「設定檔變更」段接進評論收集函式：所有複製摘要都已經照規定拼接它，不必逐一改寫
+  function hook() {
+    var orig = window.vtCollectComments;
+    window.vtCollectComments = function () {
+      return window.vtCollectTweaks() + (orig ? orig() : "");
+    };
+  }
+  if (document.readyState === "loading")
+    document.addEventListener("DOMContentLoaded", hook);
+  else hook();
+  // querySelector：頁面沒有預覽鈕是正常的，不該讓 verify 的元素參照檢查報缺漏（同上方 vt-tweaks 的寫法）
+  var dock = document.querySelector("#preview-btn");
+  document.body.appendChild(pop);
+  if (dock) {
+    launch.classList.add("vt-tw-docked");
+    dock.parentNode.insertBefore(launch, dock);
+  } else document.body.insertBefore(launch, pop); // Tab 順序：按鈕→面板
+  // 縮放、捲動時按鈕會跟著列移動（捲到頁尾，列會被頁尾往上推），開著的面板要跟著對齊
+  function follow() {
+    if (!pop.hidden) place();
+  }
+  window.addEventListener("resize", follow);
+  window.addEventListener("scroll", follow, { passive: true });
+  refreshSave();
+})();
+
+</script>
+<!-- vt-tweaks:end -->
+</body>
+</html>
