@@ -2,7 +2,7 @@
 
 日期：2026-10-13
 對應 SR：`creator-operations-platform-blueprint`
-狀態：目標已建立；一致性分析與交接整理進行中。
+狀態：目標與十五張 SR 交接草稿已建立；十一份 capability 的語意核對、具體驗收例子與完整交接驗收仍進行中。
 
 ## 這輪交付
 
@@ -38,6 +38,8 @@
 訂閱取消後的權限截止時間、程式包更新期間與授權數量、直播供應商、錄影／逐字稿保留期限、發票／SMS／AI 供應商，沿用 design 的 Open Questions。先為每個問題寫清楚影響哪張 SR；只在該張功能開始需要答案時逐題對焦。
 
 ## 下一張施工工作的方向
+
+2026-10-13 本輪已修正 tasks 重複編號、文件／runtime 混用與銷售切片優先順序，並在 CONTEXT／銷售 proposal 更正 active 與已有程式修改的狀態。交接草稿見 [Creator 平台開發交接](creator-platform-development-handoff.md)。重新分析：總藍圖 0 Critical／Warning、50 Suggestions；銷售 SR 0 Critical／Warning、29 Suggestions；兩者 Spectra validate 均通過。這些是文件檢查，不是程式或部署驗收。
 
 優先收尾已進行中的 `public-multi-course-sales-and-code-package`：公開課程 → 選方案 → 結帳 → 指定課程權限 → LINE／Email → CodePackage 領取。
 
