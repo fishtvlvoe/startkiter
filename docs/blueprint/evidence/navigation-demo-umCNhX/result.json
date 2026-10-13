@@ -1,0 +1,465 @@
+{
+  "scope": "本機導航示意，非正式角色或設定驗收",
+  "results": [
+    {
+      "name": "創作者角色標示 1440",
+      "ok": true
+    },
+    {
+      "name": "情境子選單 overview 1440",
+      "ok": true,
+      "detail": [
+        "home"
+      ]
+    },
+    {
+      "name": "子功能 overview/home 1440",
+      "ok": true,
+      "detail": {
+        "group": "overview",
+        "sub": "home",
+        "heading": "創作者工作台",
+        "overflow": false
+      }
+    },
+    {
+      "name": "情境子選單 contacts 1440",
+      "ok": true,
+      "detail": [
+        "contacts",
+        "tags",
+        "segments",
+        "consent"
+      ]
+    },
+    {
+      "name": "子功能 contacts/contacts 1440",
+      "ok": true,
+      "detail": {
+        "group": "contacts",
+        "sub": "contacts",
+        "heading": "客戶名單",
+        "overflow": false
+      }
+    },
+    {
+      "name": "子功能 contacts/tags 1440",
+      "ok": true,
+      "detail": {
+        "group": "contacts",
+        "sub": "tags",
+        "heading": "標籤",
+        "overflow": false
+      }
+    },
+    {
+      "name": "子功能 contacts/segments 1440",
+      "ok": true,
+      "detail": {
+        "group": "contacts",
+        "sub": "segments",
+        "heading": "分眾",
+        "overflow": false
+      }
+    },
+    {
+      "name": "子功能 contacts/consent 1440",
+      "ok": true,
+      "detail": {
+        "group": "contacts",
+        "sub": "consent",
+        "heading": "同意與退訂",
+        "overflow": false
+      }
+    },
+    {
+      "name": "情境子選單 site 1440",
+      "ok": true,
+      "detail": [
+        "pages",
+        "funnels",
+        "forms"
+      ]
+    },
+    {
+      "name": "子功能 site/pages 1440",
+      "ok": true,
+      "detail": {
+        "group": "site",
+        "sub": "pages",
+        "heading": "網站頁面",
+        "overflow": false
+      }
+    },
+    {
+      "name": "子功能 site/funnels 1440",
+      "ok": true,
+      "detail": {
+        "group": "site",
+        "sub": "funnels",
+        "heading": "銷售漏斗",
+        "overflow": false
+      }
+    },
+    {
+      "name": "子功能 site/forms 1440",
+      "ok": true,
+      "detail": {
+        "group": "site",
+        "sub": "forms",
+        "heading": "表單",
+        "overflow": false
+      }
+    },
+    {
+      "name": "情境子選單 email 1440",
+      "ok": true,
+      "detail": [
+        "campaigns",
+        "templates",
+        "delivery"
+      ]
+    },
+    {
+      "name": "子功能 email/campaigns 1440",
+      "ok": true,
+      "detail": {
+        "group": "email",
+        "sub": "campaigns",
+        "heading": "行銷活動",
+        "overflow": false
+      }
+    },
+    {
+      "name": "子功能 email/templates 1440",
+      "ok": true,
+      "detail": {
+        "group": "email",
+        "sub": "templates",
+        "heading": "信件範本",
+        "overflow": false
+      }
+    },
+    {
+      "name": "子功能 email/delivery 1440",
+      "ok": true,
+      "detail": {
+        "group": "email",
+        "sub": "delivery",
+        "heading": "寄送紀錄",
+        "overflow": false
+      }
+    },
+    {
+      "name": "情境子選單 automation 1440",
+      "ok": true,
+      "detail": [
+        "rules",
+        "workflows",
+        "execution"
+      ]
+    },
+    {
+      "name": "子功能 automation/rules 1440",
+      "ok": true,
+      "detail": {
+        "group": "automation",
+        "sub": "rules",
+        "heading": "自動化規則",
+        "overflow": false
+      }
+    },
+    {
+      "name": "子功能 automation/workflows 1440",
+      "ok": true,
+      "detail": {
+        "group": "automation",
+        "sub": "workflows",
+        "heading": "工作流程",
+        "overflow": false
+      }
+    },
+    {
+      "name": "子功能 automation/execution 1440",
+      "ok": true,
+      "detail": {
+        "group": "automation",
+        "sub": "execution",
+        "heading": "執行紀錄",
+        "overflow": false
+      }
+    },
+    {
+      "name": "情境子選單 products 1440",
+      "ok": true,
+      "detail": [
+        "all",
+        "course",
+        "bundle",
+        "code",
+        "saas"
+      ]
+    },
+    {
+      "name": "子功能 products/all 1440",
+      "ok": true,
+      "detail": {
+        "group": "products",
+        "sub": "all",
+        "heading": "商品與銷售方案",
+        "overflow": false
+      }
+    },
+    {
+      "name": "子功能 products/course 1440",
+      "ok": true,
+      "detail": {
+        "group": "products",
+        "sub": "course",
+        "heading": "商品與銷售方案",
+        "overflow": false
+      }
+    },
+    {
+      "name": "商品種類 course 1440",
+      "ok": true
+    },
+    {
+      "name": "子功能 products/bundle 1440",
+      "ok": true,
+      "detail": {
+        "group": "products",
+        "sub": "bundle",
+        "heading": "商品與銷售方案",
+        "overflow": false
+      }
+    },
+    {
+      "name": "商品種類 bundle 1440",
+      "ok": true
+    },
+    {
+      "name": "子功能 products/code 1440",
+      "ok": true,
+      "detail": {
+        "group": "products",
+        "sub": "code",
+        "heading": "商品與銷售方案",
+        "overflow": false
+      }
+    },
+    {
+      "name": "商品種類 code 1440",
+      "ok": true
+    },
+    {
+      "name": "子功能 products/saas 1440",
+      "ok": true,
+      "detail": {
+        "group": "products",
+        "sub": "saas",
+        "heading": "商品與銷售方案",
+        "overflow": false
+      }
+    },
+    {
+      "name": "商品種類 saas 1440",
+      "ok": true
+    },
+    {
+      "name": "情境子選單 sales 1440",
+      "ok": true,
+      "detail": [
+        "orders",
+        "subscriptions",
+        "refunds",
+        "coupons"
+      ]
+    },
+    {
+      "name": "子功能 sales/orders 1440",
+      "ok": true,
+      "detail": {
+        "group": "sales",
+        "sub": "orders",
+        "heading": "訂單",
+        "overflow": false
+      }
+    },
+    {
+      "name": "子功能 sales/subscriptions 1440",
+      "ok": true,
+      "detail": {
+        "group": "sales",
+        "sub": "subscriptions",
+        "heading": "訂閱",
+        "overflow": false
+      }
+    },
+    {
+      "name": "子功能 sales/refunds 1440",
+      "ok": true,
+      "detail": {
+        "group": "sales",
+        "sub": "refunds",
+        "heading": "退款",
+        "overflow": false
+      }
+    },
+    {
+      "name": "子功能 sales/coupons 1440",
+      "ok": true,
+      "detail": {
+        "group": "sales",
+        "sub": "coupons",
+        "heading": "優惠券",
+        "overflow": false
+      }
+    },
+    {
+      "name": "情境子選單 live 1440",
+      "ok": true,
+      "detail": [
+        "all",
+        "live",
+        "evergreen",
+        "replays"
+      ]
+    },
+    {
+      "name": "子功能 live/all 1440",
+      "ok": true,
+      "detail": {
+        "group": "live",
+        "sub": "all",
+        "heading": "直播與回放",
+        "overflow": false
+      }
+    },
+    {
+      "name": "子功能 live/live 1440",
+      "ok": true,
+      "detail": {
+        "group": "live",
+        "sub": "live",
+        "heading": "直播與回放",
+        "overflow": false
+      }
+    },
+    {
+      "name": "子功能 live/evergreen 1440",
+      "ok": true,
+      "detail": {
+        "group": "live",
+        "sub": "evergreen",
+        "heading": "直播與回放",
+        "overflow": false
+      }
+    },
+    {
+      "name": "子功能 live/replays 1440",
+      "ok": true,
+      "detail": {
+        "group": "live",
+        "sub": "replays",
+        "heading": "回放",
+        "overflow": false
+      }
+    },
+    {
+      "name": "情境子選單 settings 1440",
+      "ok": true,
+      "detail": [
+        "profile",
+        "account",
+        "payment",
+        "subscription",
+        "email",
+        "domains",
+        "integrations"
+      ]
+    },
+    {
+      "name": "子功能 settings/profile 1440",
+      "ok": true,
+      "detail": {
+        "group": "settings",
+        "sub": "profile",
+        "heading": "基本資料",
+        "overflow": false
+      }
+    },
+    {
+      "name": "子功能 settings/account 1440",
+      "ok": true,
+      "detail": {
+        "group": "settings",
+        "sub": "account",
+        "heading": "帳戶與權限",
+        "overflow": false
+      }
+    },
+    {
+      "name": "子功能 settings/payment 1440",
+      "ok": true,
+      "detail": {
+        "group": "settings",
+        "sub": "payment",
+        "heading": "收款設定",
+        "overflow": false
+      }
+    },
+    {
+      "name": "子功能 settings/subscription 1440",
+      "ok": true,
+      "detail": {
+        "group": "settings",
+        "sub": "subscription",
+        "heading": "我的方案",
+        "overflow": false
+      }
+    },
+    {
+      "name": "子功能 settings/email 1440",
+      "ok": true,
+      "detail": {
+        "group": "settings",
+        "sub": "email",
+        "heading": "寄信設定",
+        "overflow": false
+      }
+    },
+    {
+      "name": "子功能 settings/domains 1440",
+      "ok": true,
+      "detail": {
+        "group": "settings",
+        "sub": "domains",
+        "heading": "自訂網域",
+        "overflow": false
+      }
+    },
+    {
+      "name": "子功能 settings/integrations 1440",
+      "ok": true,
+      "detail": {
+        "group": "settings",
+        "sub": "integrations",
+        "heading": "整合與金鑰",
+        "overflow": false
+      }
+    },
+    {
+      "name": "平台管理員示意 1440",
+      "ok": true
+    },
+    {
+      "name": "管理員專用子選單 1440",
+      "ok": true
+    },
+    {
+      "name": "角色不冒充授權 1440",
+      "ok": false
+    }
+  ]
+}

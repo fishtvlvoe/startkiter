@@ -35,3 +35,13 @@
 - [x] 6.3 完成 self-review、`spectra analyze buyer-journey-gap-completion` 與 `spectra validate buyer-journey-gap-completion`；完成後 analyzer 無未處理 Critical/Warning、validation exit 0。
 - [x] 6.4 部署後以 ego-browser 分別用已購買測試帳號與純學員測試帳號各走一次 `/course`、結帳頁、`/admin/course`；完成後對照 `docs/2026-09-24-畫面落差與上架路徑.md` 逐項確認落差已補上，保留截圖證據（代碼實作與元件測試已具備，待部屬上線驗收）。
 
+
+## 7. 查證後新增的收尾補償任務
+
+原19項完成描述與[x]保留歷史，不代表本輪已重新驗證部署。2026-10-13主控review發現下列矛盾，新增待辦防止全勾誤封存；總表M0/M4引用此owner。
+
+- [ ] 7.1 依 A course admin can preview the real learner surface from the admin workspace, with a single return entry 補正proposal與design舊選單文字為既有preview路線；核對canonical /admin/course角色矛盾，原role SR作唯一語義修正owner，不在本卡改新auth；驗證artifact/source映射與不雙owner。
+- [ ] 7.2 依 Course landing page shares the published catalog source 核對教室/preview/官網reader與發布course IDs一致性；新增多課資料例子，若不是同reader則補相同輸出契約或重用路徑，保留歷史；驗證三入口title/order/id逐項一致，不用同DB就假認一致。
+- [ ] 7.3 依 Paid learners see a LINE community join control 與 A course entitlement exposes only that course's LINE invite 對接多課sales指定course access：目前global access/first published不能冒充per-course；確認KitClaimButton與claim-status連線需求，落差由唯一sales/旅程owner處理；驗證兩課買其一不可讀另一LINE/claim不重複，未知policy不擅改。
+- [ ] 7.4 [after: 7.1, 7.2, 7.3] 查證原6.4部署checkbox與待上線文案：找真browser/版本/migration證據，沒有就於隔離TEST重驗且保留original歷史矛盾紀錄；主控review及Git通過後preview/核准/archive；不以檔案存在或mock tests當線上完成。
+

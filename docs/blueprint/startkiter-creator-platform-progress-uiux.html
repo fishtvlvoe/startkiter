@@ -314,6 +314,7 @@
         .demo-cards { display:grid; }
         .demo-mobile-nav-label { display:block; }
       }
+      #creator-admin-demo [hidden] { display: none !important; }
       @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
     </style>
   <style id="vt-profile" data-profile-hash="020a3e00b0">:root { --fs: 1.45; --wrap-max: 1080px; }</style>
@@ -321,11 +322,11 @@
   <body>
     <div class="wrap">
       <header class="masthead">
-        <div class="eyebrow">STARTKITER · 白話計畫圖 · 2026-10-12</div>
+        <div class="eyebrow">STARTKITER · 白話計畫圖 · 2026-10-13</div>
         <h1>不是打掉重練。<br />是把已經有的課程平台，長成一套創作者營運工具。</h1>
         <p class="subhead">這份報告把「StartKiter 自己營運的網站」、「客戶買回去的程式碼包」、UI/UX 方向，以及接下來每張開發 SR 的順序放在同一張地圖。</p>
         <div class="meta-row">
-          <span class="pill"><strong>總藍圖</strong> 3 / 75 項核對完成</span>
+          <span class="pill"><strong>總藍圖</strong> 68 / 75 項核對完成；不是功能完成比例</span>
           <span class="pill"><strong>目前程式 SR</strong> 2 / 15 項核對完成</span>
           <span class="pill"><strong>狀態</strong> 有實作，驗收未完成</span>
         </div>
@@ -341,6 +342,7 @@
       </nav>
 
       <main>
+        <section id="local-acceptance" hidden aria-label="本機功能驗收"><div class="card"><h2>本機驗收載入中</h2><p>正在準備獨立的本機操作畫面；不讀正式帳號或訂單。</p></div></section>
         <section id="plain">
           <div class="section-kicker">01 · 先看懂產品邊界</div>
           <h2>「我們的營運網站」跟「客戶買回去的程式包」是兩個產品</h2>
@@ -380,12 +382,12 @@
         <section id="now">
           <div class="section-kicker">02 · 真實進度，不把文件當程式</div>
           <h2>計畫有雛形；第一條銷售功能正在寫，還不能說已完成</h2>
-          <p class="section-lead prose">下面的數字來自目前 SR 的核對清單與本次測試。清單打勾數只代表該項已按驗收條件核對，不代表其他程式碼不存在。</p>
+          <p class="section-lead prose">2026-10-13 已補齊 111 個規格驗收例子與十五張交接卡片。16 個施工階段的依賴表沒有缺失前置或循環；完整流程圖與 UI 巡查仍進行中。下方程式清單與測試數字是先前紀錄，本輪未重跑程式測試。</p>
           <div class="grid three">
             <article class="card wait">
               <span class="label">總體 Creator Blueprint</span>
-              <span class="big-number">3 / 75</span>
-              <p>目前正式勾選的是 WebinarJam 畫面逆向觀察 3 項。架構、功能、UI/UX 與後續 SR 雖已有文件草稿，交叉核對和 Spectra 驗證還沒完成。</p>
+              <span class="big-number">111 個例子</span>
+              <p>規格、交接、盤點、政策與憑證路徑文書已核對 68／75 項。實際設定接線、多部署目標、錯誤去敏與服務安全仍要測；新圖、完整 UI、倉庫／快照整合未完成，不當成功能上線。</p>
             </article>
             <article class="card wait">
               <span class="label">目前程式 SR：多課程銷售與程式包</span>
@@ -393,7 +395,7 @@
               <p>Marketing 公開課程頁、Offer 管理、結帳、權限、退款與 GitHub 交付已有多處程式修改；任務核對清單和端到端驗收尚未收尾。</p>
             </article>
             <article class="card done">
-              <span class="label">本次實際跑的相關測試</span>
+              <span class="label">先前執行的相關測試；本輪未重跑</span>
               <span class="big-number">89 項通過</span>
               <p>9 個測試檔通過。商品目錄另有資料庫整合測試；目前測試環境拒絕資料庫連線，9 項中 6 項因此失敗，不能算功能驗收通過。</p>
             </article>
@@ -410,9 +412,15 @@
               <p>目前工作樹有大量未提交變更；本報告不會替它們標成已合併或已上線。</p>
             </article>
           </div>
+          <div class="grid two" style="margin-top:calc(16px * var(--dens, 1))" aria-label="實際程式與總計畫的四個差異">
+            <article class="card warm"><span class="label">訂閱</span><h3>現在有月／年；季是要補的能力</h3><p>季、組合包與獨立程式包訂閱保留在目標中。不能只換顯示名稱；要補資料遷移、收款映射、取消與到期驗收。</p></article>
+            <article class="card warm"><span class="label">買家開發</span><h3>安裝、倉庫與設定要分開驗收</h3><p>本機能改檔不代表能推回唯讀倉庫。現有金鑰交接的通用欄位也不同於收款／寄信的實際配置；必須補接線並拿乾淨專案驗證，不能只說填完就可開站。</p></article>
+            <article class="card warm"><span class="label">工作區</span><h3>功能角色，不等於公司／團隊</h3><p>目前入口依功能與角色解析。新營運後台還要對上所屬團隊；不能因為看得到選單，就能讀到別人的資料。</p></article>
+            <article class="card warm"><span class="label">更新</span><h3>已有更新提示，還不是安全更新完成</h3><p>版本比較與合併提示可沿用；備份、客製衝突、Skill 相容檢查和回滾仍要補。不能直接覆蓋買家的專案。</p></article>
+          </div>
           <details class="reveal" style="margin-top:calc(14px * var(--dens, 1))">
-            <summary>測試數字怎麼來的？</summary>
-            <div class="detail-body">本次針對課程權限、付款通知、訂單、Email、GitHub 領取／撤銷、結帳頁與公開課程頁等測試執行 Vitest。實際輸出為 9 個測試檔、89 tests passed；`packages/payments/catalog.test.ts` 需要可用的測試資料庫，環境拒絕連線，9 tests 中 6 項因資料庫不可用失敗、3 項通過。沒有連正式資料庫、沒有做正式付款、沒有做正式部署。</div>
+            <summary>先前測試數字怎麼來的？</summary>
+            <div class="detail-body">先前針對課程權限、付款通知、訂單、Email、GitHub 領取／撤銷、結帳頁與公開課程頁等測試執行 Vitest，本輪未重跑。當時實際輸出為 9 個測試檔、89 tests passed；`packages/payments/catalog.test.ts` 需要可用的測試資料庫，環境拒絕連線，9 tests 中 6 項因資料庫不可用失敗、3 項通過。沒有連正式資料庫、沒有做正式付款、沒有做正式部署。</div>
           </details>
         </section>
 
@@ -573,6 +581,8 @@
               <option value="contacts">聯絡人（CRM 規劃中）</option>
               <option value="live">直播與回放（規劃中）</option>
             </select>
+            <div class="demo-toolbar"><label class="demo-preview-label" for="demo-ui-state">畫面狀態驗收（不連後端）<select class="demo-range" id="demo-ui-state"><option value="normal">正常畫面</option><option value="loading">載入中</option><option value="empty">沒有資料</option><option value="error">讀取失敗</option><option value="denied">沒有權限</option><option value="disabled">功能停用</option><option value="success">儲存成功示意</option></select></label></div>
+            <div class="demo-panel" id="demo-state-panel" role="status" hidden><h3 id="demo-state-title"></h3><p id="demo-state-description"></p><button type="button" class="row-action" id="demo-state-recover">回正常畫面</button></div>
             <div class="admin-layout">
               <div class="demo-stage" aria-live="polite">
                 <section class="demo-page" data-demo-page="overview" aria-label="工作總覽畫面">
@@ -604,7 +614,8 @@
 
                 <section class="demo-page" data-demo-page="courses" aria-label="課程列表畫面" hidden>
                   <div class="demo-page-head"><div><h3>課程與內容</h3><p>管理課程、章節和發布狀態；賣什麼方案到「商品與銷售方案」設定。</p></div><button class="admin-action primary" type="button" data-demo-view="offers">管理銷售方案</button></div>
-                  <div class="demo-toolbar"><input class="demo-search" type="search" aria-label="搜尋課程" placeholder="搜尋課程名稱" data-demo-search="courses" /><div class="demo-filter" role="group" aria-label="課程篩選"><button type="button" data-demo-filter="all" aria-pressed="true">全部 6</button><button type="button" data-demo-filter="published">已發布 4</button><button type="button" data-demo-filter="draft">草稿 2</button></div></div>
+                  <div class="demo-toolbar"><input class="demo-search" type="search" aria-label="搜尋課程" placeholder="搜尋課程名稱" data-demo-search="courses" /><div class="demo-filter" role="group" aria-label="課程篩選"><button type="button" data-demo-filter="all" aria-pressed="true">全部 3</button><button type="button" data-demo-filter="published" aria-pressed="false">已發布 2</button><button type="button" data-demo-filter="draft" aria-pressed="false">草稿 1</button></div></div>
+                  <div class="demo-panel" id="demo-course-empty" role="status" hidden><p>目前搜尋與發布狀態沒有符合的課程。</p><button type="button" class="row-action" data-demo-clear-search>清除搜尋與篩選</button></div>
                   <div class="demo-table-wrap"><table class="demo-table"><thead><tr><th style="width:38%">課程名稱</th><th style="width:18%">狀態</th><th style="width:18%">學員</th><th style="width:26%">下一步</th></tr></thead><tbody>
                     <tr data-course-state="published"><td class="primary-cell">AI 自動化入門</td><td><span class="demo-status">已發布</span></td><td>128 人</td><td><button class="row-action" type="button" data-demo-view="offers">管理方案</button></td></tr>
                     <tr data-course-state="published"><td class="primary-cell">用 AI 建立會員服務</td><td><span class="demo-status">已發布</span></td><td>64 人</td><td><button class="row-action" type="button" data-demo-view="offers">管理方案</button></td></tr>
@@ -622,32 +633,32 @@
                   <div class="demo-page-head"><div><h3>商品與銷售方案</h3><p>同一門課可以有不同方案；每個方案各自決定價格和交付內容。</p></div><button class="admin-action primary" type="button" data-demo-view="offer-form">＋ 建立銷售方案</button></div>
                   <div class="demo-toolbar"><span class="tag">課程：AI 自動化入門</span><span class="demo-preview-label">以下名稱、金額為畫面示意</span></div>
                   <div class="demo-table-wrap"><table class="demo-table"><thead><tr><th style="width:30%">方案名稱</th><th style="width:18%">賣什麼</th><th style="width:20%">價格／週期</th><th style="width:14%">狀態</th><th style="width:18%">操作</th></tr></thead><tbody>
-                    <tr><td class="primary-cell">單堂課程</td><td>一門課</td><td>NT$ 8,800<br /><span class="demo-preview-label">一次付清</span></td><td><span class="demo-status">已發布</span></td><td><button class="row-action" type="button" data-demo-view="offer-form">編輯</button></td></tr>
-                    <tr><td class="primary-cell">創作者工具組合包</td><td>多門指定課程</td><td>價格待設定</td><td><span class="demo-status draft">草稿</span></td><td><button class="row-action" type="button" data-demo-view="offer-form">繼續設定</button></td></tr>
-                    <tr><td class="primary-cell">CodePackage 獨立販售</td><td>程式包</td><td>價格待設定</td><td><span class="demo-status draft">草稿</span></td><td><button class="row-action" type="button" data-demo-view="offer-form">繼續設定</button></td></tr>
+                    <tr><td class="primary-cell">單堂課程</td><td>一門課</td><td>NT$ 8,800<br /><span class="demo-preview-label">一次付清</span></td><td><span class="demo-status">已發布</span></td><td><button class="row-action" type="button" data-demo-view="offer-form" data-demo-offer="course">編輯</button></td></tr>
+                    <tr><td class="primary-cell">創作者工具組合包</td><td>多門指定課程</td><td>價格待設定</td><td><span class="demo-status draft">草稿</span></td><td><button class="row-action" type="button" data-demo-view="offer-form" data-demo-offer="bundle">繼續設定</button></td></tr>
+                    <tr><td class="primary-cell">CodePackage 獨立販售</td><td>程式包</td><td>價格待設定</td><td><span class="demo-status draft">草稿</span></td><td><button class="row-action" type="button" data-demo-view="offer-form" data-demo-offer="kit">繼續設定</button></td></tr>
                     <tr><td class="primary-cell">CodePackage 訂閱</td><td>程式包更新</td><td>週期尚未決定</td><td><span class="demo-status future">規劃中</span></td><td><span class="demo-preview-label">尚不可販售</span></td></tr>
                   </tbody></table></div>
                   <div class="demo-cards">
-                    <article class="demo-record"><div class="demo-record-head"><span class="demo-record-title">單堂課程</span><span class="demo-status">已發布</span></div><div class="demo-record-meta"><div><span>交付內容</span><strong>一門課</strong></div><div><span>價格／週期</span><strong>NT$ 8,800 · 一次付清</strong></div></div><button class="row-action" type="button" data-demo-view="offer-form">編輯方案</button></article>
-                    <article class="demo-record"><div class="demo-record-head"><span class="demo-record-title">創作者工具組合包</span><span class="demo-status draft">草稿</span></div><div class="demo-record-meta"><div><span>交付內容</span><strong>多門指定課程</strong></div><div><span>價格／週期</span><strong>尚未設定</strong></div></div><button class="row-action" type="button" data-demo-view="offer-form">繼續設定</button></article>
-                    <article class="demo-record"><div class="demo-record-head"><span class="demo-record-title">CodePackage 獨立販售</span><span class="demo-status draft">草稿</span></div><div class="demo-record-meta"><div><span>交付內容</span><strong>程式包</strong></div><div><span>價格／週期</span><strong>尚未設定</strong></div></div><button class="row-action" type="button" data-demo-view="offer-form">繼續設定</button></article>
+                    <article class="demo-record"><div class="demo-record-head"><span class="demo-record-title">單堂課程</span><span class="demo-status">已發布</span></div><div class="demo-record-meta"><div><span>交付內容</span><strong>一門課</strong></div><div><span>價格／週期</span><strong>NT$ 8,800 · 一次付清</strong></div></div><button class="row-action" type="button" data-demo-view="offer-form" data-demo-offer="course">編輯方案</button></article>
+                    <article class="demo-record"><div class="demo-record-head"><span class="demo-record-title">創作者工具組合包</span><span class="demo-status draft">草稿</span></div><div class="demo-record-meta"><div><span>交付內容</span><strong>多門指定課程</strong></div><div><span>價格／週期</span><strong>尚未設定</strong></div></div><button class="row-action" type="button" data-demo-view="offer-form" data-demo-offer="bundle">繼續設定</button></article>
+                    <article class="demo-record"><div class="demo-record-head"><span class="demo-record-title">CodePackage 獨立販售</span><span class="demo-status draft">草稿</span></div><div class="demo-record-meta"><div><span>交付內容</span><strong>程式包</strong></div><div><span>價格／週期</span><strong>尚未設定</strong></div></div><button class="row-action" type="button" data-demo-view="offer-form" data-demo-offer="kit">繼續設定</button></article>
                     <article class="demo-record"><div class="demo-record-head"><span class="demo-record-title">CodePackage 訂閱</span><span class="demo-status future">規劃中</span></div><div class="demo-record-meta"><div><span>交付內容</span><strong>程式包更新</strong></div><div><span>價格／週期</span><strong>尚未決定</strong></div></div><button class="row-action" type="button" disabled>尚不可販售</button></article>
                   </div>
-                  <p class="demo-note">組合包只授予包內指定課程；CodePackage 是否單賣、是否訂閱、退款或取消後保留多久，還要依 SR 規格決定。</p>
+                  <p class="demo-note">組合包只授予包內指定課程。CodePackage 可以獨立單賣或訂閱；價格、更新期限與取消政策仍需核准，未定案的新方案不開放販售。</p>
                 </section>
 
                 <section class="demo-page" data-demo-page="offer-form" aria-label="建立銷售方案畫面" hidden>
-                  <div class="demo-page-head"><div><h3>建立銷售方案</h3><p>先選買家付什麼，再清楚列出他會拿到什麼。</p></div><button class="demo-back" type="button" data-demo-view="offers">← 回方案列表</button></div>
+                  <div class="demo-page-head"><div><h3 id="demo-offer-heading" tabindex="-1">建立銷售方案</h3><p>先選買家付什麼，再清楚列出他會拿到什麼。</p></div><button class="demo-back" type="button" data-demo-view="offers">← 回方案列表</button></div>
                   <div class="demo-panel"><div class="demo-panel-title"><span>方案基本資料</span><span class="demo-preview-label">步驟 1／2</span></div>
                     <form class="demo-form" id="demo-offer-form">
-                      <label>方案名稱<input name="offerName" value="AI 自動化入門｜單堂課" /></label>
-                      <label>販售內容<select name="productType"><option>單堂課程</option><option>多門課程組合包</option><option>獨立 CodePackage</option><option>課程＋CodePackage</option></select></label>
+                      <label>方案名稱<input name="offerName" maxlength="100" aria-describedby="demo-offer-message" /></label>
+                      <label>販售內容<select name="productType"><option value="course">單堂課程</option><option value="bundle">多門課程組合包</option><option value="code">獨立 CodePackage</option><option value="course-code">課程＋CodePackage</option></select></label>
                       <label>付款方式<select name="billingType" id="demo-billing-type"><option value="once">一次付清</option><option value="subscription">定期訂閱（規劃中）</option></select></label>
                       <label id="demo-billing-period" hidden>收款週期<select name="billingPeriod"><option>每月</option><option>每季</option><option>每年</option></select></label>
-                      <label>價格（新台幣）<input name="price" inputmode="numeric" placeholder="例如：8,800" /></label>
-                      <label>發布狀態<select name="status"><option>先存草稿</option><option>發布並開始販售</option></select></label>
+                      <label>價格（新台幣）<input name="price" inputmode="numeric" placeholder="例如：8,800" aria-describedby="demo-offer-message" /></label>
+                      <label>發布狀態<select name="status"><option value="draft">先存草稿</option><option value="published">發布狀態預覽（不真的發布）</option></select></label>
                       <label class="wide">付款後交付什麼
-                        <span class="demo-checks"><label class="demo-check"><input type="checkbox" checked /> 指定課程觀看權限</label><label class="demo-check"><input type="checkbox" /> CodePackage 私人程式庫</label></span>
+                        <span class="demo-checks"><label class="demo-check"><input name="grantCourses" type="checkbox" checked /> 指定課程觀看權限</label><label class="demo-check"><input name="grantKit" type="checkbox" /> CodePackage 私人程式庫</label></span>
                       </label>
                     </form>
                     <p class="demo-note">畫面先把內容、收費、交付分開。訂閱方案、程式包更新權限和取消政策尚未定案，未定案前不會真的開放發布。</p>
@@ -665,8 +676,8 @@
 
                 <section class="demo-page" data-demo-page="live" aria-label="直播與回放畫面" hidden>
                   <div class="demo-page-head"><div><h3>直播與回放</h3><p>活動狀態、報名、出席和回放放在同一個工作頁。</p></div><span class="tag">後續規劃</span></div>
-                  <div class="demo-filter" role="group" aria-label="活動類型"><button type="button" aria-pressed="true">全部活動</button><button type="button">即時直播</button><button type="button">預錄常青內容</button></div>
-                  <div class="demo-panel"><div class="demo-task"><span><b>每週創作者問答</b><br />即時直播 · 10 月 18 日 19:30 · 42 人報名</span><span class="demo-status">已排程</span></div><div class="demo-task"><span><b>自動化入門說明會</b><br />預錄常青內容 · 報名後依規則安排觀看</span><span class="demo-status future">草稿</span></div></div>
+                  <div class="demo-filter" role="group" aria-label="活動類型"><button type="button" data-demo-live-filter="all" aria-pressed="true">全部活動</button><button type="button" data-demo-live-filter="live" aria-pressed="false">即時直播</button><button type="button" data-demo-live-filter="evergreen" aria-pressed="false">預錄常青內容</button></div>
+                  <div class="demo-panel"><div class="demo-task" data-demo-live-kind="live"><span><b>每週創作者問答</b><br />即時直播 · 10 月 18 日 19:30 · 42 人報名</span><span class="demo-status">已排程</span></div><div class="demo-task" data-demo-live-kind="evergreen"><span><b>自動化入門說明會</b><br />預錄常青內容 · 報名後依規則安排觀看</span><span class="demo-status future">草稿</span></div></div>
                   <p class="demo-note">即時直播與預錄常青內容分開呈現；影音供應商與正式收費方案還未選定，這頁是產品設計示意。</p>
                 </section>
               </div>
@@ -774,7 +785,14 @@
         <section id="references">
           <div class="section-kicker">參考文件</div>
           <h2>想看原始規格時</h2>
-          <div class="callout prose"><p>2026-10-13 交接：<a href="creator-platform-acceptance-target.md">本輪五項驗收標準</a> · <a href="creator-platform-development-handoff.md">商品／買家使用流程與十五張 SR 交接卡片</a>。下一張先收尾正在修改的多課程銷售切片；序號是能力索引，實際前置以交接卡片為準。</p></div>
+          <div class="grid two" aria-label="完整已知能力的五個分區">
+            <details class="card reveal"><summary>平台、CRM 與營運</summary><div class="detail-body"><p>身份、工作區、品牌、聯絡人、標籤、分眾、同意／退訂、工作台、分析匯出、客服與通知。</p><p>既有身份、課程報表、寄信與客服有地基；統一營運台與聯絡人資料要擴充。商機管道與日曆保留後續獨立研究，不算目前已可用。</p></div></details>
+            <details class="card reveal"><summary>網站、行銷與自動化</summary><div class="detail-body"><p>頁面與部落格、銷售漏斗、表單、電子郵件／行銷活動、簡訊、跨模組自動化。</p><p>沿用頁面管理與電子報，先串最小頁面→表單／結帳→感謝頁；完整編輯器深度與簡訊供應商待核准。新管道使用同一套同意規則，不另造寄送真相。</p></div></details>
+            <details class="card reveal"><summary>商品、收款與分潤</summary><div class="detail-body"><p>單課、課程組合包、優惠券、獨立 CodePackage、月／季／年訂閱、訂單、退款與發票。</p><p>現有單課月／年訂閱不代表已支援季、組合包或程式包訂閱。檔案、社群、服務與實體商品保留擴充槽；推薦分潤另研究。付款、發票、授權與行銷同意是不同狀態，不互相冒充。</p></div></details>
+            <details class="card reveal"><summary>課程與買家自己的 SaaS</summary><div class="detail-body"><p>課程管理、教材與媒體、作業／測驗／討論／互動積木，以及買家手冊、桌面 AI 專案模式、安裝、可寫開發倉庫、部署與更新。</p><p>課程引擎沿用，不打掉重練。買家的終端客戶與收款屬於自己的 SaaS；官方唯讀交付倉庫不能被當成已可推送開發變更，這個移轉契約仍要補。</p></div></details>
+            <details class="card reveal"><summary>直播、AI 與安全更新</summary><div class="detail-body"><p>即時直播／預錄常青、報名、提醒、出席、回放、會後摘要；營運 AI 的來源、草稿、人審與稽核；核心／官方模組／買家客製的版本、遷移與回滾。</p><p>影音與模型供應商、錄影／資料保存政策待核准。AI 不自行退款、寄信或授權；新版先兼容舊流程、客製衝突先停，不直接整包覆蓋。</p></div></details>
+          </div>
+          <div class="callout prose"><p>2026-10-13 交接：<a href="creator-platform-capability-catalog.md">26 類已知能力與研究缺口</a> · <a href="creator-platform-completion-audit.md">75 項文件待辦的稽核索引</a> · <a href="creator-platform-domain-decision-tables.md">商品授權與 CRM 判斷</a> · <a href="creator-platform-event-operations-contract.md">事件、自動化、報表與告警</a> · <a href="creator-platform-development-handoff.md">十五張 SR 卡片與依賴</a>。<a href="creator-platform-ui-browser-evidence.md">真實 Demo 證據與限制</a>和<a href="creator-platform-acceptance-target.md">五項驗收標準</a>分開檢查；這是架構涵蓋，不是所有功能已上線或第三方逆向已完成。</p></div>
           <div class="grid two">
             <article class="card"><h3>Creator 總藍圖</h3><p><a href="startkiter-creator-platform.md">產品定位、流程、資料邊界與使用者旅程</a></p></article>
             <article class="card"><h3>SR 開發順序</h3><p><a href="../../openspec/changes/creator-operations-platform-blueprint/tasks.md">總計畫 tasks.md</a> · <a href="../../openspec/changes/creator-operations-platform-blueprint/design.md">技術決策 design.md</a></p></article>
@@ -783,12 +801,82 @@
           </div>
         </section>
       </main>
-      <footer>狀態截至 2026-10-12。這份 HTML 是白話導讀；規格以 Spectra 文件為準，測試、瀏覽器、付款、寄信、部署與回滾證據分開記錄。</footer>
+      <footer>狀態截至 2026-10-13。這份 HTML 是白話導讀與示意後台；規格以 Spectra 文件為準，測試、瀏覽器、付款、寄信、部署與回滾證據分開記錄。</footer>
+      <script src="creator-local-model.js"></script>
+      <script src="creator-local-navigation.js"></script>
+      <script src="creator-local-shell.js"></script>
+      <script src="creator-local-admin-view.js"></script>
+      <script src="creator-local-creator-view.js"></script>
+      <script src="creator-local-buyer-view.js"></script>
+      <script src="creator-local-ui.js"></script>
       <script>
         (function () {
+          if (new URLSearchParams(location.search).get('localAcceptance') === '1') return;
           const demo = document.getElementById("creator-admin-demo");
           if (!demo) return;
           const mobileNav = document.getElementById("demo-mobile-nav");
+          const search = demo.querySelector('[data-demo-search="courses"]');
+          const offerForm = document.getElementById("demo-offer-form");
+          const offerFixtures = {
+            course: { name: "單堂課程", type: "course", price: "8800", status: "published" },
+            bundle: { name: "創作者工具組合包", type: "bundle", price: "", status: "draft" },
+            kit: { name: "CodePackage 獨立販售", type: "code", price: "", status: "draft" }
+          };
+          function prepareOfferForm(key) {
+            const record = offerFixtures[key];
+            offerForm.reset();
+            offerForm.elements.offerName.value = record?.name || "";
+            offerForm.elements.productType.value = record?.type || "course";
+            offerForm.elements.price.value = record?.price || "";
+            offerForm.elements.status.value = record?.status || "draft";
+            offerForm.elements.grantCourses.checked = record?.type !== "code";
+            offerForm.elements.grantKit.checked = record?.type === "code";
+            offerForm.querySelectorAll('[aria-invalid]').forEach((field) => field.removeAttribute("aria-invalid"));
+            document.getElementById("demo-offer-heading").textContent = record ? "編輯銷售方案" : "建立銷售方案";
+            document.getElementById("demo-offer-message").textContent = "";
+            document.getElementById("demo-billing-period").hidden = true;
+          }
+          const stateControl = document.getElementById("demo-ui-state");
+          const statePanel = document.getElementById("demo-state-panel");
+          const stateRecover = document.getElementById("demo-state-recover");
+          const layout = demo.querySelector(".admin-layout");
+          const stateFixtures = {
+            loading: ["資料載入中", "示意狀態：保留入口與查詢條件，尚未取得的資料不顯示成 0。", "回正常畫面"],
+            empty: ["目前沒有資料", "示意狀態：尚未建立資料與搜尋無結果要分開；回正常畫面後可繼續建立方案。", "回正常畫面"],
+            error: ["資料暫時無法取得", "示意狀態：保留輸入與篩選。重試只恢復這份 Demo，不會呼叫外部服務。", "重試（示意）"],
+            denied: ["目前沒有操作權限", "示意狀態：不暴露管理資料。正式權限仍需伺服器驗證，這個切換器不代表登入或授權功能。", "返回儀表板（示意）"],
+            disabled: ["這項功能暫停使用", "示意狀態：下方操作已停用，既有資料保留；恢復按鈕只改畫面，不改產品設定。", "恢復可用預覽"],
+            success: ["儲存成功的畫面示意", "這裡只展示成功回饋，沒有真的儲存、發布、付款或取得權限。", "關閉成功提示"]
+          };
+          function showDemoState(value) {
+            const fixture = stateFixtures[value];
+            statePanel.hidden = !fixture;
+            layout.hidden = Boolean(fixture && value !== "disabled" && value !== "success");
+            layout.inert = value === "disabled";
+            if (fixture) {
+              document.getElementById("demo-state-title").textContent = fixture[0];
+              document.getElementById("demo-state-description").textContent = fixture[1];
+              stateRecover.textContent = fixture[2];
+            }
+          }
+          stateControl.addEventListener("change", () => showDemoState(stateControl.value));
+          stateRecover.addEventListener("click", () => {
+            if (stateControl.value === "denied") showView("overview");
+            stateControl.value = "normal";
+            showDemoState("normal");
+            stateControl.focus();
+          });
+          function applyCourseFilter() {
+            const term = search?.value.trim().toLocaleLowerCase() || "";
+            const state = demo.querySelector('[data-demo-filter][aria-pressed="true"]')?.dataset.demoFilter || "all";
+            let hasResults = false;
+            demo.querySelectorAll("[data-course-state]").forEach((row) => {
+              row.hidden = (state !== "all" && row.dataset.courseState !== state) || (term !== "" && !row.textContent.toLocaleLowerCase().includes(term));
+              if (!row.hidden) hasResults = true;
+            });
+            const empty = document.getElementById("demo-course-empty");
+            if (empty) empty.hidden = hasResults;
+          }
           function closeMenus() {
             demo.querySelectorAll("[data-demo-menu-panel]").forEach((panel) => { panel.hidden = true; });
             demo.querySelectorAll("[data-demo-menu-toggle]").forEach((button) => button.setAttribute("aria-expanded", "false"));
@@ -823,13 +911,28 @@
               return;
             }
             const viewButton = event.target.closest("[data-demo-view]");
-            if (viewButton) showView(viewButton.dataset.demoView);
+            if (viewButton) {
+              if (viewButton.dataset.demoView === "offer-form") prepareOfferForm(viewButton.dataset.demoOffer);
+              showView(viewButton.dataset.demoView);
+              if (viewButton.dataset.demoView === "offer-form") document.getElementById("demo-offer-heading").focus();
+            }
             const filterButton = event.target.closest("[data-demo-filter]");
             if (filterButton) {
               demo.querySelectorAll("[data-demo-filter]").forEach((button) => button.setAttribute("aria-pressed", String(button === filterButton)));
-              demo.querySelectorAll("[data-course-state]").forEach((row) => {
-                row.hidden = filterButton.dataset.demoFilter !== "all" && row.dataset.courseState !== filterButton.dataset.demoFilter;
+              applyCourseFilter();
+            }
+            const liveFilter = event.target.closest("[data-demo-live-filter]");
+            if (liveFilter) {
+              demo.querySelectorAll("[data-demo-live-filter]").forEach((button) => button.setAttribute("aria-pressed", String(button === liveFilter)));
+              demo.querySelectorAll("[data-demo-live-kind]").forEach((row) => {
+                row.hidden = liveFilter.dataset.demoLiveFilter !== "all" && row.dataset.demoLiveKind !== liveFilter.dataset.demoLiveFilter;
               });
+            }
+            if (event.target.closest("[data-demo-clear-search]")) {
+              if (search) search.value = "";
+              demo.querySelectorAll("[data-demo-filter]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.demoFilter === "all")));
+              applyCourseFilter();
+              search?.focus();
             }
             if (!event.target.closest(".demo-menu-group")) closeMenus();
           });
@@ -848,18 +951,37 @@
           const billing = document.getElementById("demo-billing-type");
           const period = document.getElementById("demo-billing-period");
           if (billing && period) billing.addEventListener("change", () => { period.hidden = billing.value !== "subscription"; });
-          const search = demo.querySelector('[data-demo-search="courses"]');
-          if (search) search.addEventListener("input", () => {
-            const term = search.value.trim().toLocaleLowerCase();
-            demo.querySelectorAll("[data-course-state]").forEach((row) => {
-              row.hidden = term !== "" && !row.innerText.toLocaleLowerCase().includes(term);
-            });
+          offerForm.elements.productType.addEventListener("change", () => {
+            const type = offerForm.elements.productType.value;
+            offerForm.elements.grantCourses.checked = type !== "code";
+            offerForm.elements.grantKit.checked = type === "code" || type === "course-code";
           });
+          if (search) search.addEventListener("input", applyCourseFilter);
           const preview = document.getElementById("demo-preview-offer");
           if (preview) preview.addEventListener("click", () => {
-            const name = demo.querySelector('[name="offerName"]')?.value || "未命名方案";
+            const nameField = offerForm.elements.offerName;
+            const priceField = offerForm.elements.price;
+            const name = nameField.value.trim();
+            const rawPrice = priceField.value.trim();
+            const price = Number(rawPrice.replaceAll(",", ""));
             const message = document.getElementById("demo-offer-message");
-            if (message) message.textContent = `畫面預覽：${name}。這是互動示意，沒有儲存或發布資料。`;
+            nameField.removeAttribute("aria-invalid");
+            priceField.removeAttribute("aria-invalid");
+            let invalid = null;
+            if (!name || name.length > 100) {
+              message.textContent = "請填寫 1～100 字的方案名稱；已保留其他輸入。";
+              invalid = nameField;
+            } else if (!/^(?:\d+|\d{1,3}(?:,\d{3})+)$/.test(rawPrice) || !Number.isSafeInteger(price) || price <= 0 || price > 2147483647) {
+              message.textContent = "請填寫 1～2,147,483,647 的整數新台幣價格；已保留其他輸入。";
+              invalid = priceField;
+            }
+            message.setAttribute("role", invalid ? "alert" : "status");
+            if (invalid) {
+              invalid.setAttribute("aria-invalid", "true");
+              invalid.focus();
+              return;
+            }
+            message.textContent = `畫面預覽：${name}，NT$ ${price.toLocaleString("zh-TW")}。這是互動示意，沒有儲存或發布資料；新訂閱與程式包方案仍需核准政策。`;
           });
           showView("overview");
         })();

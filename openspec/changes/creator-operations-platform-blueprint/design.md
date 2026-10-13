@@ -4,7 +4,21 @@ StartKiter 已有平台殼、Organization／Member／Invitation、課程與課�
 
 本 change 先把逆向證據整理成總計畫，再把總計畫拆成後續小 SR。`docs/blueprint/systeme-io-reverse-engineering-checklist.md` 是逐項 inventory；本 design 是它的架構決策與施工順序。`public-multi-course-sales-and-code-package` 是第一條垂直切片，必須重用本 change 的 Product／Offer／Entitlement 邊界。
 
-限制：本 change 只修改 Spectra artifacts 與藍圖文件，不修改 application runtime、Prisma schema、provider、部署或外部 Systeme.io 資料。
+限制：本 change 修改 Spectra artifacts、藍圖文件及隔離的本機 HTML 驗收程式，不修改正式 application runtime、Prisma schema、provider、部署或外部 Systeme.io 資料。
+
+### 本機操作驗收取代文件比例作為本輪目標
+
+2026-10-13 導航修正：Fish 提供設定頁截圖，確認要上方主分類＋左側情境子選單，不是全頂部或全側邊二選一。Supersedes：本機 UI 先前只有五顆上方切換按鈕的殼；已完成 11.2 不改歷史，補 11.5 修正。重用報告原 CSS 與本機 model，新增 navigation 模組管理主分類／子選單。桌面兩欄，手機可展開子選單；當前角色、主分類與子功能可見，切分類改側欄、不丟失本機商品。平台管理員為明確標示的介面示意，未施工站點／郵件／自動化／銷售／設定只顯示可切換提案與尚未串接標籤，不假報保存或權限已完成；買家預覽是獨立入口，不列成後台業務模組。驗證：creator-local-navigation.test.cjs 的映射與拒絕未知入口，ego-browser 切商品子種類／CRM／設定／平台管理員及手機子選單、截圖；保留原商品儲存回填契約。
+
+Supersedes：原先只交付導讀與畫面提案的驗收方式；已完成文件任務保留。2026-10-13 Fish 確認本輪允許實作隔離的本機操作程式。
+
+Implementation Contract（tasks 11.1～11.4）：入口 `startkiter-creator-platform-progress-uiux.html?localAcceptance=1` 重用既有 CSS 與後台分組，顯示獨立本機工作台，隱藏長報告。model 使用 version=1 的專用 localStorage key，只保存示範商品、指定資源及模擬取得快照，不讀正式資料或 secrets。課程種別指定一門，組合包至少兩門；獨立程式包不強制課程；SaaS 用示範服務入口，不自動把外部 URL 做成可導航連結。收費方式為 once／subscription 與 month／quarter／year，僅示範，不改正式付款 enum。名稱、正整數 TWD 價格、資源組合驗證失敗保留輸入並聚焦；儲存成功回列表，重整及編輯回填一致。儲存無法讀寫或版本／資料損壞時 fail-closed，不自動覆蓋，不假報成功。
+
+買家視角從示範公開商品選取「模擬取得」，記錄當下交付快照；不取得全部課程，不改正式 Entitlement。後續編輯商品不污染已取得快照；重複取得同一示範商品不重複新增。CRM 與直播只支援示範搜尋／篩選／詳情／返回，不串服務。所有外部動作明確標示未串接；用 textContent 或 HTML escaping 顯示輸入，禁止執行使用者輸入。
+
+In scope：docs/blueprint 中的本機 model、UI、focused tests、ego-browser 桌面／手機證據，以及本 SR artifacts／CONTEXT。Out of scope：正式登入、角色授權、DB、付款、寄信、影音、GitHub grants、部署與 provider 政策。單一 Agent，無新依賴及環境變數。
+
+驗證與逆推風險：先寫 node:test 失敗案例，再實作 model；跑 focused test 驗證四商品／四收費／保存讀回／錯誤不覆寫／指定內容／快照／注入字串；ego-browser 在 1440 與 390 寬度新增→保存→reload→編輯→買家取得，再走 CRM／直播／鍵盤／無溢出。localStorage 若不支援 file URL，保留明確錯誤並改用本機 HTTP 入口，不能繞過保存檢查。回滾只移除本機驗收入口及專用檔案，不變動正式資料或其他 localStorage keys。
 
 ## Goals / Non-Goals
 
@@ -197,15 +211,27 @@ Alternatives Considered:
 
 ## Implementation Contract
 
+### Commerce 與 provider 不互等，採同張 SR 內的契約／整合階段
+
+SR-06 分為 `06C`（商品／訂閱／授權／取消契約定稿）與 `06R`（runtime／整合驗收）。SR-11 讀取 06C 的已核准契約完成 provider 映射與 sandbox，06R 才能發布新 recurring Offer。這是同張 commerce SR 的施工階段，不另建第二套商品／訂單／checkout；既有一次買斷切片 SR-07 沿用現有地基先驗收，不等待完整 Creator 新殼。
+
+Alternatives Considered:
+
+- SR-06 全部完成才開始 SR-11：否決，SR-06 的 provider gate 又必須依賴 SR-11，形成循環。
+- SR-11 自己定義另一套 Product／Offer：否決，付款、授權與商品政策會產生兩份真相，歷史交易無法可靠對照。
+
+階段的進入／退出、migration、provider、owner、回滾及不做範圍，以 `docs/blueprint/creator-platform-development-handoff.md` 的卡片與施工補充矩陣共同定義；依賴表中的 16 個節點已作無循環／無缺失前置檢查，不代表已執行 runtime。
+
 本 change 交付的是一份可交給後續主控 Agent 施工的總 SR 計畫，不是 runtime：
 
 - `docs/blueprint/systeme-io-reverse-engineering-checklist.md` 列出來源模組、盤點層級、StartKiter 對照與未完成證據。
 - `docs/blueprint/webinarjam-reverse-engineering-notes.md` 保存 WebinarJam 的已觀察管理入口與未驗證流程，供後續直播 SR 使用，不作為供應商技術棧證據。
 - `docs/blueprint/startkiter-creator-platform.md` 描述產品定位、角色、核心流程、資料領域、事件與 UI/UX 契約。
 - 十一份 blueprint specs 描述可測試的 capability contract；每個後續 runtime SR 必須指出 reused／extended／new。
-- tasks.md 列出從盤點到 rollout 的 SR 順序，每一項有行為結果與驗證方式。
+- tasks.md 列出從盤點到 rollout 的能力索引與交接待辦，每一項有行為結果與驗證方式；索引不是嚴格施工時間，前置以 handoff 為準。
 - `docs/blueprint/creator-platform-development-handoff.md` 列出商品矩陣、買家桌面 AI 操作到部署／更新的交接、SR-01～15 卡片及需要 Fish 決定的政策。卡片完成不等於 runtime 完成；手冊／Skill 的乾淨專案實跑由 buyer SR 取得證據。
 - `docs/blueprint/creator-platform-acceptance-target.md` 定義本輪五項驗收；HTML Demo 是可供檢視的 UI 提案，正式導覽仍須重用 resolveNavigation 與 AppRegistrationManifest。
+- `docs/blueprint/creator-platform-source-ownership-map.md` 把十五張後續能力與五張既有 SR 對上 canonical specs 和 source，固定唯一資料／route owner；`creator-platform-ui-state-matrix.md` 定義各核心畫面與狀態的施工驗收，不代替已操作的 Demo 或 runtime 證據。
 - CodePackage active-period policy 必須分開描述服務存取、GitHub grant、更新頻道與已交付原始碼的授權；撤銷 repo 權限不宣稱可刪除已下載副本，未定案條款阻擋新訂閱發布。
 - 本 change 的 readiness 由 `spectra analyze creator-operations-platform-blueprint --json` 無 Critical／Warning 與 `spectra validate creator-operations-platform-blueprint` exit 0 決定；這不代表 runtime、部署、付款、寄信或瀏覽器驗收完成。
 
@@ -234,6 +260,16 @@ Alternatives Considered:
 7. 每張 SR 完成後獨立 archive；總計畫不替代各 SR 的 apply、verify、deploy 或 acceptance。
 
 ## Open Questions
+
+逐題決策以 `docs/blueprint/creator-platform-policy-decision-register.md` 的P01～P15為完整索引，與handoff/CONTEXT同讀。單課/Bundle/獨立CodePackage與月/季/年/買家自有SaaS是已確認的目標，不再重新問能否；未決的是具體commercial/provider/retention/repo/builder/support policy及核准證據，未選值不能當approved。
+
+- CodePackage app/workspace數、商用/再散布/移轉、source-use/update/service/grant各權利與支援版本/期限的明確policy形狀及適用Offer。
+- 新依賴圖的diagram-design首次樣式選擇已詢問但未獲答覆；僅保留目前HTML風格，不繪新圖或修改全域style-guide。
+
+- source baseline 的 `SubscriptionInterval` 只有 MONTH／YEAR，`CourseSubscriptionPlan` 指向 courseId；季／Bundle／CodePackage 訂閱需 SR-06 的 migration 與 SR-11 provider 映射及 sandbox 證據，不能只換顯示名稱。
+- `buyer-repo-upstream-sync` canonical 仍承諾 writable repo，而本銷售切片／GitHub client 交付 pull。SR-04 必須先決定交付 repo、買家可寫開發 repo、push 權限與版本追蹤，形成 canonical delta 與移轉／回滾 gate；不逕自改現有客戶權限，也不把本機可改檔說成可 push 回唯讀 repo。
+- 既有 `WorkspaceContext` 是 platform／app context，不是 Organization context；SR-01 要定義 actor／organization／app／capability 的唯一解析橋接與拒絕路徑，不新建第二套 Member／Invitation。
+- 現行 `repo-version` hint 提供 fetch／merge，未證明本總計畫的備份、衝突預覽、Skill 相容與更新回滾；SR-03／04 必須補完整更新 gate，不能直接以版本字串相等驗收安全更新。
 
 - 第一個創作者垂直族群是課程講師、顧問／教練、接案服務者或代理商。
 - 第一版網站先做單頁銷售頁、表單與簡單 Funnel，還是直接做完整 Funnel builder。

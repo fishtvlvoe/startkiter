@@ -1,0 +1,43 @@
+{
+  "scope": "注入失敗及實際DOM canary，不是正式資料或provider驗收",
+  "results": [
+    {
+      "name": "三角色DOM注入字串不執行",
+      "ok": true,
+      "detail": {
+        "images": 0,
+        "inlineEvents": 0,
+        "literal": true,
+        "executed": 0
+      }
+    },
+    {
+      "name": "寫入失敗保留表單",
+      "ok": true
+    },
+    {
+      "name": "寫入失敗沒有改存檔",
+      "ok": true
+    },
+    {
+      "name": "資料損壞fail closed",
+      "ok": true
+    },
+    {
+      "name": "損壞探針不修改原bytes",
+      "ok": true
+    },
+    {
+      "name": "未知命令拒絕且不破壞輸入",
+      "ok": true
+    },
+    {
+      "name": "Escape關閉確認且保留輸入",
+      "ok": true
+    },
+    {
+      "name": "探針結束原資料不變",
+      "ok": true
+    }
+  ]
+}

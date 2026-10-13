@@ -1,9 +1,12 @@
 ## Why
 
+2026-10-13 驗收目標重設：Fish 已確認先交付本機可操作後台，親自驗收 UI／UX 與商品→保存→買家視角的完整流程。保留原藍圖，新增範圍僅限隔離的本機示範程式，不改正式 application runtime；文件完成率不作本輪功能進度。
+
 前次 REA 已確認 StartKiter 與 Systeme.io 的差距不是單純 UI，而是平台模組、創作者工作流、資料領域與事件流尚未收斂成一張可施工的總圖。現有 `creator-operations-platform-blueprint` 已有高層藍圖與六個 capability，但缺少逐模組逆向清單、可重用的 UI/UX screen contract、現況對照、SR 依賴與完整驗收順序；現在必須先把總計畫補齊，避免 `public-multi-course-sales-and-code-package` 變成孤立的課程銷售實作。
 
 ## What Changes
 
+- 修改本機UI後續施工责任：2026-10-13 Fish核准後，未完成11.4／11.5交由 `creator-backoffice-local-acceptance`，本change保留既有完成的本機原型與架構規格，不重複施工三角色view或接線。
 - 新增 Systeme.io 模組、頁面、流程、資料、角色、狀態、事件、整合與 UX 的完整逆向工程清單。
 - 新增 `creator-ui-ux-foundation`：把任務導向頁面、共用列表／表單／狀態、桌面／手機、鍵盤與瀏覽器驗收寫成可重用契約。
 - 新增 `buyer-saas-extension-and-deployment`：定義買家取得 CodePackage 後建立自己的 SaaS／會員網站、設定登入／Organization／權限／付費入口、選擇部署層級、管理更新與服務責任的產品邊界。
@@ -15,10 +18,11 @@
 - 新增 Systeme 能力到 StartKiter 現有模組的 reused／extended／new／out-of-scope 對照矩陣。
 - 新增從 creator workspace、名單、內容、Offer、checkout、交付、行銷、自動化到分析營運的端到端流程圖。
 - 新增後續 SR 的依賴順序、每張 SR 的輸入／輸出／驗收／回滾邊界。
+- 補 `creator-platform-capability-catalog.md` 的完整已知能力目錄：商機管道、日曆、SMS、分潤、實體與其它資源商品明列 owner／研究 gate／候選後續 SR，不因十五張核心卡片而漏列，也不宣稱其第三方未觀察流程已完成。
 - 新增 `creator-platform-development-handoff.md` 的商品／授權矩陣、桌面 AI 買家使用流程、十五張能力交接卡片與政策阻擋；序號不作時間排序，優先收尾已施工的一次買斷銷售切片。
 - 擴充現有藍圖，使 `public-multi-course-sales-and-code-package` 成為第一條產品垂直切片，而不是獨立定義商品真相。
 - 明確保留 StartKiter 自己的課程深度、LINE、PAYUNi、台灣合規、GitHub CodePackage 與 plugin 平台邊界。
-- 保持本 change 為規格與計畫工作；不在本 change 修改 runtime、schema、provider 或部署設定。
+- 新增本機 UI 驗收切片：重用現有 HTML 樣式，建立單堂／組合包／程式碼包／SaaS 商品管理、一次／月／季／年收費、指定取得內容、本機保存、買家示範視角、CRM／直播查看與篩選；不修改正式 runtime、schema、provider 或部署設定。
 
 ## Non-Goals
 
@@ -53,7 +57,7 @@
 ## Impact
 
 - Affected specs：上述十一個 blueprint capability specs；既有 `app-extension-contract`、`buyer-template-selection`、`buyer-dev-skill`、`buyer-credential-handoff`、`buyer-repo-upstream-sync`、`managed-hosting-tiers`、`official-site-deployment`、`organization-tenancy`、`subscription-billing` 作為相容性與邊界依據。
-- Affected code：本 change 不修改 runtime；後續 SR 可能影響 `packages/platform`、`packages/database`、`packages/api`、`packages/course`、`packages/bundles`、`packages/payments`、`packages/newsletter`、`packages/github-kit`、`packages/ui`、`apps/saas` 與 `apps/marketing`。
-- Affected documents：`docs/blueprint/startkiter-creator-platform.md`、`docs/blueprint/systeme-io-reverse-engineering-checklist.md`、`docs/blueprint/webinarjam-reverse-engineering-notes.md`、`docs/blueprint/creator-platform-development-handoff.md`、`docs/blueprint/creator-platform-acceptance-target.md`、`docs/blueprint/startkiter-creator-platform-progress-uiux.html`、`CONTEXT.md`，以及後續 SR 的 proposal/design/spec/tasks。
+- Affected code：本 change 不修改正式 runtime；本機示範使用 `docs/blueprint/creator-local-model.js`、`creator-local-ui.js` 與 `creator-local-model.test.cjs`，入口為既有報告的 `?localAcceptance=1`。後續正式 SR 可能影響 `packages/platform`、`packages/database`、`packages/api`、`packages/course`、`packages/bundles`、`packages/payments`、`packages/newsletter`、`packages/github-kit`、`packages/ui`、`apps/saas` 與 `apps/marketing`。
+- Affected documents：`docs/blueprint/startkiter-creator-platform.md`、`docs/blueprint/systeme-io-reverse-engineering-checklist.md`、`docs/blueprint/webinarjam-reverse-engineering-notes.md`、`docs/blueprint/creator-platform-development-handoff.md`、`docs/blueprint/creator-platform-acceptance-target.md`、`docs/blueprint/creator-platform-capability-catalog.md`、`docs/blueprint/creator-platform-source-ownership-map.md`、`docs/blueprint/creator-platform-ui-state-matrix.md`、`docs/blueprint/creator-platform-ui-browser-evidence.md`、`docs/blueprint/startkiter-creator-platform-progress-uiux.html`、`CONTEXT.md`，以及後續 SR 的 proposal/design/spec/tasks。
 - Dependencies 新增：無；沿用現有 Next.js、React、TypeScript、Prisma/PostgreSQL、oRPC、Better Auth、TanStack Query、PAYUNi、email/newsletter、GitHub App、UI tokens 與 Coolify/VPS。
 - Environment variables 新增：無；SMS、分析儲存與其他 provider 在各自 SR 拍板前不新增。

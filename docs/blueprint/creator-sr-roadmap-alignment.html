@@ -1,0 +1,1283 @@
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>StartKiter｜總 SR 表、流程與現況差異</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* ════════════════════════════════════════════ */
+      /* Anthropic / Claude 官方品牌風 design tokens     */
+      /* ════════════════════════════════════════════ */
+      :root {
+        --wrap-max: 1760px; /* 內容寬度：設定檔 tokens.layout.maxWidth 與「風格設定」改的就是它 */
+        --ivory: #faf9f5;
+        --paper: #ffffff;
+        --slate: #141413;
+        --clay: #d97757;
+        --clay-d: #b85c3e;
+        --oat: #e3dacc;
+        --olive: #788c5d;
+        --g100: #f0eee6;
+        --g200: #e6e3da;
+        --g300: #d1cfc5;
+        --g500: #87867f;
+        --g700: #3d3d3a;
+
+        --serif: ui-serif, Georgia, "Times New Roman", Times, serif;
+        --sans:
+          system-ui, -apple-system, "Segoe UI", Roboto, "PingFang TC",
+          "Noto Sans TC", Helvetica, Arial, sans-serif;
+        --mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+
+        /* 狀態 semantic（warm-aligned，低調用） */
+        --green: #788c5d;
+        --green-soft: #eff1e8;
+        --green-border: #c8d2b8;
+        --red: #b85c3e;
+        --red-soft: #faebe3;
+        --red-border: #e8c4af;
+        --yellow: #c49845;
+        --yellow-soft: #f8efd9;
+        --yellow-border: #e8d4a0;
+        --olive-soft: #eff1e8;
+        --olive-border: #c8d2b8;
+        --clay-soft: #fbe9df;
+        --orange: #c9740a;
+        --orange-soft: #fbeedc;
+        --orange-border: #eccfa3;
+        --purple: #9333ea;
+        --purple-soft: #faf5ff;
+        --purple-border: #e9d5ff;
+
+        /* ── 兼容舊 component-library snippet ─────────── */
+        /* 通用元件用 --bg / --accent / --text 等命名、alias 到 Anthropic palette */
+        --bg: var(--ivory);
+        --bg-card: var(--paper);
+        --bg-soft: var(--g100);
+        --bg-soft-2: var(--g200);
+        --border: var(--g300);
+        --border-strong: var(--g500);
+        --text: var(--slate);
+        --text-muted: var(--g700);
+        --text-soft: var(--g500);
+        --accent: var(--clay);
+        --accent-soft: #fbe9df;
+        --accent-strong: var(--clay-d);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        background: var(--ivory);
+        color: var(--slate);
+        font-family: var(--sans);
+        font-size: calc(16px * var(--fs, 1));
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+        /* 保險絲：擋掉合成斜體與合成粗體。中文字體沒有義大利體與部分字重，
+           瀏覽器會機械傾斜／加粗漢字，筆畫變形。寧可不強調也不要變形字。 */
+        font-synthesis: none;
+      }
+
+      /* ════════════════════════════════════════════ */
+      /* Layout                                       */
+      /* ════════════════════════════════════════════ */
+      .wrap {
+        width: min(94vw, var(--wrap-max, 1760px)); /* --wrap-max：設定檔或「風格設定」的內容寬度 */
+        margin: 0 auto;
+        padding: 0 calc(32px * var(--dens, 1)) calc(140px * var(--dens, 1));
+      }
+      /* 長段落文字護欄：寬容器下避免一行上百字難讀（grid/卡片/表格不受限、吃滿寬） */
+      .intro,
+      p.prose,
+      .body-text {
+        max-width: 72ch;
+      }
+      /* 排印細節：pretty 讓段落尾行不留孤字、balance 讓多行標題長度接近。
+         現代瀏覽器都支援，成本為零。 */
+      p,
+      li,
+      td {
+        text-wrap: pretty;
+      }
+      h1,
+      h2,
+      h3 {
+        text-wrap: balance;
+      }
+
+      /* ════════════════════════════════════════════ */
+      /* Masthead / Hero                              */
+      /* ════════════════════════════════════════════ */
+      header.masthead {
+        padding: calc(80px * var(--dens, 1)) 0 calc(56px * var(--dens, 1));
+        border-bottom: 1.5px solid var(--g300);
+        margin-bottom: calc(12px * var(--dens, 1));
+      }
+      .eyebrow {
+        font-family: var(--mono);
+        font-size: calc(12px * var(--fs, 1));
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--g500);
+        margin-bottom: calc(18px * var(--dens, 1));
+        display: flex;
+        align-items: center;
+        gap: calc(12px * var(--dens, 1));
+      }
+      .eyebrow::before {
+        content: "";
+        width: 24px;
+        height: 1.5px;
+        background: var(--clay);
+      }
+      /* ⚠️ 選擇器要比 Tailwind preflight 高一級。它的 reset 把 h1 的 font-size
+         與 font-weight 設成 inherit，而它的樣式是 JS 動態注入、排在本區塊之後，
+         同優先級下會蓋過來——裸 `h1` 選擇器的字級會整個失效退回 16px。 */
+      body h1 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: calc(clamp(38px, 5.4vw, 62px) * var(--fs, 1));
+        line-height: 1.06;
+        letter-spacing: -0.018em;
+        margin: 0 0 calc(8px * var(--dens, 1));
+        max-width: 17ch;
+        color: var(--slate);
+      }
+      /* 中文標題強調 — 不要用斜體（漢字沒有斜體傳統，見上方 font-synthesis 註解）。
+         兩種手法依語氣選：B 換字重（預設、安靜）／ C 螢光筆（重、一頁最多一兩次）。 */
+      h1 em,
+      h2 em,
+      h3 em {
+        font-style: normal;
+        font-weight: 700;
+        color: var(--clay);
+      }
+      .hl {
+        background: linear-gradient(transparent 58%, #f7d9a0 58%);
+        font-style: normal;
+      }
+      /* 內文的 <em>：保險絲擋掉合成斜體後，中文 em 會跟正文一模一樣（強調消失）。
+         補字重讓它看得出來；英文字體有真的義大利體，斜體照樣保留。
+         （標題的 em 另有 700 ＋ clay，選擇器較具體、不受這條影響） */
+      em {
+        font-weight: 600;
+      }
+      .intro {
+        font-size: calc(16.5px * var(--fs, 1));
+        color: var(--g700);
+        margin: calc(22px * var(--dens, 1)) 0 0;
+        max-width: 620px;
+      }
+      .intro a {
+        color: var(--clay);
+        text-decoration-color: var(--oat);
+        text-underline-offset: 3px;
+      }
+      .intro a:hover {
+        text-decoration-color: var(--clay);
+      }
+
+      /* ════════════════════════════════════════════ */
+      /* TOC pills                                    */
+      /* ════════════════════════════════════════════ */
+      nav.toc {
+        display: flex;
+        flex-wrap: wrap;
+        gap: calc(8px * var(--dens, 1));
+        padding: calc(26px * var(--dens, 1)) 0 0;
+      }
+      nav.toc a {
+        font-size: calc(12.5px * var(--fs, 1));
+        padding: calc(7px * var(--dens, 1)) calc(14px * var(--dens, 1));
+        border: 1.5px solid var(--g300);
+        border-radius: 999px;
+        text-decoration: none;
+        color: var(--g700);
+        background: var(--paper);
+        transition:
+          border-color 120ms,
+          color 120ms;
+        display: inline-flex;
+        align-items: center;
+        gap: calc(7px * var(--dens, 1));
+      }
+      nav.toc a .n {
+        font-family: var(--mono);
+        font-size: calc(10px * var(--fs, 1));
+        color: var(--g500);
+      }
+      nav.toc a:hover {
+        border-color: var(--slate);
+        color: var(--slate);
+      }
+      nav.toc a:hover .n {
+        color: var(--clay);
+      }
+
+      /* ════════════════════════════════════════════ */
+      /* Section                                      */
+      /* ════════════════════════════════════════════ */
+      section {
+        margin-top: calc(72px * var(--dens, 1));
+        scroll-margin-top: 28px;
+      }
+      .sec-head {
+        display: flex;
+        align-items: baseline;
+        gap: calc(16px * var(--dens, 1));
+        margin-bottom: calc(10px * var(--dens, 1));
+      }
+      .sec-head .idx {
+        font-family: var(--mono);
+        font-size: calc(13px * var(--fs, 1));
+        color: var(--clay);
+        font-weight: 600;
+        width: 34px;
+        flex-shrink: 0;
+      }
+      .sec-head h2 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: calc(27px * var(--fs, 1));
+        margin: 0;
+        letter-spacing: -0.012em;
+        color: var(--slate);
+      }
+      .sec-head .count {
+        font-family: var(--mono);
+        font-size: calc(11px * var(--fs, 1));
+        color: var(--g500);
+        background: var(--g100);
+        padding: calc(2px * var(--dens, 1)) calc(8px * var(--dens, 1));
+        border-radius: 999px;
+      }
+      .sec-intro {
+        font-size: calc(14.5px * var(--fs, 1));
+        color: var(--g700);
+        max-width: 700px;
+        margin: 0 0 calc(24px * var(--dens, 1)) calc(50px * var(--dens, 1));
+      }
+      /* ── 窄螢幕溢出防護 ─────────────────────────
+         grid／flex 子項的 min-width 預設是 auto，裡面放 pre 或 table 會被內容
+         撐開 → 整頁橫向溢出。自訂 grid 容器時對子項加 min-width: 0，
+         或直接用 .grid-safe。（跑版不在標記裡，一定要用版面健檢量。） */
+      .grid-safe > * {
+        min-width: 0;
+      }
+      pre,
+      table {
+        max-width: 100%;
+      }
+      pre {
+        overflow-x: auto;
+      }
+
+      @media (max-width: 900px) {
+        .sec-intro {
+          margin-left: 0;
+        }
+        /* 區段內容的 50px 視覺軸縮排在手機上是純浪費 */
+        div[style*="margin-left: 50px"], /* 區段內容的 50px 視覺軸縮排在手機上是純浪費 */
+        div[style*="margin-left: calc(50px"] {
+          margin-left: 0 !important;
+        }
+        /* 長指令改換行而非橫捲：手機上捲軸比斷行難用 */
+        pre {
+          white-space: pre-wrap;
+          word-break: break-word;
+          font-size: calc(11px * var(--fs, 1));
+        }
+        /* 固定佈局讓表格文字換行，不把版面撐破 */
+        table {
+          table-layout: fixed;
+          width: 100%;
+        }
+        table th,
+        table td {
+          word-break: break-word;
+          overflow-wrap: anywhere;
+        }
+      }
+
+      /* ════════════════════════════════════════════ */
+      /* Cards                                        */
+      /* ════════════════════════════════════════════ */
+      .card {
+        background: var(--paper);
+        border: 1.5px solid var(--g300);
+        border-radius: 14px;
+        padding: calc(24px * var(--dens, 1));
+      }
+      .card-soft {
+        background: var(--g100);
+        border: 1.5px solid var(--g200);
+        border-radius: 10px;
+        padding: calc(16px * var(--dens, 1));
+      }
+
+      /* link card with hover */
+      a.link-card {
+        display: flex;
+        flex-direction: column;
+        background: var(--paper);
+        border: 1.5px solid var(--g300);
+        border-radius: 14px;
+        text-decoration: none;
+        color: inherit;
+        transition:
+          transform 150ms ease,
+          box-shadow 150ms ease,
+          border-color 150ms ease;
+        overflow: hidden;
+      }
+      a.link-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(20, 20, 19, 0.1);
+        border-color: var(--slate);
+      }
+      .link-card .body {
+        padding: calc(18px * var(--dens, 1)) calc(20px * var(--dens, 1)) calc(16px * var(--dens, 1));
+      }
+      .link-card .title {
+        font-family: var(--serif);
+        font-size: calc(19px * var(--fs, 1));
+        font-weight: 500;
+        line-height: 1.22;
+        color: var(--slate);
+        margin-bottom: calc(7px * var(--dens, 1));
+        letter-spacing: -0.008em;
+      }
+      .link-card .desc {
+        font-size: calc(13.5px * var(--fs, 1));
+        color: var(--g700);
+        line-height: 1.5;
+      }
+      .link-card .file {
+        font-family: var(--mono);
+        font-size: calc(11px * var(--fs, 1));
+        color: var(--g500);
+        border-top: 1px solid var(--g100);
+        padding-top: calc(11px * var(--dens, 1));
+        margin-top: calc(14px * var(--dens, 1));
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .link-card .file .arrow {
+        transition: transform 150ms ease;
+        color: var(--g300);
+      }
+      a.link-card:hover .file {
+        color: var(--clay);
+      }
+      a.link-card:hover .file .arrow {
+        transform: translateX(3px);
+        color: var(--clay);
+      }
+
+      /* ════════════════════════════════════════════ */
+      /* Pills / Badges                               */
+      /* ════════════════════════════════════════════ */
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: calc(6px * var(--dens, 1));
+        padding: calc(4px * var(--dens, 1)) calc(10px * var(--dens, 1));
+        border: 1.5px solid var(--g300);
+        border-radius: 999px;
+        font-size: calc(11.5px * var(--fs, 1));
+        color: var(--g700);
+        background: var(--paper);
+      }
+      .pill.clay {
+        border-color: var(--clay);
+        color: var(--clay);
+      }
+      .pill.olive {
+        border-color: var(--olive);
+        color: var(--olive);
+      }
+
+      /* status badge — warm-aligned semantic */
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: calc(4px * var(--dens, 1));
+        padding: calc(3px * var(--dens, 1)) calc(10px * var(--dens, 1));
+        font-size: calc(11px * var(--fs, 1));
+        font-weight: 600;
+        font-family: var(--mono);
+        border-radius: 9999px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .badge-green {
+        background: var(--green-soft);
+        color: var(--green);
+        border: 1px solid var(--green-border);
+      }
+      .badge-red {
+        background: var(--red-soft);
+        color: var(--red);
+        border: 1px solid var(--red-border);
+      }
+      .badge-yellow {
+        background: var(--yellow-soft);
+        color: var(--yellow);
+        border: 1px solid var(--yellow-border);
+      }
+      .badge-clay {
+        background: #fbe9df;
+        color: var(--clay-d);
+        border: 1px solid #f0c9b5;
+      }
+      .badge-oat {
+        background: var(--oat);
+        color: var(--g700);
+        border: 1px solid var(--g300);
+      }
+
+      /* ════════════════════════════════════════════ */
+      /* Footer                                       */
+      /* ════════════════════════════════════════════ */
+      footer.foot {
+        margin-top: calc(100px * var(--dens, 1));
+        border-top: 1.5px solid var(--g300);
+        padding-top: calc(36px * var(--dens, 1));
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: calc(20px * var(--dens, 1));
+        flex-wrap: wrap;
+        font-size: calc(13px * var(--fs, 1));
+        color: var(--g500);
+      }
+      footer.foot .k {
+        font-family: var(--serif);
+        font-style: italic;
+        color: var(--g700);
+        font-size: calc(15px * var(--fs, 1));
+      }
+      footer.foot a {
+        color: var(--clay);
+        text-decoration-color: var(--oat);
+        text-underline-offset: 3px;
+      }
+          /* ── 手機：收掉桌機的水平留白 ─────────────────
+         390px 螢幕上，容器 32px ＋ 卡片 24px 的左右內距吃掉 112px，加上 94vw
+         的寬度限制，文字只剩七成八。桌機上那是呼吸空間，手機上是純損失。
+         （2026-09-21 實測：清單項在 390px 只剩 218px 寬。）*/
+      @media (max-width: 640px) {
+        .wrap {
+          width: 100%;
+          padding-left: calc(14px * var(--dens, 1));
+          padding-right: calc(14px * var(--dens, 1));
+        }
+        .card {
+          padding-left: calc(16px * var(--dens, 1));
+          padding-right: calc(16px * var(--dens, 1));
+        }
+        ul,
+        ol {
+          padding-left: calc(20px * var(--dens, 1));
+        }
+      }
+    </style>
+  <style>.wrap{width:min(94vw,1380px);margin:auto;padding:calc(36px * var(--dens, 1)) 0 calc(70px * var(--dens, 1))}header{padding:calc(25px * var(--dens, 1)) 0}.eyebrow{color:var(--clay-d);font:600 calc(12px * var(--fs, 1)) var(--sans);margin-bottom:calc(12px * var(--dens, 1))}h1{font:600 clamp(30px,4vw,52px)/1.25 var(--sans)}h2{font:600 clamp(23px,3vw,32px)/1.4 var(--sans)}h3{font:600 calc(20px * var(--fs, 1))/1.5 var(--sans)}h4{font:600 calc(15px * var(--fs, 1)) var(--sans)}p,li{font:400 calc(16px * var(--fs, 1))/1.8 var(--sans)}p{max-width:72ch}.lead{font-size:calc(20px * var(--fs, 1))}.callout{padding:calc(18px * var(--dens, 1));border-left:4px solid var(--clay);background:var(--clay-soft);margin:calc(20px * var(--dens, 1)) 0}.report-nav{display:flex;flex-wrap:wrap;gap:calc(10px * var(--dens, 1))}.report-nav a,.tag{display:inline-block;padding:calc(7px * var(--dens, 1)) calc(12px * var(--dens, 1));border:1px solid var(--g300);border-radius:5px;font-size:calc(13px * var(--fs, 1))}.report-nav a{background:white}section{margin:calc(45px * var(--dens, 1)) 0;padding-top:calc(10px * var(--dens, 1));scroll-margin-top:20px}.steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:calc(14px * var(--dens, 1));margin:calc(22px * var(--dens, 1)) 0}.steps article{padding:calc(18px * var(--dens, 1));background:var(--paper);border-top:3px solid var(--clay);border-right:1px solid var(--g200);position:relative}.steps article:not(:last-child)::after{content:'→';position:absolute;right:-13px;top:14px;color:var(--clay-d)}.steps p{font-size:calc(14px * var(--fs, 1));margin-top:calc(10px * var(--dens, 1))}.compare{display:grid;grid-template-columns:1fr 1fr;gap:calc(20px * var(--dens, 1))}.card{padding:calc(22px * var(--dens, 1));background:white;border:1px solid var(--g300);border-radius:7px;min-width:0}.card img{width:100%;height:auto;border:1px solid var(--g200);margin:calc(12px * var(--dens, 1)) 0}.definition{padding:calc(22px * var(--dens, 1));background:var(--g100);margin:calc(14px * var(--dens, 1)) 0}.definition p{margin:calc(4px * var(--dens, 1)) 0}.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:calc(18px * var(--dens, 1))}.grid-3 p{font-size:calc(15px * var(--fs, 1))}.table-wrap{overflow:auto;background:white;border:1px solid var(--g300);margin:calc(22px * var(--dens, 1)) 0}table{width:100%;min-width:680px;table-layout:fixed;border-collapse:collapse}th,td{padding:calc(16px * var(--dens, 1));border-bottom:1px solid var(--g200);text-align:left;overflow-wrap:anywhere;vertical-align:top;font:400 calc(15px * var(--fs, 1))/1.7 var(--sans)}th{background:var(--g100);font-weight:600}.sr-record{border:1px solid var(--g300);background:white;border-radius:6px;margin:calc(12px * var(--dens, 1)) 0}.sr-record summary{padding:calc(18px * var(--dens, 1));cursor:pointer;display:flex;justify-content:space-between;gap:calc(10px * var(--dens, 1));font-weight:600}.sr-record[open] summary{border-bottom:1px solid var(--g200)}.sr-inner{padding:calc(18px * var(--dens, 1))}.file-note, .small-note,footer{font-size:calc(13px * var(--fs, 1));color:var(--g500);overflow-wrap:anywhere}details>summary{cursor:pointer}.detail-body{padding-top:calc(16px * var(--dens, 1))}footer{padding:calc(24px * var(--dens, 1)) 0;border-top:1px solid var(--g300)}a{color:var(--clay-d);text-decoration:underline}code{font-size:calc(12px * var(--fs, 1));overflow-wrap:anywhere}hr{margin:calc(16px * var(--dens, 1)) 0}@media(max-width:800px){.steps{grid-template-columns:1fr}.steps article:not(:last-child)::after{content:'↓';top:auto;bottom:-19px;right:50%}.compare,.grid-3{grid-template-columns:1fr}.sr-record summary{flex-wrap:wrap}.wrap{width:92vw}.card{padding:calc(16px * var(--dens, 1))}h1{font-size:calc(30px * var(--fs, 1))}}</style><style id="vt-profile" data-profile-hash="020a3e00b0">:root { --fs: 1.45; --wrap-max: 1080px; }</style>
+</head>
+  <body><div class="wrap"><header><div class="eyebrow">STARTKITER · 2026-10-13 · 本機現況對焦</div><h1>介面已看懂，<br>接下來把它接到真的系統。</h1><p class="lead">不是打掉重練。先整理現有 SR，重用已寫的程式，再補「新版介面 → 資料庫 → 買家權限」的缺口。</p><div class="callout"><strong>目前：本機 Demo 可操作，不是整個平台已開發完成。</strong><p>這一页是 SR 清單及代表性程式／測試核對，不是所有正式模組與部署的全面稽核。</p></div><nav class="report-nav" aria-label="報告段落"><a href="#flow">規劃流程</a><a href="#gap">現在與下一步差異</a><a href="#master">總 SR 表</a><a href="#sequence">施工順序</a><a href="#limits">還沒查完的</a></nav></header>
+<section id="flow"><div class="eyebrow">01 · 規劃與設計怎麼走</div><h2>每次只交付一條能驗收的流程</h2><div class="steps"><article><b>1 · 清點現有工作</b><p>看規格、程式、測試與真實證據；辨別清單過時，避免重做。</p></article><article><b>2 · 固定介面與範圍</b><p>角色、上方分類、左側子選單、操作路線；你已看過本機版。</p></article><article><b>3 · 寫施工 SR</b><p>目標、哪些不動、前置與驗收。總表排順序，功能SR管施工。</p></article><article><b>4 · 施工與整合</b><p>共用規則先固定；獨立檔案才分 Agent。舊功能保留回退。</p></article><article><b>5 · 驗收與交付</b><p>測試、桌面／手機操作、Git與部署分開；缺證據就不算完成。</p></article></div><p class="small-note">這是每批的工作順序。若驗收不符合，回到同一張 SR 修正，不重新開一套架構。</p></section>
+<section id="gap"><div class="eyebrow">02 · 已建好與接下來的差異</div><h2>Demo 驗的是操作；正式接線驗的是資料和權限。</h2><div class="compare"><article class="card"><span class="tag">已建好的本機操作版</span><h3>看畫面、走流程</h3><img src="evidence/backoffice-integration-X4dWlL/1440-final-products.png" alt="已實際驗證的本機商品後台，上方分類與左側子選單" loading="lazy"><p>商品新增、編輯、選交付、保存到瀏覽器；切角色與模擬取得可操作。保存不等於寫入正式資料庫。</p><a href="creator-local-acceptance.html">開啟目前 Demo</a></article><article class="card"><span class="tag">接下來要接到現有網站</span><h3>同一套介面，換成真實流程</h3><div class="definition"><b>登入本機網站後台</b><p>沿用現有角色與共用導航</p><hr><b>新增課程銷售方案</b><p>寫入資料庫，重新登入仍能編輯</p><hr><b>測試買家查看</b><p>只看到有資格的指定內容</p></div><p>這是下一批驗收目標，還沒有施工。四類商品的通用模型、季訂閱等不足部分另分批擴充，不讓畫面選項冒充正式能力。</p></article></div><div class="table-wrap"><table><colgroup><col style="width:20%"><col style="width:38%"><col style="width:42%"></colgroup><thead><tr><th>項目</th><th>現在的證據</th><th>下一步補什麼</th></tr></thead><tbody><tr><td>UI／UX</td><td>本機三角色＋兩層選單已操作與截圖</td><td>接到現有網站殼，保留正式角色與課程入口</td></tr><tr><td>商品保存</td><td>Demo 存瀏覽器；正式 CourseOffer 等程式另已存在</td><td>核對既有 API，再接新版表單到資料庫；不重建所有商品</td></tr><tr><td>買家內容</td><td>Demo 模擬取得快照；正式權限地基另存在</td><td>真實帳號驗證只取得指定課程／程式包資格</td></tr><tr><td>付款與交付</td><td>PAYUNi／Bundle／GitHub 有地基；本輪未真付款</td><td>檢查歷史交付快照、退款、多筆資格，再做sandbox闭環</td></tr><tr><td>CRM／直播／AI</td><td>Demo 或總架構規劃，不代表全部正式串接</td><td>交易流程穩定後，每項獨立SR；先決定資料與服務邊界</td></tr></tbody></table></div></section>
+<section id="master"><div class="eyebrow">03 · 總 SR 表</div><h2>8 張進行中、1 張暫存、3 張清單全勾待核對。</h2><div class="callout"><p><strong>不要把這些數字加成平台完成率。</strong>清單混有規劃、本機原型、正式程式與雲端驗收，單位不同。全部列入總表，但未驗證的不能直接封存。</p></div><details class="sr-record"><summary><span>本機三角色後台</span><span class="tag">13 / 14 清單項目</span></summary><div class="sr-inner"><div class="grid-3"><div><h4>目前</h4><p>本機可操作；新殼未接正式網站</p></div><div><h4>建議處理</h4><p>收尾 Git 範圍與交付，不重新做 Demo</p></div><div><h4>證據與限制</h4><p>本機程式與142項測試；歷史桌面／手機證據</p></div></div><p class="file-note">creator-backoffice-local-acceptance · <a href="../../openspec/changes/creator-backoffice-local-acceptance/tasks.md">開啟原待辦</a></p></div></details>
+<details class="sr-record"><summary><span>總架構與功能藍圖</span><span class="tag">71 / 79 清單項目</span></summary><div class="sr-inner"><div class="grid-3"><div><h4>目前</h4><p>文件／本機歷史混合，不能當產品百分比</p></div><div><h4>建議處理</h4><p>保留總計畫；補交付快照、更新與責任一致性</p></div><div><h4>證據與限制</h4><p>文件已讀；未完成項8條，部分仍引用舊界線</p></div></div><p class="file-note">creator-operations-platform-blueprint · <a href="../../openspec/changes/creator-operations-platform-blueprint/tasks.md">開啟原待辦</a></p></div></details>
+<details class="sr-record"><summary><span>多課程銷售與程式包交付</span><span class="tag">2 / 15 清單項目</span></summary><div class="sr-inner"><div class="grid-3"><div><h4>目前</h4><p>已有API／歡迎信／權限程式，清單不能代表只做兩項</p></div><div><h4>建議處理</h4><p>沿用並重核進度；先對齊現有商品API，再補缺口</p></div><div><h4>證據與限制</h4><p>本輪公開API5項、歡迎信12項測試通過</p></div></div><p class="file-note">public-multi-course-sales-and-code-package · <a href="../../openspec/changes/public-multi-course-sales-and-code-package/tasks.md">開啟原待辦</a></p></div></details>
+<details class="sr-record"><summary><span>正式角色與工作區導航</span><span class="tag">30 / 31 清單項目</span></summary><div class="sr-inner"><div class="grid-3"><div><h4>目前</h4><p>NavBar已呼叫resolveNavigation，不是沒有導航</p></div><div><h4>建議處理</h4><p>正式新版殼重用這份結果；原SR補遷移／回滾證據</p></div><div><h4>證據與限制</h4><p>實體呼叫已核對；新版頂部＋側欄尚未接入</p></div></div><p class="file-note">role-based-workspace-navigation · <a href="../../openspec/changes/role-based-workspace-navigation/tasks.md">開啟原待辦</a></p></div></details>
+<details class="sr-record"><summary><span>課程使用者／管理員入口</span><span class="tag">10 / 12 清單項目</span></summary><div class="sr-inner"><div class="grid-3"><div><h4>目前</h4><p>正式導航與掛載程式存在</p></div><div><h4>建議處理</h4><p>和新版殼劃分責任；保留課程CRUD，補部署後巡查</p></div><div><h4>證據與限制</h4><p>剩真實瀏覽器巡查及自審；本輪未重跑線上</p></div></div><p class="file-note">app-feature-surfaces · <a href="../../openspec/changes/app-feature-surfaces/tasks.md">開啟原待辦</a></p></div></details>
+<details class="sr-record"><summary><span>組合包購買入口</span><span class="tag">12 / 13 清單項目</span></summary><div class="sr-inner"><div class="grid-3"><div><h4>目前</h4><p>Bundle列表／詳情／結帳程式存在</p></div><div><h4>建議處理</h4><p>保留；與多課銷售共用一次付款驗收，不重建入口</p></div><div><h4>證據與限制</h4><p>剩真實或sandbox購買閉環，本輪未扣款</p></div></div><p class="file-note">buyer-bundle-checkout-entry · <a href="../../openspec/changes/buyer-bundle-checkout-entry/tasks.md">開啟原待辦</a></p></div></details>
+<details class="sr-record"><summary><span>電子報與自動化</span><span class="tag">18 / 41 清單項目</span></summary><div class="sr-inner"><div class="grid-3"><div><h4>目前</h4><p>清單落後：render、audience、send-engine已有程式</p></div><div><h4>建議處理</h4><p>補正而非重做；先核對介面／安全，再補真正缺的流程</p></div><div><h4>證據與限制</h4><p>本輪render／audience／consent：3檔24測試通過</p></div></div><p class="file-note">newsletter-automation-integration · <a href="../../openspec/changes/newsletter-automation-integration/tasks.md">開啟原待辦</a></p></div></details>
+<details class="sr-record"><summary><span>上線證據與回滾演練</span><span class="tag">14 / 15 清單項目</span></summary><div class="sr-inner"><div class="grid-3"><div><h4>目前</h4><p>產生證據報表的工具存在</p></div><div><h4>建議處理</h4><p>保留，集中TEST回滾實測；工具測試不等於演練</p></div><div><h4>證據與限制</h4><p>本輪報表測試12項通過；未做雲端回滾</p></div></div><p class="file-note">platform-launch-verification-evidence · <a href="../../openspec/changes/platform-launch-verification-evidence/tasks.md">開啟原待辦</a></p></div></details>
+<details class="sr-record"><summary><span>客服主機安全收尾</span><span class="tag">5 / 7 清單項目</span></summary><div class="sr-inner"><div class="grid-3"><div><h4>目前</h4><p>暫存；不作本機UI前置</p></div><div><h4>建議處理</h4><p>保留暫存，另核对入站安全與服務狀態</p></div><div><h4>證據與限制</h4><p>本輪沒有讀SSH／雲端／外部服務</p></div></div><p class="file-note">oracle-chatwoot-anti-reclaim-cutover（暫存，未還原）</p></div></details>
+<details class="sr-record"><summary><span>優惠券、匯出與通知入口</span><span class="tag">9 / 9 清單項目</span></summary><div class="sr-inner"><div class="grid-3"><div><h4>目前</h4><p>清單全勾，不自動認定已交付</p></div><div><h4>建議處理</h4><p>核對實體路由／權限測試／Git後再封存</p></div><div><h4>證據與限制</h4><p>本輪讀待辦，完整證據審查仍待做</p></div></div><p class="file-note">missing-product-surfaces · <a href="../../openspec/changes/missing-product-surfaces/tasks.md">開啟原待辦</a></p></div></details>
+<details class="sr-record"><summary><span>課程／LINE／領代碼旅程</span><span class="tag">19 / 19 清單項目</span></summary><div class="sr-inner"><div class="grid-3"><div><h4>目前</h4><p>清單全勾，但部署驗收描述仍留待上線字樣</p></div><div><h4>建議處理</h4><p>先找實際驗收證據；不依打勾直接封存</p></div><div><h4>證據與限制</h4><p>發現文字狀態不一致；不是已證明功能失敗</p></div></div><p class="file-note">buyer-journey-gap-completion · <a href="../../openspec/changes/buyer-journey-gap-completion/tasks.md">開啟原待辦</a></p></div></details>
+<details class="sr-record"><summary><span>網站功能巡查</span><span class="tag">4 / 4 清單項目</span></summary><div class="sr-inner"><div class="grid-3"><div><h4>目前</h4><p>有历史修復commit與巡查紀錄引用</p></div><div><h4>建議處理</h4><p>驗證引用與目前版本，再決定封存</p></div><div><h4>證據與限制</h4><p>歷史證據不代替新版UI驗收</p></div></div><p class="file-note">site-wide-functional-qa-sweep · <a href="../../openspec/changes/site-wide-functional-qa-sweep/tasks.md">開啟原待辦</a></p></div></details><div class="card"><h3>本輪抓到的三個清單落差</h3><ul><li>電子報渲染器與分眾已存在，舊清單卻仍列「新增」。要補正，不重做。</li><li>寄信前置 ToSend SR 已在封存目錄，電子報仍列「確認前置完成」。需確認目前介面，不再重開。</li><li>買家旅程全勾，部署驗收描述卻仍寫「待上線」。先核對證據，不憑文字判定成功或失敗。</li></ul></div></section>
+<section id="sequence"><div class="eyebrow">04 · 接下來怎麼排</div><h2>先能管理商品，再驗交易；營運擴充接在後面。</h2><div class="steps"><article><b>第一批 · 收好現在成果</b><p>本機 Demo Git範圍確認與保存；總表補正舊SR，避免混進其他修改。</p></article><article><b>第二批 · 正式後台接線</b><p>重用工作區導航與課程入口；新版殼＋既有課程方案CRUD。</p></article><article><b>第三批 · 買家交付閉環</b><p>沿用多課銷售與Bundle SR：指定內容、付款、退款、領程式包。</p></article><article><b>第四批 · 擴充商品與營運</b><p>通用組合包／獨立程式包／SaaS／季訂閱；電子報、CRM、直播各自驗收。</p></article><article><b>第五批 · 發布與維護</b><p>部署證據、相容性、回滾演練與買家更新，不省略安全閘門。</p></article></div><div class="grid-3"><article class="card"><h3>總計畫</h3><p>保留既有 blueprint，回答功能全貌與邊界。這頁總表負責順序與現況，不再造第二份領域真相。</p></article><article class="card"><h3>每張施工 SR</h3><p>能沿用就沿用；責任不同才新開。下一張正式UI接線目前是候選，未建立或批准施工。</p></article><article class="card"><h3>多 Agent</h3><p>共用schema／導航／權限由主控統一；独立畫面才平行。串接前先寫owner，不多人改同一檔。</p></article></div><div class="callout"><strong>下一個最小驗收目標</strong><p>在真正的本機網站後台新增一個課程銷售方案，重新登入後還找得到、改得了。先重用現有CourseOffer，不承諾四種新商品與所有訂閱同批完成。</p></div></section>
+<section id="limits"><div class="eyebrow">05 · 邊界與仍待核對</div><h2>程式存在，不等於正式流程已過關。</h2><div class="grid-3"><article class="card"><h3>這輪已實跑</h3><p>本機142測試＋上線報表工具12測試，共154通過。電子報3檔24通過；公開課程API5通過；歡迎信邏輯12通過。這些均非真實付款或寄信。</p></article><article class="card"><h3>這輪沒做</h3><p>沒有正式DB寫入、付款、寄信、部署、雲端回滾、Git提交或推送。也未逐項審完所有SR的完整code／歷史部署證據。</p></article><article class="card"><h3>尚未決定</h3><p>新版正式殼的最小scope、通用交付快照、買家更新／repo責任與影音供應商。只在會影響下一批時逐題確認。</p></article></div></section>
+<section id="evidence"><div class="eyebrow">06 · 附錄</div><h2>證據與原始文件</h2><details class="card"><summary>查看本輪核對方法與程式來源</summary><div class="detail-body"><p>清單由spectra list及parked即時取得；待辦直接讀各tasks，代表性程式及caller已定位。未使用tracking檔案數當實作完成數。</p><ul><li>正式NavBar呼叫resolveNavigation，來源 <code>apps/saas/modules/shared/components/NavBar.tsx</code>。</li><li>電子報現有 <code>packages/newsletter/lib/render.ts</code>、<code>audience.ts</code>、<code>send-engine.ts</code>，含assertEmailConsent caller。</li><li>公開課程路由 <code>apps/saas/app/api/public/courses/route.ts</code> 與 slug路由；歡迎信 <code>packages/api/modules/course/lib/send-welcome-email.ts</code>。</li><li>ToSend前置封存 <code>2026-09-16-mail-provider-tosend-smtp-support</code>；本輪未重新驗provider容器與送達。</li><li>目前HEAD <code>76bedd1b</code>；本輪未提交／推送，舊dirty修改全保留。</li></ul><p><a href="creator-backoffice-implementation-evidence.md">本機三角色實測證據</a> · <a href="creator-platform-development-handoff.md">原總架構交接</a> · <a href="creator-sr-audit-register.md">本輪盤點紀錄</a></p></div></details></section><footer>2026-10-13 本機對焦報告。數量來自當次清單或實測；排序是建議，不是已批准的新一批施工。此頁無外部寫入。</footer></div><!-- ═══ Session 識別 ═══ -->
+<script>
+  // ← 這三個值來自 scripts/session-label.sh；label 留空字串即整段不顯示
+  window.VT_SESSION = { label: "startkiter · SR總表", id: "local", project: "startkiter" };
+  const readableStyle=document.createElement('style');
+  readableStyle.textContent='body header h1{font-family:var(--sans);font-size:calc(42px * var(--fs,1));line-height:1.35;max-width:100%;font-weight:650}body section h2{font-family:var(--sans);font-size:calc(28px * var(--fs,1));line-height:1.45;font-weight:650}body header .lead{font-size:calc(18px * var(--fs,1));line-height:1.8}@media(max-width:620px){body header h1{font-size:calc(28px * var(--fs,1))}body section h2{font-size:calc(23px * var(--fs,1))}}';
+  document.head.append(readableStyle);
+</script>
+<style>
+  .vt-session-badge {
+    display: flex;
+    align-items: center;
+    gap: calc(9px * var(--dens, 1));
+    padding: calc(5px * var(--dens, 1)) calc(16px * var(--dens, 1));
+    background: var(--vt-session-color, #666);
+    color: #fff;
+    font-family: var(--mono, ui-monospace, monospace);
+    font-size: calc(11.5px * var(--fs, 1));
+    letter-spacing: 0.06em;
+  }
+  .vt-session-badge .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #fff;
+    opacity: 0.85;
+    flex-shrink: 0;
+  }
+  .vt-session-badge .lb {
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .vt-session-badge .id {
+    margin-left: auto;
+    opacity: 0.75;
+  }
+</style>
+<script>
+  (function () {
+    const s = window.VT_SESSION || {};
+    if (!s.label) return; // 沒填就整段停用（範本原檔即此狀態）
+    const seed = s.id || s.label;
+    let hue = 7;
+    for (const c of seed) hue = (hue * 31 + c.charCodeAt(0)) % 360;
+    const col = `hsl(${hue} 58% 42%)`;
+
+    // ① 分頁標題前綴
+    document.title = `${s.label} · ${document.title}`;
+
+    // ② favicon：色塊 + 首字
+    try {
+      const cv = document.createElement("canvas");
+      cv.width = cv.height = 64;
+      const g = cv.getContext("2d");
+      g.fillStyle = col;
+      if (g.roundRect) {
+        g.beginPath();
+        g.roundRect(2, 2, 60, 60, 14);
+        g.fill();
+      } else {
+        g.fillRect(2, 2, 60, 60);
+      }
+      g.fillStyle = "#fff";
+      g.font = '700 38px ui-sans-serif, system-ui, "PingFang TC"';
+      g.textAlign = "center";
+      g.textBaseline = "middle";
+      const ch = (s.label.match(/[A-Za-z0-9一-鿿]/) || ["?"])[0];
+      g.fillText(ch.toUpperCase(), 32, 36);
+      const link = document.createElement("link");
+      link.rel = "icon";
+      link.href = cv.toDataURL();
+      document.head.appendChild(link);
+    } catch (e) {}
+
+    // ③ 頂部色帶徽章
+    const b = document.createElement("div");
+    b.className = "vt-session-badge";
+    b.style.setProperty("--vt-session-color", col);
+    b.innerHTML =
+      '<span class="dot"></span><span class="lb"></span><span class="id"></span>';
+    b.querySelector(".lb").textContent = s.label;
+    b.querySelector(".id").textContent = s.id || "";
+    const host = document.querySelector("header") || document.body;
+    host.insertBefore(b, host.firstChild);
+  })();
+</script><!-- vt-tweaks:begin v=1f6fc87025 -->
+<style id="vt-tweaks-css">
+/* 風格設定面板 — 與 tweaks.js 成對，由 scripts/stamp.py 在 verify 時注入頁尾（作者不用複製）。
+   字級與間距的倍率靠兩個變數：--fs（字級）、--dens（間距）。stamp.py 會把頁面裡寫死的
+   px 字級與間距改成 calc(原值 * var(--fs|--dens, 1))，這裡只負責「哪些區塊不吃倍率」。 */
+
+/* 不吃倍率：結構圖、畫面樣張（它們是示意畫面，照比例縮放才對）、頁面介面本身
+   （風格設定面板、評論工具、session 徽章；字放到 200% 時還得能把它調回來）、作者手動鎖定的區塊。
+   ⚠️ 要逐一列出，不能用「class 以 vt- 開頭」：評論工具會在 body 加 vt-has-existing-export，
+   前綴比對會把整頁鎖死；被評論標記的文字（vt-comment-mark）也該跟著內文縮放。 */
+svg,
+.mock,
+[data-tw-lock],
+.vt-tw-root,
+.vt-comment-trigger,
+.vt-comment-popup,
+.vt-comment-pill,
+.vt-comment-list,
+.vt-session-badge {
+  --fs: 1;
+  --dens: 1;
+}
+/* 沒宣告字級的頁面（spec-alignment 範本就是）：零權重，任何頁面規則都蓋得過它 */
+:where(body) {
+  font-size: calc(16px * var(--fs, 1));
+}
+/* Tailwind 文字 class 的覆寫由 stamp.py 視頁面需要產生（只在有 Tailwind、倍率≠1 時生效），不放這裡 */
+
+/* ── 面板本體（按鈕與面板都掛 vt-tw-root → 在上面的排除清單裡，不吃倍率）── */
+/* 沒有底部列可停的頁：浮在左下角（右下角是評論工具） */
+.vt-tw-launch {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 9100;
+  display: flex;
+  align-items: center;
+  gap: calc(5px * var(--dens, 1));
+  font: 600 calc(12px * var(--fs, 1)) var(--sans, system-ui, sans-serif);
+  padding: calc(5px * var(--dens, 1)) calc(10px * var(--dens, 1));
+  border-radius: 999px;
+  border: 1.5px solid var(--slate, #141413);
+  background: var(--slate, #141413);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(20, 20, 19, 0.2);
+}
+.vt-tw-launch svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+/* 停在底部列「預覽摘要」左邊：外觀跟旁邊的次要按鈕一致，各寬度都停（窄螢幕只顯示圖示，見檔尾） */
+.vt-tw-launch.vt-tw-docked {
+  position: static;
+  display: inline-flex; /* 父層是一般區塊時才不會獨佔一行、把列撐高 */
+  font: 500 calc(14px * var(--fs, 1)) var(--sans, system-ui, sans-serif);
+  padding: calc(10px * var(--dens, 1)) calc(16px * var(--dens, 1));
+  border-radius: 10px;
+  border: 1.5px solid var(--g300, #d1cfc5);
+  background: #fff;
+  color: var(--slate, #141413);
+  box-shadow: none;
+}
+.vt-tw-launch.vt-tw-docked:hover {
+  border-color: var(--slate, #141413);
+}
+/* 位置（bottom、left／right、max-height）由 tweaks.js 依按鈕位置算 */
+.vt-tw-pop {
+  position: fixed;
+  width: min(330px, 92vw);
+  overflow: auto;
+  z-index: 9100;
+  background: #fff;
+  color: var(--slate, #141413);
+  border: 1.5px solid var(--g300, #d1cfc5);
+  border-radius: 12px;
+  box-shadow: 0 16px 44px rgba(20, 20, 19, 0.22);
+  padding: calc(14px * var(--dens, 1)) calc(16px * var(--dens, 1)) calc(16px * var(--dens, 1));
+  font: calc(13px * var(--fs, 1))/1.5 var(--sans, system-ui, sans-serif);
+  text-align: left;
+}
+.vt-tw-pop[hidden] {
+  display: none;
+}
+.vt-tw-sec {
+  font: 600 calc(10.5px * var(--fs, 1)) var(--mono, ui-monospace, monospace);
+  color: var(--g500, #87867f);
+  letter-spacing: 0.06em;
+  margin: calc(12px * var(--dens, 1)) 0 calc(6px * var(--dens, 1));
+  padding-top: calc(10px * var(--dens, 1));
+  border-top: 1px solid var(--g200, #e6e3da);
+}
+.vt-tw-sec.vt-tw-first {
+  border-top: 0;
+  padding-top: 0;
+  margin-top: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+/* 中英切換：面板頂端那行的右邊 */
+.vt-tw-lang {
+  font: 600 calc(11px * var(--fs, 1)) var(--sans, system-ui, sans-serif);
+  letter-spacing: 0;
+  padding: calc(2px * var(--dens, 1)) calc(8px * var(--dens, 1));
+  border-radius: 6px;
+  border: 1.5px solid var(--g300, #d1cfc5);
+  background: #fff;
+  color: var(--g700, #3d3d3a);
+  cursor: pointer;
+}
+.vt-tw-lang:hover {
+  border-color: var(--slate, #141413);
+}
+.vt-tw-item {
+  margin: calc(8px * var(--dens, 1)) 0;
+}
+.vt-tw-label {
+  display: flex;
+  justify-content: space-between;
+  gap: calc(8px * var(--dens, 1));
+  font-weight: 600;
+  margin-bottom: calc(4px * var(--dens, 1));
+}
+.vt-tw-val {
+  font-family: var(--mono, ui-monospace, monospace);
+  font-weight: 500;
+  color: var(--clay-d, #b85c3e);
+}
+.vt-tw-item input[type="range"] {
+  width: 100%;
+  accent-color: var(--clay, #d97757);
+}
+.vt-tw-seg {
+  display: flex;
+  border: 1.5px solid var(--g300, #d1cfc5);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.vt-tw-seg button {
+  flex: 1;
+  font: calc(12.5px * var(--fs, 1)) var(--sans, system-ui, sans-serif);
+  padding: calc(5px * var(--dens, 1)) calc(4px * var(--dens, 1));
+  border: 0;
+  border-right: 1px solid var(--g300, #d1cfc5);
+  background: #fff;
+  color: var(--g700, #3d3d3a);
+  cursor: pointer;
+}
+.vt-tw-seg button:last-child {
+  border-right: 0;
+}
+.vt-tw-seg button.vt-tw-on {
+  background: var(--slate, #141413);
+  color: #fff;
+}
+.vt-tw-hint {
+  font-size: calc(11.5px * var(--fs, 1));
+  color: var(--g500, #87867f);
+  line-height: 1.5;
+  margin-top: calc(5px * var(--dens, 1));
+}
+.vt-tw-actions {
+  display: flex;
+  gap: calc(8px * var(--dens, 1));
+  margin-top: calc(14px * var(--dens, 1));
+}
+.vt-tw-actions button {
+  flex: 1;
+  font: calc(12.5px * var(--fs, 1)) var(--sans, system-ui, sans-serif);
+  padding: calc(7px * var(--dens, 1)) calc(8px * var(--dens, 1));
+  border-radius: 8px;
+  border: 1.5px solid var(--g300, #d1cfc5);
+  background: #fff;
+  cursor: pointer;
+}
+.vt-tw-actions button.vt-tw-pri {
+  border-color: var(--clay, #d97757);
+  color: var(--clay-d, #b85c3e);
+  font-weight: 600;
+}
+.vt-tw-actions button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.vt-tw-manual {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: calc(8px * var(--dens, 1));
+  padding: calc(6px * var(--dens, 1)) calc(8px * var(--dens, 1));
+  font: calc(11px * var(--fs, 1))/1.5 var(--mono, ui-monospace, monospace);
+  border: 1.5px solid var(--g300, #d1cfc5);
+  border-radius: 8px;
+  resize: vertical;
+}
+.vt-tw-manual[hidden] {
+  display: none;
+}
+.vt-tw-actions button[aria-pressed="true"] {
+  background: var(--clay-d, #b85c3e);
+  border-color: var(--clay-d, #b85c3e);
+  color: #fff;
+}
+@media (max-width: 760px) {
+  .vt-tw-launch {
+    padding: calc(8px * var(--dens, 1));
+  }
+  .vt-tw-lbl {
+    display: none; /* 手機只留圖示，少蓋一點內容 */
+  }
+}
+/* 範本底部列在 900px 以下擠不下帶字的第三顆鈕：只留圖示、縮內距，高度跟旁邊的按鈕拉齊。
+   約 360px 以下、以及 700px 前後一小段寬度，列仍可能折成兩行（範圍依列上的文字與按鈕字數而定；等於更窄螢幕的版型），接受 */
+@media (max-width: 900px) {
+  .vt-tw-docked .vt-tw-lbl {
+    display: none;
+  }
+  .vt-tw-launch.vt-tw-docked {
+    padding: calc(10px * var(--dens, 1)) calc(11px * var(--dens, 1));
+    align-self: stretch;
+  }
+}
+
+</style>
+<script id="vt-tweaks-js" data-profile-tool="$HOME/.codex/skills/html-visualizer/scripts/profile.py">
+/* 風格設定面板 — 與 tweaks.css 成對，由 scripts/stamp.py 在 verify 時注入頁尾（作者不用複製）。
+ * 按鈕「風格設定」：頁面有範本底部列的「預覽摘要」（#preview-btn）就停在它左邊，各寬度都是（窄螢幕只顯示圖示）；
+ * 沒有底部列就固定在左下角（右下角是評論工具的位置）。面板從按鈕上方打開。
+ * 底部列一律用範本的，按鈕不偵測、不閃避頁面自己做的固定列。
+ * （本檔任何地方都不能出現 script 的結尾標籤字樣，否則內嵌時瀏覽器會在那裡把腳本切斷。）
+ *
+ * 固定層（每頁都有）：字級 90%–200%、密度、內容寬度，寫在 <html> 的 --fs／--dens／--wrap-max。
+ * 內容層（作者選配，預設 0 項）：頁面放一個 type 為 application/json、id 為 vt-tweaks 的 script 區塊，
+ *   內容是 [{id,label,options:[[值,顯示],...],hint}]。
+ * 選了之後在 <html> 設 data-tw-<id>="值"，作者只寫對應的 CSS，不寫 JS。hint 必填（這項會改到頁面上的什麼）。
+ * 調過的值只改畫面、不進複製摘要。讀者按「存成我的預設」才產生「設定檔變更」段落（給 AI 執行的一行
+ * profile.py 指令，使用者不用自己跑）：有拍板摘要的頁經 window.vtCollectComments 接進摘要，沒有的頁直接複製。
+ * 介面有中英兩種，面板頂端可切換（「設定檔變更」段落也跟著換語言）。
+ */
+(function () {
+  var root = document.documentElement;
+  var me = document.currentScript;
+  var tool = (me && me.getAttribute("data-profile-tool")) || "profile.py";
+  // 介面語言：讀者切換過就記在瀏覽器、之後的頁沿用；沒切過跟頁面的 lang 走。
+  // 沙盒 iframe（沒開 allow-same-origin）一碰 localStorage 就丟錯，所以包 try
+  var lang = null;
+  try {
+    lang = localStorage.getItem("vt-tw-lang");
+  } catch (e) {}
+  if (lang !== "zh" && lang !== "en") lang = /^en/i.test(root.lang) ? "en" : "zh";
+  var LANG = {
+    zh: {
+      name: "風格設定",
+      short: "風格設定",
+      title: "風格設定（字級、密度、寬度）",
+      fixed: "固定層 · 每頁都有",
+      content: "內容層 · 這頁專屬",
+      swap: "EN",
+      reset: "全部還原",
+      save: "存成我的預設",
+      added: "已加進複製摘要",
+      copied: "已複製，貼回對話即可",
+      select: "已選取，請按 Cmd+C",
+      need: function (n) {
+        return "調過" + n.slice(0, -1).join("、") + "或" + n[n.length - 1] + "，才能存成你的預設。";
+      },
+      undo: "存檔指令已加進這頁的複製摘要，複製後貼回對話即可；再按一次取消。",
+      toSummary: "按下後，存檔指令會加進這頁的複製摘要；貼回對話，AI 會寫進你的設定檔，之後的頁都用這組。",
+      toCopy: "按下後會複製一段指令；貼回對話，AI 會寫進你的設定檔，之後的頁都用這組。",
+      head: "## 設定檔變更\n給 AI：使用者要把這頁的顯示設定存成預設（",
+      pair: "：",
+      join: "、",
+      tail: "）。請執行下面這行寫入 html-visualizer 設定檔，完成後回報前後差異；使用者不用自己跑。\n",
+    },
+    en: {
+      name: "Style settings",
+      short: "Style",
+      title: "Style settings (text size, density, width)",
+      fixed: "Every page",
+      content: "This page only",
+      swap: "中文",
+      reset: "Reset all",
+      save: "Save as my default",
+      added: "Added to summary",
+      copied: "Copied",
+      select: "Press Cmd+C",
+      need: function (n) {
+        n = n.map(function (x) {
+          return x.toLowerCase();
+        });
+        return "Change the " + n.slice(0, -1).join(", ") + " or " + n[n.length - 1] + " to save it as your default.";
+      },
+      undo: "The save command is in this page's copy summary. Copy the summary and paste it into the chat. Click again to remove it.",
+      toSummary: "Adds a save command to this page's copy summary. Paste it into the chat and the AI writes it to your profile; later pages use these settings.",
+      toCopy: "Copies a save command. Paste it into the chat and the AI writes it to your profile; later pages use these settings.",
+      head: "## Profile changes\nFor the AI: the user wants to save this page's display settings as their default (",
+      pair: ": ",
+      join: ", ",
+      tail: "). Run the line below to write them to the html-visualizer profile, then report the before and after values. The user doesn't need to run it.\n",
+    },
+  };
+  var L = LANG[lang];
+  // 固定層的名稱與選項是 {zh, en}；作者寫的內容層（字串或數字）原樣顯示
+  function txt(x) {
+    return x && typeof x === "object" ? x[lang] : x;
+  }
+  var cs = getComputedStyle(root);
+  function cssNum(name, fallback) {
+    var v = parseFloat(cs.getPropertyValue(name));
+    return isNaN(v) ? fallback : v;
+  }
+  var baseFs = cssNum("--fs", 1);
+  var DENS = [
+    ["0.75", { zh: "緊湊", en: "Compact" }, "compact"],
+    ["1", { zh: "標準", en: "Standard" }, "standard"],
+    ["1.3", { zh: "寬鬆", en: "Relaxed" }, "relaxed"],
+  ];
+  var baseDens = String(cssNum("--dens", 1));
+  if (!DENS.some(function (d) { return d[0] === baseDens; })) baseDens = "1";
+  // 內容寬度只在頁面有用 --wrap-max 時提供（範本在 :root 宣告它）；沒宣告的頁按了也不會動，乾脆不顯示
+  var rawWrap = cs.getPropertyValue("--wrap-max").trim();
+  var baseWrap = parseFloat(rawWrap) || 1760;
+  var wrapOpts = [
+    ["1760px", { zh: "滿版", en: "Full" }, "1760"],
+    ["1080px", { zh: "閱讀寬", en: "Reading" }, "1080"],
+  ];
+  if (baseWrap !== 1760 && baseWrap !== 1080) wrapOpts.unshift([baseWrap + "px", { zh: "預設", en: "Default" }, String(baseWrap)]);
+  var FIXED = [
+    { id: "fs", label: { zh: "字級", en: "Text size" }, kind: "range", min: 0.9, max: 2, step: 0.05, def: String(baseFs), css: "--fs", profile: "tokens.type.scale" },
+    { id: "dens", label: { zh: "密度", en: "Density" }, css: "--dens", def: baseDens, profile: "tokens.layout.density", options: DENS },
+  ];
+  if (rawWrap) {
+    FIXED.push({ id: "width", label: { zh: "內容寬度", en: "Width" }, css: "--wrap-max", def: baseWrap + "px", profile: "tokens.layout.maxWidth", options: wrapOpts });
+  }
+  // html.vt-fs：倍率≠1 時才讓 Tailwind 文字 class 的覆寫生效（stamp.py 產生的規則都掛在它底下）
+  root.classList.toggle("vt-fs", baseFs !== 1);
+  var content = [];
+  // 用 querySelector：沒有內容層的頁面本來就沒有這個元素，不該被 verify 的元素參照檢查報成缺漏
+  var decl = document.querySelector("script#vt-tweaks");
+  if (decl) {
+    try {
+      content = JSON.parse(decl.textContent);
+    } catch (e) {
+      console.error("vt-tweaks 宣告不是合法 JSON", e);
+    }
+  }
+  content = content.filter(function (c) {
+    var ok =
+      c && c.id && c.label && Array.isArray(c.options) && c.options.length >= 2;
+    if (!ok) console.error("vt-tweaks 項目缺 id／label／options", c);
+    else if (!c.hint)
+      console.error(
+        "vt-tweaks 項目缺 hint（要寫這項會改到頁面上的什麼）",
+        c.id,
+      );
+    return ok;
+  });
+  if (content.length > 3) {
+    console.error("vt-tweaks 最多 3 項，多的不顯示");
+    content = content.slice(0, 3);
+  }
+  content.forEach(function (c) {
+    c.attr = "data-tw-" + c.id;
+    c.def = String(c.options[0][0]);
+  });
+  var ALL = FIXED.concat(content);
+  var saved = false; // 按過「存成我的預設」（只在有拍板摘要的頁用得到）
+  var state = {};
+  ALL.forEach(function (t) {
+    state[t.id] = t.def;
+  });
+
+  function label(t, v) {
+    if (t.kind === "range") return Math.round(parseFloat(v) * 100) + "%";
+    for (var i = 0; i < t.options.length; i++)
+      if (String(t.options[i][0]) === v) return txt(t.options[i][1]);
+    return v;
+  }
+  function apply(t) {
+    if (t.css) root.style.setProperty(t.css, state[t.id]);
+    if (t.attr) root.setAttribute(t.attr, state[t.id]);
+    if (t.id === "fs") root.classList.toggle("vt-fs", parseFloat(state.fs) !== 1);
+  }
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  // 切換語言時要重寫的文字：登記時先畫一次，切換時全部重跑
+  var paint = [];
+  function painted(fn) {
+    paint.push(fn);
+    fn();
+  }
+
+  var launch = el("button", "vt-tw-launch vt-tw-root");
+  launch.type = "button";
+  launch.setAttribute("aria-expanded", "false");
+  launch.innerHTML =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><line x1="21" y1="4" x2="14" y2="4"/><line x1="10" y1="4" x2="3" y2="4"/><line x1="21" y1="12" x2="12" y2="12"/><line x1="8" y1="12" x2="3" y2="12"/><line x1="21" y1="20" x2="16" y2="20"/><line x1="12" y1="20" x2="3" y2="20"/><line x1="14" y1="2" x2="14" y2="6"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="16" y1="18" x2="16" y2="22"/></svg>';
+  var lbl = launch.appendChild(el("span", "vt-tw-lbl"));
+  var pop = el("aside", "vt-tw-pop vt-tw-root");
+  pop.hidden = true;
+  painted(function () {
+    launch.setAttribute("aria-label", L.name);
+    launch.title = L.title;
+    lbl.textContent = L.short;
+    pop.setAttribute("aria-label", L.name);
+  });
+
+  function control(t) {
+    var wrap = el("div", "vt-tw-item");
+    var lab = el("div", "vt-tw-label");
+    var name = lab.appendChild(el("span"));
+    var val = el("span", "vt-tw-val");
+    lab.appendChild(val);
+    wrap.appendChild(lab);
+    function sync() {
+      val.textContent = label(t, state[t.id]);
+    }
+    if (t.kind === "range") {
+      var r = el("input");
+      r.type = "range";
+      r.min = t.min;
+      r.max = t.max;
+      r.step = t.step;
+      r.value = state[t.id];
+      r.addEventListener("input", function () {
+        state[t.id] = r.value;
+        apply(t);
+        sync();
+        refreshSave();
+      });
+      wrap.appendChild(r);
+      t.reset = function () {
+        r.value = t.def;
+      };
+    } else {
+      var seg = el("div", "vt-tw-seg");
+      t.options.forEach(function (o) {
+        var b = el("button");
+        b.type = "button";
+        painted(function () {
+          b.textContent = txt(o[1]);
+        });
+        b.setAttribute("data-v", String(o[0]));
+        b.addEventListener("click", function () {
+          state[t.id] = String(o[0]);
+          apply(t);
+          mark();
+          sync();
+          refreshSave();
+        });
+        seg.appendChild(b);
+      });
+      function mark() {
+        seg.querySelectorAll("button").forEach(function (b) {
+          b.classList.toggle(
+            "vt-tw-on",
+            b.getAttribute("data-v") === state[t.id],
+          );
+        });
+      }
+      mark();
+      t.reset = mark;
+      wrap.appendChild(seg);
+    }
+    if (t.hint) wrap.appendChild(el("div", "vt-tw-hint", t.hint));
+    t.sync = sync;
+    painted(function () {
+      name.textContent = txt(t.label);
+      if (r) r.setAttribute("aria-label", txt(t.label));
+      sync();
+    });
+    return wrap;
+  }
+  var first = pop.appendChild(el("div", "vt-tw-sec vt-tw-first"));
+  var firstText = first.appendChild(el("span"));
+  var langBtn = first.appendChild(el("button", "vt-tw-lang"));
+  langBtn.type = "button";
+  painted(function () {
+    firstText.textContent = L.fixed;
+    langBtn.textContent = L.swap;
+  });
+  FIXED.forEach(function (t) {
+    pop.appendChild(control(t));
+  });
+  if (content.length) {
+    var sec = pop.appendChild(el("div", "vt-tw-sec"));
+    painted(function () {
+      sec.textContent = L.content;
+    });
+    content.forEach(function (t) {
+      pop.appendChild(control(t));
+    });
+  }
+  var actions = el("div", "vt-tw-actions");
+  var resetBtn = el("button");
+  resetBtn.type = "button";
+  painted(function () {
+    resetBtn.textContent = L.reset;
+  });
+  var saveBtn = el("button", "vt-tw-pri");
+  saveBtn.type = "button";
+  actions.appendChild(resetBtn);
+  actions.appendChild(saveBtn);
+  pop.appendChild(actions);
+  var saveHint = el("div", "vt-tw-hint");
+  pop.appendChild(saveHint);
+  // 複製不到時的出路：指令放進這裡並全選，使用者按 Cmd+C（純展示頁沒有頁面自帶的複製函式）
+  var manual = el("textarea", "vt-tw-manual");
+  manual.readOnly = true;
+  manual.rows = 4;
+  manual.hidden = true;
+  pop.appendChild(manual);
+  var flashTimer = null;
+
+  function changedFixed() {
+    return FIXED.filter(function (t) {
+      return state[t.id] !== t.def;
+    });
+  }
+  function profileValue(t, v) {
+    if (t.options) {
+      for (var i = 0; i < t.options.length; i++)
+        if (String(t.options[i][0]) === v) return t.options[i][2];
+    }
+    return String(Math.round(parseFloat(v) * 100) / 100);
+  }
+  function hasSummary() {
+    return typeof window.vtBuildDecisionExport === "function";
+  }
+  function saveText(ch) {
+    return (
+      L.head +
+      ch
+        .map(function (t) {
+          return txt(t.label) + L.pair + label(t, state[t.id]);
+        })
+        .join(L.join) +
+      L.tail +
+      // 雙引號：路徑以 $HOME 開頭，單引號裡不會展開
+      'python3 "' +
+      tool +
+      '" set ' +
+      ch
+        .map(function (t) {
+          return t.profile + "=" + profileValue(t, state[t.id]);
+        })
+        .join(" ")
+    );
+  }
+  function refreshSave() {
+    var n = changedFixed().length;
+    // 只看目前的值：拖滑桿途中經過預設值那一格不該把已存取消
+    var on = saved && n > 0;
+    // 失敗時留下的文字框：設定一變，裡面的指令就過時了
+    if (!manual.hidden && manual.value !== saveText(changedFixed())) manual.hidden = true;
+    saveBtn.disabled = !n;
+    if (hasSummary()) saveBtn.setAttribute("aria-pressed", String(on));
+    saveBtn.textContent = on ? L.added : L.save;
+    saveHint.textContent = !n
+      ? L.need(FIXED.map(function (t) {
+          return txt(t.label);
+        }))
+      : on
+        ? L.undo
+        : hasSummary()
+        ? L.toSummary
+        : L.toCopy;
+  }
+  window.vtCollectTweaks = function () {
+    var ch = changedFixed();
+    return saved && ch.length ? "\n\n" + saveText(ch) : "";
+  };
+  resetBtn.addEventListener("click", function () {
+    saved = false;
+    ALL.forEach(function (t) {
+      state[t.id] = t.def;
+      apply(t);
+      t.reset();
+      t.sync();
+    });
+    refreshSave();
+  });
+  saveBtn.addEventListener("click", async function () {
+    if (hasSummary()) {
+      saved = !saved;
+      refreshSave();
+      return;
+    }
+    // 沒有拍板摘要的頁：按鈕本身就是出口，直接複製
+    var text = saveText(changedFixed());
+    var ok = false;
+    manual.hidden = true;
+    if (window.vtCopyText) ok = await window.vtCopyText(text);
+    // 沒有頁面的複製函式就直接走下面：在點擊當下同步複製，不先 await 別的 API 把使用者手勢耗掉
+    if (!ok) {
+      manual.value = text;
+      manual.hidden = false;
+      manual.select();
+      try {
+        ok = document.execCommand("copy");
+      } catch (e) {}
+      if (ok) manual.hidden = true;
+    }
+    saveBtn.textContent = ok ? L.copied : L.select;
+    clearTimeout(flashTimer); // 連點時舊計時器不能提早蓋掉新回饋
+    flashTimer = setTimeout(refreshSave, ok ? 2000 : 6000);
+  });
+  // 面板開在按鈕上方：按鈕在右半就右緣對齊、左半就左緣對齊；
+  // 按鈕上方不到 200px（視窗矮、底部列展開）就改貼畫面頂端，不讓面板頂端跑出畫面
+  function place() {
+    var r = launch.getBoundingClientRect();
+    var w = Math.min(330, window.innerWidth * 0.92);
+    var x = r.left + r.width / 2 > window.innerWidth / 2 ? r.right - w : r.left;
+    // 預覽鈕在列中間時（非範本的列）對齊邊緣會出界，夾回畫面內
+    pop.style.left = Math.max(8, Math.min(x, window.innerWidth - w - 8)) + "px";
+    var low = r.top - 24 < 200;
+    pop.style.top = low ? "12px" : "auto";
+    pop.style.bottom = low ? "auto" : window.innerHeight - r.top + 10 + "px";
+    pop.style.maxHeight = (low ? window.innerHeight - 24 : r.top - 24) + "px";
+  }
+  langBtn.addEventListener("click", function () {
+    lang = lang === "zh" ? "en" : "zh";
+    L = LANG[lang];
+    try {
+      localStorage.setItem("vt-tw-lang", lang);
+    } catch (e) {}
+    paint.forEach(function (f) {
+      f();
+    });
+    refreshSave();
+  });
+  function setOpen(open) {
+    if (open) place();
+    pop.hidden = !open;
+    launch.setAttribute("aria-expanded", String(open));
+  }
+  launch.addEventListener("click", function () {
+    setOpen(pop.hidden);
+  });
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape" && !pop.hidden) setOpen(false);
+  });
+  document.addEventListener("click", function (ev) {
+    // 用事件當下的路徑判斷（按鈕若在點擊後被重畫移除，closest 會找不到而誤關）
+    var inside = ev.composedPath().some(function (el) {
+      return el.classList && el.classList.contains("vt-tw-root");
+    });
+    if (!pop.hidden && !inside) setOpen(false);
+  });
+  // 把「設定檔變更」段接進評論收集函式：所有複製摘要都已經照規定拼接它，不必逐一改寫
+  function hook() {
+    var orig = window.vtCollectComments;
+    window.vtCollectComments = function () {
+      return window.vtCollectTweaks() + (orig ? orig() : "");
+    };
+  }
+  if (document.readyState === "loading")
+    document.addEventListener("DOMContentLoaded", hook);
+  else hook();
+  // querySelector：頁面沒有預覽鈕是正常的，不該讓 verify 的元素參照檢查報缺漏（同上方 vt-tweaks 的寫法）
+  var dock = document.querySelector("#preview-btn");
+  document.body.appendChild(pop);
+  if (dock) {
+    launch.classList.add("vt-tw-docked");
+    dock.parentNode.insertBefore(launch, dock);
+  } else document.body.insertBefore(launch, pop); // Tab 順序：按鈕→面板
+  // 縮放、捲動時按鈕會跟著列移動（捲到頁尾，列會被頁尾往上推），開著的面板要跟著對齊
+  function follow() {
+    if (!pop.hidden) place();
+  }
+  window.addEventListener("resize", follow);
+  window.addEventListener("scroll", follow, { passive: true });
+  refreshSave();
+})();
+
+</script>
+<!-- vt-tweaks:end -->
+</body></html>

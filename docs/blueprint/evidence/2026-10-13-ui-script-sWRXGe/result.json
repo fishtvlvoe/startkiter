@@ -1,0 +1,21 @@
+{
+  "scope": "本機 HTML prototype，不是正式 auth／保存／provider／部署",
+  "command": "bash docs/blueprint/verify-demo-ui.sh",
+  "exitCode": 0,
+  "pass": 40,
+  "fail": 0,
+  "viewports": [1440, 390],
+  "images": 12,
+  "unverified": [
+    "原生 ArrowDown 彈出選單",
+    "完整 Tab／Shift+Tab／Escape／focus trap",
+    "真正保存與全部欄位同時錯誤",
+    "登入角色／跨 workspace／server denial",
+    "未施工模組／provider／rollback"
+  ],
+  "inspection": ["1440-form.png", "390-contacts.png", "390-live.png"],
+  "earlierScriptFailures": [
+    "shell 環境變數沒有傳入 embedded runtime；改核對既有空間和報告分頁",
+    "crm selector 不存在；source 是 contacts，修正測試不改產品配合"
+  ]
+}

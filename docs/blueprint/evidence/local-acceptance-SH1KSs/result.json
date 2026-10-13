@@ -1,0 +1,345 @@
+{
+  "scope": "本機示範",
+  "results": [
+    {
+      "name": "本機入口 1440",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "空名稱錯誤 course 1440",
+      "pass": true,
+      "actual": "local-name",
+      "expected": "local-name"
+    },
+    {
+      "name": "保存回列表 course 1440",
+      "pass": true,
+      "actual": "products",
+      "expected": "products"
+    },
+    {
+      "name": "列表存在 course 1440",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "重整回填 course 1440",
+      "pass": true,
+      "actual": {
+        "name": "驗收示範 1440 course mv6cbjau",
+        "type": "course",
+        "price": "1200",
+        "billing": "once",
+        "period": "month",
+        "courses": [
+          "course-ai"
+        ],
+        "kit": false,
+        "service": false
+      },
+      "expected": {
+        "name": "驗收示範 1440 course mv6cbjau",
+        "type": "course",
+        "price": "1200",
+        "billing": "once",
+        "period": "month",
+        "courses": [
+          "course-ai"
+        ],
+        "kit": false,
+        "service": false
+      }
+    },
+    {
+      "name": "價格錯誤與保留 course 1440",
+      "pass": true,
+      "actual": {
+        "focus": "local-price",
+        "name": "驗收示範 1440 course mv6cbjau"
+      },
+      "expected": {
+        "focus": "local-price",
+        "name": "驗收示範 1440 course mv6cbjau"
+      }
+    },
+    {
+      "name": "取得指定內容 course 1440",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "不重複取得 course 1440",
+      "pass": true,
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "name": "取得重整保留 course 1440",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "空名稱錯誤 bundle 1440",
+      "pass": true,
+      "actual": "local-name",
+      "expected": "local-name"
+    },
+    {
+      "name": "保存回列表 bundle 1440",
+      "pass": true,
+      "actual": "products",
+      "expected": "products"
+    },
+    {
+      "name": "列表存在 bundle 1440",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "重整回填 bundle 1440",
+      "pass": true,
+      "actual": {
+        "name": "驗收示範 1440 bundle mv6cbjau",
+        "type": "bundle",
+        "price": "1200",
+        "billing": "subscription",
+        "period": "quarter",
+        "courses": [
+          "course-ai",
+          "course-saas"
+        ],
+        "kit": false,
+        "service": false
+      },
+      "expected": {
+        "name": "驗收示範 1440 bundle mv6cbjau",
+        "type": "bundle",
+        "price": "1200",
+        "billing": "subscription",
+        "period": "quarter",
+        "courses": [
+          "course-ai",
+          "course-saas"
+        ],
+        "kit": false,
+        "service": false
+      }
+    },
+    {
+      "name": "價格錯誤與保留 bundle 1440",
+      "pass": true,
+      "actual": {
+        "focus": "local-price",
+        "name": "驗收示範 1440 bundle mv6cbjau"
+      },
+      "expected": {
+        "focus": "local-price",
+        "name": "驗收示範 1440 bundle mv6cbjau"
+      }
+    },
+    {
+      "name": "取得指定內容 bundle 1440",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "不重複取得 bundle 1440",
+      "pass": true,
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "name": "取得重整保留 bundle 1440",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "空名稱錯誤 code 1440",
+      "pass": true,
+      "actual": "local-name",
+      "expected": "local-name"
+    },
+    {
+      "name": "保存回列表 code 1440",
+      "pass": true,
+      "actual": "products",
+      "expected": "products"
+    },
+    {
+      "name": "列表存在 code 1440",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "重整回填 code 1440",
+      "pass": true,
+      "actual": {
+        "name": "驗收示範 1440 code mv6cbjau",
+        "type": "code",
+        "price": "1200",
+        "billing": "subscription",
+        "period": "month",
+        "courses": [],
+        "kit": true,
+        "service": false
+      },
+      "expected": {
+        "name": "驗收示範 1440 code mv6cbjau",
+        "type": "code",
+        "price": "1200",
+        "billing": "subscription",
+        "period": "month",
+        "courses": [],
+        "kit": true,
+        "service": false
+      }
+    },
+    {
+      "name": "價格錯誤與保留 code 1440",
+      "pass": true,
+      "actual": {
+        "focus": "local-price",
+        "name": "驗收示範 1440 code mv6cbjau"
+      },
+      "expected": {
+        "focus": "local-price",
+        "name": "驗收示範 1440 code mv6cbjau"
+      }
+    },
+    {
+      "name": "取得指定內容 code 1440",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "不重複取得 code 1440",
+      "pass": true,
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "name": "取得重整保留 code 1440",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "空名稱錯誤 saas 1440",
+      "pass": true,
+      "actual": "local-name",
+      "expected": "local-name"
+    },
+    {
+      "name": "保存回列表 saas 1440",
+      "pass": true,
+      "actual": "products",
+      "expected": "products"
+    },
+    {
+      "name": "列表存在 saas 1440",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "重整回填 saas 1440",
+      "pass": true,
+      "actual": {
+        "name": "驗收示範 1440 saas mv6cbjau",
+        "type": "saas",
+        "price": "1200",
+        "billing": "subscription",
+        "period": "year",
+        "courses": [],
+        "kit": false,
+        "service": true
+      },
+      "expected": {
+        "name": "驗收示範 1440 saas mv6cbjau",
+        "type": "saas",
+        "price": "1200",
+        "billing": "subscription",
+        "period": "year",
+        "courses": [],
+        "kit": false,
+        "service": true
+      }
+    },
+    {
+      "name": "價格錯誤與保留 saas 1440",
+      "pass": true,
+      "actual": {
+        "focus": "local-price",
+        "name": "驗收示範 1440 saas mv6cbjau"
+      },
+      "expected": {
+        "focus": "local-price",
+        "name": "驗收示範 1440 saas mv6cbjau"
+      }
+    },
+    {
+      "name": "取得指定內容 saas 1440",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "不重複取得 saas 1440",
+      "pass": true,
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "name": "取得重整保留 saas 1440",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "搜尋空狀態 1440",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "草稿篩選 1440",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "CRM 同意篩選 1440",
+      "pass": true,
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "name": "CRM 詳情 1440",
+      "pass": true,
+      "actual": true,
+      "expected": true
+    },
+    {
+      "name": "常青篩選 1440",
+      "pass": true,
+      "actual": 1,
+      "expected": 1
+    },
+    {
+      "name": "常青詳情 1440",
+      "pass": false,
+      "actual": false,
+      "expected": true
+    }
+  ]
+}
