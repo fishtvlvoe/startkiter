@@ -17,4 +17,4 @@
 - Course access：Course／Bundle／Purchase／CourseSubscription。
 - Commerce：Order／PaymentWebhookEvent／Invoice。
 - Marketing：Newsletter*／EmailConsentLog／EmailDeliveryLog。
-- Support：SupportTicket。
+- Support：前端預填 mailto；不建立客服工單資料模型。

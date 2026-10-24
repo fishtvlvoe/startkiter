@@ -22,7 +22,6 @@ import { SupportWidget } from "@deployment/components/SupportWidget";
 import { PagesCmsAccessProvider } from "@shared/components/PagesCmsAccessProvider";
 import type { PropsWithChildren } from "react";
 
-import { ChatwootScript } from "./ChatwootScript";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -98,7 +97,6 @@ export default async function AuthenticatedLayout({ children }: PropsWithChildre
 						<ActiveOrganizationProvider>
 							<ConfirmationAlertProvider>
 								{children}
-								<ChatwootScript deployments={deployments} />
 								<SupportWidget deployments={deployments} />
 							</ConfirmationAlertProvider>
 						</ActiveOrganizationProvider>

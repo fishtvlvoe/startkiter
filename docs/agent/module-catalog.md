@@ -8,7 +8,7 @@
 | Bundles/Coupons | Implemented | offer composition、promotion |
 | Newsletter | In progress | campaign、audience、delivery、consent、automation |
 | Pages CMS | Implemented／bounded | public pages、revision、content mount |
-| Support | Implemented | support case、email／Chatwoot boundary |
+| Support | Implemented | email-only support entry、預填 mailto |
 | CRM | Not yet a complete module | contact、identity、tag、segment、timeline |
 | Funnel | Not yet a complete module | form、step、conversion、offer entry |
 | SMS | Not selected | provider adapter、consent、delivery |

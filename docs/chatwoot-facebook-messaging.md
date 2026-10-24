@@ -101,5 +101,4 @@ curl -sI https://startkiter.dev/zh-tw/legal/terms
 
 ## 相關文件
 
-- `docs/support-runtime-topology.md`
 - `openspec/changes/chatwoot-facebook-pages-messaging-live/`

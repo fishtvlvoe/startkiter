@@ -47,8 +47,6 @@ StartKiter 的環境變數範例來自 `apps/saas/.env.example`。請複製一�
 | `LINE_CHANNEL_ID` | 選填 | LINE Login channel；啟用 LINE 登入時使用。 |
 | `LINE_CHANNEL_SECRET` | 選填 | LINE Login channel secret；啟用 LINE 登入時使用。 |
 | `LINE_COMMUNITY_INVITE_URL` | 選填 | 付費學員可見的 LINE 社群邀請連結。 |
-| `LINE_MESSAGING_CHANNEL_ACCESS_TOKEN` | 選填 | LINE Messaging webhook 存取憑證。 |
-| `LINE_MESSAGING_CHANNEL_SECRET` | 選填 | LINE Messaging webhook 簽章密鑰。 |
 
 ## GitHub 代碼包履約
 
@@ -76,22 +74,6 @@ StartKiter 的環境變數範例來自 `apps/saas/.env.example`。請複製一�
 | `NEXT_PUBLIC_AVATARS_BUCKET_NAME` | 選填 | 使用者頭像 bucket。 |
 | `NEXT_PUBLIC_LESSON_MESSAGES_BUCKET_NAME` | 選填 | 單元留言附件 bucket。 |
 | `NEXT_PUBLIC_MEDIA_BUCKET_NAME` | 選填 | 課程媒體 bucket。 |
-| `NEXT_PUBLIC_CHATWOOT_BASE_URL` | 選填 | 前端客服入口的 Chatwoot 網址。 |
-| `NEXT_PUBLIC_CHATWOOT_WEBSITE_TOKEN` | 選填 | 前端客服 widget token。 |
-
-## Chatwoot、Telegram 與客服
-
-| 變數 | 必填／選填 | 用途 |
-| --- | --- | --- |
-| `CHATWOOT_BASE_URL` | 選填 | Chatwoot API 網址。 |
-| `CHATWOOT_ACCOUNT_ID` | 選填 | Chatwoot account 識別值。 |
-| `CHATWOOT_INBOX_ID` | 選填 | Chatwoot inbox 識別值。 |
-| `CHATWOOT_API_ACCESS_TOKEN` | 選填 | Chatwoot API 存取憑證。 |
-| `CHATWOOT_WEBHOOK_SECRET` | 選填 | Chatwoot webhook 驗證密鑰。 |
-| `CHATWOOT_WEBHOOK_DEBUG` | 選填 | Chatwoot webhook debug 開關，範例預設為 0。 |
-| `TELEGRAM_BOT_TOKEN` | 選填 | Telegram Bot API 憑證。 |
-| `TELEGRAM_WEBHOOK_SECRET` | 選填 | Telegram webhook 驗證密鑰。 |
-
 ## Email
 
 | 變數 | 必填／選填 | 用途 |
@@ -106,8 +88,7 @@ StartKiter 的環境變數範例來自 `apps/saas/.env.example`。請複製一�
 | `MAIL_USER` | 選填 | SMTP 使用者。 |
 | `MAIL_PASS` | 選填 | SMTP 密碼。 |
 | `SUPPORT_EMAIL` | 選填 | 客服收件地址（伺服器端）。 |
-| `NEXT_PUBLIC_SUPPORT_CHANNEL` | 選填 | 客服進線模式：`email`（預設）或 `chatwoot`。`email` 時客服入口開啟 mailto 且不載入 Chatwoot widget。 |
-| `NEXT_PUBLIC_SUPPORT_EMAIL` | 選填 | 客服收件地址（瀏覽器端，供 mailto 連結使用）。 |
+| `NEXT_PUBLIC_SUPPORT_EMAIL` | 選填 | 客服收件地址（瀏覽器端，供預填 mailto 連結使用）。 |
 
 ## AI
 

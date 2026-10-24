@@ -1,19 +1,3 @@
-export type SupportChannel = "email" | "chatwoot";
-
-/**
- * 客服進線模式。預設 email：Chatwoot 統一工單雖已實作完成，但其 webhook 派送不穩定
- * （見 unified-support-desk task 3.6），在真實客戶進線量起來之前先走 email。
- * 要切回 Chatwoot 只需設 NEXT_PUBLIC_SUPPORT_CHANNEL=chatwoot，程式碼皆保留。
- */
-export function getSupportChannel(): SupportChannel {
-	const raw = process.env.NEXT_PUBLIC_SUPPORT_CHANNEL?.trim().toLowerCase();
-	return raw === "chatwoot" ? "chatwoot" : "email";
-}
-
-export function isEmailSupportMode(): boolean {
-	return getSupportChannel() === "email";
-}
-
 export function getSupportEmail(): string | null {
 	const raw = process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim();
 	return raw ? raw : null;

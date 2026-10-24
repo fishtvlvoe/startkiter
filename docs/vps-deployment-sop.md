@@ -86,10 +86,8 @@
 | `SHOPLINE_MERCHANT_ID`, `SHOPLINE_CLIENT_KEY`, `SHOPLINE_API_KEY`, `SHOPLINE_SIGN_KEY` | Shopline credentials；即使是識別值也按 Secret 管理 |
 | `GOOGLE_CLIENT_SECRET`, `LINE_CHANNEL_SECRET`, `GITHUB_CLIENT_SECRET` | OAuth secrets |
 | `LINE_COMMUNITY_INVITE_URL` | 學員社群邀請連結；runtime 只發給有權限學員，儲存與部署畫面仍按 Secret 管理 |
-| `LINE_MESSAGING_CHANNEL_ACCESS_TOKEN`, `LINE_MESSAGING_CHANNEL_SECRET`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_WEBHOOK_SECRET` | Messaging credentials |
 | `GITHUB_APP_PRIVATE_KEY`, `GITHUB_APP_INSTALLATION_ID` | GitHub App 履約憑證 |
 | `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Object storage credentials |
-| `CHATWOOT_API_ACCESS_TOKEN`, `CHATWOOT_WEBHOOK_SECRET` | Chatwoot server credentials |
 | `RESEND_API_KEY`, `MAILGUN_API_KEY`, `POSTMARK_SERVER_TOKEN`, `MAIL_USER`, `MAIL_PASS` | Email provider credentials |
 | `OPENAI_API_KEY` | AI provider credential |
 | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Stripe server/webhook credentials |
@@ -116,12 +114,10 @@
 | `MAIL_HOST`, `MAIL_PORT`, `MAILGUN_DOMAIN` | SMTP／Mailgun endpoint 設定；帳號與密碼仍屬機密 |
 | `PAYUNI_API_URL`, `EINVOICE_PROVIDER`, `EINVOICE_TEST_MODE`, `EINVOICE_ENABLED` | provider endpoint 與 feature flags；credentials 仍屬機密 |
 | `GITHUB_APP_ID`, `GITHUB_KIT_ORG`, `GITHUB_KIT_REPO`, `GITHUB_KIT_TEMPLATE_REPO` | GitHub App／履約識別資料 |
-| `GITHUB_CLIENT_ID`, `LINE_CHANNEL_ID`, `LINE_MESSAGING_CHANNEL_ID` | OAuth／Messaging public identifiers |
+| `GITHUB_CLIENT_ID`, `LINE_CHANNEL_ID` | OAuth public identifiers |
 | `GITHUB_APP_PRIVATE_KEY_PATH`, `S3_ENDPOINT`, `S3_REGION` | 本機路徑／storage endpoint 設定 |
 | `BUNNY_LIBRARY_ID` | Bunny media library identifier |
 | `NEXT_PUBLIC_ASSIGNMENTS_BUCKET_NAME`, `NEXT_PUBLIC_AVATARS_BUCKET_NAME`, `NEXT_PUBLIC_LESSON_MESSAGES_BUCKET_NAME`, `NEXT_PUBLIC_MEDIA_BUCKET_NAME` | public bucket names |
-| `NEXT_PUBLIC_CHATWOOT_BASE_URL`, `NEXT_PUBLIC_CHATWOOT_WEBSITE_TOKEN` | 前端 Chatwoot widget 設定；若 provider 要求保密則改標 Secret |
-| `CHATWOOT_BASE_URL`, `CHATWOOT_ACCOUNT_ID`, `CHATWOOT_INBOX_ID`, `CHATWOOT_WEBHOOK_DEBUG` | Chatwoot endpoint／識別／debug 設定 |
 | `PRICE_ID_LIFETIME`, `PRICE_ID_PRO_MONTHLY`, `PRICE_ID_PRO_YEARLY` | provider price identifiers |
 | `LEMONSQUEEZY_STORE_ID` | provider store identifier |
 | `SHOPLINE_TEST_MODE` | Shopline mode flag |
@@ -195,7 +191,7 @@ Coolify resource `8x5bmcpct9dri6tnnhjleeed` 起初是 `exited:unhealthy`，Traef
 
 - **Database：外部 Neon。** `apps/saas` 與 `apps/marketing` 透過 Coolify Secret `DATABASE_URL` 連線；不在這台 VPS 自架 PostgreSQL。本次沒有資料庫搬遷或 schema 直接修改。
 - **VPS：維持 2 vCPU / 3.3GB RAM。** 現行主機 `startkiter-managed-fleet-01` 先承載主站；本次 503 是 standalone runtime image 缺檔，不是資源不足，因此不執行 4 vCPU / 8GB resize。
-- **升級門檻：** 只有在實際出現 OOM、container 持續重啟、或 Coolify/Docker 指標長時間顯示容量不足時，才另開 change 記錄升級後實際規格與停機窗口。Chatwoot 若日後部署到同機，納入同一份容量檢查，不在本 change 內執行部署。
+- **升級門檻：** 只有在實際出現 OOM、container 持續重啟、或 Coolify/Docker 指標長時間顯示容量不足時，才另開 change 記錄升級後實際規格與停機窗口。
 
 這個決策取代討論稿中的「傾向 Neon」與「建議升級」措辭；後續文件引用目前部署規格時，以本節為準。
 

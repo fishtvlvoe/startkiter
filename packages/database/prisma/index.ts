@@ -9,9 +9,6 @@ export {
   ContentType,
   ContentStatus,
   SubscriptionInterval,
-	SupportTicketChannel,
-	SupportTicketResolvedBy,
-	SupportTicketStatus,
 	VideoProvider,
 } from "./generated/client";
 export {

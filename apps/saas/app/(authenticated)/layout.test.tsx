@@ -92,10 +92,6 @@ vi.mock("@deployment/components/SupportWidget", () => ({
 	SupportWidget: () => null,
 }));
 
-vi.mock("./ChatwootScript", () => ({
-	ChatwootScript: () => null,
-}));
-
 import { getOrganizationList, getSession } from "@auth/lib/server";
 import { getOrganizationMembership } from "@startkiter/database";
 import { listPurchases } from "@payments/lib/server";

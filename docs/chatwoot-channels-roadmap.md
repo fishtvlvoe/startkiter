@@ -1,7 +1,7 @@
 # Chatwoot 多通道總圖
 
 > 這不是 Spectra change，是跨 SR 的施工地圖。每張小 SR 各自走 propose → apply → archive；這裡只記「切成幾刀、順序、驗收標準」。
-> SSOT：Facebook 細節見 `docs/chatwoot-facebook-messaging.md`、`docs/support-runtime-topology.md`；App Review 進度見 `openspec/changes/chatwoot-facebook-pages-messaging-live/assets/app-review-status.md`。
+> SSOT：Facebook 細節見 `docs/chatwoot-facebook-messaging.md`；App Review 進度見 `openspec/changes/chatwoot-facebook-pages-messaging-live/assets/app-review-status.md`。這些是外部粉專客服後台的獨立工作，不是 StartKiter 產品客服接線。
 
 最後更新：2026-09-11
 

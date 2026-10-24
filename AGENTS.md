@@ -38,15 +38,24 @@ Changes can be parked（暫存）— temporarily moved out of `openspec/changes/
 
 課 + 終身代碼包。對外課名可用「開站包」。
 
-## 目前優先順序（2026-08-23 更新，每次 session 開始先看這裡）
+## 目前優先順序（2026-09-24 更新，每次 session 開始先看這裡）
 
-1. **`platform-shell-plugin-architecture`：129/129，已於 2026-08-23 archive**（`openspec/changes/archive/2026-08-23-platform-shell-plugin-architecture/`）。WordPress 式可擴充骨架（Mount Points、Marketplace、WordPress 視覺後台外殼、買家專屬 write repo 履約、MCP Gateway）已全部完成並驗證，這是 StartKiter 的產品地基，不用再回頭動，除非發現新缺口才另開 change。
-2. **`course-studio-upgrade`：26/26，已於 2026-08-23 archive**（`openspec/changes/archive/2026-08-23-course-studio-upgrade/`）。課程管理後台編輯器（章節/單元 CRUD、講義編輯器、block schema registry、WebContainer 沙盒、即時預覽、拖曳排序）已完成並經 CR + 真實瀏覽器 E2E 驗收（PR #3，2026-08-23）。CR 揪出 8 個 Medium 問題已修復；E2E 過程額外發現「新增章節/單元/資料夾」用原生 `window.prompt()` 會凍結頁面（CDP 都打不進去），已改成 Dialog 元件並重新驗證通過。核心流程（登入、CRUD、MDX 編輯+即時預覽、WebContainerSandbox 過關/失敗兩路徑、debounce 自動存檔、拖曳排序+持久化）皆實測正常。
-3. **`core-module-bundles-coupons`（55/56）**：剩最後一項已裁決本輪不做（等買家播放頁做出來才接），這張視同完成，不用再動，等播放頁那張新 SR 立案後才回頭接。
-4. **`unified-support-desk`（53/55，2026-09-02 暫停啟用並封存）**：Chatwoot 真實 webhook 派送不穩定（task 3.6）本次不修。Fish 裁決改走 email 客服（`support-email-fallback`），Chatwoot／LINE／Telegram 程式碼與測試全數保留，設 `NEXT_PUBLIC_SUPPORT_CHANNEL=chatwoot` 即可切回。
-5. **`notifications` 缺 spec（2026-08-23 盤點發現）**：`packages/notifications/` 有實作（catalog、create-notification、welcome 等）但 `openspec/specs/` 沒有對應規格，已裁決開新 SR 補齊，走完整 discuss/propose 流程。分支 `fishtvlvoe/task-notifications-spec-backfill` 已產出 proposal/design/spec/tasks 並 `spectra validate` 通過，尚未 apply/archive。
+**狀態總覽：產品功能面基本完成（84 份 spec、25 個模組、3 個 app 都在線），剩餘工作集中在「上線前雲端驗證」與「newsletter 自動化」。2026-09-23 單日合併 8 個 PR（#7~#14），4 個 orca worktree 已全部 merge 並清除。**
 
-下一步該做的：review `notifications-spec-backfill`（worktree `~/orca/workspaces/startkiter/task-notifications-spec-backfill`）決定是否 apply；或推進 `unified-support-desk` 剩的項目。
+進行中的 SR（`spectra list` 為準）：
+
+1. **`newsletter-automation-integration`（18/41，最大缺口）**：電子報寄信引擎 Wave 1/2 整合、CR、渲染器測試未完成。前置依賴 `mail-provider-tosend-smtp-support` 先完成。分支 `fishtvlvoe/newsletter-automation-integration` 保留（已 merge 進 main，遠端仍在）。
+2. **`platform-launch-verification-evidence`（14/15）**：只剩回滾演練（TEST 環境實際跑一次 rollback 並記錄證據）。
+3. **`role-based-workspace-navigation`（30/31）**：只剩 adapter→manifest 分階段切換的 migration + rollback 證據。
+4. **`mail-provider-tosend-smtp-support`（11/12）**：只剩 Coolify 容器加 `EMAIL_PROVIDER=tosend` + 確認 `TOSEND_API_KEY` 進容器 + 真實寄信驗證。
+5. **`buyer-bundle-checkout-entry`（12/13）**：只剩正式站建測試 Bundle 走一次真實購買全流程。
+6. **`app-feature-surfaces`（10/12）**：只剩部署後 ego-browser 驗收 + analyze/validate。
+7. **`site-wide-functional-qa-sweep`（4/4）**：完成待 archive。
+8. **🅿️ parked：`oracle-chatwoot-anti-reclaim-cutover`（5/7）**：剩 NSG 過寬入站規則收斂。
+
+**建議執行順序**：先把 2~6 集中成一個「部署驗收批次」一次做完（都是雲端操作不是寫碼），再啃 newsletter；最後整批 archive。
+
+**歷史地基（已完成封存，不用回頭動）**：`platform-shell-plugin-architecture`（129/129，2026-08-23 archive，WordPress 式骨架）、`course-studio-upgrade`（26/26）、`core-module-bundles-coupons`（55/56，視同完成）、`unified-support-desk`（53/55，2026-09-02 暫停啟用封存；本次已移除其產品客服接線，現行客服只走 email）。`notifications-spec-backfill` 規格已補完（純文件，15 個檢查項刻意留給未來改通知功能時驗證）。
 
 **課程引擎（課神，暫稱）方向（2026-08-23 定案，先驗證再拆 SR）**：課程系統的長期方向從「單一功能」改成「通用課程引擎」，但**先驗證假說，不直接動工大規模建設**。
 
@@ -71,7 +80,7 @@ MVP extract 佇列已清空：`extract-site-agent`、`extract-line-learner-commu
 
 **部署方向轉彎（2026-08-22 老闆定案）：不再用 Vercel，全部搬到 Coolify + VPS**（`https://test-startkiter.vercel.app` 部署已停止更新）。現有唯一一台 Coolify 伺服器 `startkiter-managed-fleet-01`（Vultr，Ubuntu 26.04、2 vCPU/3.3GB、Docker 29.7.2，2026-08-18 建立，IP `45.76.187.247`）目前由 Coolify 管理 `apps/saas` 與 `apps/marketing`；`app.startkiter.dev` 回 `307` 導向登入，`startkiter.dev` 已於 2026-08-28 修復 standalone runtime 缺少 `@swc/helpers` ESM 檔案造成的 503，follow redirect 回 `200`。正式、可重複的部署流程見 [`docs/vps-deployment-sop.md`](docs/vps-deployment-sop.md)，本次對應 Spectra change `vps-production-deployment`（尚未 archive）。`startkiter.dev` 這個網域已在 Cloudflare 買好、zone 已啟用（zone id `631be2a55e0c1b0a15038ad244b7665d`），Cloudflare 憑證已集中到 `~/.cloudflared/api-tokens.json`：DNS 讀 `.cloudflare.tokens.startkiter_dns`，Pages 讀 `.cloudflare.tokens.pages_deploy`，Worker KV 讀 `.cloudflare.tokens.worker_kv_deploy`；`.env` 不再存 Cloudflare token。
 
-**客服 runtime 雙主機（2026-09-11 現況）**：App 仍在 Vultr；Chatwoot 已裝在 Oracle `chatwoot-oracle-01`（公網 `140.245.55.106`），Always Free 防回收靠 `oci-memhold.service` + Chatwoot 堆疊。`support.startkiter.dev` DNS 已切到 Oracle；NSG 過寬入站規則**尚未**收斂（見 parked `oracle-chatwoot-anti-reclaim-cutover` task 2.3）。細節 SSOT：`docs/support-runtime-topology.md`。產品客服通道預設仍 email。
+**客服現況**：產品客服只開啟預填 `mailto` 信件，收件地址由 `NEXT_PUBLIC_SUPPORT_EMAIL` 提供。既有 Oracle 主機、DNS 與其他外部資源不屬於產品客服程式的執行依賴，本次不操作也不刪除。
 
 這是獨立 git repo。零耦合 libon.me。不要改抽取來源。站內 agent／LINE 社群／GitHub kit 履約已封存落地。本階段不以新 extract 白名單為準，而以 `openspec/specs/` 為現行真相。
 
@@ -111,7 +120,7 @@ GitHub kit 邀請已封存（GitHub App + 站內 OAuth）。本刀不做 kit 履
 
 不做 Organization 多租戶。帳單掛 user。
 
-LINE Login Channel 做登入。學員社群用課程內 LINE 邀請連結，不能靜默入群；允許客服用途的 LINE Messaging。客服走 email（`NEXT_PUBLIC_SUPPORT_CHANNEL=email`，收件 SUPPORT_EMAIL）；Chatwoot 統一工單（網站/LINE/Telegram）已實作完成但暫停啟用，改設 chatwoot 即啟用。不做 SKOOL。
+LINE Login Channel 做登入。學員社群用課程內 LINE 邀請連結，不能靜默入群。客服只走 email，收件地址由 `SUPPORT_EMAIL`／`NEXT_PUBLIC_SUPPORT_EMAIL` 提供。不做 SKOOL。
 
 金鑰填後台，env fallback。沒設金流 fail-closed。
 

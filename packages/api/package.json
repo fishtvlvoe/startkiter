@@ -29,7 +29,6 @@
 		"@startkiter/payments": "workspace:*",
 		"@startkiter/permissions": "workspace:*",
 		"@startkiter/platform": "workspace:*",
-		"@startkiter/support": "workspace:*",
 		"@startkiter/storage": "workspace:*",
 		"@startkiter/sheets": "workspace:*",
 		"@startkiter/utils": "workspace:*",

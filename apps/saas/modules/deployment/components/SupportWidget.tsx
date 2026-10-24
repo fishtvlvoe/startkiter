@@ -15,7 +15,6 @@ import React, { useEffect, useState } from "react";
 import {
 	buildDeploymentSupportBody,
 	buildSupportMailto,
-	isEmailSupportMode,
 	SUPPORT_MAIL_SUBJECT,
 } from "../support-channel";
 
@@ -30,6 +29,7 @@ export interface OpenSupportChatOptions {
 	deployments?: SupportDeployment[] | null;
 	selectedDeploymentId?: string | null;
 	onRequireSelection?: () => void;
+	onUnavailable?: () => void;
 }
 
 export interface OpenSupportChatResult {
@@ -37,8 +37,8 @@ export interface OpenSupportChatResult {
 	selectedId: string | null;
 }
 
-/** email 模式：開啟預填部署資訊的信件，取代 Chatwoot 對話框 */
-function openSupportMail(deployment?: SupportDeployment | null): void {
+/** 開啟預填部署資訊的客服信件。 */
+function openSupportMail(deployment?: SupportDeployment | null, onUnavailable?: () => void): void {
 	const href = buildSupportMailto({
 		subject: SUPPORT_MAIL_SUBJECT,
 		body: buildDeploymentSupportBody({
@@ -49,38 +49,23 @@ function openSupportMail(deployment?: SupportDeployment | null): void {
 
 	if (href && typeof window !== "undefined") {
 		window.location.href = href;
+	} else {
+		onUnavailable?.();
 	}
 }
 
 export function openSupportChat(options: OpenSupportChatOptions = {}): OpenSupportChatResult {
-	const { deployments, selectedDeploymentId, onRequireSelection } = options;
-	const emailMode = isEmailSupportMode();
-
-	// 無部署記錄時：直接開啟客服框，不設定 buyerDeploymentId
+	const { deployments, selectedDeploymentId, onRequireSelection, onUnavailable } = options;
+	// 無部署記錄時直接開啟客服信件。
 	if (!deployments || deployments.length === 0) {
-		if (emailMode) {
-			openSupportMail(null);
-			return { needsSelection: false, selectedId: null };
-		}
-		if (typeof window !== "undefined" && window.$chatwoot) {
-			window.$chatwoot.toggle("open");
-		}
+		openSupportMail(null, onUnavailable);
 		return { needsSelection: false, selectedId: null };
 	}
 
 	// 剛好一個部署：自動帶入
 	if (deployments.length === 1 && deployments[0]) {
 		const depId = deployments[0].id;
-		if (emailMode) {
-			openSupportMail(deployments[0]);
-			return { needsSelection: false, selectedId: depId };
-		}
-		if (typeof window !== "undefined" && window.$chatwoot) {
-			window.$chatwoot.setCustomAttributes({
-				buyerDeploymentId: depId,
-			});
-			window.$chatwoot.toggle("open");
-		}
+		openSupportMail(deployments[0], onUnavailable);
 		return { needsSelection: false, selectedId: depId };
 	}
 
@@ -90,17 +75,8 @@ export function openSupportChat(options: OpenSupportChatOptions = {}): OpenSuppo
 		return { needsSelection: true, selectedId: null };
 	}
 
-	// 多個部署且已選擇：設定 custom attributes 並開啟
-	if (emailMode) {
-		openSupportMail(deployments.find((d) => d.id === selectedDeploymentId) ?? null);
-		return { needsSelection: false, selectedId: selectedDeploymentId };
-	}
-	if (typeof window !== "undefined" && window.$chatwoot) {
-		window.$chatwoot.setCustomAttributes({
-			buyerDeploymentId: selectedDeploymentId,
-		});
-		window.$chatwoot.toggle("open");
-	}
+	// 多個部署且已選擇：開啟帶部署資訊的客服信件。
+	openSupportMail(deployments.find((d) => d.id === selectedDeploymentId) ?? null, onUnavailable);
 
 	return { needsSelection: false, selectedId: selectedDeploymentId };
 }
@@ -113,6 +89,7 @@ export const SUPPORT_WIDGET_COLLAPSED_STORAGE_KEY = "startkiter.support-widget.c
 
 export function SupportWidget({ deployments = [] }: SupportWidgetProps) {
 	const [isOpen, setIsOpen] = useState(false);
+	const [isUnavailable, setIsUnavailable] = useState(false);
 	const [isCollapsed, setIsCollapsed] = useState(false);
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -138,6 +115,7 @@ export function SupportWidget({ deployments = [] }: SupportWidgetProps) {
 			deployments,
 			selectedDeploymentId: selectedId,
 			onRequireSelection: () => setIsOpen(true),
+			onUnavailable: () => setIsUnavailable(true),
 		});
 	};
 
@@ -149,6 +127,7 @@ export function SupportWidget({ deployments = [] }: SupportWidgetProps) {
 		openSupportChat({
 			deployments,
 			selectedDeploymentId: selectedId,
+			onUnavailable: () => setIsUnavailable(true),
 		});
 		setIsOpen(false);
 	};
@@ -191,6 +170,21 @@ export function SupportWidget({ deployments = [] }: SupportWidgetProps) {
 					</div>
 				)}
 			</div>
+
+
+			<Dialog open={isUnavailable} onOpenChange={setIsUnavailable}>
+				<DialogContent className="sm:max-w-md">
+					<DialogHeader>
+						<DialogTitle>客服尚未設定</DialogTitle>
+						<DialogDescription>
+							客服信箱尚未設定，請前往客服頁面查看聯絡方式。這是客服入口；課程問題請使用隨課 AI 助教。
+						</DialogDescription>
+					</DialogHeader>
+					<DialogFooter>
+						<a href="/support" className="text-primary underline">前往客服頁面</a>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 
 			{/* 多部署選擇對話框 */}
 			{deployments.length > 1 && (

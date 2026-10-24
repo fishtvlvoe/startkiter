@@ -1,45 +1,10 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { DeploymentStatusPanel } from "./components/DeploymentStatusPanel";
-import { openChatwootWithDeployment, ReportIssueButton } from "./components/ReportIssueButton";
+import { ReportIssueButton } from "./components/ReportIssueButton";
 
-describe("ReportIssueButton - Chatwoot Integration", () => {
-	beforeEach(() => {
-		vi.restoreAllMocks();
-		// Reset window.$chatwoot mock
-		(globalThis as unknown as { window: unknown }).window = {
-			$chatwoot: {
-				setUser: vi.fn(),
-				setCustomAttributes: vi.fn(),
-				toggle: vi.fn(),
-			},
-		};
-	});
-
-	it("sets buyerDeploymentId in custom_attributes and opens Chatwoot widget", () => {
-		const buyerDeploymentId = "dep_test_12345";
-		openChatwootWithDeployment(buyerDeploymentId);
-
-		expect(window.$chatwoot?.setCustomAttributes).toHaveBeenCalledWith({
-			buyerDeploymentId: "dep_test_12345",
-		});
-		expect(window.$chatwoot?.toggle).toHaveBeenCalledWith("open");
-	});
-
-	it("opens widget without setting custom_attributes when buyerDeploymentId is null or undefined", () => {
-		openChatwootWithDeployment(null);
-
-		expect(window.$chatwoot?.setCustomAttributes).not.toHaveBeenCalled();
-		expect(window.$chatwoot?.toggle).toHaveBeenCalledWith("open");
-	});
-
-	it("gracefully handles missing $chatwoot instance on window without throwing", () => {
-		(globalThis as unknown as { window: { $chatwoot?: unknown } }).window.$chatwoot = undefined;
-
-		expect(() => openChatwootWithDeployment("dep_123")).not.toThrow();
-	});
-
+describe("email support", () => {
 	it("renders ReportIssueButton with default label and icon", () => {
 		const html = renderToStaticMarkup(
 			<ReportIssueButton buyerDeploymentId="dep_123" />,

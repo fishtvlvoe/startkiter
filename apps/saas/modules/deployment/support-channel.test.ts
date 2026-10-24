@@ -1,45 +1,10 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
 	buildSupportMailto,
-	getSupportChannel,
 	getSupportEmail,
-	isEmailSupportMode,
 } from "./support-channel";
 
 const ORIGINAL_ENV = { ...process.env };
-
-describe("support-channel: 模式判斷", () => {
-	beforeEach(() => {
-		vi.unstubAllEnvs();
-	});
-
-	afterEach(() => {
-		process.env = { ...ORIGINAL_ENV };
-	});
-
-	it("未設定 NEXT_PUBLIC_SUPPORT_CHANNEL 時預設為 email", () => {
-		vi.stubEnv("NEXT_PUBLIC_SUPPORT_CHANNEL", "");
-		expect(getSupportChannel()).toBe("email");
-		expect(isEmailSupportMode()).toBe(true);
-	});
-
-	it("設為非法值時回退 email，不會誤啟用 chatwoot", () => {
-		vi.stubEnv("NEXT_PUBLIC_SUPPORT_CHANNEL", "slack");
-		expect(getSupportChannel()).toBe("email");
-		expect(isEmailSupportMode()).toBe(true);
-	});
-
-	it("明確設為 chatwoot 時才走 chatwoot", () => {
-		vi.stubEnv("NEXT_PUBLIC_SUPPORT_CHANNEL", "chatwoot");
-		expect(getSupportChannel()).toBe("chatwoot");
-		expect(isEmailSupportMode()).toBe(false);
-	});
-
-	it("大小寫與前後空白不影響判斷", () => {
-		vi.stubEnv("NEXT_PUBLIC_SUPPORT_CHANNEL", "  CHATWOOT ");
-		expect(getSupportChannel()).toBe("chatwoot");
-	});
-});
 
 describe("support-channel: 收件信箱", () => {
 	afterEach(() => {

@@ -21,10 +21,6 @@ export const app = new Hono()
 			allowHeaders: [
 				"Content-Type",
 				"Authorization",
-				"X-Chatwoot-Signature",
-				"X-Chatwoot-Timestamp",
-				"X-Line-Signature",
-				"X-Telegram-Bot-Api-Secret-Token",
 			],
 			allowMethods: ["POST", "GET", "OPTIONS"],
 			exposeHeaders: ["Content-Length"],

@@ -10,7 +10,6 @@ import { quizRouter } from "../modules/quiz/router";
 import { reviewRouter } from "../modules/review/router";
 import { organizationsRouter } from "../modules/organizations/router";
 import { paymentsRouter } from "../modules/payments/router";
-import { supportRouter } from "../modules/support/router";
 import { usersRouter } from "../modules/users/router";
 import { publicProcedure } from "./procedures";
 
@@ -26,7 +25,6 @@ export const router = publicProcedure.router({
 	assignment: assignmentRouter,
 	review: reviewRouter,
 	deployment: deploymentRouter,
-	support: supportRouter,
 });
 
 export type ApiRouterClient = RouterClient<typeof router>;

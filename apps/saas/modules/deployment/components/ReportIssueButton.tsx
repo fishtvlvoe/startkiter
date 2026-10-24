@@ -4,33 +4,14 @@ import { Button, type ButtonProps } from "@startkiter/ui/components/button";
 import { MessageSquare } from "lucide-react";
 import React from "react";
 
-import {
-	buildDeploymentSupportBody,
-	buildSupportMailto,
-	isEmailSupportMode,
-	SUPPORT_MAIL_SUBJECT,
-} from "../support-channel";
+import { buildDeploymentSupportBody, buildSupportMailto, SUPPORT_MAIL_SUBJECT } from "../support-channel";
 
 export interface ReportIssueButtonProps extends Omit<ButtonProps, "onClick"> {
 	buyerDeploymentId?: string | null;
 	onReportClick?: () => void;
 }
 
-export function openChatwootWithDeployment(buyerDeploymentId?: string | null) {
-	if (typeof window === "undefined" || !window.$chatwoot) {
-		return;
-	}
-
-	if (buyerDeploymentId) {
-		window.$chatwoot.setCustomAttributes({
-			buyerDeploymentId,
-		});
-	}
-
-	window.$chatwoot.toggle("open");
-}
-
-/** email 模式：開啟預填部署資訊的信件，取代 Chatwoot 對話框 */
+/** 開啟預填部署資訊的客服信件。 */
 export function openSupportMailForDeployment(buyerDeploymentId?: string | null): string | null {
 	const href = buildSupportMailto({
 		subject: SUPPORT_MAIL_SUBJECT,
@@ -54,11 +35,7 @@ export function ReportIssueButton({
 	...props
 }: ReportIssueButtonProps) {
 	const handleClick = () => {
-		if (isEmailSupportMode()) {
-			openSupportMailForDeployment(buyerDeploymentId);
-		} else {
-			openChatwootWithDeployment(buyerDeploymentId);
-		}
+		openSupportMailForDeployment(buyerDeploymentId);
 		onReportClick?.();
 	};
 
